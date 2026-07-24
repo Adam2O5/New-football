@@ -34,7 +34,7 @@ W odróżnieniu od klasycznego modelu piłkarskiego (wiele lig krajowych, awanse
 | Playoff         | System playoffów na końcu sezonu (faza pucharowa zamiast prostego mistrza z tabeli)  |
 | Draft           | Nabór młodych zawodników — główny sposób pozyskiwania talentów                       |
 | Salary cap      | Limit płacowy — ograniczenie budżetu na pensje, wymuszające trudne decyzje finansowe |
-| Transfery       | Uzupełnienie draftu; mechanika do doprecyzowania w fazie projektowania               |
+| Transfery       | Wymiany 2-drużynowe (zawodnicy + picki) — `trade_rules.md`; uzupełnienie draftu i FA |
 
 
 ---
@@ -46,7 +46,7 @@ W odróżnieniu od klasycznego modelu piłkarskiego (wiele lig krajowych, awanse
 Gra to w praktyce **symulator z bogatym UI**, nie gra akcji:
 
 - setki ekranów: skład, taktyka, draft, kontrakty, finanse, tabela, bracket playoffów
-- złożona logika symulacji (mecz w tle, sezon, statystyki zawodników)
+- złożona logika symulacji day-to-day (kolejne dni i mecze, decyzje menedżerskie, statystyki zawodników) — inbox i pauzy na ważne wiadomości: `docs/messages.md`
 - zapis offline — potencjalnie setki MB danych po wielu sezonach kariery
 - brak animacji meczowych — wynik i statystyki jako liczby/tekst
 
@@ -147,7 +147,7 @@ Logika symulacji **musi być niezależna od Fluttera** — umożliwia testowanie
 ```
 lib/
 ├── core/          # Silnik gry — BEZ importów Fluttera
-│   ├── simulation/    # Symulacja meczu, sezonu
+│   ├── simulation/    # Symulacja meczu, day-to-day
 │   ├── league/        # System ligowy, playoff
 │   ├── draft/         # Draft zawodników
 │   ├── finance/       # Salary cap, kontrakty
@@ -194,14 +194,12 @@ flowchart LR
 
 
 
-## 9. Otwarte kwestie (do doprecyzowania później)
+## 9. Status dokumentacji
 
-- Dokładna liczba drużyn w lidze i format playoffów (np. top 8, best-of-7)
-- Zasady draftu (loteria, kolejność wg tabeli, rundy)
-- Szczegóły salary cap (hard cap vs soft cap, wyjątki)
-- Model taktyki i wpływ na symulację meczu
-- System trudności (poziomy, adaptacyjna AI menedżerów AI)
+Szczegóły reguł: `game_rules.md` i pliki tematyczne (`draft_rules`, `salary_cap_rules`, `tactics`, `squad_management`, `player_management`, `offseason`, `contract_signing`, `messages`, itd.).
+
+Kod może chwilowo odstawać od docs (np. stare `fitness`, cap 150M, 2 rundy draftu) — **docs są źródłem prawdy projektowej**.
 
 ---
 
-*Ostatnia aktualizacja: 2026-07-20*
+*Ostatnia aktualizacja: 2026-07-24*
