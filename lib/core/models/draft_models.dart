@@ -1,0 +1,189 @@
+import 'dart:math';
+
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:new_football/core/balance/balance_config.dart';
+import 'package:new_football/core/models/assigned_role.dart';
+import 'package:new_football/core/models/contract.dart';
+import 'package:new_football/core/models/development.dart';
+import 'package:new_football/core/models/enums.dart';
+import 'package:new_football/core/models/match_models.dart';
+import 'package:new_football/core/models/player.dart';
+import 'package:new_football/core/models/player_attributes.dart';
+import 'package:new_football/core/models/season_awards.dart';
+import 'package:new_football/core/models/standing.dart';
+
+part 'draft_models.freezed.dart';
+part 'draft_models.g.dart';
+
+@freezed
+class Prospect with _$Prospect {
+  const factory Prospect({
+    required String id,
+    required String name,
+    required Nationality nationality,
+    required Position position,
+    required int age,
+    required PlayerAttributes attributes,
+    @Default(0) int scoutGrade, //unevaluated
+    @Default(0) int combineScore, //unevaluated
+    required double potentialStars,
+    required int heightCm,
+    required int injuryProne,
+    required int determination,
+    required PlayerPersonality personality,
+  }) = _Prospect;
+
+  factory Prospect.fromJson(Map<String, dynamic> json) =>
+      _$ProspectFromJson(json);
+}
+
+extension ProspectX on Prospect {
+  double projectedOverall([BalanceConfig balance = BalanceConfig.defaults]) =>
+      attributes.overallForPosition(position, balance);
+
+  /// Converts prospect → player after draft pick or undrafted FA sign.
+  /// Rolls [DevelopmentOutcome] here (hidden while still a prospect).
+  Player toPlayer({required Contract contract, required Random rng}) {
+    return Player(
+      id: id,
+      name: name,
+      position: position,
+      nationality: nationality,
+      age: age,
+      attributes: attributes,
+      contract: contract,
+      personality: personality,
+      potentialStars: potentialStars,
+      heightCm: heightCm,
+      state: PlayerState(
+        stamina: 100,
+        form: 1 + rng.nextInt(10),
+        role: position.defaultAssignedRole,
+        seasonsWithTeam: 0,
+      ),
+      hidden: PlayerHidden(
+        injuryProne: injuryProne,
+        determination: determination,
+        overallProgress: (40 + rng.nextInt(50)).clamp(0, 99),
+        growthRate: (0.7 + rng.nextDouble() * 0.8).clamp(0.0, 2.0),
+        developmentOutcome: rollDevelopmentOutcome(determination, rng),
+      ),
+    );
+  }
+}
+
+@freezed
+class DraftPick with _$DraftPick {
+  const factory DraftPick({
+    required int round,
+    required int pickNumber,
+    required String teamId,
+    String? prospectId,
+    String? playerName,
+    String? originalTeamId,
+    int? protectedTopN,
+  }) = _DraftPick;
+
+  factory DraftPick.fromJson(Map<String, dynamic> json) =>
+      _$DraftPickFromJson(json);
+}
+
+@freezed
+class LotteryResult with _$LotteryResult {
+  const factory LotteryResult({
+    required String teamId,
+    required int originalRank,
+    required int assignedPick,
+    required double oddsForFirstPick,
+  }) = _LotteryResult;
+
+  factory LotteryResult.fromJson(Map<String, dynamic> json) =>
+      _$LotteryResultFromJson(json);
+}
+
+@freezed
+class DraftClass with _$DraftClass {
+  const factory DraftClass({
+    required int year,
+    @Default([]) List<Prospect> prospects,
+  }) = _DraftClass;
+
+  factory DraftClass.fromJson(Map<String, dynamic> json) =>
+      _$DraftClassFromJson(json);
+}
+
+@freezed
+class DraftState with _$DraftState {
+  const factory DraftState({
+    required int year,
+    @Default([]) List<DraftPick> order,
+    @Default([]) List<DraftPick> completedPicks,
+    @Default([]) List<LotteryResult> lotteryResults,
+    required DraftClass draftClass,
+    @Default(0) int currentPickIndex,
+  }) = _DraftState;
+
+  factory DraftState.fromJson(Map<String, dynamic> json) =>
+      _$DraftStateFromJson(json);
+}
+
+@freezed
+class PlayInResult with _$PlayInResult {
+  const factory PlayInResult({
+    required Conference conference,
+    required String seed7TeamId,
+    required String seed8TeamId,
+    required MatchResult game7v8,
+    required MatchResult game9v10,
+    required MatchResult gameFinal,
+    required String playoffSeed7TeamId,
+    required String playoffSeed8TeamId,
+  }) = _PlayInResult;
+
+  factory PlayInResult.fromJson(Map<String, dynamic> json) =>
+      _$PlayInResultFromJson(json);
+}
+
+@freezed
+class PlayoffBracket with _$PlayoffBracket {
+  const factory PlayoffBracket({
+    required Conference conference,
+    @Default([]) List<PlayoffSeries> quarterFinals,
+    @Default([]) List<PlayoffSeries> semiFinals,
+    @Default([]) List<PlayoffSeries> conferenceFinal,
+    PlayoffSeries? leagueFinal,
+  }) = _PlayoffBracket;
+
+  factory PlayoffBracket.fromJson(Map<String, dynamic> json) =>
+      _$PlayoffBracketFromJson(json);
+}
+
+@freezed
+class Season with _$Season {
+  const factory Season({
+    required int year,
+    @Default(SeasonPhase.preseason) SeasonPhase phase,
+    @Default([]) List<ScheduledMatch> schedule,
+    @Default([]) List<ConferenceStandings> standings,
+    @Default([]) List<PlayInResult> playInResults,
+    @Default([]) List<PlayoffBracket> playoffBrackets,
+    String? championTeamId,
+    DraftState? draftState,
+    SeasonAwards? awards,
+  }) = _Season;
+
+  factory Season.fromJson(Map<String, dynamic> json) => _$SeasonFromJson(json);
+}
+
+@freezed
+class SeasonHistory with _$SeasonHistory {
+  const factory SeasonHistory({
+    required int year,
+    required List<ConferenceStandings> finalStandings,
+    String? championTeamId,
+    @Default([]) List<DraftPick> draftPicks,
+  }) = _SeasonHistory;
+
+  factory SeasonHistory.fromJson(Map<String, dynamic> json) =>
+      _$SeasonHistoryFromJson(json);
+}

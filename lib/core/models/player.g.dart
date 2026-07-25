@@ -1,0 +1,221 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+
+part of 'player.dart';
+
+// **************************************************************************
+// JsonSerializableGenerator
+// **************************************************************************
+
+_$PlayerSeasonStatsImpl _$$PlayerSeasonStatsImplFromJson(
+  Map<String, dynamic> json,
+) => _$PlayerSeasonStatsImpl(
+  year: (json['year'] as num).toInt(),
+  minutes: (json['minutes'] as num?)?.toInt() ?? 0,
+  goals: (json['goals'] as num?)?.toInt() ?? 0,
+  assists: (json['assists'] as num?)?.toInt() ?? 0,
+  appearances: (json['appearances'] as num?)?.toInt() ?? 0,
+  yellowCards: (json['yellowCards'] as num?)?.toInt() ?? 0,
+  redCards: (json['redCards'] as num?)?.toInt() ?? 0,
+  tackles: (json['tackles'] as num?)?.toInt() ?? 0,
+  interceptions: (json['interceptions'] as num?)?.toInt() ?? 0,
+  cleanSheets: (json['cleanSheets'] as num?)?.toInt() ?? 0,
+  saves: (json['saves'] as num?)?.toInt() ?? 0,
+  shotsFaced: (json['shotsFaced'] as num?)?.toInt() ?? 0,
+  ratingAvg: (json['ratingAvg'] as num?)?.toDouble() ?? 6.0,
+);
+
+Map<String, dynamic> _$$PlayerSeasonStatsImplToJson(
+  _$PlayerSeasonStatsImpl instance,
+) => <String, dynamic>{
+  'year': instance.year,
+  'minutes': instance.minutes,
+  'goals': instance.goals,
+  'assists': instance.assists,
+  'appearances': instance.appearances,
+  'yellowCards': instance.yellowCards,
+  'redCards': instance.redCards,
+  'tackles': instance.tackles,
+  'interceptions': instance.interceptions,
+  'cleanSheets': instance.cleanSheets,
+  'saves': instance.saves,
+  'shotsFaced': instance.shotsFaced,
+  'ratingAvg': instance.ratingAvg,
+};
+
+_$PlayerHiddenImpl _$$PlayerHiddenImplFromJson(Map<String, dynamic> json) =>
+    _$PlayerHiddenImpl(
+      injuryProne: (json['injuryProne'] as num).toInt(),
+      determination: (json['determination'] as num).toInt(),
+      overallProgress: (json['overallProgress'] as num).toInt(),
+      growthRate: (json['growthRate'] as num?)?.toDouble() ?? 1.0,
+      developmentOutcome: $enumDecode(
+        _$DevelopmentOutcomeEnumMap,
+        json['developmentOutcome'],
+      ),
+    );
+
+Map<String, dynamic> _$$PlayerHiddenImplToJson(_$PlayerHiddenImpl instance) =>
+    <String, dynamic>{
+      'injuryProne': instance.injuryProne,
+      'determination': instance.determination,
+      'overallProgress': instance.overallProgress,
+      'growthRate': instance.growthRate,
+      'developmentOutcome':
+          _$DevelopmentOutcomeEnumMap[instance.developmentOutcome]!,
+    };
+
+const _$DevelopmentOutcomeEnumMap = {
+  DevelopmentOutcome.exceed: 'exceed',
+  DevelopmentOutcome.hit: 'hit',
+  DevelopmentOutcome.under: 'under',
+};
+
+_$PlayerStateImpl _$$PlayerStateImplFromJson(Map<String, dynamic> json) =>
+    _$PlayerStateImpl(
+      stamina: (json['stamina'] as num?)?.toInt() ?? 100,
+      form: (json['form'] as num?)?.toInt() ?? 5,
+      injured: json['injured'] as bool? ?? false,
+      injuryDaysRemaining: (json['injuryDaysRemaining'] as num?)?.toInt() ?? 0,
+      injuryType: $enumDecodeNullable(_$InjuryTypeEnumMap, json['injuryType']),
+      role: json['role'] == null
+          ? const AssignedRole.cm()
+          : AssignedRole.fromJson(json['role'] as Map<String, dynamic>),
+      seasonsWithTeam: (json['seasonsWithTeam'] as num?)?.toInt() ?? 0,
+    );
+
+Map<String, dynamic> _$$PlayerStateImplToJson(_$PlayerStateImpl instance) =>
+    <String, dynamic>{
+      'stamina': instance.stamina,
+      'form': instance.form,
+      'injured': instance.injured,
+      'injuryDaysRemaining': instance.injuryDaysRemaining,
+      'injuryType': _$InjuryTypeEnumMap[instance.injuryType],
+      'role': instance.role,
+      'seasonsWithTeam': instance.seasonsWithTeam,
+    };
+
+const _$InjuryTypeEnumMap = {
+  InjuryType.minor: 'minor',
+  InjuryType.major: 'major',
+};
+
+_$PlayerImpl _$$PlayerImplFromJson(Map<String, dynamic> json) => _$PlayerImpl(
+  id: json['id'] as String,
+  name: json['name'] as String,
+  position: $enumDecode(_$PositionEnumMap, json['position']),
+  nationality: $enumDecode(_$NationalityEnumMap, json['nationality']),
+  age: (json['age'] as num).toInt(),
+  attributes: PlayerAttributes.fromJson(
+    json['attributes'] as Map<String, dynamic>,
+  ),
+  contract: Contract.fromJson(json['contract'] as Map<String, dynamic>),
+  personality: $enumDecode(_$PlayerPersonalityEnumMap, json['personality']),
+  potentialStars: (json['potentialStars'] as num).toDouble(),
+  heightCm: (json['heightCm'] as num).toInt(),
+  state: PlayerState.fromJson(json['state'] as Map<String, dynamic>),
+  hidden: PlayerHidden.fromJson(json['hidden'] as Map<String, dynamic>),
+  seasonStats:
+      (json['seasonStats'] as List<dynamic>?)
+          ?.map((e) => PlayerSeasonStats.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+);
+
+Map<String, dynamic> _$$PlayerImplToJson(_$PlayerImpl instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+      'position': _$PositionEnumMap[instance.position]!,
+      'nationality': _$NationalityEnumMap[instance.nationality]!,
+      'age': instance.age,
+      'attributes': instance.attributes,
+      'contract': instance.contract,
+      'personality': _$PlayerPersonalityEnumMap[instance.personality]!,
+      'potentialStars': instance.potentialStars,
+      'heightCm': instance.heightCm,
+      'state': instance.state,
+      'hidden': instance.hidden,
+      'seasonStats': instance.seasonStats,
+    };
+
+const _$PositionEnumMap = {
+  Position.gk: 'gk',
+  Position.cb: 'cb',
+  Position.lb: 'lb',
+  Position.rb: 'rb',
+  Position.lwb: 'lwb',
+  Position.rwb: 'rwb',
+  Position.cdm: 'cdm',
+  Position.cm: 'cm',
+  Position.cam: 'cam',
+  Position.lw: 'lw',
+  Position.rw: 'rw',
+  Position.st: 'st',
+};
+
+const _$NationalityEnumMap = {
+  Nationality.poland: 'poland',
+  Nationality.brazil: 'brazil',
+  Nationality.france: 'france',
+  Nationality.spain: 'spain',
+  Nationality.england: 'england',
+  Nationality.germany: 'germany',
+  Nationality.argentina: 'argentina',
+  Nationality.portugal: 'portugal',
+  Nationality.italy: 'italy',
+  Nationality.netherlands: 'netherlands',
+  Nationality.belgium: 'belgium',
+  Nationality.croatia: 'croatia',
+  Nationality.nigeria: 'nigeria',
+  Nationality.senegal: 'senegal',
+  Nationality.japan: 'japan',
+  Nationality.usa: 'usa',
+  Nationality.mexico: 'mexico',
+  Nationality.morocco: 'morocco',
+  Nationality.colombia: 'colombia',
+  Nationality.switzerland: 'switzerland',
+  Nationality.uruguay: 'uruguay',
+  Nationality.egypt: 'egypt',
+  Nationality.china: 'china',
+};
+
+const _$PlayerPersonalityEnumMap = {
+  PlayerPersonality.professional: 'professional',
+  PlayerPersonality.leader: 'leader',
+  PlayerPersonality.temperamental: 'temperamental',
+  PlayerPersonality.ambitious: 'ambitious',
+  PlayerPersonality.loyal: 'loyal',
+  PlayerPersonality.balanced: 'balanced',
+};
+
+_$PlayerMatchStatsImpl _$$PlayerMatchStatsImplFromJson(
+  Map<String, dynamic> json,
+) => _$PlayerMatchStatsImpl(
+  playerId: json['playerId'] as String,
+  minutes: (json['minutes'] as num?)?.toInt() ?? 0,
+  goals: (json['goals'] as num?)?.toInt() ?? 0,
+  assists: (json['assists'] as num?)?.toInt() ?? 0,
+  shots: (json['shots'] as num?)?.toInt() ?? 0,
+  yellowCards: (json['yellowCards'] as num?)?.toInt() ?? 0,
+  redCards: (json['redCards'] as num?)?.toInt() ?? 0,
+  tackles: (json['tackles'] as num?)?.toInt() ?? 0,
+  interceptions: (json['interceptions'] as num?)?.toInt() ?? 0,
+  saves: (json['saves'] as num?)?.toInt() ?? 0,
+  rating: (json['rating'] as num?)?.toDouble() ?? 6.0,
+);
+
+Map<String, dynamic> _$$PlayerMatchStatsImplToJson(
+  _$PlayerMatchStatsImpl instance,
+) => <String, dynamic>{
+  'playerId': instance.playerId,
+  'minutes': instance.minutes,
+  'goals': instance.goals,
+  'assists': instance.assists,
+  'shots': instance.shots,
+  'yellowCards': instance.yellowCards,
+  'redCards': instance.redCards,
+  'tackles': instance.tackles,
+  'interceptions': instance.interceptions,
+  'saves': instance.saves,
+  'rating': instance.rating,
+};
