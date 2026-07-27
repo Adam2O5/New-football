@@ -13,3 +13,4 @@ Funkcje / reguły odłożone — nie implementować w v1.
 - Rywalizacje / derby (jako osobny system; lekki czynnik meczu może zostać w `matchday_model.md`)
 - Coś na podobieństwo NBA Cup
 - Regiony skautingu z XP scouta
+- ustawienia konkretnych elementów rozgrywki (np. developmentu lub draftu (jak bblm))
