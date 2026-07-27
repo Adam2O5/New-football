@@ -422,6 +422,25 @@ class StaffBalance {
     this.growthAgeMax = 45,
     this.retireAgeMin = 55,
     this.retireAgeHardCap = 60,
+    this.salaryMarketBand = 4200000,
+    this.roleSalaryWeight = const <StaffRole, double>{
+      StaffRole.headCoach: 1.0,
+      StaffRole.youthCoach: 0.55,
+      StaffRole.scout: 0.55,
+      StaffRole.doctor: 0.55,
+      StaffRole.physio: 0.4,
+      StaffRole.cfo: 0.25,
+    },
+    this.growthAgeMinChance = 0.22,
+    this.growthAgeMaxChance = 0.14,
+    this.retireChanceByAge = const <int, double>{
+      55: 0.12,
+      56: 0.22,
+      57: 0.38,
+      58: 0.55,
+      59: 0.75,
+      60: 1.0,
+    },
   });
 
   final int salaryCap;
@@ -442,6 +461,19 @@ class StaffBalance {
   final int retireAgeMin;
   final int retireAgeHardCap;
 
+  /// Reference salary (€) for an elite (5★) Head Coach; other roles/stars
+  /// scale off this via [roleSalaryWeight] (`docs/staff_rules.md` §3).
+  final int salaryMarketBand;
+  final Map<StaffRole, double> roleSalaryWeight;
+
+  /// Base P(growth roll succeeds) at [growthAgeMin] / [growthAgeMax]
+  /// (`docs/staff_rules.md` §6), linearly interpolated between.
+  final double growthAgeMinChance;
+  final double growthAgeMaxChance;
+
+  /// Base P(retire) by age, 55–60 (`docs/staff_rules.md` §7).
+  final Map<int, double> retireChanceByAge;
+
   int maxWatched(double coverageStars) =>
       (maxWatchedBase + coverageStars * maxWatchedPerCoverageStar).round();
 
@@ -449,6 +481,24 @@ class StaffBalance {
     if (coverageStars < 1) return 0;
     final raw = (coverageStars * combineAssignCoverageFraction).floor();
     return raw < 1 ? 1 : raw;
+  }
+
+  double salaryFor(StaffRole role, double avgStars) {
+    final weight = roleSalaryWeight[role] ?? 0.5;
+    final norm = (avgStars / starMax).clamp(0.0, 1.0);
+    return weight * (0.4 + 0.6 * norm) * salaryMarketBand;
+  }
+
+  double growthChanceForAge(int age) {
+    if (age < growthAgeMin || age > growthAgeMax) return 0;
+    final span = (growthAgeMax - growthAgeMin).clamp(1, 1000);
+    final t = (age - growthAgeMin) / span;
+    return growthAgeMinChance + (growthAgeMaxChance - growthAgeMinChance) * t;
+  }
+
+  double retireChanceForAge(int age) {
+    if (age < retireAgeMin) return 0;
+    return retireChanceByAge[age] ?? (age >= retireAgeHardCap ? 1.0 : 0.0);
   }
 }
 

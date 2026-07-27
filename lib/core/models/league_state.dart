@@ -2,6 +2,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:new_football/core/models/draft_models.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/message.dart';
+import 'package:new_football/core/models/player.dart';
+import 'package:new_football/core/models/staff.dart';
 import 'package:new_football/core/models/team.dart';
 
 part 'league_state.freezed.dart';
@@ -17,8 +19,15 @@ class LeagueState with _$LeagueState {
     String? playerTeamId,
     @Default(0) int currentRound,
     @Default(1) int currentWeek,
+    /// 1 = Monday … 7 = Sunday within [currentWeek].
+    @Default(1) int currentDay,
     @Default(Inbox()) Inbox inbox,
     @Default(MessageSettings()) MessageSettings messageSettings,
+    /// Sztab bez klubu — pula dostępna do zatrudnienia (`docs/staff_rules.md`).
+    @Default([]) List<StaffMember> staffFreeAgents,
+    /// Zawodnicy bez klubu — niedraftowani + wygasłe kontrakty
+    /// (`docs/contract_signing.md`, `docs/offseason.md`).
+    @Default([]) List<Player> freeAgents,
   }) = _LeagueState;
 
   factory LeagueState.fromJson(Map<String, dynamic> json) =>

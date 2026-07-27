@@ -53,11 +53,21 @@ extension TeamX on Team {
       roster.where((p) => p.isAvailable).toList();
 
   List<Player> get startingEleven {
-    if (lineupPlayerIds.length >= 11) {
-      return lineupPlayerIds
-          .map((id) => roster.firstWhere((p) => p.id == id))
-          .take(11)
-          .toList();
+    if (lineupPlayerIds.isNotEmpty) {
+      final fromIds = <Player>[];
+      for (final id in lineupPlayerIds) {
+        final matches = roster.where((p) => p.id == id);
+        if (matches.isNotEmpty) fromIds.add(matches.first);
+        if (fromIds.length >= 11) break;
+      }
+      if (fromIds.length >= 11) return fromIds;
+      if (fromIds.isNotEmpty) {
+        final used = fromIds.map((p) => p.id).toSet();
+        final fillers = availablePlayers
+            .where((p) => !used.contains(p.id))
+            .take(11 - fromIds.length);
+        return [...fromIds, ...fillers];
+      }
     }
     return availablePlayers.take(11).toList();
   }

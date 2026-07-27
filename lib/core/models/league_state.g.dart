@@ -25,6 +25,7 @@ _$LeagueStateImpl _$$LeagueStateImplFromJson(Map<String, dynamic> json) =>
       playerTeamId: json['playerTeamId'] as String?,
       currentRound: (json['currentRound'] as num?)?.toInt() ?? 0,
       currentWeek: (json['currentWeek'] as num?)?.toInt() ?? 1,
+      currentDay: (json['currentDay'] as num?)?.toInt() ?? 1,
       inbox: json['inbox'] == null
           ? const Inbox()
           : Inbox.fromJson(json['inbox'] as Map<String, dynamic>),
@@ -33,6 +34,16 @@ _$LeagueStateImpl _$$LeagueStateImplFromJson(Map<String, dynamic> json) =>
           : MessageSettings.fromJson(
               json['messageSettings'] as Map<String, dynamic>,
             ),
+      staffFreeAgents:
+          (json['staffFreeAgents'] as List<dynamic>?)
+              ?.map((e) => StaffMember.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      freeAgents:
+          (json['freeAgents'] as List<dynamic>?)
+              ?.map((e) => Player.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
     );
 
 Map<String, dynamic> _$$LeagueStateImplToJson(_$LeagueStateImpl instance) =>
@@ -44,8 +55,11 @@ Map<String, dynamic> _$$LeagueStateImplToJson(_$LeagueStateImpl instance) =>
       'playerTeamId': instance.playerTeamId,
       'currentRound': instance.currentRound,
       'currentWeek': instance.currentWeek,
+      'currentDay': instance.currentDay,
       'inbox': instance.inbox,
       'messageSettings': instance.messageSettings,
+      'staffFreeAgents': instance.staffFreeAgents,
+      'freeAgents': instance.freeAgents,
     };
 
 const _$DifficultyEnumMap = {

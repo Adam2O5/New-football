@@ -102,4 +102,22 @@ extension TeamStaffX on TeamStaff {
 
   int get totalSalary =>
       members.fold(0, (sum, m) => sum + (m.contract?.salary ?? 0));
+
+  StaffMember? member(StaffRole role) => switch (role) {
+    StaffRole.headCoach => headCoach,
+    StaffRole.youthCoach => youthCoach,
+    StaffRole.scout => scout,
+    StaffRole.physio => physio,
+    StaffRole.doctor => doctor,
+    StaffRole.cfo => cfo,
+  };
+
+  TeamStaff withMember(StaffRole role, StaffMember? member) => switch (role) {
+    StaffRole.headCoach => copyWith(headCoach: member),
+    StaffRole.youthCoach => copyWith(youthCoach: member),
+    StaffRole.scout => copyWith(scout: member),
+    StaffRole.physio => copyWith(physio: member),
+    StaffRole.doctor => copyWith(doctor: member),
+    StaffRole.cfo => copyWith(cfo: member),
+  };
 }
