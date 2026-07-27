@@ -159,7 +159,7 @@ class HomeScreen extends ConsumerWidget {
 
     ({int? conferenceRank, int? overallRank, int wins, int draws, int losses})
     standingsInfo() {
-      if (playerId == null)
+      if (playerId == null) {
         return (
           conferenceRank: null,
           overallRank: null,
@@ -167,6 +167,7 @@ class HomeScreen extends ConsumerWidget {
           draws: 0,
           losses: 0,
         );
+      }
       int wins = 0;
       int draws = 0;
       int losses = 0;

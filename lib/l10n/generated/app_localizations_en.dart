@@ -403,7 +403,31 @@ class AppLocalizationsEn extends AppLocalizations {
   String get squad_cannotFieldInjured => 'An injured player can\'t be fielded';
 
   @override
-  String get squad_swapped => 'Swapped places';
+  String get squad_swappedPlaces => 'Swapped places';
+
+  @override
+  String get squad_rosterTitle => 'Roster';
+
+  @override
+  String get squad_zoneXi => 'XI';
+
+  @override
+  String get squad_zoneBench => 'Bench';
+
+  @override
+  String get squad_zoneReserves => 'Reserves';
+
+  @override
+  String get squad_sortOverall => 'Overall';
+
+  @override
+  String get squad_sortAssignedZone => 'Assigned position';
+
+  @override
+  String get squad_sortForm => 'Form';
+
+  @override
+  String get squad_sortPosition => 'Position';
 
   @override
   String get standings_noLeague => 'No league';

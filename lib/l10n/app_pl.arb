@@ -181,7 +181,32 @@
   "squad_tacticsTitle": "Taktyka",
   "squad_selectHint": "Zaznacz zawodnika, potem kliknij drugiego, aby zamienić miejsca",
   "squad_cannotFieldInjured": "Kontuzjowany zawodnik nie może wejść do składu meczowego",
-  "squad_swapped": "Zamieniono miejsca",
+  "squad_swappedPlaces": "Zamieniono miejsca zawodników",
+  {
+    "squadrosterTitle": "Skład",
+    "@squadrosterTitle": { "description": "Tytuł sekcji z pełną listą zawodników na ekranie składu." },
+
+    "squadzoneXi": "XI",
+    "@squadzoneXi": { "description": "Etykieta pokazywana przy zawodniku przypisanym do wyjściowej jedenastki." },
+
+    "squadzoneBench": "Ławka",
+    "@squadzoneBench": { "description": "Etykieta pokazywana przy zawodniku przypisanym do ławki rezerwowych." },
+
+    "squadzoneReserves": "Rezerwy",
+    "@squadzoneReserves": { "description": "Etykieta pokazywana przy zawodniku przypisanym do rezerw." },
+
+    "squadsortOverall": "Overall",
+    "@squadsortOverall": { "description": "Opcja sortowania składu: po ocenie overall, malejąco." },
+
+    "squadsortAssignedZone": "Przypisanie",
+    "@squadsortAssignedZone": { "description": "Opcja sortowania składu: po strefie (XI, ławka, rezerwa), a w jej obrębie po pozycji." },
+
+    "squadsortForm": "Forma",
+    "@squadsortForm": { "description": "Opcja sortowania składu: po aktualnej formie, malejąco." },
+
+    "squadsortPosition": "Pozycja",
+    "@squadsortPosition": { "description": "Opcja sortowania składu: wyłącznie po pozycji, z pominięciem strefy przypisania." }
+  }
 
   "standings_noLeague": "Brak ligi",
   "standings_tabEast": "Wschód",

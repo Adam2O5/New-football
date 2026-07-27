@@ -152,7 +152,32 @@
   "squad_tacticsTitle": "Tactics",
   "squad_selectHint": "Select a player, then tap another to swap places",
   "squad_cannotFieldInjured": "An injured player can't be fielded",
-  "squad_swapped": "Swapped places",
+  "squad_swappedPlaces": "Swapped player places",
+  {
+  "squadrosterTitle": "Roster",
+  "@squadrosterTitle": { "description": "Section title for the full roster list on the squad screen." },
+
+  "squadzoneXi": "XI",
+  "@squadzoneXi": { "description": "Label shown on a player row when assigned to the starting XI." },
+
+  "squadzoneBench": "Bench",
+  "@squadzoneBench": { "description": "Label shown on a player row when assigned to the bench." },
+
+  "squadzoneReserves": "Reserves",
+  "@squadzoneReserves": { "description": "Label shown on a player row when assigned to the reserves." },
+
+  "squadsortOverall": "Overall",
+  "@squadsortOverall": { "description": "Roster sort option: by overall rating, descending." },
+
+  "squadsortAssignedZone": "Assigned zone",
+  "@squadsortAssignedZone": { "description": "Roster sort option: by zone (XI, bench, reserve), then position." },
+
+  "squadsortForm": "Form",
+  "@squadsortForm": { "description": "Roster sort option: by current form, descending." },
+
+  "squadsortPosition": "Position",
+  "@squadsortPosition": { "description": "Roster sort option: by position only, ignoring zone." }
+  },
 
   "standings_noLeague": "No league",
   "standings_tabEast": "East",

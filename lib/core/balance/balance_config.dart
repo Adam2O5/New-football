@@ -595,6 +595,7 @@ class AwardsBalance {
 class RetirementBalance {
   const RetirementBalance({
     this.minAge = 33,
+
     /// Age → base retirement chance (0–1). Ages below [minAge] use 0.
     this.baseChanceByAge = const <int, double>{
       33: 0.03,
@@ -800,22 +801,18 @@ class TacticsBalance {
   final List<FormationMatchup> formationMatchups;
 
   static const _defaultFormationBaseStats = <Formation, FormationBaseStats>{
-    Formation.f3412: FormationBaseStats(def: 48, mid: 62, atk: 58),
-    Formation.f3421: FormationBaseStats(def: 46, mid: 64, atk: 60),
     Formation.f343: FormationBaseStats(def: 42, mid: 55, atk: 68),
     Formation.f352: FormationBaseStats(def: 50, mid: 70, atk: 55),
-    Formation.f41212: FormationBaseStats(def: 55, mid: 66, atk: 58),
-    Formation.f4222: FormationBaseStats(def: 58, mid: 60, atk: 60),
-    Formation.f4231: FormationBaseStats(def: 56, mid: 68, atk: 57),
     Formation.f424: FormationBaseStats(def: 40, mid: 45, atk: 75),
     Formation.f433: FormationBaseStats(def: 55, mid: 60, atk: 62),
-    Formation.f442: FormationBaseStats(def: 58, mid: 55, atk: 60),
-    Formation.f451: FormationBaseStats(def: 60, mid: 72, atk: 48),
-    Formation.f5212: FormationBaseStats(def: 70, mid: 52, atk: 55),
-    Formation.f5221: FormationBaseStats(def: 72, mid: 55, atk: 50),
     Formation.f523: FormationBaseStats(def: 68, mid: 48, atk: 62),
     Formation.f532: FormationBaseStats(def: 72, mid: 58, atk: 52),
-    Formation.f541: FormationBaseStats(def: 78, mid: 62, atk: 42),
+    Formation.f442Wide: FormationBaseStats(def: 58, mid: 60, atk: 60),
+    Formation.f442Narrow: FormationBaseStats(def: 58, mid: 60, atk: 60),
+    Formation.f451Wide: FormationBaseStats(def: 58, mid: 60, atk: 60),
+    Formation.f451Narrow: FormationBaseStats(def: 58, mid: 60, atk: 60),
+    Formation.f541Wide: FormationBaseStats(def: 58, mid: 60, atk: 60),
+    Formation.f541Narrow: FormationBaseStats(def: 58, mid: 60, atk: 60),
   };
 
   static const _defaultTempoDelta = <Tempo, TacticsDelta>{
@@ -846,22 +843,22 @@ class TacticsBalance {
   static const _defaultFormationMatchups = <FormationMatchup>[
     FormationMatchup(
       formationA: Formation.f433,
-      formationB: Formation.f442,
+      formationB: Formation.f442Wide,
       bonusForA: 0.06,
     ),
     FormationMatchup(
-      formationA: Formation.f442,
+      formationA: Formation.f442Wide,
       formationB: Formation.f352,
       bonusForA: 0.05,
     ),
     FormationMatchup(
-      formationA: Formation.f451,
+      formationA: Formation.f451Wide,
       formationB: Formation.f433,
       bonusForA: 0.05,
     ),
     FormationMatchup(
       formationA: Formation.f352,
-      formationB: Formation.f442,
+      formationB: Formation.f442Wide,
       bonusForA: 0.05,
     ),
     FormationMatchup(
@@ -870,7 +867,7 @@ class TacticsBalance {
       bonusForA: 0.08,
     ),
     FormationMatchup(
-      formationA: Formation.f541,
+      formationA: Formation.f541Wide,
       formationB: Formation.f424,
       bonusForA: 0.08,
     ),
@@ -880,13 +877,13 @@ class TacticsBalance {
       bonusForA: 0.05,
     ),
     FormationMatchup(
-      formationA: Formation.f4231,
-      formationB: Formation.f541,
+      formationA: Formation.f424,
+      formationB: Formation.f541Wide,
       bonusForA: 0.04,
     ),
     FormationMatchup(
       formationA: Formation.f523,
-      formationB: Formation.f451,
+      formationB: Formation.f451Wide,
       bonusForA: 0.04,
     ),
     FormationMatchup(
@@ -896,7 +893,7 @@ class TacticsBalance {
     ),
     FormationMatchup(
       formationA: Formation.f433,
-      formationB: Formation.f541,
+      formationB: Formation.f541Wide,
       bonusForA: -0.05,
     ),
   ];

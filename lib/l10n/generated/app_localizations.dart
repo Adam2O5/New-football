@@ -46,12 +46,12 @@ import 'app_localizations_pl.dart';
 ///
 /// iOS applications define key application metadata, including supported
 /// locales, in an Info.plist file that is built into the application bundle.
-/// To configure the locales supported by your app, you’ll need to edit this
+/// To configure the locales supported by your app, youâll need to edit this
 /// file.
 ///
-/// First, open your project’s ios/Runner.xcworkspace Xcode workspace file.
+/// First, open your projectâs ios/Runner.xcworkspace Xcode workspace file.
 /// Then, in the Project Navigator, open the Info.plist file under the Runner
-/// project’s Runner folder.
+/// projectâs Runner folder.
 ///
 /// Next, select the Information Property List item, select Add Item from the
 /// Editor menu, then select Localizations from the pop-up menu.
@@ -179,7 +179,7 @@ abstract class AppLocalizations {
   /// No description provided for @day_wed.
   ///
   /// In pl, this message translates to:
-  /// **'Śr'**
+  /// **'Ĺr'**
   String get day_wed;
 
   /// No description provided for @day_thu.
@@ -251,7 +251,7 @@ abstract class AppLocalizations {
   /// No description provided for @matchEvent_yellowCard.
   ///
   /// In pl, this message translates to:
-  /// **'Żółta kartka'**
+  /// **'ĹťĂłĹta kartka'**
   String get matchEvent_yellowCard;
 
   /// No description provided for @matchEvent_redCard.
@@ -269,7 +269,7 @@ abstract class AppLocalizations {
   /// No description provided for @matchEvent_majorInjury.
   ///
   /// In pl, this message translates to:
-  /// **'Poważna kontuzja'**
+  /// **'PowaĹźna kontuzja'**
   String get matchEvent_majorInjury;
 
   /// No description provided for @matchEvent_substitution.
@@ -311,19 +311,19 @@ abstract class AppLocalizations {
   /// No description provided for @messageType_retirementPlayer.
   ///
   /// In pl, this message translates to:
-  /// **'Zakończenie kariery zawodnika'**
+  /// **'ZakoĹczenie kariery zawodnika'**
   String get messageType_retirementPlayer;
 
   /// No description provided for @messageType_retirementStaff.
   ///
   /// In pl, this message translates to:
-  /// **'Odejście członka sztabu'**
+  /// **'OdejĹcie czĹonka sztabu'**
   String get messageType_retirementStaff;
 
   /// No description provided for @messageType_staffGrowth.
   ///
   /// In pl, this message translates to:
-  /// **'Rozwój sztabu'**
+  /// **'RozwĂłj sztabu'**
   String get messageType_staffGrowth;
 
   /// No description provided for @messageType_award.
@@ -359,7 +359,7 @@ abstract class AppLocalizations {
   /// No description provided for @messageType_draftPick.
   ///
   /// In pl, this message translates to:
-  /// **'Wybór w drafcie'**
+  /// **'WybĂłr w drafcie'**
   String get messageType_draftPick;
 
   /// No description provided for @messageType_contractOffer.
@@ -389,7 +389,7 @@ abstract class AppLocalizations {
   /// No description provided for @messageType_matchPreview.
   ///
   /// In pl, this message translates to:
-  /// **'Zapowiedź meczu'**
+  /// **'ZapowiedĹş meczu'**
   String get messageType_matchPreview;
 
   /// No description provided for @messageType_matchResult.
@@ -401,7 +401,7 @@ abstract class AppLocalizations {
   /// No description provided for @messageType_atmosphere.
   ///
   /// In pl, this message translates to:
-  /// **'Atmosfera w drużynie'**
+  /// **'Atmosfera w druĹźynie'**
   String get messageType_atmosphere;
 
   /// No description provided for @messageType_calendar.
@@ -419,7 +419,7 @@ abstract class AppLocalizations {
   /// No description provided for @notificationLevel_important.
   ///
   /// In pl, this message translates to:
-  /// **'Ważne'**
+  /// **'WaĹźne'**
   String get notificationLevel_important;
 
   /// No description provided for @notificationLevel_normal.
@@ -461,7 +461,7 @@ abstract class AppLocalizations {
   /// No description provided for @pressing_medium.
   ///
   /// In pl, this message translates to:
-  /// **'Średni'**
+  /// **'Ĺredni'**
   String get pressing_medium;
 
   /// No description provided for @pressing_high.
@@ -479,7 +479,7 @@ abstract class AppLocalizations {
   /// No description provided for @defensiveLine_deep.
   ///
   /// In pl, this message translates to:
-  /// **'Głęboka'**
+  /// **'GĹÄboka'**
   String get defensiveLine_deep;
 
   /// No description provided for @defensiveLine_normal.
@@ -497,7 +497,7 @@ abstract class AppLocalizations {
   /// No description provided for @attackWidth_narrow.
   ///
   /// In pl, this message translates to:
-  /// **'Wąska'**
+  /// **'WÄska'**
   String get attackWidth_narrow;
 
   /// No description provided for @attackWidth_balanced.
@@ -515,7 +515,7 @@ abstract class AppLocalizations {
   /// No description provided for @mainMenu_subtitle.
   ///
   /// In pl, this message translates to:
-  /// **'Menedżer ligi w stylu NBA'**
+  /// **'MenedĹźer ligi w stylu NBA'**
   String get mainMenu_subtitle;
 
   /// No description provided for @mainMenu_newGame.
@@ -545,7 +545,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings_language.
   ///
   /// In pl, this message translates to:
-  /// **'Język'**
+  /// **'JÄzyk'**
   String get settings_language;
 
   /// No description provided for @settings_language_polish.
@@ -575,13 +575,13 @@ abstract class AppLocalizations {
   /// No description provided for @newGame_missingFields.
   ///
   /// In pl, this message translates to:
-  /// **'Podaj nazwę zapisu i wybierz drużynę'**
+  /// **'Podaj nazwÄ zapisu i wybierz druĹźynÄ'**
   String get newGame_missingFields;
 
   /// No description provided for @newGame_createFailed.
   ///
   /// In pl, this message translates to:
-  /// **'Nie udało się utworzyć gry'**
+  /// **'Nie udaĹo siÄ utworzyÄ gry'**
   String get newGame_createFailed;
 
   /// No description provided for @newGame_saveName.
@@ -593,7 +593,7 @@ abstract class AppLocalizations {
   /// No description provided for @newGame_difficulty.
   ///
   /// In pl, this message translates to:
-  /// **'Trudność'**
+  /// **'TrudnoĹÄ'**
   String get newGame_difficulty;
 
   /// No description provided for @newGame_difficultyNormal.
@@ -611,67 +611,67 @@ abstract class AppLocalizations {
   /// No description provided for @newGame_chooseTeam.
   ///
   /// In pl, this message translates to:
-  /// **'Wybierz drużynę'**
+  /// **'Wybierz druĹźynÄ'**
   String get newGame_chooseTeam;
 
   /// No description provided for @newGame_start.
   ///
   /// In pl, this message translates to:
-  /// **'Rozpocznij karierę'**
+  /// **'Rozpocznij karierÄ'**
   String get newGame_start;
 
   /// No description provided for @loadGame_title.
   ///
   /// In pl, this message translates to:
-  /// **'Wczytaj grę'**
+  /// **'Wczytaj grÄ'**
   String get loadGame_title;
 
   /// No description provided for @loadGame_error.
   ///
   /// In pl, this message translates to:
-  /// **'Błąd: {error}'**
+  /// **'BĹÄd: {error}'**
   String loadGame_error(String error);
 
   /// No description provided for @loadGame_empty.
   ///
   /// In pl, this message translates to:
-  /// **'Brak zapisów'**
+  /// **'Brak zapisĂłw'**
   String get loadGame_empty;
 
   /// No description provided for @loadGame_subtitle.
   ///
   /// In pl, this message translates to:
-  /// **'{teamName} · Sezon {year} · {phase}'**
+  /// **'{teamName} Âˇ Sezon {year} Âˇ {phase}'**
   String loadGame_subtitle(String teamName, int year, String phase);
 
   /// No description provided for @loadGame_loadFailed.
   ///
   /// In pl, this message translates to:
-  /// **'Nie udało się wczytać zapisu'**
+  /// **'Nie udaĹo siÄ wczytaÄ zapisu'**
   String get loadGame_loadFailed;
 
   /// No description provided for @loadGame_delete.
   ///
   /// In pl, this message translates to:
-  /// **'Usuń'**
+  /// **'UsuĹ'**
   String get loadGame_delete;
 
   /// No description provided for @loadGame_deleteConfirmTitle.
   ///
   /// In pl, this message translates to:
-  /// **'Usunąć zapis?'**
+  /// **'UsunÄÄ zapis?'**
   String get loadGame_deleteConfirmTitle;
 
   /// No description provided for @loadGame_deleteConfirmMessage.
   ///
   /// In pl, this message translates to:
-  /// **'Zapis „{name}” zostanie trwale usunięty.'**
+  /// **'Zapis â{name}â zostanie trwale usuniÄty.'**
   String loadGame_deleteConfirmMessage(String name);
 
   /// No description provided for @loadGame_deleteFailed.
   ///
   /// In pl, this message translates to:
-  /// **'Nie udało się usunąć zapisu'**
+  /// **'Nie udaĹo siÄ usunÄÄ zapisu'**
   String get loadGame_deleteFailed;
 
   /// No description provided for @shell_noActiveGame.
@@ -683,7 +683,7 @@ abstract class AppLocalizations {
   /// No description provided for @shell_mainMenu.
   ///
   /// In pl, this message translates to:
-  /// **'Menu główne'**
+  /// **'Menu gĹĂłwne'**
   String get shell_mainMenu;
 
   /// No description provided for @shell_defaultCareerName.
@@ -713,7 +713,7 @@ abstract class AppLocalizations {
   /// No description provided for @shell_tab_squad.
   ///
   /// In pl, this message translates to:
-  /// **'Skład'**
+  /// **'SkĹad'**
   String get shell_tab_squad;
 
   /// No description provided for @shell_tab_tactics.
@@ -755,7 +755,7 @@ abstract class AppLocalizations {
   /// No description provided for @home_next7days.
   ///
   /// In pl, this message translates to:
-  /// **'Najbliższe 7 dni'**
+  /// **'NajbliĹźsze 7 dni'**
   String get home_next7days;
 
   /// No description provided for @home_conferenceRankLabel.
@@ -767,13 +767,13 @@ abstract class AppLocalizations {
   /// No description provided for @home_overallRankLabel.
   ///
   /// In pl, this message translates to:
-  /// **'Miejsce w tabeli ogólnej'**
+  /// **'Miejsce w tabeli ogĂłlnej'**
   String get home_overallRankLabel;
 
   /// No description provided for @home_record.
   ///
   /// In pl, this message translates to:
-  /// **'Bilans drużyny'**
+  /// **'Bilans druĹźyny'**
   String get home_record;
 
   /// No description provided for @home_lastMatchTitle.
@@ -785,37 +785,37 @@ abstract class AppLocalizations {
   /// No description provided for @home_nextMatchTitle.
   ///
   /// In pl, this message translates to:
-  /// **'Następny mecz'**
+  /// **'NastÄpny mecz'**
   String get home_nextMatchTitle;
 
   /// No description provided for @home_noPreviousMatch.
   ///
   /// In pl, this message translates to:
-  /// **'Brak rozegranych meczów'**
+  /// **'Brak rozegranych meczĂłw'**
   String get home_noPreviousMatch;
 
   /// No description provided for @home_noNextMatch.
   ///
   /// In pl, this message translates to:
-  /// **'Brak zaplanowanych meczów'**
+  /// **'Brak zaplanowanych meczĂłw'**
   String get home_noNextMatch;
 
   /// No description provided for @home_simulateUntilNextEvent.
   ///
   /// In pl, this message translates to:
-  /// **'Do następnego wydarzenia'**
+  /// **'Do nastÄpnego wydarzenia'**
   String get home_simulateUntilNextEvent;
 
   /// No description provided for @squad_noTeam.
   ///
   /// In pl, this message translates to:
-  /// **'Brak drużyny gracza'**
+  /// **'Brak druĹźyny gracza'**
   String get squad_noTeam;
 
   /// No description provided for @squad_sizeLabel.
   ///
   /// In pl, this message translates to:
-  /// **'Skład: {size} / {min}–{max}'**
+  /// **'SkĹad: {size} / {min}â{max}'**
   String squad_sizeLabel(int size, int min, int max);
 
   /// No description provided for @squad_injury.
@@ -833,7 +833,7 @@ abstract class AppLocalizations {
   /// No description provided for @squad_bench.
   ///
   /// In pl, this message translates to:
-  /// **'Ławka'**
+  /// **'Ĺawka'**
   String get squad_bench;
 
   /// No description provided for @squad_reserves.
@@ -851,20 +851,44 @@ abstract class AppLocalizations {
   /// No description provided for @squad_selectHint.
   ///
   /// In pl, this message translates to:
-  /// **'Zaznacz zawodnika, potem kliknij drugiego, aby zamienić miejsca'**
+  /// **'Zaznacz zawodnika, potem kliknij drugiego, aby zamieniÄ miejsca'**
   String get squad_selectHint;
 
   /// No description provided for @squad_cannotFieldInjured.
   ///
   /// In pl, this message translates to:
-  /// **'Kontuzjowany zawodnik nie może wejść do składu meczowego'**
+  /// **'Kontuzjowany zawodnik nie moĹźe wejĹÄ do skĹadu meczowego'**
   String get squad_cannotFieldInjured;
 
-  /// No description provided for @squad_swapped.
+  /// No description provided for @squad_swappedPlaces.
   ///
   /// In pl, this message translates to:
-  /// **'Zamieniono miejsca'**
-  String get squad_swapped;
+  /// **'Zamieniono miejsca zawodników'**
+  String get squad_swappedPlaces;
+
+  /// No description provided for squadrosterTitle.
+  String get squad_rosterTitle;
+
+  /// No description provided for squadzoneXi.
+  String get squad_zoneXi;
+
+  /// No description provided for squadzoneBench.
+  String get squad_zoneBench;
+
+  /// No description provided for squadzoneReserves.
+  String get squad_zoneReserves;
+
+  /// No description provided for squadsortOverall.
+  String get squad_sortOverall;
+
+  /// No description provided for squadsortAssignedZone.
+  String get squad_sortAssignedZone;
+
+  /// No description provided for squadsortForm.
+  String get squad_sortForm;
+
+  /// No description provided for squadsortPosition.
+  String get squad_sortPosition;
 
   /// No description provided for @standings_noLeague.
   ///
@@ -875,13 +899,13 @@ abstract class AppLocalizations {
   /// No description provided for @standings_tabEast.
   ///
   /// In pl, this message translates to:
-  /// **'Wschód'**
+  /// **'WschĂłd'**
   String get standings_tabEast;
 
   /// No description provided for @standings_tabWest.
   ///
   /// In pl, this message translates to:
-  /// **'Zachód'**
+  /// **'ZachĂłd'**
   String get standings_tabWest;
 
   /// No description provided for @standings_empty.
@@ -893,7 +917,7 @@ abstract class AppLocalizations {
   /// No description provided for @standings_col_team.
   ///
   /// In pl, this message translates to:
-  /// **'Drużyna'**
+  /// **'DruĹźyna'**
   String get standings_col_team;
 
   /// No description provided for @standings_col_record.
@@ -911,13 +935,13 @@ abstract class AppLocalizations {
   /// No description provided for @standings_col_diff.
   ///
   /// In pl, this message translates to:
-  /// **'+/−'**
+  /// **'+/â'**
   String get standings_col_diff;
 
   /// No description provided for @finance_noTeam.
   ///
   /// In pl, this message translates to:
-  /// **'Brak drużyny gracza'**
+  /// **'Brak druĹźyny gracza'**
   String get finance_noTeam;
 
   /// No description provided for @finance_title.
@@ -965,7 +989,7 @@ abstract class AppLocalizations {
   /// No description provided for @finance_cash.
   ///
   /// In pl, this message translates to:
-  /// **'Gotówka'**
+  /// **'GotĂłwka'**
   String get finance_cash;
 
   /// No description provided for @finance_status.
@@ -983,7 +1007,7 @@ abstract class AppLocalizations {
   /// No description provided for @finance_capStatus_over.
   ///
   /// In pl, this message translates to:
-  /// **'Powyżej capu'**
+  /// **'PowyĹźej capu'**
   String get finance_capStatus_over;
 
   /// No description provided for @finance_trade.
@@ -995,13 +1019,13 @@ abstract class AppLocalizations {
   /// No description provided for @finance_contracts.
   ///
   /// In pl, this message translates to:
-  /// **'Kontrakty / przedłużenia'**
+  /// **'Kontrakty / przedĹuĹźenia'**
   String get finance_contracts;
 
   /// No description provided for @tactics_noTeam.
   ///
   /// In pl, this message translates to:
-  /// **'Brak drużyny gracza'**
+  /// **'Brak druĹźyny gracza'**
   String get tactics_noTeam;
 
   /// No description provided for @tactics_formation.
@@ -1031,19 +1055,19 @@ abstract class AppLocalizations {
   /// No description provided for @tactics_attackWidth.
   ///
   /// In pl, this message translates to:
-  /// **'Szerokość ataku'**
+  /// **'SzerokoĹÄ ataku'**
   String get tactics_attackWidth;
 
   /// No description provided for @tactics_save.
   ///
   /// In pl, this message translates to:
-  /// **'Zapisz taktykę'**
+  /// **'Zapisz taktykÄ'**
   String get tactics_save;
 
   /// No description provided for @tactics_saved.
   ///
   /// In pl, this message translates to:
-  /// **'Zapisano taktykę'**
+  /// **'Zapisano taktykÄ'**
   String get tactics_saved;
 
   /// No description provided for @inbox_title.
@@ -1067,13 +1091,13 @@ abstract class AppLocalizations {
   /// No description provided for @inbox_messageSubtitle.
   ///
   /// In pl, this message translates to:
-  /// **'Tydzień {week}\n{body}'**
+  /// **'TydzieĹ {week}\n{body}'**
   String inbox_messageSubtitle(int week, String body);
 
   /// No description provided for @inbox_settingsTitle.
   ///
   /// In pl, this message translates to:
-  /// **'Poziomy powiadomień'**
+  /// **'Poziomy powiadomieĹ'**
   String get inbox_settingsTitle;
 
   /// No description provided for @draft_title.
@@ -1091,7 +1115,7 @@ abstract class AppLocalizations {
   /// No description provided for @draft_finished.
   ///
   /// In pl, this message translates to:
-  /// **'Draft zakończony'**
+  /// **'Draft zakoĹczony'**
   String get draft_finished;
 
   /// No description provided for @draft_pickLabel.
@@ -1103,7 +1127,7 @@ abstract class AppLocalizations {
   /// No description provided for @draft_teamLabel.
   ///
   /// In pl, this message translates to:
-  /// **'Drużyna: {name}'**
+  /// **'DruĹźyna: {name}'**
   String draft_teamLabel(String name);
 
   /// No description provided for @draft_yourTurn.
@@ -1139,13 +1163,13 @@ abstract class AppLocalizations {
   /// No description provided for @calendar_weekDayHeader.
   ///
   /// In pl, this message translates to:
-  /// **'Tydzień {week} · {dayName} (dzień {day})'**
+  /// **'TydzieĹ {week} Âˇ {dayName} (dzieĹ {day})'**
   String calendar_weekDayHeader(int week, String dayName, int day);
 
   /// No description provided for @calendar_phaseLine.
   ///
   /// In pl, this message translates to:
-  /// **'Faza: {phase} · Sezon {year}'**
+  /// **'Faza: {phase} Âˇ Sezon {year}'**
   String calendar_phaseLine(String phase, int year);
 
   /// No description provided for @calendar_homeLabel.
@@ -1229,19 +1253,19 @@ abstract class AppLocalizations {
   /// No description provided for @calendar_noMatches.
   ///
   /// In pl, this message translates to:
-  /// **'Brak meczów w tym tygodniu'**
+  /// **'Brak meczĂłw w tym tygodniu'**
   String get calendar_noMatches;
 
   /// No description provided for @calendar_simulateDay.
   ///
   /// In pl, this message translates to:
-  /// **'Symuluj dzień'**
+  /// **'Symuluj dzieĹ'**
   String get calendar_simulateDay;
 
   /// No description provided for @calendar_urgentMessage.
   ///
   /// In pl, this message translates to:
-  /// **'Pilna wiadomość w skrzynce'**
+  /// **'Pilna wiadomoĹÄ w skrzynce'**
   String get calendar_urgentMessage;
 
   /// No description provided for @calendar_fastForward.
@@ -1253,7 +1277,7 @@ abstract class AppLocalizations {
   /// No description provided for @calendar_simulateUntilNextMatch.
   ///
   /// In pl, this message translates to:
-  /// **'Do następnego meczu'**
+  /// **'Do nastÄpnego meczu'**
   String get calendar_simulateUntilNextMatch;
 
   /// No description provided for @calendar_simulateUntilDate.
@@ -1265,7 +1289,7 @@ abstract class AppLocalizations {
   /// No description provided for @calendar_simulateUntilPhaseEnd.
   ///
   /// In pl, this message translates to:
-  /// **'Do końca fazy'**
+  /// **'Do koĹca fazy'**
   String get calendar_simulateUntilPhaseEnd;
 
   /// No description provided for @calendar_chooseDateTitle.
@@ -1277,19 +1301,19 @@ abstract class AppLocalizations {
   /// No description provided for @calendar_weekLabel.
   ///
   /// In pl, this message translates to:
-  /// **'Tydzień'**
+  /// **'TydzieĹ'**
   String get calendar_weekLabel;
 
   /// No description provided for @calendar_dayLabel.
   ///
   /// In pl, this message translates to:
-  /// **'Dzień'**
+  /// **'DzieĹ'**
   String get calendar_dayLabel;
 
   /// No description provided for @calendar_simulating.
   ///
   /// In pl, this message translates to:
-  /// **'Symulowanie…'**
+  /// **'SymulowanieâŚ'**
   String get calendar_simulating;
 
   /// No description provided for @calendar_daysSimulated.
@@ -1307,7 +1331,7 @@ abstract class AppLocalizations {
   /// No description provided for @calendar_stopReason_reachedTarget.
   ///
   /// In pl, this message translates to:
-  /// **'Cel osiągnięty'**
+  /// **'Cel osiÄgniÄty'**
   String get calendar_stopReason_reachedTarget;
 
   /// No description provided for @calendar_stopReason_cancelled.
@@ -1331,19 +1355,19 @@ abstract class AppLocalizations {
   /// No description provided for @calendar_selectedDay_title.
   ///
   /// In pl, this message translates to:
-  /// **'Wybrany dzień'**
+  /// **'Wybrany dzieĹ'**
   String get calendar_selectedDay_title;
 
   /// No description provided for @calendar_selectedDay_noEvent.
   ///
   /// In pl, this message translates to:
-  /// **'Brak wydarzeń tego dnia'**
+  /// **'Brak wydarzeĹ tego dnia'**
   String get calendar_selectedDay_noEvent;
 
   /// No description provided for @calendar_selectedDay_matchUpcoming.
   ///
   /// In pl, this message translates to:
-  /// **'Nadchodzący mecz: {opponent}'**
+  /// **'NadchodzÄcy mecz: {opponent}'**
   String calendar_selectedDay_matchUpcoming(String opponent);
 
   /// No description provided for @calendar_selectedDay_matchResult.
@@ -1372,19 +1396,19 @@ abstract class AppLocalizations {
   /// No description provided for @trade_noTeam.
   ///
   /// In pl, this message translates to:
-  /// **'Brak drużyny'**
+  /// **'Brak druĹźyny'**
   String get trade_noTeam;
 
   /// No description provided for @trade_yourPlayer.
   ///
   /// In pl, this message translates to:
-  /// **'Twój zawodnik'**
+  /// **'TwĂłj zawodnik'**
   String get trade_yourPlayer;
 
   /// No description provided for @trade_targetTeam.
   ///
   /// In pl, this message translates to:
-  /// **'Drużyna docelowa'**
+  /// **'DruĹźyna docelowa'**
   String get trade_targetTeam;
 
   /// No description provided for @trade_theirPlayer.
@@ -1396,13 +1420,13 @@ abstract class AppLocalizations {
   /// No description provided for @trade_confirm.
   ///
   /// In pl, this message translates to:
-  /// **'Zatwierdź wymianę'**
+  /// **'ZatwierdĹş wymianÄ'**
   String get trade_confirm;
 
   /// No description provided for @trade_fillAllFields.
   ///
   /// In pl, this message translates to:
-  /// **'Uzupełnij wszystkie pola'**
+  /// **'UzupeĹnij wszystkie pola'**
   String get trade_fillAllFields;
 
   /// No description provided for @trade_notAllowed.
@@ -1414,19 +1438,19 @@ abstract class AppLocalizations {
   /// No description provided for @trade_aiRejected.
   ///
   /// In pl, this message translates to:
-  /// **'Druga drużyna odrzuciła propozycję wymiany'**
+  /// **'Druga druĹźyna odrzuciĹa propozycjÄ wymiany'**
   String get trade_aiRejected;
 
   /// No description provided for @trade_executeFailed.
   ///
   /// In pl, this message translates to:
-  /// **'Nie udało się wykonać wymiany'**
+  /// **'Nie udaĹo siÄ wykonaÄ wymiany'**
   String get trade_executeFailed;
 
   /// No description provided for @trade_success.
   ///
   /// In pl, this message translates to:
-  /// **'Wymiana zakończona sukcesem'**
+  /// **'Wymiana zakoĹczona sukcesem'**
   String get trade_success;
 
   /// No description provided for @trade_playerOption.
@@ -1444,25 +1468,25 @@ abstract class AppLocalizations {
   /// No description provided for @contract_noTeam.
   ///
   /// In pl, this message translates to:
-  /// **'Brak drużyny'**
+  /// **'Brak druĹźyny'**
   String get contract_noTeam;
 
   /// No description provided for @contract_expiringHeader.
   ///
   /// In pl, this message translates to:
-  /// **'Wygasające / do przedłużenia'**
+  /// **'WygasajÄce / do przedĹuĹźenia'**
   String get contract_expiringHeader;
 
   /// No description provided for @contract_noExpiring.
   ///
   /// In pl, this message translates to:
-  /// **'Brak zawodników do przedłużenia'**
+  /// **'Brak zawodnikĂłw do przedĹuĹźenia'**
   String get contract_noExpiring;
 
   /// No description provided for @contract_playerSubtitle.
   ///
   /// In pl, this message translates to:
-  /// **'{position} · OVR {ovr} · Lata: {years} · {salary}'**
+  /// **'{position} Âˇ OVR {ovr} Âˇ Lata: {years} Âˇ {salary}'**
   String contract_playerSubtitle(
     String position,
     int ovr,
@@ -1479,13 +1503,13 @@ abstract class AppLocalizations {
   /// No description provided for @contract_freeAgentsEmpty.
   ///
   /// In pl, this message translates to:
-  /// **'Pula FA pusta / uproszczona — skup się na przedłużeniach.'**
+  /// **'Pula FA pusta / uproszczona â skup siÄ na przedĹuĹźeniach.'**
   String get contract_freeAgentsEmpty;
 
   /// No description provided for @contract_freeAgentsCount.
   ///
   /// In pl, this message translates to:
-  /// **'{count} zawodników z yearsRemaining=0'**
+  /// **'{count} zawodnikĂłw z yearsRemaining=0'**
   String contract_freeAgentsCount(int count);
 
   /// No description provided for @contract_offerSalary.
@@ -1503,7 +1527,7 @@ abstract class AppLocalizations {
   /// No description provided for @contract_submitOffer.
   ///
   /// In pl, this message translates to:
-  /// **'Złóż ofertę przedłużenia'**
+  /// **'ZĹĂłĹź ofertÄ przedĹuĹźenia'**
   String get contract_submitOffer;
 
   /// No description provided for @contract_selectPlayer.
@@ -1515,31 +1539,31 @@ abstract class AppLocalizations {
   /// No description provided for @contract_invalidOffer.
   ///
   /// In pl, this message translates to:
-  /// **'Nieprawidłowa pensja lub lata'**
+  /// **'NieprawidĹowa pensja lub lata'**
   String get contract_invalidOffer;
 
   /// No description provided for @contract_accepted.
   ///
   /// In pl, this message translates to:
-  /// **'Kontrakt przyjęty!'**
+  /// **'Kontrakt przyjÄty!'**
   String get contract_accepted;
 
   /// No description provided for @contract_rejected.
   ///
   /// In pl, this message translates to:
-  /// **'Odrzucono ofertę'**
+  /// **'Odrzucono ofertÄ'**
   String get contract_rejected;
 
   /// No description provided for @contract_waiting.
   ///
   /// In pl, this message translates to:
-  /// **'Zawodnik rozważa ofertę…'**
+  /// **'Zawodnik rozwaĹźa ofertÄâŚ'**
   String get contract_waiting;
 
   /// No description provided for @contract_counter.
   ///
   /// In pl, this message translates to:
-  /// **'Kontroferta: {salary} × {years} lat'**
+  /// **'Kontroferta: {salary} Ă {years} lat'**
   String contract_counter(String salary, int years);
 
   /// No description provided for @staff_title.
@@ -1551,19 +1575,19 @@ abstract class AppLocalizations {
   /// No description provided for @staff_noTeam.
   ///
   /// In pl, this message translates to:
-  /// **'Brak drużyny'**
+  /// **'Brak druĹźyny'**
   String get staff_noTeam;
 
   /// No description provided for @staffRole_headCoach.
   ///
   /// In pl, this message translates to:
-  /// **'Trener główny'**
+  /// **'Trener gĹĂłwny'**
   String get staffRole_headCoach;
 
   /// No description provided for @staffRole_youthCoach.
   ///
   /// In pl, this message translates to:
-  /// **'Trener młodzieży'**
+  /// **'Trener mĹodzieĹźy'**
   String get staffRole_youthCoach;
 
   /// No description provided for @staffRole_scout.
@@ -1611,19 +1635,19 @@ abstract class AppLocalizations {
   /// No description provided for @staff_noCandidates.
   ///
   /// In pl, this message translates to:
-  /// **'Brak wolnych kandydatów na tę rolę'**
+  /// **'Brak wolnych kandydatĂłw na tÄ rolÄ'**
   String get staff_noCandidates;
 
   /// No description provided for @staff_overallStars.
   ///
   /// In pl, this message translates to:
-  /// **'★ {stars}'**
+  /// **'â {stars}'**
   String staff_overallStars(String stars);
 
   /// No description provided for @staff_memberSubtitle.
   ///
   /// In pl, this message translates to:
-  /// **'{age} lat · ★ {stars} · {salary}/rok'**
+  /// **'{age} lat Âˇ â {stars} Âˇ {salary}/rok'**
   String staff_memberSubtitle(int age, String stars, String salary);
 
   /// No description provided for @staff_hire.
@@ -1641,7 +1665,7 @@ abstract class AppLocalizations {
   /// No description provided for @staff_hireRejected.
   ///
   /// In pl, this message translates to:
-  /// **'Kandydat odrzucił ofertę lub przekroczono staff cap'**
+  /// **'Kandydat odrzuciĹ ofertÄ lub przekroczono staff cap'**
   String get staff_hireRejected;
 
   /// No description provided for @staff_capLabel.
@@ -1755,7 +1779,7 @@ abstract class AppLocalizations {
   /// No description provided for @contract_faCounter.
   ///
   /// In pl, this message translates to:
-  /// **'Kontroferta na rynku FA — spróbuj ponownie z wyższą ofertą'**
+  /// **'Kontroferta na rynku FA â sprĂłbuj ponownie z wyĹźszÄ ofertÄ'**
   String get contract_faCounter;
 
   /// No description provided for @playerDetail_title.
@@ -1773,7 +1797,7 @@ abstract class AppLocalizations {
   /// No description provided for @playerDetail_headerLine.
   ///
   /// In pl, this message translates to:
-  /// **'{position} · {nationality} · {age} lat'**
+  /// **'{position} Âˇ {nationality} Âˇ {age} lat'**
   String playerDetail_headerLine(String position, String nationality, int age);
 
   /// No description provided for @playerDetail_attributes.
@@ -1815,7 +1839,7 @@ abstract class AppLocalizations {
   /// No description provided for @playerDetail_personality.
   ///
   /// In pl, this message translates to:
-  /// **'Osobowość: {personality}'**
+  /// **'OsobowoĹÄ: {personality}'**
   String playerDetail_personality(String personality);
 
   /// No description provided for @matchday_defaultTitle.
@@ -1833,7 +1857,7 @@ abstract class AppLocalizations {
   /// No description provided for @matchday_resume.
   ///
   /// In pl, this message translates to:
-  /// **'Wznów'**
+  /// **'WznĂłw'**
   String get matchday_resume;
 
   /// No description provided for @matchday_pause.
@@ -1845,7 +1869,7 @@ abstract class AppLocalizations {
   /// No description provided for @matchday_toEnd.
   ///
   /// In pl, this message translates to:
-  /// **'Do końca'**
+  /// **'Do koĹca'**
   String get matchday_toEnd;
 
   /// No description provided for @router_noMatchData.

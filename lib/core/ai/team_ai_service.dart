@@ -58,9 +58,10 @@ class TeamAiService {
         ? 1.1 + _random.nextDouble() * 0.15
         : 0.95 + _random.nextDouble() * 0.15;
     return ContractOffer(
-      salary: (want * mult)
-          .round()
-          .clamp(balance.salaryCap.minSalary, balance.salaryCap.maxSalary),
+      salary: (want * mult).round().clamp(
+        balance.salaryCap.minSalary,
+        balance.salaryCap.maxSalary,
+      ),
       years: 2 + _random.nextInt(3),
     );
   }
@@ -108,7 +109,7 @@ class TeamAiService {
     }
     return TacticsSetup(
       formation: opponent.formation == Formation.f433
-          ? Formation.f442
+          ? Formation.f442Wide
           : Formation.f433,
       pressing: PressingIntensity.high,
     );

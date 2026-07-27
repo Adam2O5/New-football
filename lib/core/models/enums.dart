@@ -27,24 +27,18 @@ enum Position {
 enum SeasonPhase { preseason, regular, playIn, playoff, draft, offseason }
 
 enum Formation {
-  f3412('3-4-1-2'),
-  f3421('3-4-2-1'),
   f343('3-4-3'),
   f352('3-5-2'),
-
-  f41212('4-1-2-1-2'),
-  f4222('4-2-2-2'),
-  f4231('4-2-3-1'),
   f424('4-2-4'),
   f433('4-3-3'),
-  f442('4-4-2'),
-  f451('4-5-1'),
-
-  f5212('5-2-1-2'),
-  f5221('5-2-2-1'),
+  f442Wide('4-4-2 (szerokie)'),
+  f442Narrow('4-4-2 (wąskie)'),
+  f451Wide('4-5-1 (szerokie)'),
+  f451Narrow('4-5-1 (wąskie)'),
   f523('5-2-3'),
   f532('5-3-2'),
-  f541('5-4-1');
+  f541Wide('5-4-1 (szerokie)'),
+  f541Narrow('5-4-1 (wąskie)');
 
   const Formation(this.label);
   final String label;

@@ -472,7 +472,7 @@ class CalendarScreen extends ConsumerWidget {
                     child: FilledButton.icon(
                       onPressed: canSimulateSelectedDay
                           ? () => simulateUntilDate(
-                              selectedInfo!.week,
+                              selectedInfo.week,
                               selectedInfo.day,
                             )
                           : null,

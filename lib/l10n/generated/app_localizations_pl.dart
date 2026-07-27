@@ -404,7 +404,31 @@ class AppLocalizationsPl extends AppLocalizations {
       'Kontuzjowany zawodnik nie może wejść do składu meczowego';
 
   @override
-  String get squad_swapped => 'Zamieniono miejsca';
+  String get squad_swappedPlaces => 'Zamieniono miejsca zawodników';
+
+  @override
+  String get squad_rosterTitle => 'Skład';
+
+  @override
+  String get squad_zoneXi => 'XI';
+
+  @override
+  String get squad_zoneBench => 'Ławka';
+
+  @override
+  String get squad_zoneReserves => 'Rezerwy';
+
+  @override
+  String get squad_sortOverall => 'Ogólne';
+
+  @override
+  String get squad_sortAssignedZone => 'Przypisane miejsce';
+
+  @override
+  String get squad_sortForm => 'Forma';
+
+  @override
+  String get squad_sortPosition => 'Pozycja';
 
   @override
   String get standings_noLeague => 'Brak ligi';
