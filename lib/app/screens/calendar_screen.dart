@@ -78,6 +78,12 @@ class CalendarScreen extends ConsumerWidget {
       });
     }
     final month = cursorMonthValue ?? currentMonth;
+    final firstSeasonYear = league.history.isNotEmpty
+        ? league.history.map((h) => h.year).reduce((a, b) => a < b ? a : b)
+        : seasonYear;
+    final minMonthDate = _week1StartForSeason(firstSeasonYear);
+    final minMonth = DateTime(minMonthDate.year, minMonthDate.month);
+    final maxMonth = DateTime(currentMonth.year, currentMonth.month + 12);
 
     final playerId = league.playerTeamId;
     final currentWeek = week;
@@ -97,8 +103,15 @@ class CalendarScreen extends ConsumerWidget {
       matchesByRound.putIfAbsent(m.round, () => <ScheduledMatch>[]).add(m);
     }
 
-    ({int week, int day, bool isPast, int matchCount, String? playerMatchLabel, List<String> eventLabels})?
-        dayInfo(DateTime date) {
+    ({
+      int week,
+      int day,
+      bool isPast,
+      int matchCount,
+      String? playerMatchLabel,
+      List<String> eventLabels,
+    })?
+    dayInfo(DateTime date) {
       final mapped = _inGameWeekDayForDate(date, seasonYear);
       if (mapped == null) return null;
       final w = mapped.week;
@@ -178,39 +191,42 @@ class CalendarScreen extends ConsumerWidget {
       );
     }
 
-    final stripItems = <({
-      DateTime date,
-      int week,
-      int day,
-      String? playerMatchLabel,
-      List<String> eventLabels,
-    })>[];
+    final stripItems =
+        <
+          ({
+            DateTime date,
+            int week,
+            int day,
+            String? playerMatchLabel,
+            List<String> eventLabels,
+          })
+        >[];
     for (var d = 1; d <= daysInMonth; d++) {
       final date = DateTime(month.year, month.month, d);
       final info = dayInfo(date);
       if (info == null || info.isPast) continue;
       if (info.playerMatchLabel == null && info.eventLabels.isEmpty) continue;
-      stripItems.add(
-        (
-          date: date,
-          week: info.week,
-          day: info.day,
-          playerMatchLabel: info.playerMatchLabel,
-          eventLabels: info.eventLabels,
-        ),
-      );
+      stripItems.add((
+        date: date,
+        week: info.week,
+        day: info.day,
+        playerMatchLabel: info.playerMatchLabel,
+        eventLabels: info.eventLabels,
+      ));
     }
     stripItems.sort((a, b) => a.date.compareTo(b.date));
     final strip = stripItems.take(14).toList();
 
     Future<void> simulateDay() async {
-      final result =
-          await ref.read(gameControllerProvider.notifier).simulateDay();
+      final result = await ref
+          .read(gameControllerProvider.notifier)
+          .simulateDay();
       if (!context.mounted || result == null) return;
       final nextLeague = ref.read(activeLeagueProvider);
       if (nextLeague != null) {
-        ref.read(calendarCursorMonthProvider.notifier).state =
-            _monthForInGame(nextLeague);
+        ref.read(calendarCursorMonthProvider.notifier).state = _monthForInGame(
+          nextLeague,
+        );
       }
       if (result.playerMatch != null) {
         context.push('/game/match', extra: result.playerMatch);
@@ -218,9 +234,9 @@ class CalendarScreen extends ConsumerWidget {
       }
       if (result.pauseForUrgent) {
         ref.read(shellTabIndexProvider.notifier).state = 4;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.calendar_urgentMessage)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.calendar_urgentMessage)));
       }
     }
 
@@ -236,8 +252,9 @@ class CalendarScreen extends ConsumerWidget {
       if (!context.mounted) return;
       final nextLeague = ref.read(activeLeagueProvider);
       if (nextLeague == null) return;
-      ref.read(calendarCursorMonthProvider.notifier).state =
-          _monthForInGame(nextLeague);
+      ref.read(calendarCursorMonthProvider.notifier).state = _monthForInGame(
+        nextLeague,
+      );
     }
 
     Future<void> simulateUntilNextMatch() async {
@@ -245,13 +262,15 @@ class CalendarScreen extends ConsumerWidget {
         context,
         ref,
         l10n,
-        () => ref.read(gameControllerProvider.notifier).simulateUntilNextMatch(),
+        () =>
+            ref.read(gameControllerProvider.notifier).simulateUntilNextMatch(),
       );
       if (!context.mounted) return;
       final nextLeague = ref.read(activeLeagueProvider);
       if (nextLeague == null) return;
-      ref.read(calendarCursorMonthProvider.notifier).state =
-          _monthForInGame(nextLeague);
+      ref.read(calendarCursorMonthProvider.notifier).state = _monthForInGame(
+        nextLeague,
+      );
     }
 
     return Scaffold(
@@ -298,24 +317,40 @@ class CalendarScreen extends ConsumerWidget {
                   Row(
                     children: [
                       IconButton(
-                        onPressed: () {
-                          ref.read(calendarCursorMonthProvider.notifier).state =
-                              DateTime(month.year, month.month - 1, 1);
-                        },
+                        onPressed: month.isAfter(minMonth)
+                            ? () {
+                                ref
+                                    .read(calendarCursorMonthProvider.notifier)
+                                    .state = DateTime(
+                                  month.year,
+                                  month.month - 1,
+                                  1,
+                                );
+                              }
+                            : null,
                         icon: const Icon(Icons.chevron_left),
                       ),
                       Expanded(
                         child: Text(
-                          MaterialLocalizations.of(context).formatMonthYear(month),
+                          MaterialLocalizations.of(
+                            context,
+                          ).formatMonthYear(month),
                           style: Theme.of(context).textTheme.titleLarge,
                           textAlign: TextAlign.center,
                         ),
                       ),
                       IconButton(
-                        onPressed: () {
-                          ref.read(calendarCursorMonthProvider.notifier).state =
-                              DateTime(month.year, month.month + 1, 1);
-                        },
+                        onPressed: month.isBefore(maxMonth)
+                            ? () {
+                                ref
+                                    .read(calendarCursorMonthProvider.notifier)
+                                    .state = DateTime(
+                                  month.year,
+                                  month.month + 1,
+                                  1,
+                                );
+                              }
+                            : null,
                         icon: const Icon(Icons.chevron_right),
                       ),
                     ],
@@ -347,9 +382,9 @@ class CalendarScreen extends ConsumerWidget {
                                         '${dayName(context, item.day)} ${item.date.day}',
                                         maxLines: 1,
                                         overflow: TextOverflow.ellipsis,
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .labelLarge,
+                                        style: Theme.of(
+                                          context,
+                                        ).textTheme.labelLarge,
                                       ),
                                       const SizedBox(height: 6),
                                       if (item.eventLabels.isNotEmpty)
@@ -357,9 +392,9 @@ class CalendarScreen extends ConsumerWidget {
                                           item.eventLabels.first,
                                           maxLines: 1,
                                           overflow: TextOverflow.ellipsis,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodyMedium,
+                                          style: Theme.of(
+                                            context,
+                                          ).textTheme.bodyMedium,
                                         ),
                                       if (item.playerMatchLabel != null) ...[
                                         const SizedBox(height: 6),
@@ -367,9 +402,9 @@ class CalendarScreen extends ConsumerWidget {
                                           item.playerMatchLabel!,
                                           maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodySmall,
+                                          style: Theme.of(
+                                            context,
+                                          ).textTheme.bodySmall,
                                         ),
                                       ],
                                     ],
@@ -388,15 +423,17 @@ class CalendarScreen extends ConsumerWidget {
                     physics: const NeverScrollableScrollPhysics(),
                     gridDelegate:
                         const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 7,
-                    ),
+                          crossAxisCount: 7,
+                          childAspectRatio: 0.85,
+                        ),
                     itemBuilder: (context, i) {
                       final date = gridStart.add(Duration(days: i));
                       final info = dayInfo(date);
                       final isInMonth = date.month == month.month;
                       final isEnabled =
                           info != null && !info.isPast && isInMonth;
-                      final isToday = info != null &&
+                      final isToday =
+                          info != null &&
                           info.week == currentWeek &&
                           info.day == currentDay;
 
@@ -413,59 +450,66 @@ class CalendarScreen extends ConsumerWidget {
                             decoration: BoxDecoration(
                               color: isToday
                                   ? Theme.of(context)
-                                      .colorScheme
-                                      .primaryContainer
-                                      .withValues(alpha: 0.45)
+                                        .colorScheme
+                                        .primaryContainer
+                                        .withValues(alpha: 0.45)
                                   : null,
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: Column(
+                              mainAxisSize: MainAxisSize.min,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   '${date.day}',
-                                  style: Theme.of(context)
-                                      .textTheme
-                                      .labelSmall
+                                  style: Theme.of(context).textTheme.labelSmall
                                       ?.copyWith(
                                         color: isEnabled
                                             ? null
-                                            : Theme.of(context)
-                                                .disabledColor,
-                                        fontWeight:
-                                            isToday ? FontWeight.bold : null,
+                                            : Theme.of(context).disabledColor,
+                                        fontWeight: isToday
+                                            ? FontWeight.bold
+                                            : null,
                                       ),
                                 ),
-                                const SizedBox(height: 4),
                                 if (info != null) ...[
-                                  if (info.playerMatchLabel != null)
-                                    Tooltip(
-                                      message: info.playerMatchLabel!,
-                                      child: const Icon(
-                                        Icons.sports_soccer,
-                                        size: 14,
-                                        color: Colors.greenAccent,
-                                      ),
-                                    ),
-                                  if (info.playerMatchLabel == null &&
-                                      info.matchCount > 0)
-                                    Tooltip(
-                                      message: '${info.matchCount} matches',
-                                      child: const Icon(
-                                        Icons.sports_soccer,
-                                        size: 14,
-                                        color: Colors.white70,
-                                      ),
-                                    ),
-                                  if (info.eventLabels.isNotEmpty)
-                                    Tooltip(
-                                      message: info.eventLabels.join('\n'),
-                                      child: const Icon(
-                                        Icons.event_available_outlined,
-                                        size: 14,
-                                        color: Colors.amber,
-                                      ),
-                                    ),
+                                  const SizedBox(height: 2),
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      if (info.playerMatchLabel != null)
+                                        Tooltip(
+                                          message: info.playerMatchLabel!,
+                                          child: const Icon(
+                                            Icons.sports_soccer,
+                                            size: 12,
+                                            color: Colors.greenAccent,
+                                          ),
+                                        )
+                                      else if (info.matchCount > 0)
+                                        Tooltip(
+                                          message: '${info.matchCount} matches',
+                                          child: const Icon(
+                                            Icons.sports_soccer,
+                                            size: 12,
+                                            color: Colors.white70,
+                                          ),
+                                        ),
+                                      if (info.eventLabels.isNotEmpty) ...[
+                                        if (info.playerMatchLabel != null ||
+                                            info.matchCount > 0)
+                                          const SizedBox(width: 2),
+                                        Tooltip(
+                                          message: info.eventLabels.join('\n'),
+                                          child: const Icon(
+                                            Icons.event_available_outlined,
+                                            size: 12,
+                                            color: Colors.amber,
+                                          ),
+                                        ),
+                                      ],
+                                    ],
+                                  ),
                                 ],
                               ],
                             ),
@@ -541,10 +585,12 @@ class CalendarScreen extends ConsumerWidget {
     }
 
     final reasonLabel = switch (result.stopReason) {
-      SimulationStopReason.reachedTarget => l10n.calendar_stopReason_reachedTarget,
+      SimulationStopReason.reachedTarget =>
+        l10n.calendar_stopReason_reachedTarget,
       SimulationStopReason.cancelled => l10n.calendar_stopReason_cancelled,
       SimulationStopReason.noSave => l10n.calendar_stopReason_noSave,
-      SimulationStopReason.playerMatch => l10n.calendar_stopReason_reachedTarget,
+      SimulationStopReason.playerMatch =>
+        l10n.calendar_stopReason_reachedTarget,
       SimulationStopReason.urgent => l10n.calendar_stopReason_reachedTarget,
       SimulationStopReason.draftPick => l10n.calendar_stopReason_draftPick,
     };
