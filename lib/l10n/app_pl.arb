@@ -1,0 +1,499 @@
+{
+  "@@locale": "pl",
+
+  "appTitle": "New Football",
+
+  "common_cancel": "Anuluj",
+  "common_save": "Zapisz",
+
+  "stat_ovr": "OVR",
+  "stat_form": "Forma",
+  "stat_cond": "Cond",
+  "stat_pv": "PV",
+  "stat_pot": "Pot.",
+  "stat_height": "Wzrost",
+
+  "money_million": "{value} mln",
+  "@money_million": {
+    "placeholders": {
+      "value": {"type": "String"}
+    }
+  },
+  "money_thousand": "{value} tys.",
+  "@money_thousand": {
+    "placeholders": {
+      "value": {"type": "String"}
+    }
+  },
+
+  "day_mon": "Pon",
+  "day_tue": "Wt",
+  "day_wed": "Śr",
+  "day_thu": "Czw",
+  "day_fri": "Pt",
+  "day_sat": "Sob",
+  "day_sun": "Nd",
+
+  "seasonPhase_preseason": "Przedsezon",
+  "seasonPhase_regular": "Sezon zasadniczy",
+  "seasonPhase_playIn": "Play-in",
+  "seasonPhase_playoff": "Playoffy",
+  "seasonPhase_draft": "Draft",
+  "seasonPhase_offseason": "Offseason",
+
+  "matchEvent_goal": "Gol",
+  "matchEvent_yellowCard": "Żółta kartka",
+  "matchEvent_redCard": "Czerwona kartka",
+  "matchEvent_minorInjury": "Drobna kontuzja",
+  "matchEvent_majorInjury": "Poważna kontuzja",
+  "matchEvent_substitution": "Zmiana",
+  "matchEvent_scoredPenalty": "Wykorzystany karny",
+  "matchEvent_missedPenalty": "Niewykorzystany karny",
+  "matchEvent_halfTime": "Przerwa",
+  "matchEvent_fullTime": "Koniec meczu",
+
+  "messageType_injury": "Kontuzja",
+  "messageType_retirementPlayer": "Zakończenie kariery zawodnika",
+  "messageType_retirementStaff": "Odejście członka sztabu",
+  "messageType_staffGrowth": "Rozwój sztabu",
+  "messageType_award": "Nagroda",
+  "messageType_lottery": "Loteria draftowa",
+  "messageType_scoutReport": "Raport skautingowy",
+  "messageType_combine": "Combine",
+  "messageType_mockDraft": "Prognoza draftu",
+  "messageType_draftPick": "Wybór w drafcie",
+  "messageType_contractOffer": "Oferta kontraktu",
+  "messageType_contractSigned": "Podpisany kontrakt",
+  "messageType_trade": "Wymiana",
+  "messageType_walkover": "Walkower",
+  "messageType_matchPreview": "Zapowiedź meczu",
+  "messageType_matchResult": "Wynik meczu",
+  "messageType_atmosphere": "Atmosfera w drużynie",
+  "messageType_calendar": "Kalendarz",
+  "messageType_system": "System",
+
+  "notificationLevel_important": "Ważne",
+  "notificationLevel_normal": "Normalne",
+  "notificationLevel_muted": "Wyciszone",
+
+  "tempo_slow": "Wolne",
+  "tempo_balanced": "Zbalansowane",
+  "tempo_fast": "Szybkie",
+
+  "pressing_low": "Niski",
+  "pressing_medium": "Średni",
+  "pressing_high": "Wysoki",
+  "pressing_gegenpressing": "Gegenpressing",
+
+  "defensiveLine_deep": "Głęboka",
+  "defensiveLine_normal": "Standardowa",
+  "defensiveLine_high": "Wysoka",
+
+  "attackWidth_narrow": "Wąska",
+  "attackWidth_balanced": "Zbalansowana",
+  "attackWidth_wide": "Szeroka",
+
+  "mainMenu_subtitle": "Menedżer ligi w stylu NBA",
+  "mainMenu_newGame": "Nowa gra",
+  "mainMenu_loadGame": "Wczytaj",
+  "mainMenu_settings": "Ustawienia",
+
+  "settings_title": "Ustawienia",
+  "settings_language": "Język",
+  "settings_language_polish": "Polski",
+  "settings_language_english": "English",
+
+  "newGame_title": "Nowa gra",
+  "newGame_defaultSaveName": "Moja kariera",
+  "newGame_missingFields": "Podaj nazwę zapisu i wybierz drużynę",
+  "newGame_createFailed": "Nie udało się utworzyć gry",
+  "newGame_saveName": "Nazwa zapisu",
+  "newGame_difficulty": "Trudność",
+  "newGame_difficultyNormal": "Normalna",
+  "newGame_difficultyHard": "Trudna",
+  "newGame_chooseTeam": "Wybierz drużynę",
+  "newGame_start": "Rozpocznij karierę",
+
+  "loadGame_title": "Wczytaj grę",
+  "loadGame_error": "Błąd: {error}",
+  "@loadGame_error": {
+    "placeholders": {
+      "error": {"type": "String"}
+    }
+  },
+  "loadGame_empty": "Brak zapisów",
+  "loadGame_subtitle": "{teamName} · Sezon {year} · {phase}",
+  "@loadGame_subtitle": {
+    "placeholders": {
+      "teamName": {"type": "String"},
+      "year": {"type": "int"},
+      "phase": {"type": "String"}
+    }
+  },
+  "loadGame_loadFailed": "Nie udało się wczytać zapisu",
+  "loadGame_delete": "Usuń",
+  "loadGame_deleteConfirmTitle": "Usunąć zapis?",
+  "loadGame_deleteConfirmMessage": "Zapis „{name}” zostanie trwale usunięty.",
+  "@loadGame_deleteConfirmMessage": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "loadGame_deleteFailed": "Nie udało się usunąć zapisu",
+
+  "shell_noActiveGame": "Brak aktywnej gry",
+  "shell_mainMenu": "Menu główne",
+  "shell_defaultCareerName": "Kariera",
+  "shell_draftTooltip": "Draft",
+  "shell_menuTooltip": "Menu",
+  "shell_tab_calendar": "Kalendarz",
+  "shell_tab_squad": "Skład",
+  "shell_tab_tactics": "Taktyka",
+  "shell_tab_standings": "Tabela",
+  "shell_tab_finance": "Finanse",
+  "shell_tab_inbox": "Skrzynka",
+
+  "squad_noTeam": "Brak drużyny gracza",
+  "squad_sizeLabel": "Skład: {size} / {min}–{max}",
+  "@squad_sizeLabel": {
+    "placeholders": {
+      "size": {"type": "int"},
+      "min": {"type": "int"},
+      "max": {"type": "int"}
+    }
+  },
+  "squad_injury": "KONTUZJA",
+  "squad_xiBadge": "XI",
+  "squad_bench": "Ławka",
+  "squad_reserves": "Rezerwa",
+  "squad_tacticsTitle": "Taktyka",
+  "squad_selectHint": "Zaznacz zawodnika, potem kliknij drugiego, aby zamienić miejsca",
+  "squad_cannotFieldInjured": "Kontuzjowany zawodnik nie może wejść do składu meczowego",
+  "squad_swapped": "Zamieniono miejsca",
+
+  "standings_noLeague": "Brak ligi",
+  "standings_tabEast": "Wschód",
+  "standings_tabWest": "Zachód",
+  "standings_empty": "Brak tabeli",
+  "standings_col_team": "Drużyna",
+  "standings_col_record": "W-R-P",
+  "standings_col_points": "Pkt",
+  "standings_col_diff": "+/−",
+
+  "finance_noTeam": "Brak drużyny gracza",
+  "finance_title": "Finanse",
+  "finance_payroll": "Payroll",
+  "finance_cap": "Salary cap",
+  "finance_capSpace": "Wolne miejsce",
+  "finance_firstApron": "Pierwszy apron",
+  "finance_secondApron": "Drugi apron",
+  "finance_tax": "Podatek luksusowy",
+  "finance_cash": "Gotówka",
+  "finance_status": "Status",
+  "finance_capStatus_under": "Pod capem",
+  "finance_capStatus_over": "Powyżej capu",
+  "finance_trade": "Wymiany (trade)",
+  "finance_contracts": "Kontrakty / przedłużenia",
+
+  "tactics_noTeam": "Brak drużyny gracza",
+  "tactics_formation": "Formacja",
+  "tactics_tempo": "Tempo",
+  "tactics_pressing": "Pressing",
+  "tactics_defensiveLine": "Linia obrony",
+  "tactics_attackWidth": "Szerokość ataku",
+  "tactics_save": "Zapisz taktykę",
+  "tactics_saved": "Zapisano taktykę",
+
+  "inbox_title": "Skrzynka",
+  "inbox_notifications": "Powiadomienia",
+  "inbox_empty": "Skrzynka pusta",
+  "inbox_messageSubtitle": "Tydzień {week}\n{body}",
+  "@inbox_messageSubtitle": {
+    "placeholders": {
+      "week": {"type": "int"},
+      "body": {"type": "String"}
+    }
+  },
+  "inbox_settingsTitle": "Poziomy powiadomień",
+
+  "draft_title": "Draft",
+  "draft_notActive": "Draft jeszcze nieaktywny",
+  "draft_finished": "Draft zakończony",
+  "draft_pickLabel": "Pick #{number} (R{round})",
+  "@draft_pickLabel": {
+    "placeholders": {
+      "number": {"type": "int"},
+      "round": {"type": "int"}
+    }
+  },
+  "draft_teamLabel": "Drużyna: {name}",
+  "@draft_teamLabel": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "draft_yourTurn": "Twoja kolej!",
+  "draft_remainingProspects": "Pozostali prospecti ({count})",
+  "@draft_remainingProspects": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "draft_select": "Wybierz",
+  "draft_selected": "Wybrano: {name}",
+  "@draft_selected": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+
+  "calendar_noLeague": "Brak ligi",
+  "calendar_weekDayHeader": "Tydzień {week} · {dayName} (dzień {day})",
+  "@calendar_weekDayHeader": {
+    "placeholders": {
+      "week": {"type": "int"},
+      "dayName": {"type": "String"},
+      "day": {"type": "int"}
+    }
+  },
+  "calendar_phaseLine": "Faza: {phase} · Sezon {year}",
+  "@calendar_phaseLine": {
+    "placeholders": {
+      "phase": {"type": "String"},
+      "year": {"type": "int"}
+    }
+  },
+  "calendar_homeLabel": "Home",
+  "calendar_event_tradeDeadline": "Deadline wymiany",
+  "calendar_event_awards": "Nagrody",
+  "calendar_event_retirements": "Emerytury",
+  "calendar_event_draftLottery": "Loteria draftu",
+  "calendar_event_scoutReport": "Raport skautingowy",
+  "calendar_event_combine": "Draft Combine",
+  "calendar_event_mockDraft": "Mock Draft (finalny)",
+  "calendar_event_draft": "Draft",
+  "calendar_event_freeAgency": "Wolna agentura",
+  "calendar_draft": "Draft",
+  "calendar_pickProgress": "Pick {current}/{total}",
+  "@calendar_pickProgress": {
+    "placeholders": {
+      "current": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
+  "calendar_weekEvents": "Wydarzenia tygodnia",
+  "calendar_noMatches": "Brak meczów w tym tygodniu",
+  "calendar_simulateDay": "Symuluj dzień",
+  "calendar_urgentMessage": "Pilna wiadomość w skrzynce",
+  "calendar_fastForward": "Szybka symulacja",
+  "calendar_simulateUntilNextMatch": "Do następnego meczu",
+  "calendar_simulateUntilDate": "Do wybranej daty",
+  "calendar_simulateUntilPhaseEnd": "Do końca fazy",
+  "calendar_chooseDateTitle": "Wybierz cel symulacji",
+  "calendar_weekLabel": "Tydzień",
+  "calendar_dayLabel": "Dzień",
+  "calendar_simulating": "Symulowanie…",
+  "calendar_daysSimulated": "Zasymulowano dni: {count}",
+  "@calendar_daysSimulated": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "calendar_cancel": "Anuluj",
+  "calendar_stopReason_reachedTarget": "Cel osiągnięty",
+  "calendar_stopReason_cancelled": "Symulacja przerwana",
+  "calendar_stopReason_draftPick": "Twoja tura draftu",
+  "calendar_stopReason_noSave": "Brak zapisanej gry",
+
+  "trade_title": "Wymiana",
+  "trade_noTeam": "Brak drużyny",
+  "trade_yourPlayer": "Twój zawodnik",
+  "trade_targetTeam": "Drużyna docelowa",
+  "trade_theirPlayer": "Ich zawodnik",
+  "trade_confirm": "Zatwierdź wymianę",
+  "trade_fillAllFields": "Uzupełnij wszystkie pola",
+  "trade_notAllowed": "Wymiana niedozwolona",
+  "trade_aiRejected": "Druga drużyna odrzuciła propozycję wymiany",
+  "trade_executeFailed": "Nie udało się wykonać wymiany",
+  "trade_success": "Wymiana zakończona sukcesem",
+  "trade_playerOption": "{name} ({position}, PV {pv})",
+  "@trade_playerOption": {
+    "placeholders": {
+      "name": {"type": "String"},
+      "position": {"type": "String"},
+      "pv": {"type": "int"}
+    }
+  },
+
+  "contract_title": "Kontrakty",
+  "contract_noTeam": "Brak drużyny",
+  "contract_expiringHeader": "Wygasające / do przedłużenia",
+  "contract_noExpiring": "Brak zawodników do przedłużenia",
+  "contract_playerSubtitle": "{position} · OVR {ovr} · Lata: {years} · {salary}",
+  "@contract_playerSubtitle": {
+    "placeholders": {
+      "position": {"type": "String"},
+      "ovr": {"type": "int"},
+      "years": {"type": "int"},
+      "salary": {"type": "String"}
+    }
+  },
+  "contract_freeAgentsHeader": "Wolni agenci (lata = 0 w lidze)",
+  "contract_freeAgentsEmpty": "Pula FA pusta / uproszczona — skup się na przedłużeniach.",
+  "contract_freeAgentsCount": "{count} zawodników z yearsRemaining=0",
+  "@contract_freeAgentsCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "contract_offerSalary": "Oferta pensji",
+  "contract_offerYears": "Lata kontraktu",
+  "contract_submitOffer": "Złóż ofertę przedłużenia",
+  "contract_selectPlayer": "Wybierz zawodnika",
+  "contract_invalidOffer": "Nieprawidłowa pensja lub lata",
+  "contract_accepted": "Kontrakt przyjęty!",
+  "contract_rejected": "Odrzucono ofertę",
+  "contract_waiting": "Zawodnik rozważa ofertę…",
+  "contract_counter": "Kontroferta: {salary} × {years} lat",
+  "@contract_counter": {
+    "placeholders": {
+      "salary": {"type": "String"},
+      "years": {"type": "int"}
+    }
+  },
+
+  "staff_title": "Sztab",
+  "staff_noTeam": "Brak drużyny",
+  "staffRole_headCoach": "Trener główny",
+  "staffRole_youthCoach": "Trener młodzieży",
+  "staffRole_scout": "Scout",
+  "staffRole_physio": "Fizjoterapeuta",
+  "staffRole_doctor": "Lekarz",
+  "staffRole_cfo": "CFO",
+  "staff_emptySlot": "Slot wolny",
+  "staff_fire": "Zwolnij",
+  "staff_candidatesHeader": "Kandydaci do zatrudnienia",
+  "staff_noCandidates": "Brak wolnych kandydatów na tę rolę",
+  "staff_overallStars": "★ {stars}",
+  "@staff_overallStars": {
+    "placeholders": {
+      "stars": {"type": "String"}
+    }
+  },
+  "staff_memberSubtitle": "{age} lat · ★ {stars} · {salary}/rok",
+  "@staff_memberSubtitle": {
+    "placeholders": {
+      "age": {"type": "int"},
+      "stars": {"type": "String"},
+      "salary": {"type": "String"}
+    }
+  },
+  "staff_hire": "Zatrudnij",
+  "staff_hireAccepted": "Zatrudniono {name}!",
+  "@staff_hireAccepted": {
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "staff_hireRejected": "Kandydat odrzucił ofertę lub przekroczono staff cap",
+  "staff_capLabel": "Staff cap",
+  "staff_capUsage": "{used} / {cap}",
+  "@staff_capUsage": {
+    "placeholders": {
+      "used": {"type": "String"},
+      "cap": {"type": "String"}
+    }
+  },
+
+  "scouting_watchlistTitle": "Watchlista skauta",
+  "scouting_watchlistLimit": "Wybrano {selected} / {limit}",
+  "@scouting_watchlistLimit": {
+    "placeholders": {
+      "selected": {"type": "int"},
+      "limit": {"type": "int"}
+    }
+  },
+  "scouting_cancel": "Anuluj",
+  "scouting_save": "Zapisz",
+  "scouting_slot_top1": "Typ: TOP 1",
+  "scouting_slot_top3": "Typ: TOP 3",
+  "scouting_slot_top5": "Typ: TOP 5",
+  "scouting_slot_top10": "Typ: TOP 10",
+  "scouting_slot_r1": "Typ: R1",
+  "scouting_slot_r2": "Typ: R2",
+  "scouting_slot_r3": "Typ: R3",
+  "scouting_slot_x": "Typ: X",
+  "draft_scoutGradeShort": "Scout {grade}",
+  "@draft_scoutGradeShort": {
+    "placeholders": {
+      "grade": {"type": "int"}
+    }
+  },
+  "draft_potentialShort": "Pot. {stars}",
+  "@draft_potentialShort": {
+    "placeholders": {
+      "stars": {"type": "String"}
+    }
+  },
+  "draft_injuryProneShort": "Kontuzje {value}/10",
+  "@draft_injuryProneShort": {
+    "placeholders": {
+      "value": {"type": "int"}
+    }
+  },
+  "draft_determinationShort": "Determinacja {value}/10",
+  "@draft_determinationShort": {
+    "placeholders": {
+      "value": {"type": "int"}
+    }
+  },
+
+  "contract_faCounter": "Kontroferta na rynku FA — spróbuj ponownie z wyższą ofertą",
+
+  "playerDetail_title": "Zawodnik",
+  "playerDetail_notFound": "Nie znaleziono zawodnika",
+  "playerDetail_headerLine": "{position} · {nationality} · {age} lat",
+  "@playerDetail_headerLine": {
+    "placeholders": {
+      "position": {"type": "String"},
+      "nationality": {"type": "String"},
+      "age": {"type": "int"}
+    }
+  },
+  "playerDetail_attributes": "Atrybuty",
+  "playerDetail_contract": "Kontrakt",
+  "playerDetail_salaryLine": "Pensja: {salary} / rok",
+  "@playerDetail_salaryLine": {
+    "placeholders": {
+      "salary": {"type": "String"}
+    }
+  },
+  "playerDetail_contractYears": "Lata: {years}",
+  "@playerDetail_contractYears": {
+    "placeholders": {
+      "years": {"type": "int"}
+    }
+  },
+  "playerDetail_birdRights": "Bird rights",
+  "playerDetail_noTradeClause": "NTC",
+  "playerDetail_personality": "Osobowość: {personality}",
+  "@playerDetail_personality": {
+    "placeholders": {
+      "personality": {"type": "String"}
+    }
+  },
+
+  "matchday_defaultTitle": "Mecz",
+  "matchday_finishedSnackbar": "Koniec: {home}:{away}",
+  "@matchday_finishedSnackbar": {
+    "placeholders": {
+      "home": {"type": "int"},
+      "away": {"type": "int"}
+    }
+  },
+  "matchday_resume": "Wznów",
+  "matchday_pause": "Pauza",
+  "matchday_toEnd": "Do końca",
+
+  "router_noMatchData": "Brak danych meczu"
+}
