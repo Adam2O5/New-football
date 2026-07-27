@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/app/screens/calendar_screen.dart';
 import 'package:new_football/app/screens/finance_screen.dart';
+import 'package:new_football/app/screens/home_screen.dart';
 import 'package:new_football/app/screens/inbox_screen.dart';
 import 'package:new_football/app/screens/squad_screen.dart';
 import 'package:new_football/app/screens/standings_screen.dart';
@@ -24,6 +25,7 @@ class ShellScreen extends ConsumerStatefulWidget {
 
 class _ShellScreenState extends ConsumerState<ShellScreen> {
   static const _tabs = [
+    HomeScreen(),
     CalendarScreen(),
     SquadScreen(),
     StandingsScreen(),
@@ -93,6 +95,11 @@ class _ShellScreenState extends ConsumerState<ShellScreen> {
           ref.read(shellTabIndexProvider.notifier).state = i;
         },
         destinations: [
+          NavigationDestination(
+            icon: const Icon(Icons.home_outlined),
+            selectedIcon: const Icon(Icons.home),
+            label: l10n.shell_tab_home,
+          ),
           NavigationDestination(
             icon: const Icon(Icons.calendar_month_outlined),
             selectedIcon: const Icon(Icons.calendar_month),

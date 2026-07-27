@@ -15,6 +15,9 @@ import 'package:new_football/l10n/generated/app_localizations.dart';
 
 final calendarCursorMonthProvider = StateProvider<DateTime?>((ref) => null);
 
+/// Currently selected day in the calendar grid, driving the info panel.
+final calendarSelectedDayProvider = StateProvider<DateTime?>((ref) => null);
+
 DateTime _week1StartForSeason(int seasonYear) {
   // Docs: week #1 starts at the first full Mon–Sun week inside August.
   DateTime d = DateTime(seasonYear, 8, 1);
@@ -100,7 +103,7 @@ class CalendarScreen extends ConsumerWidget {
     final teamNameById = {for (final t in league.teams) t.id: t.name};
     final matchesByRound = <int, List<ScheduledMatch>>{};
     for (final m in league.currentSeason.schedule) {
-      matchesByRound.putIfAbsent(m.round, () => <ScheduledMatch>[]).add(m);
+      matchesByRound.putIfAbsent(m.round, () => []).add(m);
     }
 
     ({
@@ -108,7 +111,9 @@ class CalendarScreen extends ConsumerWidget {
       int day,
       bool isPast,
       int matchCount,
+      int? round,
       String? playerMatchLabel,
+      ScheduledMatch? playerMatch,
       List<String> eventLabels,
     })?
     dayInfo(DateTime date) {
@@ -119,16 +124,17 @@ class CalendarScreen extends ConsumerWidget {
       final isPast = w < currentWeek || (w == currentWeek && d < currentDay);
 
       var matchCount = 0;
+      int? round;
       String? playerMatchLabel;
+      ScheduledMatch? pm;
 
       final slot = calendar.regularSeasonSlotForDay(d);
       if (calendar.isRegularSeasonWeek(w) && slot != null) {
-        final round = scheduleRoundForWeekSlot(w, slot);
+        round = scheduleRoundForWeekSlot(w, slot);
         final fixtures = matchesByRound[round] ?? const [];
         matchCount = fixtures.length;
 
         if (playerId != null) {
-          ScheduledMatch? pm;
           for (final f in fixtures) {
             if (f.homeTeamId == playerId || f.awayTeamId == playerId) {
               pm = f;
@@ -186,58 +192,11 @@ class CalendarScreen extends ConsumerWidget {
         day: d,
         isPast: isPast,
         matchCount: matchCount,
+        round: round,
         playerMatchLabel: playerMatchLabel,
+        playerMatch: pm,
         eventLabels: eventLabels,
       );
-    }
-
-    final stripItems =
-        <
-          ({
-            DateTime date,
-            int week,
-            int day,
-            String? playerMatchLabel,
-            List<String> eventLabels,
-          })
-        >[];
-    for (var d = 1; d <= daysInMonth; d++) {
-      final date = DateTime(month.year, month.month, d);
-      final info = dayInfo(date);
-      if (info == null || info.isPast) continue;
-      if (info.playerMatchLabel == null && info.eventLabels.isEmpty) continue;
-      stripItems.add((
-        date: date,
-        week: info.week,
-        day: info.day,
-        playerMatchLabel: info.playerMatchLabel,
-        eventLabels: info.eventLabels,
-      ));
-    }
-    stripItems.sort((a, b) => a.date.compareTo(b.date));
-    final strip = stripItems.take(14).toList();
-
-    Future<void> simulateDay() async {
-      final result = await ref
-          .read(gameControllerProvider.notifier)
-          .simulateDay();
-      if (!context.mounted || result == null) return;
-      final nextLeague = ref.read(activeLeagueProvider);
-      if (nextLeague != null) {
-        ref.read(calendarCursorMonthProvider.notifier).state = _monthForInGame(
-          nextLeague,
-        );
-      }
-      if (result.playerMatch != null) {
-        context.push('/game/match', extra: result.playerMatch);
-        return;
-      }
-      if (result.pauseForUrgent) {
-        ref.read(shellTabIndexProvider.notifier).state = 4;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(l10n.calendar_urgentMessage)));
-      }
     }
 
     Future<void> simulateUntilDate(int targetWeek, int targetDay) async {
@@ -257,57 +216,51 @@ class CalendarScreen extends ConsumerWidget {
       );
     }
 
-    Future<void> simulateUntilNextMatch() async {
-      await _runBatch(
-        context,
-        ref,
-        l10n,
-        () =>
-            ref.read(gameControllerProvider.notifier).simulateUntilNextMatch(),
+    final selectedDay =
+        ref.watch(calendarSelectedDayProvider) ??
+        _dateForInGameWeekDay(seasonYear, currentWeek, currentDay);
+    final selectedInfo = dayInfo(selectedDay);
+
+    String selectedDayBody;
+    final selectedMatch = selectedInfo?.playerMatch;
+    if (selectedMatch != null) {
+      final homeName =
+          teamNameById[selectedMatch.homeTeamId] ?? selectedMatch.homeTeamId;
+      final awayName =
+          teamNameById[selectedMatch.awayTeamId] ?? selectedMatch.awayTeamId;
+      final isPlayerHome = selectedMatch.homeTeamId == playerId;
+      final opponentName = isPlayerHome ? awayName : homeName;
+      if (selectedMatch.result != null) {
+        selectedDayBody = l10n.calendar_selectedDay_matchResult(
+          homeName,
+          awayName,
+          selectedMatch.result!.homeGoals,
+          selectedMatch.result!.awayGoals,
+        );
+      } else {
+        selectedDayBody = l10n.calendar_selectedDay_matchUpcoming(opponentName);
+      }
+    } else if (selectedInfo != null && selectedInfo.eventLabels.isNotEmpty) {
+      selectedDayBody = l10n.calendar_selectedDay_offseasonEvent(
+        selectedInfo.eventLabels.join(', '),
       );
-      if (!context.mounted) return;
-      final nextLeague = ref.read(activeLeagueProvider);
-      if (nextLeague == null) return;
-      ref.read(calendarCursorMonthProvider.notifier).state = _monthForInGame(
-        nextLeague,
-      );
+    } else {
+      selectedDayBody = l10n.calendar_selectedDay_noEvent;
     }
+
+    final canSimulateSelectedDay = selectedInfo != null && !selectedInfo.isPast;
+
+    // Precompute rounds per grid cell so that a match round spanning two
+    // consecutive calendar days only shows the ball icon once.
+    final cellRounds = List<int?>.generate(totalCells, (i) {
+      final date = gridStart.add(Duration(days: i));
+      return dayInfo(date)?.round;
+    });
 
     return Scaffold(
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Row(
-            children: [
-              const Icon(Icons.home_outlined),
-              const SizedBox(width: 8),
-              Text(
-                l10n.calendar_homeLabel,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              Expanded(
-                child: FilledButton.icon(
-                  onPressed: simulateDay,
-                  icon: const Icon(Icons.play_arrow),
-                  label: Text(l10n.calendar_simulateDay),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: FilledButton.icon(
-                  onPressed: simulateUntilNextMatch,
-                  icon: const Icon(Icons.fast_forward),
-                  label: Text(l10n.calendar_simulateUntilNextMatch),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
           Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -356,66 +309,30 @@ class CalendarScreen extends ConsumerWidget {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  if (strip.isNotEmpty)
-                    SizedBox(
-                      height: 98,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: strip.length,
-                        separatorBuilder: (context, _) =>
-                            const SizedBox(width: 12),
-                        itemBuilder: (context, i) {
-                          final item = strip[i];
-                          return InkWell(
-                            onTap: () => simulateUntilDate(item.week, item.day),
-                            borderRadius: BorderRadius.circular(12),
-                            child: Card(
-                              child: Padding(
-                                padding: const EdgeInsets.all(12),
-                                child: SizedBox(
-                                  width: 220,
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        '${dayName(context, item.day)} ${item.date.day}',
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: Theme.of(
-                                          context,
-                                        ).textTheme.labelLarge,
-                                      ),
-                                      const SizedBox(height: 6),
-                                      if (item.eventLabels.isNotEmpty)
-                                        Text(
-                                          item.eventLabels.first,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: Theme.of(
-                                            context,
-                                          ).textTheme.bodyMedium,
-                                        ),
-                                      if (item.playerMatchLabel != null) ...[
-                                        const SizedBox(height: 6),
-                                        Text(
-                                          item.playerMatchLabel!,
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: Theme.of(
-                                            context,
-                                          ).textTheme.bodySmall,
-                                        ),
-                                      ],
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          );
-                        },
-                      ),
+                  Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .surfaceContainerHighest
+                          .withValues(alpha: 0.4),
+                      borderRadius: BorderRadius.circular(12),
                     ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${l10n.calendar_selectedDay_title} · ${dayName(context, selectedDay.weekday)} ${selectedDay.day}.${selectedDay.month.toString().padLeft(2, '0')}',
+                          style: Theme.of(context).textTheme.titleMedium,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          selectedDayBody,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                        ),
+                      ],
+                    ),
+                  ),
                   const SizedBox(height: 12),
                   GridView.builder(
                     itemCount: totalCells,
@@ -436,12 +353,32 @@ class CalendarScreen extends ConsumerWidget {
                           info != null &&
                           info.week == currentWeek &&
                           info.day == currentDay;
+                      final isSelected =
+                          info != null &&
+                          date.year == selectedDay.year &&
+                          date.month == selectedDay.month &&
+                          date.day == selectedDay.day;
+
+                      final currentRound = cellRounds[i];
+                      final previousRound = i > 0 ? cellRounds[i - 1] : null;
+                      final showMatchIcon =
+                          info != null &&
+                          currentRound != null &&
+                          currentRound != previousRound;
 
                       return Opacity(
                         opacity: isInMonth ? 1.0 : 0.35,
                         child: InkWell(
-                          onTap: isEnabled
-                              ? () => simulateUntilDate(info.week, info.day)
+                          onTap: info != null
+                              ? () {
+                                  ref
+                                          .read(
+                                            calendarSelectedDayProvider
+                                                .notifier,
+                                          )
+                                          .state =
+                                      date;
+                                }
                               : null,
                           borderRadius: BorderRadius.circular(8),
                           child: Container(
@@ -455,6 +392,14 @@ class CalendarScreen extends ConsumerWidget {
                                         .withValues(alpha: 0.45)
                                   : null,
                               borderRadius: BorderRadius.circular(8),
+                              border: isSelected && !isToday
+                                  ? Border.all(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.primary,
+                                      width: 1.5,
+                                    )
+                                  : null,
                             ),
                             child: Column(
                               mainAxisSize: MainAxisSize.min,
@@ -477,7 +422,8 @@ class CalendarScreen extends ConsumerWidget {
                                   Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      if (info.playerMatchLabel != null)
+                                      if (showMatchIcon &&
+                                          info.playerMatchLabel != null)
                                         Tooltip(
                                           message: info.playerMatchLabel!,
                                           child: const Icon(
@@ -486,7 +432,8 @@ class CalendarScreen extends ConsumerWidget {
                                             color: Colors.greenAccent,
                                           ),
                                         )
-                                      else if (info.matchCount > 0)
+                                      else if (showMatchIcon &&
+                                          info.matchCount > 0)
                                         Tooltip(
                                           message: '${info.matchCount} matches',
                                           child: const Icon(
@@ -496,8 +443,9 @@ class CalendarScreen extends ConsumerWidget {
                                           ),
                                         ),
                                       if (info.eventLabels.isNotEmpty) ...[
-                                        if (info.playerMatchLabel != null ||
-                                            info.matchCount > 0)
+                                        if (showMatchIcon &&
+                                            (info.playerMatchLabel != null ||
+                                                info.matchCount > 0))
                                           const SizedBox(width: 2),
                                         Tooltip(
                                           message: info.eventLabels.join('\n'),
@@ -518,6 +466,20 @@ class CalendarScreen extends ConsumerWidget {
                       );
                     },
                   ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: FilledButton.icon(
+                      onPressed: canSimulateSelectedDay
+                          ? () => simulateUntilDate(
+                              selectedInfo!.week,
+                              selectedInfo.day,
+                            )
+                          : null,
+                      icon: const Icon(Icons.fast_forward),
+                      label: Text(l10n.calendar_simulateUntilDate),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -526,80 +488,81 @@ class CalendarScreen extends ConsumerWidget {
       ),
     );
   }
+}
 
-  // Legacy fast-forward sheet/dialog removed:
-  // simulation to dates is handled via tapping calendar day cards.
+// Legacy fast-forward sheet/dialog removed:
+// simulation to dates is handled via the "simulate to date" button below
+// the calendar grid, using the currently selected day.
 
-  Future<void> _runBatch(
-    BuildContext context,
-    WidgetRef ref,
-    AppLocalizations l10n,
-    Future<BatchSimulationResult> Function() run,
-  ) async {
-    final controller = ref.read(gameControllerProvider.notifier);
-    unawaited(
-      showDialog<void>(
-        context: context,
-        barrierDismissible: false,
-        builder: (dialogContext) => AlertDialog(
-          content: Row(
-            children: [
-              const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(strokeWidth: 3),
-              ),
-              const SizedBox(width: 16),
-              Expanded(child: Text(l10n.calendar_simulating)),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: controller.cancelSimulation,
-              child: Text(l10n.calendar_cancel),
+Future<void> _runBatch(
+  BuildContext context,
+  WidgetRef ref,
+  AppLocalizations l10n,
+  Future Function() run,
+) async {
+  final controller = ref.read(gameControllerProvider.notifier);
+  unawaited(
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        content: Row(
+          children: [
+            const SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(strokeWidth: 3),
             ),
+            const SizedBox(width: 16),
+            Expanded(child: Text(l10n.calendar_simulating)),
           ],
         ),
+        actions: [
+          TextButton(
+            onPressed: controller.cancelSimulation,
+            child: Text(l10n.calendar_cancel),
+          ),
+        ],
       ),
-    );
+    ),
+  );
 
-    final result = await run();
+  final result = await run();
 
-    if (!context.mounted) return;
-    Navigator.of(context, rootNavigator: true).pop();
+  if (!context.mounted) return;
+  Navigator.of(context, rootNavigator: true).pop();
 
-    if (result.lastResult?.playerMatch != null) {
-      context.push('/game/match', extra: result.lastResult!.playerMatch);
-      return;
-    }
-    if (result.stopReason == SimulationStopReason.urgent) {
-      ref.read(shellTabIndexProvider.notifier).state = 4;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l10n.calendar_urgentMessage)));
-      return;
-    }
-    if (result.stopReason == SimulationStopReason.draftPick) {
-      context.push('/game/draft');
-      return;
-    }
-
-    final reasonLabel = switch (result.stopReason) {
-      SimulationStopReason.reachedTarget =>
-        l10n.calendar_stopReason_reachedTarget,
-      SimulationStopReason.cancelled => l10n.calendar_stopReason_cancelled,
-      SimulationStopReason.noSave => l10n.calendar_stopReason_noSave,
-      SimulationStopReason.playerMatch =>
-        l10n.calendar_stopReason_reachedTarget,
-      SimulationStopReason.urgent => l10n.calendar_stopReason_reachedTarget,
-      SimulationStopReason.draftPick => l10n.calendar_stopReason_draftPick,
-    };
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          '$reasonLabel · ${l10n.calendar_daysSimulated(result.daysSimulated)}',
-        ),
-      ),
-    );
+  if (result.lastResult?.playerMatch != null) {
+    context.push('/game/match', extra: result.lastResult!.playerMatch);
+    return;
   }
+  if (result.stopReason == SimulationStopReason.urgent) {
+    // Tabs: Home(0) Calendar(1) Squad(2) Standings(3) Finance(4) Inbox(5).
+    ref.read(shellTabIndexProvider.notifier).state = 5;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.calendar_urgentMessage)));
+    return;
+  }
+  if (result.stopReason == SimulationStopReason.draftPick) {
+    context.push('/game/draft');
+    return;
+  }
+
+  final reasonLabel = switch (result.stopReason as SimulationStopReason) {
+    SimulationStopReason.reachedTarget =>
+      l10n.calendar_stopReason_reachedTarget,
+    SimulationStopReason.cancelled => l10n.calendar_stopReason_cancelled,
+    SimulationStopReason.noSave => l10n.calendar_stopReason_noSave,
+    SimulationStopReason.playerMatch => l10n.calendar_stopReason_reachedTarget,
+    SimulationStopReason.urgent => l10n.calendar_stopReason_reachedTarget,
+    SimulationStopReason.draftPick => l10n.calendar_stopReason_draftPick,
+  };
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(
+        '$reasonLabel · ${l10n.calendar_daysSimulated(result.daysSimulated)}',
+      ),
+    ),
+  );
 }

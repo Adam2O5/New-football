@@ -130,6 +130,18 @@
   "shell_tab_standings": "Standings",
   "shell_tab_finance": "Finance",
   "shell_tab_inbox": "Inbox",
+  "shell_tab_home": "Home",
+
+  "home_title": "Home",
+  "home_next7days": "Next 7 days",
+  "home_conferenceRankLabel": "Conference rank",
+  "home_overallRankLabel": "Overall rank",
+  "home_record": "Team record",
+  "home_lastMatchTitle": "Last match",
+  "home_nextMatchTitle": "Next match",
+  "home_noPreviousMatch": "No matches played yet",
+  "home_noNextMatch": "No matches scheduled",
+  "home_simulateUntilNextEvent": "To next event",
 
   "squad_noTeam": "No player team",
   "squad_sizeLabel": "Squad: {size} / {min}–{max}",
@@ -224,6 +236,25 @@
   "calendar_stopReason_cancelled": "Simulation cancelled",
   "calendar_stopReason_draftPick": "Your draft turn",
   "calendar_stopReason_noSave": "No active save",
+  "calendar_selectedDay_title": "Selected day",
+  "calendar_selectedDay_noEvent": "No events on this day",
+  "calendar_selectedDay_matchUpcoming": "Upcoming match: {opponent}",
+  "@calendar_selectedDay_matchUpcoming": {
+    "placeholders": { "opponent": {"type": "String"} }
+  },
+  "calendar_selectedDay_matchResult": "{home} {homeGoals}:{awayGoals} {away}",
+  "@calendar_selectedDay_matchResult": {
+    "placeholders": {
+      "home": {"type": "String"},
+      "away": {"type": "String"},
+      "homeGoals": {"type": "int"},
+      "awayGoals": {"type": "int"}
+    }
+  },
+  "calendar_selectedDay_offseasonEvent": "Event: {name}",
+  "@calendar_selectedDay_offseasonEvent": {
+    "placeholders": { "name": {"type": "String"} }
+  },
 
   "trade_title": "Trade",
   "trade_noTeam": "No team",

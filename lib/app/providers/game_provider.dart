@@ -242,6 +242,28 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     return _simulateUntil((_) => false);
   }
 
+  bool _isCalendarEventDay(LeagueState league) {
+    final calendar = _ref.read(calendarServiceProvider);
+    final calCfg = calendar.balance.calendar;
+    final week = league.currentWeek;
+    final day = league.currentDay;
+    if (calendar.isTradeDeadline(week, day)) return true;
+    if (week == calCfg.awardsWeek && day == 1) return true;
+    if (week == calCfg.awardsWeek + 1 && (day == 1 || day == 3 || day == 5)) {
+      return true;
+    }
+    if (week == calCfg.draftWeek && day == 1) return true;
+    if (week == calCfg.freeAgencyWeek && day == 1) return true;
+    return false;
+  }
+
+  /// Simulates day by day until the player's next match, or the next
+  /// offseason/calendar event (trade deadline, awards, draft, free agency),
+  /// comes up — whichever happens first.
+  Future<BatchSimulationResult> simulateUntilNextEvent() {
+    return _simulateUntil(_isCalendarEventDay);
+  }
+
   /// Simulates day by day until (week, day) is reached — i.e. stops with the
   /// calendar sitting on that date, ready to be played from there.
   Future<BatchSimulationResult> simulateUntilDate(

@@ -340,6 +340,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shell_tab_inbox => 'Inbox';
 
   @override
+  String get shell_tab_home => 'Home';
+
+  @override
+  String get home_title => 'Home';
+
+  @override
+  String get home_next7days => 'Next 7 days';
+
+  @override
+  String get home_conferenceRankLabel => 'Conference rank';
+
+  @override
+  String get home_overallRankLabel => 'Overall rank';
+
+  @override
+  String get home_record => 'Team record';
+
+  @override
+  String get home_lastMatchTitle => 'Last match';
+
+  @override
+  String get home_nextMatchTitle => 'Next match';
+
+  @override
+  String get home_noPreviousMatch => 'No matches played yet';
+
+  @override
+  String get home_noNextMatch => 'No matches scheduled';
+
+  @override
+  String get home_simulateUntilNextEvent => 'To next event';
+
+  @override
   String get squad_noTeam => 'No player team';
 
   @override
@@ -620,6 +653,32 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get calendar_stopReason_noSave => 'No active save';
+
+  @override
+  String get calendar_selectedDay_title => 'Selected day';
+
+  @override
+  String get calendar_selectedDay_noEvent => 'No events on this day';
+
+  @override
+  String calendar_selectedDay_matchUpcoming(String opponent) {
+    return 'Upcoming match: $opponent';
+  }
+
+  @override
+  String calendar_selectedDay_matchResult(
+    String home,
+    String away,
+    int homeGoals,
+    int awayGoals,
+  ) {
+    return '$home $homeGoals:$awayGoals $away';
+  }
+
+  @override
+  String calendar_selectedDay_offseasonEvent(String name) {
+    return 'Event: $name';
+  }
 
   @override
   String get trade_title => 'Trade';

@@ -340,6 +340,39 @@ class AppLocalizationsPl extends AppLocalizations {
   String get shell_tab_inbox => 'Skrzynka';
 
   @override
+  String get shell_tab_home => 'Start';
+
+  @override
+  String get home_title => 'Start';
+
+  @override
+  String get home_next7days => 'Najbliższe 7 dni';
+
+  @override
+  String get home_conferenceRankLabel => 'Miejsce w konferencji';
+
+  @override
+  String get home_overallRankLabel => 'Miejsce w tabeli ogólnej';
+
+  @override
+  String get home_record => 'Bilans drużyny';
+
+  @override
+  String get home_lastMatchTitle => 'Poprzedni mecz';
+
+  @override
+  String get home_nextMatchTitle => 'Następny mecz';
+
+  @override
+  String get home_noPreviousMatch => 'Brak rozegranych meczów';
+
+  @override
+  String get home_noNextMatch => 'Brak zaplanowanych meczów';
+
+  @override
+  String get home_simulateUntilNextEvent => 'Do następnego wydarzenia';
+
+  @override
   String get squad_noTeam => 'Brak drużyny gracza';
 
   @override
@@ -621,6 +654,32 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get calendar_stopReason_noSave => 'Brak zapisanej gry';
+
+  @override
+  String get calendar_selectedDay_title => 'Wybrany dzień';
+
+  @override
+  String get calendar_selectedDay_noEvent => 'Brak wydarzeń tego dnia';
+
+  @override
+  String calendar_selectedDay_matchUpcoming(String opponent) {
+    return 'Nadchodzący mecz: $opponent';
+  }
+
+  @override
+  String calendar_selectedDay_matchResult(
+    String home,
+    String away,
+    int homeGoals,
+    int awayGoals,
+  ) {
+    return '$home $homeGoals:$awayGoals $away';
+  }
+
+  @override
+  String calendar_selectedDay_offseasonEvent(String name) {
+    return 'Wydarzenie: $name';
+  }
 
   @override
   String get trade_title => 'Wymiana';

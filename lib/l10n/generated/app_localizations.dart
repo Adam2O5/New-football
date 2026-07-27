@@ -740,6 +740,72 @@ abstract class AppLocalizations {
   /// **'Skrzynka'**
   String get shell_tab_inbox;
 
+  /// No description provided for @shell_tab_home.
+  ///
+  /// In pl, this message translates to:
+  /// **'Start'**
+  String get shell_tab_home;
+
+  /// No description provided for @home_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Start'**
+  String get home_title;
+
+  /// No description provided for @home_next7days.
+  ///
+  /// In pl, this message translates to:
+  /// **'Najbliższe 7 dni'**
+  String get home_next7days;
+
+  /// No description provided for @home_conferenceRankLabel.
+  ///
+  /// In pl, this message translates to:
+  /// **'Miejsce w konferencji'**
+  String get home_conferenceRankLabel;
+
+  /// No description provided for @home_overallRankLabel.
+  ///
+  /// In pl, this message translates to:
+  /// **'Miejsce w tabeli ogólnej'**
+  String get home_overallRankLabel;
+
+  /// No description provided for @home_record.
+  ///
+  /// In pl, this message translates to:
+  /// **'Bilans drużyny'**
+  String get home_record;
+
+  /// No description provided for @home_lastMatchTitle.
+  ///
+  /// In pl, this message translates to:
+  /// **'Poprzedni mecz'**
+  String get home_lastMatchTitle;
+
+  /// No description provided for @home_nextMatchTitle.
+  ///
+  /// In pl, this message translates to:
+  /// **'Następny mecz'**
+  String get home_nextMatchTitle;
+
+  /// No description provided for @home_noPreviousMatch.
+  ///
+  /// In pl, this message translates to:
+  /// **'Brak rozegranych meczów'**
+  String get home_noPreviousMatch;
+
+  /// No description provided for @home_noNextMatch.
+  ///
+  /// In pl, this message translates to:
+  /// **'Brak zaplanowanych meczów'**
+  String get home_noNextMatch;
+
+  /// No description provided for @home_simulateUntilNextEvent.
+  ///
+  /// In pl, this message translates to:
+  /// **'Do następnego wydarzenia'**
+  String get home_simulateUntilNextEvent;
+
   /// No description provided for @squad_noTeam.
   ///
   /// In pl, this message translates to:
@@ -1261,6 +1327,41 @@ abstract class AppLocalizations {
   /// In pl, this message translates to:
   /// **'Brak zapisanej gry'**
   String get calendar_stopReason_noSave;
+
+  /// No description provided for @calendar_selectedDay_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wybrany dzień'**
+  String get calendar_selectedDay_title;
+
+  /// No description provided for @calendar_selectedDay_noEvent.
+  ///
+  /// In pl, this message translates to:
+  /// **'Brak wydarzeń tego dnia'**
+  String get calendar_selectedDay_noEvent;
+
+  /// No description provided for @calendar_selectedDay_matchUpcoming.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nadchodzący mecz: {opponent}'**
+  String calendar_selectedDay_matchUpcoming(String opponent);
+
+  /// No description provided for @calendar_selectedDay_matchResult.
+  ///
+  /// In pl, this message translates to:
+  /// **'{home} {homeGoals}:{awayGoals} {away}'**
+  String calendar_selectedDay_matchResult(
+    String home,
+    String away,
+    int homeGoals,
+    int awayGoals,
+  );
+
+  /// No description provided for @calendar_selectedDay_offseasonEvent.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wydarzenie: {name}'**
+  String calendar_selectedDay_offseasonEvent(String name);
 
   /// No description provided for @trade_title.
   ///

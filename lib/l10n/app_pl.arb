@@ -152,6 +152,18 @@
   "shell_tab_standings": "Tabela",
   "shell_tab_finance": "Finanse",
   "shell_tab_inbox": "Skrzynka",
+  "shell_tab_home": "Start",
+
+  "home_title": "Start",
+  "home_next7days": "Najbliższe 7 dni",
+  "home_conferenceRankLabel": "Miejsce w konferencji",
+  "home_overallRankLabel": "Miejsce w tabeli ogólnej",
+  "home_record": "Bilans drużyny",
+  "home_lastMatchTitle": "Poprzedni mecz",
+  "home_nextMatchTitle": "Następny mecz",
+  "home_noPreviousMatch": "Brak rozegranych meczów",
+  "home_noNextMatch": "Brak zaplanowanych meczów",
+  "home_simulateUntilNextEvent": "Do następnego wydarzenia",
 
   "squad_noTeam": "Brak drużyny gracza",
   "squad_sizeLabel": "Skład: {size} / {min}–{max}",
@@ -304,6 +316,25 @@
   "calendar_stopReason_cancelled": "Symulacja przerwana",
   "calendar_stopReason_draftPick": "Twoja tura draftu",
   "calendar_stopReason_noSave": "Brak zapisanej gry",
+  "calendar_selectedDay_title": "Wybrany dzień",
+  "calendar_selectedDay_noEvent": "Brak wydarzeń tego dnia",
+  "calendar_selectedDay_matchUpcoming": "Nadchodzący mecz: {opponent}",
+  "@calendar_selectedDay_matchUpcoming": {
+    "placeholders": { "opponent": {"type": "String"} }
+  },
+  "calendar_selectedDay_matchResult": "{home} {homeGoals}:{awayGoals} {away}",
+  "@calendar_selectedDay_matchResult": {
+    "placeholders": {
+      "home": {"type": "String"},
+      "away": {"type": "String"},
+      "homeGoals": {"type": "int"},
+      "awayGoals": {"type": "int"}
+    }
+  },
+  "calendar_selectedDay_offseasonEvent": "Wydarzenie: {name}",
+  "@calendar_selectedDay_offseasonEvent": {
+    "placeholders": { "name": {"type": "String"} }
+  },
 
   "trade_title": "Wymiana",
   "trade_noTeam": "Brak drużyny",
