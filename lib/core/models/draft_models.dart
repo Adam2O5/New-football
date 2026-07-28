@@ -170,6 +170,14 @@ class Season with _$Season {
     String? championTeamId,
     DraftState? draftState,
     SeasonAwards? awards,
+    @Default(false) bool staffGrowthDone,
+    @Default(false) bool playerRetirementsDone,
+    @Default(false) bool combineDone,
+    @Default(false) bool finalMockDone,
+    @Default(false) bool faOpenDone,
+    @Default(false) bool scoutReportDone,
+    @Default(false) bool tradeDeadlineAcked,
+    DraftState? nextDraftState,
   }) = _Season;
 
   factory Season.fromJson(Map<String, dynamic> json) => _$SeasonFromJson(json);

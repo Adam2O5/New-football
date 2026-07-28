@@ -17,33 +17,27 @@ import 'package:new_football/core/services/season_service.dart';
 import 'package:new_football/core/services/staff_service.dart';
 import 'package:new_football/data/save_repository.dart';
 
-final saveRepositoryProvider = Provider<SaveRepository>((ref) {
+final saveRepositoryProvider = Provider((ref) {
   return SaveRepository();
 });
 
-final gameFactoryProvider = Provider<GameFactory>((ref) => GameFactory());
+final gameFactoryProvider = Provider((ref) => GameFactory());
 
-final calendarServiceProvider = Provider<CalendarService>(
-  (ref) => const CalendarService(),
-);
+final calendarServiceProvider = Provider((ref) => const CalendarService());
 
-final matchEngineProvider = Provider<MatchEngine>((ref) => const MatchEngine());
+final matchEngineProvider = Provider((ref) => const MatchEngine());
 
-final daySimulatorProvider = Provider<DaySimulator>((ref) {
+final daySimulatorProvider = Provider((ref) {
   return DaySimulator(matchEngine: ref.watch(matchEngineProvider));
 });
 
-final seasonServiceProvider = Provider<SeasonService>((ref) => SeasonService());
+final seasonServiceProvider = Provider((ref) => SeasonService());
 
-final staffServiceProvider = Provider<StaffService>((ref) => StaffService());
+final staffServiceProvider = Provider((ref) => StaffService());
 
-final scoutingServiceProvider = Provider<ScoutingService>(
-  (ref) => ScoutingService(),
-);
+final scoutingServiceProvider = Provider((ref) => ScoutingService());
 
-final contractServiceProvider = Provider<ContractService>(
-  (ref) => ContractService(),
-);
+final contractServiceProvider = Provider((ref) => ContractService());
 
 final savesListProvider = FutureProvider.autoDispose<List<GameSaveMeta>>((
   ref,
@@ -51,7 +45,7 @@ final savesListProvider = FutureProvider.autoDispose<List<GameSaveMeta>>((
   return ref.watch(saveRepositoryProvider).listSaves();
 });
 
-/// Why a batch simulation (`GameController.simulateUntil...`) stopped.
+/// Why a batch simulation (`GameController.simulateTo...`) stopped.
 enum SimulationStopReason {
   /// Target date / phase end reached without any blocking event.
   reachedTarget,
@@ -62,8 +56,10 @@ enum SimulationStopReason {
   /// An urgent inbox message needs attention.
   urgent,
 
-  /// It's the player's turn to make a draft pick.
-  draftPick,
+  /// The next registered calendar event needs player input (e.g. draft
+  /// pick) — UI should navigate there. Draft has no separate stop reason:
+  /// it is just a `playerAction` event like any other.
+  event,
 
   /// User cancelled the batch simulation.
   cancelled,
@@ -77,11 +73,16 @@ class BatchSimulationResult {
     required this.stopReason,
     required this.daysSimulated,
     this.lastResult,
+    this.eventId,
   });
 
   final SimulationStopReason stopReason;
   final int daysSimulated;
   final DaySimulationResult? lastResult;
+
+  /// Set when [stopReason] is [SimulationStopReason.event] — the id of the
+  /// `CalendarEventSlot` that needs attention.
+  final String? eventId;
 }
 
 class GameController extends StateNotifier<AsyncValue<GameSave?>> {
@@ -92,6 +93,7 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   SaveRepository get _repo => _ref.read(saveRepositoryProvider);
   DaySimulator get _days => _ref.read(daySimulatorProvider);
   SeasonService get _season => _ref.read(seasonServiceProvider);
+  CalendarService get _calendar => _ref.read(calendarServiceProvider);
 
   GameSave? get save => state.valueOrNull;
 
@@ -135,35 +137,133 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     if (autosave) await _repo.save(next);
   }
 
-  Future<DaySimulationResult?> simulateDay() async {
-    final current = save;
-    if (current == null) return null;
-    var league = _maybeRunPhaseHooks(current.leagueState);
-    final result = _days.simulateDay(league);
-    await updateLeague((_) => result.league);
-    return result;
-  }
-
   bool _cancelRequested = false;
 
-  /// Requests that an in-progress `simulateUntil...` batch stop as soon as
-  /// possible (checked between simulated days).
+  /// Requests that an in-progress batch stop as soon as possible (checked
+  /// between simulated days).
   void cancelSimulation() {
     _cancelRequested = true;
   }
 
-  bool _awaitingPlayerDraftPick(LeagueState league) {
+  /// Advances the calendar by exactly one day: no phase hooks, no
+  /// calendar-event auto-resolution, no auto-simulating the player's match.
+  /// This is the raw primitive `simulateToEvent`/`simulateToDate` build on.
+  Future<DaySimulationResult?> advanceOneDay() async {
+    final current = save;
+    if (current == null) return null;
+    final result = _days.simulateDay(current.leagueState);
+    await updateLeague((_) => result.league);
+    return result;
+  }
+
+  /// Returns the id of the calendar event registered at [week]/[day] that
+  /// still needs to run this season, or null if none is due today.
+  String? _dueEventIdToday(LeagueState league) {
+    final due = _calendar.nextEvent(
+      league.currentWeek,
+      league.currentDay,
+      (id) => _isEventDone(league, id),
+    );
+    if (due == null) return null;
+    if (due.week != league.currentWeek || due.day != league.currentDay) {
+      return null;
+    }
+    return due.id;
+  }
+
+  bool _isEventDone(LeagueState league, String id) {
+    final s = league.currentSeason;
+    switch (id) {
+      case 'staffGrowth':
+        return s.staffGrowthDone;
+      case 'retirements':
+        return s.playerRetirementsDone;
+      case 'awards':
+        return s.awards != null;
+      case 'lottery':
+        return s.draftState != null;
+      case 'scoutReport':
+        return s.scoutReportDone;
+      case 'combine':
+        return s.combineDone;
+      case 'finalMock':
+        return s.finalMockDone;
+      case 'nextClassGeneration':
+        return s.nextDraftState != null;
+      case 'draft':
+        final draft = s.draftState;
+        if (draft == null) return false;
+        return draft.currentPickIndex >= draft.order.length;
+      case 'freeAgencyOpen':
+        return s.faOpenDone;
+      case 'tradeDeadline':
+        return s.tradeDeadlineAcked;
+      default:
+        return true;
+    }
+  }
+
+  /// Returns true if the calendar event due today is a `playerAction` that
+  /// the batch must stop for (currently only the draft, when it's the
+  /// player's turn to pick).
+  bool _isBlockingPlayerEvent(LeagueState league, String eventId) {
+    if (eventId != 'draft') return false;
     final draft = league.currentSeason.draftState;
     if (draft == null) return false;
     if (draft.currentPickIndex >= draft.order.length) return false;
     return draft.order[draft.currentPickIndex].teamId == league.playerTeamId;
   }
 
-  /// Repeatedly calls [simulateDay] until [reachedTarget] holds (checked
-  /// before each day), the player's match/turn comes up, an urgent message
-  /// arrives, the batch is cancelled, or [maxDays] is hit as a safety cap.
+  /// Runs the automatic/informational calendar event registered for
+  /// [eventId] at the current date. No-op (besides validation) for
+  /// `playerAction` events like `draft` — those are driven entirely by the
+  /// dedicated UI + `makeDraftPick`.
+  Future<void> runEventAtCurrentDay(String eventId) async {
+    await updateLeague((league) {
+      switch (eventId) {
+        case 'staffGrowth':
+          return _season.runStaffGrowthAndRetire(league);
+        case 'retirements':
+          return _season.runPlayerRetirements(league);
+        case 'awards':
+          return _season.runAwards(league);
+        case 'lottery':
+          return _season.runLottery(league);
+        case 'scoutReport':
+          return _season.runScoutReport(league);
+        case 'combine':
+          return _season.runCombine(league);
+        case 'finalMock':
+          return _season.runFinalMock(league);
+        case 'nextClassGeneration':
+          return _season.runNextClassGeneration(league);
+        case 'draft':
+          // playerAction — handled by the draft screen + makeDraftPick.
+          return league;
+        case 'freeAgencyOpen':
+          return _season.runFreeAgencyOpen(league);
+        case 'tradeDeadline':
+          return league.copyWith(
+            currentSeason: league.currentSeason.copyWith(
+              tradeDeadlineAcked: true,
+            ),
+          );
+        default:
+          return league;
+      }
+    });
+  }
+
+  /// Repeatedly advances one day at a time until [reachedTarget] holds
+  /// (checked before each day), a due event/match/urgent condition stops
+  /// the batch, cancellation is requested, or [maxDays] is hit as a safety
+  /// cap. [autoResolveEvents] controls whether automatic/informational
+  /// events encountered along the way are executed immediately
+  /// (`simulateToDate` semantics) or left for the caller to react to
+  /// (`simulateToEvent` semantics).
   Future<BatchSimulationResult> _simulateUntil(
     bool Function(LeagueState league) reachedTarget, {
+    bool autoResolveEvents = false,
     int maxDays = 400,
   }) async {
     _cancelRequested = false;
@@ -186,20 +286,38 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
           lastResult: lastResult,
         );
       }
-      if (_awaitingPlayerDraftPick(current.leagueState)) {
+
+      final league = current.leagueState;
+      final dueEventId = _dueEventIdToday(league);
+      if (dueEventId != null && _isBlockingPlayerEvent(league, dueEventId)) {
         return BatchSimulationResult(
-          stopReason: SimulationStopReason.draftPick,
+          stopReason: SimulationStopReason.event,
           daysSimulated: daysSimulated,
           lastResult: lastResult,
+          eventId: dueEventId,
         );
       }
-      if (reachedTarget(current.leagueState)) {
+
+      if (reachedTarget(league)) {
         return BatchSimulationResult(
           stopReason: SimulationStopReason.reachedTarget,
           daysSimulated: daysSimulated,
           lastResult: lastResult,
         );
       }
+
+      if (dueEventId != null) {
+        if (!autoResolveEvents) {
+          return BatchSimulationResult(
+            stopReason: SimulationStopReason.event,
+            daysSimulated: daysSimulated,
+            lastResult: lastResult,
+            eventId: dueEventId,
+          );
+        }
+        await runEventAtCurrentDay(dueEventId);
+      }
+
       if (daysSimulated >= maxDays) {
         return BatchSimulationResult(
           stopReason: SimulationStopReason.reachedTarget,
@@ -208,7 +326,7 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
         );
       }
 
-      final result = await simulateDay();
+      final result = await advanceOneDay();
       if (result == null) {
         return BatchSimulationResult(
           stopReason: SimulationStopReason.noSave,
@@ -236,104 +354,42 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     }
   }
 
-  /// Simulates day by day until the player's next match comes up (or the
-  /// simulation is otherwise interrupted).
-  Future<BatchSimulationResult> simulateUntilNextMatch() {
-    return _simulateUntil((_) => false);
+  /// Simulates day by day until the next unresolved calendar event or the
+  /// player's match comes up — whichever happens first. Encountered events
+  /// are NOT auto-resolved; the caller reacts to `BatchSimulationResult`.
+  Future<BatchSimulationResult> simulateToEvent() {
+    return _simulateUntil((_) => false, autoResolveEvents: false);
   }
 
-  bool _isCalendarEventDay(LeagueState league) {
-    final calendar = _ref.read(calendarServiceProvider);
-    final calCfg = calendar.balance.calendar;
-    final week = league.currentWeek;
-    final day = league.currentDay;
-    if (calendar.isTradeDeadline(week, day)) return true;
-    if (week == calCfg.awardsWeek && day == 1) return true;
-    if (week == calCfg.awardsWeek + 1 && (day == 1 || day == 3 || day == 5)) {
-      return true;
-    }
-    if (week == calCfg.draftWeek && day == 1) return true;
-    if (week == calCfg.freeAgencyWeek && day == 1) return true;
-    return false;
-  }
-
-  /// Simulates day by day until the player's next match, or the next
-  /// offseason/calendar event (trade deadline, awards, draft, free agency),
-  /// comes up — whichever happens first.
-  Future<BatchSimulationResult> simulateUntilNextEvent() {
-    return _simulateUntil(_isCalendarEventDay);
-  }
-
-  /// Simulates day by day until (week, day) is reached — i.e. stops with the
-  /// calendar sitting on that date, ready to be played from there.
-  Future<BatchSimulationResult> simulateUntilDate(
-    int targetWeek,
-    int targetDay,
-  ) {
-    final calendar = _ref.read(calendarServiceProvider);
+  /// Simulates day by day until (week, day) is reached, auto-resolving any
+  /// automatic/informational events encountered along the way. Stops early
+  /// if the player's match comes up, an urgent message arrives, or a
+  /// `playerAction` event (draft, when it's the player's turn) is due.
+  Future<BatchSimulationResult> simulateToDate(int targetWeek, int targetDay) {
     return _simulateUntil(
-      (league) => calendar.isAtOrAfter(
+      (league) => _calendar.isAtOrAfter(
         league.currentWeek,
         league.currentDay,
         targetWeek,
         targetDay,
       ),
+      autoResolveEvents: true,
     );
   }
 
-  /// Simulates through the last day of [phase] (inclusive), stopping at the
-  /// first day of whatever comes next.
-  Future<BatchSimulationResult> simulateUntilPhaseEnd(SeasonPhase phase) {
-    final calendar = _ref.read(calendarServiceProvider);
-    final (endWeek, endDay) = calendar.endOfPhase(phase);
-    final (targetWeek, targetDay) = calendar.advanceDay(endWeek, endDay);
-    return simulateUntilDate(targetWeek, targetDay);
+  /// Simulates day by day until the player's next match comes up (or the
+  /// simulation is otherwise interrupted). Events along the way are NOT
+  /// auto-resolved.
+  Future<BatchSimulationResult> simulateUntilNextMatch() {
+    return _simulateUntil((_) => false, autoResolveEvents: false);
   }
 
-  LeagueState _maybeRunPhaseHooks(LeagueState league) {
-    final week = league.currentWeek;
-    final day = league.currentDay;
-    if (week == 31 && day == 1 && league.currentSeason.playInResults.isEmpty) {
-      return _season.setupPlayIn(league);
-    }
-    if (week == 32 &&
-        day == 1 &&
-        league.currentSeason.playoffBrackets.isEmpty) {
-      var s = league;
-      if (s.currentSeason.playInResults.isEmpty) {
-        s = _season.setupPlayIn(s);
-      }
-      return _season.setupPlayoffs(s);
-    }
-    if (week >= 32 &&
-        week <= 43 &&
-        league.currentSeason.playoffBrackets.isNotEmpty &&
-        league.currentSeason.championTeamId == null &&
-        day == 3) {
-      return _season.advancePlayoffs(league);
-    }
-    if (week == 44 && day == 1 && league.currentSeason.awards == null) {
-      return _season.runAwardsAndLottery(league);
-    }
-    if (week == 45 && day == 1) {
-      return _season.runScoutReport(league);
-    }
-    if (week == 45 && day == 3) {
-      return _season.runCombine(league);
-    }
-    if (week == 45 && day == 5) {
-      return _season.runFinalMock(league);
-    }
-    if (week == 46 && day == 1) {
-      return _season.advanceDraft(league);
-    }
-    if (week == 47 && day == 1) {
-      return _season.expireContracts(league);
-    }
-    if (week >= 48 && day == 1) {
-      return _season.rolloverSeason(league);
-    }
-    return league;
+  /// Simulates through the last day of [phase] (inclusive), stopping at the
+  /// first day of whatever comes next. Auto-resolves events along the way.
+  Future<BatchSimulationResult> simulateUntilPhaseEnd(SeasonPhase phase) {
+    final (endWeek, endDay) = _calendar.endOfPhase(phase);
+    final (targetWeek, targetDay) = _calendar.advanceDay(endWeek, endDay);
+    return simulateToDate(targetWeek, targetDay);
   }
 
   Future<void> applyPlayerMatch(
@@ -456,6 +512,6 @@ final gameControllerProvider =
       return GameController(ref);
     });
 
-final activeLeagueProvider = Provider<LeagueState?>((ref) {
+final activeLeagueProvider = Provider((ref) {
   return ref.watch(gameControllerProvider).valueOrNull?.leagueState;
 });

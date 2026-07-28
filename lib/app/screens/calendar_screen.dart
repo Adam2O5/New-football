@@ -99,7 +99,6 @@ class CalendarScreen extends ConsumerWidget {
     final totalCells = ((leading + daysInMonth + 6) ~/ 7) * 7;
     final gridStart = monthStart.subtract(Duration(days: leading));
 
-    final calCfg = calendar.balance.calendar;
     final teamNameById = {for (final t in league.teams) t.id: t.name};
     final matchesByRound = <int, List<ScheduledMatch>>{};
     for (final m in league.currentSeason.schedule) {
@@ -153,38 +152,22 @@ class CalendarScreen extends ConsumerWidget {
       }
 
       final eventLabels = <String>[];
-      if (calendar.isTradeDeadline(w, d)) {
-        eventLabels.add(l10n.calendar_event_tradeDeadline);
-      }
-
-      if (w == calCfg.awardsWeek && d == 1) {
-        eventLabels.add(l10n.calendar_event_awards);
-        eventLabels.add(l10n.calendar_event_retirements);
-        eventLabels.add(l10n.calendar_event_draftLottery);
-      }
-      if (w == calCfg.awardsWeek + 1 && d == 1) {
-        eventLabels.add(l10n.calendar_event_scoutReport);
-      }
-      if (w == calCfg.awardsWeek + 1 && d == 3) {
-        eventLabels.add(l10n.calendar_event_combine);
-      }
-      if (w == calCfg.awardsWeek + 1 && d == 5) {
-        eventLabels.add(l10n.calendar_event_mockDraft);
-      }
-      if (w == calCfg.draftWeek && d == 1) {
-        final draft = league.currentSeason.draftState;
-        if (draft != null) {
-          final total = draft.order.length;
-          final currentPick = (draft.currentPickIndex + 1).clamp(1, total);
-          eventLabels.add(
-            '${l10n.calendar_event_draft} · ${l10n.calendar_pickProgress(currentPick, total)}',
-          );
-        } else {
-          eventLabels.add(l10n.calendar_event_draft);
+      for (final e in calendar.eventsOn(w, d)) {
+        if (e.id == 'draft') {
+          final draft = league.currentSeason.draftState;
+          if (draft != null) {
+            final total = draft.order.length;
+            final currentPick = (draft.currentPickIndex + 1).clamp(1, total);
+            eventLabels.add(
+              '${l10n.calendar_event_draft} · ${l10n.calendar_pickProgress(currentPick, total)}',
+            );
+          } else {
+            eventLabels.add(l10n.calendar_event_draft);
+          }
+          continue;
         }
-      }
-      if (w == calCfg.freeAgencyWeek && d == 1) {
-        eventLabels.add(l10n.calendar_event_freeAgency);
+        final label = calendarEventLabel(context, e.id);
+        if (label != null) eventLabels.add(label);
       }
 
       return (
@@ -199,14 +182,14 @@ class CalendarScreen extends ConsumerWidget {
       );
     }
 
-    Future<void> simulateUntilDate(int targetWeek, int targetDay) async {
+    Future<void> simulateToDate(int targetWeek, int targetDay) async {
       await _runBatch(
         context,
         ref,
         l10n,
         () => ref
             .read(gameControllerProvider.notifier)
-            .simulateUntilDate(targetWeek, targetDay),
+            .simulateToDate(targetWeek, targetDay),
       );
       if (!context.mounted) return;
       final nextLeague = ref.read(activeLeagueProvider);
@@ -471,7 +454,7 @@ class CalendarScreen extends ConsumerWidget {
                     width: double.infinity,
                     child: FilledButton.icon(
                       onPressed: canSimulateSelectedDay
-                          ? () => simulateUntilDate(
+                          ? () => simulateToDate(
                               selectedInfo.week,
                               selectedInfo.day,
                             )
@@ -544,11 +527,22 @@ Future<void> _runBatch(
     ).showSnackBar(SnackBar(content: Text(l10n.calendar_urgentMessage)));
     return;
   }
-  if (result.stopReason == SimulationStopReason.draftPick) {
-    context.push('/game/draft');
+  if (result.stopReason == SimulationStopReason.urgent) {
+    ref.read(shellTabIndexProvider.notifier).state = 5;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.calendar_urgentMessage)));
     return;
   }
-
+  if (result.stopReason == SimulationStopReason.event) {
+    if (result.eventId == 'draft') {
+      context.push('/game/draft');
+      return;
+    }
+    // Inne eventy informacyjne/automatyczne nie powinny tu trafić, bo
+    // simulateToEvent()/simulateToDate() same je rozróżniają — ale
+    // zachowujemy fallback na wypadek nieoczekiwanego stopu.
+  }
   final reasonLabel = switch (result.stopReason as SimulationStopReason) {
     SimulationStopReason.reachedTarget =>
       l10n.calendar_stopReason_reachedTarget,
@@ -556,7 +550,7 @@ Future<void> _runBatch(
     SimulationStopReason.noSave => l10n.calendar_stopReason_noSave,
     SimulationStopReason.playerMatch => l10n.calendar_stopReason_reachedTarget,
     SimulationStopReason.urgent => l10n.calendar_stopReason_reachedTarget,
-    SimulationStopReason.draftPick => l10n.calendar_stopReason_draftPick,
+    SimulationStopReason.event => l10n.calendar_stopReason_draftPick,
   };
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(

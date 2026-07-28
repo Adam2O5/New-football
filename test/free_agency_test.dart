@@ -11,7 +11,7 @@ void main() {
     var league = SeedDataGenerator()
         .generateLeague(seed: 11)
         .copyWith(playerTeamId: null);
-    league = season.runAwardsAndLottery(league);
+    league = season.runLottery(league);
     league = season.advanceDraft(league);
     // 90 picks made from a 120-prospect class → ~30 leftover free agents.
     expect(league.freeAgents.length, 30);
@@ -23,9 +23,7 @@ void main() {
     final expiredPlayer = team.roster.first.copyWith(
       contract: team.roster.first.contract.copyWith(yearsRemaining: 0),
     );
-    team = team.copyWith(
-      roster: [expiredPlayer, ...team.roster.skip(1)],
-    );
+    team = team.copyWith(roster: [expiredPlayer, ...team.roster.skip(1)]);
     final state = league.updateTeam(team);
 
     final season = SeasonService();
@@ -34,10 +32,7 @@ void main() {
       result.teamById(team.id)!.roster.any((p) => p.id == expiredPlayer.id),
       isFalse,
     );
-    expect(
-      result.freeAgents.any((p) => p.id == expiredPlayer.id),
-      isTrue,
-    );
+    expect(result.freeAgents.any((p) => p.id == expiredPlayer.id), isTrue);
   });
 
   test('DaySimulator resolves free agency offers during week 47', () {

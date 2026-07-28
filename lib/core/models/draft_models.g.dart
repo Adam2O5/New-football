@@ -270,6 +270,16 @@ _$SeasonImpl _$$SeasonImplFromJson(Map<String, dynamic> json) => _$SeasonImpl(
   awards: json['awards'] == null
       ? null
       : SeasonAwards.fromJson(json['awards'] as Map<String, dynamic>),
+  staffGrowthDone: json['staffGrowthDone'] as bool? ?? false,
+  playerRetirementsDone: json['playerRetirementsDone'] as bool? ?? false,
+  combineDone: json['combineDone'] as bool? ?? false,
+  finalMockDone: json['finalMockDone'] as bool? ?? false,
+  faOpenDone: json['faOpenDone'] as bool? ?? false,
+  scoutReportDone: json['scoutReportDone'] as bool? ?? false,
+  tradeDeadlineAcked: json['tradeDeadlineAcked'] as bool? ?? false,
+  nextDraftState: json['nextDraftState'] == null
+      ? null
+      : DraftState.fromJson(json['nextDraftState'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$$SeasonImplToJson(_$SeasonImpl instance) =>
@@ -283,6 +293,14 @@ Map<String, dynamic> _$$SeasonImplToJson(_$SeasonImpl instance) =>
       'championTeamId': instance.championTeamId,
       'draftState': instance.draftState,
       'awards': instance.awards,
+      'staffGrowthDone': instance.staffGrowthDone,
+      'playerRetirementsDone': instance.playerRetirementsDone,
+      'combineDone': instance.combineDone,
+      'finalMockDone': instance.finalMockDone,
+      'faOpenDone': instance.faOpenDone,
+      'scoutReportDone': instance.scoutReportDone,
+      'tradeDeadlineAcked': instance.tradeDeadlineAcked,
+      'nextDraftState': instance.nextDraftState,
     };
 
 const _$SeasonPhaseEnumMap = {

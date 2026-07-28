@@ -194,46 +194,118 @@ class SeasonService {
     return state;
   }
 
-  LeagueState runAwardsAndLottery(LeagueState league) {
-    // Event #0 (`docs/offseason.md`): staff growth/retire runs before Awards.
-    league = staffService.growthAndRetireTick(league);
+  LeagueState runStaffGrowthAndRetire(LeagueState league) {
+    final state = staffService.growthAndRetireTick(league);
+    return state.copyWith(
+      currentSeason: state.currentSeason.copyWith(staffGrowthDone: true),
+    );
+  }
+
+  LeagueState runAwards(LeagueState league) {
     final awards = _computeAwards(league);
-    final lottery = _runLottery(league);
-    final draftClass = SeedDataGenerator(
-      random: _random,
-    ).generateDraftClass(year: league.currentSeason.year);
-    final order = _buildDraftOrder(league, lottery);
-
-    final draftState = DraftState(
-      year: league.currentSeason.year,
-      order: order,
-      lotteryResults: lottery,
-      draftClass: draftClass,
-    );
-
     var state = league.copyWith(
-      currentSeason: league.currentSeason.copyWith(
-        awards: awards,
-        draftState: draftState,
-        phase: SeasonPhase.offseason,
-      ),
+      currentSeason: league.currentSeason.copyWith(awards: awards),
     );
-    state = _msg(
+    return _msg(
       state,
       MessageType.award,
       'Nagrody sezonu',
       'MVP: ${_playerName(state, awards.mvpPlayerId)}',
       urgent: true,
     );
+  }
+
+  /// Emerytury (śr tyg. 44): wyłącznie tabela bazowa
+  /// `BalanceConfig.retirement.baseChanceForAge(age)`, bez modyfikatorów.
+  LeagueState runPlayerRetirements(LeagueState league) {
+    final retired = <String>[];
+    final teams = league.teams.map((t) {
+      final keep = <Player>[];
+      for (final p in t.roster) {
+        final chance = balance.retirement.baseChanceForAge(p.age);
+        if (chance > 0 && _random.nextDouble() < chance) {
+          retired.add(p.name);
+        } else {
+          keep.add(p);
+        }
+      }
+      return capService.applyPayroll(t.copyWith(roster: keep));
+    }).toList();
+
+    var state = league.copyWith(
+      teams: teams,
+      currentSeason: league.currentSeason.copyWith(playerRetirementsDone: true),
+    );
+    if (retired.isNotEmpty) {
+      state = _msg(
+        state,
+        MessageType.calendar,
+        'Emerytury',
+        'Kariery zakończyli: ${retired.join(', ')}.',
+      );
+    }
+    return state;
+  }
+
+  LeagueState runLottery(LeagueState league) {
+    final lottery = _computeLotteryResults(league);
+    final existingClass = league.currentSeason.draftState?.draftClass;
+    final draftClass =
+        existingClass ??
+        SeedDataGenerator(
+          random: _random,
+        ).generateDraftClass(year: league.currentSeason.year);
+    final order = _buildDraftOrder(league, lottery);
+    final draftState = DraftState(
+      year: league.currentSeason.year,
+      order: order,
+      lotteryResults: lottery,
+      draftClass: draftClass,
+    );
+    var state = league.copyWith(
+      currentSeason: league.currentSeason.copyWith(
+        draftState: draftState,
+        phase: SeasonPhase.offseason,
+      ),
+    );
     final first = lottery.where((l) => l.assignedPick == 1).first;
-    state = _msg(
+    return _msg(
       state,
       MessageType.lottery,
       'Loteria draftu',
-      'Pick #1: ${_teamName(state, first.teamId)}',
+      'Pick 1: ${_teamName(state, first.teamId)}',
       urgent: true,
     );
-    return state;
+  }
+
+  /// Generuje klasę draftową na przyszły rok, sygnał „done” =
+  /// `season.nextDraftState != null`. Promocja do `draftState` przy rollover
+  /// jeszcze nieprzeanalizowana — patrz uwaga w odpowiedzi.
+  LeagueState runNextClassGeneration(LeagueState league) {
+    final draftClass = SeedDataGenerator(
+      random: _random,
+    ).generateDraftClass(year: league.currentSeason.year + 1);
+    final nextDraftState = DraftState(
+      year: league.currentSeason.year + 1,
+      draftClass: draftClass,
+    );
+    return league.copyWith(
+      currentSeason: league.currentSeason.copyWith(
+        nextDraftState: nextDraftState,
+      ),
+    );
+  }
+
+  LeagueState runFreeAgencyOpen(LeagueState league) {
+    var state = league.copyWith(
+      currentSeason: league.currentSeason.copyWith(faOpenDone: true),
+    );
+    return _msg(
+      state,
+      MessageType.calendar,
+      'Rynek wolnych agentów otwarty',
+      'Możesz teraz składać oferty zawodnikom i sztabowi bez klubu.',
+    );
   }
 
   /// Scout Report (pon tyg. 45, `docs/offseason.md` §5): AI auto-assigns a
@@ -259,7 +331,10 @@ class SeasonService {
       return t.copyWith(scouting: scouting);
     }).toList();
     return _msg(
-      league.copyWith(teams: teams),
+      league.copyWith(
+        teams: teams,
+        currentSeason: league.currentSeason.copyWith(scoutReportDone: true),
+      ),
       MessageType.scoutReport,
       'Raport skautingowy',
       'Sztab przygotował raporty z obserwacji i przydział na Combine.',
@@ -275,7 +350,10 @@ class SeasonService {
       );
     }).toList();
     return _msg(
-      league.copyWith(teams: teams),
+      league.copyWith(
+        teams: teams,
+        currentSeason: league.currentSeason.copyWith(combineDone: true),
+      ),
       MessageType.combine,
       'Draft Combine',
       'Testy fizyczne i mecz pokazowy zakończone.',
@@ -295,7 +373,10 @@ class SeasonService {
       );
     }).toList();
     return _msg(
-      league.copyWith(teams: teams),
+      league.copyWith(
+        teams: teams,
+        currentSeason: league.currentSeason.copyWith(finalMockDone: true),
+      ),
       MessageType.mockDraft,
       'Mock Draft finalny',
       'Scouci opublikowali estymowane sloty draftu.',
@@ -323,10 +404,11 @@ class SeasonService {
           .map((c) => c.prospectId)
           .whereType<String>()
           .toSet();
-      final remaining = draft.draftClass.prospects
-          .where((p) => !taken.contains(p.id))
-          .toList()
-        ..sort((a, b) => b.scoutGrade.compareTo(a.scoutGrade));
+      final remaining =
+          draft.draftClass.prospects
+              .where((p) => !taken.contains(p.id))
+              .toList()
+            ..sort((a, b) => b.scoutGrade.compareTo(a.scoutGrade));
       if (remaining.isEmpty) break;
 
       final chosen = isPlayer
@@ -407,9 +489,7 @@ class SeasonService {
             ),
           )
           .toList();
-      state = state.copyWith(
-        freeAgents: [...state.freeAgents, ...undrafted],
-      );
+      state = state.copyWith(freeAgents: [...state.freeAgents, ...undrafted]);
     }
 
     return state;
@@ -443,25 +523,30 @@ class SeasonService {
     );
 
     final newYear = league.currentSeason.year + 1;
+
+    // Promocja: draftClass wygenerowana przez runNextClassGeneration (tydz. 46/1,
+    // order 1) staje się bazą draftState nowego sezonu. Wyjątek: pierwszy sezon
+    // (nowy save) nie ma nextDraftState — draftState zostaje null, a runLottery
+    // wygeneruje draftClass "w locie" jako fallback (patrz zmiana w runLottery).
+    final promotedDraftState = league.currentSeason.nextDraftState != null
+        ? DraftState(
+            year: newYear,
+            draftClass: league.currentSeason.nextDraftState!.draftClass,
+          )
+        : null;
+
     var teams = league.teams.map((t) {
-      final roster = t.roster
-          .map((p) {
-            final years = (p.contract.yearsRemaining - 1).clamp(0, 10);
-            return p.copyWith(
-              age: p.age + 1,
-              contract: p.contract.copyWith(yearsRemaining: years),
-              state: p.state.copyWith(
-                seasonsWithTeam: p.state.seasonsWithTeam + 1,
-                stamina: 90,
-              ),
-            );
-          })
-          .where((p) {
-            if (p.age < 33) return true;
-            final chance = (p.age - 32) * 0.12;
-            return _random.nextDouble() > chance;
-          })
-          .toList();
+      final roster = t.roster.map((p) {
+        final years = (p.contract.yearsRemaining - 1).clamp(0, 10);
+        return p.copyWith(
+          age: p.age + 1,
+          contract: p.contract.copyWith(yearsRemaining: years),
+          state: p.state.copyWith(
+            seasonsWithTeam: p.state.seasonsWithTeam + 1,
+            stamina: 90,
+          ),
+        );
+      }).toList();
 
       // Player development ticks weekly in `DaySimulator`, not here — avoid
       // double-applying growth on top of the season's weekly ticks.
@@ -497,6 +582,14 @@ class SeasonService {
         phase: SeasonPhase.regular,
         schedule: schedule,
         standings: standings,
+        staffGrowthDone: false,
+        playerRetirementsDone: false,
+        combineDone: false,
+        finalMockDone: false,
+        faOpenDone: false,
+        scoutReportDone: false,
+        tradeDeadlineAcked: false,
+        nextDraftState: null,
       ),
     );
   }
@@ -560,12 +653,8 @@ class SeasonService {
 
   PlayoffSeries _playOneGame(LeagueState league, PlayoffSeries series) {
     final homeFirst = series.games.length.isEven;
-    final homeId = homeFirst
-        ? series.higherSeedTeamId
-        : series.lowerSeedTeamId;
-    final awayId = homeFirst
-        ? series.lowerSeedTeamId
-        : series.higherSeedTeamId;
+    final homeId = homeFirst ? series.higherSeedTeamId : series.lowerSeedTeamId;
+    final awayId = homeFirst ? series.lowerSeedTeamId : series.higherSeedTeamId;
     return series.recordGame(_sim(league, homeId, awayId));
   }
 
@@ -592,7 +681,7 @@ class SeasonService {
     );
   }
 
-  List<LotteryResult> _runLottery(LeagueState league) {
+  List<LotteryResult> _computeLotteryResults(LeagueState league) {
     final all = <Standing>[];
     for (final cs in league.currentSeason.standings) {
       all.addAll(cs.standings);
@@ -623,8 +712,8 @@ class SeasonService {
       results.add(
         LotteryResult(
           teamId: remaining[idx].teamId,
-          originalRank: all.indexWhere((s) => s.teamId == remaining[idx].teamId) +
-              1,
+          originalRank:
+              all.indexWhere((s) => s.teamId == remaining[idx].teamId) + 1,
           assignedPick: pick,
           oddsForFirstPick: remainingWeights[idx] / totalOdds,
         ),

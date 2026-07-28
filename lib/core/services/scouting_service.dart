@@ -14,7 +14,8 @@ class ScoutingService {
   final BalanceConfig balance;
   final Random _random;
 
-  int maxWatched(double coverageStars) => balance.staff.maxWatched(coverageStars);
+  int maxWatched(double coverageStars) =>
+      balance.staff.maxWatched(coverageStars);
 
   TeamScouting setWatchlist(
     TeamScouting scouting,
@@ -26,7 +27,8 @@ class ScoutingService {
     final cappedSet = capped.toSet();
     final existing = {for (final k in scouting.knowledge) k.prospectId: k};
     final knowledge = [
-      for (final id in capped) existing[id] ?? ScoutingKnowledge(prospectId: id),
+      for (final id in capped)
+        existing[id] ?? ScoutingKnowledge(prospectId: id),
     ];
     return scouting.copyWith(
       watchlistProspectIds: capped,
@@ -68,12 +70,46 @@ class ScoutingService {
           ? ScoutingTier.tier4
           : k.tier;
       return k.copyWith(
-        injuryProneKnown: k.injuryProneKnown || _random.nextDouble() < bonusChance,
+        injuryProneKnown:
+            k.injuryProneKnown || _random.nextDouble() < bonusChance,
         determinationKnown:
             k.determinationKnown || _random.nextDouble() < bonusChance,
         tier: tier,
       );
     }).toList();
+    return scouting.copyWith(knowledge: updated);
+  }
+
+  /// Mock Draft wczesny: estymowany slot z większym szumem niż finalny,
+  /// sterowany przez `DraftBalance.mockEarlyNoise*`.
+  TeamScouting runEarlyMock(
+    TeamScouting scouting,
+    List<Prospect> rankedProspects,
+    double evaluationStars,
+  ) {
+    final minNoise = balance.draft.mockEarlyNoiseMin;
+    final maxNoise = balance.draft.mockEarlyNoiseMax;
+    final stars = evaluationStars.clamp(0.0, 5.0);
+    final t = 1 - (stars / 5.0);
+    final noiseRange = (minNoise + (maxNoise - minNoise) * t).round();
+
+    final updated = scouting.knowledge.map((k) {
+      final trueRank = rankedProspects.indexWhere((p) => p.id == k.prospectId);
+      if (trueRank < 0) return k;
+
+      final noisy =
+          (trueRank + (_random.nextInt(noiseRange * 2 + 1) - noiseRange)).clamp(
+            0,
+            rankedProspects.length - 1,
+          );
+
+      final tier = k.tier.index < ScoutingTier.tier2.index
+          ? ScoutingTier.tier2
+          : k.tier;
+
+      return k.copyWith(estimatedSlot: _slotForRank(noisy), tier: tier);
+    }).toList();
+
     return scouting.copyWith(knowledge: updated);
   }
 
@@ -88,8 +124,11 @@ class ScoutingService {
     final updated = scouting.knowledge.map((k) {
       final trueRank = rankedProspects.indexWhere((p) => p.id == k.prospectId);
       if (trueRank < 0) return k;
-      final noisy = (trueRank + (_random.nextInt(noiseRange * 2 + 1) - noiseRange))
-          .clamp(0, rankedProspects.length - 1);
+      final noisy =
+          (trueRank + (_random.nextInt(noiseRange * 2 + 1) - noiseRange)).clamp(
+            0,
+            rankedProspects.length - 1,
+          );
       final tier = k.tier.index < ScoutingTier.tier3.index
           ? ScoutingTier.tier3
           : k.tier;

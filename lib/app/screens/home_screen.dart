@@ -110,11 +110,22 @@ Future<void> _runBatch(
     ).showSnackBar(SnackBar(content: Text(l10n.calendar_urgentMessage)));
     return;
   }
-  if (result.stopReason == SimulationStopReason.draftPick) {
-    context.push('/game/draft');
+  if (result.stopReason == SimulationStopReason.urgent) {
+    ref.read(shellTabIndexProvider.notifier).state = 5;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.calendar_urgentMessage)));
     return;
   }
-
+  if (result.stopReason == SimulationStopReason.event) {
+    if (result.eventId == 'draft') {
+      context.push('/game/draft');
+      return;
+    }
+    // Inne eventy informacyjne/automatyczne nie powinny tu trafić, bo
+    // simulateToEvent()/simulateToDate() same je rozróżniają — ale
+    // zachowujemy fallback na wypadek nieoczekiwanego stopu.
+  }
   final reasonLabel = switch (result.stopReason) {
     SimulationStopReason.reachedTarget =>
       l10n.calendar_stopReason_reachedTarget,
@@ -122,7 +133,7 @@ Future<void> _runBatch(
     SimulationStopReason.noSave => l10n.calendar_stopReason_noSave,
     SimulationStopReason.playerMatch => l10n.calendar_stopReason_reachedTarget,
     SimulationStopReason.urgent => l10n.calendar_stopReason_reachedTarget,
-    SimulationStopReason.draftPick => l10n.calendar_stopReason_draftPick,
+    SimulationStopReason.event => l10n.calendar_stopReason_draftPick,
   };
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
@@ -150,7 +161,6 @@ class HomeScreen extends ConsumerWidget {
     final seasonYear = league.currentSeason.year;
     final playerId = league.playerTeamId;
 
-    final calCfg = calendar.balance.calendar;
     final teamNameById = {for (final t in league.teams) t.id: t.name};
     final matchesByRound = <int, List<ScheduledMatch>>{};
     for (final m in league.currentSeason.schedule) {
@@ -272,28 +282,9 @@ class HomeScreen extends ConsumerWidget {
       }
 
       final eventLabels = <String>[];
-      if (calendar.isTradeDeadline(w, d)) {
-        eventLabels.add(l10n.calendar_event_tradeDeadline);
-      }
-      if (w == calCfg.awardsWeek && d == 1) {
-        eventLabels.add(l10n.calendar_event_awards);
-        eventLabels.add(l10n.calendar_event_retirements);
-        eventLabels.add(l10n.calendar_event_draftLottery);
-      }
-      if (w == calCfg.awardsWeek + 1 && d == 1) {
-        eventLabels.add(l10n.calendar_event_scoutReport);
-      }
-      if (w == calCfg.awardsWeek + 1 && d == 3) {
-        eventLabels.add(l10n.calendar_event_combine);
-      }
-      if (w == calCfg.awardsWeek + 1 && d == 5) {
-        eventLabels.add(l10n.calendar_event_mockDraft);
-      }
-      if (w == calCfg.draftWeek && d == 1) {
-        eventLabels.add(l10n.calendar_event_draft);
-      }
-      if (w == calCfg.freeAgencyWeek && d == 1) {
-        eventLabels.add(l10n.calendar_event_freeAgency);
+      for (final e in calendar.eventsOn(w, d)) {
+        final label = calendarEventLabel(context, e.id);
+        if (label != null) eventLabels.add(label);
       }
 
       return (
@@ -313,7 +304,7 @@ class HomeScreen extends ConsumerWidget {
     Future<void> simulateDay() async {
       final result = await ref
           .read(gameControllerProvider.notifier)
-          .simulateDay();
+          .advanceOneDay();
       if (!context.mounted || result == null) return;
       final nextLeague = ref.read(activeLeagueProvider);
       if (nextLeague != null) {
@@ -333,13 +324,12 @@ class HomeScreen extends ConsumerWidget {
       }
     }
 
-    Future<void> simulateUntilNextEvent() async {
+    Future<void> simulateToEvent() async {
       await _runBatch(
         context,
         ref,
         l10n,
-        () =>
-            ref.read(gameControllerProvider.notifier).simulateUntilNextEvent(),
+        ref.read(gameControllerProvider.notifier).simulateToEvent,
       );
     }
 
@@ -532,7 +522,7 @@ class HomeScreen extends ConsumerWidget {
               const SizedBox(width: 12),
               Expanded(
                 child: FilledButton.icon(
-                  onPressed: simulateUntilNextEvent,
+                  onPressed: simulateToEvent,
                   icon: const Icon(Icons.fast_forward),
                   label: Text(l10n.home_simulateUntilNextEvent),
                 ),

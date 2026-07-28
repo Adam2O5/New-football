@@ -15,6 +15,25 @@ String seasonPhaseLabel(BuildContext context, SeasonPhase phase) {
   };
 }
 
+/// Maps a `CalendarEventSlot.id` to its display label. Returns `null` for
+/// backend-only events (`staffGrowth`, `nextClassGeneration`) that have no
+/// player-facing representation on the calendar grid.
+String? calendarEventLabel(BuildContext context, String eventId) {
+  final l10n = AppLocalizations.of(context)!;
+  return switch (eventId) {
+    'awards' => l10n.calendar_event_awards,
+    'retirements' => l10n.calendar_event_retirements,
+    'lottery' => l10n.calendar_event_draftLottery,
+    'scoutReport' => l10n.calendar_event_scoutReport,
+    'combine' => l10n.calendar_event_combine,
+    'finalMock' => l10n.calendar_event_mockDraft,
+    'draft' => l10n.calendar_event_draft,
+    'freeAgencyOpen' => l10n.calendar_event_freeAgency,
+    'tradeDeadline' => l10n.calendar_event_tradeDeadline,
+    _ => null,
+  };
+}
+
 String matchEventLabel(BuildContext context, MatchEventType type) {
   final l10n = AppLocalizations.of(context)!;
   return switch (type) {

@@ -2172,6 +2172,14 @@ mixin _$Season {
   String? get championTeamId => throw _privateConstructorUsedError;
   DraftState? get draftState => throw _privateConstructorUsedError;
   SeasonAwards? get awards => throw _privateConstructorUsedError;
+  bool get staffGrowthDone => throw _privateConstructorUsedError;
+  bool get playerRetirementsDone => throw _privateConstructorUsedError;
+  bool get combineDone => throw _privateConstructorUsedError;
+  bool get finalMockDone => throw _privateConstructorUsedError;
+  bool get faOpenDone => throw _privateConstructorUsedError;
+  bool get scoutReportDone => throw _privateConstructorUsedError;
+  bool get tradeDeadlineAcked => throw _privateConstructorUsedError;
+  DraftState? get nextDraftState => throw _privateConstructorUsedError;
 
   /// Serializes this Season to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -2197,10 +2205,19 @@ abstract class $SeasonCopyWith<$Res> {
     String? championTeamId,
     DraftState? draftState,
     SeasonAwards? awards,
+    bool staffGrowthDone,
+    bool playerRetirementsDone,
+    bool combineDone,
+    bool finalMockDone,
+    bool faOpenDone,
+    bool scoutReportDone,
+    bool tradeDeadlineAcked,
+    DraftState? nextDraftState,
   });
 
   $DraftStateCopyWith<$Res>? get draftState;
   $SeasonAwardsCopyWith<$Res>? get awards;
+  $DraftStateCopyWith<$Res>? get nextDraftState;
 }
 
 /// @nodoc
@@ -2227,6 +2244,14 @@ class _$SeasonCopyWithImpl<$Res, $Val extends Season>
     Object? championTeamId = freezed,
     Object? draftState = freezed,
     Object? awards = freezed,
+    Object? staffGrowthDone = null,
+    Object? playerRetirementsDone = null,
+    Object? combineDone = null,
+    Object? finalMockDone = null,
+    Object? faOpenDone = null,
+    Object? scoutReportDone = null,
+    Object? tradeDeadlineAcked = null,
+    Object? nextDraftState = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -2266,6 +2291,38 @@ class _$SeasonCopyWithImpl<$Res, $Val extends Season>
                 ? _value.awards
                 : awards // ignore: cast_nullable_to_non_nullable
                       as SeasonAwards?,
+            staffGrowthDone: null == staffGrowthDone
+                ? _value.staffGrowthDone
+                : staffGrowthDone // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            playerRetirementsDone: null == playerRetirementsDone
+                ? _value.playerRetirementsDone
+                : playerRetirementsDone // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            combineDone: null == combineDone
+                ? _value.combineDone
+                : combineDone // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            finalMockDone: null == finalMockDone
+                ? _value.finalMockDone
+                : finalMockDone // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            faOpenDone: null == faOpenDone
+                ? _value.faOpenDone
+                : faOpenDone // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            scoutReportDone: null == scoutReportDone
+                ? _value.scoutReportDone
+                : scoutReportDone // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            tradeDeadlineAcked: null == tradeDeadlineAcked
+                ? _value.tradeDeadlineAcked
+                : tradeDeadlineAcked // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            nextDraftState: freezed == nextDraftState
+                ? _value.nextDraftState
+                : nextDraftState // ignore: cast_nullable_to_non_nullable
+                      as DraftState?,
           )
           as $Val,
     );
@@ -2298,6 +2355,20 @@ class _$SeasonCopyWithImpl<$Res, $Val extends Season>
       return _then(_value.copyWith(awards: value) as $Val);
     });
   }
+
+  /// Create a copy of Season
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $DraftStateCopyWith<$Res>? get nextDraftState {
+    if (_value.nextDraftState == null) {
+      return null;
+    }
+
+    return $DraftStateCopyWith<$Res>(_value.nextDraftState!, (value) {
+      return _then(_value.copyWith(nextDraftState: value) as $Val);
+    });
+  }
 }
 
 /// @nodoc
@@ -2318,12 +2389,22 @@ abstract class _$$SeasonImplCopyWith<$Res> implements $SeasonCopyWith<$Res> {
     String? championTeamId,
     DraftState? draftState,
     SeasonAwards? awards,
+    bool staffGrowthDone,
+    bool playerRetirementsDone,
+    bool combineDone,
+    bool finalMockDone,
+    bool faOpenDone,
+    bool scoutReportDone,
+    bool tradeDeadlineAcked,
+    DraftState? nextDraftState,
   });
 
   @override
   $DraftStateCopyWith<$Res>? get draftState;
   @override
   $SeasonAwardsCopyWith<$Res>? get awards;
+  @override
+  $DraftStateCopyWith<$Res>? get nextDraftState;
 }
 
 /// @nodoc
@@ -2349,6 +2430,14 @@ class __$$SeasonImplCopyWithImpl<$Res>
     Object? championTeamId = freezed,
     Object? draftState = freezed,
     Object? awards = freezed,
+    Object? staffGrowthDone = null,
+    Object? playerRetirementsDone = null,
+    Object? combineDone = null,
+    Object? finalMockDone = null,
+    Object? faOpenDone = null,
+    Object? scoutReportDone = null,
+    Object? tradeDeadlineAcked = null,
+    Object? nextDraftState = freezed,
   }) {
     return _then(
       _$SeasonImpl(
@@ -2388,6 +2477,38 @@ class __$$SeasonImplCopyWithImpl<$Res>
             ? _value.awards
             : awards // ignore: cast_nullable_to_non_nullable
                   as SeasonAwards?,
+        staffGrowthDone: null == staffGrowthDone
+            ? _value.staffGrowthDone
+            : staffGrowthDone // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        playerRetirementsDone: null == playerRetirementsDone
+            ? _value.playerRetirementsDone
+            : playerRetirementsDone // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        combineDone: null == combineDone
+            ? _value.combineDone
+            : combineDone // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        finalMockDone: null == finalMockDone
+            ? _value.finalMockDone
+            : finalMockDone // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        faOpenDone: null == faOpenDone
+            ? _value.faOpenDone
+            : faOpenDone // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        scoutReportDone: null == scoutReportDone
+            ? _value.scoutReportDone
+            : scoutReportDone // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        tradeDeadlineAcked: null == tradeDeadlineAcked
+            ? _value.tradeDeadlineAcked
+            : tradeDeadlineAcked // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        nextDraftState: freezed == nextDraftState
+            ? _value.nextDraftState
+            : nextDraftState // ignore: cast_nullable_to_non_nullable
+                  as DraftState?,
       ),
     );
   }
@@ -2406,6 +2527,14 @@ class _$SeasonImpl implements _Season {
     this.championTeamId,
     this.draftState,
     this.awards,
+    this.staffGrowthDone = false,
+    this.playerRetirementsDone = false,
+    this.combineDone = false,
+    this.finalMockDone = false,
+    this.faOpenDone = false,
+    this.scoutReportDone = false,
+    this.tradeDeadlineAcked = false,
+    this.nextDraftState,
   }) : _schedule = schedule,
        _standings = standings,
        _playInResults = playInResults,
@@ -2461,10 +2590,33 @@ class _$SeasonImpl implements _Season {
   final DraftState? draftState;
   @override
   final SeasonAwards? awards;
+  @override
+  @JsonKey()
+  final bool staffGrowthDone;
+  @override
+  @JsonKey()
+  final bool playerRetirementsDone;
+  @override
+  @JsonKey()
+  final bool combineDone;
+  @override
+  @JsonKey()
+  final bool finalMockDone;
+  @override
+  @JsonKey()
+  final bool faOpenDone;
+  @override
+  @JsonKey()
+  final bool scoutReportDone;
+  @override
+  @JsonKey()
+  final bool tradeDeadlineAcked;
+  @override
+  final DraftState? nextDraftState;
 
   @override
   String toString() {
-    return 'Season(year: $year, phase: $phase, schedule: $schedule, standings: $standings, playInResults: $playInResults, playoffBrackets: $playoffBrackets, championTeamId: $championTeamId, draftState: $draftState, awards: $awards)';
+    return 'Season(year: $year, phase: $phase, schedule: $schedule, standings: $standings, playInResults: $playInResults, playoffBrackets: $playoffBrackets, championTeamId: $championTeamId, draftState: $draftState, awards: $awards, staffGrowthDone: $staffGrowthDone, playerRetirementsDone: $playerRetirementsDone, combineDone: $combineDone, finalMockDone: $finalMockDone, faOpenDone: $faOpenDone, scoutReportDone: $scoutReportDone, tradeDeadlineAcked: $tradeDeadlineAcked, nextDraftState: $nextDraftState)';
   }
 
   @override
@@ -2491,7 +2643,23 @@ class _$SeasonImpl implements _Season {
                 other.championTeamId == championTeamId) &&
             (identical(other.draftState, draftState) ||
                 other.draftState == draftState) &&
-            (identical(other.awards, awards) || other.awards == awards));
+            (identical(other.awards, awards) || other.awards == awards) &&
+            (identical(other.staffGrowthDone, staffGrowthDone) ||
+                other.staffGrowthDone == staffGrowthDone) &&
+            (identical(other.playerRetirementsDone, playerRetirementsDone) ||
+                other.playerRetirementsDone == playerRetirementsDone) &&
+            (identical(other.combineDone, combineDone) ||
+                other.combineDone == combineDone) &&
+            (identical(other.finalMockDone, finalMockDone) ||
+                other.finalMockDone == finalMockDone) &&
+            (identical(other.faOpenDone, faOpenDone) ||
+                other.faOpenDone == faOpenDone) &&
+            (identical(other.scoutReportDone, scoutReportDone) ||
+                other.scoutReportDone == scoutReportDone) &&
+            (identical(other.tradeDeadlineAcked, tradeDeadlineAcked) ||
+                other.tradeDeadlineAcked == tradeDeadlineAcked) &&
+            (identical(other.nextDraftState, nextDraftState) ||
+                other.nextDraftState == nextDraftState));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -2507,6 +2675,14 @@ class _$SeasonImpl implements _Season {
     championTeamId,
     draftState,
     awards,
+    staffGrowthDone,
+    playerRetirementsDone,
+    combineDone,
+    finalMockDone,
+    faOpenDone,
+    scoutReportDone,
+    tradeDeadlineAcked,
+    nextDraftState,
   );
 
   /// Create a copy of Season
@@ -2534,6 +2710,14 @@ abstract class _Season implements Season {
     final String? championTeamId,
     final DraftState? draftState,
     final SeasonAwards? awards,
+    final bool staffGrowthDone,
+    final bool playerRetirementsDone,
+    final bool combineDone,
+    final bool finalMockDone,
+    final bool faOpenDone,
+    final bool scoutReportDone,
+    final bool tradeDeadlineAcked,
+    final DraftState? nextDraftState,
   }) = _$SeasonImpl;
 
   factory _Season.fromJson(Map<String, dynamic> json) = _$SeasonImpl.fromJson;
@@ -2556,6 +2740,22 @@ abstract class _Season implements Season {
   DraftState? get draftState;
   @override
   SeasonAwards? get awards;
+  @override
+  bool get staffGrowthDone;
+  @override
+  bool get playerRetirementsDone;
+  @override
+  bool get combineDone;
+  @override
+  bool get finalMockDone;
+  @override
+  bool get faOpenDone;
+  @override
+  bool get scoutReportDone;
+  @override
+  bool get tradeDeadlineAcked;
+  @override
+  DraftState? get nextDraftState;
 
   /// Create a copy of Season
   /// with the given fields replaced by the non-null parameter values.
