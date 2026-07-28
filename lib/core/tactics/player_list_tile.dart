@@ -12,6 +12,8 @@ class PlayerListTile extends StatelessWidget {
     required this.zone,
     required this.selected,
     required this.onTap,
+    this.enableDragDrop = false,
+    this.onAcceptDrop,
   });
 
   final AppLocalizations l10n;
@@ -19,6 +21,11 @@ class PlayerListTile extends StatelessWidget {
   final RosterZone zone;
   final bool selected;
   final VoidCallback onTap;
+
+  /// Gdy true, tile jest przeciągalny i akceptuje przeciągnięty id
+  /// (`onAcceptDrop`) — caller reużywa `_trySwap` do wykonania zamiany.
+  final bool enableDragDrop;
+  final void Function(String draggedPlayerId)? onAcceptDrop;
 
   String _zoneLabel(AppLocalizations l10n) {
     switch (zone) {
@@ -31,8 +38,7 @@ class PlayerListTile extends StatelessWidget {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildTile(BuildContext context) {
     return Container(
       color: selected
           ? Theme.of(
@@ -62,6 +68,44 @@ class PlayerListTile extends StatelessWidget {
         ),
         onTap: onTap,
       ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final tile = _buildTile(context);
+    if (!enableDragDrop) return tile;
+
+    return DragTarget<String>(
+      onWillAcceptWithDetails: (details) => details.data != player.id,
+      onAcceptWithDetails: (details) => onAcceptDrop?.call(details.data),
+      builder: (context, candidateData, rejectedData) {
+        final hovered = candidateData.isNotEmpty;
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 120),
+          decoration: BoxDecoration(
+            border: hovered
+                ? Border.all(
+                    color: Theme.of(context).colorScheme.primary,
+                    width: 2,
+                  )
+                : null,
+          ),
+          child: LongPressDraggable<String>(
+            data: player.id,
+            feedback: Material(
+              elevation: 4,
+              borderRadius: BorderRadius.circular(12),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 320),
+                child: tile,
+              ),
+            ),
+            childWhenDragging: Opacity(opacity: 0.35, child: tile),
+            child: tile,
+          ),
+        );
+      },
     );
   }
 }

@@ -40,24 +40,22 @@ Każda formacja ma kształt `obrońcy–pomoc–atak` (bez bramkarza).
 
 ### Formacje w grze
 
+Wingbacki (`lwb`/`rwb`) w formacjach 5-osobowej obrony liczą się do linii **D**, zgodnie z `formation_layout.dart`.
+
 | Formacja | Kształt (D–M–A) | Charakter |
 | -------- | --------------- | --------- |
-| `3-4-1-2` | 3–5–2 | 3 OB + skrzydłowi pomocy + CAM + 2 ST |
-| `3-4-2-1` | 3–5–2 | 3 OB + skrzydłowi pomocy + 2 CAM + ST |
 | `3-4-3` | 3–4–3 | szeroki atak, cienka obrona |
 | `3-5-2` | 3–5–2 | kontrola środka, WB wysoko |
-| `4-1-2-1-2` | 4–4–2 | diament: CDM + 2 CM + CAM + 2 ST |
-| `4-2-2-2` | 4–4–2 | 2 CDM + 2 CAM/skrzydła + 2 ST |
-| `4-2-3-1` | 4–5–1 | 2 CDM + 3 ofensywnych pomocy + ST |
 | `4-2-4` | 4–2–4 | ekstremalny atak |
 | `4-3-3` | 4–3–3 | klasyczny balans szerokości |
-| `4-4-2` | 4–4–2 | klasyczna dwójka z przodu |
-| `4-5-1` | 4–5–1 | gęsty środek, 1 ST |
-| `5-2-1-2` | 5–3–2 | 5 OB + 2 CM + CAM + 2 ST |
-| `5-2-2-1` | 5–4–1 | 5 OB + 2 CM + 2 ofensywnych + ST |
-| `5-2-3` | 5–2–3 | 5 OB + 2 CM + 3 z przodu |
+| `4-4-2 (szerokie)` | 4–4–2 | klasyczna dwójka z przodu, skrzydłowi szeroko w pomocy |
+| `4-4-2 (wąskie)` | 4–4–2 | jw., pomoc skupiona centralnie (brak szerokich skrzydłowych) |
+| `4-5-1 (szerokie)` | 4–5–1 | gęsty środek z szerokimi skrzydłowymi, 1 ST |
+| `4-5-1 (wąskie)` | 4–5–1 | jw., cała piątka pomocy centralnie |
+| `5-2-3` | 5–2–3 | 5 obrońców (w tym WB), 3 z przodu |
 | `5-3-2` | 5–3–2 | solidny blok + 2 ST |
-| `5-4-1` | 5–4–1 | maksymalna obrona |
+| `5-4-1 (szerokie)` | 5–4–1 | maksymalna obrona, szerocy skrzydłowi w pomocy |
+| `5-4-1 (wąskie)` | 5–4–1 | jw., pomoc skupiona centralnie |
 
 Reguła kciuka z sekcji 1 wynika wprost z D/M/A: np. `5-4-1` ma wysokie D i M → trudniej stracić gola i utrzymać piłkę; `4-2-4` ma wysokie A → więcej sytuacji bramkowych, mniej kontroli.
 
@@ -75,24 +73,24 @@ Nie muszą sumować się do 100 — to niezależne „słupki siły” fazy. Typ
 
 ### Wartości bazowe (projekt)
 
+Zgodne z `BalanceConfig.tactics.formationBaseStats` — jedyne źródło prawdy liczbowej; tabela poniżej to jej odzwierciedlenie.
+
 | Formacja | def | mid | atk | Notatka |
 | -------- | --: | --: | --: | ------- |
-| `3-4-1-2` | 48 | 62 | 58 | środek + dwójka |
-| `3-4-2-1` | 46 | 64 | 60 | dwóch „10”, jeden ST |
 | `3-4-3` | 42 | 55 | 68 | ofensywna szerokość |
 | `3-5-2` | 50 | 70 | 55 | król posiadania w 3 OB |
-| `4-1-2-1-2` | 55 | 66 | 58 | diament |
-| `4-2-2-2` | 58 | 60 | 60 | kompakt + 2 ST |
-| `4-2-3-1` | 56 | 68 | 57 | elastyczny środek |
 | `4-2-4` | 40 | 45 | 75 | all-in atak |
 | `4-3-3` | 55 | 60 | 62 | uniwersalna |
-| `4-4-2` | 58 | 55 | 60 | klasyna |
-| `4-5-1` | 60 | 72 | 48 | park the midfield |
-| `5-2-1-2` | 70 | 52 | 55 | niski blok + CAM |
-| `5-2-2-1` | 72 | 55 | 50 | bardzo defensywna |
+| `4-4-2 (szerokie)` | 58 | 60 | 60 | klasyczna |
+| `4-4-2 (wąskie)` | 58 | 60 | 60 | klasyczna, węższy środek |
+| `4-5-1 (szerokie)` | 58 | 60 | 60 | park the midfield |
+| `4-5-1 (wąskie)` | 58 | 60 | 60 | jw., bez szerokości |
 | `5-2-3` | 68 | 48 | 62 | 5 OB, 3 z przodu |
 | `5-3-2` | 72 | 58 | 52 | klasyczny 5-back |
-| `5-4-1` | 78 | 62 | 42 | ultra-def |
+| `5-4-1 (szerokie)` | 58 | 60 | 60 | ultra-def |
+| `5-4-1 (wąskie)` | 58 | 60 | 60 | ultra-def, bez szerokości |
+
+Wariacje szerokie/wąskie mają obecnie identyczne wartości bazowe (placeholder w `BalanceConfig`) — strojenie osobnych wartości to odrębne zadanie, poza zakresem tego dokumentu.
 
 ### Jak wchodzą do symulacji
 
@@ -139,28 +137,31 @@ Formacje mają **relacje przewagi**, niezależne od jakości zawodników (jakoś
 
 | Rodzina | Formacje | Silna przeciwko | Słaba przeciwko |
 | ------- | -------- | --------------- | --------------- |
-| **3-back wide** | `3-4-3`, `3-4-1-2`, `3-4-2-1`, `3-5-2` | wąskie 4-4-2 / diamenty bez szerokości | szerokie 4-3-3 / 4-2-4; szybkie skrzydła |
-| **4-back balanced** | `4-3-3`, `4-4-2`, `4-2-3-1` | klasyczne 4-4-2 mirror; 3-back przy dobrej szerokości | ultra-def 5-back (mało przestrzeni); gęste 4-5-1 |
-| **4-back attack** | `4-2-4`, `4-2-2-2` | wysokie linie 3-back | 5-back + deep line |
-| **4-back control** | `4-5-1`, `4-1-2-1-2` | pressujące 4-3-3 | bezpośrednie 4-4-2 / 5-2-3 |
-| **5-back** | `5-*` | ofensywne 4-2-4 / 3-4-3 | wąskie ataki centralne + CAM; zmęczenie WB |
+| **3-back wide** | `3-4-3`, `3-5-2` | wąskie 4-4-2 / diamenty bez szerokości | szerokie 4-3-3; szybkie skrzydła |
+| **4-back balanced** | `4-3-3`, `4-4-2` (szerokie/wąskie) | klasyczne 4-4-2 mirror; 3-back przy dobrej szerokości | ultra-def 5-4-1 (mało przestrzeni); gęste 4-5-1 |
+| **4-back attack** | `4-2-4` | wysokie linie 3-back | 5-back + deep line |
+| **4-back control** | `4-5-1` (szerokie/wąskie) | pressujące 4-3-3 | bezpośrednie 4-4-2 |
+| **5-back** | `5-2-3`, `5-3-2`, `5-4-1` (szerokie/wąskie) | ofensywne 4-2-4 | wąskie ataki centralne; zmęczenie WB |
 
 ### Konkretne matchupy (bonus `formationMatchup`, clamp łącznie z innymi kontrami)
 
+Tabela 1:1 z `BalanceConfig.tactics._defaultFormationMatchups` — jedyne źródło prawdy liczbowej.
+
 | Atakująca / ustawiona formacja | Vs | Bonus (dla lewej) | Uzasadnienie |
 | ------------------------------ | -- | ----------------: | ------------ |
-| `4-3-3` | `4-4-2` | +0,06 | szerokość vs płaska czwórka pomocy |
-| `4-4-2` | `3-5-2` | +0,05 | dwie dziewiątki vs 3 OB przy stałych |
-| `4-5-1` | `4-3-3` | +0,05 | zagęszczenie środka vs trójka pomocy |
-| `3-5-2` | `4-4-2` | +0,05 | przewaga liczebna w mid |
-| `5-3-2` / `5-4-1` | `4-2-4` | +0,08 | blok vs overcommit |
+| `4-3-3` | `4-4-2 (szerokie)` | +0,06 | szerokość vs płaska czwórka pomocy |
+| `4-4-2 (szerokie)` | `3-5-2` | +0,05 | dwie dziewiątki vs 3 OB przy stałych |
+| `4-5-1 (szerokie)` | `4-3-3` | +0,05 | zagęszczenie środka vs trójka pomocy |
+| `3-5-2` | `4-4-2 (szerokie)` | +0,05 | przewaga liczebna w mid |
+| `5-3-2` | `4-2-4` | +0,08 | blok vs overcommit |
+| `5-4-1 (szerokie)` | `4-2-4` | +0,08 | blok vs overcommit |
 | `4-2-4` | `3-4-3` | +0,05 | jeszcze więcej zagrożenia vs 3 OB |
-| `4-2-3-1` | `5-4-1` | +0,04 | CAM między liniami niskiego bloku |
-| `5-2-3` | `4-5-1` | +0,04 | trójka z przodu rozciąga gęsty mid |
+| `4-2-4` | `5-4-1 (szerokie)` | +0,04 | wysokie ryzyko kontry vs niski blok |
+| `5-2-3` | `4-5-1 (szerokie)` | +0,04 | trójka z przodu rozciąga gęsty mid |
 | `3-4-3` | `5-3-2` | −0,06 | (kara) wąskie kanały / 5 OB |
-| `4-3-3` | `5-4-1` | −0,05 | (kara) mało miejsca na skrzydłach |
+| `4-3-3` | `5-4-1 (szerokie)` | −0,05 | (kara) mało miejsca na skrzydłach |
 
-Pełna macierz 16×16 nie jest wymagana na start: silnik używa **rodziny + lista wyjątków**; brak wpisu = 0.
+Pełna macierz 12×12 nie jest wymagana na start: silnik używa **rodziny + lista wyjątków**; brak wpisu = 0.
 
 Łączny bonus kontr (formacja + ustawienia z sekcji 7) clamp: **−0,15 … +0,15**.
 

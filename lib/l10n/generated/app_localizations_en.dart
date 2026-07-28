@@ -403,7 +403,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get squad_cannotFieldInjured => 'An injured player can\'t be fielded';
 
   @override
-  String get squad_swappedPlaces => 'Swapped places';
+  String get squad_swappedPlaces => 'Swapped player places';
 
   @override
   String get squad_rosterTitle => 'Roster';
@@ -421,13 +421,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get squad_sortOverall => 'Overall';
 
   @override
-  String get squad_sortAssignedZone => 'Assigned position';
+  String get squad_sortAssignedZone => 'Assigned zone';
 
   @override
   String get squad_sortForm => 'Form';
 
   @override
   String get squad_sortPosition => 'Position';
+
+  @override
+  String substitute_sheetTitle(String name) {
+    return 'Substitute for $name';
+  }
+
+  @override
+  String get substitute_sheetSubtitle => 'Choose a player to swap places with';
 
   @override
   String get standings_noLeague => 'No league';

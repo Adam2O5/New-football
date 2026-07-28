@@ -419,16 +419,25 @@ class AppLocalizationsPl extends AppLocalizations {
   String get squad_zoneReserves => 'Rezerwy';
 
   @override
-  String get squad_sortOverall => 'Ogólne';
+  String get squad_sortOverall => 'Overall';
 
   @override
-  String get squad_sortAssignedZone => 'Przypisane miejsce';
+  String get squad_sortAssignedZone => 'Przypisanie';
 
   @override
   String get squad_sortForm => 'Forma';
 
   @override
   String get squad_sortPosition => 'Pozycja';
+
+  @override
+  String substitute_sheetTitle(String name) {
+    return 'Zmiana za $name';
+  }
+
+  @override
+  String get substitute_sheetSubtitle =>
+      'Wybierz zawodnika do zamiany miejscami';
 
   @override
   String get standings_noLeague => 'Brak ligi';

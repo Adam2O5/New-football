@@ -153,30 +153,43 @@
   "squad_selectHint": "Select a player, then tap another to swap places",
   "squad_cannotFieldInjured": "An injured player can't be fielded",
   "squad_swappedPlaces": "Swapped player places",
-  {
-  "squadrosterTitle": "Roster",
-  "@squadrosterTitle": { "description": "Section title for the full roster list on the squad screen." },
+  
+  "squad_rosterTitle": "Roster",
+  "@squad_rosterTitle": { "description": "Section title for the full roster list on the squad screen." },
 
-  "squadzoneXi": "XI",
-  "@squadzoneXi": { "description": "Label shown on a player row when assigned to the starting XI." },
+  "squad_zoneXi": "XI",
+  "@squad_zoneXi": { "description": "Label shown on a player row when assigned to the starting XI." },
 
-  "squadzoneBench": "Bench",
-  "@squadzoneBench": { "description": "Label shown on a player row when assigned to the bench." },
+  "squad_zoneBench": "Bench",
+  "@squad_zoneBench": { "description": "Label shown on a player row when assigned to the bench." },
 
-  "squadzoneReserves": "Reserves",
-  "@squadzoneReserves": { "description": "Label shown on a player row when assigned to the reserves." },
+  "squad_zoneReserves": "Reserves",
+  "@squad_zoneReserves": { "description": "Label shown on a player row when assigned to the reserves." },
 
-  "squadsortOverall": "Overall",
-  "@squadsortOverall": { "description": "Roster sort option: by overall rating, descending." },
+  "squad_sortOverall": "Overall",
+  "@squad_sortOverall": { "description": "Roster sort option: by overall rating, descending." },
 
-  "squadsortAssignedZone": "Assigned zone",
-  "@squadsortAssignedZone": { "description": "Roster sort option: by zone (XI, bench, reserve), then position." },
+  "squad_sortAssignedZone": "Assigned zone",
+  "@squad_sortAssignedZone": { "description": "Roster sort option: by zone (XI, bench, reserve), then position." },
 
-  "squadsortForm": "Form",
-  "@squadsortForm": { "description": "Roster sort option: by current form, descending." },
+  "squad_sortForm": "Form",
+  "@squad_sortForm": { "description": "Roster sort option: by current form, descending." },
 
-  "squadsortPosition": "Position",
-  "@squadsortPosition": { "description": "Roster sort option: by position only, ignoring zone." }
+  "squad_sortPosition": "Position",
+  "@squad_sortPosition": { "description": "Roster sort option: by position only, ignoring zone." },  
+
+  "substitute_sheetTitle": "Substitute for {name}",
+  "@substitute_sheetTitle": {
+    "description": "Title of the bottom sheet opened when tapping a slot on the pitch, showing the name of the player being substituted.",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "substitute_sheetSubtitle": "Choose a player to swap places with",
+  "@substitute_sheetSubtitle": {
+    "description": "Subtitle/hint shown below the title in the substitute bottom sheet."
   },
 
   "standings_noLeague": "No league",

@@ -4,13 +4,16 @@ import 'package:go_router/go_router.dart';
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/app/l10n/enum_labels.dart';
 import 'package:new_football/core/balance/balance_config.dart';
+import 'package:new_football/core/models/assigned_role.dart';
 import 'package:new_football/core/models/enums.dart';
-import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/team.dart';
+import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/tactics/pitch_field.dart';
 import 'package:new_football/core/tactics/player_list_tile.dart';
 import 'package:new_football/core/tactics/player_sort.dart';
+import 'package:new_football/core/tactics/role_picker_sheet.dart';
+import 'package:new_football/core/tactics/substitute_sheet.dart';
 import 'package:new_football/core/tactics/tactics_setup.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
@@ -21,7 +24,8 @@ class SquadScreen extends ConsumerStatefulWidget {
   ConsumerState<SquadScreen> createState() => _SquadScreenState();
 }
 
-class _SquadScreenState extends ConsumerState<SquadScreen> {
+class _SquadScreenState extends ConsumerState<SquadScreen>
+    with SingleTickerProviderStateMixin {
   String? selectedId;
   Formation? formation;
   Tempo? tempo;
@@ -30,6 +34,20 @@ class _SquadScreenState extends ConsumerState<SquadScreen> {
   AttackWidth? width;
   bool tacticsDirty = false;
   PlayerSortMode sortMode = PlayerSortMode.assignedZone;
+
+  late final TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -40,19 +58,48 @@ class _SquadScreenState extends ConsumerState<SquadScreen> {
       return Center(child: Text(l10n.squad_noTeam));
     }
 
-    final min = BalanceConfig.defaults.roster.minSize;
-    final max = BalanceConfig.defaults.roster.maxSize;
-    final size = team.roster.length;
-    final sizeOk = size >= min && size <= max;
-
-    final byId = {for (final p in team.roster) p.id: p};
-
     formation ??= team.tactics.formation;
     tempo ??= team.tactics.tempo;
     pressing ??= team.tactics.pressing;
     line ??= team.tactics.defensiveLine;
     width ??= team.tactics.attackWidth;
 
+    return Column(
+      children: [
+        Material(
+          color: Theme.of(context).colorScheme.surface,
+          child: TabBar(
+            controller: _tabController,
+            tabs: [
+              Tab(text: l10n.squad_rosterTitle),
+              Tab(text: l10n.squad_tacticsTitle),
+            ],
+          ),
+        ),
+        Expanded(
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              _buildSquadTab(context, l10n, team),
+              _buildTacticsTab(context, l10n, team),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  // -- Zakładka "Skład": pitch (tap → SubstituteSheet) + sortowalna lista.
+  Widget _buildSquadTab(
+    BuildContext context,
+    AppLocalizations l10n,
+    Team team,
+  ) {
+    final min = BalanceConfig.defaults.roster.minSize;
+    final max = BalanceConfig.defaults.roster.maxSize;
+    final size = team.roster.length;
+    final sizeOk = size >= min && size <= max;
+    final byId = {for (final p in team.roster) p.id: p};
     final sortedRoster = sortRoster(team, team.roster, sortMode);
 
     return ListView(
@@ -88,7 +135,10 @@ class _SquadScreenState extends ConsumerState<SquadScreen> {
             lineupPlayerIds: team.lineupPlayerIds,
             playersById: byId,
             selectedId: selectedId,
-            onTap: (p) => _onTapPlayer(context, team, p),
+            enableDragDrop: true,
+            onAcceptDrop: (draggedId, targetId) =>
+                _trySwap(context, team, draggedId, targetId),
+            onTap: (p) => _openSubstituteSheet(context, l10n, team, p),
             onLongPress: (p) => context.push('/game/player/${p.id}'),
           ),
         ),
@@ -143,18 +193,53 @@ class _SquadScreenState extends ConsumerState<SquadScreen> {
               player: p,
               zone: rosterZoneOf(team, p.id),
               selected: selectedId == p.id,
+              enableDragDrop: true,
+              onAcceptDrop: (draggedId) =>
+                  _trySwap(context, team, draggedId, p.id),
               onTap: () => _onTapPlayer(context, team, p),
             );
           },
         ),
+        const SizedBox(height: 16),
+      ],
+    );
+  }
+
+  // -- Zakładka "Taktyka": pitch (tap → RolePickerSheet) + formularz taktyki.
+  Widget _buildTacticsTab(
+    BuildContext context,
+    AppLocalizations l10n,
+    Team team,
+  ) {
+    final byId = {for (final p in team.roster) p.id: p};
+
+    return ListView(
+      padding: EdgeInsets.zero,
+      children: [
         Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
           child: Align(
             alignment: Alignment.centerLeft,
             child: Text(
               l10n.squad_tacticsTitle,
               style: Theme.of(context).textTheme.titleMedium,
             ),
+          ),
+        ),
+        SizedBox(
+          height: 340,
+          child: PitchField(
+            formation: formation!,
+            midfieldSlots: team.tactics.midfieldSlots,
+            lineupPlayerIds: team.lineupPlayerIds,
+            playersById: byId,
+            selectedId: null,
+            onTap: (p) => showRolePickerSheet(
+              context,
+              player: p,
+              onSelected: (role) => _assignRole(context, team, p, role),
+            ),
+            onLongPress: (p) => context.push('/game/player/${p.id}'),
           ),
         ),
         Padding(
@@ -311,6 +396,48 @@ class _SquadScreenState extends ConsumerState<SquadScreen> {
     );
   }
 
+  Future<void> _assignRole(
+    BuildContext context,
+    Team team,
+    Player player,
+    AssignedRole role,
+  ) async {
+    final updatedRoster = team.roster
+        .map(
+          (p) => p.id == player.id
+              ? p.copyWith(state: p.state.copyWith(role: role))
+              : p,
+        )
+        .toList();
+    await ref.read(gameControllerProvider.notifier).updateLeague((league) {
+      final currentTeam = league.playerTeam!;
+      return league.updateTeam(currentTeam.copyWith(roster: updatedRoster));
+    });
+    if (!context.mounted) return;
+    final info = roleDisplayInfo(role);
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('${player.name}: ${info.label}')));
+  }
+
+  Future<void> _openSubstituteSheet(
+    BuildContext context,
+    AppLocalizations l10n,
+    Team team,
+    Player outPlayer,
+  ) async {
+    final xi = team.lineupPlayerIds.toSet();
+    final candidates = team.roster.where((p) => !xi.contains(p.id)).toList();
+    await showSubstituteSheet(
+      context,
+      l10n: l10n,
+      outPlayer: outPlayer,
+      candidates: candidates,
+      onSelected: (candidate) =>
+          _trySwap(context, team, outPlayer.id, candidate.id),
+    );
+  }
+
   void _onTapPlayer(BuildContext context, Team team, Player player) {
     final current = selectedId;
     if (current == null) {
@@ -326,6 +453,7 @@ class _SquadScreenState extends ConsumerState<SquadScreen> {
   }
 
   void _trySwap(BuildContext context, Team team, String idA, String idB) {
+    if (idA == idB) return;
     final l10n = AppLocalizations.of(context)!;
     final playerA = team.roster.where((p) => p.id == idA).firstOrNull;
     final playerB = team.roster.where((p) => p.id == idB).firstOrNull;
@@ -357,10 +485,8 @@ class _SquadScreenState extends ConsumerState<SquadScreen> {
       switch (zone) {
         case RosterZone.xi:
           lineup.remove(id);
-          break;
         case RosterZone.bench:
           bench.remove(id);
-          break;
         case RosterZone.reserve:
           break;
       }
@@ -370,10 +496,8 @@ class _SquadScreenState extends ConsumerState<SquadScreen> {
       switch (zone) {
         case RosterZone.xi:
           lineup.add(id);
-          break;
         case RosterZone.bench:
           bench.add(id);
-          break;
         case RosterZone.reserve:
           break;
       }

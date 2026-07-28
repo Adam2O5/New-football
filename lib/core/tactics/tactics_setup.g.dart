@@ -60,22 +60,18 @@ Map<String, dynamic> _$$TacticsSetupImplToJson(_$TacticsSetupImpl instance) =>
     };
 
 const _$FormationEnumMap = {
-  Formation.f3412: 'f3412',
-  Formation.f3421: 'f3421',
   Formation.f343: 'f343',
   Formation.f352: 'f352',
-  Formation.f41212: 'f41212',
-  Formation.f4222: 'f4222',
-  Formation.f4231: 'f4231',
   Formation.f424: 'f424',
   Formation.f433: 'f433',
-  Formation.f442: 'f442',
-  Formation.f451: 'f451',
-  Formation.f5212: 'f5212',
-  Formation.f5221: 'f5221',
+  Formation.f442Wide: 'f442Wide',
+  Formation.f442Narrow: 'f442Narrow',
+  Formation.f451Wide: 'f451Wide',
+  Formation.f451Narrow: 'f451Narrow',
   Formation.f523: 'f523',
   Formation.f532: 'f532',
-  Formation.f541: 'f541',
+  Formation.f541Wide: 'f541Wide',
+  Formation.f541Narrow: 'f541Narrow',
 };
 
 const _$TempoEnumMap = {

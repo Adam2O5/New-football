@@ -6,10 +6,7 @@ import 'package:new_football/core/tactics/position_group.dart';
 import 'package:new_football/core/tactics/tactics_setup.dart';
 
 class PlacedPlayer {
-  const PlacedPlayer({
-    required this.slot,
-    required this.player,
-  });
+  const PlacedPlayer({required this.slot, required this.player});
 
   final AssignedSlot slot;
   final Player? player;
@@ -34,7 +31,9 @@ List<PlacedPlayer> placePlayersOnSlots({
   void takeMatches(bool Function(AssignedSlot slot, Player player) matches) {
     for (var i = pending.length - 1; i >= 0; i--) {
       final player = pending[i];
-      final slotIndex = remainingSlots.indexWhere((slot) => matches(slot, player));
+      final slotIndex = remainingSlots.indexWhere(
+        (slot) => matches(slot, player),
+      );
       if (slotIndex == -1) continue;
       final slot = remainingSlots.removeAt(slotIndex);
       placements[slot.key] = player;
@@ -67,6 +66,8 @@ class PitchField extends StatelessWidget {
     required this.selectedId,
     required this.onTap,
     this.onLongPress,
+    this.enableDragDrop = false,
+    this.onAcceptDrop,
   });
 
   final Formation formation;
@@ -76,6 +77,12 @@ class PitchField extends StatelessWidget {
   final String? selectedId;
   final void Function(Player player) onTap;
   final void Function(Player player)? onLongPress;
+
+  /// Gdy true, chip gracza jest przeciągalny i akceptuje przeciągnięty id
+  /// (`onAcceptDrop`) — caller reużywa `_trySwap` do wykonania zamiany.
+  final bool enableDragDrop;
+  final void Function(String draggedPlayerId, String targetPlayerId)?
+  onAcceptDrop;
 
   @override
   Widget build(BuildContext context) {
@@ -105,15 +112,9 @@ class PitchField extends StatelessWidget {
                     if (placement.player != null)
                       Positioned(
                         left: placement.slot.x * constraints.maxWidth - 24,
-                        top: (1 - placement.slot.y) * constraints.maxHeight - 24,
-                        child: _PitchChip(
-                          player: placement.player!,
-                          selected: placement.player!.id == selectedId,
-                          onTap: () => onTap(placement.player!),
-                          onLongPress: onLongPress == null
-                              ? null
-                              : () => onLongPress!(placement.player!),
-                        ),
+                        top:
+                            (1 - placement.slot.y) * constraints.maxHeight - 24,
+                        child: _buildChip(context, placement.player!),
                       ),
                 ],
               );
@@ -121,6 +122,47 @@ class PitchField extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildChip(BuildContext context, Player player) {
+    final chip = _PitchChip(
+      player: player,
+      selected: player.id == selectedId,
+      onTap: () => onTap(player),
+      onLongPress: onLongPress == null ? null : () => onLongPress!(player),
+    );
+
+    if (!enableDragDrop) return chip;
+
+    return DragTarget<String>(
+      onWillAcceptWithDetails: (details) => details.data != player.id,
+      onAcceptWithDetails: (details) =>
+          onAcceptDrop?.call(details.data, player.id),
+      builder: (context, candidateData, rejectedData) {
+        final hovered = candidateData.isNotEmpty;
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 120),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: hovered
+                ? Border.all(
+                    color: Theme.of(context).colorScheme.primary,
+                    width: 2,
+                  )
+                : null,
+          ),
+          child: LongPressDraggable<String>(
+            data: player.id,
+            feedback: Material(
+              color: Colors.transparent,
+              child: Opacity(opacity: 0.85, child: chip),
+            ),
+            childWhenDragging: Opacity(opacity: 0.35, child: chip),
+            child: chip,
+          ),
+        );
+      },
     );
   }
 }
@@ -188,13 +230,29 @@ class _PitchMarkingsPainter extends CustomPainter {
       ..color = Colors.white.withValues(alpha: 0.5)
       ..style = PaintingStyle.stroke
       ..strokeWidth = 1.5;
-    canvas.drawLine(Offset(0, size.height / 2), Offset(size.width, size.height / 2), paint);
-    canvas.drawCircle(Offset(size.width / 2, size.height / 2), size.width * 0.16, paint);
+    canvas.drawLine(
+      Offset(0, size.height / 2),
+      Offset(size.width, size.height / 2),
+      paint,
+    );
+    canvas.drawCircle(
+      Offset(size.width / 2, size.height / 2),
+      size.width * 0.16,
+      paint,
+    );
     final boxWidth = size.width * 0.5;
     final boxHeight = size.height * 0.12;
-    canvas.drawRect(Rect.fromLTWH((size.width - boxWidth) / 2, 0, boxWidth, boxHeight), paint);
     canvas.drawRect(
-      Rect.fromLTWH((size.width - boxWidth) / 2, size.height - boxHeight, boxWidth, boxHeight),
+      Rect.fromLTWH((size.width - boxWidth) / 2, 0, boxWidth, boxHeight),
+      paint,
+    );
+    canvas.drawRect(
+      Rect.fromLTWH(
+        (size.width - boxWidth) / 2,
+        size.height - boxHeight,
+        boxWidth,
+        boxHeight,
+      ),
       paint,
     );
   }
