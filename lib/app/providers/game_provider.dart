@@ -8,10 +8,12 @@ import 'package:new_football/core/models/match_models.dart';
 import 'package:new_football/core/models/message.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/staff.dart';
+import 'package:new_football/core/services/calendar_event_registry.dart';
 import 'package:new_football/core/services/calendar_service.dart';
 import 'package:new_football/core/services/contract_service.dart';
 import 'package:new_football/core/services/day_simulator.dart';
 import 'package:new_football/core/services/game_factory.dart';
+import 'package:new_football/core/services/schedule_generator.dart';
 import 'package:new_football/core/services/scouting_service.dart';
 import 'package:new_football/core/services/season_service.dart';
 import 'package:new_football/core/services/staff_service.dart';
@@ -85,6 +87,25 @@ class BatchSimulationResult {
   final String? eventId;
 }
 
+/// Next actionable thing on the calendar: the player's upcoming fixture, or
+/// the next unresolved `CalendarEventSlot`. Drives the contextual button on
+/// `HomeScreen` — `kind` decides which button(s) are shown.
+class UpcomingAction {
+  const UpcomingAction({
+    required this.kind,
+    required this.id,
+    required this.week,
+    required this.day,
+  });
+
+  final CalendarEventKind kind;
+
+  /// Registry event id, or `'match'` for the player's next fixture.
+  final String id;
+  final int week;
+  final int day;
+}
+
 class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   GameController(this._ref) : super(const AsyncValue.data(null));
 
@@ -156,51 +177,94 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     return result;
   }
 
-  /// Returns the id of the calendar event registered at [week]/[day] that
-  /// still needs to run this season, or null if none is due today.
-  String? _dueEventIdToday(LeagueState league) {
-    final due = _calendar.nextEvent(
-      league.currentWeek,
-      league.currentDay,
-      (id) => _isEventDone(league, id),
-    );
-    if (due == null) return null;
-    if (due.week != league.currentWeek || due.day != league.currentDay) {
-      return null;
-    }
-    return due.id;
+  /// Earliest unplayed fixture of the player's team, mapped to its
+  /// calendar (week, day). Uses the first day of the fixture's slot window
+  /// (Wed for midweek, Sat for weekend) as the canonical match day — this
+  /// matches how `DaySimulator` actually resolves the round when stepping
+  /// day by day.
+  (int week, int day)? _nextPlayerMatchDate(LeagueState league) {
+    final playerId = league.playerTeamId;
+    if (playerId == null) return null;
+    final fixtures =
+        league.currentSeason.schedule
+            .where(
+              (m) =>
+                  (m.homeTeamId == playerId || m.awayTeamId == playerId) &&
+                  m.result == null,
+            )
+            .toList()
+          ..sort((a, b) => a.round.compareTo(b.round));
+    if (fixtures.isEmpty) return null;
+    final round = fixtures.first.round;
+    if (round < 1 || round > 58) return null;
+    final (week, slot) = weekSlotForRound(round);
+    return (week, slot == 0 ? 3 : 6);
   }
 
-  bool _isEventDone(LeagueState league, String id) {
-    final s = league.currentSeason;
-    switch (id) {
-      case 'staffGrowth':
-        return s.staffGrowthDone;
-      case 'retirements':
-        return s.playerRetirementsDone;
-      case 'awards':
-        return s.awards != null;
-      case 'lottery':
-        return s.draftState != null;
-      case 'scoutReport':
-        return s.scoutReportDone;
-      case 'combine':
-        return s.combineDone;
-      case 'finalMock':
-        return s.finalMockDone;
-      case 'nextClassGeneration':
-        return s.nextDraftState != null;
-      case 'draft':
-        final draft = s.draftState;
-        if (draft == null) return false;
-        return draft.currentPickIndex >= draft.order.length;
-      case 'freeAgencyOpen':
-        return s.faOpenDone;
-      case 'tradeDeadline':
-        return s.tradeDeadlineAcked;
-      default:
-        return true;
+  /// Next actionable item on the calendar: the player's fixture or the next
+  /// unresolved `CalendarEventSlot`, whichever comes first. Returns `null`
+  /// only if neither exists (e.g. no player team and no pending events).
+  UpcomingAction? nextEvent({LeagueState? league}) {
+    final state = league ?? save?.leagueState;
+    if (state == null) return null;
+
+    final matchDate = _nextPlayerMatchDate(state);
+    final eventSlot = CalendarEventRegistry.nextEvent(state);
+
+    if (matchDate == null && eventSlot == null) return null;
+    if (eventSlot == null) {
+      return UpcomingAction(
+        kind: CalendarEventKind.match,
+        id: 'match',
+        week: matchDate!.$1,
+        day: matchDate.$2,
+      );
     }
+    if (matchDate == null) {
+      return UpcomingAction(
+        kind: eventSlot.kind,
+        id: eventSlot.id,
+        week: eventSlot.week,
+        day: eventSlot.day,
+      );
+    }
+
+    final fromWeek = state.currentWeek;
+    final fromDay = state.currentDay;
+    int normWeek(int week, int day) =>
+        (week < fromWeek || (week == fromWeek && day < fromDay))
+        ? week + 52
+        : week;
+
+    final matchNorm = normWeek(matchDate.$1, matchDate.$2);
+    final eventNorm = normWeek(eventSlot.week, eventSlot.day);
+    final matchFirst = matchNorm != eventNorm
+        ? matchNorm < eventNorm
+        : matchDate.$2 <= eventSlot.day;
+
+    return matchFirst
+        ? UpcomingAction(
+            kind: CalendarEventKind.match,
+            id: 'match',
+            week: matchDate.$1,
+            day: matchDate.$2,
+          )
+        : UpcomingAction(
+            kind: eventSlot.kind,
+            id: eventSlot.id,
+            week: eventSlot.week,
+            day: eventSlot.day,
+          );
+  }
+
+  /// Non-null only when a non-match calendar event is due exactly today.
+  UpcomingAction? _dueActionToday(LeagueState league) {
+    final action = nextEvent(league: league);
+    if (action == null) return null;
+    if (action.week != league.currentWeek || action.day != league.currentDay) {
+      return null;
+    }
+    return action;
   }
 
   /// Returns true if the calendar event due today is a `playerAction` that
@@ -254,16 +318,51 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     });
   }
 
+  /// Auto-simulates the player's fixture headlessly (same engine call as
+  /// AI-vs-AI fixtures in `DaySimulator._resolveRound`) and applies the
+  /// result via `applyPlayerMatchResult`. Used only by `simulateToDate` —
+  /// `simulateToEvent` must hand the match off to `MatchdayScreen` instead
+  /// (`DaySimulator.simulateDay` deliberately does not auto-sim it).
+  /// Returns `null` if either team can't be resolved (should not happen in
+  /// practice; treated as a hard stop by the caller).
+  Future<MatchResult?> _autoSimulatePlayerMatch(ScheduledMatch match) async {
+    final current = save;
+    if (current == null) return null;
+    final league = current.leagueState;
+    final home = league.teamById(match.homeTeamId);
+    final away = league.teamById(match.awayTeamId);
+    if (home == null || away == null) return null;
+
+    final engine = _ref.read(matchEngineProvider);
+    final result = engine.simulateFull(
+      home: home,
+      away: away,
+      rngSeed: Object.hash(match.id, league.currentWeek, league.currentDay),
+    );
+    await updateLeague((l) => _days.applyPlayerMatchResult(l, match, result));
+    return result;
+  }
+
   /// Repeatedly advances one day at a time until [reachedTarget] holds
   /// (checked before each day), a due event/match/urgent condition stops
   /// the batch, cancellation is requested, or [maxDays] is hit as a safety
-  /// cap. [autoResolveEvents] controls whether automatic/informational
-  /// events encountered along the way are executed immediately
-  /// (`simulateToDate` semantics) or left for the caller to react to
-  /// (`simulateToEvent` semantics).
+  /// cap.
+  ///
+  /// [autoResolveEvents] controls whether automatic/informational/
+  /// non-blocking `playerAction` events encountered along the way are
+  /// executed immediately (`simulateToDate` semantics) or left for the
+  /// caller to react to (`simulateToEvent` semantics).
+  ///
+  /// [autoSimulatePlayerMatch] controls whether the player's own fixture is
+  /// auto-simulated headlessly and the batch continues (`simulateToDate`:
+  /// calendar fast-forward skips most matches/events), or the batch stops
+  /// so the caller can hand off to `MatchdayScreen` (`simulateToEvent`:
+  /// home-screen day-by-day / next-match-or-event, matching the FIFA-style
+  /// "stop right before it happens" flow).
   Future<BatchSimulationResult> _simulateUntil(
     bool Function(LeagueState league) reachedTarget, {
     bool autoResolveEvents = false,
+    bool autoSimulatePlayerMatch = false,
     int maxDays = 400,
   }) async {
     _cancelRequested = false;
@@ -288,7 +387,11 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
       }
 
       final league = current.leagueState;
-      final dueEventId = _dueEventIdToday(league);
+      final due = _dueActionToday(league);
+      final dueEventId = (due != null && due.kind != CalendarEventKind.match)
+          ? due.id
+          : null;
+
       if (dueEventId != null && _isBlockingPlayerEvent(league, dueEventId)) {
         return BatchSimulationResult(
           stopReason: SimulationStopReason.event,
@@ -338,6 +441,27 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
       daysSimulated++;
 
       if (result.playerMatch != null) {
+        if (autoSimulatePlayerMatch) {
+          final autoResult = await _autoSimulatePlayerMatch(
+            result.playerMatch!,
+          );
+          if (autoResult != null) {
+            final leagueAfter = save!.leagueState;
+            lastResult = DaySimulationResult(
+              league: leagueAfter,
+              pauseForUrgent: leagueAfter.inbox.pendingUrgent.isNotEmpty,
+              simulatedResults: [autoResult],
+            );
+            if (leagueAfter.inbox.pendingUrgent.isNotEmpty) {
+              return BatchSimulationResult(
+                stopReason: SimulationStopReason.urgent,
+                daysSimulated: daysSimulated,
+                lastResult: lastResult,
+              );
+            }
+            continue;
+          }
+        }
         return BatchSimulationResult(
           stopReason: SimulationStopReason.playerMatch,
           daysSimulated: daysSimulated,
@@ -355,16 +479,23 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   }
 
   /// Simulates day by day until the next unresolved calendar event or the
-  /// player's match comes up — whichever happens first. Encountered events
-  /// are NOT auto-resolved; the caller reacts to `BatchSimulationResult`.
+  /// player's match comes up — whichever happens first. Nic nie jest
+  /// auto-resolwowane: to jest ścieżka `HomeScreen` (day-by-day / do
+  /// następnego meczu-lub-eventu), caller reaguje na `BatchSimulationResult`.
   Future<BatchSimulationResult> simulateToEvent() {
-    return _simulateUntil((_) => false, autoResolveEvents: false);
+    return _simulateUntil(
+      (_) => false,
+      autoResolveEvents: false,
+      autoSimulatePlayerMatch: false,
+    );
   }
 
-  /// Simulates day by day until (week, day) is reached, auto-resolving any
-  /// automatic/informational events encountered along the way. Stops early
-  /// if the player's match comes up, an urgent message arrives, or a
-  /// `playerAction` event (draft, when it's the player's turn) is due.
+  /// Szybka symulacja kalendarzowa: dociąga do (week, day), auto-resolwując
+  /// po drodze zarówno automatyczne/informacyjne eventy, jak i mecze
+  /// gracza (headlessly, silnikiem — bez otwierania `MatchdayScreen`).
+  /// Zatrzymuje się wyłącznie na: pilnej wiadomości w skrzynce lub
+  /// `playerAction` evencie, na który wymagana jest realna decyzja gracza
+  /// (obecnie tylko tura draftu gracza).
   Future<BatchSimulationResult> simulateToDate(int targetWeek, int targetDay) {
     return _simulateUntil(
       (league) => _calendar.isAtOrAfter(
@@ -374,18 +505,13 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
         targetDay,
       ),
       autoResolveEvents: true,
+      autoSimulatePlayerMatch: true,
     );
   }
 
-  /// Simulates day by day until the player's next match comes up (or the
-  /// simulation is otherwise interrupted). Events along the way are NOT
-  /// auto-resolved.
-  Future<BatchSimulationResult> simulateUntilNextMatch() {
-    return _simulateUntil((_) => false, autoResolveEvents: false);
-  }
-
   /// Simulates through the last day of [phase] (inclusive), stopping at the
-  /// first day of whatever comes next. Auto-resolves events along the way.
+  /// first day of whatever comes next. Ta sama semantyka co `simulateToDate`
+  /// (auto-resolve eventów i meczów gracza).
   Future<BatchSimulationResult> simulateUntilPhaseEnd(SeasonPhase phase) {
     final (endWeek, endDay) = _calendar.endOfPhase(phase);
     final (targetWeek, targetDay) = _calendar.advanceDay(endWeek, endDay);
@@ -514,4 +640,11 @@ final gameControllerProvider =
 
 final activeLeagueProvider = Provider((ref) {
   return ref.watch(gameControllerProvider).valueOrNull?.leagueState;
+});
+
+/// Next fixture/event the player can act on, driving the contextual button
+/// on `HomeScreen`. Recomputed whenever `activeLeagueProvider` changes.
+final nextGameEventProvider = Provider<UpcomingAction?>((ref) {
+  ref.watch(activeLeagueProvider);
+  return ref.read(gameControllerProvider.notifier).nextEvent();
 });

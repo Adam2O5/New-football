@@ -15,12 +15,12 @@ String seasonPhaseLabel(BuildContext context, SeasonPhase phase) {
   };
 }
 
-/// Maps a `CalendarEventSlot.id` to its display label. Returns `null` for
-/// backend-only events (`staffGrowth`, `nextClassGeneration`) that have no
-/// player-facing representation on the calendar grid.
+/// Maps a `CalendarEventSlot.id` to its display label.
 String? calendarEventLabel(BuildContext context, String eventId) {
   final l10n = AppLocalizations.of(context)!;
   return switch (eventId) {
+    // TODO: brak dedykowanego klucza l10n — dodać do app_*.arb.
+    'staffGrowth' => 'Rozwój i emerytury sztabu',
     'awards' => l10n.calendar_event_awards,
     'retirements' => l10n.calendar_event_retirements,
     'lottery' => l10n.calendar_event_draftLottery,
@@ -28,6 +28,8 @@ String? calendarEventLabel(BuildContext context, String eventId) {
     'combine' => l10n.calendar_event_combine,
     'finalMock' => l10n.calendar_event_mockDraft,
     'draft' => l10n.calendar_event_draft,
+    // TODO: brak dedykowanego klucza l10n — dodać do app_*.arb.
+    'nextClassGeneration' => 'Generacja nowej klasy draftowej',
     'freeAgencyOpen' => l10n.calendar_event_freeAgency,
     'tradeDeadline' => l10n.calendar_event_tradeDeadline,
     _ => null,

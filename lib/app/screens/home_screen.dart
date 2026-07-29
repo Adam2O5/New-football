@@ -13,6 +13,7 @@ import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/match_models.dart';
 import 'package:new_football/core/models/standing.dart';
+import 'package:new_football/core/services/calendar_event_registry.dart';
 import 'package:new_football/core/services/schedule_generator.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
@@ -53,7 +54,27 @@ DateTime _monthForInGame(LeagueState league) {
   return DateTime(d.year, d.month);
 }
 
-Future<void> _runBatch(
+void _refreshCalendarCursor(WidgetRef ref) {
+  final league = ref.read(activeLeagueProvider);
+  if (league == null) return;
+  ref.read(calendarCursorMonthProvider.notifier).state = _monthForInGame(
+    league,
+  );
+}
+
+/// Screen route for `playerAction` events that have a dedicated UI. Events
+/// without one (e.g. `scoutReport`, `nextClassGeneration` today) fall back
+/// to the draft screen, since that's where the related watchlist/board UI
+/// currently lives.
+String? _routeForEvent(String id) => switch (id) {
+  'draft' => '/game/draft',
+  'scoutReport' => '/game/draft',
+  'nextClassGeneration' => '/game/draft',
+  'freeAgencyOpen' => '/game/contracts',
+  _ => null,
+};
+
+Future<BatchSimulationResult> _runBatchDialog(
   BuildContext context,
   WidgetRef ref,
   AppLocalizations l10n,
@@ -88,44 +109,17 @@ Future<void> _runBatch(
 
   final result = await run();
 
-  if (!context.mounted) return;
-  Navigator.of(context, rootNavigator: true).pop();
+  if (context.mounted) {
+    Navigator.of(context, rootNavigator: true).pop();
+  }
+  return result;
+}
 
-  final nextLeague = ref.read(activeLeagueProvider);
-  if (nextLeague != null) {
-    ref.read(calendarCursorMonthProvider.notifier).state = _monthForInGame(
-      nextLeague,
-    );
-  }
-
-  if (result.lastResult?.playerMatch != null) {
-    context.push('/game/match', extra: result.lastResult!.playerMatch);
-    return;
-  }
-  if (result.stopReason == SimulationStopReason.urgent) {
-    // Tabs: Home(0) Calendar(1) Squad(2) Standings(3) Finance(4) Inbox(5).
-    ref.read(shellTabIndexProvider.notifier).state = 5;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(l10n.calendar_urgentMessage)));
-    return;
-  }
-  if (result.stopReason == SimulationStopReason.urgent) {
-    ref.read(shellTabIndexProvider.notifier).state = 5;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(l10n.calendar_urgentMessage)));
-    return;
-  }
-  if (result.stopReason == SimulationStopReason.event) {
-    if (result.eventId == 'draft') {
-      context.push('/game/draft');
-      return;
-    }
-    // Inne eventy informacyjne/automatyczne nie powinny tu trafić, bo
-    // simulateToEvent()/simulateToDate() same je rozróżniają — ale
-    // zachowujemy fallback na wypadek nieoczekiwanego stopu.
-  }
+void _showBatchSnack(
+  BuildContext context,
+  AppLocalizations l10n,
+  BatchSimulationResult result,
+) {
   final reasonLabel = switch (result.stopReason) {
     SimulationStopReason.reachedTarget =>
       l10n.calendar_stopReason_reachedTarget,
@@ -133,7 +127,7 @@ Future<void> _runBatch(
     SimulationStopReason.noSave => l10n.calendar_stopReason_noSave,
     SimulationStopReason.playerMatch => l10n.calendar_stopReason_reachedTarget,
     SimulationStopReason.urgent => l10n.calendar_stopReason_reachedTarget,
-    SimulationStopReason.event => l10n.calendar_stopReason_draftPick,
+    SimulationStopReason.event => l10n.calendar_stopReason_reachedTarget,
   };
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
@@ -142,6 +136,181 @@ Future<void> _runBatch(
       ),
     ),
   );
+}
+
+/// "Przejdź do {event}": dociąga kalendarz do dnia eventu bez jego
+/// wykonania, potem — jeśli istnieje dedykowany ekran — nawiguje do niego.
+Future<void> _goToEvent(
+  BuildContext context,
+  WidgetRef ref,
+  AppLocalizations l10n,
+  UpcomingAction action,
+) async {
+  final result = await _runBatchDialog(
+    context,
+    ref,
+    l10n,
+    ref.read(gameControllerProvider.notifier).simulateToEvent,
+  );
+  if (!context.mounted) return;
+  _refreshCalendarCursor(ref);
+
+  if (result.stopReason == SimulationStopReason.urgent) {
+    ref.read(shellTabIndexProvider.notifier).state = 5;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.calendar_urgentMessage)));
+    return;
+  }
+  if (result.stopReason != SimulationStopReason.event) {
+    _showBatchSnack(context, l10n, result);
+    return;
+  }
+
+  final route = _routeForEvent(action.id);
+  if (route != null) {
+    context.push(route);
+    return;
+  }
+  _showBatchSnack(context, l10n, result);
+}
+
+/// "Symuluj {event}": dociąga kalendarz do dnia eventu i od razu go
+/// wykonuje (`runEventAtCurrentDay`).
+Future<void> _simulateEvent(
+  BuildContext context,
+  WidgetRef ref,
+  AppLocalizations l10n,
+  UpcomingAction action,
+) async {
+  final result = await _runBatchDialog(
+    context,
+    ref,
+    l10n,
+    ref.read(gameControllerProvider.notifier).simulateToEvent,
+  );
+  if (!context.mounted) return;
+  _refreshCalendarCursor(ref);
+
+  if (result.stopReason == SimulationStopReason.urgent) {
+    ref.read(shellTabIndexProvider.notifier).state = 5;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.calendar_urgentMessage)));
+    return;
+  }
+  if (result.stopReason != SimulationStopReason.event) {
+    _showBatchSnack(context, l10n, result);
+    return;
+  }
+
+  await ref
+      .read(gameControllerProvider.notifier)
+      .runEventAtCurrentDay(action.id);
+  if (!context.mounted) return;
+  _refreshCalendarCursor(ref);
+  final label = calendarEventLabel(context, action.id) ?? action.id;
+  ScaffoldMessenger.of(
+    context,
+  ).showSnackBar(SnackBar(content: Text('Wykonano: $label')));
+}
+
+/// "Symuluj mecz": dociąga kalendarz do dnia meczu gracza i otwiera
+/// `MatchdayScreen`. Nie rozgrywa meczu samodzielnie.
+Future<void> _simulateMatch(
+  BuildContext context,
+  WidgetRef ref,
+  AppLocalizations l10n,
+) async {
+  final result = await _runBatchDialog(
+    context,
+    ref,
+    l10n,
+    ref.read(gameControllerProvider.notifier).simulateToEvent,
+  );
+  if (!context.mounted) return;
+  _refreshCalendarCursor(ref);
+
+  if (result.lastResult?.playerMatch != null) {
+    context.push('/game/match', extra: result.lastResult!.playerMatch);
+    return;
+  }
+  if (result.stopReason == SimulationStopReason.urgent) {
+    ref.read(shellTabIndexProvider.notifier).state = 5;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.calendar_urgentMessage)));
+    return;
+  }
+  _showBatchSnack(context, l10n, result);
+}
+
+Widget _buildNextActionSection(
+  BuildContext context,
+  WidgetRef ref,
+  AppLocalizations l10n,
+  UpcomingAction? action,
+) {
+  if (action == null) {
+    return Text(
+      'Brak nadchodzących wydarzeń.',
+      style: Theme.of(context).textTheme.bodyMedium,
+    );
+  }
+
+  if (action.kind == CalendarEventKind.match) {
+    return SizedBox(
+      width: double.infinity,
+      child: FilledButton.icon(
+        onPressed: () => _simulateMatch(context, ref, l10n),
+        icon: const Icon(Icons.sports_soccer),
+        label: const Text('Symuluj mecz'),
+      ),
+    );
+  }
+
+  final label = calendarEventLabel(context, action.id) ?? action.id;
+
+  switch (action.kind) {
+    case CalendarEventKind.playerAction:
+      return SizedBox(
+        width: double.infinity,
+        child: FilledButton.icon(
+          onPressed: () => _goToEvent(context, ref, l10n, action),
+          icon: const Icon(Icons.event_available_outlined),
+          label: Text('Przejdź do: $label'),
+        ),
+      );
+    case CalendarEventKind.automatic:
+      return SizedBox(
+        width: double.infinity,
+        child: FilledButton.icon(
+          onPressed: () => _simulateEvent(context, ref, l10n, action),
+          icon: const Icon(Icons.fast_forward),
+          label: Text('Symuluj: $label'),
+        ),
+      );
+    case CalendarEventKind.informational:
+      return Row(
+        children: [
+          Expanded(
+            child: OutlinedButton(
+              onPressed: () => _goToEvent(context, ref, l10n, action),
+              child: Text('Przejdź do: $label'),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: FilledButton(
+              onPressed: () => _simulateEvent(context, ref, l10n, action),
+              child: Text('Symuluj: $label'),
+            ),
+          ),
+        ],
+      );
+    case CalendarEventKind.match:
+      return const SizedBox.shrink();
+  }
 }
 
 class HomeScreen extends ConsumerWidget {
@@ -155,7 +324,7 @@ class HomeScreen extends ConsumerWidget {
       return Center(child: Text(l10n.calendar_noLeague));
     }
 
-    final calendar = ref.watch(calendarServiceProvider);
+    final nextAction = ref.watch(nextGameEventProvider);
     final currentWeek = league.currentWeek;
     final currentDay = league.currentDay;
     final seasonYear = league.currentSeason.year;
@@ -263,6 +432,7 @@ class HomeScreen extends ConsumerWidget {
       final d = mapped.day;
 
       String? playerMatchLabel;
+      final calendar = ref.read(calendarServiceProvider);
       final slot = calendar.regularSeasonSlotForDay(d);
       if (calendar.isRegularSeasonWeek(w) && slot != null) {
         final round = scheduleRoundForWeekSlot(w, slot);
@@ -300,38 +470,6 @@ class HomeScreen extends ConsumerWidget {
       7,
       (i) => today.add(Duration(days: i)),
     );
-
-    Future<void> simulateDay() async {
-      final result = await ref
-          .read(gameControllerProvider.notifier)
-          .advanceOneDay();
-      if (!context.mounted || result == null) return;
-      final nextLeague = ref.read(activeLeagueProvider);
-      if (nextLeague != null) {
-        ref.read(calendarCursorMonthProvider.notifier).state = _monthForInGame(
-          nextLeague,
-        );
-      }
-      if (result.playerMatch != null) {
-        context.push('/game/match', extra: result.playerMatch);
-        return;
-      }
-      if (result.pauseForUrgent) {
-        ref.read(shellTabIndexProvider.notifier).state = 5;
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(l10n.calendar_urgentMessage)));
-      }
-    }
-
-    Future<void> simulateToEvent() async {
-      await _runBatch(
-        context,
-        ref,
-        l10n,
-        ref.read(gameControllerProvider.notifier).simulateToEvent,
-      );
-    }
 
     return Scaffold(
       body: ListView(
@@ -510,25 +648,7 @@ class HomeScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 16),
-          Row(
-            children: [
-              Expanded(
-                child: FilledButton.icon(
-                  onPressed: simulateDay,
-                  icon: const Icon(Icons.play_arrow),
-                  label: Text(l10n.calendar_simulateDay),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: FilledButton.icon(
-                  onPressed: simulateToEvent,
-                  icon: const Icon(Icons.fast_forward),
-                  label: Text(l10n.home_simulateUntilNextEvent),
-                ),
-              ),
-            ],
-          ),
+          _buildNextActionSection(context, ref, l10n, nextAction),
         ],
       ),
     );

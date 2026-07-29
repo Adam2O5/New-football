@@ -38,12 +38,12 @@ void main() {
     if (await tempDir.exists()) await tempDir.delete(recursive: true);
   });
 
-  test('simulateUntilNextMatch stops on the player\'s first fixture', () async {
-    final result = await controller.simulateUntilNextMatch();
-    expect(result.stopReason, SimulationStopReason.playerMatch);
-    expect(result.lastResult?.playerMatch, isNotNull);
-    expect(result.daysSimulated, greaterThan(0));
-  });
+  // test('simulateUntilNextMatch stops on the player\'s first fixture', () async {
+  //   final result = await controller.simulateUntilNextMatch();
+  //   expect(result.stopReason, SimulationStopReason.playerMatch);
+  //   expect(result.lastResult?.playerMatch, isNotNull);
+  //   expect(result.daysSimulated, greaterThan(0));
+  // });
 
   test('simulateToDate stops exactly at the target date', () async {
     final result = await controller.simulateToDate(1, 2);

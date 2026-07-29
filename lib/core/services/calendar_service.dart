@@ -1,5 +1,6 @@
 import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/enums.dart';
+import 'package:new_football/core/services/calendar_event_registry.dart';
 
 /// Canonical season calendar helpers (`docs/game_calendar.md`).
 class CalendarService {
@@ -91,147 +92,13 @@ class CalendarService {
     }
   }
 
-  // ---------------------------------------------------------------------
-  // Event registry (krok 1 + krok 5)
-  // ---------------------------------------------------------------------
-
-  /// Non-interactive vs. player-facing calendar events.
-  List<CalendarEventSlot> _registry() {
-    final week44 = _c.awardsWeek;
-    final week45 = week44 + 1;
-    final week46 = _c.draftWeek;
-    final week47 = _c.freeAgencyWeek;
-    return [
-      CalendarEventSlot(
-        id: 'staffGrowth',
-        week: week44,
-        day: 1,
-        order: 0,
-        kind: CalendarEventKind.automatic,
-      ),
-      CalendarEventSlot(
-        id: 'retirements',
-        week: week44,
-        day: 1,
-        order: 1,
-        kind: CalendarEventKind.automatic,
-      ),
-      CalendarEventSlot(
-        id: 'awards',
-        week: week44,
-        day: 1,
-        order: 2,
-        kind: CalendarEventKind.informational,
-      ),
-      CalendarEventSlot(
-        id: 'lottery',
-        week: week44,
-        day: 1,
-        order: 3,
-        kind: CalendarEventKind.informational,
-      ),
-      CalendarEventSlot(
-        id: 'scoutReport',
-        week: week45,
-        day: 1,
-        order: 0,
-        kind: CalendarEventKind.automatic,
-      ),
-      CalendarEventSlot(
-        id: 'combine',
-        week: week45,
-        day: 3,
-        order: 0,
-        kind: CalendarEventKind.automatic,
-      ),
-      CalendarEventSlot(
-        id: 'finalMock',
-        week: week45,
-        day: 5,
-        order: 0,
-        kind: CalendarEventKind.automatic,
-      ),
-      CalendarEventSlot(
-        id: 'nextClassGeneration',
-        week: week46,
-        day: 1,
-        order: 0,
-        kind: CalendarEventKind.automatic,
-      ),
-      CalendarEventSlot(
-        id: 'draft',
-        week: week46,
-        day: 1,
-        order: 1,
-        kind: CalendarEventKind.playerAction,
-      ),
-      CalendarEventSlot(
-        id: 'freeAgencyOpen',
-        week: week47,
-        day: 1,
-        order: 0,
-        kind: CalendarEventKind.informational,
-      ),
-      CalendarEventSlot(
-        id: 'tradeDeadline',
-        week: _c.tradeDeadlineWeek,
-        day: 1,
-        order: 0,
-        kind: CalendarEventKind.informational,
-      ),
-    ];
-  }
-
   /// All registered calendar events falling exactly on (week, day),
   /// regardless of whether they've already resolved this season. Used by
-  /// the UI to render event labels on the calendar grid.
+  /// the UI to render event labels on the calendar grid. Single source of
+  /// truth: `CalendarEventRegistry` (`docs/game_calendar.md`).
   List<CalendarEventSlot> eventsOn(int week, int day) {
-    return _registry().where((e) => e.week == week && e.day == day).toList();
+    return CalendarEventRegistry.build(
+      _c,
+    ).where((e) => e.week == week && e.day == day).toList();
   }
-
-  /// Returns the next unresolved event at or after (week, day), or null if
-  /// none remain registered ahead (caller should fall back to phase-end /
-  /// rollover logic). `isDone` decides whether a slot has already fired
-  /// this season, per the flags on `Season`.
-  CalendarEventSlot? nextEvent(
-    int week,
-    int day,
-    bool Function(String id) isDone,
-  ) {
-    final ahead =
-        _registry().where((e) => !isDone(e.id)).where((e) {
-          if (e.week != week) return e.week > week;
-          return e.day >= day;
-        }).toList()..sort((a, b) {
-          final byWeek = a.week.compareTo(b.week);
-          if (byWeek != 0) return byWeek;
-          final byDay = a.day.compareTo(b.day);
-          if (byDay != 0) return byDay;
-          return a.order.compareTo(b.order);
-        });
-    if (ahead.isEmpty) return null;
-    return ahead.first;
-  }
-}
-
-/// Whether a calendar event resolves itself or needs player input.
-enum CalendarEventKind { automatic, informational, playerAction }
-
-/// A single scheduled slot in the offseason event registry.
-class CalendarEventSlot {
-  const CalendarEventSlot({
-    required this.id,
-    required this.week,
-    required this.day,
-    required this.order,
-    required this.kind,
-  });
-
-  final String id;
-  final int week;
-  final int day;
-
-  /// Tie-breaker for multiple events on the same (week, day).
-  final int order;
-  final CalendarEventKind kind;
 }
