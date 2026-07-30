@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-
+import 'package:flutter/services.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
 class MainMenuScreen extends StatelessWidget {
@@ -49,6 +49,11 @@ class MainMenuScreen extends StatelessWidget {
               OutlinedButton(
                 onPressed: () => context.push('/settings'),
                 child: Text(l10n.mainMenu_settings),
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton(
+                onPressed: () => SystemNavigator.pop(),
+                child: Text(l10n.mainMenu_exitGame),
               ),
               const Spacer(flex: 2),
             ],

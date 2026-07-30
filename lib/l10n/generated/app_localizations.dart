@@ -536,6 +536,12 @@ abstract class AppLocalizations {
   /// **'Ustawienia'**
   String get mainMenu_settings;
 
+  /// No description provided for @mainMenu_exitGame.
+  ///
+  /// In pl, this message translates to:
+  /// **'Opuść grę'**
+  String get mainMenu_exitGame;
+
   /// No description provided for @settings_title.
   ///
   /// In pl, this message translates to:

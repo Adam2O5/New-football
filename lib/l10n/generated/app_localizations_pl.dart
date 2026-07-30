@@ -232,6 +232,9 @@ class AppLocalizationsPl extends AppLocalizations {
   String get mainMenu_settings => 'Ustawienia';
 
   @override
+  String get mainMenu_exitGame => 'Opuść grę';
+
+  @override
   String get settings_title => 'Ustawienia';
 
   @override
