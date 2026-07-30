@@ -175,8 +175,13 @@ Future<void> _goToEvent(
   _showBatchSnack(context, l10n, result);
 }
 
-/// "Symuluj {event}": dociąga kalendarz do dnia eventu i od razu go
-/// wykonuje (`runEventAtCurrentDay`).
+/// "Symuluj {event}": dociąga kalendarz do dnia eventu, wykonuje go
+/// (`runEventAtCurrentDay`) i dopiero wtedy przesuwa dzień o jeden.
+/// `runEventAtCurrentDay` samo w sobie NIE przesuwa kalendarza (patrz
+/// `GameController.runEventAtCurrentDay` w `game_provider.dart`) — bez
+/// `advanceOneDay()` po jego wywołaniu `currentWeek`/`currentDay`
+/// zostawałyby zamrożone na dniu eventu na stałe, mimo że event jest już
+/// oznaczony jako wykonany (i przycisk "wygląda" na zmieniony).
 Future<void> _simulateEvent(
   BuildContext context,
   WidgetRef ref,
@@ -204,11 +209,24 @@ Future<void> _simulateEvent(
     return;
   }
 
-  await ref
-      .read(gameControllerProvider.notifier)
-      .runEventAtCurrentDay(action.id);
+  final controller = ref.read(gameControllerProvider.notifier);
+  await controller.runEventAtCurrentDay(action.id);
+  final dayResult = await controller.advanceOneDay();
   if (!context.mounted) return;
   _refreshCalendarCursor(ref);
+
+  if (dayResult?.playerMatch != null) {
+    context.push('/game/match', extra: dayResult!.playerMatch);
+    return;
+  }
+  if (dayResult?.pauseForUrgent ?? false) {
+    ref.read(shellTabIndexProvider.notifier).state = 5;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.calendar_urgentMessage)));
+    return;
+  }
+
   final label = calendarEventLabel(context, action.id) ?? action.id;
   ScaffoldMessenger.of(
     context,
@@ -424,18 +442,25 @@ class HomeScreen extends ConsumerWidget {
       return '$home – $away';
     }
 
-    ({int week, int day, String? playerMatchLabel, List<String> eventLabels})?
+    ({
+      int week,
+      int day,
+      int? round,
+      String? playerMatchLabel,
+      List<String> eventLabels,
+    })?
     dayInfo(DateTime date) {
       final mapped = _inGameWeekDayForDate(date, seasonYear);
       if (mapped == null) return null;
       final w = mapped.week;
       final d = mapped.day;
 
+      int? round;
       String? playerMatchLabel;
       final calendar = ref.read(calendarServiceProvider);
       final slot = calendar.regularSeasonSlotForDay(d);
       if (calendar.isRegularSeasonWeek(w) && slot != null) {
-        final round = scheduleRoundForWeekSlot(w, slot);
+        round = scheduleRoundForWeekSlot(w, slot);
         final fixtures = matchesByRound[round] ?? const [];
         if (playerId != null) {
           ScheduledMatch? pm;
@@ -460,6 +485,7 @@ class HomeScreen extends ConsumerWidget {
       return (
         week: w,
         day: d,
+        round: round,
         playerMatchLabel: playerMatchLabel,
         eventLabels: eventLabels,
       );
@@ -470,6 +496,10 @@ class HomeScreen extends ConsumerWidget {
       7,
       (i) => today.add(Duration(days: i)),
     );
+    // Runda meczowa obejmuje dwa kolejne dni (śr/czw albo sob/nd) — dedup,
+    // żeby badge meczu pojawiał się tylko pierwszego dnia pary, analogicznie
+    // do `cellRounds`/`showMatchIcon` w `calendar_screen.dart`.
+    final cellRounds = next7.map((date) => dayInfo(date)?.round).toList();
 
     return Scaffold(
       body: ListView(
@@ -485,6 +515,10 @@ class HomeScreen extends ConsumerWidget {
                 final date = next7[i];
                 final info = dayInfo(date);
                 final isToday = i == 0;
+                final currentRound = cellRounds[i];
+                final previousRound = i > 0 ? cellRounds[i - 1] : null;
+                final showMatchIcon =
+                    currentRound != null && currentRound != previousRound;
                 return Card(
                   color: isToday
                       ? Theme.of(
@@ -508,7 +542,7 @@ class HomeScreen extends ConsumerWidget {
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                           const SizedBox(height: 8),
-                          if (info?.playerMatchLabel != null)
+                          if (showMatchIcon && info?.playerMatchLabel != null)
                             Text(
                               info!.playerMatchLabel!,
                               maxLines: 2,

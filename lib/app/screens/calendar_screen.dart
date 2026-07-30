@@ -527,13 +527,6 @@ Future<void> _runBatch(
     ).showSnackBar(SnackBar(content: Text(l10n.calendar_urgentMessage)));
     return;
   }
-  if (result.stopReason == SimulationStopReason.urgent) {
-    ref.read(shellTabIndexProvider.notifier).state = 5;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(l10n.calendar_urgentMessage)));
-    return;
-  }
   if (result.stopReason == SimulationStopReason.event) {
     if (result.eventId == 'draft') {
       context.push('/game/draft');
