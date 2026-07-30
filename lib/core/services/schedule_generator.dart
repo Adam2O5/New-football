@@ -84,9 +84,21 @@ int scheduleRoundForWeekSlot(int week, int slot) {
   return ((zeroBased ~/ 2) + 1, zeroBased % 2);
 }
 
-/// Midweek matches: Wednesday (3) or Thursday (4). Weekend: Saturday (6) or Sunday (7).
-int matchDayForSlot(int slot, {Random? random}) {
-  final rng = random ?? Random();
-  if (slot == 0) return rng.nextBool() ? 3 : 4;
-  return rng.nextBool() ? 6 : 7;
+/// Returns the actual regular-season match days for [week]:
+/// - midweek slot: Wednesday (3) or Thursday (4)
+/// - weekend slot: Saturday (6) or Sunday (7)
+///
+/// The mapping is deterministic per week and seed so UI and simulation can
+/// query it repeatedly and always get the same answer. If midweek lands on
+/// Thursday, weekend is forced to Sunday to preserve the Thu→Sun rest window.
+({int midweekDay, int weekendDay}) matchDaysForWeek(int week, {int seed = 0}) {
+  if (week < 1) {
+    throw ArgumentError('Invalid week=$week');
+  }
+
+  final rng = Random(Object.hash(seed, week));
+  final midweekDay = rng.nextBool() ? 3 : 4;
+  final weekendDay = midweekDay == 4 ? 7 : (rng.nextBool() ? 6 : 7);
+
+  return (midweekDay: midweekDay, weekendDay: weekendDay);
 }

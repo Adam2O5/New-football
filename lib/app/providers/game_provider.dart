@@ -178,10 +178,9 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   }
 
   /// Earliest unplayed fixture of the player's team, mapped to its
-  /// calendar (week, day). Uses the first day of the fixture's slot window
-  /// (Wed for midweek, Sat for weekend) as the canonical match day — this
-  /// matches how `DaySimulator` actually resolves the round when stepping
-  /// day by day.
+  /// calendar (week, day). Uses the deterministic actual match day for the
+  /// fixture's week/slot, so HomeScreen and batch simulation point to the
+  /// same date as `DaySimulator`.
   (int week, int day)? _nextPlayerMatchDate(LeagueState league) {
     final playerId = league.playerTeamId;
     if (playerId == null) return null;
@@ -197,8 +196,11 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     if (fixtures.isEmpty) return null;
     final round = fixtures.first.round;
     if (round < 1 || round > 58) return null;
+
     final (week, slot) = weekSlotForRound(round);
-    return (week, slot == 0 ? 3 : 6);
+    final matchDays = matchDaysForWeek(week);
+
+    return (week, slot == 0 ? matchDays.midweekDay : matchDays.weekendDay);
   }
 
   /// Next actionable item on the calendar: the player's fixture or the next

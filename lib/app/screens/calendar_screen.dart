@@ -128,7 +128,9 @@ class CalendarScreen extends ConsumerWidget {
       ScheduledMatch? pm;
 
       final slot = calendar.regularSeasonSlotForDay(d);
-      if (calendar.isRegularSeasonWeek(w) && slot != null) {
+      final isActualMatchDay = slot != null && calendar.isActualMatchDay(w, d);
+
+      if (calendar.isRegularSeasonWeek(w) && slot != null && isActualMatchDay) {
         round = scheduleRoundForWeekSlot(w, slot);
         final fixtures = matchesByRound[round] ?? const [];
         matchCount = fixtures.length;
@@ -233,13 +235,6 @@ class CalendarScreen extends ConsumerWidget {
 
     final canSimulateSelectedDay = selectedInfo != null && !selectedInfo.isPast;
 
-    // Precompute rounds per grid cell so that a match round spanning two
-    // consecutive calendar days only shows the ball icon once.
-    final cellRounds = List<int?>.generate(totalCells, (i) {
-      final date = gridStart.add(Duration(days: i));
-      return dayInfo(date)?.round;
-    });
-
     return Scaffold(
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -342,13 +337,6 @@ class CalendarScreen extends ConsumerWidget {
                           date.month == selectedDay.month &&
                           date.day == selectedDay.day;
 
-                      final currentRound = cellRounds[i];
-                      final previousRound = i > 0 ? cellRounds[i - 1] : null;
-                      final showMatchIcon =
-                          info != null &&
-                          currentRound != null &&
-                          currentRound != previousRound;
-
                       return Opacity(
                         opacity: isInMonth ? 1.0 : 0.35,
                         child: InkWell(
@@ -405,8 +393,7 @@ class CalendarScreen extends ConsumerWidget {
                                   Row(
                                     mainAxisSize: MainAxisSize.min,
                                     children: [
-                                      if (showMatchIcon &&
-                                          info.playerMatchLabel != null)
+                                      if (info.playerMatchLabel != null)
                                         Tooltip(
                                           message: info.playerMatchLabel!,
                                           child: const Icon(
@@ -415,8 +402,7 @@ class CalendarScreen extends ConsumerWidget {
                                             color: Colors.greenAccent,
                                           ),
                                         )
-                                      else if (showMatchIcon &&
-                                          info.matchCount > 0)
+                                      else if (info.matchCount > 0)
                                         Tooltip(
                                           message: '${info.matchCount} matches',
                                           child: const Icon(
@@ -426,9 +412,8 @@ class CalendarScreen extends ConsumerWidget {
                                           ),
                                         ),
                                       if (info.eventLabels.isNotEmpty) ...[
-                                        if (showMatchIcon &&
-                                            (info.playerMatchLabel != null ||
-                                                info.matchCount > 0))
+                                        if (info.playerMatchLabel != null ||
+                                            info.matchCount > 0)
                                           const SizedBox(width: 2),
                                         Tooltip(
                                           message: info.eventLabels.join('\n'),

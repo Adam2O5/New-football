@@ -1,6 +1,7 @@
 import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/services/calendar_event_registry.dart';
+import 'package:new_football/core/services/schedule_generator.dart';
 
 /// Canonical season calendar helpers (`docs/game_calendar.md`).
 class CalendarService {
@@ -43,6 +44,21 @@ class CalendarService {
     if (day == 3 || day == 4) return 0;
     if (day == 6 || day == 7) return 1;
     return null;
+  }
+
+  /// True only for the deterministic, actual match day picked for a given week.
+  bool isActualMatchDay(int week, int day, {int seed = 0}) {
+    if (!isRegularSeasonWeek(week)) return false;
+
+    final slot = regularSeasonSlotForDay(day);
+    if (slot == null) return false;
+
+    final matchDays = matchDaysForWeek(week, seed: seed);
+    return switch (slot) {
+      0 => day == matchDays.midweekDay,
+      1 => day == matchDays.weekendDay,
+      _ => false,
+    };
   }
 
   String dayName(int day) {

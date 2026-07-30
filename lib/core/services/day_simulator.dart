@@ -84,13 +84,12 @@ class DaySimulator {
 
     if (calendar.isRegularSeasonWeek(week)) {
       final slot = calendar.regularSeasonSlotForDay(day);
-      if (slot != null) {
+      if (slot != null && calendar.isActualMatchDay(week, day)) {
         final round = scheduleRoundForWeekSlot(week, slot);
         final outcome = _resolveRound(state, round);
         state = outcome.league;
         results.addAll(outcome.results);
         playerMatch = outcome.playerMatch;
-        // If player has a match, don't auto-sim it — hand off to UI.
         if (playerMatch != null) {
           return DaySimulationResult(
             league: state,
@@ -272,10 +271,7 @@ class DaySimulator {
   }
 
   Team _applyFatigue(Team team, MatchResult result) {
-    final onPitch = {
-      ...team.lineupPlayerIds,
-      ...team.benchPlayerIds,
-    };
+    final onPitch = {...team.lineupPlayerIds, ...team.benchPlayerIds};
     final roster = team.roster.map((p) {
       if (!onPitch.contains(p.id)) return p.recoverBetweenMatches(balance);
       return p.withMatchFatigue(90, balance);

@@ -144,8 +144,9 @@ Future<void> _goToEvent(
   BuildContext context,
   WidgetRef ref,
   AppLocalizations l10n,
-  UpcomingAction action,
-) async {
+  UpcomingAction action, {
+  bool openRoute = true,
+}) async {
   final result = await _runBatchDialog(
     context,
     ref,
@@ -162,8 +163,18 @@ Future<void> _goToEvent(
     ).showSnackBar(SnackBar(content: Text(l10n.calendar_urgentMessage)));
     return;
   }
-  if (result.stopReason != SimulationStopReason.event) {
+
+  if (result.stopReason != SimulationStopReason.event &&
+      result.stopReason != SimulationStopReason.playerMatch) {
     _showBatchSnack(context, l10n, result);
+    return;
+  }
+
+  if (!openRoute) {
+    return;
+  }
+
+  if (result.stopReason == SimulationStopReason.playerMatch) {
     return;
   }
 
@@ -172,6 +183,7 @@ Future<void> _goToEvent(
     context.push(route);
     return;
   }
+
   _showBatchSnack(context, l10n, result);
 }
 
@@ -263,16 +275,99 @@ Future<void> _simulateMatch(
   _showBatchSnack(context, l10n, result);
 }
 
+bool _isGoToOnlyEvent(String id) {
+  switch (id) {
+    case 'draft':
+    case 'contractExtension':
+    case 'freeAgencyOpen':
+    case 'nextClassGeneration':
+    case 'scoutReport':
+      return true;
+    case 'staffGrowth':
+      return false;
+    default:
+      return false;
+  }
+}
+
+bool _isSimulateOnlyEvent(String id) {
+  switch (id) {
+    case 'combine':
+    case 'finalMock':
+    case 'staffGrowth':
+      return true;
+    default:
+      return false;
+  }
+}
+
+Future<void> _advanceOneDay(
+  BuildContext context,
+  WidgetRef ref,
+  AppLocalizations l10n,
+) async {
+  final controller = ref.read(gameControllerProvider.notifier);
+  final result = await controller.advanceOneDay();
+  if (!context.mounted) return;
+  _refreshCalendarCursor(ref);
+
+  if (result?.playerMatch != null) {
+    context.push('/game/match', extra: result!.playerMatch);
+    return;
+  }
+  if (result?.pauseForUrgent ?? false) {
+    ref.read(shellTabIndexProvider.notifier).state = 5;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.calendar_urgentMessage)));
+  }
+}
+
 Widget _buildNextActionSection(
   BuildContext context,
   WidgetRef ref,
   AppLocalizations l10n,
+  LeagueState league,
   UpcomingAction? action,
 ) {
-  if (action == null) {
-    return Text(
-      'Brak nadchodzących wydarzeń.',
-      style: Theme.of(context).textTheme.bodyMedium,
+  final actionIsToday =
+      action != null &&
+      action.week == league.currentWeek &&
+      action.day == league.currentDay;
+
+  if (!actionIsToday) {
+    final secondaryLabel = switch (action?.kind) {
+      CalendarEventKind.match => 'Symuluj do następnego meczu',
+      CalendarEventKind.playerAction ||
+      CalendarEventKind.automatic ||
+      CalendarEventKind.informational =>
+        action != null
+            ? 'Symuluj do: ${calendarEventLabel(context, action.id) ?? action.id}'
+            : 'Symuluj do wydarzenia',
+      null => 'Symuluj do wydarzenia',
+    };
+
+    return Row(
+      children: [
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: () => _advanceOneDay(context, ref, l10n),
+            icon: const Icon(Icons.skip_next_outlined),
+            label: const Text('Symuluj dzień'),
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: FilledButton.icon(
+            onPressed: action == null
+                ? null
+                : () =>
+                      _goToEvent(context, ref, l10n, action, openRoute: false),
+            icon: const Icon(Icons.fast_forward),
+            label: Text(secondaryLabel),
+          ),
+        ),
+      ],
     );
   }
 
@@ -288,47 +383,48 @@ Widget _buildNextActionSection(
   }
 
   final label = calendarEventLabel(context, action.id) ?? action.id;
+  final goToOnly = _isGoToOnlyEvent(action.id);
+  final simulateOnly = _isSimulateOnlyEvent(action.id);
 
-  switch (action.kind) {
-    case CalendarEventKind.playerAction:
-      return SizedBox(
-        width: double.infinity,
-        child: FilledButton.icon(
-          onPressed: () => _goToEvent(context, ref, l10n, action),
-          icon: const Icon(Icons.event_available_outlined),
-          label: Text('Przejdź do: $label'),
-        ),
-      );
-    case CalendarEventKind.automatic:
-      return SizedBox(
-        width: double.infinity,
-        child: FilledButton.icon(
-          onPressed: () => _simulateEvent(context, ref, l10n, action),
-          icon: const Icon(Icons.fast_forward),
-          label: Text('Symuluj: $label'),
-        ),
-      );
-    case CalendarEventKind.informational:
-      return Row(
-        children: [
-          Expanded(
-            child: OutlinedButton(
-              onPressed: () => _goToEvent(context, ref, l10n, action),
-              child: Text('Przejdź do: $label'),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: FilledButton(
-              onPressed: () => _simulateEvent(context, ref, l10n, action),
-              child: Text('Symuluj: $label'),
-            ),
-          ),
-        ],
-      );
-    case CalendarEventKind.match:
-      return const SizedBox.shrink();
+  if (goToOnly) {
+    return SizedBox(
+      width: double.infinity,
+      child: FilledButton.icon(
+        onPressed: () => _goToEvent(context, ref, l10n, action),
+        icon: const Icon(Icons.event_available_outlined),
+        label: Text('Przejdź do: $label'),
+      ),
+    );
   }
+
+  if (simulateOnly) {
+    return SizedBox(
+      width: double.infinity,
+      child: FilledButton.icon(
+        onPressed: () => _simulateEvent(context, ref, l10n, action),
+        icon: const Icon(Icons.fast_forward),
+        label: Text('Symuluj: $label'),
+      ),
+    );
+  }
+
+  return Row(
+    children: [
+      Expanded(
+        child: OutlinedButton(
+          onPressed: () => _goToEvent(context, ref, l10n, action),
+          child: Text('Przejdź do: $label'),
+        ),
+      ),
+      const SizedBox(width: 12),
+      Expanded(
+        child: FilledButton(
+          onPressed: () => _simulateEvent(context, ref, l10n, action),
+          child: Text('Symuluj: $label'),
+        ),
+      ),
+    ],
+  );
 }
 
 class HomeScreen extends ConsumerWidget {
@@ -459,7 +555,9 @@ class HomeScreen extends ConsumerWidget {
       String? playerMatchLabel;
       final calendar = ref.read(calendarServiceProvider);
       final slot = calendar.regularSeasonSlotForDay(d);
-      if (calendar.isRegularSeasonWeek(w) && slot != null) {
+      final isActualMatchDay = slot != null && calendar.isActualMatchDay(w, d);
+
+      if (calendar.isRegularSeasonWeek(w) && slot != null && isActualMatchDay) {
         round = scheduleRoundForWeekSlot(w, slot);
         final fixtures = matchesByRound[round] ?? const [];
         if (playerId != null) {
@@ -496,10 +594,6 @@ class HomeScreen extends ConsumerWidget {
       7,
       (i) => today.add(Duration(days: i)),
     );
-    // Runda meczowa obejmuje dwa kolejne dni (śr/czw albo sob/nd) — dedup,
-    // żeby badge meczu pojawiał się tylko pierwszego dnia pary, analogicznie
-    // do `cellRounds`/`showMatchIcon` w `calendar_screen.dart`.
-    final cellRounds = next7.map((date) => dayInfo(date)?.round).toList();
 
     return Scaffold(
       body: ListView(
@@ -515,10 +609,6 @@ class HomeScreen extends ConsumerWidget {
                 final date = next7[i];
                 final info = dayInfo(date);
                 final isToday = i == 0;
-                final currentRound = cellRounds[i];
-                final previousRound = i > 0 ? cellRounds[i - 1] : null;
-                final showMatchIcon =
-                    currentRound != null && currentRound != previousRound;
                 return Card(
                   color: isToday
                       ? Theme.of(
@@ -542,7 +632,7 @@ class HomeScreen extends ConsumerWidget {
                             style: Theme.of(context).textTheme.bodySmall,
                           ),
                           const SizedBox(height: 8),
-                          if (showMatchIcon && info?.playerMatchLabel != null)
+                          if (info?.playerMatchLabel != null)
                             Text(
                               info!.playerMatchLabel!,
                               maxLines: 2,
@@ -682,7 +772,7 @@ class HomeScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 16),
-          _buildNextActionSection(context, ref, l10n, nextAction),
+          _buildNextActionSection(context, ref, l10n, league, nextAction),
         ],
       ),
     );
