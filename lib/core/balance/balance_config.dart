@@ -1,4 +1,8 @@
 import 'package:new_football/core/models/enums.dart';
+import 'package:new_football/core/balance/trade_value_balance.dart';
+import 'package:new_football/core/balance/tactics_balance.dart';
+export 'package:new_football/core/balance/trade_value_balance.dart';
+export 'package:new_football/core/balance/tactics_balance.dart';
 
 /// Immutable game balance knobs for the simulation core.
 ///
@@ -22,6 +26,7 @@ class BalanceConfig {
     this.calendar = const CalendarBalance(),
     this.chemistry = const ChemistryBalance(),
     this.tactics = const TacticsBalance(),
+    this.tradeValue = const TradeValueBalance(),
   });
 
   final RosterBalance roster;
@@ -38,6 +43,7 @@ class BalanceConfig {
   final CalendarBalance calendar;
   final ChemistryBalance chemistry;
   final TacticsBalance tactics;
+  final TradeValueBalance tradeValue;
 
   static const defaults = BalanceConfig();
 }
@@ -86,7 +92,8 @@ class MatchdayBalance {
   final int maxSubstitutionWindows;
 }
 
-/// Stamina, fatigue, trade-value and form knobs (`player_management.md`).
+/// Stamina, fatigue and form knobs (`player_management.md`). Trade-value
+/// knobs moved to `TradeValueBalance` (`trade_value_balance.dart`).
 class PlayerBalance {
   const PlayerBalance({
     this.staminaMin = 0,
@@ -95,16 +102,6 @@ class PlayerBalance {
     this.fatiguePerFullMatch = 15,
     this.recoveryBetweenMatches = 20,
     this.injuryDaysClampMax = 999,
-    this.pointValueOverallPivot = 70,
-    this.pointValueOverallWeight = 35,
-    this.pointValueFutWeight = 15,
-    this.pointValueYoungAgeMax = 24,
-    this.pointValueOldAgeMin = 32,
-    this.pointValueYoungStarsPivot = 2.5,
-    this.pointValueYoungStarsWeight = 40,
-    this.pointValueOldAgeWeight = 25,
-    this.pointValueMin = -1000,
-    this.pointValueMax = 1000,
     this.staminaOkThreshold = 60,
     this.staminaSoftThreshold = 40,
     this.injuryRiskOk = 1.0,
@@ -123,17 +120,6 @@ class PlayerBalance {
   final int fatiguePerFullMatch;
   final int recoveryBetweenMatches;
   final int injuryDaysClampMax;
-
-  final int pointValueOverallPivot;
-  final double pointValueOverallWeight;
-  final double pointValueFutWeight;
-  final int pointValueYoungAgeMax;
-  final int pointValueOldAgeMin;
-  final double pointValueYoungStarsPivot;
-  final double pointValueYoungStarsWeight;
-  final double pointValueOldAgeWeight;
-  final int pointValueMin;
-  final int pointValueMax;
 
   /// Stamina ≥ this → no injury / performance penalty.
   final int staminaOkThreshold;
@@ -738,163 +724,4 @@ class ChemistryBalance {
   final double roleMultFailMin;
   final double roleMultFailMax;
   final double formationMatchupClamp;
-}
-
-// ---------------------------------------------------------------------------
-// Tactics (tactics.md)
-// ---------------------------------------------------------------------------
-
-/// `def` / `mid` / `atk` base power bars (0–100) for a [Formation].
-class FormationBaseStats {
-  const FormationBaseStats({
-    required this.def,
-    required this.mid,
-    required this.atk,
-  });
-
-  final int def;
-  final int mid;
-  final int atk;
-}
-
-/// Delta applied to `def` / `mid` / `atk` by a tactical setting value.
-class TacticsDelta {
-  const TacticsDelta({this.def = 0, this.mid = 0, this.atk = 0});
-
-  final int def;
-  final int mid;
-  final int atk;
-}
-
-/// Counter-formation bonus: [formationA] gets [bonusForA] vs [formationB].
-class FormationMatchup {
-  const FormationMatchup({
-    required this.formationA,
-    required this.formationB,
-    required this.bonusForA,
-  });
-
-  final Formation formationA;
-  final Formation formationB;
-  final double bonusForA;
-}
-
-class TacticsBalance {
-  const TacticsBalance({
-    this.matchupClamp = 0.15,
-    this.formationBaseStats = _defaultFormationBaseStats,
-    this.tempoDelta = _defaultTempoDelta,
-    this.attackWidthDelta = _defaultAttackWidthDelta,
-    this.defensiveLineDelta = _defaultDefensiveLineDelta,
-    this.pressingDelta = _defaultPressingDelta,
-    this.formationMatchups = _defaultFormationMatchups,
-  });
-
-  /// Total counter bonus (formation + settings) clamp: ±this value.
-  final double matchupClamp;
-
-  final Map<Formation, FormationBaseStats> formationBaseStats;
-  final Map<Tempo, TacticsDelta> tempoDelta;
-  final Map<AttackWidth, TacticsDelta> attackWidthDelta;
-  final Map<DefensiveLine, TacticsDelta> defensiveLineDelta;
-  final Map<PressingIntensity, TacticsDelta> pressingDelta;
-  final List<FormationMatchup> formationMatchups;
-
-  static const _defaultFormationBaseStats = <Formation, FormationBaseStats>{
-    Formation.f343: FormationBaseStats(def: 42, mid: 55, atk: 68),
-    Formation.f352: FormationBaseStats(def: 50, mid: 70, atk: 55),
-    Formation.f424: FormationBaseStats(def: 40, mid: 45, atk: 75),
-    Formation.f433: FormationBaseStats(def: 55, mid: 60, atk: 62),
-    Formation.f523: FormationBaseStats(def: 68, mid: 48, atk: 62),
-    Formation.f532: FormationBaseStats(def: 72, mid: 58, atk: 52),
-    Formation.f442Wide: FormationBaseStats(def: 58, mid: 60, atk: 60),
-    Formation.f442Narrow: FormationBaseStats(def: 58, mid: 60, atk: 60),
-    Formation.f451Wide: FormationBaseStats(def: 58, mid: 60, atk: 60),
-    Formation.f451Narrow: FormationBaseStats(def: 58, mid: 60, atk: 60),
-    Formation.f541Wide: FormationBaseStats(def: 58, mid: 60, atk: 60),
-    Formation.f541Narrow: FormationBaseStats(def: 58, mid: 60, atk: 60),
-  };
-
-  static const _defaultTempoDelta = <Tempo, TacticsDelta>{
-    Tempo.slow: TacticsDelta(def: 2, mid: 3, atk: -4),
-    Tempo.balanced: TacticsDelta(),
-    Tempo.fast: TacticsDelta(def: -4, mid: -3, atk: 6),
-  };
-
-  static const _defaultAttackWidthDelta = <AttackWidth, TacticsDelta>{
-    AttackWidth.narrow: TacticsDelta(def: 1, mid: 2, atk: -2),
-    AttackWidth.balanced: TacticsDelta(),
-    AttackWidth.wide: TacticsDelta(def: -3, mid: -1, atk: 4),
-  };
-
-  static const _defaultDefensiveLineDelta = <DefensiveLine, TacticsDelta>{
-    DefensiveLine.deep: TacticsDelta(def: 6, atk: -3),
-    DefensiveLine.normal: TacticsDelta(),
-    DefensiveLine.high: TacticsDelta(def: -4, atk: 3),
-  };
-
-  static const _defaultPressingDelta = <PressingIntensity, TacticsDelta>{
-    PressingIntensity.low: TacticsDelta(def: 3, mid: -2, atk: -2),
-    PressingIntensity.medium: TacticsDelta(),
-    PressingIntensity.high: TacticsDelta(def: -2, mid: 2, atk: 1),
-    PressingIntensity.gegenpressing: TacticsDelta(def: -5, mid: 3, atk: 2),
-  };
-
-  static const _defaultFormationMatchups = <FormationMatchup>[
-    FormationMatchup(
-      formationA: Formation.f433,
-      formationB: Formation.f442Wide,
-      bonusForA: 0.06,
-    ),
-    FormationMatchup(
-      formationA: Formation.f442Wide,
-      formationB: Formation.f352,
-      bonusForA: 0.05,
-    ),
-    FormationMatchup(
-      formationA: Formation.f451Wide,
-      formationB: Formation.f433,
-      bonusForA: 0.05,
-    ),
-    FormationMatchup(
-      formationA: Formation.f352,
-      formationB: Formation.f442Wide,
-      bonusForA: 0.05,
-    ),
-    FormationMatchup(
-      formationA: Formation.f532,
-      formationB: Formation.f424,
-      bonusForA: 0.08,
-    ),
-    FormationMatchup(
-      formationA: Formation.f541Wide,
-      formationB: Formation.f424,
-      bonusForA: 0.08,
-    ),
-    FormationMatchup(
-      formationA: Formation.f424,
-      formationB: Formation.f343,
-      bonusForA: 0.05,
-    ),
-    FormationMatchup(
-      formationA: Formation.f424,
-      formationB: Formation.f541Wide,
-      bonusForA: 0.04,
-    ),
-    FormationMatchup(
-      formationA: Formation.f523,
-      formationB: Formation.f451Wide,
-      bonusForA: 0.04,
-    ),
-    FormationMatchup(
-      formationA: Formation.f343,
-      formationB: Formation.f532,
-      bonusForA: -0.06,
-    ),
-    FormationMatchup(
-      formationA: Formation.f433,
-      formationB: Formation.f541Wide,
-      bonusForA: -0.05,
-    ),
-  ];
 }

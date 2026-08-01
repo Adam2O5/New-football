@@ -3,7 +3,6 @@ import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/tactics/formation_layout.dart';
 import 'package:new_football/core/tactics/position_group.dart';
-import 'package:new_football/core/tactics/tactics_setup.dart';
 
 class PlacedPlayer {
   const PlacedPlayer({required this.slot, required this.player});
@@ -60,7 +59,6 @@ class PitchField extends StatelessWidget {
   const PitchField({
     super.key,
     required this.formation,
-    required this.midfieldSlots,
     required this.lineupPlayerIds,
     required this.playersById,
     required this.selectedId,
@@ -71,7 +69,6 @@ class PitchField extends StatelessWidget {
   });
 
   final Formation formation;
-  final MidfieldSlots? midfieldSlots;
   final List<String> lineupPlayerIds;
   final Map<String, Player> playersById;
   final String? selectedId;
@@ -87,9 +84,8 @@ class PitchField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final layout = FormationLayout.of(formation);
-    final slots = layout.assignSlots(midfieldSlots);
     final placements = placePlayersOnSlots(
-      slots: slots,
+      slots: layout.slots,
       lineupPlayerIds: lineupPlayerIds,
       playersById: playersById,
     );

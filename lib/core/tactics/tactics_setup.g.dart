@@ -6,49 +6,31 @@ part of 'tactics_setup.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$MidfieldSlotsImpl _$$MidfieldSlotsImplFromJson(Map<String, dynamic> json) =>
-    _$MidfieldSlotsImpl(
-      cdm: (json['cdm'] as num?)?.toInt() ?? 1,
-      cm: (json['cm'] as num?)?.toInt() ?? 1,
-      cam: (json['cam'] as num?)?.toInt() ?? 1,
+_$TacticsSetupImpl _$$TacticsSetupImplFromJson(Map<String, dynamic> json) =>
+    _$TacticsSetupImpl(
+      formation:
+          $enumDecodeNullable(_$FormationEnumMap, json['formation']) ??
+          Formation.f433,
+      tempo:
+          $enumDecodeNullable(_$TempoEnumMap, json['tempo']) ?? Tempo.balanced,
+      attackWidth:
+          $enumDecodeNullable(_$AttackWidthEnumMap, json['attackWidth']) ??
+          AttackWidth.balanced,
+      defensiveLine:
+          $enumDecodeNullable(_$DefensiveLineEnumMap, json['defensiveLine']) ??
+          DefensiveLine.normal,
+      pressing:
+          $enumDecodeNullable(_$PressingIntensityEnumMap, json['pressing']) ??
+          PressingIntensity.medium,
+      cornersAttack: (json['cornersAttack'] as num?)?.toInt() ?? 50,
+      cornersDefense: (json['cornersDefense'] as num?)?.toInt() ?? 50,
+      freeKicks: (json['freeKicks'] as num?)?.toInt() ?? 30,
+      penalties: (json['penalties'] as num?)?.toInt() ?? 80,
     );
-
-Map<String, dynamic> _$$MidfieldSlotsImplToJson(_$MidfieldSlotsImpl instance) =>
-    <String, dynamic>{
-      'cdm': instance.cdm,
-      'cm': instance.cm,
-      'cam': instance.cam,
-    };
-
-_$TacticsSetupImpl _$$TacticsSetupImplFromJson(
-  Map<String, dynamic> json,
-) => _$TacticsSetupImpl(
-  formation:
-      $enumDecodeNullable(_$FormationEnumMap, json['formation']) ??
-      Formation.f433,
-  midfieldSlots: json['midfieldSlots'] == null
-      ? null
-      : MidfieldSlots.fromJson(json['midfieldSlots'] as Map<String, dynamic>),
-  tempo: $enumDecodeNullable(_$TempoEnumMap, json['tempo']) ?? Tempo.balanced,
-  attackWidth:
-      $enumDecodeNullable(_$AttackWidthEnumMap, json['attackWidth']) ??
-      AttackWidth.balanced,
-  defensiveLine:
-      $enumDecodeNullable(_$DefensiveLineEnumMap, json['defensiveLine']) ??
-      DefensiveLine.normal,
-  pressing:
-      $enumDecodeNullable(_$PressingIntensityEnumMap, json['pressing']) ??
-      PressingIntensity.medium,
-  cornersAttack: (json['cornersAttack'] as num?)?.toInt() ?? 50,
-  cornersDefense: (json['cornersDefense'] as num?)?.toInt() ?? 50,
-  freeKicks: (json['freeKicks'] as num?)?.toInt() ?? 30,
-  penalties: (json['penalties'] as num?)?.toInt() ?? 80,
-);
 
 Map<String, dynamic> _$$TacticsSetupImplToJson(_$TacticsSetupImpl instance) =>
     <String, dynamic>{
       'formation': _$FormationEnumMap[instance.formation]!,
-      'midfieldSlots': instance.midfieldSlots,
       'tempo': _$TempoEnumMap[instance.tempo]!,
       'attackWidth': _$AttackWidthEnumMap[instance.attackWidth]!,
       'defensiveLine': _$DefensiveLineEnumMap[instance.defensiveLine]!,
@@ -61,17 +43,26 @@ Map<String, dynamic> _$$TacticsSetupImplToJson(_$TacticsSetupImpl instance) =>
 
 const _$FormationEnumMap = {
   Formation.f343: 'f343',
+  Formation.f3421: 'f3421',
   Formation.f352: 'f352',
+  Formation.f3511: 'f3511',
+  Formation.f41212Narrow: 'f41212Narrow',
+  Formation.f4132: 'f4132',
+  Formation.f4141: 'f4141',
+  Formation.f4231: 'f4231',
+  Formation.f4231Wide: 'f4231Wide',
   Formation.f424: 'f424',
+  Formation.f4312: 'f4312',
+  Formation.f4321: 'f4321',
   Formation.f433: 'f433',
-  Formation.f442Wide: 'f442Wide',
-  Formation.f442Narrow: 'f442Narrow',
-  Formation.f451Wide: 'f451Wide',
-  Formation.f451Narrow: 'f451Narrow',
+  Formation.f433Attack: 'f433Attack',
+  Formation.f433Defend: 'f433Defend',
+  Formation.f442: 'f442',
+  Formation.f442Defend: 'f442Defend',
+  Formation.f451: 'f451',
+  Formation.f5212: 'f5212',
   Formation.f523: 'f523',
   Formation.f532: 'f532',
-  Formation.f541Wide: 'f541Wide',
-  Formation.f541Narrow: 'f541Narrow',
 };
 
 const _$TempoEnumMap = {

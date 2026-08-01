@@ -131,7 +131,6 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
           height: 340,
           child: PitchField(
             formation: formation!,
-            midfieldSlots: team.tactics.midfieldSlots,
             lineupPlayerIds: team.lineupPlayerIds,
             playersById: byId,
             selectedId: selectedId,
@@ -230,7 +229,6 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
           height: 340,
           child: PitchField(
             formation: formation!,
-            midfieldSlots: team.tactics.midfieldSlots,
             lineupPlayerIds: team.lineupPlayerIds,
             playersById: byId,
             selectedId: null,
@@ -365,7 +363,6 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
                               pressing: pressing!,
                               defensiveLine: line!,
                               attackWidth: width!,
-                              midfieldSlots: team.tactics.midfieldSlots,
                               cornersAttack: team.tactics.cornersAttack,
                               cornersDefense: team.tactics.cornersDefense,
                               freeKicks: team.tactics.freeKicks,

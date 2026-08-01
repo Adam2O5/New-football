@@ -15,189 +15,6 @@ final _privateConstructorUsedError = UnsupportedError(
   'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
 );
 
-MidfieldSlots _$MidfieldSlotsFromJson(Map<String, dynamic> json) {
-  return _MidfieldSlots.fromJson(json);
-}
-
-/// @nodoc
-mixin _$MidfieldSlots {
-  int get cdm => throw _privateConstructorUsedError;
-  int get cm => throw _privateConstructorUsedError;
-  int get cam => throw _privateConstructorUsedError;
-
-  /// Serializes this MidfieldSlots to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of MidfieldSlots
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $MidfieldSlotsCopyWith<MidfieldSlots> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-abstract class $MidfieldSlotsCopyWith<$Res> {
-  factory $MidfieldSlotsCopyWith(
-    MidfieldSlots value,
-    $Res Function(MidfieldSlots) then,
-  ) = _$MidfieldSlotsCopyWithImpl<$Res, MidfieldSlots>;
-  @useResult
-  $Res call({int cdm, int cm, int cam});
-}
-
-/// @nodoc
-class _$MidfieldSlotsCopyWithImpl<$Res, $Val extends MidfieldSlots>
-    implements $MidfieldSlotsCopyWith<$Res> {
-  _$MidfieldSlotsCopyWithImpl(this._value, this._then);
-
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
-
-  /// Create a copy of MidfieldSlots
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({Object? cdm = null, Object? cm = null, Object? cam = null}) {
-    return _then(
-      _value.copyWith(
-            cdm: null == cdm
-                ? _value.cdm
-                : cdm // ignore: cast_nullable_to_non_nullable
-                      as int,
-            cm: null == cm
-                ? _value.cm
-                : cm // ignore: cast_nullable_to_non_nullable
-                      as int,
-            cam: null == cam
-                ? _value.cam
-                : cam // ignore: cast_nullable_to_non_nullable
-                      as int,
-          )
-          as $Val,
-    );
-  }
-}
-
-/// @nodoc
-abstract class _$$MidfieldSlotsImplCopyWith<$Res>
-    implements $MidfieldSlotsCopyWith<$Res> {
-  factory _$$MidfieldSlotsImplCopyWith(
-    _$MidfieldSlotsImpl value,
-    $Res Function(_$MidfieldSlotsImpl) then,
-  ) = __$$MidfieldSlotsImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({int cdm, int cm, int cam});
-}
-
-/// @nodoc
-class __$$MidfieldSlotsImplCopyWithImpl<$Res>
-    extends _$MidfieldSlotsCopyWithImpl<$Res, _$MidfieldSlotsImpl>
-    implements _$$MidfieldSlotsImplCopyWith<$Res> {
-  __$$MidfieldSlotsImplCopyWithImpl(
-    _$MidfieldSlotsImpl _value,
-    $Res Function(_$MidfieldSlotsImpl) _then,
-  ) : super(_value, _then);
-
-  /// Create a copy of MidfieldSlots
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({Object? cdm = null, Object? cm = null, Object? cam = null}) {
-    return _then(
-      _$MidfieldSlotsImpl(
-        cdm: null == cdm
-            ? _value.cdm
-            : cdm // ignore: cast_nullable_to_non_nullable
-                  as int,
-        cm: null == cm
-            ? _value.cm
-            : cm // ignore: cast_nullable_to_non_nullable
-                  as int,
-        cam: null == cam
-            ? _value.cam
-            : cam // ignore: cast_nullable_to_non_nullable
-                  as int,
-      ),
-    );
-  }
-}
-
-/// @nodoc
-@JsonSerializable()
-class _$MidfieldSlotsImpl implements _MidfieldSlots {
-  const _$MidfieldSlotsImpl({this.cdm = 1, this.cm = 1, this.cam = 1});
-
-  factory _$MidfieldSlotsImpl.fromJson(Map<String, dynamic> json) =>
-      _$$MidfieldSlotsImplFromJson(json);
-
-  @override
-  @JsonKey()
-  final int cdm;
-  @override
-  @JsonKey()
-  final int cm;
-  @override
-  @JsonKey()
-  final int cam;
-
-  @override
-  String toString() {
-    return 'MidfieldSlots(cdm: $cdm, cm: $cm, cam: $cam)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$MidfieldSlotsImpl &&
-            (identical(other.cdm, cdm) || other.cdm == cdm) &&
-            (identical(other.cm, cm) || other.cm == cm) &&
-            (identical(other.cam, cam) || other.cam == cam));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(runtimeType, cdm, cm, cam);
-
-  /// Create a copy of MidfieldSlots
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$MidfieldSlotsImplCopyWith<_$MidfieldSlotsImpl> get copyWith =>
-      __$$MidfieldSlotsImplCopyWithImpl<_$MidfieldSlotsImpl>(this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$MidfieldSlotsImplToJson(this);
-  }
-}
-
-abstract class _MidfieldSlots implements MidfieldSlots {
-  const factory _MidfieldSlots({final int cdm, final int cm, final int cam}) =
-      _$MidfieldSlotsImpl;
-
-  factory _MidfieldSlots.fromJson(Map<String, dynamic> json) =
-      _$MidfieldSlotsImpl.fromJson;
-
-  @override
-  int get cdm;
-  @override
-  int get cm;
-  @override
-  int get cam;
-
-  /// Create a copy of MidfieldSlots
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$MidfieldSlotsImplCopyWith<_$MidfieldSlotsImpl> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
 TacticsSetup _$TacticsSetupFromJson(Map<String, dynamic> json) {
   return _TacticsSetup.fromJson(json);
 }
@@ -205,7 +22,6 @@ TacticsSetup _$TacticsSetupFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$TacticsSetup {
   Formation get formation => throw _privateConstructorUsedError;
-  MidfieldSlots? get midfieldSlots => throw _privateConstructorUsedError;
   Tempo get tempo => throw _privateConstructorUsedError;
   AttackWidth get attackWidth => throw _privateConstructorUsedError;
   DefensiveLine get defensiveLine => throw _privateConstructorUsedError;
@@ -234,7 +50,6 @@ abstract class $TacticsSetupCopyWith<$Res> {
   @useResult
   $Res call({
     Formation formation,
-    MidfieldSlots? midfieldSlots,
     Tempo tempo,
     AttackWidth attackWidth,
     DefensiveLine defensiveLine,
@@ -244,8 +59,6 @@ abstract class $TacticsSetupCopyWith<$Res> {
     int freeKicks,
     int penalties,
   });
-
-  $MidfieldSlotsCopyWith<$Res>? get midfieldSlots;
 }
 
 /// @nodoc
@@ -264,7 +77,6 @@ class _$TacticsSetupCopyWithImpl<$Res, $Val extends TacticsSetup>
   @override
   $Res call({
     Object? formation = null,
-    Object? midfieldSlots = freezed,
     Object? tempo = null,
     Object? attackWidth = null,
     Object? defensiveLine = null,
@@ -280,10 +92,6 @@ class _$TacticsSetupCopyWithImpl<$Res, $Val extends TacticsSetup>
                 ? _value.formation
                 : formation // ignore: cast_nullable_to_non_nullable
                       as Formation,
-            midfieldSlots: freezed == midfieldSlots
-                ? _value.midfieldSlots
-                : midfieldSlots // ignore: cast_nullable_to_non_nullable
-                      as MidfieldSlots?,
             tempo: null == tempo
                 ? _value.tempo
                 : tempo // ignore: cast_nullable_to_non_nullable
@@ -320,20 +128,6 @@ class _$TacticsSetupCopyWithImpl<$Res, $Val extends TacticsSetup>
           as $Val,
     );
   }
-
-  /// Create a copy of TacticsSetup
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $MidfieldSlotsCopyWith<$Res>? get midfieldSlots {
-    if (_value.midfieldSlots == null) {
-      return null;
-    }
-
-    return $MidfieldSlotsCopyWith<$Res>(_value.midfieldSlots!, (value) {
-      return _then(_value.copyWith(midfieldSlots: value) as $Val);
-    });
-  }
 }
 
 /// @nodoc
@@ -347,7 +141,6 @@ abstract class _$$TacticsSetupImplCopyWith<$Res>
   @useResult
   $Res call({
     Formation formation,
-    MidfieldSlots? midfieldSlots,
     Tempo tempo,
     AttackWidth attackWidth,
     DefensiveLine defensiveLine,
@@ -357,9 +150,6 @@ abstract class _$$TacticsSetupImplCopyWith<$Res>
     int freeKicks,
     int penalties,
   });
-
-  @override
-  $MidfieldSlotsCopyWith<$Res>? get midfieldSlots;
 }
 
 /// @nodoc
@@ -377,7 +167,6 @@ class __$$TacticsSetupImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? formation = null,
-    Object? midfieldSlots = freezed,
     Object? tempo = null,
     Object? attackWidth = null,
     Object? defensiveLine = null,
@@ -393,10 +182,6 @@ class __$$TacticsSetupImplCopyWithImpl<$Res>
             ? _value.formation
             : formation // ignore: cast_nullable_to_non_nullable
                   as Formation,
-        midfieldSlots: freezed == midfieldSlots
-            ? _value.midfieldSlots
-            : midfieldSlots // ignore: cast_nullable_to_non_nullable
-                  as MidfieldSlots?,
         tempo: null == tempo
             ? _value.tempo
             : tempo // ignore: cast_nullable_to_non_nullable
@@ -439,7 +224,6 @@ class __$$TacticsSetupImplCopyWithImpl<$Res>
 class _$TacticsSetupImpl implements _TacticsSetup {
   const _$TacticsSetupImpl({
     this.formation = Formation.f433,
-    this.midfieldSlots,
     this.tempo = Tempo.balanced,
     this.attackWidth = AttackWidth.balanced,
     this.defensiveLine = DefensiveLine.normal,
@@ -456,8 +240,6 @@ class _$TacticsSetupImpl implements _TacticsSetup {
   @override
   @JsonKey()
   final Formation formation;
-  @override
-  final MidfieldSlots? midfieldSlots;
   @override
   @JsonKey()
   final Tempo tempo;
@@ -485,7 +267,7 @@ class _$TacticsSetupImpl implements _TacticsSetup {
 
   @override
   String toString() {
-    return 'TacticsSetup(formation: $formation, midfieldSlots: $midfieldSlots, tempo: $tempo, attackWidth: $attackWidth, defensiveLine: $defensiveLine, pressing: $pressing, cornersAttack: $cornersAttack, cornersDefense: $cornersDefense, freeKicks: $freeKicks, penalties: $penalties)';
+    return 'TacticsSetup(formation: $formation, tempo: $tempo, attackWidth: $attackWidth, defensiveLine: $defensiveLine, pressing: $pressing, cornersAttack: $cornersAttack, cornersDefense: $cornersDefense, freeKicks: $freeKicks, penalties: $penalties)';
   }
 
   @override
@@ -495,8 +277,6 @@ class _$TacticsSetupImpl implements _TacticsSetup {
             other is _$TacticsSetupImpl &&
             (identical(other.formation, formation) ||
                 other.formation == formation) &&
-            (identical(other.midfieldSlots, midfieldSlots) ||
-                other.midfieldSlots == midfieldSlots) &&
             (identical(other.tempo, tempo) || other.tempo == tempo) &&
             (identical(other.attackWidth, attackWidth) ||
                 other.attackWidth == attackWidth) &&
@@ -519,7 +299,6 @@ class _$TacticsSetupImpl implements _TacticsSetup {
   int get hashCode => Object.hash(
     runtimeType,
     formation,
-    midfieldSlots,
     tempo,
     attackWidth,
     defensiveLine,
@@ -547,7 +326,6 @@ class _$TacticsSetupImpl implements _TacticsSetup {
 abstract class _TacticsSetup implements TacticsSetup {
   const factory _TacticsSetup({
     final Formation formation,
-    final MidfieldSlots? midfieldSlots,
     final Tempo tempo,
     final AttackWidth attackWidth,
     final DefensiveLine defensiveLine,
@@ -563,8 +341,6 @@ abstract class _TacticsSetup implements TacticsSetup {
 
   @override
   Formation get formation;
-  @override
-  MidfieldSlots? get midfieldSlots;
   @override
   Tempo get tempo;
   @override
