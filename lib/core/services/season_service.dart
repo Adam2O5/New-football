@@ -11,6 +11,7 @@ import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/match_models.dart';
 import 'package:new_football/core/models/message.dart';
 import 'package:new_football/core/models/player.dart';
+import 'package:new_football/core/models/draft_pick.dart';
 import 'package:new_football/core/models/season_awards.dart';
 import 'package:new_football/core/models/seed_data_generator.dart';
 import 'package:new_football/core/models/standing.dart';
@@ -255,14 +256,35 @@ class SeasonService {
         SeedDataGenerator(
           random: _random,
         ).generateDraftClass(year: league.currentSeason.year);
-    final order = _buildDraftOrder(league, lottery);
+    final currentYear = league.currentSeason.year;
+    final (order, consumedPickIds) = _buildDraftOrder(
+      league,
+      lottery,
+      currentYear,
+    );
+
+    var teams = league.teams;
+    if (consumedPickIds.isNotEmpty) {
+      teams = teams.map((t) {
+        if (!t.ownedPicks.any((p) => consumedPickIds.contains(p.id))) {
+          return t;
+        }
+        return t.copyWith(
+          ownedPicks: t.ownedPicks
+              .where((p) => !consumedPickIds.contains(p.id))
+              .toList(),
+        );
+      }).toList();
+    }
+
     final draftState = DraftState(
-      year: league.currentSeason.year,
+      year: currentYear,
       order: order,
       lotteryResults: lottery,
       draftClass: draftClass,
     );
     var state = league.copyWith(
+      teams: teams,
       currentSeason: league.currentSeason.copyWith(
         draftState: draftState,
         phase: SeasonPhase.offseason,
@@ -278,9 +300,11 @@ class SeasonService {
     );
   }
 
-  /// Generuje klasę draftową na przyszły rok, sygnał „done” =
-  /// `season.nextDraftState != null`. Promocja do `draftState` przy rollover
-  /// jeszcze nieprzeanalizowana — patrz uwaga w odpowiedzi.
+  /// Generuje klasę draftową na przyszły rok oraz przedłuża o jeden rok
+  /// horyzont handlowalnych picków każdej drużyny (`docs/trade_rules.md` —
+  /// max 7 lat w przód). Sygnał „done” = `season.nextDraftState != null`.
+  /// Promocja do `draftState` przy rollover jeszcze nieprzeanalizowana —
+  /// patrz uwaga w odpowiedzi.
   LeagueState runNextClassGeneration(LeagueState league) {
     final draftClass = SeedDataGenerator(
       random: _random,
@@ -289,7 +313,25 @@ class SeasonService {
       year: league.currentSeason.year + 1,
       draftClass: draftClass,
     );
+
+    final currentYear = league.currentSeason.year;
+    final horizonYear = currentYear + 7;
+    final teams = league.teams.map((t) {
+      final newPicks = [
+        for (var round = 1; round <= 3; round++)
+          DraftPick(
+            id: 'pick_${t.id}_${horizonYear}_r$round',
+            year: horizonYear,
+            round: round,
+            teamId: t.id,
+            originalTeamId: t.id,
+          ).recalculateTradeValue(currentYear: currentYear),
+      ];
+      return t.copyWith(ownedPicks: [...t.ownedPicks, ...newPicks]);
+    }).toList();
+
     return league.copyWith(
+      teams: teams,
       currentSeason: league.currentSeason.copyWith(
         nextDraftState: nextDraftState,
       ),
@@ -418,17 +460,19 @@ class SeasonService {
             )
           : remaining.first;
 
-      final overallPick = draft.currentPickIndex + 1;
+      final overallPick = pick.pickNumber ?? draft.currentPickIndex + 1;
       final salary = balance.salaryCap.rookieSalaryForPick(overallPick);
-      final player = chosen.toPlayer(
-        contract: Contract(
-          salary: salary,
-          yearsRemaining: balance.salaryCap.rookieScaleYears,
-          isRookieScale: true,
-          rookiePickSlot: overallPick,
-        ),
-        rng: _random,
-      );
+      final player = chosen
+          .toPlayer(
+            contract: Contract(
+              salary: salary,
+              yearsRemaining: balance.salaryCap.rookieScaleYears,
+              isRookieScale: true,
+              rookiePickSlot: overallPick,
+            ),
+            rng: _random,
+          )
+          .recalculateTradeValue(balance);
 
       teams = teams.map((t) {
         if (t.id != pick.teamId) return t;
@@ -480,13 +524,15 @@ class SeasonService {
       final undrafted = draft.draftClass.prospects
           .where((p) => !draftedIds.contains(p.id))
           .map(
-            (p) => p.toPlayer(
-              contract: Contract(
-                salary: balance.salaryCap.minSalary,
-                yearsRemaining: 0,
-              ),
-              rng: _random,
-            ),
+            (p) => p
+                .toPlayer(
+                  contract: Contract(
+                    salary: balance.salaryCap.minSalary,
+                    yearsRemaining: 0,
+                  ),
+                  rng: _random,
+                )
+                .recalculateTradeValue(balance),
           )
           .toList();
       state = state.copyWith(freeAgents: [...state.freeAgents, ...undrafted]);
@@ -538,14 +584,16 @@ class SeasonService {
     var teams = league.teams.map((t) {
       final roster = t.roster.map((p) {
         final years = (p.contract.yearsRemaining - 1).clamp(0, 10);
-        return p.copyWith(
-          age: p.age + 1,
-          contract: p.contract.copyWith(yearsRemaining: years),
-          state: p.state.copyWith(
-            seasonsWithTeam: p.state.seasonsWithTeam + 1,
-            stamina: 90,
-          ),
-        );
+        return p
+            .copyWith(
+              age: p.age + 1,
+              contract: p.contract.copyWith(yearsRemaining: years),
+              state: p.state.copyWith(
+                seasonsWithTeam: p.state.seasonsWithTeam + 1,
+                stamina: 90,
+              ),
+            )
+            .recalculateTradeValue(balance);
       }).toList();
 
       // Player development ticks weekly in `DaySimulator`, not here — avoid
@@ -553,6 +601,12 @@ class SeasonService {
       var team = t.copyWith(
         roster: roster,
         finance: t.finance.copyWith(midLevelExceptionAvailable: true),
+        // Prognoza miejsca w tabeli (`projectedFinish`) i dyskonto czasowe
+        // zmieniają się co sezon — przeliczyć wartość wszystkich
+        // posiadanych picków pod nowy `currentYear`.
+        ownedPicks: t.ownedPicks
+            .map((p) => p.recalculateTradeValue(currentYear: newYear))
+            .toList(),
       );
       return capService.applyPayroll(team);
     }).toList();
@@ -724,9 +778,22 @@ class SeasonService {
     return results;
   }
 
-  List<DraftPick> _buildDraftOrder(
+  /// Buduje kolejność draftu na [currentYear]. Dla każdego slotu próbuje
+  /// znaleźć pasujący, wcześniej wygenerowany `DraftPick`
+  /// (`originalTeamId` + `year` + `round`) w puli którejkolwiek drużyny —
+  /// tak materializuje się realny efekt handlu przyszłymi pickami
+  /// (`Team.ownedPicks`, `docs/trade_rules.md`). Jeśli żadna drużyna nie
+  /// posiada takiego picka (np. pierwszy sezon kariery — pick na rok
+  /// bieżący nigdy nie został wstępnie wygenerowany), slot jest
+  /// syntetyzowany na miejscu i przypisany drużynie oryginalnej.
+  ///
+  /// Zwraca zbudowaną kolejność oraz zbiór `id` picków skonsumowanych z
+  /// `ownedPicks` — wywołujący (`runLottery`) musi je usunąć z odpowiednich
+  /// drużyn.
+  (List<DraftPick>, Set<String>) _buildDraftOrder(
     LeagueState league,
     List<LotteryResult> lottery,
+    int currentYear,
   ) {
     final all = <Standing>[];
     for (final cs in league.currentSeason.standings) {
@@ -756,20 +823,47 @@ class SeasonService {
       if (r1.length < 30) break;
     }
 
+    final consumed = <String>{};
+
+    DraftPick? findOwnedPick(String originalTeamId, int round) {
+      for (final t in league.teams) {
+        for (final p in t.ownedPicks) {
+          if (p.originalTeamId == originalTeamId &&
+              p.year == currentYear &&
+              p.round == round) {
+            return p.copyWith(teamId: t.id);
+          }
+        }
+      }
+      return null;
+    }
+
+    DraftPick pickFor(String originalTeamId, int round, int overallPickNumber) {
+      final owned = findOwnedPick(originalTeamId, round);
+      if (owned != null) {
+        consumed.add(owned.id);
+        return owned.copyWith(pickNumber: overallPickNumber);
+      }
+      // Brak wstępnie wygenerowanego picka (typowo: pierwszy sezon kariery)
+      // — syntetyzujemy slot na miejscu, przypisany oryginalnej drużynie.
+      return DraftPick(
+        id: 'draftpick_${currentYear}_${round}_$originalTeamId',
+        year: currentYear,
+        round: round,
+        pickNumber: overallPickNumber,
+        teamId: originalTeamId,
+        originalTeamId: originalTeamId,
+      );
+    }
+
     final picks = <DraftPick>[];
     for (var round = 1; round <= 3; round++) {
       for (var i = 0; i < 30; i++) {
-        picks.add(
-          DraftPick(
-            round: round,
-            pickNumber: (round - 1) * 30 + i + 1,
-            teamId: r1[i % r1.length],
-            originalTeamId: r1[i % r1.length],
-          ),
-        );
+        final overallPickNumber = (round - 1) * 30 + i + 1;
+        picks.add(pickFor(r1[i % r1.length], round, overallPickNumber));
       }
     }
-    return picks;
+    return (picks, consumed);
   }
 
   String _playerName(LeagueState s, String? id) {

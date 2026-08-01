@@ -119,6 +119,7 @@ _$PlayerImpl _$$PlayerImplFromJson(Map<String, dynamic> json) => _$PlayerImpl(
           ?.map((e) => PlayerSeasonStats.fromJson(e as Map<String, dynamic>))
           .toList() ??
       const [],
+  tradeValue: (json['tradeValue'] as num?)?.toInt() ?? 0,
 );
 
 Map<String, dynamic> _$$PlayerImplToJson(_$PlayerImpl instance) =>
@@ -136,6 +137,7 @@ Map<String, dynamic> _$$PlayerImplToJson(_$PlayerImpl instance) =>
       'state': instance.state,
       'hidden': instance.hidden,
       'seasonStats': instance.seasonStats,
+      'tradeValue': instance.tradeValue,
     };
 
 const _$PositionEnumMap = {

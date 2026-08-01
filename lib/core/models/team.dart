@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/contract.dart';
+import 'package:new_football/core/models/draft_pick.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/scouting.dart';
@@ -39,6 +40,11 @@ class Team with _$Team {
     @Default(50) int chemistry,
     @Default(TeamStaff()) TeamStaff staff,
     @Default(TeamScouting()) TeamScouting scouting,
+
+    /// Picki draftowe (własne i nabyte) — bieżący rocznik oraz przyszłe,
+    /// handlowalne (`docs/trade_rules.md`, `DraftPick`).
+    @Default([]) List<DraftPick> ownedPicks,
+
     /// `null` = drużyna gracza; ustawione = drużyna AI.
     TeamAiConfig? ai,
   }) = _Team;
@@ -87,10 +93,11 @@ extension TeamX on Team {
     BalanceConfig balance = BalanceConfig.defaults,
   }) {
     final sampleSize = balance.player.tallestOutfieldSampleSize;
-    final pool = (onPitch ?? startingEleven)
-        .where((p) => p.position != Position.gk)
-        .toList()
-      ..sort((a, b) => b.heightCm.compareTo(a.heightCm));
+    final pool =
+        (onPitch ?? startingEleven)
+            .where((p) => p.position != Position.gk)
+            .toList()
+          ..sort((a, b) => b.heightCm.compareTo(a.heightCm));
     if (pool.isEmpty) return 0;
     final top = pool.take(sampleSize);
     return top.map((p) => p.heightCm).reduce((a, b) => a + b) / top.length;

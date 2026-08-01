@@ -1047,6 +1047,7 @@ mixin _$Player {
   PlayerState get state => throw _privateConstructorUsedError;
   PlayerHidden get hidden => throw _privateConstructorUsedError;
   List<PlayerSeasonStats> get seasonStats => throw _privateConstructorUsedError;
+  int get tradeValue => throw _privateConstructorUsedError;
 
   /// Serializes this Player to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -1076,6 +1077,7 @@ abstract class $PlayerCopyWith<$Res> {
     PlayerState state,
     PlayerHidden hidden,
     List<PlayerSeasonStats> seasonStats,
+    int tradeValue,
   });
 
   $PlayerAttributesCopyWith<$Res> get attributes;
@@ -1112,6 +1114,7 @@ class _$PlayerCopyWithImpl<$Res, $Val extends Player>
     Object? state = null,
     Object? hidden = null,
     Object? seasonStats = null,
+    Object? tradeValue = null,
   }) {
     return _then(
       _value.copyWith(
@@ -1167,6 +1170,10 @@ class _$PlayerCopyWithImpl<$Res, $Val extends Player>
                 ? _value.seasonStats
                 : seasonStats // ignore: cast_nullable_to_non_nullable
                       as List<PlayerSeasonStats>,
+            tradeValue: null == tradeValue
+                ? _value.tradeValue
+                : tradeValue // ignore: cast_nullable_to_non_nullable
+                      as int,
           )
           as $Val,
     );
@@ -1235,6 +1242,7 @@ abstract class _$$PlayerImplCopyWith<$Res> implements $PlayerCopyWith<$Res> {
     PlayerState state,
     PlayerHidden hidden,
     List<PlayerSeasonStats> seasonStats,
+    int tradeValue,
   });
 
   @override
@@ -1274,6 +1282,7 @@ class __$$PlayerImplCopyWithImpl<$Res>
     Object? state = null,
     Object? hidden = null,
     Object? seasonStats = null,
+    Object? tradeValue = null,
   }) {
     return _then(
       _$PlayerImpl(
@@ -1329,6 +1338,10 @@ class __$$PlayerImplCopyWithImpl<$Res>
             ? _value._seasonStats
             : seasonStats // ignore: cast_nullable_to_non_nullable
                   as List<PlayerSeasonStats>,
+        tradeValue: null == tradeValue
+            ? _value.tradeValue
+            : tradeValue // ignore: cast_nullable_to_non_nullable
+                  as int,
       ),
     );
   }
@@ -1351,6 +1364,7 @@ class _$PlayerImpl implements _Player {
     required this.state,
     required this.hidden,
     final List<PlayerSeasonStats> seasonStats = const [],
+    this.tradeValue = 0,
   }) : _seasonStats = seasonStats;
 
   factory _$PlayerImpl.fromJson(Map<String, dynamic> json) =>
@@ -1390,8 +1404,12 @@ class _$PlayerImpl implements _Player {
   }
 
   @override
+  @JsonKey()
+  final int tradeValue;
+
+  @override
   String toString() {
-    return 'Player(id: $id, name: $name, position: $position, nationality: $nationality, age: $age, attributes: $attributes, contract: $contract, personality: $personality, potentialStars: $potentialStars, heightCm: $heightCm, state: $state, hidden: $hidden, seasonStats: $seasonStats)';
+    return 'Player(id: $id, name: $name, position: $position, nationality: $nationality, age: $age, attributes: $attributes, contract: $contract, personality: $personality, potentialStars: $potentialStars, heightCm: $heightCm, state: $state, hidden: $hidden, seasonStats: $seasonStats, tradeValue: $tradeValue)';
   }
 
   @override
@@ -1421,7 +1439,9 @@ class _$PlayerImpl implements _Player {
             const DeepCollectionEquality().equals(
               other._seasonStats,
               _seasonStats,
-            ));
+            ) &&
+            (identical(other.tradeValue, tradeValue) ||
+                other.tradeValue == tradeValue));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1441,6 +1461,7 @@ class _$PlayerImpl implements _Player {
     state,
     hidden,
     const DeepCollectionEquality().hash(_seasonStats),
+    tradeValue,
   );
 
   /// Create a copy of Player
@@ -1472,6 +1493,7 @@ abstract class _Player implements Player {
     required final PlayerState state,
     required final PlayerHidden hidden,
     final List<PlayerSeasonStats> seasonStats,
+    final int tradeValue,
   }) = _$PlayerImpl;
 
   factory _Player.fromJson(Map<String, dynamic> json) = _$PlayerImpl.fromJson;
@@ -1502,6 +1524,8 @@ abstract class _Player implements Player {
   PlayerHidden get hidden;
   @override
   List<PlayerSeasonStats> get seasonStats;
+  @override
+  int get tradeValue;
 
   /// Create a copy of Player
   /// with the given fields replaced by the non-null parameter values.

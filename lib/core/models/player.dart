@@ -135,6 +135,7 @@ class Player with _$Player {
     required PlayerState state,
     required PlayerHidden hidden,
     @Default([]) List<PlayerSeasonStats> seasonStats,
+    @Default(0) int tradeValue,
   }) = _Player;
 
   factory Player.fromJson(Map<String, dynamic> json) => _$PlayerFromJson(json);
@@ -160,24 +161,54 @@ extension PlayerX on Player {
     BalanceConfig balance = BalanceConfig.defaults,
   ]) => balance.player.injuryRiskMult(state.stamina);
 
-  /// Trade-value indicator (`player_management.md` §3), derived from visible
-  /// attributes/age — not a stored field.
-  int pointValue([BalanceConfig balance = BalanceConfig.defaults]) {
-    final b = balance.player;
-    final positionAvg = attributes.overallForPosition(position, balance);
-    final ageAdj = age <= b.pointValueYoungAgeMax
-        ? (potentialStars - b.pointValueYoungStarsPivot) *
-              b.pointValueYoungStarsWeight
-        : age >= b.pointValueOldAgeMin
-        ? -(age - (b.pointValueOldAgeMin - 1)) * b.pointValueOldAgeWeight
+  /// Wycena handlowa zawodnika w widełkach zależnych od OVR
+  /// (`docs/player_management.md` §3, `TradeValueBalance`). Komponent OVR
+  /// ustala pasmo i pozycję w nim; komponent kontraktowy (wiek, pensja
+  /// względem rynku, długość kontraktu) przesuwa wartość w obrębie pasma —
+  /// młody, tanio i długo związany zawodnik trafia w górną granicę, stary,
+  /// przepłacony na krótkim kontrakcie — w dolną.
+  int computeTradeValue([BalanceConfig balance = BalanceConfig.defaults]) {
+    final tv = balance.tradeValue;
+    final ovr = overall(balance).round();
+    final band = tv.bandForOvr(ovr);
+    final ovrT = (ovr - band.ovrMin) / (band.ovrMax - band.ovrMin);
+
+    final double ageScore;
+    if (age <= tv.agePeakMax) {
+      ageScore = 1.0;
+    } else if (age >= tv.ageDeclineMin) {
+      ageScore = -1.0;
+    } else {
+      final span = tv.ageDeclineMin - tv.agePeakMax;
+      ageScore = 1.0 - 2.0 * (age - tv.agePeakMax) / span;
+    }
+
+    final marketSalary = tv.baseSalaryFor(ovr, age, potentialStars);
+    final salaryScore = marketSalary > 0
+        ? (1.0 - contract.salary / marketSalary).clamp(-1.0, 1.0)
         : 0.0;
-    final raw =
-        (overall(balance) - b.pointValueOverallPivot) *
-            b.pointValueOverallWeight +
-        (positionAvg - b.pointValueOverallPivot) * b.pointValueFutWeight +
-        ageAdj;
-    return raw.round().clamp(b.pointValueMin, b.pointValueMax);
+
+    final lengthFactor = (contract.yearsRemaining / tv.contractLengthCap).clamp(
+      0.0,
+      1.0,
+    );
+    final contractScore = ((ageScore + salaryScore) / 2.0) * lengthFactor;
+
+    final finalT =
+        tv.ovrWeight * ovrT + tv.contractWeight * ((contractScore + 1.0) / 2.0);
+
+    final value =
+        band.valueLow +
+        finalT.clamp(0.0, 1.0) * (band.valueHigh - band.valueLow);
+    return value.round();
   }
+
+  /// Przelicza i zapisuje [Player.tradeValue] — wołać po każdej zmianie
+  /// wpływającej na wynik (podpis / przedłużenie kontraktu, wymiana,
+  /// rollover sezonu, tick developmentu).
+  Player recalculateTradeValue([
+    BalanceConfig balance = BalanceConfig.defaults,
+  ]) => copyWith(tradeValue: computeTradeValue(balance));
 
   Player withMatchFatigue(
     int minutesPlayed, [

@@ -64,6 +64,11 @@ _$TeamImpl _$$TeamImplFromJson(Map<String, dynamic> json) => _$TeamImpl(
   scouting: json['scouting'] == null
       ? const TeamScouting()
       : TeamScouting.fromJson(json['scouting'] as Map<String, dynamic>),
+  ownedPicks:
+      (json['ownedPicks'] as List<dynamic>?)
+          ?.map((e) => DraftPick.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
   ai: json['ai'] == null
       ? null
       : TeamAiConfig.fromJson(json['ai'] as Map<String, dynamic>),
@@ -84,6 +89,7 @@ Map<String, dynamic> _$$TeamImplToJson(_$TeamImpl instance) =>
       'chemistry': instance.chemistry,
       'staff': instance.staff,
       'scouting': instance.scouting,
+      'ownedPicks': instance.ownedPicks,
       'ai': instance.ai,
     };
 

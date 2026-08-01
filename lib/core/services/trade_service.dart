@@ -1,17 +1,30 @@
 import 'package:new_football/core/balance/balance_config.dart';
+import 'package:new_football/core/models/draft_pick.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/services/calendar_service.dart';
 import 'package:new_football/core/services/salary_cap_service.dart';
 
 class TradeAsset {
-  const TradeAsset.player(this.playerId) : pickYear = null, pickRound = null;
-  const TradeAsset.pick({required this.pickYear, required this.pickRound})
-    : playerId = null;
+  const TradeAsset.player(this.playerId)
+    : pickYear = null,
+      pickRound = null,
+      originalTeamId = null;
+
+  const TradeAsset.pick({
+    required this.pickYear,
+    required this.pickRound,
+    required this.originalTeamId,
+  }) : playerId = null;
 
   final String? playerId;
   final int? pickYear;
   final int? pickRound;
+
+  /// Drużyna, do której pierwotnie należał ten pick (`DraftPick.originalTeamId`)
+  /// — wraz z `pickYear`/`pickRound` jednoznacznie identyfikuje konkretny
+  /// `DraftPick` w `Team.ownedPicks`.
+  final String? originalTeamId;
 
   bool get isPlayer => playerId != null;
   bool get isPick => pickYear != null;
@@ -50,20 +63,44 @@ class TradeService {
   final SalaryCapService capService;
   final CalendarService calendarService;
 
-  int assetValue(Team team, TradeAsset asset) {
+  /// Znajduje konkretny `DraftPick` w `team.ownedPicks` odpowiadający
+  /// [asset] (dopasowanie po `pickYear`/`pickRound`/`originalTeamId`).
+  DraftPick? _findOwnedPick(Team team, TradeAsset asset) {
+    for (final p in team.ownedPicks) {
+      if (p.year == asset.pickYear &&
+          p.round == asset.pickRound &&
+          p.originalTeamId == asset.originalTeamId) {
+        return p;
+      }
+    }
+    return null;
+  }
+
+  /// Wycena handlowa aktywa. [currentYear] jest wymagany dla picków —
+  /// wpływa na dyskonto czasowe (`DraftPick.computeTradeValue`).
+  int assetValue(Team team, TradeAsset asset, {required int currentYear}) {
     if (asset.isPlayer) {
       final matches = team.roster.where((p) => p.id == asset.playerId);
       if (matches.isEmpty) return 0;
-      return matches.first.pointValue(balance);
+      return matches.first.computeTradeValue(balance);
     }
-    // Rough pick value: R1 ~ 40, R2 ~ 15, R3 ~ 5, decay by years.
-    final roundVal = switch (asset.pickRound) {
-      1 => 40,
-      2 => 15,
-      3 => 5,
-      _ => 3,
-    };
-    return roundVal;
+    final owned = _findOwnedPick(team, asset);
+    if (owned != null) {
+      return owned.computeTradeValue(
+        currentYear: currentYear,
+        balance: balance,
+      );
+    }
+    // Pick nie znaleziony w ownedPicks (np. rozbieżność stanu UI/silnika) —
+    // policz wartość "z powietrza" dla podanych parametrów zamiast zwracać 0,
+    // żeby okno wymian nie pokazywało fałszywie zerowej wyceny.
+    return DraftPick(
+      id: 'preview_${asset.originalTeamId}_${asset.pickYear}_r${asset.pickRound}',
+      year: asset.pickYear!,
+      round: asset.pickRound!,
+      teamId: team.id,
+      originalTeamId: asset.originalTeamId!,
+    ).computeTradeValue(currentYear: currentYear, balance: balance);
   }
 
   /// Validates a proposed trade. Pass [currentWeek] to also enforce the
@@ -79,7 +116,8 @@ class TradeService {
       return const TradeValidation(ok: false, reason: 'Niezgodne ID drużyn');
     }
 
-    if (currentWeek != null && !calendarService.isTradeWindowOpen(currentWeek)) {
+    if (currentWeek != null &&
+        !calendarService.isTradeWindowOpen(currentWeek)) {
       return const TradeValidation(
         ok: false,
         reason: 'Okno wymian jest zamknięte',
@@ -184,17 +222,42 @@ class TradeService {
       );
     }).toList();
 
+    // Picki: przenosimy konkretny DraftPick z ownedPicks nadawcy do
+    // odbiorcy (zmiana teamId, originalTeamId bez zmian — `trade_rules.md`).
+    final remainingA = List<DraftPick>.from(a.ownedPicks);
+    final movingPicksToB = <DraftPick>[];
+    for (final asset in proposal.assetsFromA.where((x) => x.isPick)) {
+      final idx = remainingA.indexWhere(
+        (p) =>
+            p.year == asset.pickYear &&
+            p.round == asset.pickRound &&
+            p.originalTeamId == asset.originalTeamId,
+      );
+      if (idx == -1)
+        return null; // asset niedostępny — walidacja powinna to wyłapać wcześniej
+      movingPicksToB.add(remainingA.removeAt(idx).copyWith(teamId: b.id));
+    }
+
+    final remainingB = List<DraftPick>.from(b.ownedPicks);
+    final movingPicksToA = <DraftPick>[];
+    for (final asset in proposal.assetsFromB.where((x) => x.isPick)) {
+      final idx = remainingB.indexWhere(
+        (p) =>
+            p.year == asset.pickYear &&
+            p.round == asset.pickRound &&
+            p.originalTeamId == asset.originalTeamId,
+      );
+      if (idx == -1) return null;
+      movingPicksToA.add(remainingB.removeAt(idx).copyWith(teamId: a.id));
+    }
+
     var newA = a.copyWith(
-      roster: [
-        ...a.roster.where((p) => !leaveA.contains(p.id)),
-        ...movingToA,
-      ],
+      roster: [...a.roster.where((p) => !leaveA.contains(p.id)), ...movingToA],
+      ownedPicks: [...remainingA, ...movingPicksToA],
     );
     var newB = b.copyWith(
-      roster: [
-        ...b.roster.where((p) => !leaveB.contains(p.id)),
-        ...movingToB,
-      ],
+      roster: [...b.roster.where((p) => !leaveB.contains(p.id)), ...movingToB],
+      ownedPicks: [...remainingB, ...movingPicksToB],
     );
     newA = capService.applyPayroll(newA);
     newB = capService.applyPayroll(newB);

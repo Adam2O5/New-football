@@ -5,6 +5,7 @@ import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/assigned_role.dart';
 import 'package:new_football/core/models/contract.dart';
 import 'package:new_football/core/models/development.dart';
+import 'package:new_football/core/models/draft_pick.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/match_models.dart';
 import 'package:new_football/core/models/player.dart';
@@ -70,22 +71,6 @@ extension ProspectX on Prospect {
       ),
     );
   }
-}
-
-@freezed
-class DraftPick with _$DraftPick {
-  const factory DraftPick({
-    required int round,
-    required int pickNumber,
-    required String teamId,
-    String? prospectId,
-    String? playerName,
-    String? originalTeamId,
-    int? protectedTopN,
-  }) = _DraftPick;
-
-  factory DraftPick.fromJson(Map<String, dynamic> json) =>
-      _$DraftPickFromJson(json);
 }
 
 @freezed

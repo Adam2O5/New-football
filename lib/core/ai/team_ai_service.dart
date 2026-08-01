@@ -109,7 +109,7 @@ class TeamAiService {
     }
     return TacticsSetup(
       formation: opponent.formation == Formation.f433
-          ? Formation.f442Wide
+          ? Formation.f442
           : Formation.f433,
       pressing: PressingIntensity.high,
     );

@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/core/models/draft_models.dart';
 import 'package:new_football/core/models/enums.dart';
+import 'package:new_football/core/models/draft_pick.dart';
 import 'package:new_football/core/models/message.dart';
 import 'package:new_football/core/services/game_factory.dart';
 import 'package:new_football/data/save_repository.dart';
@@ -106,7 +107,14 @@ void main() {
           draftState: DraftState(
             year: l.currentSeason.year,
             order: [
-              const DraftPick(round: 1, pickNumber: 1, teamId: 'team_east_0'),
+              const DraftPick(
+                id: 'draft_pick_1',
+                year: 2027,
+                round: 1,
+                pickNumber: 1,
+                teamId: 'team_east_0',
+                originalTeamId: 'team_east_0',
+              ),
             ],
             draftClass: DraftClass(year: l.currentSeason.year),
           ),

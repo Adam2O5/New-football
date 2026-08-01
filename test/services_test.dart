@@ -89,8 +89,12 @@ void main() {
     final lopsided = const TradeProposal(
       teamAId: 'self',
       teamBId: 'other',
-      assetsFromA: [TradeAsset.pick(pickYear: 2027, pickRound: 1)],
-      assetsFromB: [TradeAsset.pick(pickYear: 2027, pickRound: 3)],
+      assetsFromA: [
+        TradeAsset.pick(pickYear: 2027, pickRound: 1, originalTeamId: 'self'),
+      ],
+      assetsFromB: [
+        TradeAsset.pick(pickYear: 2027, pickRound: 3, originalTeamId: 'other'),
+      ],
     );
     expect(
       ai.shouldAcceptTrade(
@@ -105,8 +109,12 @@ void main() {
     final generous = const TradeProposal(
       teamAId: 'self',
       teamBId: 'other',
-      assetsFromA: [TradeAsset.pick(pickYear: 2027, pickRound: 3)],
-      assetsFromB: [TradeAsset.pick(pickYear: 2027, pickRound: 1)],
+      assetsFromA: [
+        TradeAsset.pick(pickYear: 2027, pickRound: 3, originalTeamId: 'self'),
+      ],
+      assetsFromB: [
+        TradeAsset.pick(pickYear: 2027, pickRound: 1, originalTeamId: 'other'),
+      ],
     );
     expect(
       ai.shouldAcceptTrade(
@@ -119,33 +127,36 @@ void main() {
     );
   });
 
-  test('DaySimulator ticks player development weekly, not just at rollover', () {
-    final sim = DaySimulator();
-    final team = league.teams.first;
-    // No player team, so fixtures never pause the sim before the
-    // week-boundary development tick runs.
-    var state = league.copyWith(
-      currentWeek: 5,
-      currentDay: 1,
-      playerTeamId: null,
-    );
-    final before = state
-        .teamById(team.id)!
-        .roster
-        .fold<double>(0, (sum, p) => sum + p.hidden.overallProgress);
+  test(
+    'DaySimulator ticks player development weekly, not just at rollover',
+    () {
+      final sim = DaySimulator();
+      final team = league.teams.first;
+      // No player team, so fixtures never pause the sim before the
+      // week-boundary development tick runs.
+      var state = league.copyWith(
+        currentWeek: 5,
+        currentDay: 1,
+        playerTeamId: null,
+      );
+      final before = state
+          .teamById(team.id)!
+          .roster
+          .fold<double>(0, (sum, p) => sum + p.hidden.overallProgress);
 
-    // Four full weeks — enough for per-player rounding noise to average
-    // out across a ~25-player roster.
-    for (var i = 0; i < 28; i++) {
-      state = sim.simulateDay(state).league;
-    }
+      // Four full weeks — enough for per-player rounding noise to average
+      // out across a ~25-player roster.
+      for (var i = 0; i < 28; i++) {
+        state = sim.simulateDay(state).league;
+      }
 
-    final after = state
-        .teamById(team.id)!
-        .roster
-        .fold<double>(0, (sum, p) => sum + p.hidden.overallProgress);
-    expect(after, greaterThan(before));
-  });
+      final after = state
+          .teamById(team.id)!
+          .roster
+          .fold<double>(0, (sum, p) => sum + p.hidden.overallProgress);
+      expect(after, greaterThan(before));
+    },
+  );
 
   test('DevelopmentService.developTeam applies a single weekly delta', () {
     final dev = DevelopmentService();

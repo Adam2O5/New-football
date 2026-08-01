@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:new_football/core/models/assigned_role.dart';
 import 'package:new_football/core/models/contract.dart';
 import 'package:new_football/core/models/development.dart';
+import 'package:new_football/core/models/draft_pick.dart';
 import 'package:new_football/core/models/draft_models.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
@@ -39,6 +40,7 @@ class SeedDataGenerator {
           index: i,
           rng: rng,
           isPlayer: playerTeamId != null && i == 0,
+          seasonYear: year,
         ),
       );
     }
@@ -53,6 +55,7 @@ class SeedDataGenerator {
           index: i + 15,
           rng: rng,
           isPlayer: false,
+          seasonYear: year,
         ),
       );
     }
@@ -99,6 +102,7 @@ class SeedDataGenerator {
     required int index,
     required Random rng,
     required bool isPlayer,
+    required int seasonYear,
   }) {
     final teamId = 'team_${conference.name}_$index';
     final roster = _generateRoster(
@@ -118,10 +122,32 @@ class SeedDataGenerator {
       finance: TeamFinance(totalPayroll: payroll),
       lineupPlayerIds: roster.take(11).map((p) => p.id).toList(),
       benchPlayerIds: roster.skip(11).take(7).map((p) => p.id).toList(),
+      ownedPicks: _generateOwnedPicks(teamId, seasonYear),
       ai: isPlayer
           ? null
           : TeamAiConfig(managerProfile: ManagerProfile.values[rng.nextInt(3)]),
     );
+  }
+
+  /// Startowa pula przyszłych, handlowalnych picków drużyny: najbliższe
+  /// 7 roczników × 3 rundy (`docs/trade_rules.md` — max 7 lat w przód).
+  /// `pickNumber` jest `null` do czasu loterii/budowy `DraftState.order`
+  /// dla danego roku (`SeasonService.runLottery`).
+  List<DraftPick> _generateOwnedPicks(String teamId, int seasonYear) {
+    final picks = <DraftPick>[];
+    for (var y = seasonYear + 1; y <= seasonYear + 7; y++) {
+      for (var round = 1; round <= 3; round++) {
+        final pick = DraftPick(
+          id: 'pick_${teamId}_${y}_r$round',
+          year: y,
+          round: round,
+          teamId: teamId,
+          originalTeamId: teamId,
+        );
+        picks.add(pick.recalculateTradeValue(currentYear: seasonYear));
+      }
+    }
+    return picks;
   }
 
   List<Player> _generateRoster(
@@ -215,8 +241,10 @@ class SeedDataGenerator {
 
     // Keep a ~25-player roster comfortably under the 300M salary cap on
     // average (elite ~90+ OVR ≈ 20-27M, replacement-level ≈ 1-1.5M).
-    final salary = (1000000 + (base - 40) * 350000 + rng.nextInt(300000))
-        .clamp(500000, 80000000);
+    final salary = (1000000 + (base - 40) * 350000 + rng.nextInt(300000)).clamp(
+      500000,
+      80000000,
+    );
 
     final potentialStars = ((base - 50) / 10).clamp(0.5, 5.0);
     final roundedStars = (potentialStars * 2).round() / 2.0;
@@ -225,7 +253,7 @@ class SeedDataGenerator {
     final determination = 1 + rng.nextInt(10);
     final heightCm = _heightCmFor(position, rng);
 
-    return Player(
+    final player = Player(
       id: id,
       name: name,
       position: position,
@@ -256,6 +284,7 @@ class SeedDataGenerator {
         developmentOutcome: rollDevelopmentOutcome(determination, rng),
       ),
     );
+    return player.recalculateTradeValue();
   }
 
   int _heightCmFor(Position position, Random rng) {
@@ -394,7 +423,8 @@ class SeedDataGenerator {
     final roles = StaffRole.values;
     return List.generate(
       count,
-      (i) => generateStaffMember(rng, roles[i % roles.length], balance: balance),
+      (i) =>
+          generateStaffMember(rng, roles[i % roles.length], balance: balance),
     );
   }
 

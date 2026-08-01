@@ -281,6 +281,10 @@ mixin _$Team {
   TeamStaff get staff => throw _privateConstructorUsedError;
   TeamScouting get scouting => throw _privateConstructorUsedError;
 
+  /// Picki draftowe (własne i nabyte) — bieżący rocznik oraz przyszłe,
+  /// handlowalne (`docs/trade_rules.md`, `DraftPick`).
+  List<DraftPick> get ownedPicks => throw _privateConstructorUsedError;
+
   /// `null` = drużyna gracza; ustawione = drużyna AI.
   TeamAiConfig? get ai => throw _privateConstructorUsedError;
 
@@ -312,6 +316,7 @@ abstract class $TeamCopyWith<$Res> {
     int chemistry,
     TeamStaff staff,
     TeamScouting scouting,
+    List<DraftPick> ownedPicks,
     TeamAiConfig? ai,
   });
 
@@ -350,6 +355,7 @@ class _$TeamCopyWithImpl<$Res, $Val extends Team>
     Object? chemistry = null,
     Object? staff = null,
     Object? scouting = null,
+    Object? ownedPicks = null,
     Object? ai = freezed,
   }) {
     return _then(
@@ -406,6 +412,10 @@ class _$TeamCopyWithImpl<$Res, $Val extends Team>
                 ? _value.scouting
                 : scouting // ignore: cast_nullable_to_non_nullable
                       as TeamScouting,
+            ownedPicks: null == ownedPicks
+                ? _value.ownedPicks
+                : ownedPicks // ignore: cast_nullable_to_non_nullable
+                      as List<DraftPick>,
             ai: freezed == ai
                 ? _value.ai
                 : ai // ignore: cast_nullable_to_non_nullable
@@ -492,6 +502,7 @@ abstract class _$$TeamImplCopyWith<$Res> implements $TeamCopyWith<$Res> {
     int chemistry,
     TeamStaff staff,
     TeamScouting scouting,
+    List<DraftPick> ownedPicks,
     TeamAiConfig? ai,
   });
 
@@ -532,6 +543,7 @@ class __$$TeamImplCopyWithImpl<$Res>
     Object? chemistry = null,
     Object? staff = null,
     Object? scouting = null,
+    Object? ownedPicks = null,
     Object? ai = freezed,
   }) {
     return _then(
@@ -588,6 +600,10 @@ class __$$TeamImplCopyWithImpl<$Res>
             ? _value.scouting
             : scouting // ignore: cast_nullable_to_non_nullable
                   as TeamScouting,
+        ownedPicks: null == ownedPicks
+            ? _value._ownedPicks
+            : ownedPicks // ignore: cast_nullable_to_non_nullable
+                  as List<DraftPick>,
         ai: freezed == ai
             ? _value.ai
             : ai // ignore: cast_nullable_to_non_nullable
@@ -614,10 +630,12 @@ class _$TeamImpl implements _Team {
     this.chemistry = 50,
     this.staff = const TeamStaff(),
     this.scouting = const TeamScouting(),
+    final List<DraftPick> ownedPicks = const [],
     this.ai,
   }) : _roster = roster,
        _lineupPlayerIds = lineupPlayerIds,
-       _benchPlayerIds = benchPlayerIds;
+       _benchPlayerIds = benchPlayerIds,
+       _ownedPicks = ownedPicks;
 
   factory _$TeamImpl.fromJson(Map<String, dynamic> json) =>
       _$$TeamImplFromJson(json);
@@ -674,13 +692,27 @@ class _$TeamImpl implements _Team {
   @JsonKey()
   final TeamScouting scouting;
 
+  /// Picki draftowe (własne i nabyte) — bieżący rocznik oraz przyszłe,
+  /// handlowalne (`docs/trade_rules.md`, `DraftPick`).
+  final List<DraftPick> _ownedPicks;
+
+  /// Picki draftowe (własne i nabyte) — bieżący rocznik oraz przyszłe,
+  /// handlowalne (`docs/trade_rules.md`, `DraftPick`).
+  @override
+  @JsonKey()
+  List<DraftPick> get ownedPicks {
+    if (_ownedPicks is EqualUnmodifiableListView) return _ownedPicks;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_ownedPicks);
+  }
+
   /// `null` = drużyna gracza; ustawione = drużyna AI.
   @override
   final TeamAiConfig? ai;
 
   @override
   String toString() {
-    return 'Team(id: $id, name: $name, city: $city, conference: $conference, roster: $roster, finance: $finance, tactics: $tactics, lineupPlayerIds: $lineupPlayerIds, benchPlayerIds: $benchPlayerIds, atmosphere: $atmosphere, chemistry: $chemistry, staff: $staff, scouting: $scouting, ai: $ai)';
+    return 'Team(id: $id, name: $name, city: $city, conference: $conference, roster: $roster, finance: $finance, tactics: $tactics, lineupPlayerIds: $lineupPlayerIds, benchPlayerIds: $benchPlayerIds, atmosphere: $atmosphere, chemistry: $chemistry, staff: $staff, scouting: $scouting, ownedPicks: $ownedPicks, ai: $ai)';
   }
 
   @override
@@ -711,6 +743,10 @@ class _$TeamImpl implements _Team {
             (identical(other.staff, staff) || other.staff == staff) &&
             (identical(other.scouting, scouting) ||
                 other.scouting == scouting) &&
+            const DeepCollectionEquality().equals(
+              other._ownedPicks,
+              _ownedPicks,
+            ) &&
             (identical(other.ai, ai) || other.ai == ai));
   }
 
@@ -731,6 +767,7 @@ class _$TeamImpl implements _Team {
     chemistry,
     staff,
     scouting,
+    const DeepCollectionEquality().hash(_ownedPicks),
     ai,
   );
 
@@ -763,6 +800,7 @@ abstract class _Team implements Team {
     final int chemistry,
     final TeamStaff staff,
     final TeamScouting scouting,
+    final List<DraftPick> ownedPicks,
     final TeamAiConfig? ai,
   }) = _$TeamImpl;
 
@@ -794,6 +832,11 @@ abstract class _Team implements Team {
   TeamStaff get staff;
   @override
   TeamScouting get scouting;
+
+  /// Picki draftowe (własne i nabyte) — bieżący rocznik oraz przyszłe,
+  /// handlowalne (`docs/trade_rules.md`, `DraftPick`).
+  @override
+  List<DraftPick> get ownedPicks;
 
   /// `null` = drużyna gracza; ustawione = drużyna AI.
   @override

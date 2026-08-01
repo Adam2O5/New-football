@@ -44,9 +44,7 @@ class _TacticsScreenState extends ConsumerState<TacticsScreen> {
           value: _formation,
           decoration: InputDecoration(labelText: l10n.tactics_formation),
           items: Formation.values
-              .map(
-                (f) => DropdownMenuItem(value: f, child: Text(f.label)),
-              )
+              .map((f) => DropdownMenuItem(value: f, child: Text(f.label)))
               .toList(),
           onChanged: (v) {
             if (v == null) return;
@@ -147,23 +145,22 @@ class _TacticsScreenState extends ConsumerState<TacticsScreen> {
                     pressing: _pressing!,
                     defensiveLine: _line!,
                     attackWidth: _width!,
-                    midfieldSlots: team.tactics.midfieldSlots,
                     cornersAttack: team.tactics.cornersAttack,
                     cornersDefense: team.tactics.cornersDefense,
                     freeKicks: team.tactics.freeKicks,
                     penalties: team.tactics.penalties,
                   );
-                  await ref.read(gameControllerProvider.notifier).updateLeague(
-                    (l) {
-                      final t = l.playerTeam!;
-                      return l.updateTeam(t.copyWith(tactics: newTactics));
-                    },
-                  );
+                  await ref.read(gameControllerProvider.notifier).updateLeague((
+                    l,
+                  ) {
+                    final t = l.playerTeam!;
+                    return l.updateTeam(t.copyWith(tactics: newTactics));
+                  });
                   if (!mounted) return;
                   setState(() => _dirty = false);
-                  ScaffoldMessenger.of(this.context).showSnackBar(
-                    SnackBar(content: Text(l10n.tactics_saved)),
-                  );
+                  ScaffoldMessenger.of(
+                    this.context,
+                  ).showSnackBar(SnackBar(content: Text(l10n.tactics_saved)));
                 },
           child: Text(l10n.tactics_save),
         ),

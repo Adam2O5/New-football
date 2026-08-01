@@ -92,28 +92,6 @@ const _$PlayerPersonalityEnumMap = {
   PlayerPersonality.balanced: 'balanced',
 };
 
-_$DraftPickImpl _$$DraftPickImplFromJson(Map<String, dynamic> json) =>
-    _$DraftPickImpl(
-      round: (json['round'] as num).toInt(),
-      pickNumber: (json['pickNumber'] as num).toInt(),
-      teamId: json['teamId'] as String,
-      prospectId: json['prospectId'] as String?,
-      playerName: json['playerName'] as String?,
-      originalTeamId: json['originalTeamId'] as String?,
-      protectedTopN: (json['protectedTopN'] as num?)?.toInt(),
-    );
-
-Map<String, dynamic> _$$DraftPickImplToJson(_$DraftPickImpl instance) =>
-    <String, dynamic>{
-      'round': instance.round,
-      'pickNumber': instance.pickNumber,
-      'teamId': instance.teamId,
-      'prospectId': instance.prospectId,
-      'playerName': instance.playerName,
-      'originalTeamId': instance.originalTeamId,
-      'protectedTopN': instance.protectedTopN,
-    };
-
 _$LotteryResultImpl _$$LotteryResultImplFromJson(Map<String, dynamic> json) =>
     _$LotteryResultImpl(
       teamId: json['teamId'] as String,
