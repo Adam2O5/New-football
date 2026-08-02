@@ -16,6 +16,7 @@ import 'package:new_football/core/models/seed_data.dart';
 import 'package:new_football/core/models/staff.dart';
 import 'package:new_football/core/models/standing.dart';
 import 'package:new_football/core/models/team.dart';
+import 'package:new_football/core/tactics/formation_layout.dart';
 
 class SeedDataGenerator {
   SeedDataGenerator({Random? random}) : _random = random ?? Random();
@@ -155,33 +156,8 @@ class SeedDataGenerator {
     Random rng, {
     required int strengthBase,
   }) {
-    const positions = [
-      Position.gk,
-      Position.gk,
-      Position.cb,
-      Position.cb,
-      Position.cb,
-      Position.lb,
-      Position.rb,
-      Position.cdm,
-      Position.cm,
-      Position.cm,
-      Position.cam,
-      Position.lw,
-      Position.rw,
-      Position.st,
-      Position.st,
-      Position.cb,
-      Position.cm,
-      Position.lw,
-      Position.rw,
-      Position.st,
-      Position.gk,
-      Position.cdm,
-      Position.cam,
-      Position.st,
-      Position.lb,
-    ];
+    final formation = Formation.values[rng.nextInt(Formation.values.length)];
+    final positions = _buildRosterPositions(formation);
 
     return positions.asMap().entries.map((entry) {
       final pos = entry.value;
@@ -195,6 +171,25 @@ class SeedDataGenerator {
         index: entry.key,
       );
     }).toList();
+  }
+
+  List<Position> _buildRosterPositions(Formation formation) {
+    final formationPositions = _positionsForFormation(formation);
+
+    return [
+      ...formationPositions,
+      ...formationPositions,
+      Position.gk,
+      Position.cb,
+      Position.cm,
+      Position.st,
+    ];
+  }
+
+  List<Position> _positionsForFormation(Formation formation) {
+    return FormationLayout.of(
+      formation,
+    ).slots.map((slot) => slot.position).toList();
   }
 
   Player _generatePlayer({
