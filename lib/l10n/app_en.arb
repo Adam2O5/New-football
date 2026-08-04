@@ -87,7 +87,7 @@
   "mainMenu_newGame": "New game",
   "mainMenu_loadGame": "Load",
   "mainMenu_settings": "Settings",
-  "mainMenu_exitGame": "Exit game"
+  "mainMenu_exitGame": "Exit game",
 
   "settings_title": "Settings",
   "settings_language": "Language",

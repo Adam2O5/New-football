@@ -150,16 +150,17 @@ String _prospectFogSubtitle(
   return parts.join(' · ');
 }
 
-String _slotLabel(AppLocalizations l10n, EstimatedDraftSlot slot) => switch (slot) {
-  EstimatedDraftSlot.top1 => l10n.scouting_slot_top1,
-  EstimatedDraftSlot.top3 => l10n.scouting_slot_top3,
-  EstimatedDraftSlot.top5 => l10n.scouting_slot_top5,
-  EstimatedDraftSlot.top10 => l10n.scouting_slot_top10,
-  EstimatedDraftSlot.r1 => l10n.scouting_slot_r1,
-  EstimatedDraftSlot.r2 => l10n.scouting_slot_r2,
-  EstimatedDraftSlot.r3 => l10n.scouting_slot_r3,
-  EstimatedDraftSlot.x => l10n.scouting_slot_x,
-};
+String _slotLabel(AppLocalizations l10n, EstimatedDraftSlot slot) =>
+    switch (slot) {
+      EstimatedDraftSlot.top1 => l10n.scouting_slot_top1,
+      EstimatedDraftSlot.top3 => l10n.scouting_slot_top3,
+      EstimatedDraftSlot.top5 => l10n.scouting_slot_top5,
+      EstimatedDraftSlot.top10 => l10n.scouting_slot_top10,
+      EstimatedDraftSlot.r1 => l10n.scouting_slot_r1,
+      EstimatedDraftSlot.r2 => l10n.scouting_slot_r2,
+      EstimatedDraftSlot.r3 => l10n.scouting_slot_r3,
+      EstimatedDraftSlot.x => l10n.scouting_slot_x,
+    };
 
 class _DraftBody extends ConsumerWidget {
   const _DraftBody({required this.draft, required this.playerTeamId});
@@ -177,10 +178,11 @@ class _DraftBody extends ConsumerWidget {
         .map((p) => p.prospectId)
         .whereType<String>()
         .toSet();
-    final remaining = draft.draftClass.prospects
-        .where((p) => !pickedIds.contains(p.id))
-        .toList()
-      ..sort((a, b) => b.scoutGrade.compareTo(a.scoutGrade));
+    final remaining =
+        draft.draftClass.prospects
+            .where((p) => !pickedIds.contains(p.id))
+            .toList()
+          ..sort((a, b) => b.scoutGrade.compareTo(a.scoutGrade));
 
     final isPlayerTurn =
         current != null &&
@@ -205,7 +207,10 @@ class _DraftBody extends ConsumerWidget {
                 Text(
                   current == null
                       ? l10n.draft_finished
-                      : l10n.draft_pickLabel(current.pickNumber, current.round),
+                      : l10n.draft_pickLabel(
+                          current.pickNumber ?? 0,
+                          current.round,
+                        ),
                   style: Theme.of(context).textTheme.titleLarge,
                 ),
                 Text(l10n.draft_teamLabel(teamName)),
@@ -245,7 +250,9 @@ class _DraftBody extends ConsumerWidget {
                               .makeDraftPick(p.id);
                           if (!context.mounted) return;
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(l10n.draft_selected(p.name))),
+                            SnackBar(
+                              content: Text(l10n.draft_selected(p.name)),
+                            ),
                           );
                         },
                         child: Text(l10n.draft_select),

@@ -67,17 +67,27 @@ class PlayerDetailScreen extends ConsumerWidget {
               _chip(context, l10n.stat_ovr, '${p.overall().round()}'),
               _chip(context, l10n.stat_form, '${p.state.form}'),
               _chip(context, l10n.stat_cond, '${p.state.stamina}%'),
-              _chip(context, l10n.stat_pv, '${p.pointValue()}'),
-              _chip(context, l10n.stat_pot, p.potentialStars.toStringAsFixed(1)),
+              _chip(context, l10n.stat_pv, '${p.tradeValue}'),
+              _chip(
+                context,
+                l10n.stat_pot,
+                p.potentialStars.toStringAsFixed(1),
+              ),
               _chip(context, l10n.stat_height, '${p.heightCm} cm'),
             ],
           ),
           const SizedBox(height: 16),
-          Text(l10n.playerDetail_attributes, style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            l10n.playerDetail_attributes,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           const SizedBox(height: 8),
           ..._attributeRows(p),
           const SizedBox(height: 16),
-          Text(l10n.playerDetail_contract, style: Theme.of(context).textTheme.titleMedium),
+          Text(
+            l10n.playerDetail_contract,
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           Card(
             child: ListTile(
               title: Text(

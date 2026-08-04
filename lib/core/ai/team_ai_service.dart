@@ -27,15 +27,16 @@ class TeamAiService {
     required Team other,
     required TradeProposal proposal,
     required TradeService tradeService,
+    required int currentYear,
   }) {
     final profile = self.ai?.managerProfile ?? ManagerProfile.balanced;
     final ourValue = proposal.assetsFromB.fold<int>(
       0,
-      (s, a) => s + tradeService.assetValue(other, a),
+      (s, a) => s + tradeService.assetValue(other, a, currentYear: currentYear),
     );
     final theirValue = proposal.assetsFromA.fold<int>(
       0,
-      (s, a) => s + tradeService.assetValue(self, a),
+      (s, a) => s + tradeService.assetValue(self, a, currentYear: currentYear),
     );
     if (theirValue == 0) return ourValue > 0;
 

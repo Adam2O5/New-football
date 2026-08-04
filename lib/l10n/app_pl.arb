@@ -97,7 +97,7 @@
   "mainMenu_newGame": "Nowa gra",
   "mainMenu_loadGame": "Wczytaj",
   "mainMenu_settings": "Ustawienia",
-  "mainMenu_exitGame": "Opuść grę"
+  "mainMenu_exitGame": "Opuść grę",
 
   "settings_title": "Ustawienia",
   "settings_language": "Język",
