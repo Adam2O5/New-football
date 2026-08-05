@@ -89,9 +89,18 @@ class SeedDataGenerator {
       ),
     ];
 
+    final nextDraftState = DraftState(
+      year: year + 1,
+      draftClass: generateDraftClass(year: year + 1),
+    );
+
     return LeagueState(
       teams: teams,
-      currentSeason: Season(year: year, standings: standings),
+      currentSeason: Season(
+        year: year,
+        standings: standings,
+        nextDraftState: nextDraftState,
+      ),
       playerTeamId: actualPlayerTeamId,
     );
   }

@@ -11,6 +11,7 @@ import 'package:new_football/app/screens/new_game_screen.dart';
 import 'package:new_football/app/screens/player_detail_screen.dart';
 import 'package:new_football/app/screens/settings_screen.dart';
 import 'package:new_football/app/screens/shell_screen.dart';
+import 'package:new_football/app/screens/prospects_screen.dart';
 import 'package:new_football/app/screens/staff_screen.dart';
 import 'package:new_football/app/screens/trade_screen.dart';
 import 'package:new_football/core/models/match_models.dart';
@@ -85,6 +86,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/game/staff',
         builder: (context, state) => const StaffScreen(),
+      ),
+      GoRoute(
+        path: '/game/prospects',
+        builder: (context, state) => const ProspectsScreen(),
       ),
     ],
   );
