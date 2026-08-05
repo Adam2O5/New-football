@@ -537,6 +537,14 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     );
   }
 
+  Future<void> simulateOneDraftPick() async {
+    await updateLeague((l) => _season.advanceDraftOnePick(l));
+  }
+
+  Future<void> simulateDraftToPlayerTurn() async {
+    await updateLeague((l) => _season.advanceDraft(l));
+  }
+
   ContractService get _contracts => _ref.read(contractServiceProvider);
 
   /// Submits the player's offer for a free agent. On `accept` the player

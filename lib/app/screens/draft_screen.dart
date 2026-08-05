@@ -4,125 +4,23 @@ import 'package:go_router/go_router.dart';
 
 import 'package:new_football/app/widgets/screen_background.dart';
 import 'package:new_football/app/providers/game_provider.dart';
-import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/draft_models.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/scouting.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
-class DraftScreen extends ConsumerWidget {
-  const DraftScreen({super.key});
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
-    final league = ref.watch(activeLeagueProvider);
-    final draft = league?.currentSeason.draftState;
+enum DraftPhase { preStart, inProgress, playerTurn, completed }
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.draft_title),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.pop(),
-        ),
-        actions: [
-          if (draft != null)
-            IconButton(
-              tooltip: l10n.scouting_watchlistTitle,
-              icon: const Icon(Icons.visibility_outlined),
-              onPressed: () => _openWatchlistDialog(context, ref, draft),
-            ),
-        ],
-      ),
-      body: draft == null
-          ? Center(child: Text(l10n.draft_notActive))
-          : ScreenBackground(
-              child: _DraftBody(
-                draft: draft,
-                playerTeamId: league!.playerTeamId,
-              ),
-            ),
-    );
-  }
+enum DraftTab { draftOrder, prospects }
 
-  Future<void> _openWatchlistDialog(
-    BuildContext context,
-    WidgetRef ref,
-    DraftState draft,
-  ) async {
-    final league = ref.read(activeLeagueProvider)!;
-    final team = league.playerTeam;
-    if (team == null) return;
-    final coverage = team.staff.scout?.attributes.coverage ?? 0.0;
-    final limit = BalanceConfig.defaults.staff.maxWatched(coverage);
-    var selected = team.scouting.watchlistProspectIds.toSet();
-    final l10n = AppLocalizations.of(context)!;
-
-    await showDialog<void>(
-      context: context,
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: Text(l10n.scouting_watchlistTitle),
-              content: SizedBox(
-                width: 400,
-                height: 480,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(l10n.scouting_watchlistLimit(selected.length, limit)),
-                    const SizedBox(height: 8),
-                    Expanded(
-                      child: ListView(
-                        children: draft.draftClass.prospects.map((p) {
-                          final checked = selected.contains(p.id);
-                          return CheckboxListTile(
-                            value: checked,
-                            title: Text(p.name),
-                            subtitle: Text(p.position.code),
-                            onChanged: (v) {
-                              setState(() {
-                                if (v == true) {
-                                  if (selected.length < limit) {
-                                    selected = {...selected, p.id};
-                                  }
-                                } else {
-                                  selected = {...selected}..remove(p.id);
-                                }
-                              });
-                            },
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text(l10n.scouting_cancel),
-                ),
-                FilledButton(
-                  onPressed: () async {
-                    await ref
-                        .read(gameControllerProvider.notifier)
-                        .setScoutWatchlist(selected.toList());
-                    if (context.mounted) Navigator.of(context).pop();
-                  },
-                  child: Text(l10n.scouting_save),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-}
+// ---------------------------------------------------------------------------
+// Fog-of-war helpers (preserved from old implementation)
+// ---------------------------------------------------------------------------
 
 String _prospectFogSubtitle(
   AppLocalizations l10n,
@@ -168,112 +66,617 @@ String _slotLabel(AppLocalizations l10n, EstimatedDraftSlot slot) =>
       EstimatedDraftSlot.x => l10n.scouting_slot_x,
     };
 
-class _DraftBody extends ConsumerWidget {
-  const _DraftBody({required this.draft, required this.playerTeamId});
+String _fogValue(dynamic rawValue, ScoutingTier? tier, ScoutingTier requiredTier, {bool? additionalFlag}) {
+  if (tier == null || tier.index < requiredTier.index) return '—';
+  if (additionalFlag != null && additionalFlag == false) return '—';
+  return rawValue.toString();
+}
 
-  final DraftState draft;
-  final String? playerTeamId;
+// ---------------------------------------------------------------------------
+// DraftScreen
+// ---------------------------------------------------------------------------
+
+class DraftScreen extends ConsumerStatefulWidget {
+  const DraftScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context)!;
-    final league = ref.watch(activeLeagueProvider)!;
-    final idx = draft.currentPickIndex;
-    final current = idx < draft.order.length ? draft.order[idx] : null;
-    final pickedIds = draft.completedPicks
-        .map((p) => p.prospectId)
-        .whereType<String>()
-        .toSet();
-    final remaining =
-        draft.draftClass.prospects
-            .where((p) => !pickedIds.contains(p.id))
-            .toList()
-          ..sort((a, b) => b.scoutGrade.compareTo(a.scoutGrade));
+  ConsumerState<DraftScreen> createState() => _DraftScreenState();
+}
 
-    final isPlayerTurn =
-        current != null &&
-        playerTeamId != null &&
-        current.teamId == playerTeamId;
-    final playerScouting = league.playerTeam?.scouting;
+class _DraftScreenState extends ConsumerState<DraftScreen> {
+  DraftPhase _phase = DraftPhase.preStart;
+  DraftTab _activeTab = DraftTab.draftOrder;
 
-    final teamName = current == null
-        ? '—'
-        : (league.teamById(current.teamId)?.name ?? current.teamId);
+  @override
+  Widget build(BuildContext context) {
+    final league = ref.watch(activeLeagueProvider);
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        Card(
-          margin: const EdgeInsets.all(12),
-          child: Padding(
-            padding: const EdgeInsets.all(16),
+    if (league == null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Draft'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.pop(),
+          ),
+        ),
+        body: const Center(child: Text('Brak aktywnej ligi')),
+      );
+    }
+
+    final draft = league.currentSeason.draftState;
+    if (draft == null) {
+      return Scaffold(
+        appBar: AppBar(
+          title: const Text('Draft'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.pop(),
+          ),
+        ),
+        body: const Center(child: Text('Draft niedostępny')),
+      );
+    }
+
+    return PopScope(
+      canPop: _phase == DraftPhase.preStart,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _showExitDialog();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Draft'),
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              if (_phase == DraftPhase.preStart) {
+                context.pop();
+              } else {
+                _showExitDialog();
+              }
+            },
+          ),
+        ),
+        body: ScreenBackground(
+          child: Container(
+            margin: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Theme.of(context)
+                  .colorScheme
+                  .surface
+                  .withValues(alpha: 0.85),
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  current == null
-                      ? l10n.draft_finished
-                      : l10n.draft_pickLabel(
-                          current.pickNumber ?? 0,
-                          current.round,
-                        ),
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                Text(l10n.draft_teamLabel(teamName)),
-                if (isPlayerTurn)
-                  Text(
-                    l10n.draft_yourTurn,
-                    style: TextStyle(
+                // Player turn banner
+                if (_phase == DraftPhase.playerTurn)
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 10,
+                      horizontal: 16,
+                    ),
+                    decoration: BoxDecoration(
                       color: Theme.of(context).colorScheme.primary,
-                      fontWeight: FontWeight.bold,
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(12),
+                      ),
+                    ),
+                    child: Text(
+                      'Twoja kolej! Wybierz prospekta z zakładki Prospekty.',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onPrimary,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
+
+                // Tab switcher
+                Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: SegmentedButton<DraftTab>(
+                    segments: const [
+                      ButtonSegment(
+                        value: DraftTab.draftOrder,
+                        label: Text('Draft Order'),
+                      ),
+                      ButtonSegment(
+                        value: DraftTab.prospects,
+                        label: Text('Prospekty'),
+                      ),
+                    ],
+                    selected: {_activeTab},
+                    onSelectionChanged: (selection) {
+                      setState(() {
+                        _activeTab = selection.first;
+                      });
+                    },
+                  ),
+                ),
+
+                // Tab content
+                Expanded(
+                  child: _activeTab == DraftTab.draftOrder
+                      ? _buildDraftOrderTab(league, draft)
+                      : _buildProspectsTab(league, draft),
+                ),
+
+                // Bottom buttons
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: _buildBottomButtons(context),
+                ),
               ],
             ),
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Text(
-            l10n.draft_remainingProspects(remaining.length),
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
+      ),
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // Draft Order Tab
+  // -------------------------------------------------------------------------
+
+  Widget _buildDraftOrderTab(LeagueState league, DraftState draft) {
+    if (_phase == DraftPhase.completed) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.check_circle_outline, size: 64),
+            const SizedBox(height: 16),
+            Text(
+              'Draft zakończony!',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
+          ],
         ),
-        Expanded(
-          child: ListView.builder(
-            itemCount: remaining.length,
-            itemBuilder: (context, i) {
-              final p = remaining[i];
-              final knowledge = playerScouting?.forProspect(p.id);
-              return ListTile(
-                title: Text(p.name),
-                subtitle: Text(_prospectFogSubtitle(l10n, p, knowledge)),
-                trailing: isPlayerTurn
-                    ? FilledButton(
-                        onPressed: () async {
-                          await ref
-                              .read(gameControllerProvider.notifier)
-                              .makeDraftPick(p.id);
-                          if (!context.mounted) return;
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(l10n.draft_selected(p.name)),
-                            ),
-                          );
-                        },
-                        child: Text(l10n.draft_select),
-                      )
-                    : Text(
-                        knowledge != null &&
-                                knowledge.tier.index >= ScoutingTier.tier3.index
-                            ? '${p.scoutGrade}'
-                            : '—',
-                      ),
-              );
-            },
+      );
+    }
+
+    return ListView.builder(
+      itemCount: draft.order.length,
+      itemBuilder: (context, index) {
+        final pick = draft.order[index];
+        final teamName = league.teamById(pick.teamId)?.name ?? pick.teamId;
+        final isCurrent = index == draft.currentPickIndex &&
+            _phase != DraftPhase.preStart;
+        final isPlayerTeam = pick.teamId == league.playerTeamId;
+        final isCompleted = pick.prospectId != null;
+
+        // Find prospect name if picked
+        String? prospectName;
+        if (isCompleted) {
+          prospectName = pick.playerName ?? pick.prospectId;
+        }
+
+        return Container(
+          decoration: BoxDecoration(
+            color: isCurrent
+                ? Theme.of(context).colorScheme.primaryContainer
+                : null,
+            border: isCurrent
+                ? Border.all(
+                    color: Theme.of(context).colorScheme.primary,
+                    width: 2,
+                  )
+                : null,
           ),
+          child: ListTile(
+            leading: CircleAvatar(
+              radius: 16,
+              backgroundColor: isPlayerTeam
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.surfaceContainerHighest,
+              child: Text(
+                '${pick.pickNumber ?? (index + 1)}',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.bold,
+                  color: isPlayerTeam
+                      ? Theme.of(context).colorScheme.onPrimary
+                      : null,
+                ),
+              ),
+            ),
+            title: Text(
+              teamName,
+              style: TextStyle(
+                fontWeight: isPlayerTeam ? FontWeight.bold : FontWeight.normal,
+                color: isCompleted && !isPlayerTeam
+                    ? Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withValues(alpha: 0.6)
+                    : null,
+              ),
+            ),
+            subtitle: Text('Runda ${pick.round}'),
+            trailing: prospectName != null
+                ? Text(
+                    prospectName,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w500,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
+                  )
+                : null,
+          ),
+        );
+      },
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // Prospects Tab
+  // -------------------------------------------------------------------------
+
+  Widget _buildProspectsTab(LeagueState league, DraftState draft) {
+    final l10n = AppLocalizations.of(context)!;
+    final scouting = league.playerTeam?.scouting;
+
+    // Filter out already-picked prospects
+    final pickedIds = draft.completedPicks
+        .map((p) => p.prospectId)
+        .whereType<String>()
+        .toSet();
+    final remaining = draft.draftClass.prospects
+        .where((p) => !pickedIds.contains(p.id))
+        .toList()
+      ..sort((a, b) => b.scoutGrade.compareTo(a.scoutGrade));
+
+    if (remaining.isEmpty) {
+      return const Center(child: Text('Brak dostępnych prospektów'));
+    }
+
+    return ListView.builder(
+      itemCount: remaining.length,
+      itemBuilder: (context, index) {
+        final p = remaining[index];
+        final knowledge = scouting?.forProspect(p.id);
+
+        return ListTile(
+          title: Text(p.name),
+          subtitle: Text(_prospectFogSubtitle(l10n, p, knowledge)),
+          onTap: () => _showProspectDetail(p, scouting),
+        );
+      },
+    );
+  }
+
+  // -------------------------------------------------------------------------
+  // Bottom Buttons
+  // -------------------------------------------------------------------------
+
+  Widget _buildBottomButtons(BuildContext context) {
+    switch (_phase) {
+      case DraftPhase.preStart:
+        return SizedBox(
+          width: double.infinity,
+          child: FilledButton(
+            onPressed: _startDraft,
+            child: const Text('Rozpocznij draft'),
+          ),
+        );
+
+      case DraftPhase.inProgress:
+        return Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: _simulateOnePick,
+                child: const Text('Symuluj wybór'),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: FilledButton(
+                onPressed: _simulateToMyPick,
+                child: const Text('Symuluj do mojego wyboru'),
+              ),
+            ),
+          ],
+        );
+
+      case DraftPhase.playerTurn:
+        return Row(
+          children: [
+            Expanded(
+              child: OutlinedButton(
+                onPressed: null, // disabled
+                child: const Text('Symuluj wybór'),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: FilledButton(
+                onPressed: null, // disabled
+                child: const Text('Symuluj do mojego wyboru'),
+              ),
+            ),
+          ],
+        );
+
+      case DraftPhase.completed:
+        return SizedBox(
+          width: double.infinity,
+          child: FilledButton(
+            onPressed: () => context.pop(),
+            child: const Text('Zakończ'),
+          ),
+        );
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // Logic Methods
+  // -------------------------------------------------------------------------
+
+  void _startDraft() {
+    setState(() {
+      _phase = DraftPhase.inProgress;
+    });
+  }
+
+  Future<void> _simulateOnePick() async {
+    await ref.read(gameControllerProvider.notifier).simulateOneDraftPick();
+    _updatePhase();
+  }
+
+  Future<void> _simulateToMyPick() async {
+    await ref.read(gameControllerProvider.notifier).simulateDraftToPlayerTurn();
+    _updatePhase();
+  }
+
+  Future<void> _makePlayerPick(String prospectId) async {
+    await ref.read(gameControllerProvider.notifier).makeDraftPick(prospectId);
+    _updatePhase();
+    if (!mounted) return;
+    final prospect = ref
+        .read(activeLeagueProvider)
+        ?.currentSeason
+        .draftState
+        ?.draftClass
+        .prospects
+        .where((p) => p.id == prospectId)
+        .firstOrNull;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Wybrano: ${prospect?.name ?? prospectId}'),
+      ),
+    );
+  }
+
+  void _updatePhase() {
+    final league = ref.read(activeLeagueProvider);
+    final draft = league?.currentSeason.draftState;
+    if (draft == null) return;
+
+    setState(() {
+      if (draft.currentPickIndex >= draft.order.length) {
+        _phase = DraftPhase.completed;
+      } else if (draft.order[draft.currentPickIndex].teamId ==
+          league?.playerTeamId) {
+        _phase = DraftPhase.playerTurn;
+      } else {
+        _phase = DraftPhase.inProgress;
+      }
+    });
+  }
+
+  // -------------------------------------------------------------------------
+  // Exit Dialog (LotteryScreen pattern)
+  // -------------------------------------------------------------------------
+
+  Future<void> _showExitDialog() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Opuść draft'),
+        content: const Text(
+          'Czy na pewno chcesz opuścić draft? '
+          'Pozostała część zostanie przesymulowana.',
         ),
-      ],
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Nie'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Tak'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true && mounted) {
+      // Simulate all remaining picks
+      await ref
+          .read(gameControllerProvider.notifier)
+          .simulateDraftToPlayerTurn();
+      // If there are still picks remaining (player turn hit), keep simulating
+      var league = ref.read(activeLeagueProvider);
+      var draft = league?.currentSeason.draftState;
+      while (draft != null && draft.currentPickIndex < draft.order.length) {
+        // Make auto-pick for player's turn then continue
+        final currentPick = draft.order[draft.currentPickIndex];
+        if (currentPick.teamId == league?.playerTeamId) {
+          // Auto-pick best available for player
+          final pickedIds = draft.completedPicks
+              .map((p) => p.prospectId)
+              .whereType<String>()
+              .toSet();
+          final remaining = draft.draftClass.prospects
+              .where((p) => !pickedIds.contains(p.id))
+              .toList()
+            ..sort((a, b) => b.scoutGrade.compareTo(a.scoutGrade));
+          if (remaining.isNotEmpty) {
+            await ref
+                .read(gameControllerProvider.notifier)
+                .makeDraftPick(remaining.first.id);
+          } else {
+            break;
+          }
+        }
+        await ref
+            .read(gameControllerProvider.notifier)
+            .simulateDraftToPlayerTurn();
+        league = ref.read(activeLeagueProvider);
+        draft = league?.currentSeason.draftState;
+      }
+      if (mounted) context.pop();
+    }
+  }
+
+  // -------------------------------------------------------------------------
+  // Prospect Detail Bottom Sheet
+  // -------------------------------------------------------------------------
+
+  void _showProspectDetail(Prospect prospect, TeamScouting? scouting) {
+    final knowledge = scouting?.forProspect(prospect.id);
+    final showPickButton = _phase == DraftPhase.playerTurn;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (sheetContext) => DraggableScrollableSheet(
+        initialChildSize: 0.6,
+        minChildSize: 0.3,
+        maxChildSize: 0.85,
+        expand: false,
+        builder: (sheetContext, scrollController) => _ProspectDetailSheet(
+          prospect: prospect,
+          knowledge: knowledge,
+          scrollController: scrollController,
+          showPickButton: showPickButton,
+          onPick: () {
+            Navigator.pop(sheetContext);
+            _makePlayerPick(prospect.id);
+          },
+        ),
+      ),
+    );
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Prospect Detail Sheet (reuses pattern from ProspectsScreen)
+// ---------------------------------------------------------------------------
+
+class _ProspectDetailSheet extends StatelessWidget {
+  const _ProspectDetailSheet({
+    required this.prospect,
+    required this.knowledge,
+    required this.scrollController,
+    required this.showPickButton,
+    required this.onPick,
+  });
+
+  final Prospect prospect;
+  final ScoutingKnowledge? knowledge;
+  final ScrollController scrollController;
+  final bool showPickButton;
+  final VoidCallback onPick;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final tier = knowledge?.tier;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.colorScheme.surface,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      child: ListView(
+        controller: scrollController,
+        padding: const EdgeInsets.all(20),
+        children: [
+          // Drag handle
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 16),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          // Name & basic info header
+          Text(prospect.name, style: theme.textTheme.headlineSmall),
+          const SizedBox(height: 8),
+          Text(
+            '${prospect.position.code} · ${prospect.nationality.code} · ${prospect.age} lat · ${prospect.heightCm} cm',
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+          const SizedBox(height: 16),
+          const Divider(),
+          const SizedBox(height: 12),
+
+          // Scouting data section
+          Text('Dane skautingowe', style: theme.textTheme.titleMedium),
+          const SizedBox(height: 12),
+
+          if (knowledge == null)
+            Text(
+              'Brak danych skautingowych. Dodaj prospekta do listy obserwowanych.',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            )
+          else ...[
+            _detailRow('Combine Score',
+                _fogValue(prospect.combineScore, tier, ScoutingTier.tier2)),
+            _detailRow('Scout Grade',
+                _fogValue(prospect.scoutGrade, tier, ScoutingTier.tier3)),
+            _detailRow('Potencjał',
+                _fogValue(prospect.potentialStars.toStringAsFixed(1), tier, ScoutingTier.tier4)),
+            _detailRow(
+                'Podatność na kontuzje',
+                _fogValue(prospect.injuryProne, tier, ScoutingTier.tier5,
+                    additionalFlag: knowledge?.injuryProneKnown)),
+            _detailRow(
+                'Determinacja',
+                _fogValue(prospect.determination, tier, ScoutingTier.tier5,
+                    additionalFlag: knowledge?.determinationKnown)),
+            _detailRow('Estymowany slot',
+                knowledge!.estimatedSlot != null
+                    ? _slotLabel(AppLocalizations.of(context)!, knowledge!.estimatedSlot!)
+                    : '—'),
+          ],
+
+          // Pick button
+          if (showPickButton) ...[
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton(
+                onPressed: onPick,
+                child: const Text('Wybierz gracza'),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Widget _detailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
+        ],
+      ),
     );
   }
 }

@@ -513,6 +513,71 @@ class SeasonService {
     return state;
   }
 
+  /// Advances the draft by exactly one AI pick. Does nothing if:
+  /// - draftState is null
+  /// - draft is already complete
+  /// - the current pick belongs to the player's team
+  LeagueState advanceDraftOnePick(LeagueState league) {
+    var draft = league.currentSeason.draftState;
+    if (draft == null) return league;
+    if (draft.currentPickIndex >= draft.order.length) return league;
+
+    final pick = draft.order[draft.currentPickIndex];
+    if (pick.teamId == league.playerTeamId) return league;
+
+    final taken = draft.completedPicks
+        .map((c) => c.prospectId)
+        .whereType<String>()
+        .toSet();
+    final remaining = draft.draftClass.prospects
+        .where((p) => !taken.contains(p.id))
+        .toList()
+      ..sort((a, b) => b.scoutGrade.compareTo(a.scoutGrade));
+    if (remaining.isEmpty) return league;
+
+    final chosen = remaining.first;
+    final overallPick = pick.pickNumber ?? draft.currentPickIndex + 1;
+    final salary = balance.salaryCap.rookieSalaryForPick(overallPick);
+    final player = chosen
+        .toPlayer(
+          contract: Contract(
+            salary: salary,
+            yearsRemaining: balance.salaryCap.rookieScaleYears,
+            isRookieScale: true,
+            rookiePickSlot: overallPick,
+          ),
+          rng: _random,
+        )
+        .recalculateTradeValue(balance);
+
+    var teams = league.teams.map((t) {
+      if (t.id != pick.teamId) return t;
+      return capService.applyPayroll(
+        t.copyWith(roster: [...t.roster, player]),
+      );
+    }).toList();
+
+    final completed = pick.copyWith(
+      prospectId: chosen.id,
+      playerName: chosen.name,
+    );
+    final newOrder = List<DraftPick>.from(draft.order);
+    newOrder[draft.currentPickIndex] = completed;
+    draft = draft.copyWith(
+      completedPicks: [...draft.completedPicks, completed],
+      currentPickIndex: draft.currentPickIndex + 1,
+      order: newOrder,
+    );
+
+    return league.copyWith(
+      teams: teams,
+      currentSeason: league.currentSeason.copyWith(
+        draftState: draft,
+        phase: SeasonPhase.draft,
+      ),
+    );
+  }
+
   /// Contracts that hit 0 years (decremented at rollover) leave the roster
   /// and join the FA pool when the market opens (`docs/offseason.md` §10).
   LeagueState expireContracts(LeagueState league) {
