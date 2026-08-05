@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:new_football/app/widgets/screen_background.dart';
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/services/game_factory.dart';
@@ -31,26 +32,28 @@ class _NewGameScreenState extends ConsumerState<NewGameScreen> {
     final teamId = _selectedTeamId;
     final name = _nameCtrl.text.trim();
     if (teamId == null || name.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.newGame_missingFields)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.newGame_missingFields)));
       return;
     }
     setState(() => _creating = true);
-    await ref.read(gameControllerProvider.notifier).createNewGame(
-      NewGameRequest(
-        saveName: name,
-        playerTeamId: teamId,
-        difficulty: _difficulty,
-      ),
-    );
+    await ref
+        .read(gameControllerProvider.notifier)
+        .createNewGame(
+          NewGameRequest(
+            saveName: name,
+            playerTeamId: teamId,
+            difficulty: _difficulty,
+          ),
+        );
     if (!mounted) return;
     setState(() => _creating = false);
     final err = ref.read(gameControllerProvider).hasError;
     if (err) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.newGame_createFailed)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.newGame_createFailed)));
       return;
     }
     context.go('/game');
@@ -72,66 +75,78 @@ class _NewGameScreenState extends ConsumerState<NewGameScreen> {
           onPressed: () => context.go('/'),
         ),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          TextField(
-            controller: _nameCtrl,
-            decoration: InputDecoration(labelText: l10n.newGame_saveName),
+      body: ScreenBackground(
+        child: Container(
+          margin: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Theme.of(context)
+                .colorScheme
+                .surface
+                .withValues(alpha: 0.85),
+            borderRadius: BorderRadius.circular(12),
           ),
-          const SizedBox(height: 16),
-          DropdownButtonFormField<Difficulty>(
-            value: _difficulty,
-            decoration: InputDecoration(labelText: l10n.newGame_difficulty),
-            items: [
-              DropdownMenuItem(
-                value: Difficulty.normal,
-                child: Text(l10n.newGame_difficultyNormal),
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              TextField(
+                controller: _nameCtrl,
+                decoration: InputDecoration(labelText: l10n.newGame_saveName),
               ),
-              DropdownMenuItem(
-                value: Difficulty.hard,
-                child: Text(l10n.newGame_difficultyHard),
+              const SizedBox(height: 16),
+              DropdownButtonFormField<Difficulty>(
+                value: _difficulty,
+                decoration: InputDecoration(labelText: l10n.newGame_difficulty),
+                items: [
+                  DropdownMenuItem(
+                    value: Difficulty.normal,
+                    child: Text(l10n.newGame_difficultyNormal),
+                  ),
+                  DropdownMenuItem(
+                    value: Difficulty.hard,
+                    child: Text(l10n.newGame_difficultyHard),
+                  ),
+                ],
+                onChanged: (v) {
+                  if (v != null) setState(() => _difficulty = v);
+                },
+              ),
+              const SizedBox(height: 20),
+              Text(
+                l10n.newGame_chooseTeam,
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 8),
+              ...teams.map((t) {
+                final selected = t.id == _selectedTeamId;
+                return Card(
+                  child: ListTile(
+                    selected: selected,
+                    title: Text(t.name),
+                    subtitle: Text('${t.city} · ${t.conference.label}'),
+                    trailing: selected
+                        ? Icon(
+                            Icons.check_circle,
+                            color: Theme.of(context).colorScheme.primary,
+                          )
+                        : null,
+                    onTap: () => setState(() => _selectedTeamId = t.id),
+                  ),
+                );
+              }),
+              const SizedBox(height: 16),
+              FilledButton(
+                onPressed: _creating ? null : () => _create(l10n),
+                child: _creating
+                    ? const SizedBox(
+                        height: 22,
+                        width: 22,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Text(l10n.newGame_start),
               ),
             ],
-            onChanged: (v) {
-              if (v != null) setState(() => _difficulty = v);
-            },
           ),
-          const SizedBox(height: 20),
-          Text(
-            l10n.newGame_chooseTeam,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          ...teams.map((t) {
-            final selected = t.id == _selectedTeamId;
-            return Card(
-              child: ListTile(
-                selected: selected,
-                title: Text(t.name),
-                subtitle: Text('${t.city} · ${t.conference.label}'),
-                trailing: selected
-                    ? Icon(
-                        Icons.check_circle,
-                        color: Theme.of(context).colorScheme.primary,
-                      )
-                    : null,
-                onTap: () => setState(() => _selectedTeamId = t.id),
-              ),
-            );
-          }),
-          const SizedBox(height: 16),
-          FilledButton(
-            onPressed: _creating ? null : () => _create(l10n),
-            child: _creating
-                ? const SizedBox(
-                    height: 22,
-                    width: 22,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(l10n.newGame_start),
-          ),
-        ],
+        ),
       ),
     );
   }

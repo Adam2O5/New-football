@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:new_football/app/widgets/screen_background.dart';
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/core/ai/team_ai_service.dart';
 import 'package:new_football/core/models/draft_pick.dart';
@@ -34,7 +35,7 @@ class _TradeScreenState extends ConsumerState<TradeScreen> {
     if (league == null || own == null) {
       return Scaffold(
         appBar: AppBar(title: Text(l10n.trade_title)),
-        body: Center(child: Text(l10n.trade_noTeam)),
+        body: ScreenBackground(child: Center(child: Text(l10n.trade_noTeam))),
       );
     }
 
@@ -51,96 +52,107 @@ class _TradeScreenState extends ConsumerState<TradeScreen> {
           onPressed: () => context.pop(),
         ),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          DropdownButtonFormField<String>(
-            value: _ownPlayerId,
-            decoration: InputDecoration(labelText: l10n.trade_yourPlayer),
-            items: own.roster
-                .map(
-                  (p) => DropdownMenuItem(
-                    value: p.id,
-                    child: Text(
-                      l10n.trade_playerOption(
-                        p.name,
-                        p.position.code,
-                        p.tradeValue,
+      body: ScreenBackground(
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            DropdownButtonFormField<String>(
+              value: _ownPlayerId,
+              decoration: InputDecoration(labelText: l10n.trade_yourPlayer),
+              items: own.roster
+                  .map(
+                    (p) => DropdownMenuItem(
+                      value: p.id,
+                      child: Text(
+                        l10n.trade_playerOption(
+                          p.name,
+                          p.position.code,
+                          p.tradeValue,
+                        ),
                       ),
                     ),
-                  ),
-                )
-                .toList(),
-            onChanged: (v) => setState(() => _ownPlayerId = v),
-          ),
-          const SizedBox(height: 12),
-          DropdownButtonFormField<String>(
-            value: _ownPickId,
-            //todo decoration: InputDecoration(labelText: l10n.trade_yourPick),
-            items: own.ownedPicks
-                .map(
-                  (p) =>
-                      DropdownMenuItem(value: p.id, child: Text(_pickLabel(p))),
-                )
-                .toList(),
-            onChanged: (v) => setState(() => _ownPickId = v),
-          ),
-          const SizedBox(height: 20),
-          DropdownButtonFormField<String>(
-            value: _targetTeamId,
-            decoration: InputDecoration(labelText: l10n.trade_targetTeam),
-            items: others
-                .map((t) => DropdownMenuItem(value: t.id, child: Text(t.name)))
-                .toList(),
-            onChanged: (v) => setState(() {
-              _targetTeamId = v;
-              _theirPlayerId = null;
-              _theirPickId = null;
-            }),
-          ),
-          const SizedBox(height: 12),
-          DropdownButtonFormField<String>(
-            value: _theirPlayerId,
-            decoration: InputDecoration(labelText: l10n.trade_theirPlayer),
-            items: (target?.roster ?? <Player>[])
-                .map(
-                  (p) => DropdownMenuItem(
-                    value: p.id,
-                    child: Text(
-                      l10n.trade_playerOption(
-                        p.name,
-                        p.position.code,
-                        p.tradeValue,
+                  )
+                  .toList(),
+              onChanged: (v) => setState(() => _ownPlayerId = v),
+            ),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<String>(
+              value: _ownPickId,
+              //todo decoration: InputDecoration(labelText: l10n.trade_yourPick),
+              items: own.ownedPicks
+                  .map(
+                    (p) => DropdownMenuItem(
+                      value: p.id,
+                      child: Text(_pickLabel(p)),
+                    ),
+                  )
+                  .toList(),
+              onChanged: (v) => setState(() => _ownPickId = v),
+            ),
+            const SizedBox(height: 20),
+            DropdownButtonFormField<String>(
+              value: _targetTeamId,
+              decoration: InputDecoration(labelText: l10n.trade_targetTeam),
+              items: others
+                  .map(
+                    (t) => DropdownMenuItem(value: t.id, child: Text(t.name)),
+                  )
+                  .toList(),
+              onChanged: (v) => setState(() {
+                _targetTeamId = v;
+                _theirPlayerId = null;
+                _theirPickId = null;
+              }),
+            ),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<String>(
+              value: _theirPlayerId,
+              decoration: InputDecoration(labelText: l10n.trade_theirPlayer),
+              items: (target?.roster ?? <Player>[])
+                  .map(
+                    (p) => DropdownMenuItem(
+                      value: p.id,
+                      child: Text(
+                        l10n.trade_playerOption(
+                          p.name,
+                          p.position.code,
+                          p.tradeValue,
+                        ),
                       ),
                     ),
-                  ),
-                )
-                .toList(),
-            onChanged: target == null
-                ? null
-                : (v) => setState(() => _theirPlayerId = v),
-          ),
-          const SizedBox(height: 12),
-          DropdownButtonFormField<String>(
-            value: _theirPickId,
-            //todo decoration: InputDecoration(labelText: l10n.trade_theirPick),
-            items: (target?.ownedPicks ?? <DraftPick>[])
-                .map(
-                  (p) =>
-                      DropdownMenuItem(value: p.id, child: Text(_pickLabel(p))),
-                )
-                .toList(),
-            onChanged: target == null
-                ? null
-                : (v) => setState(() => _theirPickId = v),
-          ),
-          const SizedBox(height: 20),
-          FilledButton(
-            onPressed: () => _execute(l10n, league, own, target),
-            child: Text(l10n.trade_confirm),
-          ),
-          if (_status != null) ...[const SizedBox(height: 12), Text(_status!)],
-        ],
+                  )
+                  .toList(),
+              onChanged: target == null
+                  ? null
+                  : (v) => setState(() => _theirPlayerId = v),
+            ),
+            const SizedBox(height: 12),
+            DropdownButtonFormField<String>(
+              value: _theirPickId,
+              //todo decoration: InputDecoration(labelText: l10n.trade_theirPick),
+              items: (target?.ownedPicks ?? <DraftPick>[])
+                  .map(
+                    (p) => DropdownMenuItem(
+                      value: p.id,
+                      child: Text(_pickLabel(p)),
+                    ),
+                  )
+                  .toList(),
+              onChanged: target == null
+                  ? null
+                  : (v) => setState(() => _theirPickId = v),
+            ),
+            const SizedBox(height: 20),
+            FilledButton(
+              onPressed: () => _execute(l10n, league, own, target),
+              child: Text(l10n.trade_confirm),
+            ),
+            if (_status != null) ...[
+              const SizedBox(height: 12),
+              Text(_status!),
+            ],
+          ],
+        ),
       ),
     );
   }

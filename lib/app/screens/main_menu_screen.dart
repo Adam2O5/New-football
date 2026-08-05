@@ -3,6 +3,8 @@ import 'package:go_router/go_router.dart';
 import 'package:flutter/services.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
+import 'package:new_football/app/widgets/screen_background.dart';
+
 class MainMenuScreen extends StatelessWidget {
   const MainMenuScreen({super.key});
 
@@ -11,52 +13,78 @@ class MainMenuScreen extends StatelessWidget {
     final theme = Theme.of(context);
     final l10n = AppLocalizations.of(context)!;
     return Scaffold(
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 28),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              const Spacer(flex: 2),
-              Text(
-                l10n.appTitle,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.headlineLarge?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  letterSpacing: 0.5,
-                  color: theme.colorScheme.primary,
+      body: ScreenBackground(
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 28),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Spacer(flex: 2),
+                Text(
+                  l10n.appTitle,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.headlineLarge?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.5,
+                    color: theme.colorScheme.primary,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                l10n.mainMenu_subtitle,
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurfaceVariant,
+                const SizedBox(height: 8),
+                Text(
+                  l10n.mainMenu_subtitle,
+                  textAlign: TextAlign.center,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
                 ),
-              ),
-              const Spacer(),
-              FilledButton(
-                onPressed: () => context.push('/new-game'),
-                child: Text(l10n.mainMenu_newGame),
-              ),
-              const SizedBox(height: 12),
-              OutlinedButton(
-                onPressed: () => context.push('/load-game'),
-                child: Text(l10n.mainMenu_loadGame),
-              ),
-              const SizedBox(height: 12),
-              OutlinedButton(
-                onPressed: () => context.push('/settings'),
-                child: Text(l10n.mainMenu_settings),
-              ),
-              const SizedBox(height: 12),
-              OutlinedButton(
-                onPressed: () => SystemNavigator.pop(),
-                child: Text(l10n.mainMenu_exitGame),
-              ),
-              const Spacer(flex: 2),
-            ],
+                const Spacer(),
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surface.withValues(alpha: 0.85),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      FilledButton(
+                        onPressed: () => context.push('/new-game'),
+                        child: Text(l10n.mainMenu_newGame),
+                      ),
+                      const SizedBox(height: 12),
+                      OutlinedButton(
+                        onPressed: () => context.push('/load-game'),
+                        style: OutlinedButton.styleFrom(
+                          backgroundColor: theme.colorScheme.surface
+                              .withValues(alpha: 0.85),
+                        ),
+                        child: Text(l10n.mainMenu_loadGame),
+                      ),
+                      const SizedBox(height: 12),
+                      OutlinedButton(
+                        onPressed: () => context.push('/settings'),
+                        style: OutlinedButton.styleFrom(
+                          backgroundColor: theme.colorScheme.surface
+                              .withValues(alpha: 0.85),
+                        ),
+                        child: Text(l10n.mainMenu_settings),
+                      ),
+                      const SizedBox(height: 12),
+                      OutlinedButton(
+                        onPressed: () => SystemNavigator.pop(),
+                        style: OutlinedButton.styleFrom(
+                          backgroundColor: theme.colorScheme.surface
+                              .withValues(alpha: 0.85),
+                        ),
+                        child: Text(l10n.mainMenu_exitGame),
+                      ),
+                    ],
+                  ),
+                ),
+                const Spacer(flex: 2),
+              ],
+            ),
           ),
         ),
       ),

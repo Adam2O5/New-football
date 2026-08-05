@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:new_football/app/widgets/screen_background.dart';
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
@@ -15,7 +16,9 @@ class StandingsScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final league = ref.watch(activeLeagueProvider);
     if (league == null) {
-      return Center(child: Text(l10n.standings_noLeague));
+      return ScreenBackground(
+        child: Center(child: Text(l10n.standings_noLeague)),
+      );
     }
 
     ConferenceStandings? east;
@@ -27,29 +30,41 @@ class StandingsScreen extends ConsumerWidget {
 
     return DefaultTabController(
       length: 2,
-      child: Column(
-        children: [
-          TabBar(
-            tabs: [
-              Tab(text: l10n.standings_tabEast),
-              Tab(text: l10n.standings_tabWest),
+      child: ScreenBackground(
+        child: Container(
+          margin: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Theme.of(context)
+                .colorScheme
+                .surface
+                .withValues(alpha: 0.85),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            children: [
+              TabBar(
+                tabs: [
+                  Tab(text: l10n.standings_tabEast),
+                  Tab(text: l10n.standings_tabWest),
+                ],
+              ),
+              Expanded(
+                child: TabBarView(
+                  children: [
+                    _StandingsTable(
+                      standings: east?.sorted ?? const [],
+                      league: league,
+                    ),
+                    _StandingsTable(
+                      standings: west?.sorted ?? const [],
+                      league: league,
+                    ),
+                  ],
+                ),
+              ),
             ],
           ),
-          Expanded(
-            child: TabBarView(
-              children: [
-                _StandingsTable(
-                  standings: east?.sorted ?? const [],
-                  league: league,
-                ),
-                _StandingsTable(
-                  standings: west?.sorted ?? const [],
-                  league: league,
-                ),
-              ],
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

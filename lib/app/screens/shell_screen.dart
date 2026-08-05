@@ -4,11 +4,12 @@ import 'package:go_router/go_router.dart';
 
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/app/screens/calendar_screen.dart';
-import 'package:new_football/app/screens/finance_screen.dart';
 import 'package:new_football/app/screens/home_screen.dart';
 import 'package:new_football/app/screens/inbox_screen.dart';
+import 'package:new_football/app/screens/other_screen.dart';
 import 'package:new_football/app/screens/squad_screen.dart';
 import 'package:new_football/app/screens/standings_screen.dart';
+import 'package:new_football/app/widgets/screen_background.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
@@ -29,7 +30,7 @@ class _ShellScreenState extends ConsumerState<ShellScreen> {
     CalendarScreen(),
     SquadScreen(),
     StandingsScreen(),
-    FinanceScreen(),
+    OtherScreen(),
     InboxScreen(),
   ];
 
@@ -44,23 +45,31 @@ class _ShellScreenState extends ConsumerState<ShellScreen> {
     }
   }
 
+  void _showWorkInProgress(BuildContext context, AppLocalizations l10n) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.other_workInProgress)));
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final league = ref.watch(activeLeagueProvider);
     if (league == null) {
       return Scaffold(
-        body: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(l10n.shell_noActiveGame),
-              const SizedBox(height: 12),
-              FilledButton(
-                onPressed: () => context.go('/'),
-                child: Text(l10n.shell_mainMenu),
-              ),
-            ],
+        body: ScreenBackground(
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(l10n.shell_noActiveGame),
+                const SizedBox(height: 12),
+                FilledButton(
+                  onPressed: () => context.go('/'),
+                  child: Text(l10n.shell_mainMenu),
+                ),
+              ],
+            ),
           ),
         ),
       );
@@ -74,9 +83,14 @@ class _ShellScreenState extends ConsumerState<ShellScreen> {
         title: Text(teamName),
         actions: [
           IconButton(
-            tooltip: l10n.shell_draftTooltip,
-            onPressed: () => context.push('/game/draft'),
-            icon: const Icon(Icons.how_to_vote_outlined),
+            tooltip: l10n.shell_settingsTooltip,
+            onPressed: () => _showWorkInProgress(context, l10n),
+            icon: const Icon(Icons.settings_outlined),
+          ),
+          IconButton(
+            tooltip: l10n.shell_saveTooltip,
+            onPressed: () => _showWorkInProgress(context, l10n),
+            icon: const Icon(Icons.save_outlined),
           ),
           IconButton(
             tooltip: l10n.shell_menuTooltip,
@@ -88,7 +102,9 @@ class _ShellScreenState extends ConsumerState<ShellScreen> {
           ),
         ],
       ),
-      body: IndexedStack(index: index, children: _tabs),
+      body: ScreenBackground(
+        child: IndexedStack(index: index, children: _tabs),
+      ),
       bottomNavigationBar: NavigationBar(
         selectedIndex: index,
         onDestinationSelected: (i) {
@@ -116,9 +132,9 @@ class _ShellScreenState extends ConsumerState<ShellScreen> {
             label: l10n.shell_tab_standings,
           ),
           NavigationDestination(
-            icon: const Icon(Icons.account_balance_wallet_outlined),
-            selectedIcon: const Icon(Icons.account_balance_wallet),
-            label: l10n.shell_tab_finance,
+            icon: const Icon(Icons.more_horiz_outlined),
+            selectedIcon: const Icon(Icons.more_horiz),
+            label: l10n.shell_tab_other,
           ),
           NavigationDestination(
             icon: const Icon(Icons.mail_outline),

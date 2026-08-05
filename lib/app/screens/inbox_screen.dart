@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:new_football/app/widgets/screen_background.dart';
 import 'package:new_football/app/l10n/enum_labels.dart';
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/core/models/enums.dart';
@@ -15,7 +16,9 @@ class InboxScreen extends ConsumerWidget {
     final l10n = AppLocalizations.of(context)!;
     final league = ref.watch(activeLeagueProvider);
     if (league == null) {
-      return Center(child: Text(l10n.standings_noLeague));
+      return ScreenBackground(
+        child: Center(child: Text(l10n.standings_noLeague)),
+      );
     }
 
     final messages = [...league.inbox.messages]
@@ -27,72 +30,103 @@ class InboxScreen extends ConsumerWidget {
         return b.week.compareTo(a.week);
       });
 
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
-          child: Row(
-            children: [
-              Text(l10n.inbox_title, style: Theme.of(context).textTheme.titleMedium),
-              const Spacer(),
-              TextButton.icon(
-                onPressed: () => _openSettings(context, ref),
-                icon: const Icon(Icons.tune, size: 18),
-                label: Text(l10n.inbox_notifications),
+    return ScreenBackground(
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: Theme.of(context)
+                    .colorScheme
+                    .surface
+                    .withValues(alpha: 0.85),
+                borderRadius: BorderRadius.circular(12),
               ),
-            ],
+              child: Row(
+                children: [
+                  Text(
+                    l10n.inbox_title,
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const Spacer(),
+                  TextButton.icon(
+                    onPressed: () => _openSettings(context, ref),
+                    icon: const Icon(Icons.tune, size: 18),
+                    label: Text(l10n.inbox_notifications),
+                  ),
+                ],
+              ),
+            ),
           ),
-        ),
-        Expanded(
-          child: messages.isEmpty
-              ? Center(child: Text(l10n.inbox_empty))
-              : ListView.separated(
-                  padding: const EdgeInsets.all(12),
-                  itemCount: messages.length,
-                  separatorBuilder: (_, _) => const SizedBox(height: 6),
-                  itemBuilder: (context, i) {
-                    final m = messages[i];
-                    final urgent = m.priority == MessagePriority.urgent;
-                    return Card(
-                      color: urgent
-                          ? Theme.of(context).colorScheme.errorContainer
-                                .withValues(alpha: m.read ? 0.35 : 0.7)
-                          : null,
-                      child: ListTile(
-                        leading: Icon(
-                          urgent ? Icons.priority_high : Icons.mail_outline,
+          Expanded(
+            child: messages.isEmpty
+                ? Center(child: Text(l10n.inbox_empty))
+                : Container(
+                    margin: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .surface
+                          .withValues(alpha: 0.85),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: ListView.separated(
+                      padding: const EdgeInsets.all(12),
+                      itemCount: messages.length,
+                      separatorBuilder: (_, _) => const SizedBox(height: 6),
+                      itemBuilder: (context, i) {
+                        final m = messages[i];
+                        final urgent = m.priority == MessagePriority.urgent;
+                        return Card(
                           color: urgent
-                              ? Theme.of(context).colorScheme.error
-                              : (m.read
-                                    ? null
-                                    : Theme.of(context).colorScheme.primary),
-                        ),
-                        title: Text(
-                          m.title,
-                          style: TextStyle(
-                            fontWeight: m.read
-                                ? FontWeight.normal
-                                : FontWeight.bold,
-                            color: urgent
-                                ? Theme.of(context).colorScheme.error
-                                : null,
+                              ? Theme.of(context).colorScheme.errorContainer
+                                    .withValues(alpha: m.read ? 0.35 : 0.7)
+                              : null,
+                          child: ListTile(
+                            leading: Icon(
+                              urgent
+                                  ? Icons.priority_high
+                                  : Icons.mail_outline,
+                              color: urgent
+                                  ? Theme.of(context).colorScheme.error
+                                  : (m.read
+                                        ? null
+                                        : Theme.of(context)
+                                              .colorScheme
+                                              .primary),
+                            ),
+                            title: Text(
+                              m.title,
+                              style: TextStyle(
+                                fontWeight: m.read
+                                    ? FontWeight.normal
+                                    : FontWeight.bold,
+                                color: urgent
+                                    ? Theme.of(context).colorScheme.error
+                                    : null,
+                              ),
+                            ),
+                            subtitle: Text(
+                              l10n.inbox_messageSubtitle(m.week, m.body),
+                            ),
+                            isThreeLine: true,
+                            onTap: () {
+                              if (!m.read) {
+                                ref
+                                    .read(gameControllerProvider.notifier)
+                                    .markMessageRead(m.id);
+                              }
+                            },
                           ),
-                        ),
-                        subtitle: Text(l10n.inbox_messageSubtitle(m.week, m.body)),
-                        isThreeLine: true,
-                        onTap: () {
-                          if (!m.read) {
-                            ref
-                                .read(gameControllerProvider.notifier)
-                                .markMessageRead(m.id);
-                          }
-                        },
-                      ),
-                    );
-                  },
-                ),
-        ),
-      ],
+                        );
+                      },
+                    ),
+                  ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -154,9 +188,11 @@ class InboxScreen extends ConsumerWidget {
                 ),
                 FilledButton(
                   onPressed: () {
-                    ref.read(gameControllerProvider.notifier).updateLeague(
-                      (l) => l.copyWith(messageSettings: settings),
-                    );
+                    ref
+                        .read(gameControllerProvider.notifier)
+                        .updateLeague(
+                          (l) => l.copyWith(messageSettings: settings),
+                        );
                     Navigator.pop(ctx);
                   },
                   child: Text(l10n.common_save),

@@ -346,6 +346,60 @@ class AppLocalizationsPl extends AppLocalizations {
   String get shell_tab_home => 'Start';
 
   @override
+  String get shell_tab_other => 'Inne';
+
+  @override
+  String get shell_settingsTooltip => 'Ustawienia';
+
+  @override
+  String get shell_saveTooltip => 'Zapisz';
+
+  @override
+  String get other_title => 'Inne';
+
+  @override
+  String get other_workInProgress => 'W trakcie prac';
+
+  @override
+  String get other_tradeHistory => 'Historia wymian';
+
+  @override
+  String get other_finances => 'Finanse';
+
+  @override
+  String get other_contracts => 'Kontrakty';
+
+  @override
+  String get other_freeAgency => 'Wolni agenci';
+
+  @override
+  String get other_prospects => 'Prospekci';
+
+  @override
+  String get other_staff => 'Sztab';
+
+  @override
+  String get other_development => 'Rozwój';
+
+  @override
+  String get other_playerStats => 'Statystyki zawodników';
+
+  @override
+  String get other_rewards => 'Nagrody';
+
+  @override
+  String get other_search => 'Szukaj';
+
+  @override
+  String get other_draftHistory => 'Historia draftu';
+
+  @override
+  String get other_rankings => 'Rankingi';
+
+  @override
+  String get other_watchlist => 'Lista obserwowanych';
+
+  @override
   String get home_title => 'Start';
 
   @override

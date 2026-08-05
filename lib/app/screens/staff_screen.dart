@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:new_football/app/widgets/screen_background.dart';
 import 'package:new_football/app/l10n/enum_labels.dart';
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/app/utils/formatters.dart';
@@ -32,7 +33,7 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
     if (league == null || team == null) {
       return Scaffold(
         appBar: AppBar(title: Text(l10n.staff_title)),
-        body: Center(child: Text(l10n.staff_noTeam)),
+        body: ScreenBackground(child: Center(child: Text(l10n.staff_noTeam))),
       );
     }
 
@@ -48,34 +49,36 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
           onPressed: () => context.pop(),
         ),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          Card(
-            child: ListTile(
-              title: Text(l10n.staff_capLabel),
-              trailing: Text(
-                l10n.staff_capUsage(
-                  formatMoney(context, used),
-                  formatMoney(context, cap),
-                ),
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: used > cap
-                      ? Theme.of(context).colorScheme.error
-                      : null,
+      body: ScreenBackground(
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            Card(
+              child: ListTile(
+                title: Text(l10n.staff_capLabel),
+                trailing: Text(
+                  l10n.staff_capUsage(
+                    formatMoney(context, used),
+                    formatMoney(context, cap),
+                  ),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    color: used > cap
+                        ? Theme.of(context).colorScheme.error
+                        : null,
+                  ),
                 ),
               ),
             ),
-          ),
-          const SizedBox(height: 12),
-          for (final role in StaffRole.values)
-            _roleSection(context, l10n, league, team, role),
-          if (_status != null) ...[
             const SizedBox(height: 12),
-            Text(_status!, textAlign: TextAlign.center),
+            for (final role in StaffRole.values)
+              _roleSection(context, l10n, league, team, role),
+            if (_status != null) ...[
+              const SizedBox(height: 12),
+              Text(_status!, textAlign: TextAlign.center),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

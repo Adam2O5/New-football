@@ -752,6 +752,114 @@ abstract class AppLocalizations {
   /// **'Start'**
   String get shell_tab_home;
 
+  /// No description provided for @shell_tab_other.
+  ///
+  /// In pl, this message translates to:
+  /// **'Inne'**
+  String get shell_tab_other;
+
+  /// No description provided for @shell_settingsTooltip.
+  ///
+  /// In pl, this message translates to:
+  /// **'Ustawienia'**
+  String get shell_settingsTooltip;
+
+  /// No description provided for @shell_saveTooltip.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zapisz'**
+  String get shell_saveTooltip;
+
+  /// No description provided for @other_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Inne'**
+  String get other_title;
+
+  /// No description provided for @other_workInProgress.
+  ///
+  /// In pl, this message translates to:
+  /// **'W trakcie prac'**
+  String get other_workInProgress;
+
+  /// No description provided for @other_tradeHistory.
+  ///
+  /// In pl, this message translates to:
+  /// **'Historia wymian'**
+  String get other_tradeHistory;
+
+  /// No description provided for @other_finances.
+  ///
+  /// In pl, this message translates to:
+  /// **'Finanse'**
+  String get other_finances;
+
+  /// No description provided for @other_contracts.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kontrakty'**
+  String get other_contracts;
+
+  /// No description provided for @other_freeAgency.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wolni agenci'**
+  String get other_freeAgency;
+
+  /// No description provided for @other_prospects.
+  ///
+  /// In pl, this message translates to:
+  /// **'Prospekci'**
+  String get other_prospects;
+
+  /// No description provided for @other_staff.
+  ///
+  /// In pl, this message translates to:
+  /// **'Sztab'**
+  String get other_staff;
+
+  /// No description provided for @other_development.
+  ///
+  /// In pl, this message translates to:
+  /// **'Rozwój'**
+  String get other_development;
+
+  /// No description provided for @other_playerStats.
+  ///
+  /// In pl, this message translates to:
+  /// **'Statystyki zawodników'**
+  String get other_playerStats;
+
+  /// No description provided for @other_rewards.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nagrody'**
+  String get other_rewards;
+
+  /// No description provided for @other_search.
+  ///
+  /// In pl, this message translates to:
+  /// **'Szukaj'**
+  String get other_search;
+
+  /// No description provided for @other_draftHistory.
+  ///
+  /// In pl, this message translates to:
+  /// **'Historia draftu'**
+  String get other_draftHistory;
+
+  /// No description provided for @other_rankings.
+  ///
+  /// In pl, this message translates to:
+  /// **'Rankingi'**
+  String get other_rankings;
+
+  /// No description provided for @other_watchlist.
+  ///
+  /// In pl, this message translates to:
+  /// **'Lista obserwowanych'**
+  String get other_watchlist;
+
   /// No description provided for @home_title.
   ///
   /// In pl, this message translates to:

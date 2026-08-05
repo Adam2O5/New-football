@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+import 'package:new_football/app/widgets/screen_background.dart';
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/app/l10n/enum_labels.dart';
 import 'package:new_football/core/balance/balance_config.dart';
@@ -55,7 +57,7 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
     final league = ref.watch(activeLeagueProvider);
     final team = league?.playerTeam;
     if (team == null) {
-      return Center(child: Text(l10n.squad_noTeam));
+      return ScreenBackground(child: Center(child: Text(l10n.squad_noTeam)));
     }
 
     formation ??= team.tactics.formation;
@@ -64,28 +66,30 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
     line ??= team.tactics.defensiveLine;
     width ??= team.tactics.attackWidth;
 
-    return Column(
-      children: [
-        Material(
-          color: Theme.of(context).colorScheme.surface,
-          child: TabBar(
-            controller: _tabController,
-            tabs: [
-              Tab(text: l10n.squad_rosterTitle),
-              Tab(text: l10n.squad_tacticsTitle),
-            ],
+    return ScreenBackground(
+      child: Column(
+        children: [
+          Material(
+            color: Theme.of(context).colorScheme.surface,
+            child: TabBar(
+              controller: _tabController,
+              tabs: [
+                Tab(text: l10n.squad_rosterTitle),
+                Tab(text: l10n.squad_tacticsTitle),
+              ],
+            ),
           ),
-        ),
-        Expanded(
-          child: TabBarView(
-            controller: _tabController,
-            children: [
-              _buildSquadTab(context, l10n, team),
-              _buildTacticsTab(context, l10n, team),
-            ],
+          Expanded(
+            child: TabBarView(
+              controller: _tabController,
+              children: [
+                _buildSquadTab(context, l10n, team),
+                _buildTacticsTab(context, l10n, team),
+              ],
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -141,63 +145,77 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
             onLongPress: (p) => context.push('/game/player/${p.id}'),
           ),
         ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+          decoration: BoxDecoration(
+            color: Theme.of(context)
+                .colorScheme
+                .surface
+                .withValues(alpha: 0.85),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
             children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  l10n.squad_rosterTitle,
-                  style: Theme.of(context).textTheme.titleMedium,
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        l10n.squad_rosterTitle,
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                    ),
+                    DropdownButton<PlayerSortMode>(
+                      value: sortMode,
+                      onChanged: (v) {
+                        if (v == null) return;
+                        setState(() => sortMode = v);
+                      },
+                      items: [
+                        DropdownMenuItem(
+                          value: PlayerSortMode.overall,
+                          child: Text(l10n.squad_sortOverall),
+                        ),
+                        DropdownMenuItem(
+                          value: PlayerSortMode.assignedZone,
+                          child: Text(l10n.squad_sortAssignedZone),
+                        ),
+                        DropdownMenuItem(
+                          value: PlayerSortMode.form,
+                          child: Text(l10n.squad_sortForm),
+                        ),
+                        DropdownMenuItem(
+                          value: PlayerSortMode.position,
+                          child: Text(l10n.squad_sortPosition),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
-              DropdownButton<PlayerSortMode>(
-                value: sortMode,
-                onChanged: (v) {
-                  if (v == null) return;
-                  setState(() => sortMode = v);
+              ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: sortedRoster.length,
+                itemBuilder: (context, i) {
+                  final p = sortedRoster[i];
+                  return PlayerListTile(
+                    l10n: l10n,
+                    player: p,
+                    zone: rosterZoneOf(team, p.id),
+                    selected: selectedId == p.id,
+                    enableDragDrop: true,
+                    onAcceptDrop: (draggedId) =>
+                        _trySwap(context, team, draggedId, p.id),
+                    onTap: () => _onTapPlayer(context, team, p),
+                  );
                 },
-                items: [
-                  DropdownMenuItem(
-                    value: PlayerSortMode.overall,
-                    child: Text(l10n.squad_sortOverall),
-                  ),
-                  DropdownMenuItem(
-                    value: PlayerSortMode.assignedZone,
-                    child: Text(l10n.squad_sortAssignedZone),
-                  ),
-                  DropdownMenuItem(
-                    value: PlayerSortMode.form,
-                    child: Text(l10n.squad_sortForm),
-                  ),
-                  DropdownMenuItem(
-                    value: PlayerSortMode.position,
-                    child: Text(l10n.squad_sortPosition),
-                  ),
-                ],
               ),
             ],
           ),
-        ),
-        ListView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          itemCount: sortedRoster.length,
-          itemBuilder: (context, i) {
-            final p = sortedRoster[i];
-            return PlayerListTile(
-              l10n: l10n,
-              player: p,
-              zone: rosterZoneOf(team, p.id),
-              selected: selectedId == p.id,
-              enableDragDrop: true,
-              onAcceptDrop: (draggedId) =>
-                  _trySwap(context, team, draggedId, p.id),
-              onTap: () => _onTapPlayer(context, team, p),
-            );
-          },
         ),
         const SizedBox(height: 16),
       ],

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:new_football/app/widgets/screen_background.dart';
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/app/utils/formatters.dart';
 import 'package:new_football/core/models/player.dart';
@@ -34,7 +35,9 @@ class PlayerDetailScreen extends ConsumerWidget {
     if (player == null) {
       return Scaffold(
         appBar: AppBar(title: Text(l10n.playerDetail_title)),
-        body: Center(child: Text(l10n.playerDetail_notFound)),
+        body: ScreenBackground(
+          child: Center(child: Text(l10n.playerDetail_notFound)),
+        ),
       );
     }
 
@@ -47,71 +50,73 @@ class PlayerDetailScreen extends ConsumerWidget {
           onPressed: () => context.pop(),
         ),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          Text(
-            l10n.playerDetail_headerLine(
-              p.position.code,
-              p.nationality.label,
-              p.age,
-            ),
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          if (teamName != null) Text(teamName),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              _chip(context, l10n.stat_ovr, '${p.overall().round()}'),
-              _chip(context, l10n.stat_form, '${p.state.form}'),
-              _chip(context, l10n.stat_cond, '${p.state.stamina}%'),
-              _chip(context, l10n.stat_pv, '${p.tradeValue}'),
-              _chip(
-                context,
-                l10n.stat_pot,
-                p.potentialStars.toStringAsFixed(1),
+      body: ScreenBackground(
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            Text(
+              l10n.playerDetail_headerLine(
+                p.position.code,
+                p.nationality.label,
+                p.age,
               ),
-              _chip(context, l10n.stat_height, '${p.heightCm} cm'),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Text(
-            l10n.playerDetail_attributes,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          ..._attributeRows(p),
-          const SizedBox(height: 16),
-          Text(
-            l10n.playerDetail_contract,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          Card(
-            child: ListTile(
-              title: Text(
-                l10n.playerDetail_salaryLine(
-                  formatMoney(context, p.contract.salary),
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            if (teamName != null) Text(teamName),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                _chip(context, l10n.stat_ovr, '${p.overall().round()}'),
+                _chip(context, l10n.stat_form, '${p.state.form}'),
+                _chip(context, l10n.stat_cond, '${p.state.stamina}%'),
+                _chip(context, l10n.stat_pv, '${p.tradeValue}'),
+                _chip(
+                  context,
+                  l10n.stat_pot,
+                  p.potentialStars.toStringAsFixed(1),
+                ),
+                _chip(context, l10n.stat_height, '${p.heightCm} cm'),
+              ],
+            ),
+            const SizedBox(height: 16),
+            Text(
+              l10n.playerDetail_attributes,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            ..._attributeRows(p),
+            const SizedBox(height: 16),
+            Text(
+              l10n.playerDetail_contract,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            Card(
+              child: ListTile(
+                title: Text(
+                  l10n.playerDetail_salaryLine(
+                    formatMoney(context, p.contract.salary),
+                  ),
+                ),
+                subtitle: Text(
+                  l10n.playerDetail_contractYears(p.contract.yearsRemaining) +
+                      (p.contract.hasBirdRights
+                          ? ' · ${l10n.playerDetail_birdRights}'
+                          : '') +
+                      (p.contract.noTradeClause
+                          ? ' · ${l10n.playerDetail_noTradeClause}'
+                          : ''),
                 ),
               ),
-              subtitle: Text(
-                l10n.playerDetail_contractYears(p.contract.yearsRemaining) +
-                    (p.contract.hasBirdRights
-                        ? ' · ${l10n.playerDetail_birdRights}'
-                        : '') +
-                    (p.contract.noTradeClause
-                        ? ' · ${l10n.playerDetail_noTradeClause}'
-                        : ''),
-              ),
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            l10n.playerDetail_personality(p.personality.name),
-            style: Theme.of(context).textTheme.bodyMedium,
-          ),
-        ],
+            const SizedBox(height: 8),
+            Text(
+              l10n.playerDetail_personality(p.personality.name),
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ],
+        ),
       ),
     );
   }

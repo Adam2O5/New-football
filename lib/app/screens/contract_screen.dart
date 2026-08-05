@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:new_football/app/widgets/screen_background.dart';
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/app/utils/formatters.dart';
 import 'package:new_football/core/models/league_state.dart';
@@ -42,16 +43,17 @@ class _ContractScreenState extends ConsumerState<ContractScreen> {
     if (league == null || team == null) {
       return Scaffold(
         appBar: AppBar(title: Text(l10n.contract_title)),
-        body: Center(child: Text(l10n.contract_noTeam)),
+        body: ScreenBackground(
+          child: Center(child: Text(l10n.contract_noTeam)),
+        ),
       );
     }
 
-    final expiring = team.roster
-        .where((p) => p.contract.yearsRemaining <= 1)
-        .toList()
-      ..sort(
-        (a, b) => a.contract.yearsRemaining.compareTo(b.contract.yearsRemaining),
-      );
+    final expiring =
+        team.roster.where((p) => p.contract.yearsRemaining <= 1).toList()..sort(
+          (a, b) =>
+              a.contract.yearsRemaining.compareTo(b.contract.yearsRemaining),
+        );
 
     final freeAgents = [...league.freeAgents]
       ..sort((a, b) => b.overall().compareTo(a.overall()));
@@ -64,102 +66,106 @@ class _ContractScreenState extends ConsumerState<ContractScreen> {
           onPressed: () => context.pop(),
         ),
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          Text(
-            l10n.contract_expiringHeader,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          if (expiring.isEmpty)
-            Card(child: ListTile(title: Text(l10n.contract_noExpiring)))
-          else
-            ...expiring.map((p) {
-              final selected = _target == _Target.ownExpiring && p.id == _selectedId;
-              return Card(
-                color: selected
-                    ? Theme.of(context).colorScheme.primaryContainer
-                    : null,
-                child: ListTile(
-                  title: Text(p.name),
-                  subtitle: Text(
-                    l10n.contract_playerSubtitle(
-                      p.position.code,
-                      p.overall().round(),
-                      p.contract.yearsRemaining,
-                      formatMoney(context, p.contract.salary),
+      body: ScreenBackground(
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            Text(
+              l10n.contract_expiringHeader,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            if (expiring.isEmpty)
+              Card(child: ListTile(title: Text(l10n.contract_noExpiring)))
+            else
+              ...expiring.map((p) {
+                final selected =
+                    _target == _Target.ownExpiring && p.id == _selectedId;
+                return Card(
+                  color: selected
+                      ? Theme.of(context).colorScheme.primaryContainer
+                      : null,
+                  child: ListTile(
+                    title: Text(p.name),
+                    subtitle: Text(
+                      l10n.contract_playerSubtitle(
+                        p.position.code,
+                        p.overall().round(),
+                        p.contract.yearsRemaining,
+                        formatMoney(context, p.contract.salary),
+                      ),
                     ),
+                    onTap: () {
+                      setState(() {
+                        _target = _Target.ownExpiring;
+                        _selectedId = p.id;
+                        final want = ContractService().playerWant(p);
+                        _salaryCtrl.text = want.toString();
+                      });
+                    },
                   ),
-                  onTap: () {
-                    setState(() {
-                      _target = _Target.ownExpiring;
-                      _selectedId = p.id;
-                      final want = ContractService().playerWant(p);
-                      _salaryCtrl.text = want.toString();
-                    });
-                  },
-                ),
-              );
-            }),
-          const SizedBox(height: 16),
-          Text(
-            l10n.contract_freeAgentsHeader,
-            style: Theme.of(context).textTheme.titleMedium,
-          ),
-          const SizedBox(height: 8),
-          if (freeAgents.isEmpty)
-            Card(child: ListTile(title: Text(l10n.contract_freeAgentsEmpty)))
-          else
-            ...freeAgents.take(30).map((p) {
-              final selected = _target == _Target.freeAgent && p.id == _selectedId;
-              return Card(
-                color: selected
-                    ? Theme.of(context).colorScheme.primaryContainer
-                    : null,
-                child: ListTile(
-                  title: Text(p.name),
-                  subtitle: Text(
-                    l10n.contract_playerSubtitle(
-                      p.position.code,
-                      p.overall().round(),
-                      p.contract.yearsRemaining,
-                      formatMoney(context, ContractService().playerWant(p)),
+                );
+              }),
+            const SizedBox(height: 16),
+            Text(
+              l10n.contract_freeAgentsHeader,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
+            if (freeAgents.isEmpty)
+              Card(child: ListTile(title: Text(l10n.contract_freeAgentsEmpty)))
+            else
+              ...freeAgents.take(30).map((p) {
+                final selected =
+                    _target == _Target.freeAgent && p.id == _selectedId;
+                return Card(
+                  color: selected
+                      ? Theme.of(context).colorScheme.primaryContainer
+                      : null,
+                  child: ListTile(
+                    title: Text(p.name),
+                    subtitle: Text(
+                      l10n.contract_playerSubtitle(
+                        p.position.code,
+                        p.overall().round(),
+                        p.contract.yearsRemaining,
+                        formatMoney(context, ContractService().playerWant(p)),
+                      ),
                     ),
+                    onTap: () {
+                      setState(() {
+                        _target = _Target.freeAgent;
+                        _selectedId = p.id;
+                        final want = ContractService().playerWant(p);
+                        _salaryCtrl.text = want.toString();
+                      });
+                    },
                   ),
-                  onTap: () {
-                    setState(() {
-                      _target = _Target.freeAgent;
-                      _selectedId = p.id;
-                      final want = ContractService().playerWant(p);
-                      _salaryCtrl.text = want.toString();
-                    });
-                  },
-                ),
-              );
-            }),
-          const SizedBox(height: 16),
-          TextField(
-            controller: _salaryCtrl,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(labelText: l10n.contract_offerSalary),
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: _yearsCtrl,
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(labelText: l10n.contract_offerYears),
-          ),
-          const SizedBox(height: 16),
-          FilledButton(
-            onPressed: () => _offer(l10n, team),
-            child: Text(l10n.contract_submitOffer),
-          ),
-          if (_status != null) ...[
-            const SizedBox(height: 12),
-            Text(_status!),
+                );
+              }),
+            const SizedBox(height: 16),
+            TextField(
+              controller: _salaryCtrl,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(labelText: l10n.contract_offerSalary),
+            ),
+            const SizedBox(height: 8),
+            TextField(
+              controller: _yearsCtrl,
+              keyboardType: TextInputType.number,
+              decoration: InputDecoration(labelText: l10n.contract_offerYears),
+            ),
+            const SizedBox(height: 16),
+            FilledButton(
+              onPressed: () => _offer(l10n, team),
+              child: Text(l10n.contract_submitOffer),
+            ),
+            if (_status != null) ...[
+              const SizedBox(height: 12),
+              Text(_status!),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

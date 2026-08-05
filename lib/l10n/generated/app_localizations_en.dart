@@ -346,6 +346,60 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shell_tab_home => 'Home';
 
   @override
+  String get shell_tab_other => 'Other';
+
+  @override
+  String get shell_settingsTooltip => 'Settings';
+
+  @override
+  String get shell_saveTooltip => 'Save';
+
+  @override
+  String get other_title => 'Other';
+
+  @override
+  String get other_workInProgress => 'Work in progress';
+
+  @override
+  String get other_tradeHistory => 'Trade history';
+
+  @override
+  String get other_finances => 'Finances';
+
+  @override
+  String get other_contracts => 'Contracts';
+
+  @override
+  String get other_freeAgency => 'Free Agency';
+
+  @override
+  String get other_prospects => 'Prospects';
+
+  @override
+  String get other_staff => 'Staff';
+
+  @override
+  String get other_development => 'Development';
+
+  @override
+  String get other_playerStats => 'Player stats';
+
+  @override
+  String get other_rewards => 'Rewards';
+
+  @override
+  String get other_search => 'Search';
+
+  @override
+  String get other_draftHistory => 'Draft history';
+
+  @override
+  String get other_rankings => 'Rankings';
+
+  @override
+  String get other_watchlist => 'Watchlist';
+
+  @override
   String get home_title => 'Home';
 
   @override

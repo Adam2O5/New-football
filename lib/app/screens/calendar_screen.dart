@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:new_football/app/widgets/screen_background.dart';
 import 'package:new_football/app/l10n/enum_labels.dart';
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/app/screens/shell_screen.dart';
@@ -236,223 +237,234 @@ class CalendarScreen extends ConsumerWidget {
     final canSimulateSelectedDay = selectedInfo != null && !selectedInfo.isPast;
 
     return Scaffold(
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      IconButton(
-                        onPressed: month.isAfter(minMonth)
-                            ? () {
-                                ref
-                                    .read(calendarCursorMonthProvider.notifier)
-                                    .state = DateTime(
-                                  month.year,
-                                  month.month - 1,
-                                  1,
-                                );
-                              }
-                            : null,
-                        icon: const Icon(Icons.chevron_left),
-                      ),
-                      Expanded(
-                        child: Text(
-                          MaterialLocalizations.of(
-                            context,
-                          ).formatMonthYear(month),
-                          style: Theme.of(context).textTheme.titleLarge,
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: month.isBefore(maxMonth)
-                            ? () {
-                                ref
-                                    .read(calendarCursorMonthProvider.notifier)
-                                    .state = DateTime(
-                                  month.year,
-                                  month.month + 1,
-                                  1,
-                                );
-                              }
-                            : null,
-                        icon: const Icon(Icons.chevron_right),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .surfaceContainerHighest
-                          .withValues(alpha: 0.4),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+      body: ScreenBackground(
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
                       children: [
-                        Text(
-                          '${l10n.calendar_selectedDay_title} · ${dayName(context, selectedDay.weekday)} ${selectedDay.day}.${selectedDay.month.toString().padLeft(2, '0')}',
-                          style: Theme.of(context).textTheme.titleMedium,
+                        IconButton(
+                          onPressed: month.isAfter(minMonth)
+                              ? () {
+                                  ref
+                                      .read(
+                                        calendarCursorMonthProvider.notifier,
+                                      )
+                                      .state = DateTime(
+                                    month.year,
+                                    month.month - 1,
+                                    1,
+                                  );
+                                }
+                              : null,
+                          icon: const Icon(Icons.chevron_left),
                         ),
-                        const SizedBox(height: 8),
-                        Text(
-                          selectedDayBody,
-                          style: Theme.of(context).textTheme.bodyMedium,
+                        Expanded(
+                          child: Text(
+                            MaterialLocalizations.of(
+                              context,
+                            ).formatMonthYear(month),
+                            style: Theme.of(context).textTheme.titleLarge,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: month.isBefore(maxMonth)
+                              ? () {
+                                  ref
+                                      .read(
+                                        calendarCursorMonthProvider.notifier,
+                                      )
+                                      .state = DateTime(
+                                    month.year,
+                                    month.month + 1,
+                                    1,
+                                  );
+                                }
+                              : null,
+                          icon: const Icon(Icons.chevron_right),
                         ),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  GridView.builder(
-                    itemCount: totalCells,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 7,
-                          childAspectRatio: 0.85,
-                        ),
-                    itemBuilder: (context, i) {
-                      final date = gridStart.add(Duration(days: i));
-                      final info = dayInfo(date);
-                      final isInMonth = date.month == month.month;
-                      final isEnabled =
-                          info != null && !info.isPast && isInMonth;
-                      final isToday =
-                          info != null &&
-                          info.week == currentWeek &&
-                          info.day == currentDay;
-                      final isSelected =
-                          info != null &&
-                          date.year == selectedDay.year &&
-                          date.month == selectedDay.month &&
-                          date.day == selectedDay.day;
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .surfaceContainerHighest
+                            .withValues(alpha: 0.4),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${l10n.calendar_selectedDay_title} · ${dayName(context, selectedDay.weekday)} ${selectedDay.day}.${selectedDay.month.toString().padLeft(2, '0')}',
+                            style: Theme.of(context).textTheme.titleMedium,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            selectedDayBody,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    GridView.builder(
+                      itemCount: totalCells,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 7,
+                            childAspectRatio: 0.85,
+                          ),
+                      itemBuilder: (context, i) {
+                        final date = gridStart.add(Duration(days: i));
+                        final info = dayInfo(date);
+                        final isInMonth = date.month == month.month;
+                        final isEnabled =
+                            info != null && !info.isPast && isInMonth;
+                        final isToday =
+                            info != null &&
+                            info.week == currentWeek &&
+                            info.day == currentDay;
+                        final isSelected =
+                            info != null &&
+                            date.year == selectedDay.year &&
+                            date.month == selectedDay.month &&
+                            date.day == selectedDay.day;
 
-                      return Opacity(
-                        opacity: isInMonth ? 1.0 : 0.35,
-                        child: InkWell(
-                          onTap: info != null
-                              ? () {
-                                  ref
-                                          .read(
-                                            calendarSelectedDayProvider
-                                                .notifier,
-                                          )
-                                          .state =
-                                      date;
-                                }
-                              : null,
-                          borderRadius: BorderRadius.circular(8),
-                          child: Container(
-                            margin: const EdgeInsets.all(3),
-                            padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
-                              color: isToday
-                                  ? Theme.of(context)
-                                        .colorScheme
-                                        .primaryContainer
-                                        .withValues(alpha: 0.45)
-                                  : null,
-                              borderRadius: BorderRadius.circular(8),
-                              border: isSelected && !isToday
-                                  ? Border.all(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.primary,
-                                      width: 1.5,
-                                    )
-                                  : null,
-                            ),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '${date.day}',
-                                  style: Theme.of(context).textTheme.labelSmall
-                                      ?.copyWith(
-                                        color: isEnabled
-                                            ? null
-                                            : Theme.of(context).disabledColor,
-                                        fontWeight: isToday
-                                            ? FontWeight.bold
-                                            : null,
-                                      ),
-                                ),
-                                if (info != null) ...[
-                                  const SizedBox(height: 2),
-                                  Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      if (info.playerMatchLabel != null)
-                                        Tooltip(
-                                          message: info.playerMatchLabel!,
-                                          child: const Icon(
-                                            Icons.sports_soccer,
-                                            size: 12,
-                                            color: Colors.greenAccent,
-                                          ),
-                                        )
-                                      else if (info.matchCount > 0)
-                                        Tooltip(
-                                          message: '${info.matchCount} matches',
-                                          child: const Icon(
-                                            Icons.sports_soccer,
-                                            size: 12,
-                                            color: Colors.white70,
-                                          ),
+                        return Opacity(
+                          opacity: isInMonth ? 1.0 : 0.35,
+                          child: InkWell(
+                            onTap: info != null
+                                ? () {
+                                    ref
+                                            .read(
+                                              calendarSelectedDayProvider
+                                                  .notifier,
+                                            )
+                                            .state =
+                                        date;
+                                  }
+                                : null,
+                            borderRadius: BorderRadius.circular(8),
+                            child: Container(
+                              margin: const EdgeInsets.all(3),
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: isToday
+                                    ? Theme.of(context)
+                                          .colorScheme
+                                          .primaryContainer
+                                          .withValues(alpha: 0.45)
+                                    : null,
+                                borderRadius: BorderRadius.circular(8),
+                                border: isSelected && !isToday
+                                    ? Border.all(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.primary,
+                                        width: 1.5,
+                                      )
+                                    : null,
+                              ),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '${date.day}',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .labelSmall
+                                        ?.copyWith(
+                                          color: isEnabled
+                                              ? null
+                                              : Theme.of(context).disabledColor,
+                                          fontWeight: isToday
+                                              ? FontWeight.bold
+                                              : null,
                                         ),
-                                      if (info.eventLabels.isNotEmpty) ...[
-                                        if (info.playerMatchLabel != null ||
-                                            info.matchCount > 0)
-                                          const SizedBox(width: 2),
-                                        Tooltip(
-                                          message: info.eventLabels.join('\n'),
-                                          child: const Icon(
-                                            Icons.event_available_outlined,
-                                            size: 12,
-                                            color: Colors.amber,
-                                          ),
-                                        ),
-                                      ],
-                                    ],
                                   ),
+                                  if (info != null) ...[
+                                    const SizedBox(height: 2),
+                                    Row(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        if (info.playerMatchLabel != null)
+                                          Tooltip(
+                                            message: info.playerMatchLabel!,
+                                            child: const Icon(
+                                              Icons.sports_soccer,
+                                              size: 12,
+                                              color: Colors.greenAccent,
+                                            ),
+                                          )
+                                        else if (info.matchCount > 0)
+                                          Tooltip(
+                                            message:
+                                                '${info.matchCount} matches',
+                                            child: const Icon(
+                                              Icons.sports_soccer,
+                                              size: 12,
+                                              color: Colors.white70,
+                                            ),
+                                          ),
+                                        if (info.eventLabels.isNotEmpty) ...[
+                                          if (info.playerMatchLabel != null ||
+                                              info.matchCount > 0)
+                                            const SizedBox(width: 2),
+                                          Tooltip(
+                                            message: info.eventLabels.join(
+                                              '\n',
+                                            ),
+                                            child: const Icon(
+                                              Icons.event_available_outlined,
+                                              size: 12,
+                                              color: Colors.amber,
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ],
                                 ],
-                              ],
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    width: double.infinity,
-                    child: FilledButton.icon(
-                      onPressed: canSimulateSelectedDay
-                          ? () => simulateToDate(
-                              selectedInfo.week,
-                              selectedInfo.day,
-                            )
-                          : null,
-                      icon: const Icon(Icons.fast_forward),
-                      label: Text(l10n.calendar_simulateUntilDate),
+                        );
+                      },
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 12),
+                    SizedBox(
+                      width: double.infinity,
+                      child: FilledButton.icon(
+                        onPressed: canSimulateSelectedDay
+                            ? () => simulateToDate(
+                                selectedInfo.week,
+                                selectedInfo.day,
+                              )
+                            : null,
+                        icon: const Icon(Icons.fast_forward),
+                        label: Text(l10n.calendar_simulateUntilDate),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

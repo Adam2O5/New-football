@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:new_football/app/widgets/screen_background.dart';
 import 'package:new_football/app/l10n/enum_labels.dart';
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/core/engine/match_engine.dart';
@@ -65,7 +66,10 @@ class _MatchdayScreenState extends ConsumerState<MatchdayScreen> {
     setState(() => _paused = paused);
     _timer?.cancel();
     if (!paused) {
-      _timer = Timer.periodic(const Duration(milliseconds: 350), (_) => _tick());
+      _timer = Timer.periodic(
+        const Duration(milliseconds: 350),
+        (_) => _tick(),
+      );
     }
   }
 
@@ -123,79 +127,83 @@ class _MatchdayScreenState extends ConsumerState<MatchdayScreen> {
           live == null
               ? l10n.matchday_defaultTitle
               : '${home?.name ?? '?'} ${live.state.homeGoals}:'
-                  '${live.state.awayGoals} ${away?.name ?? '?'}',
+                    '${live.state.awayGoals} ${away?.name ?? '?'}',
         ),
         automaticallyImplyLeading: false,
       ),
-      body: live == null || home == null || away == null
-          ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Text(
-                    "${live.state.minute}'",
-                    style: Theme.of(context).textTheme.headlineMedium,
-                  ),
-                ),
-                Expanded(
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 2,
-                        child: _LineupPane(
-                          title: home.name,
-                          players: live.state.homeLineup
-                              .map((p) => '${p.position.code} ${p.name}')
-                              .toList(),
-                        ),
-                      ),
-                      Expanded(
-                        flex: 3,
-                        child: _EventFeed(events: live.events),
-                      ),
-                      Expanded(
-                        flex: 2,
-                        child: _LineupPane(
-                          title: away.name,
-                          players: live.state.awayLineup
-                              .map((p) => '${p.position.code} ${p.name}')
-                              .toList(),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SafeArea(
-                  child: Padding(
+      body: ScreenBackground(
+        child: live == null || home == null || away == null
+            ? const Center(child: CircularProgressIndicator())
+            : Column(
+                children: [
+                  Padding(
                     padding: const EdgeInsets.all(12),
+                    child: Text(
+                      "${live.state.minute}'",
+                      style: Theme.of(context).textTheme.headlineMedium,
+                    ),
+                  ),
+                  Expanded(
                     child: Row(
                       children: [
                         Expanded(
-                          child: OutlinedButton(
-                            onPressed: live.isFinished || _finishing
-                                ? null
-                                : () => _setPaused(!_paused),
-                            child: Text(
-                              _paused ? l10n.matchday_resume : l10n.matchday_pause,
-                            ),
+                          flex: 2,
+                          child: _LineupPane(
+                            title: home.name,
+                            players: live.state.homeLineup
+                                .map((p) => '${p.position.code} ${p.name}')
+                                .toList(),
                           ),
                         ),
-                        const SizedBox(width: 8),
                         Expanded(
-                          child: FilledButton(
-                            onPressed: live.isFinished || _finishing
-                                ? null
-                                : _toEnd,
-                            child: Text(l10n.matchday_toEnd),
+                          flex: 3,
+                          child: _EventFeed(events: live.events),
+                        ),
+                        Expanded(
+                          flex: 2,
+                          child: _LineupPane(
+                            title: away.name,
+                            players: live.state.awayLineup
+                                .map((p) => '${p.position.code} ${p.name}')
+                                .toList(),
                           ),
                         ),
                       ],
                     ),
                   ),
-                ),
-              ],
-            ),
+                  SafeArea(
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: OutlinedButton(
+                              onPressed: live.isFinished || _finishing
+                                  ? null
+                                  : () => _setPaused(!_paused),
+                              child: Text(
+                                _paused
+                                    ? l10n.matchday_resume
+                                    : l10n.matchday_pause,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: FilledButton(
+                              onPressed: live.isFinished || _finishing
+                                  ? null
+                                  : _toEnd,
+                              child: Text(l10n.matchday_toEnd),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+      ),
     );
   }
 }

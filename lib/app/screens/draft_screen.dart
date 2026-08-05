@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:new_football/app/widgets/screen_background.dart';
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/draft_models.dart';
@@ -37,7 +38,12 @@ class DraftScreen extends ConsumerWidget {
       ),
       body: draft == null
           ? Center(child: Text(l10n.draft_notActive))
-          : _DraftBody(draft: draft, playerTeamId: league!.playerTeamId),
+          : ScreenBackground(
+              child: _DraftBody(
+                draft: draft,
+                playerTeamId: league!.playerTeamId,
+              ),
+            ),
     );
   }
 

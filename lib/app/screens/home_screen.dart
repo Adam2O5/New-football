@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:new_football/app/widgets/screen_background.dart';
 import 'package:new_football/app/l10n/enum_labels.dart';
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/app/screens/calendar_screen.dart';
@@ -354,6 +355,12 @@ Widget _buildNextActionSection(
             onPressed: () => _advanceOneDay(context, ref, l10n),
             icon: const Icon(Icons.skip_next_outlined),
             label: const Text('Symuluj dzień'),
+            style: OutlinedButton.styleFrom(
+              backgroundColor: Theme.of(context)
+                  .colorScheme
+                  .surface
+                  .withValues(alpha: 0.85),
+            ),
           ),
         ),
         const SizedBox(width: 12),
@@ -413,6 +420,12 @@ Widget _buildNextActionSection(
       Expanded(
         child: OutlinedButton(
           onPressed: () => _goToEvent(context, ref, l10n, action),
+          style: OutlinedButton.styleFrom(
+            backgroundColor: Theme.of(context)
+                .colorScheme
+                .surface
+                .withValues(alpha: 0.85),
+          ),
           child: Text('Przejdź do: $label'),
         ),
       ),
@@ -596,184 +609,187 @@ class HomeScreen extends ConsumerWidget {
     );
 
     return Scaffold(
-      body: ListView(
-        padding: const EdgeInsets.all(16),
-        children: [
-          SizedBox(
-            height: 110,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              itemCount: next7.length,
-              separatorBuilder: (context, _) => const SizedBox(width: 12),
-              itemBuilder: (context, i) {
-                final date = next7[i];
-                final info = dayInfo(date);
-                final isToday = i == 0;
-                return Card(
-                  color: isToday
-                      ? Theme.of(
-                          context,
-                        ).colorScheme.primaryContainer.withValues(alpha: 0.45)
-                      : null,
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: SizedBox(
-                      width: 150,
+      body: ScreenBackground(
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            SizedBox(
+              height: 110,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: next7.length,
+                separatorBuilder: (context, _) => const SizedBox(width: 12),
+                itemBuilder: (context, i) {
+                  final date = next7[i];
+                  final info = dayInfo(date);
+                  final isToday = i == 0;
+                  return Card(
+                    color: isToday
+                        ? Theme.of(
+                            context,
+                          ).colorScheme.primaryContainer.withValues(alpha: 0.45)
+                        : null,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: SizedBox(
+                        width: 150,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              dayName(context, date.weekday),
+                              style: Theme.of(context).textTheme.labelLarge,
+                            ),
+                            Text(
+                              '${date.day}.${date.month.toString().padLeft(2, '0')}',
+                              style: Theme.of(context).textTheme.bodySmall,
+                            ),
+                            const SizedBox(height: 8),
+                            if (info?.playerMatchLabel != null)
+                              Text(
+                                info!.playerMatchLabel!,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context).textTheme.bodySmall,
+                              )
+                            else if (info != null &&
+                                info.eventLabels.isNotEmpty)
+                              Text(
+                                info.eventLabels.first,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.home_record,
+                            style: Theme.of(context).textTheme.labelMedium,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            '${standings.wins}-${standings.draws}-${standings.losses}',
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.home_conferenceRankLabel,
+                            style: Theme.of(context).textTheme.labelMedium,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            standings.conferenceRank != null
+                                ? '#${standings.conferenceRank}'
+                                : '—',
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                        ],
+                      ),
+                    ),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.home_overallRankLabel,
+                            style: Theme.of(context).textTheme.labelMedium,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            standings.overallRank != null
+                                ? '#${standings.overallRank}'
+                                : '—',
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Text(
-                            dayName(context, date.weekday),
+                            l10n.home_lastMatchTitle,
                             style: Theme.of(context).textTheme.labelLarge,
                           ),
-                          Text(
-                            '${date.day}.${date.month.toString().padLeft(2, '0')}',
-                            style: Theme.of(context).textTheme.bodySmall,
-                          ),
                           const SizedBox(height: 8),
-                          if (info?.playerMatchLabel != null)
-                            Text(
-                              info!.playerMatchLabel!,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context).textTheme.bodySmall,
-                            )
-                          else if (info != null && info.eventLabels.isNotEmpty)
-                            Text(
-                              info.eventLabels.first,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
+                          Text(
+                            lastPlayed != null
+                                ? matchLine(lastPlayed, withResult: true)
+                                : l10n.home_noPreviousMatch,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
                         ],
                       ),
                     ),
                   ),
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 16),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l10n.home_record,
-                          style: Theme.of(context).textTheme.labelMedium,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          '${standings.wins}-${standings.draws}-${standings.losses}',
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l10n.home_conferenceRankLabel,
-                          style: Theme.of(context).textTheme.labelMedium,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          standings.conferenceRank != null
-                              ? '#${standings.conferenceRank}'
-                              : '—',
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          l10n.home_overallRankLabel,
-                          style: Theme.of(context).textTheme.labelMedium,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          standings.overallRank != null
-                              ? '#${standings.overallRank}'
-                              : '—',
-                          style: Theme.of(context).textTheme.titleLarge,
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          l10n.home_lastMatchTitle,
-                          style: Theme.of(context).textTheme.labelLarge,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          lastPlayed != null
-                              ? matchLine(lastPlayed, withResult: true)
-                              : l10n.home_noPreviousMatch,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ],
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            l10n.home_nextMatchTitle,
+                            style: Theme.of(context).textTheme.labelLarge,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            nextUpcoming != null
+                                ? matchLine(nextUpcoming, withResult: false)
+                                : l10n.home_noNextMatch,
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          l10n.home_nextMatchTitle,
-                          style: Theme.of(context).textTheme.labelLarge,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          nextUpcoming != null
-                              ? matchLine(nextUpcoming, withResult: false)
-                              : l10n.home_noNextMatch,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          _buildNextActionSection(context, ref, l10n, league, nextAction),
-        ],
+              ],
+            ),
+            const SizedBox(height: 16),
+            _buildNextActionSection(context, ref, l10n, league, nextAction),
+          ],
+        ),
       ),
     );
   }
