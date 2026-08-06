@@ -65,6 +65,10 @@ class StaffMember with _$StaffMember {
     required StaffRole role,
     @Default(StaffAttributes()) StaffAttributes attributes,
     StaffContract? contract,
+
+    /// Previous attributes captured before the last growth tick.
+    /// Used by the Development screen to compute growth deltas.
+    StaffAttributes? previousAttributes,
   }) = _StaffMember;
 
   factory StaffMember.fromJson(Map<String, dynamic> json) =>

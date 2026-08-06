@@ -65,6 +65,11 @@ _$StaffMemberImpl _$$StaffMemberImplFromJson(Map<String, dynamic> json) =>
       contract: json['contract'] == null
           ? null
           : StaffContract.fromJson(json['contract'] as Map<String, dynamic>),
+      previousAttributes: json['previousAttributes'] == null
+          ? null
+          : StaffAttributes.fromJson(
+              json['previousAttributes'] as Map<String, dynamic>,
+            ),
     );
 
 Map<String, dynamic> _$$StaffMemberImplToJson(_$StaffMemberImpl instance) =>
@@ -76,6 +81,7 @@ Map<String, dynamic> _$$StaffMemberImplToJson(_$StaffMemberImpl instance) =>
       'role': _$StaffRoleEnumMap[instance.role]!,
       'attributes': instance.attributes,
       'contract': instance.contract,
+      'previousAttributes': instance.previousAttributes,
     };
 
 const _$NationalityEnumMap = {

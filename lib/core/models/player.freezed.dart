@@ -1049,6 +1049,14 @@ mixin _$Player {
   List<PlayerSeasonStats> get seasonStats => throw _privateConstructorUsedError;
   int get tradeValue => throw _privateConstructorUsedError;
 
+  /// Previous overall rating (rounded) captured at season start.
+  /// Used by the Development screen to compute OVR delta.
+  int? get previousOvr => throw _privateConstructorUsedError;
+
+  /// Previous potentialStars captured at season start.
+  /// Used by the Development screen to compute potential delta.
+  double? get previousPotential => throw _privateConstructorUsedError;
+
   /// Serializes this Player to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
@@ -1078,6 +1086,8 @@ abstract class $PlayerCopyWith<$Res> {
     PlayerHidden hidden,
     List<PlayerSeasonStats> seasonStats,
     int tradeValue,
+    int? previousOvr,
+    double? previousPotential,
   });
 
   $PlayerAttributesCopyWith<$Res> get attributes;
@@ -1115,6 +1125,8 @@ class _$PlayerCopyWithImpl<$Res, $Val extends Player>
     Object? hidden = null,
     Object? seasonStats = null,
     Object? tradeValue = null,
+    Object? previousOvr = freezed,
+    Object? previousPotential = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -1174,6 +1186,14 @@ class _$PlayerCopyWithImpl<$Res, $Val extends Player>
                 ? _value.tradeValue
                 : tradeValue // ignore: cast_nullable_to_non_nullable
                       as int,
+            previousOvr: freezed == previousOvr
+                ? _value.previousOvr
+                : previousOvr // ignore: cast_nullable_to_non_nullable
+                      as int?,
+            previousPotential: freezed == previousPotential
+                ? _value.previousPotential
+                : previousPotential // ignore: cast_nullable_to_non_nullable
+                      as double?,
           )
           as $Val,
     );
@@ -1243,6 +1263,8 @@ abstract class _$$PlayerImplCopyWith<$Res> implements $PlayerCopyWith<$Res> {
     PlayerHidden hidden,
     List<PlayerSeasonStats> seasonStats,
     int tradeValue,
+    int? previousOvr,
+    double? previousPotential,
   });
 
   @override
@@ -1283,6 +1305,8 @@ class __$$PlayerImplCopyWithImpl<$Res>
     Object? hidden = null,
     Object? seasonStats = null,
     Object? tradeValue = null,
+    Object? previousOvr = freezed,
+    Object? previousPotential = freezed,
   }) {
     return _then(
       _$PlayerImpl(
@@ -1342,6 +1366,14 @@ class __$$PlayerImplCopyWithImpl<$Res>
             ? _value.tradeValue
             : tradeValue // ignore: cast_nullable_to_non_nullable
                   as int,
+        previousOvr: freezed == previousOvr
+            ? _value.previousOvr
+            : previousOvr // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        previousPotential: freezed == previousPotential
+            ? _value.previousPotential
+            : previousPotential // ignore: cast_nullable_to_non_nullable
+                  as double?,
       ),
     );
   }
@@ -1365,6 +1397,8 @@ class _$PlayerImpl implements _Player {
     required this.hidden,
     final List<PlayerSeasonStats> seasonStats = const [],
     this.tradeValue = 0,
+    this.previousOvr,
+    this.previousPotential,
   }) : _seasonStats = seasonStats;
 
   factory _$PlayerImpl.fromJson(Map<String, dynamic> json) =>
@@ -1407,9 +1441,19 @@ class _$PlayerImpl implements _Player {
   @JsonKey()
   final int tradeValue;
 
+  /// Previous overall rating (rounded) captured at season start.
+  /// Used by the Development screen to compute OVR delta.
+  @override
+  final int? previousOvr;
+
+  /// Previous potentialStars captured at season start.
+  /// Used by the Development screen to compute potential delta.
+  @override
+  final double? previousPotential;
+
   @override
   String toString() {
-    return 'Player(id: $id, name: $name, position: $position, nationality: $nationality, age: $age, attributes: $attributes, contract: $contract, personality: $personality, potentialStars: $potentialStars, heightCm: $heightCm, state: $state, hidden: $hidden, seasonStats: $seasonStats, tradeValue: $tradeValue)';
+    return 'Player(id: $id, name: $name, position: $position, nationality: $nationality, age: $age, attributes: $attributes, contract: $contract, personality: $personality, potentialStars: $potentialStars, heightCm: $heightCm, state: $state, hidden: $hidden, seasonStats: $seasonStats, tradeValue: $tradeValue, previousOvr: $previousOvr, previousPotential: $previousPotential)';
   }
 
   @override
@@ -1441,7 +1485,11 @@ class _$PlayerImpl implements _Player {
               _seasonStats,
             ) &&
             (identical(other.tradeValue, tradeValue) ||
-                other.tradeValue == tradeValue));
+                other.tradeValue == tradeValue) &&
+            (identical(other.previousOvr, previousOvr) ||
+                other.previousOvr == previousOvr) &&
+            (identical(other.previousPotential, previousPotential) ||
+                other.previousPotential == previousPotential));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1462,6 +1510,8 @@ class _$PlayerImpl implements _Player {
     hidden,
     const DeepCollectionEquality().hash(_seasonStats),
     tradeValue,
+    previousOvr,
+    previousPotential,
   );
 
   /// Create a copy of Player
@@ -1494,6 +1544,8 @@ abstract class _Player implements Player {
     required final PlayerHidden hidden,
     final List<PlayerSeasonStats> seasonStats,
     final int tradeValue,
+    final int? previousOvr,
+    final double? previousPotential,
   }) = _$PlayerImpl;
 
   factory _Player.fromJson(Map<String, dynamic> json) = _$PlayerImpl.fromJson;
@@ -1526,6 +1578,16 @@ abstract class _Player implements Player {
   List<PlayerSeasonStats> get seasonStats;
   @override
   int get tradeValue;
+
+  /// Previous overall rating (rounded) captured at season start.
+  /// Used by the Development screen to compute OVR delta.
+  @override
+  int? get previousOvr;
+
+  /// Previous potentialStars captured at season start.
+  /// Used by the Development screen to compute potential delta.
+  @override
+  double? get previousPotential;
 
   /// Create a copy of Player
   /// with the given fields replaced by the non-null parameter values.

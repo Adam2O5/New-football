@@ -123,6 +123,7 @@ class StaffService {
           final chance = balance.staff.growthChanceForAge(member.age);
           if (_random.nextDouble() < chance) {
             final grown = member.copyWith(
+              previousAttributes: member.attributes,
               attributes: _bumpAttribute(member.attributes, member.role),
             );
             staff = staff.withMember(role, grown);

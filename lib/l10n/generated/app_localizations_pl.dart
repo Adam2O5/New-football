@@ -1057,4 +1057,70 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get router_noMatchData => 'Brak danych meczu';
+
+  @override
+  String get dev_title => 'Rozwój';
+
+  @override
+  String get dev_tabPlayers => 'Zawodnicy';
+
+  @override
+  String get dev_tabStaff => 'Sztab';
+
+  @override
+  String get dev_noTeam => 'Brak danych drużyny';
+
+  @override
+  String get dev_noPlayers => 'Brak zawodników';
+
+  @override
+  String get dev_vacant => 'Wakancja';
+
+  @override
+  String get dev_colName => 'Nazwa';
+
+  @override
+  String get dev_colAge => 'Wiek';
+
+  @override
+  String get dev_colPotential => 'Pot.';
+
+  @override
+  String get dev_colOvr => 'OVR';
+
+  @override
+  String get dev_colChange => '+/-';
+
+  @override
+  String get staffAttr_tactics => 'Taktyka';
+
+  @override
+  String get staffAttr_motivation => 'Motywacja';
+
+  @override
+  String get staffAttr_development => 'Rozwój';
+
+  @override
+  String get staffAttr_mentoring => 'Mentoring';
+
+  @override
+  String get staffAttr_coverage => 'Zasięg';
+
+  @override
+  String get staffAttr_evaluation => 'Ocena';
+
+  @override
+  String get staffAttr_rehabilitation => 'Rehabilitacja';
+
+  @override
+  String get staffAttr_regenaration => 'Regeneracja';
+
+  @override
+  String get staffAttr_prevention => 'Prewencja';
+
+  @override
+  String get staffAttr_care => 'Opieka';
+
+  @override
+  String get staffAttr_negotiation => 'Negocjacje';
 }

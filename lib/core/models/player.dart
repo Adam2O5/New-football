@@ -136,6 +136,14 @@ class Player with _$Player {
     required PlayerHidden hidden,
     @Default([]) List<PlayerSeasonStats> seasonStats,
     @Default(0) int tradeValue,
+
+    /// Previous overall rating (rounded) captured at season start.
+    /// Used by the Development screen to compute OVR delta.
+    int? previousOvr,
+
+    /// Previous potentialStars captured at season start.
+    /// Used by the Development screen to compute potential delta.
+    double? previousPotential,
   }) = _Player;
 
   factory Player.fromJson(Map<String, dynamic> json) => _$PlayerFromJson(json);

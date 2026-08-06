@@ -600,5 +600,28 @@
   "matchday_pause": "Pauza",
   "matchday_toEnd": "Do końca",
 
-  "router_noMatchData": "Brak danych meczu"
+  "router_noMatchData": "Brak danych meczu",
+
+  "dev_title": "Rozwój",
+  "dev_tabPlayers": "Zawodnicy",
+  "dev_tabStaff": "Sztab",
+  "dev_noTeam": "Brak danych drużyny",
+  "dev_noPlayers": "Brak zawodników",
+  "dev_vacant": "Wakancja",
+  "dev_colName": "Nazwa",
+  "dev_colAge": "Wiek",
+  "dev_colPotential": "Pot.",
+  "dev_colOvr": "OVR",
+  "dev_colChange": "+/-",
+  "staffAttr_tactics": "Taktyka",
+  "staffAttr_motivation": "Motywacja",
+  "staffAttr_development": "Rozwój",
+  "staffAttr_mentoring": "Mentoring",
+  "staffAttr_coverage": "Zasięg",
+  "staffAttr_evaluation": "Ocena",
+  "staffAttr_rehabilitation": "Rehabilitacja",
+  "staffAttr_regenaration": "Regeneracja",
+  "staffAttr_prevention": "Prewencja",
+  "staffAttr_care": "Opieka",
+  "staffAttr_negotiation": "Negocjacje"
 }

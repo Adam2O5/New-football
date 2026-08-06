@@ -401,5 +401,28 @@
   "matchday_pause": "Pause",
   "matchday_toEnd": "Skip to end",
 
-  "router_noMatchData": "No match data"
+  "router_noMatchData": "No match data",
+
+  "dev_title": "Development",
+  "dev_tabPlayers": "Players",
+  "dev_tabStaff": "Staff",
+  "dev_noTeam": "No team data available",
+  "dev_noPlayers": "No players available",
+  "dev_vacant": "Vacant",
+  "dev_colName": "Name",
+  "dev_colAge": "Age",
+  "dev_colPotential": "Pot.",
+  "dev_colOvr": "OVR",
+  "dev_colChange": "+/-",
+  "staffAttr_tactics": "Tactics",
+  "staffAttr_motivation": "Motivation",
+  "staffAttr_development": "Development",
+  "staffAttr_mentoring": "Mentoring",
+  "staffAttr_coverage": "Coverage",
+  "staffAttr_evaluation": "Evaluation",
+  "staffAttr_rehabilitation": "Rehabilitation",
+  "staffAttr_regenaration": "Regeneration",
+  "staffAttr_prevention": "Prevention",
+  "staffAttr_care": "Care",
+  "staffAttr_negotiation": "Negotiation"
 }

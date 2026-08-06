@@ -2027,6 +2027,138 @@ abstract class AppLocalizations {
   /// In pl, this message translates to:
   /// **'Brak danych meczu'**
   String get router_noMatchData;
+
+  /// No description provided for @dev_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Rozwój'**
+  String get dev_title;
+
+  /// No description provided for @dev_tabPlayers.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zawodnicy'**
+  String get dev_tabPlayers;
+
+  /// No description provided for @dev_tabStaff.
+  ///
+  /// In pl, this message translates to:
+  /// **'Sztab'**
+  String get dev_tabStaff;
+
+  /// No description provided for @dev_noTeam.
+  ///
+  /// In pl, this message translates to:
+  /// **'Brak danych drużyny'**
+  String get dev_noTeam;
+
+  /// No description provided for @dev_noPlayers.
+  ///
+  /// In pl, this message translates to:
+  /// **'Brak zawodników'**
+  String get dev_noPlayers;
+
+  /// No description provided for @dev_vacant.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wakancja'**
+  String get dev_vacant;
+
+  /// No description provided for @dev_colName.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nazwa'**
+  String get dev_colName;
+
+  /// No description provided for @dev_colAge.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wiek'**
+  String get dev_colAge;
+
+  /// No description provided for @dev_colPotential.
+  ///
+  /// In pl, this message translates to:
+  /// **'Pot.'**
+  String get dev_colPotential;
+
+  /// No description provided for @dev_colOvr.
+  ///
+  /// In pl, this message translates to:
+  /// **'OVR'**
+  String get dev_colOvr;
+
+  /// No description provided for @dev_colChange.
+  ///
+  /// In pl, this message translates to:
+  /// **'+/-'**
+  String get dev_colChange;
+
+  /// No description provided for @staffAttr_tactics.
+  ///
+  /// In pl, this message translates to:
+  /// **'Taktyka'**
+  String get staffAttr_tactics;
+
+  /// No description provided for @staffAttr_motivation.
+  ///
+  /// In pl, this message translates to:
+  /// **'Motywacja'**
+  String get staffAttr_motivation;
+
+  /// No description provided for @staffAttr_development.
+  ///
+  /// In pl, this message translates to:
+  /// **'Rozwój'**
+  String get staffAttr_development;
+
+  /// No description provided for @staffAttr_mentoring.
+  ///
+  /// In pl, this message translates to:
+  /// **'Mentoring'**
+  String get staffAttr_mentoring;
+
+  /// No description provided for @staffAttr_coverage.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zasięg'**
+  String get staffAttr_coverage;
+
+  /// No description provided for @staffAttr_evaluation.
+  ///
+  /// In pl, this message translates to:
+  /// **'Ocena'**
+  String get staffAttr_evaluation;
+
+  /// No description provided for @staffAttr_rehabilitation.
+  ///
+  /// In pl, this message translates to:
+  /// **'Rehabilitacja'**
+  String get staffAttr_rehabilitation;
+
+  /// No description provided for @staffAttr_regenaration.
+  ///
+  /// In pl, this message translates to:
+  /// **'Regeneracja'**
+  String get staffAttr_regenaration;
+
+  /// No description provided for @staffAttr_prevention.
+  ///
+  /// In pl, this message translates to:
+  /// **'Prewencja'**
+  String get staffAttr_prevention;
+
+  /// No description provided for @staffAttr_care.
+  ///
+  /// In pl, this message translates to:
+  /// **'Opieka'**
+  String get staffAttr_care;
+
+  /// No description provided for @staffAttr_negotiation.
+  ///
+  /// In pl, this message translates to:
+  /// **'Negocjacje'**
+  String get staffAttr_negotiation;
 }
 
 class _AppLocalizationsDelegate

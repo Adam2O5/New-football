@@ -636,7 +636,10 @@ class SeasonService {
       // Player development ticks weekly in `DaySimulator`, not here — avoid
       // double-applying growth on top of the season's weekly ticks.
       var team = t.copyWith(
-        roster: roster,
+        roster: roster.map((p) => p.copyWith(
+          previousOvr: p.overall(balance).round(),
+          previousPotential: p.potentialStars,
+        )).toList(),
         finance: t.finance.copyWith(midLevelExceptionAvailable: true),
         // Prognoza miejsca w tabeli (`projectedFinish`) i dyskonto czasowe
         // zmieniają się co sezon — przeliczyć wartość wszystkich
@@ -645,6 +648,7 @@ class SeasonService {
             .map((p) => p.recalculateTradeValue(currentYear: newYear))
             .toList(),
       );
+
       return capService.applyPayroll(team);
     }).toList();
 

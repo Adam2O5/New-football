@@ -600,6 +600,10 @@ mixin _$StaffMember {
   StaffAttributes get attributes => throw _privateConstructorUsedError;
   StaffContract? get contract => throw _privateConstructorUsedError;
 
+  /// Previous attributes captured before the last growth tick.
+  /// Used by the Development screen to compute growth deltas.
+  StaffAttributes? get previousAttributes => throw _privateConstructorUsedError;
+
   /// Serializes this StaffMember to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
@@ -625,10 +629,12 @@ abstract class $StaffMemberCopyWith<$Res> {
     StaffRole role,
     StaffAttributes attributes,
     StaffContract? contract,
+    StaffAttributes? previousAttributes,
   });
 
   $StaffAttributesCopyWith<$Res> get attributes;
   $StaffContractCopyWith<$Res>? get contract;
+  $StaffAttributesCopyWith<$Res>? get previousAttributes;
 }
 
 /// @nodoc
@@ -653,6 +659,7 @@ class _$StaffMemberCopyWithImpl<$Res, $Val extends StaffMember>
     Object? role = null,
     Object? attributes = null,
     Object? contract = freezed,
+    Object? previousAttributes = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -684,6 +691,10 @@ class _$StaffMemberCopyWithImpl<$Res, $Val extends StaffMember>
                 ? _value.contract
                 : contract // ignore: cast_nullable_to_non_nullable
                       as StaffContract?,
+            previousAttributes: freezed == previousAttributes
+                ? _value.previousAttributes
+                : previousAttributes // ignore: cast_nullable_to_non_nullable
+                      as StaffAttributes?,
           )
           as $Val,
     );
@@ -712,6 +723,20 @@ class _$StaffMemberCopyWithImpl<$Res, $Val extends StaffMember>
       return _then(_value.copyWith(contract: value) as $Val);
     });
   }
+
+  /// Create a copy of StaffMember
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $StaffAttributesCopyWith<$Res>? get previousAttributes {
+    if (_value.previousAttributes == null) {
+      return null;
+    }
+
+    return $StaffAttributesCopyWith<$Res>(_value.previousAttributes!, (value) {
+      return _then(_value.copyWith(previousAttributes: value) as $Val);
+    });
+  }
 }
 
 /// @nodoc
@@ -731,12 +756,15 @@ abstract class _$$StaffMemberImplCopyWith<$Res>
     StaffRole role,
     StaffAttributes attributes,
     StaffContract? contract,
+    StaffAttributes? previousAttributes,
   });
 
   @override
   $StaffAttributesCopyWith<$Res> get attributes;
   @override
   $StaffContractCopyWith<$Res>? get contract;
+  @override
+  $StaffAttributesCopyWith<$Res>? get previousAttributes;
 }
 
 /// @nodoc
@@ -760,6 +788,7 @@ class __$$StaffMemberImplCopyWithImpl<$Res>
     Object? role = null,
     Object? attributes = null,
     Object? contract = freezed,
+    Object? previousAttributes = freezed,
   }) {
     return _then(
       _$StaffMemberImpl(
@@ -791,6 +820,10 @@ class __$$StaffMemberImplCopyWithImpl<$Res>
             ? _value.contract
             : contract // ignore: cast_nullable_to_non_nullable
                   as StaffContract?,
+        previousAttributes: freezed == previousAttributes
+            ? _value.previousAttributes
+            : previousAttributes // ignore: cast_nullable_to_non_nullable
+                  as StaffAttributes?,
       ),
     );
   }
@@ -807,6 +840,7 @@ class _$StaffMemberImpl implements _StaffMember {
     required this.role,
     this.attributes = const StaffAttributes(),
     this.contract,
+    this.previousAttributes,
   });
 
   factory _$StaffMemberImpl.fromJson(Map<String, dynamic> json) =>
@@ -828,9 +862,14 @@ class _$StaffMemberImpl implements _StaffMember {
   @override
   final StaffContract? contract;
 
+  /// Previous attributes captured before the last growth tick.
+  /// Used by the Development screen to compute growth deltas.
+  @override
+  final StaffAttributes? previousAttributes;
+
   @override
   String toString() {
-    return 'StaffMember(id: $id, name: $name, nationality: $nationality, age: $age, role: $role, attributes: $attributes, contract: $contract)';
+    return 'StaffMember(id: $id, name: $name, nationality: $nationality, age: $age, role: $role, attributes: $attributes, contract: $contract, previousAttributes: $previousAttributes)';
   }
 
   @override
@@ -847,7 +886,9 @@ class _$StaffMemberImpl implements _StaffMember {
             (identical(other.attributes, attributes) ||
                 other.attributes == attributes) &&
             (identical(other.contract, contract) ||
-                other.contract == contract));
+                other.contract == contract) &&
+            (identical(other.previousAttributes, previousAttributes) ||
+                other.previousAttributes == previousAttributes));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -861,6 +902,7 @@ class _$StaffMemberImpl implements _StaffMember {
     role,
     attributes,
     contract,
+    previousAttributes,
   );
 
   /// Create a copy of StaffMember
@@ -886,6 +928,7 @@ abstract class _StaffMember implements StaffMember {
     required final StaffRole role,
     final StaffAttributes attributes,
     final StaffContract? contract,
+    final StaffAttributes? previousAttributes,
   }) = _$StaffMemberImpl;
 
   factory _StaffMember.fromJson(Map<String, dynamic> json) =
@@ -905,6 +948,11 @@ abstract class _StaffMember implements StaffMember {
   StaffAttributes get attributes;
   @override
   StaffContract? get contract;
+
+  /// Previous attributes captured before the last growth tick.
+  /// Used by the Development screen to compute growth deltas.
+  @override
+  StaffAttributes? get previousAttributes;
 
   /// Create a copy of StaffMember
   /// with the given fields replaced by the non-null parameter values.

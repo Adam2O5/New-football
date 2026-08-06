@@ -120,6 +120,8 @@ _$PlayerImpl _$$PlayerImplFromJson(Map<String, dynamic> json) => _$PlayerImpl(
           .toList() ??
       const [],
   tradeValue: (json['tradeValue'] as num?)?.toInt() ?? 0,
+  previousOvr: (json['previousOvr'] as num?)?.toInt(),
+  previousPotential: (json['previousPotential'] as num?)?.toDouble(),
 );
 
 Map<String, dynamic> _$$PlayerImplToJson(_$PlayerImpl instance) =>
@@ -138,6 +140,8 @@ Map<String, dynamic> _$$PlayerImplToJson(_$PlayerImpl instance) =>
       'hidden': instance.hidden,
       'seasonStats': instance.seasonStats,
       'tradeValue': instance.tradeValue,
+      'previousOvr': instance.previousOvr,
+      'previousPotential': instance.previousPotential,
     };
 
 const _$PositionEnumMap = {

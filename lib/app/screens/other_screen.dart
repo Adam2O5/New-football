@@ -24,7 +24,7 @@ class OtherScreen extends StatelessWidget {
       (Icons.person_search_outlined, l10n.other_freeAgency, null),
       (Icons.emoji_people_outlined, l10n.other_prospects, '/game/prospects'),
       (Icons.groups_outlined, l10n.other_staff, null),
-      (Icons.trending_up, l10n.other_development, null),
+      (Icons.trending_up, l10n.other_development, '/game/development'),
       (Icons.bar_chart, l10n.other_playerStats, null),
       (Icons.emoji_events_outlined, l10n.other_rewards, null),
       (Icons.search, l10n.other_search, null),
