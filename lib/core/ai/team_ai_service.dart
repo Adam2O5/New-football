@@ -9,18 +9,20 @@ import 'package:new_football/core/services/trade_service.dart';
 import 'package:new_football/core/tactics/tactics_setup.dart';
 
 /// AI decision helpers (`docs/AI_behaviour.md`).
+///
+/// V1: jeden model AI — bez poziomów trudności i bez profili menedżera.
+/// Brak biasu przeciw graczowi (§1.3).
 class TeamAiService {
   TeamAiService({
     this.balance = BalanceConfig.defaults,
-    this.difficulty = Difficulty.normal,
     Random? random,
   }) : _random = random ?? Random();
 
   final BalanceConfig balance;
-  final Difficulty difficulty;
   final Random _random;
 
-  double get _valueMargin => difficulty == Difficulty.hard ? 0.20 : 0.12;
+  /// Fixed value margin for trade acceptance (AI_behaviour.md §1: no difficulty).
+  static const double _valueMargin = 0.12;
 
   bool shouldAcceptTrade({
     required Team self,
@@ -29,7 +31,6 @@ class TeamAiService {
     required TradeService tradeService,
     required int currentYear,
   }) {
-    final profile = self.ai?.managerProfile ?? ManagerProfile.balanced;
     final ourValue = proposal.assetsFromB.fold<int>(
       0,
       (s, a) => s + tradeService.assetValue(other, a, currentYear: currentYear),
@@ -41,23 +42,13 @@ class TeamAiService {
     if (theirValue == 0) return ourValue > 0;
 
     final ratio = ourValue / theirValue;
-    final need = switch (profile) {
-      ManagerProfile.cautious => 1.0 + _valueMargin,
-      ManagerProfile.balanced => 1.0,
-      ManagerProfile.aggressive => 1.0 - _valueMargin * 0.5,
-    };
-
-    if (difficulty == Difficulty.hard && _isRival(self, other)) {
-      return ratio >= need + 0.15;
-    }
-    return ratio >= need;
+    // V1: single acceptance threshold, no profile differentiation.
+    return ratio >= 1.0 - _valueMargin * 0.5;
   }
 
   ContractOffer makeFaOffer(Player player, ContractService contracts) {
     final want = contracts.playerWant(player);
-    final mult = difficulty == Difficulty.hard
-        ? 1.1 + _random.nextDouble() * 0.15
-        : 0.95 + _random.nextDouble() * 0.15;
+    final mult = 0.95 + _random.nextDouble() * 0.15;
     return ContractOffer(
       salary: (want * mult).round().clamp(
         balance.salaryCap.minSalary,
@@ -97,8 +88,7 @@ class TeamAiService {
   }
 
   TacticsSetup counterTactics(TacticsSetup opponent) {
-    if (difficulty != Difficulty.hard) return const TacticsSetup();
-    // Prefer a formation that counters opponent if listed.
+    // V1: always attempt counter-formation from matchup table.
     for (final m in balance.tactics.formationMatchups) {
       if (m.formationB == opponent.formation) {
         return TacticsSetup(
@@ -115,6 +105,4 @@ class TeamAiService {
       pressing: PressingIntensity.high,
     );
   }
-
-  bool _isRival(Team a, Team b) => a.conference == b.conference;
 }

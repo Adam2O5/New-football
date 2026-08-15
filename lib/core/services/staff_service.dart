@@ -1,13 +1,11 @@
 import 'dart:math';
 
-import 'package:uuid/uuid.dart';
-
 import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
-import 'package:new_football/core/models/message.dart';
 import 'package:new_football/core/models/staff.dart';
 import 'package:new_football/core/models/team.dart';
+import 'package:new_football/core/services/message_service.dart';
 
 enum StaffReaction { accept, hardReject, waiting, counter }
 
@@ -21,12 +19,13 @@ class StaffOffer {
 /// Sztab: zatrudnianie, zwalnianie, rozwój i emerytury (`docs/staff_rules.md`,
 /// `docs/contract_signing.md` §7–9).
 class StaffService {
-  StaffService({this.balance = BalanceConfig.defaults, Random? random})
-    : _random = random ?? Random();
+  StaffService({this.balance = BalanceConfig.defaults, Random? random, MessageService? messages})
+    : _random = random ?? Random(),
+      _messages = messages ?? MessageService();
 
   final BalanceConfig balance;
   final Random _random;
-  final _uuid = const Uuid();
+  final MessageService _messages;
 
   double marketSalary(StaffMember member) =>
       balance.staff.salaryFor(member.role, member.overall);
@@ -177,18 +176,13 @@ class StaffService {
     String title,
     String body,
   ) {
-    final level = league.messageSettings.levelFor(type);
-    if (level == NotificationLevel.muted) return league;
-    final msg = GameMessage(
-      id: _uuid.v4(),
+    return _messages.send(
+      league,
       type: type,
-      priority: level == NotificationLevel.important
-          ? MessagePriority.urgent
-          : MessagePriority.normal,
-      title: title,
-      body: body,
-      week: league.currentWeek,
+      domain: MessageDomain.staff,
+      titleKey: 'msg_${type.name}_title',
+      bodyKey: 'msg_${type.name}_body',
+      args: {'_legacyTitle': title, '_legacyBody': body},
     );
-    return league.copyWith(inbox: league.inbox.addMessage(msg));
   }
 }

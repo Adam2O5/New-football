@@ -10,7 +10,6 @@ String seasonPhaseLabel(BuildContext context, SeasonPhase phase) {
     SeasonPhase.regular => l10n.seasonPhase_regular,
     SeasonPhase.playIn => l10n.seasonPhase_playIn,
     SeasonPhase.playoff => l10n.seasonPhase_playoff,
-    SeasonPhase.draft => l10n.seasonPhase_draft,
     SeasonPhase.offseason => l10n.seasonPhase_offseason,
   };
 }

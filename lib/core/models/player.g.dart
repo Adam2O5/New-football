@@ -119,7 +119,10 @@ _$PlayerImpl _$$PlayerImplFromJson(Map<String, dynamic> json) => _$PlayerImpl(
           ?.map((e) => PlayerSeasonStats.fromJson(e as Map<String, dynamic>))
           .toList() ??
       const [],
-  tradeValue: (json['tradeValue'] as num?)?.toInt() ?? 0,
+  pointValue: (json['pointValue'] as num?)?.toInt() ?? 0,
+  optimalRole: AssignedRole.fromJson(
+    json['optimalRole'] as Map<String, dynamic>,
+  ),
   previousOvr: (json['previousOvr'] as num?)?.toInt(),
   previousPotential: (json['previousPotential'] as num?)?.toDouble(),
 );
@@ -139,7 +142,8 @@ Map<String, dynamic> _$$PlayerImplToJson(_$PlayerImpl instance) =>
       'state': instance.state,
       'hidden': instance.hidden,
       'seasonStats': instance.seasonStats,
-      'tradeValue': instance.tradeValue,
+      'pointValue': instance.pointValue,
+      'optimalRole': instance.optimalRole,
       'previousOvr': instance.previousOvr,
       'previousPotential': instance.previousPotential,
     };

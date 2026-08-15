@@ -23,6 +23,9 @@ _$ProspectImpl _$$ProspectImplFromJson(Map<String, dynamic> json) =>
       injuryProne: (json['injuryProne'] as num).toInt(),
       determination: (json['determination'] as num).toInt(),
       personality: $enumDecode(_$PlayerPersonalityEnumMap, json['personality']),
+      optimalRole: AssignedRole.fromJson(
+        json['optimalRole'] as Map<String, dynamic>,
+      ),
     );
 
 Map<String, dynamic> _$$ProspectImplToJson(_$ProspectImpl instance) =>
@@ -40,6 +43,7 @@ Map<String, dynamic> _$$ProspectImplToJson(_$ProspectImpl instance) =>
       'injuryProne': instance.injuryProne,
       'determination': instance.determination,
       'personality': _$PlayerPersonalityEnumMap[instance.personality]!,
+      'optimalRole': instance.optimalRole,
     };
 
 const _$NationalityEnumMap = {
@@ -181,7 +185,10 @@ Map<String, dynamic> _$$PlayInResultImplToJson(_$PlayInResultImpl instance) =>
       'playoffSeed8TeamId': instance.playoffSeed8TeamId,
     };
 
-const _$ConferenceEnumMap = {Conference.europe: 'europe', Conference.restOfTheWorld: 'restOfTheWorld'};
+const _$ConferenceEnumMap = {
+  Conference.europe: 'europe',
+  Conference.restOfTheWorld: 'restOfTheWorld',
+};
 
 _$PlayoffBracketImpl _$$PlayoffBracketImplFromJson(Map<String, dynamic> json) =>
     _$PlayoffBracketImpl(
@@ -286,7 +293,6 @@ const _$SeasonPhaseEnumMap = {
   SeasonPhase.regular: 'regular',
   SeasonPhase.playIn: 'playIn',
   SeasonPhase.playoff: 'playoff',
-  SeasonPhase.draft: 'draft',
   SeasonPhase.offseason: 'offseason',
 };
 

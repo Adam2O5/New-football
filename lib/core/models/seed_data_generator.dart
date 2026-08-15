@@ -135,7 +135,7 @@ class SeedDataGenerator {
       ownedPicks: _generateOwnedPicks(teamId, seasonYear),
       ai: isPlayer
           ? null
-          : TeamAiConfig(managerProfile: ManagerProfile.values[rng.nextInt(3)]),
+          : const TeamAiConfig(),
     );
   }
 
@@ -268,6 +268,7 @@ class SeedDataGenerator {
           .values[rng.nextInt(PlayerPersonality.values.length)],
       potentialStars: roundedStars,
       heightCm: heightCm,
+      optimalRole: _randomRoleFor(position, rng),
       contract: Contract(
         salary: salary,
         yearsRemaining: 1 + rng.nextInt(4),
@@ -288,7 +289,7 @@ class SeedDataGenerator {
         developmentOutcome: rollDevelopmentOutcome(determination, rng),
       ),
     );
-    return player.recalculateTradeValue();
+    return player.recalculatePointValue();
   }
 
   int _heightCmFor(Position position, Random rng) {
@@ -304,6 +305,12 @@ class SeedDataGenerator {
 
   int _attr(int base, Random rng, {int boost = 0}) =>
       (base + boost + rng.nextInt(10) - 5).clamp(50, 99);
+
+  /// Random optimal role for a given position (`data_generation.md`).
+  AssignedRole _randomRoleFor(Position position, Random rng) {
+    final roles = rolesForPosition(position);
+    return roles[rng.nextInt(roles.length)];
+  }
 
   DraftClass generateDraftClass({required int year, int prospectCount = 120}) {
     final prospects = <Prospect>[];
@@ -331,6 +338,7 @@ class SeedDataGenerator {
           nationality: nationality,
           position: pos,
           age: 18 + _random.nextInt(3),
+          optimalRole: _randomRoleFor(pos, _random),
           attributes: pos == Position.gk
               ? PlayerAttributes.goalkeeper(
                   stats: GoalkeeperAttributes(

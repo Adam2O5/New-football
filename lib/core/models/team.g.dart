@@ -8,12 +8,6 @@ part of 'team.dart';
 
 _$TeamAiConfigImpl _$$TeamAiConfigImplFromJson(Map<String, dynamic> json) =>
     _$TeamAiConfigImpl(
-      managerProfile:
-          $enumDecodeNullable(
-            _$ManagerProfileEnumMap,
-            json['managerProfile'],
-          ) ??
-          ManagerProfile.balanced,
       aggressionLevel: (json['aggressionLevel'] as num?)?.toDouble() ?? 0.5,
       riskTolerance: (json['riskTolerance'] as num?)?.toDouble() ?? 0.5,
       playerPatternMemory:
@@ -22,17 +16,10 @@ _$TeamAiConfigImpl _$$TeamAiConfigImplFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$$TeamAiConfigImplToJson(_$TeamAiConfigImpl instance) =>
     <String, dynamic>{
-      'managerProfile': _$ManagerProfileEnumMap[instance.managerProfile]!,
       'aggressionLevel': instance.aggressionLevel,
       'riskTolerance': instance.riskTolerance,
       'playerPatternMemory': instance.playerPatternMemory,
     };
-
-const _$ManagerProfileEnumMap = {
-  ManagerProfile.cautious: 'cautious',
-  ManagerProfile.balanced: 'balanced',
-  ManagerProfile.aggressive: 'aggressive',
-};
 
 _$TeamImpl _$$TeamImplFromJson(Map<String, dynamic> json) => _$TeamImpl(
   id: json['id'] as String,
@@ -93,4 +80,7 @@ Map<String, dynamic> _$$TeamImplToJson(_$TeamImpl instance) =>
       'ai': instance.ai,
     };
 
-const _$ConferenceEnumMap = {Conference.europe: 'europe', Conference.restOfTheWorld: 'restOfTheWorld'};
+const _$ConferenceEnumMap = {
+  Conference.europe: 'europe',
+  Conference.restOfTheWorld: 'restOfTheWorld',
+};

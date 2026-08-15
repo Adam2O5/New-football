@@ -35,6 +35,10 @@ mixin _$Prospect {
   int get determination => throw _privateConstructorUsedError;
   PlayerPersonality get personality => throw _privateConstructorUsedError;
 
+  /// Optymalna rola taktyczna (`player_management.md`).
+  /// Ujawniana przez Combine (`offseason.md` §7).
+  AssignedRole get optimalRole => throw _privateConstructorUsedError;
+
   /// Serializes this Prospect to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
@@ -64,9 +68,11 @@ abstract class $ProspectCopyWith<$Res> {
     int injuryProne,
     int determination,
     PlayerPersonality personality,
+    AssignedRole optimalRole,
   });
 
   $PlayerAttributesCopyWith<$Res> get attributes;
+  $AssignedRoleCopyWith<$Res> get optimalRole;
 }
 
 /// @nodoc
@@ -97,6 +103,7 @@ class _$ProspectCopyWithImpl<$Res, $Val extends Prospect>
     Object? injuryProne = null,
     Object? determination = null,
     Object? personality = null,
+    Object? optimalRole = null,
   }) {
     return _then(
       _value.copyWith(
@@ -152,6 +159,10 @@ class _$ProspectCopyWithImpl<$Res, $Val extends Prospect>
                 ? _value.personality
                 : personality // ignore: cast_nullable_to_non_nullable
                       as PlayerPersonality,
+            optimalRole: null == optimalRole
+                ? _value.optimalRole
+                : optimalRole // ignore: cast_nullable_to_non_nullable
+                      as AssignedRole,
           )
           as $Val,
     );
@@ -164,6 +175,16 @@ class _$ProspectCopyWithImpl<$Res, $Val extends Prospect>
   $PlayerAttributesCopyWith<$Res> get attributes {
     return $PlayerAttributesCopyWith<$Res>(_value.attributes, (value) {
       return _then(_value.copyWith(attributes: value) as $Val);
+    });
+  }
+
+  /// Create a copy of Prospect
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $AssignedRoleCopyWith<$Res> get optimalRole {
+    return $AssignedRoleCopyWith<$Res>(_value.optimalRole, (value) {
+      return _then(_value.copyWith(optimalRole: value) as $Val);
     });
   }
 }
@@ -191,10 +212,13 @@ abstract class _$$ProspectImplCopyWith<$Res>
     int injuryProne,
     int determination,
     PlayerPersonality personality,
+    AssignedRole optimalRole,
   });
 
   @override
   $PlayerAttributesCopyWith<$Res> get attributes;
+  @override
+  $AssignedRoleCopyWith<$Res> get optimalRole;
 }
 
 /// @nodoc
@@ -224,6 +248,7 @@ class __$$ProspectImplCopyWithImpl<$Res>
     Object? injuryProne = null,
     Object? determination = null,
     Object? personality = null,
+    Object? optimalRole = null,
   }) {
     return _then(
       _$ProspectImpl(
@@ -279,6 +304,10 @@ class __$$ProspectImplCopyWithImpl<$Res>
             ? _value.personality
             : personality // ignore: cast_nullable_to_non_nullable
                   as PlayerPersonality,
+        optimalRole: null == optimalRole
+            ? _value.optimalRole
+            : optimalRole // ignore: cast_nullable_to_non_nullable
+                  as AssignedRole,
       ),
     );
   }
@@ -301,6 +330,7 @@ class _$ProspectImpl implements _Prospect {
     required this.injuryProne,
     required this.determination,
     required this.personality,
+    required this.optimalRole,
   });
 
   factory _$ProspectImpl.fromJson(Map<String, dynamic> json) =>
@@ -337,9 +367,14 @@ class _$ProspectImpl implements _Prospect {
   @override
   final PlayerPersonality personality;
 
+  /// Optymalna rola taktyczna (`player_management.md`).
+  /// Ujawniana przez Combine (`offseason.md` §7).
+  @override
+  final AssignedRole optimalRole;
+
   @override
   String toString() {
-    return 'Prospect(id: $id, name: $name, nationality: $nationality, position: $position, age: $age, attributes: $attributes, scoutGrade: $scoutGrade, combineScore: $combineScore, potentialStars: $potentialStars, heightCm: $heightCm, injuryProne: $injuryProne, determination: $determination, personality: $personality)';
+    return 'Prospect(id: $id, name: $name, nationality: $nationality, position: $position, age: $age, attributes: $attributes, scoutGrade: $scoutGrade, combineScore: $combineScore, potentialStars: $potentialStars, heightCm: $heightCm, injuryProne: $injuryProne, determination: $determination, personality: $personality, optimalRole: $optimalRole)';
   }
 
   @override
@@ -369,7 +404,9 @@ class _$ProspectImpl implements _Prospect {
             (identical(other.determination, determination) ||
                 other.determination == determination) &&
             (identical(other.personality, personality) ||
-                other.personality == personality));
+                other.personality == personality) &&
+            (identical(other.optimalRole, optimalRole) ||
+                other.optimalRole == optimalRole));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -389,6 +426,7 @@ class _$ProspectImpl implements _Prospect {
     injuryProne,
     determination,
     personality,
+    optimalRole,
   );
 
   /// Create a copy of Prospect
@@ -420,6 +458,7 @@ abstract class _Prospect implements Prospect {
     required final int injuryProne,
     required final int determination,
     required final PlayerPersonality personality,
+    required final AssignedRole optimalRole,
   }) = _$ProspectImpl;
 
   factory _Prospect.fromJson(Map<String, dynamic> json) =
@@ -451,6 +490,11 @@ abstract class _Prospect implements Prospect {
   int get determination;
   @override
   PlayerPersonality get personality;
+
+  /// Optymalna rola taktyczna (`player_management.md`).
+  /// Ujawniana przez Combine (`offseason.md` §7).
+  @override
+  AssignedRole get optimalRole;
 
   /// Create a copy of Prospect
   /// with the given fields replaced by the non-null parameter values.

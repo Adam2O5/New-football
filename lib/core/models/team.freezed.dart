@@ -21,7 +21,6 @@ TeamAiConfig _$TeamAiConfigFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$TeamAiConfig {
-  ManagerProfile get managerProfile => throw _privateConstructorUsedError;
   double get aggressionLevel => throw _privateConstructorUsedError;
   double get riskTolerance => throw _privateConstructorUsedError;
   Map<String, dynamic> get playerPatternMemory =>
@@ -45,7 +44,6 @@ abstract class $TeamAiConfigCopyWith<$Res> {
   ) = _$TeamAiConfigCopyWithImpl<$Res, TeamAiConfig>;
   @useResult
   $Res call({
-    ManagerProfile managerProfile,
     double aggressionLevel,
     double riskTolerance,
     Map<String, dynamic> playerPatternMemory,
@@ -67,17 +65,12 @@ class _$TeamAiConfigCopyWithImpl<$Res, $Val extends TeamAiConfig>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? managerProfile = null,
     Object? aggressionLevel = null,
     Object? riskTolerance = null,
     Object? playerPatternMemory = null,
   }) {
     return _then(
       _value.copyWith(
-            managerProfile: null == managerProfile
-                ? _value.managerProfile
-                : managerProfile // ignore: cast_nullable_to_non_nullable
-                      as ManagerProfile,
             aggressionLevel: null == aggressionLevel
                 ? _value.aggressionLevel
                 : aggressionLevel // ignore: cast_nullable_to_non_nullable
@@ -106,7 +99,6 @@ abstract class _$$TeamAiConfigImplCopyWith<$Res>
   @override
   @useResult
   $Res call({
-    ManagerProfile managerProfile,
     double aggressionLevel,
     double riskTolerance,
     Map<String, dynamic> playerPatternMemory,
@@ -127,17 +119,12 @@ class __$$TeamAiConfigImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? managerProfile = null,
     Object? aggressionLevel = null,
     Object? riskTolerance = null,
     Object? playerPatternMemory = null,
   }) {
     return _then(
       _$TeamAiConfigImpl(
-        managerProfile: null == managerProfile
-            ? _value.managerProfile
-            : managerProfile // ignore: cast_nullable_to_non_nullable
-                  as ManagerProfile,
         aggressionLevel: null == aggressionLevel
             ? _value.aggressionLevel
             : aggressionLevel // ignore: cast_nullable_to_non_nullable
@@ -159,7 +146,6 @@ class __$$TeamAiConfigImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$TeamAiConfigImpl implements _TeamAiConfig {
   const _$TeamAiConfigImpl({
-    this.managerProfile = ManagerProfile.balanced,
     this.aggressionLevel = 0.5,
     this.riskTolerance = 0.5,
     final Map<String, dynamic> playerPatternMemory = const {},
@@ -168,9 +154,6 @@ class _$TeamAiConfigImpl implements _TeamAiConfig {
   factory _$TeamAiConfigImpl.fromJson(Map<String, dynamic> json) =>
       _$$TeamAiConfigImplFromJson(json);
 
-  @override
-  @JsonKey()
-  final ManagerProfile managerProfile;
   @override
   @JsonKey()
   final double aggressionLevel;
@@ -189,7 +172,7 @@ class _$TeamAiConfigImpl implements _TeamAiConfig {
 
   @override
   String toString() {
-    return 'TeamAiConfig(managerProfile: $managerProfile, aggressionLevel: $aggressionLevel, riskTolerance: $riskTolerance, playerPatternMemory: $playerPatternMemory)';
+    return 'TeamAiConfig(aggressionLevel: $aggressionLevel, riskTolerance: $riskTolerance, playerPatternMemory: $playerPatternMemory)';
   }
 
   @override
@@ -197,8 +180,6 @@ class _$TeamAiConfigImpl implements _TeamAiConfig {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$TeamAiConfigImpl &&
-            (identical(other.managerProfile, managerProfile) ||
-                other.managerProfile == managerProfile) &&
             (identical(other.aggressionLevel, aggressionLevel) ||
                 other.aggressionLevel == aggressionLevel) &&
             (identical(other.riskTolerance, riskTolerance) ||
@@ -213,7 +194,6 @@ class _$TeamAiConfigImpl implements _TeamAiConfig {
   @override
   int get hashCode => Object.hash(
     runtimeType,
-    managerProfile,
     aggressionLevel,
     riskTolerance,
     const DeepCollectionEquality().hash(_playerPatternMemory),
@@ -235,7 +215,6 @@ class _$TeamAiConfigImpl implements _TeamAiConfig {
 
 abstract class _TeamAiConfig implements TeamAiConfig {
   const factory _TeamAiConfig({
-    final ManagerProfile managerProfile,
     final double aggressionLevel,
     final double riskTolerance,
     final Map<String, dynamic> playerPatternMemory,
@@ -244,8 +223,6 @@ abstract class _TeamAiConfig implements TeamAiConfig {
   factory _TeamAiConfig.fromJson(Map<String, dynamic> json) =
       _$TeamAiConfigImpl.fromJson;
 
-  @override
-  ManagerProfile get managerProfile;
   @override
   double get aggressionLevel;
   @override

@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import 'package:new_football/app/widgets/screen_background.dart';
 import 'package:new_football/app/providers/game_provider.dart';
-import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/services/game_factory.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
@@ -17,7 +16,6 @@ class NewGameScreen extends ConsumerStatefulWidget {
 
 class _NewGameScreenState extends ConsumerState<NewGameScreen> {
   final _nameCtrl = TextEditingController();
-  Difficulty _difficulty = Difficulty.normal;
   String? _selectedTeamId;
   bool _creating = false;
   bool _nameInitialized = false;
@@ -44,7 +42,6 @@ class _NewGameScreenState extends ConsumerState<NewGameScreen> {
           NewGameRequest(
             saveName: name,
             playerTeamId: teamId,
-            difficulty: _difficulty,
           ),
         );
     if (!mounted) return;
@@ -91,24 +88,6 @@ class _NewGameScreenState extends ConsumerState<NewGameScreen> {
               TextField(
                 controller: _nameCtrl,
                 decoration: InputDecoration(labelText: l10n.newGame_saveName),
-              ),
-              const SizedBox(height: 16),
-              DropdownButtonFormField<Difficulty>(
-                value: _difficulty,
-                decoration: InputDecoration(labelText: l10n.newGame_difficulty),
-                items: [
-                  DropdownMenuItem(
-                    value: Difficulty.normal,
-                    child: Text(l10n.newGame_difficultyNormal),
-                  ),
-                  DropdownMenuItem(
-                    value: Difficulty.hard,
-                    child: Text(l10n.newGame_difficultyHard),
-                  ),
-                ],
-                onChanged: (v) {
-                  if (v != null) setState(() => _difficulty = v);
-                },
               ),
               const SizedBox(height: 20),
               Text(

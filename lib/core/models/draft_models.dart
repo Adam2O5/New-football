@@ -32,6 +32,10 @@ class Prospect with _$Prospect {
     required int injuryProne,
     required int determination,
     required PlayerPersonality personality,
+
+    /// Optymalna rola taktyczna (`player_management.md`).
+    /// Ujawniana przez Combine (`offseason.md` §7).
+    required AssignedRole optimalRole,
   }) = _Prospect;
 
   factory Prospect.fromJson(Map<String, dynamic> json) =>
@@ -56,6 +60,7 @@ extension ProspectX on Prospect {
       personality: personality,
       potentialStars: potentialStars,
       heightCm: heightCm,
+      optimalRole: optimalRole,
       state: PlayerState(
         stamina: 100,
         form: 1 + rng.nextInt(10),

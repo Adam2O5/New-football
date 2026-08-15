@@ -67,7 +67,7 @@ class _TradeScreenState extends ConsumerState<TradeScreen> {
                         l10n.trade_playerOption(
                           p.name,
                           p.position.code,
-                          p.tradeValue,
+                          p.pointValue,
                         ),
                       ),
                     ),
@@ -116,7 +116,7 @@ class _TradeScreenState extends ConsumerState<TradeScreen> {
                         l10n.trade_playerOption(
                           p.name,
                           p.position.code,
-                          p.tradeValue,
+                          p.pointValue,
                         ),
                       ),
                     ),
@@ -217,7 +217,7 @@ class _TradeScreenState extends ConsumerState<TradeScreen> {
       return;
     }
     final currentYear = league.currentSeason.year;
-    final aiService = TeamAiService(difficulty: league.difficulty);
+    final aiService = TeamAiService();
     // shouldAcceptTrade values `assetsFromA` against `self`'s roster and
     // `assetsFromB` against `other`'s — mirror the proposal so `self`
     // (the target) is evaluated on what it actually gives/receives.

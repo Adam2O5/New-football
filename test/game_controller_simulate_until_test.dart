@@ -99,10 +99,16 @@ void main() {
   });
 
   test('draft pick pending stops the batch for the player\'s turn', () async {
-    // Inject a minimal draft state where it's the player team's turn —
-    // GameController must not simulate past this without a pick.
+    // Postaw kalendarz dokładnie na dniu draftu (poniedziałek tyg. 46 —
+    // `game_calendar.md`) i wstrzyknij minimalny draftState, w którym pick
+    // nr 1 należy do drużyny gracza. GameController nie może przesymulować
+    // tego dnia bez wyboru — batch musi stanąć na `event`/`draft` zanim
+    // upłynie choć jeden dzień.
+    const draftWeek = 46;
     await controller.updateLeague(
       (l) => l.copyWith(
+        currentWeek: draftWeek,
+        currentDay: 1,
         currentSeason: l.currentSeason.copyWith(
           draftState: DraftState(
             year: l.currentSeason.year,

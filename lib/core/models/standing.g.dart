@@ -46,4 +46,7 @@ Map<String, dynamic> _$$ConferenceStandingsImplToJson(
   'standings': instance.standings,
 };
 
-const _$ConferenceEnumMap = {Conference.europe: 'europe', Conference.restOfTheWorld: 'restOfTheWorld'};
+const _$ConferenceEnumMap = {
+  Conference.europe: 'europe',
+  Conference.restOfTheWorld: 'restOfTheWorld',
+};

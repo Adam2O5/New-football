@@ -14,7 +14,6 @@ part 'team.g.dart';
 @freezed
 class TeamAiConfig with _$TeamAiConfig {
   const factory TeamAiConfig({
-    @Default(ManagerProfile.balanced) ManagerProfile managerProfile,
     @Default(0.5) double aggressionLevel,
     @Default(0.5) double riskTolerance,
     @Default({}) Map<String, dynamic> playerPatternMemory,

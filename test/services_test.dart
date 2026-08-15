@@ -51,7 +51,7 @@ void main() {
   });
 
   test('TeamAiService autoSelectLineup includes GK', () {
-    final ai = TeamAiService(difficulty: Difficulty.hard);
+    final ai = TeamAiService();
     final team = ai.autoSelectLineup(league.teams[2]);
     expect(team.lineupPlayerIds.length, 11);
     final xi = team.startingEleven;
@@ -73,59 +73,6 @@ void main() {
     expect(validation.ok, isFalse);
     expect(validation.reason, contains('zamknięte'));
   });
-
-  // test('TeamAiService rejects a lopsided trade and accepts a fair one', () {
-  //   final selfTeam = league.teams[0].copyWith(
-  //     ai: const TeamAiConfig(managerProfile: ManagerProfile.balanced),
-  //   );
-  //   final otherTeam = league.teams[1];
-  //   final svc = TradeService();
-  //   final ai = TeamAiService(difficulty: Difficulty.normal);
-
-  //   // Draft picks value deterministically by round (assetValue ignores the
-  //   // team for picks), so this is independent of the seeded rosters'
-  //   // relative strength. shouldAcceptTrade values assetsFromA against
-  //   // `self` and assetsFromB against `other`.
-  //   final lopsided = const TradeProposal(
-  //     teamAId: 'self',
-  //     teamBId: 'other',
-  //     assetsFromA: [
-  //       TradeAsset.pick(pickYear: 2027, pickRound: 1, originalTeamId: 'self'),
-  //     ],
-  //     assetsFromB: [
-  //       TradeAsset.pick(pickYear: 2027, pickRound: 3, originalTeamId: 'other'),
-  //     ],
-  //   );
-  //   expect(
-  //     ai.shouldAcceptTrade(
-  //       self: selfTeam,
-  //       other: otherTeam,
-  //       proposal: lopsided,
-  //       tradeService: svc,
-  //     ),
-  //     isFalse,
-  //   );
-
-  //   final generous = const TradeProposal(
-  //     teamAId: 'self',
-  //     teamBId: 'other',
-  //     assetsFromA: [
-  //       TradeAsset.pick(pickYear: 2027, pickRound: 3, originalTeamId: 'self'),
-  //     ],
-  //     assetsFromB: [
-  //       TradeAsset.pick(pickYear: 2027, pickRound: 1, originalTeamId: 'other'),
-  //     ],
-  //   );
-  //   expect(
-  //     ai.shouldAcceptTrade(
-  //       self: selfTeam,
-  //       other: otherTeam,
-  //       proposal: generous,
-  //       tradeService: svc,
-  //     ),
-  //     isTrue,
-  //   );
-  // });
 
   test(
     'DaySimulator ticks player development weekly, not just at rollover',

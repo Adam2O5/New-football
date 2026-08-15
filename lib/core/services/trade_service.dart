@@ -82,7 +82,7 @@ class TradeService {
     if (asset.isPlayer) {
       final matches = team.roster.where((p) => p.id == asset.playerId);
       if (matches.isEmpty) return 0;
-      return matches.first.computeTradeValue(balance);
+      return matches.first.computePointValue(balance);
     }
     final owned = _findOwnedPick(team, asset);
     if (owned != null) {

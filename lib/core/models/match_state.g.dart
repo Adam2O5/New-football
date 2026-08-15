@@ -38,7 +38,6 @@ const _$SeasonPhaseEnumMap = {
   SeasonPhase.regular: 'regular',
   SeasonPhase.playIn: 'playIn',
   SeasonPhase.playoff: 'playoff',
-  SeasonPhase.draft: 'draft',
   SeasonPhase.offseason: 'offseason',
 };
 

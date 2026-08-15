@@ -19,9 +19,6 @@ _$LeagueStateImpl _$$LeagueStateImplFromJson(Map<String, dynamic> json) =>
               ?.map((e) => SeasonHistory.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
-      difficulty:
-          $enumDecodeNullable(_$DifficultyEnumMap, json['difficulty']) ??
-          Difficulty.normal,
       playerTeamId: json['playerTeamId'] as String?,
       currentRound: (json['currentRound'] as num?)?.toInt() ?? 0,
       currentWeek: (json['currentWeek'] as num?)?.toInt() ?? 1,
@@ -44,6 +41,11 @@ _$LeagueStateImpl _$$LeagueStateImplFromJson(Map<String, dynamic> json) =>
               ?.map((e) => Player.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
+      strengthTable: json['strengthTable'] == null
+          ? null
+          : LeagueStrengthTable.fromJson(
+              json['strengthTable'] as Map<String, dynamic>,
+            ),
     );
 
 Map<String, dynamic> _$$LeagueStateImplToJson(_$LeagueStateImpl instance) =>
@@ -51,7 +53,6 @@ Map<String, dynamic> _$$LeagueStateImplToJson(_$LeagueStateImpl instance) =>
       'teams': instance.teams,
       'currentSeason': instance.currentSeason,
       'history': instance.history,
-      'difficulty': _$DifficultyEnumMap[instance.difficulty]!,
       'playerTeamId': instance.playerTeamId,
       'currentRound': instance.currentRound,
       'currentWeek': instance.currentWeek,
@@ -60,10 +61,5 @@ Map<String, dynamic> _$$LeagueStateImplToJson(_$LeagueStateImpl instance) =>
       'messageSettings': instance.messageSettings,
       'staffFreeAgents': instance.staffFreeAgents,
       'freeAgents': instance.freeAgents,
+      'strengthTable': instance.strengthTable,
     };
-
-const _$DifficultyEnumMap = {
-  Difficulty.easy: 'easy',
-  Difficulty.normal: 'normal',
-  Difficulty.hard: 'hard',
-};

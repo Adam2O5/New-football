@@ -137,6 +137,11 @@ class Player with _$Player {
     @Default([]) List<PlayerSeasonStats> seasonStats,
     @Default(0) int pointValue,
 
+    /// Optymalna rola taktyczna zawodnika (`player_management.md`).
+    /// Gra w tej roli daje bonus cohesion +2 i `roleFitMult` ×1.03
+    /// (`squad_management.md`, `matchday_model.md`).
+    required AssignedRole optimalRole,
+
     /// Previous overall rating (rounded) captured at season start.
     /// Used by the Development screen to compute OVR delta.
     int? previousOvr,
@@ -169,54 +174,71 @@ extension PlayerX on Player {
     BalanceConfig balance = BalanceConfig.defaults,
   ]) => balance.player.injuryRiskMult(state.stamina);
 
-  /// Wycena handlowa zawodnika w widełkach zależnych od OVR
-  /// (`docs/player_management.md` §3, `TradeValueBalance`). Komponent OVR
-  /// ustala pasmo i pozycję w nim; komponent kontraktowy (wiek, pensja
-  /// względem rynku, długość kontraktu) przesuwa wartość w obrębie pasma —
-  /// młody, tanio i długo związany zawodnik trafia w górną granicę, stary,
-  /// przepłacony na krótkim kontrakcie — w dolną.
-  int computeTradeValue([BalanceConfig balance = BalanceConfig.defaults]) {
-    final tv = balance.tradeValue;
-    final ovr = overall(balance).round();
-    final band = tv.bandForOvr(ovr);
-    final ovrT = (ovr - band.ovrMin) / (band.ovrMax - band.ovrMin);
+  /// Wycena handlowa zawodnika — formuła 4-komponentowa
+  /// (`player_management.md` §pointValue).
+  ///
+  /// `pointValue = clamp(round(ovrComponent + potentialComponent +
+  ///   ageComponent + contractComponent), -1000, 1000)`
+  int computePointValue([BalanceConfig balance = BalanceConfig.defaults]) {
+    final ovr = overall(balance);
 
+    // 1. Komponent overall: (overall - 70) * 30  →  -600 … +870
+    final ovrComponent = (ovr - 70) * 30;
+
+    // 2. Komponent potencjału: potentialGap * (4.5*youngFactor + olderFactor)
+    final ceilingOvr = _ceilingOvrForStars(potentialStars);
+    final potentialGap = (ceilingOvr - ovr).clamp(0.0, 50.0);
+    final youngFactor = age <= 26 ? (4.5 - 0.5 * (age - 18)).clamp(0.0, 4.5) : 0.0;
+    final olderFactor = age >= 27 ? (0.8 - 0.08 * (age - 27)).clamp(0.15, 0.8) : 0.0;
+    final potentialComponent = potentialGap * (4.5 * youngFactor + olderFactor);
+
+    // 3. Komponent wieku: ageScore * 150  →  -150 … +150
     final double ageScore;
-    if (age <= tv.agePeakMax) {
+    if (age <= 24) {
       ageScore = 1.0;
-    } else if (age >= tv.ageDeclineMin) {
+    } else if (age >= 34) {
       ageScore = -1.0;
     } else {
-      final span = tv.ageDeclineMin - tv.agePeakMax;
-      ageScore = 1.0 - 2.0 * (age - tv.agePeakMax) / span;
+      ageScore = 1.0 - 2.0 * (age - 24) / 10.0;
     }
+    final ageComponent = ageScore * 150;
 
-    final marketSalary = tv.baseSalaryFor(ovr, age, potentialStars);
-    final salaryScore = marketSalary > 0
-        ? (1.0 - contract.salary / marketSalary).clamp(-1.0, 1.0)
+    // 4. Komponent kontraktowy: salaryScore * 260 * (0.5 + 0.5*lengthFactor)
+    const pvMinSalary = 1000000;
+    const pvMaxSalary = 60000000;
+    final ovrNorm = ((ovr - 50) * 2 / 100).clamp(0.0, 1.0);
+    final estimatedSalary = pvMinSalary + (pvMaxSalary - pvMinSalary) * (ovrNorm * ovrNorm * ovrNorm);
+    final salaryScore = estimatedSalary > 0
+        ? (1.0 - contract.salary / estimatedSalary).clamp(-1.0, 1.0)
         : 0.0;
+    final lengthFactor = (contract.yearsRemaining / 5.0).clamp(0.0, 1.0);
+    final contractComponent = salaryScore * 260 * (0.5 + 0.5 * lengthFactor);
 
-    final lengthFactor = (contract.yearsRemaining / tv.contractLengthCap).clamp(
-      0.0,
-      1.0,
-    );
-    final contractScore = ((ageScore + salaryScore) / 2.0) * lengthFactor;
-
-    final finalT =
-        tv.ovrWeight * ovrT + tv.contractWeight * ((contractScore + 1.0) / 2.0);
-
-    final value =
-        band.valueLow +
-        finalT.clamp(0.0, 1.0) * (band.valueHigh - band.valueLow);
-    return value.round();
+    final raw = ovrComponent + potentialComponent + ageComponent + contractComponent;
+    return raw.round().clamp(-1000, 1000);
   }
 
-  /// Przelicza i zapisuje [Player.tradeValue] — wołać po każdej zmianie
+  /// Midpoint ceiling OVR for a given potential stars rating
+  /// (`player_management.md` — tabela gwiazdek).
+  static double _ceilingOvrForStars(double stars) {
+    if (stars <= 0.5) return 52.5;
+    if (stars <= 1.0) return 58.0;
+    if (stars <= 1.5) return 63.0;
+    if (stars <= 2.0) return 68.0;
+    if (stars <= 2.5) return 73.0;
+    if (stars <= 3.0) return 78.0;
+    if (stars <= 3.5) return 82.5;
+    if (stars <= 4.0) return 86.5;
+    if (stars <= 4.5) return 90.5;
+    return 96.0; // 5.0★
+  }
+
+  /// Przelicza i zapisuje [Player.pointValue] — wołać po każdej zmianie
   /// wpływającej na wynik (podpis / przedłużenie kontraktu, wymiana,
   /// rollover sezonu, tick developmentu).
-  Player recalculateTradeValue([
+  Player recalculatePointValue([
     BalanceConfig balance = BalanceConfig.defaults,
-  ]) => copyWith(tradeValue: computeTradeValue(balance));
+  ]) => copyWith(pointValue: computePointValue(balance));
 
   Player withMatchFatigue(
     int minutesPlayed, [

@@ -9,6 +9,7 @@ import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/seed_data_generator.dart';
 import 'package:new_football/core/models/staff.dart';
 import 'package:new_football/core/models/team.dart';
+import 'package:new_football/core/services/league_strength_service.dart';
 import 'package:new_football/core/services/schedule_generator.dart';
 import 'package:new_football/core/services/staff_service.dart';
 
@@ -16,14 +17,12 @@ class NewGameRequest {
   const NewGameRequest({
     required this.saveName,
     required this.playerTeamId,
-    this.difficulty = Difficulty.normal,
     this.seasonYear = 2026,
     this.seed,
   });
 
   final String saveName;
   final String playerTeamId;
-  final Difficulty difficulty;
   final int seasonYear;
   final int? seed;
 }
@@ -61,7 +60,7 @@ class GameFactory {
       league.teams.map((t) => t.id).toList(),
     );
 
-    final ai = TeamAiService(difficulty: request.difficulty);
+    final ai = TeamAiService();
     var teams = league.teams.map(ai.autoSelectLineup).toList();
 
     final staffRng = Random(request.seed ?? Object.hash(request.saveName, 1));
@@ -77,7 +76,6 @@ class GameFactory {
     league = league.copyWith(
       teams: teams,
       staffFreeAgents: staffPool,
-      difficulty: request.difficulty,
       currentWeek: 1,
       currentDay: 1,
       currentRound: 0,
@@ -86,6 +84,15 @@ class GameFactory {
         schedule: schedule,
       ),
     );
+
+    // Initial strength table — no hysteresis on first calculation.
+    final strengthService = const LeagueStrengthService();
+    final strengthTable = strengthService.calculate(
+      league,
+      week: 1,
+      day: 1,
+    );
+    league = league.copyWith(strengthTable: strengthTable);
 
     final playerTeam = league.playerTeam;
     final now = DateTime.now();

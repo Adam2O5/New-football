@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/services/game_factory.dart';
 import 'package:new_football/data/save_repository.dart';
 
@@ -23,7 +22,6 @@ void main() {
       const NewGameRequest(
         saveName: 'Test',
         playerTeamId: 'team_europe_0',
-        difficulty: Difficulty.normal,
         seed: 99,
       ),
     );

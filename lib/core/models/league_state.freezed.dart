@@ -24,7 +24,6 @@ mixin _$LeagueState {
   List<Team> get teams => throw _privateConstructorUsedError;
   Season get currentSeason => throw _privateConstructorUsedError;
   List<SeasonHistory> get history => throw _privateConstructorUsedError;
-  Difficulty get difficulty => throw _privateConstructorUsedError;
   String? get playerTeamId => throw _privateConstructorUsedError;
   int get currentRound => throw _privateConstructorUsedError;
   int get currentWeek => throw _privateConstructorUsedError;
@@ -40,6 +39,12 @@ mixin _$LeagueState {
   /// Zawodnicy bez klubu — niedraftowani + wygasłe kontrakty
   /// (`docs/contract_signing.md`, `docs/offseason.md`).
   List<Player> get freeAgents => throw _privateConstructorUsedError;
+
+  /// Tabela siły ligi (`team_management.md`). Jedno źródło prawdy dla
+  /// `teamStatus`, `expectedRank` i `teamPower` wszystkich 30 drużyn.
+  /// `null` = jeszcze nie przeliczona (zostanie obliczona przy pierwszym
+  /// `shouldRecalculate` w `DaySimulator`).
+  LeagueStrengthTable? get strengthTable => throw _privateConstructorUsedError;
 
   /// Serializes this LeagueState to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -62,7 +67,6 @@ abstract class $LeagueStateCopyWith<$Res> {
     List<Team> teams,
     Season currentSeason,
     List<SeasonHistory> history,
-    Difficulty difficulty,
     String? playerTeamId,
     int currentRound,
     int currentWeek,
@@ -71,11 +75,13 @@ abstract class $LeagueStateCopyWith<$Res> {
     MessageSettings messageSettings,
     List<StaffMember> staffFreeAgents,
     List<Player> freeAgents,
+    LeagueStrengthTable? strengthTable,
   });
 
   $SeasonCopyWith<$Res> get currentSeason;
   $InboxCopyWith<$Res> get inbox;
   $MessageSettingsCopyWith<$Res> get messageSettings;
+  $LeagueStrengthTableCopyWith<$Res>? get strengthTable;
 }
 
 /// @nodoc
@@ -96,7 +102,6 @@ class _$LeagueStateCopyWithImpl<$Res, $Val extends LeagueState>
     Object? teams = null,
     Object? currentSeason = null,
     Object? history = null,
-    Object? difficulty = null,
     Object? playerTeamId = freezed,
     Object? currentRound = null,
     Object? currentWeek = null,
@@ -105,6 +110,7 @@ class _$LeagueStateCopyWithImpl<$Res, $Val extends LeagueState>
     Object? messageSettings = null,
     Object? staffFreeAgents = null,
     Object? freeAgents = null,
+    Object? strengthTable = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -120,10 +126,6 @@ class _$LeagueStateCopyWithImpl<$Res, $Val extends LeagueState>
                 ? _value.history
                 : history // ignore: cast_nullable_to_non_nullable
                       as List<SeasonHistory>,
-            difficulty: null == difficulty
-                ? _value.difficulty
-                : difficulty // ignore: cast_nullable_to_non_nullable
-                      as Difficulty,
             playerTeamId: freezed == playerTeamId
                 ? _value.playerTeamId
                 : playerTeamId // ignore: cast_nullable_to_non_nullable
@@ -156,6 +158,10 @@ class _$LeagueStateCopyWithImpl<$Res, $Val extends LeagueState>
                 ? _value.freeAgents
                 : freeAgents // ignore: cast_nullable_to_non_nullable
                       as List<Player>,
+            strengthTable: freezed == strengthTable
+                ? _value.strengthTable
+                : strengthTable // ignore: cast_nullable_to_non_nullable
+                      as LeagueStrengthTable?,
           )
           as $Val,
     );
@@ -190,6 +196,20 @@ class _$LeagueStateCopyWithImpl<$Res, $Val extends LeagueState>
       return _then(_value.copyWith(messageSettings: value) as $Val);
     });
   }
+
+  /// Create a copy of LeagueState
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $LeagueStrengthTableCopyWith<$Res>? get strengthTable {
+    if (_value.strengthTable == null) {
+      return null;
+    }
+
+    return $LeagueStrengthTableCopyWith<$Res>(_value.strengthTable!, (value) {
+      return _then(_value.copyWith(strengthTable: value) as $Val);
+    });
+  }
 }
 
 /// @nodoc
@@ -205,7 +225,6 @@ abstract class _$$LeagueStateImplCopyWith<$Res>
     List<Team> teams,
     Season currentSeason,
     List<SeasonHistory> history,
-    Difficulty difficulty,
     String? playerTeamId,
     int currentRound,
     int currentWeek,
@@ -214,6 +233,7 @@ abstract class _$$LeagueStateImplCopyWith<$Res>
     MessageSettings messageSettings,
     List<StaffMember> staffFreeAgents,
     List<Player> freeAgents,
+    LeagueStrengthTable? strengthTable,
   });
 
   @override
@@ -222,6 +242,8 @@ abstract class _$$LeagueStateImplCopyWith<$Res>
   $InboxCopyWith<$Res> get inbox;
   @override
   $MessageSettingsCopyWith<$Res> get messageSettings;
+  @override
+  $LeagueStrengthTableCopyWith<$Res>? get strengthTable;
 }
 
 /// @nodoc
@@ -241,7 +263,6 @@ class __$$LeagueStateImplCopyWithImpl<$Res>
     Object? teams = null,
     Object? currentSeason = null,
     Object? history = null,
-    Object? difficulty = null,
     Object? playerTeamId = freezed,
     Object? currentRound = null,
     Object? currentWeek = null,
@@ -250,6 +271,7 @@ class __$$LeagueStateImplCopyWithImpl<$Res>
     Object? messageSettings = null,
     Object? staffFreeAgents = null,
     Object? freeAgents = null,
+    Object? strengthTable = freezed,
   }) {
     return _then(
       _$LeagueStateImpl(
@@ -265,10 +287,6 @@ class __$$LeagueStateImplCopyWithImpl<$Res>
             ? _value._history
             : history // ignore: cast_nullable_to_non_nullable
                   as List<SeasonHistory>,
-        difficulty: null == difficulty
-            ? _value.difficulty
-            : difficulty // ignore: cast_nullable_to_non_nullable
-                  as Difficulty,
         playerTeamId: freezed == playerTeamId
             ? _value.playerTeamId
             : playerTeamId // ignore: cast_nullable_to_non_nullable
@@ -301,6 +319,10 @@ class __$$LeagueStateImplCopyWithImpl<$Res>
             ? _value._freeAgents
             : freeAgents // ignore: cast_nullable_to_non_nullable
                   as List<Player>,
+        strengthTable: freezed == strengthTable
+            ? _value.strengthTable
+            : strengthTable // ignore: cast_nullable_to_non_nullable
+                  as LeagueStrengthTable?,
       ),
     );
   }
@@ -313,7 +335,6 @@ class _$LeagueStateImpl implements _LeagueState {
     required final List<Team> teams,
     required this.currentSeason,
     final List<SeasonHistory> history = const [],
-    this.difficulty = Difficulty.normal,
     this.playerTeamId,
     this.currentRound = 0,
     this.currentWeek = 1,
@@ -322,6 +343,7 @@ class _$LeagueStateImpl implements _LeagueState {
     this.messageSettings = const MessageSettings(),
     final List<StaffMember> staffFreeAgents = const [],
     final List<Player> freeAgents = const [],
+    this.strengthTable,
   }) : _teams = teams,
        _history = history,
        _staffFreeAgents = staffFreeAgents,
@@ -349,9 +371,6 @@ class _$LeagueStateImpl implements _LeagueState {
     return EqualUnmodifiableListView(_history);
   }
 
-  @override
-  @JsonKey()
-  final Difficulty difficulty;
   @override
   final String? playerTeamId;
   @override
@@ -398,9 +417,16 @@ class _$LeagueStateImpl implements _LeagueState {
     return EqualUnmodifiableListView(_freeAgents);
   }
 
+  /// Tabela siły ligi (`team_management.md`). Jedno źródło prawdy dla
+  /// `teamStatus`, `expectedRank` i `teamPower` wszystkich 30 drużyn.
+  /// `null` = jeszcze nie przeliczona (zostanie obliczona przy pierwszym
+  /// `shouldRecalculate` w `DaySimulator`).
+  @override
+  final LeagueStrengthTable? strengthTable;
+
   @override
   String toString() {
-    return 'LeagueState(teams: $teams, currentSeason: $currentSeason, history: $history, difficulty: $difficulty, playerTeamId: $playerTeamId, currentRound: $currentRound, currentWeek: $currentWeek, currentDay: $currentDay, inbox: $inbox, messageSettings: $messageSettings, staffFreeAgents: $staffFreeAgents, freeAgents: $freeAgents)';
+    return 'LeagueState(teams: $teams, currentSeason: $currentSeason, history: $history, playerTeamId: $playerTeamId, currentRound: $currentRound, currentWeek: $currentWeek, currentDay: $currentDay, inbox: $inbox, messageSettings: $messageSettings, staffFreeAgents: $staffFreeAgents, freeAgents: $freeAgents, strengthTable: $strengthTable)';
   }
 
   @override
@@ -412,8 +438,6 @@ class _$LeagueStateImpl implements _LeagueState {
             (identical(other.currentSeason, currentSeason) ||
                 other.currentSeason == currentSeason) &&
             const DeepCollectionEquality().equals(other._history, _history) &&
-            (identical(other.difficulty, difficulty) ||
-                other.difficulty == difficulty) &&
             (identical(other.playerTeamId, playerTeamId) ||
                 other.playerTeamId == playerTeamId) &&
             (identical(other.currentRound, currentRound) ||
@@ -432,7 +456,9 @@ class _$LeagueStateImpl implements _LeagueState {
             const DeepCollectionEquality().equals(
               other._freeAgents,
               _freeAgents,
-            ));
+            ) &&
+            (identical(other.strengthTable, strengthTable) ||
+                other.strengthTable == strengthTable));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -442,7 +468,6 @@ class _$LeagueStateImpl implements _LeagueState {
     const DeepCollectionEquality().hash(_teams),
     currentSeason,
     const DeepCollectionEquality().hash(_history),
-    difficulty,
     playerTeamId,
     currentRound,
     currentWeek,
@@ -451,6 +476,7 @@ class _$LeagueStateImpl implements _LeagueState {
     messageSettings,
     const DeepCollectionEquality().hash(_staffFreeAgents),
     const DeepCollectionEquality().hash(_freeAgents),
+    strengthTable,
   );
 
   /// Create a copy of LeagueState
@@ -472,7 +498,6 @@ abstract class _LeagueState implements LeagueState {
     required final List<Team> teams,
     required final Season currentSeason,
     final List<SeasonHistory> history,
-    final Difficulty difficulty,
     final String? playerTeamId,
     final int currentRound,
     final int currentWeek,
@@ -481,6 +506,7 @@ abstract class _LeagueState implements LeagueState {
     final MessageSettings messageSettings,
     final List<StaffMember> staffFreeAgents,
     final List<Player> freeAgents,
+    final LeagueStrengthTable? strengthTable,
   }) = _$LeagueStateImpl;
 
   factory _LeagueState.fromJson(Map<String, dynamic> json) =
@@ -492,8 +518,6 @@ abstract class _LeagueState implements LeagueState {
   Season get currentSeason;
   @override
   List<SeasonHistory> get history;
-  @override
-  Difficulty get difficulty;
   @override
   String? get playerTeamId;
   @override
@@ -517,6 +541,13 @@ abstract class _LeagueState implements LeagueState {
   /// (`docs/contract_signing.md`, `docs/offseason.md`).
   @override
   List<Player> get freeAgents;
+
+  /// Tabela siły ligi (`team_management.md`). Jedno źródło prawdy dla
+  /// `teamStatus`, `expectedRank` i `teamPower` wszystkich 30 drużyn.
+  /// `null` = jeszcze nie przeliczona (zostanie obliczona przy pierwszym
+  /// `shouldRecalculate` w `DaySimulator`).
+  @override
+  LeagueStrengthTable? get strengthTable;
 
   /// Create a copy of LeagueState
   /// with the given fields replaced by the non-null parameter values.

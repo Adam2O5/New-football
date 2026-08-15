@@ -1047,7 +1047,12 @@ mixin _$Player {
   PlayerState get state => throw _privateConstructorUsedError;
   PlayerHidden get hidden => throw _privateConstructorUsedError;
   List<PlayerSeasonStats> get seasonStats => throw _privateConstructorUsedError;
-  int get tradeValue => throw _privateConstructorUsedError;
+  int get pointValue => throw _privateConstructorUsedError;
+
+  /// Optymalna rola taktyczna zawodnika (`player_management.md`).
+  /// Gra w tej roli daje bonus cohesion +2 i `roleFitMult` ×1.03
+  /// (`squad_management.md`, `matchday_model.md`).
+  AssignedRole get optimalRole => throw _privateConstructorUsedError;
 
   /// Previous overall rating (rounded) captured at season start.
   /// Used by the Development screen to compute OVR delta.
@@ -1085,7 +1090,8 @@ abstract class $PlayerCopyWith<$Res> {
     PlayerState state,
     PlayerHidden hidden,
     List<PlayerSeasonStats> seasonStats,
-    int tradeValue,
+    int pointValue,
+    AssignedRole optimalRole,
     int? previousOvr,
     double? previousPotential,
   });
@@ -1094,6 +1100,7 @@ abstract class $PlayerCopyWith<$Res> {
   $ContractCopyWith<$Res> get contract;
   $PlayerStateCopyWith<$Res> get state;
   $PlayerHiddenCopyWith<$Res> get hidden;
+  $AssignedRoleCopyWith<$Res> get optimalRole;
 }
 
 /// @nodoc
@@ -1124,7 +1131,8 @@ class _$PlayerCopyWithImpl<$Res, $Val extends Player>
     Object? state = null,
     Object? hidden = null,
     Object? seasonStats = null,
-    Object? tradeValue = null,
+    Object? pointValue = null,
+    Object? optimalRole = null,
     Object? previousOvr = freezed,
     Object? previousPotential = freezed,
   }) {
@@ -1182,10 +1190,14 @@ class _$PlayerCopyWithImpl<$Res, $Val extends Player>
                 ? _value.seasonStats
                 : seasonStats // ignore: cast_nullable_to_non_nullable
                       as List<PlayerSeasonStats>,
-            tradeValue: null == tradeValue
-                ? _value.tradeValue
-                : tradeValue // ignore: cast_nullable_to_non_nullable
+            pointValue: null == pointValue
+                ? _value.pointValue
+                : pointValue // ignore: cast_nullable_to_non_nullable
                       as int,
+            optimalRole: null == optimalRole
+                ? _value.optimalRole
+                : optimalRole // ignore: cast_nullable_to_non_nullable
+                      as AssignedRole,
             previousOvr: freezed == previousOvr
                 ? _value.previousOvr
                 : previousOvr // ignore: cast_nullable_to_non_nullable
@@ -1238,6 +1250,16 @@ class _$PlayerCopyWithImpl<$Res, $Val extends Player>
       return _then(_value.copyWith(hidden: value) as $Val);
     });
   }
+
+  /// Create a copy of Player
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $AssignedRoleCopyWith<$Res> get optimalRole {
+    return $AssignedRoleCopyWith<$Res>(_value.optimalRole, (value) {
+      return _then(_value.copyWith(optimalRole: value) as $Val);
+    });
+  }
 }
 
 /// @nodoc
@@ -1262,7 +1284,8 @@ abstract class _$$PlayerImplCopyWith<$Res> implements $PlayerCopyWith<$Res> {
     PlayerState state,
     PlayerHidden hidden,
     List<PlayerSeasonStats> seasonStats,
-    int tradeValue,
+    int pointValue,
+    AssignedRole optimalRole,
     int? previousOvr,
     double? previousPotential,
   });
@@ -1275,6 +1298,8 @@ abstract class _$$PlayerImplCopyWith<$Res> implements $PlayerCopyWith<$Res> {
   $PlayerStateCopyWith<$Res> get state;
   @override
   $PlayerHiddenCopyWith<$Res> get hidden;
+  @override
+  $AssignedRoleCopyWith<$Res> get optimalRole;
 }
 
 /// @nodoc
@@ -1304,7 +1329,8 @@ class __$$PlayerImplCopyWithImpl<$Res>
     Object? state = null,
     Object? hidden = null,
     Object? seasonStats = null,
-    Object? tradeValue = null,
+    Object? pointValue = null,
+    Object? optimalRole = null,
     Object? previousOvr = freezed,
     Object? previousPotential = freezed,
   }) {
@@ -1362,10 +1388,14 @@ class __$$PlayerImplCopyWithImpl<$Res>
             ? _value._seasonStats
             : seasonStats // ignore: cast_nullable_to_non_nullable
                   as List<PlayerSeasonStats>,
-        tradeValue: null == tradeValue
-            ? _value.tradeValue
-            : tradeValue // ignore: cast_nullable_to_non_nullable
+        pointValue: null == pointValue
+            ? _value.pointValue
+            : pointValue // ignore: cast_nullable_to_non_nullable
                   as int,
+        optimalRole: null == optimalRole
+            ? _value.optimalRole
+            : optimalRole // ignore: cast_nullable_to_non_nullable
+                  as AssignedRole,
         previousOvr: freezed == previousOvr
             ? _value.previousOvr
             : previousOvr // ignore: cast_nullable_to_non_nullable
@@ -1396,7 +1426,8 @@ class _$PlayerImpl implements _Player {
     required this.state,
     required this.hidden,
     final List<PlayerSeasonStats> seasonStats = const [],
-    this.tradeValue = 0,
+    this.pointValue = 0,
+    required this.optimalRole,
     this.previousOvr,
     this.previousPotential,
   }) : _seasonStats = seasonStats;
@@ -1439,7 +1470,13 @@ class _$PlayerImpl implements _Player {
 
   @override
   @JsonKey()
-  final int tradeValue;
+  final int pointValue;
+
+  /// Optymalna rola taktyczna zawodnika (`player_management.md`).
+  /// Gra w tej roli daje bonus cohesion +2 i `roleFitMult` ×1.03
+  /// (`squad_management.md`, `matchday_model.md`).
+  @override
+  final AssignedRole optimalRole;
 
   /// Previous overall rating (rounded) captured at season start.
   /// Used by the Development screen to compute OVR delta.
@@ -1453,7 +1490,7 @@ class _$PlayerImpl implements _Player {
 
   @override
   String toString() {
-    return 'Player(id: $id, name: $name, position: $position, nationality: $nationality, age: $age, attributes: $attributes, contract: $contract, personality: $personality, potentialStars: $potentialStars, heightCm: $heightCm, state: $state, hidden: $hidden, seasonStats: $seasonStats, tradeValue: $tradeValue, previousOvr: $previousOvr, previousPotential: $previousPotential)';
+    return 'Player(id: $id, name: $name, position: $position, nationality: $nationality, age: $age, attributes: $attributes, contract: $contract, personality: $personality, potentialStars: $potentialStars, heightCm: $heightCm, state: $state, hidden: $hidden, seasonStats: $seasonStats, pointValue: $pointValue, optimalRole: $optimalRole, previousOvr: $previousOvr, previousPotential: $previousPotential)';
   }
 
   @override
@@ -1484,8 +1521,10 @@ class _$PlayerImpl implements _Player {
               other._seasonStats,
               _seasonStats,
             ) &&
-            (identical(other.tradeValue, tradeValue) ||
-                other.tradeValue == tradeValue) &&
+            (identical(other.pointValue, pointValue) ||
+                other.pointValue == pointValue) &&
+            (identical(other.optimalRole, optimalRole) ||
+                other.optimalRole == optimalRole) &&
             (identical(other.previousOvr, previousOvr) ||
                 other.previousOvr == previousOvr) &&
             (identical(other.previousPotential, previousPotential) ||
@@ -1509,7 +1548,8 @@ class _$PlayerImpl implements _Player {
     state,
     hidden,
     const DeepCollectionEquality().hash(_seasonStats),
-    tradeValue,
+    pointValue,
+    optimalRole,
     previousOvr,
     previousPotential,
   );
@@ -1543,7 +1583,8 @@ abstract class _Player implements Player {
     required final PlayerState state,
     required final PlayerHidden hidden,
     final List<PlayerSeasonStats> seasonStats,
-    final int tradeValue,
+    final int pointValue,
+    required final AssignedRole optimalRole,
     final int? previousOvr,
     final double? previousPotential,
   }) = _$PlayerImpl;
@@ -1577,7 +1618,13 @@ abstract class _Player implements Player {
   @override
   List<PlayerSeasonStats> get seasonStats;
   @override
-  int get tradeValue;
+  int get pointValue;
+
+  /// Optymalna rola taktyczna zawodnika (`player_management.md`).
+  /// Gra w tej roli daje bonus cohesion +2 i `roleFitMult` ×1.03
+  /// (`squad_management.md`, `matchday_model.md`).
+  @override
+  AssignedRole get optimalRole;
 
   /// Previous overall rating (rounded) captured at season start.
   /// Used by the Development screen to compute OVR delta.

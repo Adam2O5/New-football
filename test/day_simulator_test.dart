@@ -18,13 +18,14 @@ void main() {
     // Jump to Wednesday week 1 (day 3) for midweek slot.
     var league = game.leagueState.copyWith(currentWeek: 1, currentDay: 3);
     final result = sim.simulateDay(league);
-    // Player match may pause, or AI matches resolve.
+    // Day advances regardless; player match may or may not pause the sim.
     expect(result.league.currentWeek, anyOf(1, 2));
-    if (result.playerMatch == null) {
-      expect(result.league.currentDay, 4);
-      expect(result.simulatedResults, isNotEmpty);
+    if (result.playerMatch != null) {
+      // Player's team has a match — sim pauses for interactive matchday.
+      expect(result.league.currentDay, 3); // doesn't advance past match day
     } else {
-      expect(result.pauseForUrgent, isTrue);
+      // No player match today — calendar moves to day 4.
+      expect(result.league.currentDay, 4);
     }
   });
 
@@ -33,7 +34,8 @@ void main() {
     expect(cal.phaseForWeek(1), SeasonPhase.regular);
     expect(cal.phaseForWeek(31), SeasonPhase.playIn);
     expect(cal.phaseForWeek(35), SeasonPhase.playoff);
-    expect(cal.phaseForWeek(46), SeasonPhase.draft);
+    expect(cal.phaseForWeek(44), SeasonPhase.offseason);
+    expect(cal.phaseForWeek(46), SeasonPhase.offseason);
     expect(cal.phaseForWeek(47), SeasonPhase.offseason);
   });
 

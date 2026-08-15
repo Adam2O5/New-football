@@ -9,7 +9,6 @@ import 'package:new_football/core/models/draft_models.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/match_models.dart';
-import 'package:new_football/core/models/message.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/draft_pick.dart';
 import 'package:new_football/core/models/season_awards.dart';
@@ -19,6 +18,7 @@ import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/services/calendar_service.dart';
 import 'package:new_football/core/services/development_service.dart';
 import 'package:new_football/core/services/prospect_service.dart';
+import 'package:new_football/core/services/message_service.dart';
 import 'package:new_football/core/services/salary_cap_service.dart';
 import 'package:new_football/core/services/schedule_generator.dart';
 import 'package:new_football/core/services/scouting_service.dart';
@@ -34,6 +34,7 @@ class SeasonService {
     SalaryCapService? capService,
     StaffService? staffService,
     ScoutingService? scoutingService,
+    MessageService? messages,
     Random? random,
   }) : matchEngine = matchEngine ?? MatchEngine(balance: balance),
        calendar = calendar ?? CalendarService(balance: balance),
@@ -41,6 +42,7 @@ class SeasonService {
        capService = capService ?? SalaryCapService(balance: balance),
        staffService = staffService ?? StaffService(balance: balance),
        scoutingService = scoutingService ?? ScoutingService(balance: balance),
+       _messages = messages ?? MessageService(),
        _random = random ?? Random();
 
   final BalanceConfig balance;
@@ -50,6 +52,7 @@ class SeasonService {
   final SalaryCapService capService;
   final StaffService staffService;
   final ScoutingService scoutingService;
+  final MessageService _messages;
   final Random _random;
   final _uuid = const Uuid();
 
@@ -444,7 +447,7 @@ class SeasonService {
             ),
             rng: _random,
           )
-          .recalculateTradeValue(balance);
+          .recalculatePointValue(balance);
 
       teams = teams.map((t) {
         if (t.id != pick.teamId) return t;
@@ -481,7 +484,7 @@ class SeasonService {
       teams: teams,
       currentSeason: state.currentSeason.copyWith(
         draftState: draft,
-        phase: SeasonPhase.draft,
+        phase: SeasonPhase.offseason,
       ),
     );
 
@@ -504,7 +507,7 @@ class SeasonService {
                   ),
                   rng: _random,
                 )
-                .recalculateTradeValue(balance),
+                .recalculatePointValue(balance),
           )
           .toList();
       state = state.copyWith(freeAgents: [...state.freeAgents, ...undrafted]);
@@ -548,7 +551,7 @@ class SeasonService {
           ),
           rng: _random,
         )
-        .recalculateTradeValue(balance);
+        .recalculatePointValue(balance);
 
     var teams = league.teams.map((t) {
       if (t.id != pick.teamId) return t;
@@ -573,7 +576,7 @@ class SeasonService {
       teams: teams,
       currentSeason: league.currentSeason.copyWith(
         draftState: draft,
-        phase: SeasonPhase.draft,
+        phase: SeasonPhase.offseason,
       ),
     );
   }
@@ -630,7 +633,7 @@ class SeasonService {
                 stamina: 90,
               ),
             )
-            .recalculateTradeValue(balance);
+            .recalculatePointValue(balance);
       }).toList();
 
       // Player development ticks weekly in `DaySimulator`, not here — avoid
@@ -677,6 +680,7 @@ class SeasonService {
         phase: SeasonPhase.regular,
         schedule: schedule,
         standings: standings,
+        draftState: promotedDraftState,
         staffGrowthDone: false,
         playerRetirementsDone: false,
         combineDone: false,
@@ -926,14 +930,13 @@ class SeasonService {
     String body, {
     bool urgent = false,
   }) {
-    final msg = GameMessage(
-      id: _uuid.v4(),
+    return _messages.send(
+      league,
       type: type,
       priority: urgent ? MessagePriority.urgent : MessagePriority.normal,
-      title: title,
-      body: body,
-      week: league.currentWeek,
+      titleKey: 'msg_${type.name}_title',
+      bodyKey: 'msg_${type.name}_body',
+      args: {'_legacyTitle': title, '_legacyBody': body},
     );
-    return league.copyWith(inbox: league.inbox.addMessage(msg));
   }
 }

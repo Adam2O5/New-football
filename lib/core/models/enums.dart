@@ -245,8 +245,6 @@ enum PlayerPersonality {
   final String description;
 }
 
-enum ManagerProfile { cautious, balanced, aggressive }
-
 enum MatchEventType {
   goal,
   yellowCard,
@@ -267,33 +265,85 @@ enum PlayoffRound {
   leagueFinal,
 }
 
-enum Difficulty { easy, normal, hard }
-
 enum StaffRole { headCoach, youthCoach, scout, physio, doctor, cfo }
 
 enum MessageType {
+  // Matchday (A)
+  matchPreview,
+  matchResult,
+  walkover,
+  lineupNoGk,
+  benchIncomplete,
+  suspensionStart,
+  suspensionEnd,
+  // Health (B)
   injury,
+  injuryReturn,
+  injuryRecurrence,
+  potentialLoss,
+  // Player events (C)
+  playerEvent,
+  // Team events (D)
+  teamEvent,
+  // Roster (E)
   retirementPlayer,
   retirementStaff,
+  retirementLeagueDigest,
+  rosterWarning,
+  // Contracts (F)
+  contractOffer,
+  contractSigned,
+  contractExpired,
+  declineToExtend,
+  rfaOfferSheet,
+  // Staff (G)
   staffGrowth,
-  award,
+  staffHired,
+  staffFired,
+  staffSlotEmpty,
+  // Trades (H)
+  trade,
+  tradeOffer,
+  tradeWindowEvent,
+  // Draft & scouting (I)
   lottery,
   scoutReport,
   combine,
   mockDraft,
   draftPick,
-  contractOffer,
-  contractSigned,
-  trade,
-  walkover,
-  matchPreview,
-  matchResult,
+  draftPickLeague,
+  // Finance (J)
+  apronWarning,
+  capUpdateTv,
+  staffCapViolation,
+  // Season (K)
+  award,
   atmosphere,
+  teamStatusChange,
+  seasonSummary,
+  playoffMissed,
+  // System (L)
   calendar,
   system,
 }
 
-enum MessagePriority { normal, urgent }
+/// Message domain for grouping and per-domain configuration (`messages.md` §4).
+enum MessageDomain {
+  matchday,
+  health,
+  playerEvent,
+  teamEvent,
+  roster,
+  contracts,
+  staff,
+  trades,
+  draft,
+  finance,
+  season,
+  system,
+}
+
+enum MessagePriority { silenced, normal, urgent }
 
 enum NotificationLevel { important, normal, muted }
 

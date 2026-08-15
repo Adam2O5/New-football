@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:new_football/core/models/draft_models.dart';
 import 'package:new_football/core/models/enums.dart';
+import 'package:new_football/core/models/league_strength.dart';
 import 'package:new_football/core/models/message.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/staff.dart';
@@ -15,7 +16,6 @@ class LeagueState with _$LeagueState {
     required List<Team> teams,
     required Season currentSeason,
     @Default([]) List<SeasonHistory> history,
-    @Default(Difficulty.normal) Difficulty difficulty,
     String? playerTeamId,
     @Default(0) int currentRound,
     @Default(1) int currentWeek,
@@ -31,6 +31,12 @@ class LeagueState with _$LeagueState {
     /// Zawodnicy bez klubu — niedraftowani + wygasłe kontrakty
     /// (`docs/contract_signing.md`, `docs/offseason.md`).
     @Default([]) List<Player> freeAgents,
+
+    /// Tabela siły ligi (`team_management.md`). Jedno źródło prawdy dla
+    /// `teamStatus`, `expectedRank` i `teamPower` wszystkich 30 drużyn.
+    /// `null` = jeszcze nie przeliczona (zostanie obliczona przy pierwszym
+    /// `shouldRecalculate` w `DaySimulator`).
+    LeagueStrengthTable? strengthTable,
   }) = _LeagueState;
 
   factory LeagueState.fromJson(Map<String, dynamic> json) =>

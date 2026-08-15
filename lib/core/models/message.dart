@@ -4,17 +4,54 @@ import 'package:new_football/core/models/enums.dart';
 part 'message.freezed.dart';
 part 'message.g.dart';
 
+/// A single option in a decision message (`messages.md` §12).
+@freezed
+class MessageAction with _$MessageAction {
+  const factory MessageAction({
+    required String id,
+    required String labelKey,
+  }) = _MessageAction;
+
+  factory MessageAction.fromJson(Map<String, dynamic> json) =>
+      _$MessageActionFromJson(json);
+}
+
+/// Decision spec for messages requiring player choice (`messages.md` §12).
+@freezed
+class DecisionSpec with _$DecisionSpec {
+  const factory DecisionSpec({
+    required List<MessageAction> options,
+    required String defaultOnExpiry,
+  }) = _DecisionSpec;
+
+  factory DecisionSpec.fromJson(Map<String, dynamic> json) =>
+      _$DecisionSpecFromJson(json);
+}
+
+/// Full message model (`messages.md` §4).
 @freezed
 class GameMessage with _$GameMessage {
   const factory GameMessage({
     required String id,
     required MessageType type,
+    String? kind,
+    @Default(MessageDomain.system) MessageDomain domain,
     @Default(MessagePriority.normal) MessagePriority priority,
-    required String title,
-    required String body,
+    required int seasonYear,
     required int week,
+    @Default(1) int day,
+    int? hour,
+    required String titleKey,
+    required String bodyKey,
+    @Default({}) Map<String, dynamic> args,
+    @Default({}) Map<String, dynamic> payload,
+    @Default([]) List<MessageAction> actions,
+    DecisionSpec? decision,
+    String? expiresAt,
+    String? groupKey,
+    String? dedupKey,
     @Default(false) bool read,
-    Map<String, dynamic>? payload,
+    @Default(false) bool acknowledged,
   }) = _GameMessage;
 
   factory GameMessage.fromJson(Map<String, dynamic> json) =>
@@ -47,14 +84,27 @@ extension InboxX on Inbox {
   List<GameMessage> get unread => messages.where((m) => !m.read).toList();
 
   List<GameMessage> get pendingUrgent =>
-      messages.where((m) => !m.read && m.priority == MessagePriority.urgent).toList();
+      messages
+          .where((m) => !m.acknowledged && m.priority == MessagePriority.urgent)
+          .toList();
 
-  Inbox addMessage(GameMessage message) =>
-      copyWith(messages: [...messages, message]);
+  Inbox addMessage(GameMessage message) {
+    // Silenced messages go to archive only (not inbox) — `messages.md` §5.
+    if (message.priority == MessagePriority.silenced) return this;
+    return copyWith(messages: [...messages, message]);
+  }
 
   Inbox markRead(String id) => copyWith(
     messages: messages
         .map((m) => m.id == id ? m.copyWith(read: true) : m)
+        .toList(),
+  );
+
+  Inbox acknowledge(String id) => copyWith(
+    messages: messages
+        .map((m) => m.id == id
+            ? m.copyWith(read: true, acknowledged: true)
+            : m)
         .toList(),
   );
 }

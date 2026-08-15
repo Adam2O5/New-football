@@ -98,7 +98,7 @@ class InboxScreen extends ConsumerWidget {
                                               .primary),
                             ),
                             title: Text(
-                              m.title,
+                              m.args['_legacyTitle'] as String? ?? m.titleKey,
                               style: TextStyle(
                                 fontWeight: m.read
                                     ? FontWeight.normal
@@ -109,7 +109,10 @@ class InboxScreen extends ConsumerWidget {
                               ),
                             ),
                             subtitle: Text(
-                              l10n.inbox_messageSubtitle(m.week, m.body),
+                              l10n.inbox_messageSubtitle(
+                                m.week,
+                                m.args['_legacyBody'] as String? ?? m.bodyKey,
+                              ),
                             ),
                             isThreeLine: true,
                             onTap: () {

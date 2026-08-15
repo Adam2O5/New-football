@@ -4,6 +4,22 @@ import 'package:new_football/core/models/league_state.dart';
 
 enum CalendarEventKind { match, playerAction, automatic, informational }
 
+/// Typed calendar event identifiers — single source of truth.
+/// Replaces stringly-typed IDs across the codebase.
+enum CalendarEventId {
+  staffGrowth,
+  awards,
+  retirements,
+  lottery,
+  scoutReport,
+  combine,
+  finalMock,
+  draft,
+  nextClassGeneration,
+  tradeDeadline,
+  freeAgencyOpen,
+}
+
 class CalendarEventSlot {
   const CalendarEventSlot({
     required this.id,
@@ -13,7 +29,7 @@ class CalendarEventSlot {
     required this.kind,
   });
 
-  final String id;
+  final CalendarEventId id;
   final int week;
   final int day;
   final int order;
@@ -31,77 +47,77 @@ class CalendarEventRegistry {
     final scoutWeek = awardsWeek + 1;
     return [
       CalendarEventSlot(
-        id: 'staffGrowth',
+        id: CalendarEventId.staffGrowth,
         week: awardsWeek,
         day: 1,
         order: 0,
         kind: CalendarEventKind.automatic,
       ),
       CalendarEventSlot(
-        id: 'awards',
+        id: CalendarEventId.awards,
         week: awardsWeek,
         day: 1,
         order: 1,
         kind: CalendarEventKind.informational,
       ),
       CalendarEventSlot(
-        id: 'retirements',
+        id: CalendarEventId.retirements,
         week: awardsWeek,
         day: 3,
         order: 0,
         kind: CalendarEventKind.informational,
       ),
       CalendarEventSlot(
-        id: 'lottery',
+        id: CalendarEventId.lottery,
         week: awardsWeek,
         day: 5,
         order: 0,
         kind: CalendarEventKind.playerAction,
       ),
       CalendarEventSlot(
-        id: 'scoutReport',
+        id: CalendarEventId.scoutReport,
         week: scoutWeek,
         day: 1,
         order: 0,
         kind: CalendarEventKind.playerAction,
       ),
       CalendarEventSlot(
-        id: 'combine',
+        id: CalendarEventId.combine,
         week: scoutWeek,
         day: 3,
         order: 0,
         kind: CalendarEventKind.automatic,
       ),
       CalendarEventSlot(
-        id: 'finalMock',
+        id: CalendarEventId.finalMock,
         week: scoutWeek,
         day: 5,
         order: 0,
         kind: CalendarEventKind.automatic,
       ),
       CalendarEventSlot(
-        id: 'draft',
+        id: CalendarEventId.draft,
         week: calendar.draftWeek,
         day: 1,
         order: 0,
         kind: CalendarEventKind.playerAction,
       ),
       CalendarEventSlot(
-        id: 'nextClassGeneration',
+        id: CalendarEventId.nextClassGeneration,
         week: calendar.draftWeek,
         day: 1,
         order: 1,
         kind: CalendarEventKind.playerAction,
       ),
       CalendarEventSlot(
-        id: 'tradeDeadline',
+        id: CalendarEventId.tradeDeadline,
         week: calendar.tradeDeadlineWeek,
         day: 1,
         order: 0,
         kind: CalendarEventKind.informational,
       ),
       CalendarEventSlot(
-        id: 'freeAgencyOpen',
+        id: CalendarEventId.freeAgencyOpen,
         week: calendar.freeAgencyWeek,
         day: 1,
         order: 0,
@@ -111,33 +127,31 @@ class CalendarEventRegistry {
   }
 
   /// Czy akcja przypisana do [id] została już wykonana w bieżącym sezonie.
-  static bool isDone(Season season, String id) {
+  static bool isDone(Season season, CalendarEventId id) {
     switch (id) {
-      case 'staffGrowth':
+      case CalendarEventId.staffGrowth:
         return season.staffGrowthDone;
-      case 'awards':
+      case CalendarEventId.awards:
         return season.awards != null;
-      case 'retirements':
+      case CalendarEventId.retirements:
         return season.playerRetirementsDone;
-      case 'lottery':
+      case CalendarEventId.lottery:
         return (season.draftState?.lotteryResults.isNotEmpty) ?? false;
-      case 'scoutReport':
+      case CalendarEventId.scoutReport:
         return season.scoutReportDone;
-      case 'combine':
+      case CalendarEventId.combine:
         return season.combineDone;
-      case 'finalMock':
+      case CalendarEventId.finalMock:
         return season.finalMockDone;
-      case 'draft':
+      case CalendarEventId.draft:
         final draft = season.draftState;
         return draft != null && draft.currentPickIndex >= draft.order.length;
-      case 'nextClassGeneration':
+      case CalendarEventId.nextClassGeneration:
         return season.nextDraftState != null;
-      case 'tradeDeadline':
+      case CalendarEventId.tradeDeadline:
         return season.tradeDeadlineAcked;
-      case 'freeAgencyOpen':
+      case CalendarEventId.freeAgencyOpen:
         return season.faOpenDone;
-      default:
-        throw ArgumentError.value(id, 'id', 'Unknown calendar event slot id');
     }
   }
 

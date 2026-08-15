@@ -6,6 +6,7 @@ import 'package:new_football/core/models/match_models.dart';
 import 'package:new_football/core/models/match_state.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/team.dart';
+import 'package:new_football/core/services/cohesion_service.dart';
 import 'package:new_football/core/tactics/tactics_setup.dart';
 
 class LiveMatch {
@@ -19,6 +20,10 @@ class LiveMatch {
     this.awaySubsUsed = 0,
     this.homeSubWindows = 0,
     this.awaySubWindows = 0,
+    this.homeCohesionMult = 1.03,
+    this.awayCohesionMult = 1.03,
+    this.homeChemistry = 50,
+    this.awayChemistry = 50,
   }) : events = events ?? [];
 
   MatchState state;
@@ -30,6 +35,14 @@ class LiveMatch {
   int awaySubsUsed;
   int homeSubWindows;
   int awaySubWindows;
+
+  /// Lineup cohesion multiplier (1.01–1.05 × HC Motivation), frozen at start.
+  final double homeCohesionMult;
+  final double awayCohesionMult;
+
+  /// Team zgranie (0–100) from Team.chemistry, frozen at start.
+  final int homeChemistry;
+  final int awayChemistry;
 
   bool get isFinished => state.minute >= 90;
 
@@ -152,6 +165,10 @@ class MatchEngine {
       );
     }
 
+    final cohesionSvc = const CohesionService();
+    final homeCohesion = cohesionSvc.computeCohesion(home.startingEleven);
+    final awayCohesion = cohesionSvc.computeCohesion(away.startingEleven);
+
     return LiveMatch(
       state: MatchState(
         minute: 0,
@@ -167,6 +184,16 @@ class MatchEngine {
       homeTeamId: home.id,
       awayTeamId: away.id,
       balance: balance,
+      homeCohesionMult: cohesionSvc.cohesionMult(
+        homeCohesion,
+        headCoach: home.staff.headCoach,
+      ),
+      awayCohesionMult: cohesionSvc.cohesionMult(
+        awayCohesion,
+        headCoach: away.staff.headCoach,
+      ),
+      homeChemistry: home.chemistry,
+      awayChemistry: away.chemistry,
     );
   }
 
@@ -194,7 +221,8 @@ class MatchEngine {
     final homePower = _teamPower(
       state.homeLineup,
       state.homeTactics,
-      chemistry: 50,
+      chemistry: live.homeChemistry,
+      cohesionMult: live.homeCohesionMult,
       isHome: true,
       momentum: state.momentum,
       morale: state.moraleModHome,
@@ -204,7 +232,8 @@ class MatchEngine {
     final awayPower = _teamPower(
       state.awayLineup,
       state.awayTactics,
-      chemistry: 50,
+      chemistry: live.awayChemistry,
+      cohesionMult: live.awayCohesionMult,
       isHome: false,
       momentum: -state.momentum,
       morale: state.moraleModAway,
@@ -404,6 +433,7 @@ class MatchEngine {
     List<Player> lineup,
     TacticsSetup tactics, {
     required int chemistry,
+    required double cohesionMult,
     required bool isHome,
     required double momentum,
     required double morale,
@@ -424,7 +454,8 @@ class MatchEngine {
           p.staminaPerformanceMult(balance) *
           (0.85 + p.state.form / 20) *
           roleMult *
-          chemMult;
+          chemMult *
+          cohesionMult;
       sum += contrib;
     }
     sum /= lineup.length;

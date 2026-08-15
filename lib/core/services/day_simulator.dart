@@ -1,5 +1,3 @@
-import 'package:uuid/uuid.dart';
-
 import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/engine/match_engine.dart';
 import 'package:new_football/core/models/enums.dart';
@@ -14,6 +12,8 @@ import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/services/calendar_service.dart';
 import 'package:new_football/core/services/contract_service.dart';
 import 'package:new_football/core/services/development_service.dart';
+import 'package:new_football/core/services/league_strength_service.dart';
+import 'package:new_football/core/services/message_service.dart';
 import 'package:new_football/core/services/salary_cap_service.dart';
 import 'package:new_football/core/services/schedule_generator.dart';
 import 'package:new_football/core/services/scouting_service.dart';
@@ -44,12 +44,14 @@ class DaySimulator {
     ScoutingService? scouting,
     ContractService? contracts,
     SalaryCapService? capService,
+    MessageService? messages,
   }) : matchEngine = matchEngine ?? MatchEngine(balance: balance),
        calendar = calendar ?? CalendarService(balance: balance),
        development = development ?? DevelopmentService(balance: balance),
        scouting = scouting ?? ScoutingService(balance: balance),
        contracts = contracts ?? ContractService(balance: balance),
-       capService = capService ?? SalaryCapService(balance: balance);
+       capService = capService ?? SalaryCapService(balance: balance),
+       messages = messages ?? MessageService();
 
   final BalanceConfig balance;
   final MatchEngine matchEngine;
@@ -58,7 +60,7 @@ class DaySimulator {
   final ScoutingService scouting;
   final ContractService contracts;
   final SalaryCapService capService;
-  final _uuid = const Uuid();
+  final MessageService messages;
 
   DaySimulationResult simulateDay(LeagueState league) {
     final week = league.currentWeek;
@@ -72,13 +74,27 @@ class DaySimulator {
       currentSeason: state.currentSeason.copyWith(phase: phase),
     );
 
-    if (calendar.isTradeDeadline(week, day)) {
-      state = _addMessage(
+    // Periodic strength table recalculation (`team_management.md`).
+    const strengthService = LeagueStrengthService();
+    if (strengthService.shouldRecalculate(week, day, state.strengthTable)) {
+      final table = strengthService.calculate(
         state,
-        type: MessageType.calendar,
+        previousTable: state.strengthTable,
+        week: week,
+        day: day,
+      );
+      state = state.copyWith(strengthTable: table);
+    }
+
+    if (calendar.isTradeDeadline(week, day)) {
+      state = messages.send(
+        state,
+        type: MessageType.tradeWindowEvent,
+        kind: 'deadline',
+        domain: MessageDomain.trades,
         priority: MessagePriority.urgent,
-        title: 'Trade deadline',
-        body: 'Okno wymian zamknięte do końca playoffów.',
+        titleKey: 'msg_tradeWindowEvent_deadline_title',
+        bodyKey: 'msg_tradeWindowEvent_deadline_body',
       );
     }
 
@@ -136,11 +152,13 @@ class DaySimulator {
           }).toList(),
         );
       }
-      state = _addMessage(
+      state = messages.send(
         state,
         type: MessageType.calendar,
-        title: 'Nowy tydzień $nextWeek',
-        body: 'Faza: ${nextPhase.name}',
+        domain: MessageDomain.system,
+        titleKey: 'msg_calendar_newWeek_title',
+        bodyKey: 'msg_calendar_newWeek_body',
+        args: {'week': nextWeek, 'phase': nextPhase.name},
       );
     }
 
@@ -287,7 +305,7 @@ class DaySimulator {
 
   LeagueState _resolveFreeAgencyDay(LeagueState league) {
     if (league.freeAgents.isEmpty) return league;
-    final ai = TeamAiService(balance: balance, difficulty: league.difficulty);
+    final ai = TeamAiService(balance: balance);
     var state = league;
     final remaining = <Player>[];
 
@@ -323,11 +341,13 @@ class DaySimulator {
         continue;
       }
       state = state.updateTeam(signed);
-      state = _addMessage(
+      state = messages.send(
         state,
         type: MessageType.contractSigned,
-        title: 'FA: ${player.name} → ${winningTeam.name}',
-        body: 'Podpisano kontrakt na rynku wolnych agentów.',
+        domain: MessageDomain.contracts,
+        titleKey: 'msg_contractSigned_fa_title',
+        bodyKey: 'msg_contractSigned_fa_body',
+        args: {'playerName': player.name, 'teamName': winningTeam.name},
       );
     }
 
@@ -348,13 +368,18 @@ class DaySimulator {
   }
 
   LeagueState _notifyMatchResult(LeagueState league, MatchResult result) {
-    final home = league.teamById(result.homeTeamId)?.name ?? result.homeTeamId;
-    final away = league.teamById(result.awayTeamId)?.name ?? result.awayTeamId;
-    return _addMessage(
+    return messages.send(
       league,
       type: MessageType.matchResult,
-      title: '$home ${result.homeGoals}:${result.awayGoals} $away',
-      body: 'Mecz zakończony.',
+      domain: MessageDomain.matchday,
+      titleKey: 'msg_matchResult_title',
+      bodyKey: 'msg_matchResult_body',
+      args: {
+        'homeTeam': league.teamById(result.homeTeamId)?.name ?? result.homeTeamId,
+        'awayTeam': league.teamById(result.awayTeamId)?.name ?? result.awayTeamId,
+        'homeGoals': result.homeGoals,
+        'awayGoals': result.awayGoals,
+      },
       payload: {
         'homeTeamId': result.homeTeamId,
         'awayTeamId': result.awayTeamId,
@@ -364,28 +389,4 @@ class DaySimulator {
     );
   }
 
-  LeagueState _addMessage(
-    LeagueState league, {
-    required MessageType type,
-    required String title,
-    required String body,
-    MessagePriority priority = MessagePriority.normal,
-    Map<String, dynamic>? payload,
-  }) {
-    final level = league.messageSettings.levelFor(type);
-    if (level == NotificationLevel.muted) return league;
-    final effectivePriority = level == NotificationLevel.important
-        ? MessagePriority.urgent
-        : priority;
-    final msg = GameMessage(
-      id: _uuid.v4(),
-      type: type,
-      priority: effectivePriority,
-      title: title,
-      body: body,
-      week: league.currentWeek,
-      payload: payload,
-    );
-    return league.copyWith(inbox: league.inbox.addMessage(msg));
-  }
 }

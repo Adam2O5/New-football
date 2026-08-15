@@ -19,7 +19,8 @@ class CalendarService {
     if (week >= _c.playoffStartWeek && week <= _c.playoffEndWeek) {
       return SeasonPhase.playoff;
     }
-    if (week == _c.draftWeek) return SeasonPhase.draft;
+    // Tydzień draftu (46) należy do offseason — `game_calendar.md` definiuje
+    // dokładnie 5 faz: preseason → regular → playIn → playoff → offseason.
     return SeasonPhase.offseason;
   }
 
@@ -101,8 +102,6 @@ class CalendarService {
         return (_c.playInWeek, 7);
       case SeasonPhase.playoff:
         return (_c.playoffEndWeek, 7);
-      case SeasonPhase.draft:
-        return (_c.draftWeek, 7);
       case SeasonPhase.offseason:
         return (_c.freeAgencyWeek, 7);
     }

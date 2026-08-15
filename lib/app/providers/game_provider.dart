@@ -533,7 +533,7 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   }
 
   Future<void> markMessageRead(String id) async {
-    await updateLeague((l) => l.copyWith(inbox: l.inbox.markRead(id)));
+    await updateLeague((l) => l.copyWith(inbox: l.inbox.acknowledge(id)));
   }
 
   Future<void> makeDraftPick(String prospectId) async {

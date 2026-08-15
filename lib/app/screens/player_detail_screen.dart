@@ -71,7 +71,7 @@ class PlayerDetailScreen extends ConsumerWidget {
                 _chip(context, l10n.stat_ovr, '${p.overall().round()}'),
                 _chip(context, l10n.stat_form, '${p.state.form}'),
                 _chip(context, l10n.stat_cond, '${p.state.stamina}%'),
-                _chip(context, l10n.stat_pv, '${p.tradeValue}'),
+                _chip(context, l10n.stat_pv, '${p.pointValue}'),
                 _chip(
                   context,
                   l10n.stat_pot,
