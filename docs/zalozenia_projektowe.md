@@ -34,7 +34,7 @@ W odróżnieniu od klasycznego modelu piłkarskiego (wiele lig krajowych, awanse
 | Playoff         | System playoffów na końcu sezonu (faza pucharowa zamiast prostego mistrza z tabeli)  |
 | Draft           | Nabór młodych zawodników — główny sposób pozyskiwania talentów                       |
 | Salary cap      | Limit płacowy — ograniczenie budżetu na pensje, wymuszające trudne decyzje finansowe |
-| Transfery       | Wymiany 2-drużynowe (zawodnicy + picki) — `trade_rules.md`; uzupełnienie draftu i FA |
+| Transfery       | Wymiany 2-drużynowe (zawodnicy + picki) — `trades.md`; uzupełnienie draftu i FA |
 
 
 ---
@@ -196,7 +196,7 @@ flowchart LR
 
 ## 9. Status dokumentacji
 
-Szczegóły reguł: `game_rules.md` i pliki tematyczne (`draft_rules`, `salary_cap_rules`, `tactics`, `squad_management`, `player_management`, `offseason`, `contract_signing`, `messages`, itd.).
+Szczegóły reguł: `game_rules.md` i pliki tematyczne (`draft`, `salary_cap`, `contracts`, `trades`, `tactics`, `squad_management`, `team_management`, `player_management`, `matchday_model`, `staff`, `offseason`, `game_calendar`, `messages`, `AI_behaviour`, `data_generation`).
 
 Kod może chwilowo odstawać od docs (np. stare `fitness`, cap 150M, 2 rundy draftu) — **docs są źródłem prawdy projektowej**.
 

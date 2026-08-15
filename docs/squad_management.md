@@ -1,231 +1,60 @@
-# Zarządzanie składem (squad management)
+# Zarządzanie składem
 
-Dokument projektowy: limity rosteru, skład meczowy, atmosfera i zgranie.
+Dokument opisuje limity rosteru, skład meczowy oraz spójność ustawienia (lineup cohesion). 
 
-Powiązane: `player_management.md`, `tactics.md`, `matchday_model.md`, `staff_rules.md`, `trade_rules.md`, `salary_cap_rules.md`.
+## Limity składu
 
-Status: **projekt**.
+### Zasady rosteru
 
----
+- Minimalna liczba zawodników w kadrze wynosi 20.
+- Maksymalna liczba zawodników w kadrze to 30.
+- Wszelkie operacje kontrolowane przez menedżera (draft, wolni agenci, wymiany, podpisy) muszą zawsze zamykać się w granicach od 20 do 30 gracz.
+- **Nie ma mechanizmu zwolnienia zawodnika** — niekorzystny kontrakt można zdjąć wyłącznie wymianą (`salary_cap.md`, `trades.md`). Przy rosterze 30 podpisanie kolejnego zawodnika wymaga uprzedniej wymiany.
+- Podpisanie kontraktu lub wymiana przekraczająca wyznaczone limity zostanie automatycznie odrzucona przez system (nie zostają nawet zsubmitowane)(chyba, że istnieje wyjątek jak przy tradzie z drużyną <20 zawodników).
+- Jedyną drogą, która może spowodować spadek liczby zawodników poniżej 20, jest przejście gracza na emeryturę.
 
-## 1. Limity składu
+### Walkower
 
-### Roster (cały zespół)
+- Jeśli w dniu rozgrywania meczu rozmiar kadry jest mniejszy niż 20 lub większy niż 30, mecz nie zostaje rozegrany.
+- Taka sytuacja skutkuje walkowerem 0-3 na korzyść drużyny przeciwnej.
+- Jeśli po obu stronach występuje nielegalny roster, przyznawany jest wynik `dsq` i żadna z drużyn nie otrzymuje punktów.
+- Zespół będący w takiej sytuacji otrzymuje pilną wiadomość w systemie wiadomości i musi naprawić kadrę przed kolejnymi meczami poprzez wolnych agentów, draft lub transfery.
+- Porażka przez walkower bardzo pogarsza atmosferę w zespole.
 
-| Reguła | Wartość |
-| ------ | ------- |
-| Minimalna liczba zawodników | **20** |
-| Maksymalna liczba zawodników | **30** |
-| Minimum bramkarzy | **brak** (nie wymuszamy liczby GK w kadrze) |
+### Skład meczowy
 
-- Operacje **kontrolowane** (draft, FA, trade, zwolnienie, podpis) muszą zostawić `20 ≤ rosterSize ≤ 30`. Trade / podpis poza limitem = **odrzucenie**.
-- **Jedyna** droga poza 20–30: **emerytura** zawodników (`offseason.md`). Wówczas roster może być &lt; 20 (lub teoretycznie &gt; 30 nie występuje przy samym odjęciu).
-- Seed / nowa kariera: domyślnie **25** zawodników; zalecany ≥ 1 GK, bez twardego wymogu.
-
-### Walkower (nielegalny roster na mecz)
-
-Jeśli w dniu meczu `rosterSize < 20` lub `rosterSize > 30`:
-
-- Mecz **nie jest rozgrywany** — wynik **walkower 0–3** na korzyść przeciwnika.
-- Obie strony nielegalne → **0–0**, bez punktów (lub anulowanie — v1: 0–0, 0 pkt).
-- Wiadomość z czerwoną flagą — `messages.md`.
-- Naprawa: FA / draft / trade do przywrócenia 20–30 przed kolejnymi meczami.
-
-### Bramkarz po emeryturze
-
-Po emeryturze ostatniego / kluczowego BR klub ma czas **do startu tyg. 1** na podpisanie następcy. Brak BR w kadrze **nie** blokuje offseasonu; w meczu bez `Position.gk` w bramce obowiązuje kara wyniku — `matchday_model.md` (to **nie** jest walkower rosteru).
-
-### Skład meczowy (matchday)
-
-| Element | Liczba |
-| ------- | -----: |
-| Wyjściowa jedenastka (XI) | **11** |
-| Ławka rezerwowa | **7** |
-| Razem w protokole | **18** |
-
-- XI + ławka ⊆ roster; zawodnicy kontuzjowani / zawieszeni nie mogą wejść do protokołu (chyba że osobna reguła ligi).
-- Pozostali członkowie rosteru (do 12 przy max 30) to **rezerwa poza meczem** — nie grają, ale liczą się do limitu 20–30 i payroll.
-- Zmiany w trakcie meczu: tylko z 7-osobowej ławki (`matchday_model.md`).
+- Wyjściowa jedenastka składa się dokładnie z 11 graczy.
+- Ławka rezerwowa mieści maksymalnie 7 zawodników.
+- W protokole meczowym może się znaleźć łącznie 18 zawodników, które muszą pochodzić z aktywnego rosteru.
+- Zawodnicy z urazami lub zawieszeniami nie mogą zostać umieszczeni w protokole meczowym.
+- Zawodnicy spoza 18-osobowej kadry meczowej to rezerwa, która nie gra, ale obciąża budżet płacowy i limit rosteru.
+- Zmiany w trakcie spotkania można przeprowadzać wyłącznie wykorzystując 7-osobową ławkę.
+- Jeśli zespół mieści się w limicie liczebności rosteru, ale poprzez kontuzje/zawieszenia nie może zapełnić całej ławki rezerwowej to może on przystąpić do meczu - jedyna różnica to mniejsza liczba zmienników (trzeba do tego dostosować UI i komunikaty).
+- Jeśli zespół mieści się w limicie liczebności rosteru, ale poprzez kontuzje/zawieszenia ma mniej niż 11 graczy zdolnych do gry to nie może on przystąpić do meczu - przyznawany jest wtedy walkower 0-3 na korzyść drużyny przeciwnej.
 
 ---
 
-## 2. Atmosfera i zgranie — przegląd
+## Lineup Cohesion
 
-Każdy zespół ma dwa powiązane wskaźniki (skala **0–100**):
+Lineup cohesion to składowa opisująca współpracę oraz znajomość pozycji jedenastki meczowej. 
 
-| Wskaźnik | EN (kod) | Opis |
-| -------- | -------- | ---- |
-| **Atmosfera** | `atmosphere` / morale szatni | nastroje, zadowolenie, „klimat” w klubie |
-| **Zgranie** | `chemistry` | jak dobrze skład współpracuje na boisku i w schemacie |
+### Pozycje
 
-Relacja dwukierunkowa:
+Gra na nominalnej pozycji wpływa pozytywnie na lineup cohesion. Wystawienie gracza na obcej pozycji obniża lineup cohesion i statystyki zawodnika.
 
-```text
-słaba atmosfera  ──►  obniża zgranie (z czasem)
-dobra atmosfera  ──►  podnosi zgranie (z czasem)
-wysokie zgranie  ──►  lekko wspiera atmosferę (stabilizacja)
-```
+- zawodnik na obcej pozycji: -5 i mnożnik atrybutów 0,9 
+- zawodnik na swojej pozycji: +2
 
-Aktualizacja: co mecz / co tydzień (do ustalenia w silniku day-to-day); zmiany są **stopniowe** (np. ±1…3 pkt), nie skoki ±30 po jednym wyniku.
+### Role
 
----
+Ustawienia zawodnika w jego optymalnej roli taktycznej daje dedykowany bonus meczowy do statystyk zawodnika oraz lineup cohesion. Ustawienie go w innej roli taktycznej nie powoduje żednego debuffa. 
 
-## 3. Atmosfera (`atmosphere`)
+- zawodnik na swojej roli: +2
 
-### Co na nią wpływa
-
-| Czynnik | Kierunek | Uwagi |
-| ------- | -------- | ----- |
-| **Zgranie** | wysokie ↑ / niskie ↓ | feedback loop ze sekcji 2 |
-| **Forma zespołu** | seria zwycięstw ↑, porażek ↓ | forma = wyniki z ostatnich N meczów (+ ewentualnie miejsce w tabeli vs oczekiwania) |
-| **Respektowanie próśb zawodników** | spełnione ↑ / zignorowane ↓ | prośby: więcej minut, trade, rola, przedłużenie, transfer out itd. |
-
-Dodatkowe (lżejsze) źródła — spójne z `matchday_model.md` / osobowościami:
-
-- obecność `leader` w XI / szatni → lekki bonus,
-- konflikty `temperamental`, złamane obietnice kontraktowe → kara,
-- sztab / styl trenera zgodny z szatnią → lekki bonus (`staff_rules.md`).
-
-### Skutki atmosfery
-
-| Poziom | Zakres (przykład) | Efekt |
-| ------ | ----------------- | ----- |
-| Kryzys | 0–29 | mocny dren zgrania; ↑ szansa próśb / trade demand; w meczu ↑ błędy / kartki nerwowe |
-| Słaba | 30–49 | powolny spadek zgrania; gorsza motywacja |
-| Neutralna | 50–69 | brak silnego dryfu |
-| Dobra | 70–84 | powolny wzrost zgrania |
-| Świetna | 85–100 | szybszy wzrost zgrania; bonus morale w meczu |
-
-Niska atmosfera **obniża zgranie**; wysoka **je polepsza** — to główny most między szatnią a boiskiem.
-
----
-
-## 4. Zgranie (`chemistry`)
-
-### Co buduje zgranie
-
-Ważne: do zgrania liczy się **optymalna pozycja**, **nie** optymalna rola.
-
-| Czynnik | Opis |
-| ------- | ---- |
-| **Optymalne pozycje w XI** | zawodnik na swojej `Position` (lub akceptowanej secondary — jeśli odblokowana) ↑; gra „nie na swojej” pozycji ↓ |
-| **Czas razem** | `seasonsWithTeam` + wspólne mecze w XI; nowi transfery startują z karą „adaptacji” |
-| **Osobowość** | kompatybilność w szatni (np. wielu `leader` / `professional` ↑; skupisko `temperamental` ↓); zgodność z trenerem |
-| **Trenerzy / sztab** | rating Defense/Offense + match stylu gry ze składem (`staff_rules.md`) |
-| **Wspólna narodowość** | pary / klastry tej samej `Nationality` w XI dają bonus linków (nie wymaga całej drużyny z jednego kraju) |
-| **Atmosfera** | dryf w górę/dół jak w sekcji 3 |
-
-### Czego zgranie **nie** myli z rolą
-
-- Ustawienie `AssignedRole` (np. `falseNine` vs `pressingForward`) **nie** jest warunkiem zgrania.
-- Rola daje **osobny boost meczowy** (sekcja 6), niezależny od chemistry.
-
-### Skutki zgrania — atrybuty
-
-Zgranie modyfikuje **efektywne** atrybuty jawne (FUT) / wkład w meczu — nie nadpisuje permanentnie zapisanych 50–99.
-
-```text
-effectiveAttr = round( baseAttr × chemistryMult )
-chemistryMult ∈ [0.92 … 1.08]     // przykład; clamp w kodzie
-```
-
-| Zgranie | `chemistryMult` (projekt) | Efekt |
-| ------- | ------------------------: | ----- |
-| 0–29 | 0,92–0,95 | wyraźne obniżenie |
-| 30–49 | 0,95–0,98 | lekkie obniżenie |
-| 50–69 | ~1,00 | baseline |
-| 70–84 | 1,02–1,05 | lekki boost |
-| 85–100 | 1,05–1,08 | silny boost |
-
-Wysokie zgranie **zwiększa** atrybuty (efektywne); niskie **obniża**.  
-Overall UI może pokazywać bazowy overall + strzałkę / tint „chemii”, żeby nie mylić z developmentem.
-
-Dodatkowo w symulacji (`matchday_model.md`): wysokie zgranie → lepsze podania / mniej chaosu przy pressingu.
-
----
-
-## 5. Pozycja vs rola — rozróżnienie
-
-| Pojęcie | Wpływa na | Gdy OK | Gdy źle |
-| ------- | --------- | ------ | ------- |
-| **Pozycja** (`Position`) | zgranie drużyny + ewentualna twarda kara contribution | buduje chemistry | drenuje chemistry, gorszy wkład |
-| **Rola** (`AssignedRole`) | osobny mnożnik statystyk / contribution | **boost do statystyk** | brak boostu lub kara fit (patrz `tactics.md`) |
-
-Przykład: LW wystawiony jako ST → kara pozycji (zgranie ↓).  
-ST z rolą `completeForward` przy dobrym fit → boost roli, nawet jeśli zgranie drużyny jest średnie.
-
----
-
-## 6. Boost optymalnej roli
-
-Zawodnik w XI (lub wchodzący z ławki) na **optymalnej roli** względem pozycji i atrybutów:
-
-```text
-roleMult ≈ 1,05 … 1,12   // gdy fit ≥ próg
-roleMult ≈ 0,80 … 0,90   // gdy rola niepasująca (FAIL)
-roleMult = 1,00          // rola „standard” / neutralna
-```
-
-- Boost dotyczy **efektywnych** statystyk w meczu (i ewentualnie widocznego „in-form role” w UI).
-- Stackowanie z chemią:
-
-```text
-matchAttr = baseAttr × chemistryMult × roleMult
-```
-
-(z clampem per atrybut, np. 40–99, żeby nie wybuchać ponad skalę FUT).
-
-Szczegóły progów fit: `tactics.md` §6.
-
----
-
-## 7. Prośby zawodników (wpływ na atmosferę)
-
-Typowe prośby (przykłady):
-
-- więcej minut / miejsce w XI,
-- zmiana pozycji / rola (tu: prośba o rolę **nie** buduje zgrania sama z siebie — tylko morale po spełnieniu),
-- przedłużenie kontraktu / podwyżka,
-- transfer / trade out,
-- obiecanie walki o tytuł / draft pick protection itd.
-
-| Reakcja menedżera | Atmosfera |
-| ----------------- | --------- |
-| Spełnienie w terminie | ↑ |
-| Częściowe spełnienie | lekki ↑ lub 0 |
-| Ignorowanie / złamanie obietnicy | ↓ (silniej u `ambitious` / `temperamental`) |
-| Spełnienie u `loyal` | mniejszy bonus (i tak stabilni); złamanie i tak boli mniej niż u innych |
-
----
-
-## 8. Walidacja i operacje rosterowe
-
-| Operacja | Warunek |
-| -------- | ------- |
-| Trade | po ruchu **obie** strony: 20–30; inaczej trade **odrzucony** (`trade_rules.md`) |
-| FA / draft / podpis / zwolnienie | po ruchu: 20–30 (podpis blokowany jeśli &gt; 30; zwolnienie blokowane jeśli &lt; 20 — wyjątek: emerytura omija blokadę) |
-| Emerytura | może zejść poniżej 20; skutek: walkower do naprawy |
-| Cap / apron | osobno — `salary_cap_rules.md` |
-| Ustawienie XI | dokładnie 11 dostępnych; formacja z `tactics.md`; slot BR ideally `gk` |
-| Ławka | do 7 z pozostałych dostępnych |
-
----
-
-## 9. Podsumowanie zależności
-
-```text
-prośby + forma zespołu + zgranie ──► atmosphere
-atmosphere (dryf) + pozycje XI + czas razem
-  + osobowości + trenerzy + narodowość ──► chemistry
-chemistry ──► effective FUT attrs (× 0.92…1.08)
-optymalna rola ──► dodatkowy roleMult (× ~1.05…1.12)
-pozycja ≠ rola
-```
-
----
-
-## 10. Status względem kodu
-
-- Roster seed ≈ 25; limity 20–30 i ławka 7 wymagają walidacji w modelu / UI (bez min. GK).
-- `Team` ma `roster` + `lineupPlayerIds`; brak jeszcze pól `atmosphere` / `chemistry` i ławki 7.
-- Ten dokument jest źródłem prawdy projektowej; stałe liczbowe — w kodzie / `BalanceConfig`.
+| Lineup Cohesion | Mnożnik atrybutów |
+| --------------- | ----------------- |
+| 0–20            | 1,01              |
+| 21–40           | 1,02              |
+| 41–60           | 1,03              |
+| 61–80           | 1,04              |
+| 81–100          | 1,05              |

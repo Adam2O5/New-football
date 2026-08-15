@@ -9,7 +9,7 @@ Kotwica startu: **pierwszy pełny tydzień sierpnia** (pon.–niedz. w całości
 
 Numery tygodni są **ciągłe**: po niedzieli tyg. *N* następuje poniedziałek tyg. *N+1* (brak „dziur” poza jawnym tygodniem przerwy).
 
-Day-to-day i inbox: `messages.md`. Negocjacje kontraktów: `contract_signing.md`.
+Day-to-day i inbox: `messages.md`. Negocjacje kontraktów: `contracts.md`.
 
 ---
 
@@ -39,9 +39,7 @@ Tyg. 47 …   ──► Free agency + skauting ciągły + przygotowania
 | Playoff R2 (półfinały konf.) | **35–37** | 2 |
 | Finały konferencji | **38–40** | 2 |
 | Finał ligi | **41–43** | 2 |
-| Offseason — awards → mock finalny | **44–45** | — |
-| Draft + przedłużenia kontraktów | **46** | — |
-| Free agency + przygotowania | **47** → do tyg. 1 kolejnego sezonu | — |
+| Offseason  | **44** → do tyg. 1 kolejnego sezonu | — |
 
 Od końca finału (koniec tyg. **43**) do startu kolejnego sezonu jest **~9 tygodni** (44–… + reszta lata) — wystarcza na draft, FA i przedłużenia.
 
@@ -75,10 +73,10 @@ Play-in zaczyna się poniedziałkiem tygodnia **31**.
 
 | Event | Kiedy |
 | ----- | ----- |
-| **Otwarcie okna** | po finale playoff (od poniedziałku tyg. **44**) — `trade_rules.md` |
+| **Otwarcie okna** | po finale playoff (od poniedziałku tyg. **44**) — `trades.md` |
 | **Trade deadline** | **poniedziałek tygodnia 23** sezonu regularnego |
 
-Po deadline zabronione są nowe transakcje do **końca kolejnego playoff**. Okno otwiera się znowu po finale (tyg. 44).
+Po deadline zabronione są nowe transakcje do **końca kolejnego playoff**. Okno otwiera się znowu po finale (poniedziałek tyg. 44).
 
 ---
 
@@ -111,7 +109,7 @@ Format: **best-of-5** (do 3 wygranych). Przy 2 slotach/tydz. maksymalnie **4 mec
 
 > Trzy tygodnie na finał ligi to **świadomy bufor** — realnie seria BO5 często kończy się w 2 tygodnie; trzeci tydzień absorbuje dogrywki i daje margines na UI/symulację.
 
-Po finale, **przed Awards (pon 44):** roll wzrostu / emerytury sztabu — `staff_rules.md`.
+Po finale, **przed Awards (pon 44):** roll wzrostu / emerytury sztabu — `staff.md`.
 
 ---
 
@@ -119,27 +117,29 @@ Po finale, **przed Awards (pon 44):** roll wzrostu / emerytury sztabu — `staff
 
 | Okres | Tygodnie | Wydarzenia |
 | ----- | -------- | ---------- |
-| Przerwa po play-off | **44–45** | Awards, retirements, lottery, scout report, combine, **mock finalny** |
-| Draft + przedłużenia | **46** | 3 rundy draftu; **generacja klasy N+1 + mock wstępny**; okno wymian już otwarte od tyg. 44 |
-| Przedłużenia kontraktów | **46** (po drafcie) | Bird rights, przedłużenia własnych + start rynku sztabu — `contract_signing.md` |
-| Free agency | od **poniedziałku tyg. 47** | FA (10h/dzień), **reset MLE**, RFA match, **ciągły skauting** klasy N+1 |
-| Przygotowania | tyg. **47** → tyg. **1** kolejnego sezonu | Obozy, treningi, wymiany, domykanie rosteru (w tym BR po emeryturze) |
+| Przerwa po play-off | **44–45** | otwarcie okna wymian, awards, retirements, lottery, scout report, combine, mock finalny |
+| Draft + przedłużenia | **46** poniedziałek | 3 rundy draftu; **generacja klasy N+1 + mock wstępny** |
+| Przedłużenia kontraktów | **46** wtorek - niedziela | Contract extension `contracts.md` |
+| Free agency | od **poniedziałku tyg. 47** | FA, RFA match|
+| Przygotowania | tyg. **47** → tyg. **1** kolejnego sezonu | wymiany, domykanie rosteru |
 
 Szczegóły reguł eventów: **`offseason.md`**.
 
 ---
 
-## Exact schedule — przerwa przed draftem (tyg. 44–45)
+## Exact schedule — offseason przed draftem (tyg. 44–45)
 
 | Event | Kiedy | Opis |
 | ----- | ----- | ---- |
-| **Staff growth / retire** | po finale tyg. **43**, przed Awards | Upgrade ★ sztabu (35–45) i emerytury sztabu (55–60) — `staff_rules.md` |
 | **Awards** | **poniedziałek tygodnia 44** | Nagrody sezonu (MVP, ROTY, DPOY, Coach, królowie, BR, Team of the Season). **Od tego dnia (po finale) okno wymian jest otwarte.** |
-| **Retirements** | **środa tygodnia 44** | Decyzje o emeryturze (tabela P dla 33+). Zawodnicy schodzą z rosteru; limity **20–30** (`squad_management.md`). Po emeryturze BR: czas na następcę do tyg. **1**. |
-| **Lottery** | **piątek tygodnia 44** | Loteria draftowa dla **10** najsłabszych drużyn — picki **1–10** 1. rundy (`draft_rules.md`). Picki **11–30** według tabeli. |
+| **Staff growth / retire** | **wtorek tygodnia 44** | Upgrade ★ sztabu (35–45) i emerytury sztabu (55–60) — `staff.md` |
+| **Retirements** | **środa tygodnia 44** | Decyzje o emeryturze (tabela P dla 33+). Zawodnicy schodzą z rosteru; limity **20–30** (`squad_management.md`). |
+| **Lottery** | **piątek tygodnia 44** | Loteria draftowa dla **10** najsłabszych drużyn — picki **1–10** 1. rundy (`draft.md`). Picki **11–30** według tabeli. |
 | **Scout Report** | **poniedziałek tygodnia 45** | Podsumowanie wiedzy scouta o obserwowanych prospectach + **assign na Draft Combine**. |
 | **Draft Combine** | **środa tygodnia 45** | Mecz pokazowy (2 najlepsi na pozycji) + testy fizyczne/medyczne całej klasy. |
 | **Mock Draft (finalny)** | **piątek tygodnia 45** | Finalny mock (Combine + rok rozwoju); sort UI listy prospectów. Scout dopina estymowane sloty. |
+
+Szczegóły: **`offseason.md`**.
 
 ---
 
@@ -147,11 +147,11 @@ Szczegóły reguł eventów: **`offseason.md`**.
 
 | Event | Kiedy | Opis |
 | ----- | ----- | ---- |
-| **Draft** | **poniedziałek tygodnia 46** | 3 rundy draftu (90 wyborów). Okno wymian nadal otwarte (od tyg. 44). Po drafcie: **generacja 120 prospectów klasy N+1** + **mock wstępny**. |
-| **Contract extensions** | **wtorek–niedziela tygodnia 46** | Okno przedłużeń własnych zawodników (Bird) + negocjacje sztabu w rytmie godzinowym — `contract_signing.md`. |
-| **Free agency open** | **poniedziałek tygodnia 47** | Start FA (10h/dzień); MLE reset; start **ciągłego skautingu** klasy N+1. |
+| **Draft** | **poniedziałek tygodnia 46** | `draft.md` |
+| **Contract extensions** | **wtorek–niedziela tygodnia 46** | `contracts.md` |
+| **Free agency open** | **poniedziałek tygodnia 47** | `contracts.md` |
 
-Szczegóły: **`offseason.md`**. Draft: `draft_rules.md`. Cap / Bird / MLE: `salary_cap_rules.md`.
+Szczegóły: **`offseason.md`**.
 
 ---
 
@@ -166,7 +166,7 @@ Szczegóły: **`offseason.md`**. Draft: `draft_rules.md`. Cap / Bird / MLE: `sal
 | **35–37** | Playoff — runda 2 |
 | **38–40** | Finały konferencji |
 | **41–43** | Finał ligi (+ staff growth/retire przed Awards) |
-| **44** | Awards (pon), Retirements (śr), Lottery (pt) |
+| **44** | StaffGrowth (pon), Awards (wt), Retirements (śr), Lottery (pt) |
 | **45** | Scout Report (pon), Draft Combine (śr), Mock Draft finalny (pt) |
 | **46** | Draft (pon) + mock wstępny N+1 + przedłużenia (wt–niedz) |
 | **47+** | Free agency + skauting ciągły + przygotowania |
@@ -183,8 +183,8 @@ Szczegóły: **`offseason.md`**. Draft: `draft_rules.md`. Cap / Bird / MLE: `sal
 | Play-in | Tyg. **31** (śr ×2, sob) |
 | Koniec playoff | Niedziela tyg. **43** |
 | Otwarcie okna wymian | Poniedziałek tyg. **44** (po finale) |
-| Staff growth / retire | Po finale, przed Awards |
-| Awards | Poniedziałek tyg. **44** |
+| Staff growth / retire | Poniedziałek tyg. **44** |
+| Awards | Wtorek tyg. **44** |
 | Retirements | Środa tyg. **44** |
 | Lottery | Piątek tyg. **44** |
 | Scout Report | Poniedziałek tyg. **45** |
@@ -203,7 +203,7 @@ W kodzie (`ScheduleGenerator` / day-to-day):
 
 - **58 meczów** = wynik 29 × 2 w sezonie regularnym (niezależnie od dat wall-clock).
 - Numer tygodnia sezonu jest **kanoniczny** dla eventów (nie polegaj na „14 czerwca”).
-- **Fazy** (`SeasonPhase` w `enums.dart`): `preseason` → `regular` → `playIn` → `playoff` → `draft` → `offseason`.
+- **Fazy** (`SeasonPhase` w `enums.dart`): `preseason` → `regular` → `playIn` → `playoff` → `offseason`.
 - **Preseason:** faza techniczna przed poniedziałkiem tyg. **1** — **nic się nie dzieje** (brak meczów, eventów, skautingu, FA). Służy tylko do spójności enum / UI „przed startem”.
 - Symulacja dzień-po-dniu + pauza na czerwone flagi inboxa — `messages.md`.
 
@@ -212,6 +212,6 @@ W kodzie (`ScheduleGenerator` / day-to-day):
 ## Uwagi projektowe
 
 1. **Kontuzje i zmęczenie** — 2 mecze/tydz. przez 29 tyg. to intensywny kalendarz; rotacja i stamina mają wysoką wagę (`player_management.md`, `squad_management.md`).
-2. **Trade window** — otwarte od końca playoff (tyg. **44**) do trade deadline (tyg. **23`); zamknięte od deadline do końca kolejnego playoff — `trade_rules.md`.
+2. **Trade window** — otwarte od początku offseason (tyg. **44**) do trade deadline (tyg. **23**); zamknięte od deadline do końca kolejnego playoff — `trades.md`.
 3. Przy przesunięciu kotwicy sierpnia (rok kalendarzowy) **numery tygodni i dni tygodnia eventów pozostają bez zmian**.
 4. Klasy draftowe żyją ~rok: generacja po drafcie → skauting od FA → Scout Report / Combine / mock finalny → draft.
