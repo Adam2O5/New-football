@@ -181,7 +181,7 @@ Map<String, dynamic> _$$PlayInResultImplToJson(_$PlayInResultImpl instance) =>
       'playoffSeed8TeamId': instance.playoffSeed8TeamId,
     };
 
-const _$ConferenceEnumMap = {Conference.east: 'east', Conference.west: 'west'};
+const _$ConferenceEnumMap = {Conference.europe: 'europe', Conference.restOfTheWorld: 'restOfTheWorld'};
 
 _$PlayoffBracketImpl _$$PlayoffBracketImplFromJson(Map<String, dynamic> json) =>
     _$PlayoffBracketImpl(

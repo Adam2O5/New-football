@@ -1,6 +1,6 @@
 enum Conference {
-  east('European'),
-  west('Rest of World');
+  europe('European'),
+  restOfTheWorld('Rest of World');
 
   const Conference(this.label);
   final String label;
@@ -24,7 +24,7 @@ enum Position {
   final String code;
 }
 
-enum SeasonPhase { preseason, regular, playIn, playoff, draft, offseason }
+enum SeasonPhase { preseason, regular, playIn, playoff, offseason }
 
 enum Formation {
   f343('3-4-3'),
@@ -310,3 +310,5 @@ enum ScoutingTier { tier1, tier2, tier3, tier4, tier5 }
 enum EstimatedDraftSlot { top1, top3, top5, top10, r1, r2, r3, x }
 
 enum TeamOfSeasonSlot { gk, lb, cb1, cb2, rb, mid1, mid2, mid3, lw, st, rw }
+
+enum TeamStatus { rebuild, retool, pretender, contender, elite }

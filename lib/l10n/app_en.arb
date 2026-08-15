@@ -213,8 +213,8 @@
   },
 
   "standings_noLeague": "No league",
-  "standings_tabEast": "East",
-  "standings_tabWest": "West",
+  "standings_tabEast": "Europe",
+  "standings_tabWest": "Rest of World",
   "standings_empty": "No table",
   "standings_col_team": "Team",
   "standings_col_record": "W-D-L",

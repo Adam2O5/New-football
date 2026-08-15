@@ -93,4 +93,4 @@ Map<String, dynamic> _$$TeamImplToJson(_$TeamImpl instance) =>
       'ai': instance.ai,
     };
 
-const _$ConferenceEnumMap = {Conference.east: 'east', Conference.west: 'west'};
+const _$ConferenceEnumMap = {Conference.europe: 'europe', Conference.restOfTheWorld: 'restOfTheWorld'};

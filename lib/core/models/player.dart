@@ -135,7 +135,7 @@ class Player with _$Player {
     required PlayerState state,
     required PlayerHidden hidden,
     @Default([]) List<PlayerSeasonStats> seasonStats,
-    @Default(0) int tradeValue,
+    @Default(0) int pointValue,
 
     /// Previous overall rating (rounded) captured at season start.
     /// Used by the Development screen to compute OVR delta.

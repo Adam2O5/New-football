@@ -12,7 +12,7 @@ void main() {
       final game = GameFactory().create(
         const NewGameRequest(
           saveName: 'Balance',
-          playerTeamId: 'team_east_0',
+          playerTeamId: 'team_europe_0',
           seed: 123,
         ),
       );

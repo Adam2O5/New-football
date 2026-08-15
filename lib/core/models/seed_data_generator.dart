@@ -37,7 +37,7 @@ class SeedDataGenerator {
         _generateTeam(
           city: city,
           name: name,
-          conference: Conference.east,
+          conference: Conference.europe,
           index: i,
           rng: rng,
           isPlayer: playerTeamId != null && i == 0,
@@ -52,7 +52,7 @@ class SeedDataGenerator {
         _generateTeam(
           city: city,
           name: name,
-          conference: Conference.west,
+          conference: Conference.restOfTheWorld,
           index: i + 15,
           rng: rng,
           isPlayer: false,
@@ -74,16 +74,16 @@ class SeedDataGenerator {
 
     final standings = [
       ConferenceStandings(
-        conference: Conference.east,
+        conference: Conference.europe,
         standings: teams
-            .where((t) => t.conference == Conference.east)
+            .where((t) => t.conference == Conference.europe)
             .map((t) => Standing(teamId: t.id))
             .toList(),
       ),
       ConferenceStandings(
-        conference: Conference.west,
+        conference: Conference.restOfTheWorld,
         standings: teams
-            .where((t) => t.conference == Conference.west)
+            .where((t) => t.conference == Conference.restOfTheWorld)
             .map((t) => Standing(teamId: t.id))
             .toList(),
       ),

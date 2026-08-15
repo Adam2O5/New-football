@@ -12,6 +12,7 @@ import 'package:new_football/core/services/calendar_event_registry.dart';
 import 'package:new_football/core/services/calendar_service.dart';
 import 'package:new_football/core/services/contract_service.dart';
 import 'package:new_football/core/services/day_simulator.dart';
+import 'package:new_football/core/services/draft_service.dart';
 import 'package:new_football/core/services/game_factory.dart';
 import 'package:new_football/core/services/schedule_generator.dart';
 import 'package:new_football/core/services/scouting_service.dart';
@@ -34,6 +35,8 @@ final daySimulatorProvider = Provider((ref) {
 });
 
 final seasonServiceProvider = Provider((ref) => SeasonService());
+
+final draftServiceProvider = Provider((ref) => DraftService());
 
 final staffServiceProvider = Provider((ref) => StaffService());
 
@@ -271,8 +274,9 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
 
   /// Returns true if the calendar event due today is a `playerAction` that
   /// the batch must stop for (currently only the draft, when it's the
-  /// player's turn to pick).
+  /// player's turn to pick, or the lottery which requires interactive UI).
   bool _isBlockingPlayerEvent(LeagueState league, String eventId) {
+    if (eventId == 'lottery') return true;
     if (eventId != 'draft') return false;
     final draft = league.currentSeason.draftState;
     if (draft == null) return false;
@@ -294,7 +298,8 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
         case 'awards':
           return _season.runAwards(league);
         case 'lottery':
-          return _season.runLottery(league);
+          // playerAction — handled by the lottery screen interactively.
+          return league;
         case 'scoutReport':
           return _season.runScoutReport(league);
         case 'combine':

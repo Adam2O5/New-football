@@ -143,6 +143,7 @@ class PlayerBalance {
   /// How many tallest outfield players feed set-piece / aerial averages.
   final int tallestOutfieldSampleSize;
 
+  // wages untouchable
   static const _defaultOutfieldOverallWeights = <Position, OutfieldAttrWeights>{
     Position.cb: OutfieldAttrWeights(
       pace: 0.10,

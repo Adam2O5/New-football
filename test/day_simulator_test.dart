@@ -10,7 +10,7 @@ void main() {
     final game = GameFactory().create(
       const NewGameRequest(
         saveName: 'Day',
-        playerTeamId: 'team_east_0',
+        playerTeamId: 'team_europe_0',
         seed: 5,
       ),
     );

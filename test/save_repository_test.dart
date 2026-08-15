@@ -22,7 +22,7 @@ void main() {
     final game = GameFactory().create(
       const NewGameRequest(
         saveName: 'Test',
-        playerTeamId: 'team_east_0',
+        playerTeamId: 'team_europe_0',
         difficulty: Difficulty.normal,
         seed: 99,
       ),
@@ -35,6 +35,6 @@ void main() {
     final loaded = await repo.load(game.meta.id);
     expect(loaded.leagueState.teams.length, 30);
     expect(loaded.leagueState.currentSeason.schedule.length, 870);
-    expect(loaded.leagueState.playerTeamId, 'team_east_0');
+    expect(loaded.leagueState.playerTeamId, 'team_europe_0');
   });
 }

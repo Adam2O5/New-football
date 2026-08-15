@@ -151,8 +151,8 @@ class SeasonService {
     PlayoffBracket? east;
     PlayoffBracket? west;
     for (final b in brackets) {
-      if (b.conference == Conference.east) east = b;
-      if (b.conference == Conference.west) west = b;
+      if (b.conference == Conference.europe) east = b;
+      if (b.conference == Conference.restOfTheWorld) west = b;
     }
 
     if (east != null &&

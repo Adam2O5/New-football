@@ -28,7 +28,7 @@ void main() {
     await controller.createNewGame(
       const NewGameRequest(
         saveName: 'SimUntil',
-        playerTeamId: 'team_east_0',
+        playerTeamId: 'team_europe_0',
         seed: 7,
       ),
     );
@@ -112,8 +112,8 @@ void main() {
                 year: 2027,
                 round: 1,
                 pickNumber: 1,
-                teamId: 'team_east_0',
-                originalTeamId: 'team_east_0',
+                teamId: 'team_europe_0',
+                originalTeamId: 'team_europe_0',
               ),
             ],
             draftClass: DraftClass(year: l.currentSeason.year),

@@ -29,7 +29,7 @@ extension StaffAttributesX on StaffAttributes {
   double overallForRole(StaffRole role) {
     switch (role) {
       case StaffRole.headCoach:
-        return (tactics + motivation + development) / 3.0;
+        return (tactics + motivation) / 2.0;
       case StaffRole.youthCoach:
         return (development + mentoring) / 2.0;
       case StaffRole.scout:

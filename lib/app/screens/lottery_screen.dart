@@ -203,9 +203,9 @@ class _LotteryScreenState extends ConsumerState<LotteryScreen> {
         Padding(
           padding: const EdgeInsets.all(16),
           child: FilledButton.icon(
-            onPressed: () => context.pop(),
+            onPressed: _finishLottery,
             icon: const Icon(Icons.check),
-            label: const Text('Zakończ'),
+            label: const Text('Zakończ losowanie'),
           ),
         ),
       ],
@@ -287,20 +287,10 @@ class _LotteryScreenState extends ConsumerState<LotteryScreen> {
 
   Future<void> _persistResults() async {
     try {
+      final draftService = ref.read(draftServiceProvider);
       await ref.read(gameControllerProvider.notifier).updateLeague((league) {
-        final draftState = league.currentSeason.draftState?.copyWith(
-              lotteryResults: _results,
-            ) ??
-            DraftState(
-              year: league.currentSeason.year,
-              lotteryResults: _results,
-              draftClass: league.currentSeason.nextDraftState?.draftClass ??
-                  DraftClass(year: league.currentSeason.year, prospects: []),
-            );
-        return league.copyWith(
-          currentSeason:
-              league.currentSeason.copyWith(draftState: draftState),
-        );
+        // Zapisz wyniki loterii i zbuduj pełną kolejność draftu
+        return draftService.buildDraftOrder(league, _results);
       });
     } catch (e) {
       if (!mounted) return;
@@ -308,6 +298,17 @@ class _LotteryScreenState extends ConsumerState<LotteryScreen> {
         SnackBar(content: Text('Błąd zapisu: $e')),
       );
     }
+  }
+
+  /// Kończy losowanie: zapisuje wyniki, przesuwa kalendarz o jeden dzień
+  /// i wraca do ekranu głównego.
+  Future<void> _finishLottery() async {
+    await _persistResults();
+    if (!mounted) return;
+    // Przesuń kalendarz o jeden dzień (dzień po loterii)
+    await ref.read(gameControllerProvider.notifier).advanceOneDay();
+    if (!mounted) return;
+    context.pop();
   }
 
   Future<void> _showExitDialog() async {

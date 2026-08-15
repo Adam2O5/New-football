@@ -56,7 +56,7 @@ class CalendarEventRegistry {
         week: awardsWeek,
         day: 5,
         order: 0,
-        kind: CalendarEventKind.informational,
+        kind: CalendarEventKind.playerAction,
       ),
       CalendarEventSlot(
         id: 'scoutReport',

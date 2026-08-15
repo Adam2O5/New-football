@@ -24,8 +24,8 @@ class StandingsScreen extends ConsumerWidget {
     ConferenceStandings? east;
     ConferenceStandings? west;
     for (final cs in league.currentSeason.standings) {
-      if (cs.conference == Conference.east) east = cs;
-      if (cs.conference == Conference.west) west = cs;
+      if (cs.conference == Conference.europe) east = cs;
+      if (cs.conference == Conference.restOfTheWorld) west = cs;
     }
 
     return DefaultTabController(

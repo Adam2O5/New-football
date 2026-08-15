@@ -68,6 +68,7 @@ void _refreshCalendarCursor(WidgetRef ref) {
 /// to the draft screen, since that's where the related watchlist/board UI
 /// currently lives.
 String? _routeForEvent(String id) => switch (id) {
+  'lottery' => '/game/lottery',
   'draft' => '/game/draft',
   'scoutReport' => '/game/draft',
   'nextClassGeneration' => '/game/draft',
@@ -278,6 +279,7 @@ Future<void> _simulateMatch(
 
 bool _isGoToOnlyEvent(String id) {
   switch (id) {
+    case 'lottery':
     case 'draft':
     case 'contractExtension':
     case 'freeAgencyOpen':
@@ -481,8 +483,8 @@ class HomeScreen extends ConsumerWidget {
       ConferenceStandings? west;
 
       for (final cs in league.currentSeason.standings) {
-        if (cs.conference == Conference.east) east = cs;
-        if (cs.conference == Conference.west) west = cs;
+        if (cs.conference == Conference.europe) east = cs;
+        if (cs.conference == Conference.restOfTheWorld) west = cs;
       }
       final eastSorted = east?.sorted ?? const <Standing>[];
       final westSorted = west?.sorted ?? const <Standing>[];

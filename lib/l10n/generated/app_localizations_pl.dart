@@ -500,10 +500,10 @@ class AppLocalizationsPl extends AppLocalizations {
   String get standings_noLeague => 'Brak ligi';
 
   @override
-  String get standings_tabEast => 'Wschód';
+  String get standings_tabEast => 'Europa';
 
   @override
-  String get standings_tabWest => 'Zachód';
+  String get standings_tabWest => 'Reszta świata';
 
   @override
   String get standings_empty => 'Brak tabeli';
