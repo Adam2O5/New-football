@@ -400,6 +400,29 @@ class SeasonService {
     );
   }
 
+  LeagueState _finalizeDraftFreeAgents(LeagueState state, DraftState draft) {
+    if (draft.currentPickIndex < draft.order.length) return state;
+    final draftedIds = draft.completedPicks
+        .map((c) => c.prospectId)
+        .whereType<String>()
+        .toSet();
+    final undrafted = draft.draftClass.prospects
+        .where((p) => !draftedIds.contains(p.id))
+        .map(
+          (p) => p
+              .toPlayer(
+                contract: Contract(
+                  salary: balance.salaryCap.minSalary,
+                  yearsRemaining: 0,
+                ),
+                rng: _random,
+              )
+              .recalculatePointValue(balance),
+        )
+        .toList();
+    return state.copyWith(freeAgents: [...state.freeAgents, ...undrafted]);
+  }
+
   LeagueState advanceDraft(LeagueState league, {String? playerPickProspectId}) {
     var draft = league.currentSeason.draftState;
     if (draft == null) return league;
@@ -492,25 +515,7 @@ class SeasonService {
     // (`docs/offseason.md` §8).
     final nowComplete = draft.currentPickIndex >= draft.order.length;
     if (!wasComplete && nowComplete) {
-      final draftedIds = draft.completedPicks
-          .map((c) => c.prospectId)
-          .whereType<String>()
-          .toSet();
-      final undrafted = draft.draftClass.prospects
-          .where((p) => !draftedIds.contains(p.id))
-          .map(
-            (p) => p
-                .toPlayer(
-                  contract: Contract(
-                    salary: balance.salaryCap.minSalary,
-                    yearsRemaining: 0,
-                  ),
-                  rng: _random,
-                )
-                .recalculatePointValue(balance),
-          )
-          .toList();
-      state = state.copyWith(freeAgents: [...state.freeAgents, ...undrafted]);
+      state = _finalizeDraftFreeAgents(state, draft);
     }
 
     return state;
@@ -532,10 +537,9 @@ class SeasonService {
         .map((c) => c.prospectId)
         .whereType<String>()
         .toSet();
-    final remaining = draft.draftClass.prospects
-        .where((p) => !taken.contains(p.id))
-        .toList()
-      ..sort((a, b) => b.scoutGrade.compareTo(a.scoutGrade));
+    final remaining =
+        draft.draftClass.prospects.where((p) => !taken.contains(p.id)).toList()
+          ..sort((a, b) => b.scoutGrade.compareTo(a.scoutGrade));
     if (remaining.isEmpty) return league;
 
     final chosen = remaining.first;
@@ -555,9 +559,7 @@ class SeasonService {
 
     var teams = league.teams.map((t) {
       if (t.id != pick.teamId) return t;
-      return capService.applyPayroll(
-        t.copyWith(roster: [...t.roster, player]),
-      );
+      return capService.applyPayroll(t.copyWith(roster: [...t.roster, player]));
     }).toList();
 
     final completed = pick.copyWith(
@@ -572,13 +574,14 @@ class SeasonService {
       order: newOrder,
     );
 
-    return league.copyWith(
+    var state = league.copyWith(
       teams: teams,
       currentSeason: league.currentSeason.copyWith(
         draftState: draft,
         phase: SeasonPhase.offseason,
       ),
     );
+    return _finalizeDraftFreeAgents(state, draft);
   }
 
   /// Contracts that hit 0 years (decremented at rollover) leave the roster
@@ -639,10 +642,14 @@ class SeasonService {
       // Player development ticks weekly in `DaySimulator`, not here — avoid
       // double-applying growth on top of the season's weekly ticks.
       var team = t.copyWith(
-        roster: roster.map((p) => p.copyWith(
-          previousOvr: p.overall(balance).round(),
-          previousPotential: p.potentialStars,
-        )).toList(),
+        roster: roster
+            .map(
+              (p) => p.copyWith(
+                previousOvr: p.overall(balance).round(),
+                previousPotential: p.potentialStars,
+              ),
+            )
+            .toList(),
         finance: t.finance.copyWith(midLevelExceptionAvailable: true),
         // Prognoza miejsca w tabeli (`projectedFinish`) i dyskonto czasowe
         // zmieniają się co sezon — przeliczyć wartość wszystkich
@@ -791,6 +798,7 @@ class SeasonService {
       return a.goalDifference.compareTo(b.goalDifference);
     });
     final lotteryTeams = all.take(10).toList();
+    if (lotteryTeams.length < 10) return [];
     final weights = [140, 120, 100, 90, 80, 70, 60, 50, 40, 30];
     final remaining = List<Standing>.from(lotteryTeams);
     final remainingWeights = List<int>.from(weights);

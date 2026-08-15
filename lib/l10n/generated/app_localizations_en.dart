@@ -364,7 +364,107 @@ class AppLocalizationsEn extends AppLocalizations {
   String get other_tradeHistory => 'Trade history';
 
   @override
+  String get other_teamOverview => 'Team overview';
+
+  @override
   String get other_finances => 'Finances';
+
+  @override
+  String get teamOverview_title => 'Team overview';
+
+  @override
+  String get teamOverview_noLeague => 'No active league';
+
+  @override
+  String get teamOverview_invalidTeam => 'Player team is not available';
+
+  @override
+  String teamOverview_conference(Object conference) {
+    return 'Conference: $conference';
+  }
+
+  @override
+  String get teamOverview_conferenceEurope => 'Europe';
+
+  @override
+  String get teamOverview_conferenceRestOfWorld => 'Rest of World';
+
+  @override
+  String get teamOverview_standings => 'Standings';
+
+  @override
+  String get teamOverview_record => 'Record';
+
+  @override
+  String get teamOverview_conferenceRank => 'Conference rank';
+
+  @override
+  String get teamOverview_overallRank => 'Overall rank';
+
+  @override
+  String get teamOverview_financials => 'Financials';
+
+  @override
+  String get teamOverview_payroll => 'Payroll';
+
+  @override
+  String get teamOverview_cap => 'Salary cap';
+
+  @override
+  String get teamOverview_capSpace => 'Cap space';
+
+  @override
+  String get teamOverview_teamState => 'Team state';
+
+  @override
+  String get teamOverview_atmosphere => 'Atmosphere';
+
+  @override
+  String get teamOverview_chemistry => 'Chemistry';
+
+  @override
+  String get teamOverview_roster => 'Roster';
+
+  @override
+  String get teamOverview_staff => 'Staff';
+
+  @override
+  String get teamOverview_nextAction => 'Next action';
+
+  @override
+  String get teamOverview_action => 'Action';
+
+  @override
+  String get teamOverview_nextMatch => 'Next match';
+
+  @override
+  String get teamOverview_noNextAction => 'No upcoming action';
+
+  @override
+  String get teamOverview_calendarPosition => 'Calendar';
+
+  @override
+  String teamOverview_weekDay(Object day, Object week) {
+    return 'Week $week, day $day';
+  }
+
+  @override
+  String get teamOverview_navigation => 'Open screens';
+
+  @override
+  String get teamOverview_viewSquad => 'Squad';
+
+  @override
+  String get teamOverview_viewStats => 'Statistics';
+
+  @override
+  String get teamOverview_viewStaff => 'Staff';
+
+  @override
+  String get teamOverview_viewFinance => 'Finance';
+
+  @override
+  String get teamOverview_viewSearch => 'Search';
 
   @override
   String get other_contracts => 'Contracts';
@@ -519,6 +619,55 @@ class AppLocalizationsEn extends AppLocalizations {
   String get standings_col_diff => '+/−';
 
   @override
+  String get standings_tabPostseason => 'Postseason';
+
+  @override
+  String get standings_playIn => 'Play-in';
+
+  @override
+  String get standings_playoffs => 'Playoffs';
+
+  @override
+  String get standings_notStarted => 'Not started';
+
+  @override
+  String get standings_noPostseasonData => 'No postseason data available';
+
+  @override
+  String get standings_match7v8 => '7th vs 8th';
+
+  @override
+  String get standings_match9v10 => '9th vs 10th';
+
+  @override
+  String get standings_playInFinal => 'Play-in final';
+
+  @override
+  String get standings_quarterFinals => 'Quarter-finals';
+
+  @override
+  String get standings_semiFinals => 'Semi-finals';
+
+  @override
+  String get standings_conferenceFinals => 'Conference final';
+
+  @override
+  String get standings_leagueFinal => 'League final';
+
+  @override
+  String get standings_seriesInProgress => 'Series in progress';
+
+  @override
+  String standings_seriesWinner(String team) {
+    return 'Winner: $team';
+  }
+
+  @override
+  String standings_champion(String team) {
+    return 'Champion: $team';
+  }
+
+  @override
   String get finance_noTeam => 'No player team';
 
   @override
@@ -559,6 +708,111 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get finance_contracts => 'Contracts / extensions';
+
+  @override
+  String get finance_capWarning => 'Payroll is above the salary cap';
+
+  @override
+  String get finance_capHealthy => 'Payroll is within the salary cap';
+
+  @override
+  String get freeAgency_title => 'Free Agency';
+
+  @override
+  String get freeAgency_noTeam => 'No player team';
+
+  @override
+  String get freeAgency_search => 'Search by name';
+
+  @override
+  String get freeAgency_position => 'Position';
+
+  @override
+  String get freeAgency_allPositions => 'All positions';
+
+  @override
+  String get freeAgency_minOvr => 'Min OVR';
+
+  @override
+  String get freeAgency_any => 'Any';
+
+  @override
+  String get freeAgency_sort => 'Sort';
+
+  @override
+  String get freeAgency_sortOvr => 'Overall';
+
+  @override
+  String get freeAgency_sortName => 'Name';
+
+  @override
+  String freeAgency_poolCount(Object count) {
+    return 'Available free agents: $count';
+  }
+
+  @override
+  String freeAgency_rosterUsage(Object count) {
+    return 'Roster: $count/30';
+  }
+
+  @override
+  String get freeAgency_empty => 'No free agents match the filters';
+
+  @override
+  String freeAgency_playerSubtitle(Object ovr, Object position, Object salary) {
+    return '$position · OVR $ovr · Market salary: $salary';
+  }
+
+  @override
+  String freeAgency_contractHeader(Object name) {
+    return 'Offer for $name';
+  }
+
+  @override
+  String freeAgency_marketDemand(Object salary) {
+    return 'Estimated market salary: $salary';
+  }
+
+  @override
+  String get freeAgency_offerSalary => 'Salary offer';
+
+  @override
+  String get freeAgency_offerYears => 'Contract years';
+
+  @override
+  String get freeAgency_submitOffer => 'Submit offer';
+
+  @override
+  String get freeAgency_selectPlayer => 'Select a free agent first';
+
+  @override
+  String get freeAgency_invalidOffer =>
+      'Enter a valid salary and 1–5 contract years';
+
+  @override
+  String get freeAgency_accepted => 'Offer accepted and player signed';
+
+  @override
+  String get freeAgency_rejected => 'Offer rejected';
+
+  @override
+  String get freeAgency_waiting => 'Player is considering the offer';
+
+  @override
+  String freeAgency_counter(Object salary, Object years) {
+    return 'Player made a counter offer: $salary × $years years';
+  }
+
+  @override
+  String get freeAgency_rosterFull => 'Roster is full';
+
+  @override
+  String get freeAgency_status => 'Offer status';
+
+  @override
+  String freeAgency_capSpace(Object amount) {
+    return 'Cap space: $amount';
+  }
 
   @override
   String get tactics_noTeam => 'No player team';
@@ -779,10 +1033,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get trade_yourPlayer => 'Your player';
 
   @override
+  String get trade_yourPick => 'Your draft pick';
+
+  @override
   String get trade_targetTeam => 'Target team';
 
   @override
   String get trade_theirPlayer => 'Their player';
+
+  @override
+  String get trade_theirPick => 'Their draft pick';
 
   @override
   String get trade_confirm => 'Confirm trade';
@@ -1122,4 +1382,517 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get staffAttr_negotiation => 'Negotiation';
+
+  @override
+  String get prospects_title => 'Prospects';
+
+  @override
+  String get prospects_name => 'Name';
+
+  @override
+  String get prospects_nationality => 'Nat';
+
+  @override
+  String get prospects_age => 'Age';
+
+  @override
+  String get prospects_positionShort => 'Pos';
+
+  @override
+  String get prospects_combine => 'Combine';
+
+  @override
+  String get prospects_grade => 'Grade';
+
+  @override
+  String get prospects_stars => 'Stars';
+
+  @override
+  String get prospects_injuryShort => 'Inj';
+
+  @override
+  String get prospects_determinationShort => 'Det';
+
+  @override
+  String get prospects_slot => 'Slot';
+
+  @override
+  String get prospects_noDraftClass => 'No draft class available';
+
+  @override
+  String get prospects_empty => 'No prospects match the filters';
+
+  @override
+  String get prospects_search => 'Search by name';
+
+  @override
+  String get prospects_position => 'Position';
+
+  @override
+  String get prospects_allPositions => 'All positions';
+
+  @override
+  String get prospects_watchOnly => 'Watchlist only';
+
+  @override
+  String get prospects_sort => 'Sort';
+
+  @override
+  String get prospects_sortName => 'Name';
+
+  @override
+  String get prospects_sortOvr => 'Projected OVR';
+
+  @override
+  String get prospects_sortGrade => 'Scout grade';
+
+  @override
+  String get prospects_sortPotential => 'Potential';
+
+  @override
+  String get prospects_watchlist => 'Watchlist';
+
+  @override
+  String get prospects_watched => 'Watched';
+
+  @override
+  String get prospects_saveWatchlist => 'Save watchlist';
+
+  @override
+  String prospects_coverage(Object limit, Object selected, Object stars) {
+    return 'Coverage: $stars★ · $selected/$limit';
+  }
+
+  @override
+  String get prospects_scoutingData => 'Scouting data';
+
+  @override
+  String get prospects_noScouting =>
+      'No scouting data. Add this prospect to the watchlist.';
+
+  @override
+  String get prospects_combineScore => 'Combine score';
+
+  @override
+  String get prospects_scoutGrade => 'Scout grade';
+
+  @override
+  String get prospects_potential => 'Potential';
+
+  @override
+  String get prospects_injuryProne => 'Injury proneness';
+
+  @override
+  String get prospects_determination => 'Determination';
+
+  @override
+  String get prospects_estimatedSlot => 'Estimated slot';
+
+  @override
+  String get prospects_unknown => 'Unknown';
+
+  @override
+  String get playerDetail_health => 'Health';
+
+  @override
+  String get playerDetail_available => 'Available';
+
+  @override
+  String playerDetail_injury(Object type) {
+    return 'Injured: $type';
+  }
+
+  @override
+  String playerDetail_injuryDays(Object days) {
+    return 'Days remaining: $days';
+  }
+
+  @override
+  String get playerDetail_roleTeam => 'Role and team';
+
+  @override
+  String playerDetail_currentRole(Object role) {
+    return 'Current role: $role';
+  }
+
+  @override
+  String playerDetail_optimalRole(Object role) {
+    return 'Optimal role: $role';
+  }
+
+  @override
+  String playerDetail_seasonsWithTeam(Object seasons) {
+    return 'Seasons with team: $seasons';
+  }
+
+  @override
+  String get playerDetail_history => 'Season history';
+
+  @override
+  String get playerDetail_career => 'Career totals';
+
+  @override
+  String get playerDetail_season => 'Season';
+
+  @override
+  String get playerDetail_appearances => 'Apps';
+
+  @override
+  String get playerDetail_minutes => 'Minutes';
+
+  @override
+  String get playerDetail_goals => 'Goals';
+
+  @override
+  String get playerDetail_assists => 'Assists';
+
+  @override
+  String get playerDetail_rating => 'Rating';
+
+  @override
+  String get playerDetail_noHistory => 'No season statistics available';
+
+  @override
+  String get squad_filters => 'Roster filters';
+
+  @override
+  String get squad_search => 'Search by name';
+
+  @override
+  String get squad_position => 'Position';
+
+  @override
+  String get squad_allPositions => 'All positions';
+
+  @override
+  String get squad_zone => 'Zone';
+
+  @override
+  String get squad_allZones => 'All zones';
+
+  @override
+  String get squad_availability => 'Availability';
+
+  @override
+  String get squad_allPlayers => 'All players';
+
+  @override
+  String get squad_available => 'Available';
+
+  @override
+  String get squad_injuredOnly => 'Injured';
+
+  @override
+  String get squad_minOvr => 'Min OVR';
+
+  @override
+  String get squad_minForm => 'Min form';
+
+  @override
+  String get squad_any => 'Any';
+
+  @override
+  String get squad_clearFilters => 'Clear filters';
+
+  @override
+  String get squad_noPlayers => 'No players match the filters';
+
+  @override
+  String get squad_matchday => 'Matchday squad';
+
+  @override
+  String squad_healthy(Object count) {
+    return 'Healthy: $count';
+  }
+
+  @override
+  String get squad_belowXi => 'Fewer than 11 healthy players are available';
+
+  @override
+  String squad_xiCount(Object count) {
+    return 'XI: $count';
+  }
+
+  @override
+  String squad_benchCount(Object count) {
+    return 'Bench: $count';
+  }
+
+  @override
+  String squad_reserveCount(Object count) {
+    return 'Reserves: $count';
+  }
+
+  @override
+  String get draftHistory_title => 'Draft history';
+
+  @override
+  String get draftHistory_noDraftData => 'No draft data available';
+
+  @override
+  String get draftHistory_currentDraft => 'Current draft';
+
+  @override
+  String draftHistory_season(Object year) {
+    return 'Season $year';
+  }
+
+  @override
+  String draftHistory_pick(Object number) {
+    return 'Pick $number';
+  }
+
+  @override
+  String draftHistory_round(Object round) {
+    return 'Round $round';
+  }
+
+  @override
+  String get draftHistory_team => 'Team';
+
+  @override
+  String get draftHistory_originalTeam => 'Original team';
+
+  @override
+  String get draftHistory_player => 'Player';
+
+  @override
+  String get draftHistory_noPicks => 'No completed picks';
+
+  @override
+  String get draftHistory_lottery => 'Lottery results';
+
+  @override
+  String get draftHistory_noLottery =>
+      'Lottery results are not available for this season';
+
+  @override
+  String get rankings_title => 'Rankings';
+
+  @override
+  String get rankings_power => 'Power ranking';
+
+  @override
+  String get rankings_expected => 'Expected rank';
+
+  @override
+  String get rankings_assets => 'Trade assets';
+
+  @override
+  String get rankings_noStrength => 'Power ranking is not calculated yet';
+
+  @override
+  String get rankings_rank => 'Rank';
+
+  @override
+  String get rankings_team => 'Team';
+
+  @override
+  String get rankings_powerValue => 'Power';
+
+  @override
+  String get rankings_status => 'Status';
+
+  @override
+  String rankings_updated(Object day, Object week) {
+    return 'Updated: week $week, day $day';
+  }
+
+  @override
+  String get rankings_expectedDisclaimer =>
+      'Expected rank reflects roster strength, not a simulated final table.';
+
+  @override
+  String get rankings_assetValue => 'Value';
+
+  @override
+  String get rankings_assetType => 'Type';
+
+  @override
+  String get rankings_owner => 'Owner';
+
+  @override
+  String get rankings_noAssets => 'No trade assets available';
+
+  @override
+  String get rankings_playerAsset => 'Player';
+
+  @override
+  String get rankings_pickAsset => 'Draft pick';
+
+  @override
+  String get rankings_statusRebuild => 'Rebuild';
+
+  @override
+  String get rankings_statusRetool => 'Retool';
+
+  @override
+  String get rankings_statusPretender => 'Pretender';
+
+  @override
+  String get rankings_statusContender => 'Contender';
+
+  @override
+  String get rankings_statusElite => 'Elite';
+
+  @override
+  String get stats_title => 'Statistics';
+
+  @override
+  String get stats_players => 'Player stats';
+
+  @override
+  String get stats_teamOverview => 'Team overview';
+
+  @override
+  String get stats_noStats => 'No recorded match statistics';
+
+  @override
+  String get stats_search => 'Search player';
+
+  @override
+  String get stats_sort => 'Sort';
+
+  @override
+  String get stats_sortOvr => 'OVR';
+
+  @override
+  String get stats_sortGoals => 'Goals';
+
+  @override
+  String get stats_sortAssists => 'Assists';
+
+  @override
+  String get stats_sortRating => 'Rating';
+
+  @override
+  String get stats_player => 'Player';
+
+  @override
+  String get stats_team => 'Team';
+
+  @override
+  String get stats_appearances => 'Apps';
+
+  @override
+  String get stats_minutes => 'Minutes';
+
+  @override
+  String get stats_goals => 'Goals';
+
+  @override
+  String get stats_assists => 'Assists';
+
+  @override
+  String get stats_rating => 'Rating';
+
+  @override
+  String get stats_record => 'Record';
+
+  @override
+  String get stats_roster => 'Roster';
+
+  @override
+  String get stats_averageOvr => 'Average OVR';
+
+  @override
+  String get stats_injured => 'Injured';
+
+  @override
+  String get stats_payroll => 'Payroll';
+
+  @override
+  String get stats_atmosphere => 'Atmosphere';
+
+  @override
+  String get stats_chemistry => 'Chemistry';
+
+  @override
+  String get stats_status => 'Status';
+
+  @override
+  String get stats_noStandings => 'No standings available';
+
+  @override
+  String get rewards_title => 'Rewards';
+
+  @override
+  String get rewards_noAwards => 'Awards have not been calculated yet';
+
+  @override
+  String get rewards_notAwarded => 'Not awarded';
+
+  @override
+  String get rewards_mvp => 'MVP';
+
+  @override
+  String get rewards_roty => 'Rookie of the year';
+
+  @override
+  String get rewards_dpoy => 'Defensive player of the year';
+
+  @override
+  String get rewards_topScorer => 'Top scorer';
+
+  @override
+  String get rewards_topAssist => 'Top assist provider';
+
+  @override
+  String get rewards_bestGk => 'Best goalkeeper';
+
+  @override
+  String get rewards_coachOfYear => 'Coach of the year';
+
+  @override
+  String get rewards_champion => 'Champion';
+
+  @override
+  String get rewards_teamOfSeason => 'Team of the season';
+
+  @override
+  String get search_title => 'Search';
+
+  @override
+  String get search_hint => 'Search teams, players and prospects';
+
+  @override
+  String get search_allTypes => 'All types';
+
+  @override
+  String get search_players => 'Players';
+
+  @override
+  String get search_teams => 'Teams';
+
+  @override
+  String get search_prospects => 'Prospects';
+
+  @override
+  String get search_freeAgents => 'Free agents';
+
+  @override
+  String get search_noResults => 'No results';
+
+  @override
+  String get search_tradeAction => 'Trade';
+
+  @override
+  String search_teamResult(Object conference) {
+    return 'Team · $conference';
+  }
+
+  @override
+  String search_playerResult(Object position, Object team) {
+    return 'Player · $team · $position';
+  }
+
+  @override
+  String search_prospectResult(Object age, Object position) {
+    return 'Prospect · $position · age $age';
+  }
+
+  @override
+  String search_freeAgentResult(Object ovr, Object position) {
+    return 'Free agent · $position · OVR $ovr';
+  }
 }

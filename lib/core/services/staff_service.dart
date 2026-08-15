@@ -19,9 +19,12 @@ class StaffOffer {
 /// Sztab: zatrudnianie, zwalnianie, rozwój i emerytury (`docs/staff_rules.md`,
 /// `docs/contract_signing.md` §7–9).
 class StaffService {
-  StaffService({this.balance = BalanceConfig.defaults, Random? random, MessageService? messages})
-    : _random = random ?? Random(),
-      _messages = messages ?? MessageService();
+  StaffService({
+    this.balance = BalanceConfig.defaults,
+    Random? random,
+    MessageService? messages,
+  }) : _random = random ?? Random(),
+       _messages = messages ?? MessageService();
 
   final BalanceConfig balance;
   final Random _random;
@@ -47,7 +50,10 @@ class StaffService {
     const mandateFit = 1.0;
     const clubFit = 1.0;
     return 100 *
-        (0.55 * salaryFit + 0.25 * yearsFit + 0.15 * mandateFit + 0.05 * clubFit);
+        (0.55 * salaryFit +
+            0.25 * yearsFit +
+            0.15 * mandateFit +
+            0.05 * clubFit);
   }
 
   StaffReaction evaluateOffer(StaffMember member, StaffOffer offer) {
@@ -82,7 +88,10 @@ class StaffService {
     if (team.staff.member(member.role) != null) return null;
     if (!canHire(team, offer.salary)) return null;
     final hired = member.copyWith(
-      contract: StaffContract(salary: offer.salary, yearsRemaining: offer.years),
+      contract: StaffContract(
+        salary: offer.salary,
+        yearsRemaining: offer.years,
+      ),
     );
     return team.copyWith(staff: team.staff.withMember(member.role, hired));
   }
@@ -102,11 +111,14 @@ class StaffService {
         final member = staff.member(role);
         if (member == null) continue;
 
+        final baseline = member.copyWith(previousAttributes: member.attributes);
+        staff = staff.withMember(role, baseline);
+        changed = true;
+
         if (member.age >= balance.staff.retireAgeMin) {
           final chance = balance.staff.retireChanceForAge(member.age);
           if (_random.nextDouble() < chance) {
             staff = staff.withMember(role, null);
-            changed = true;
             state = _msg(
               state,
               MessageType.retirementStaff,
@@ -121,12 +133,10 @@ class StaffService {
             member.age <= balance.staff.growthAgeMax) {
           final chance = balance.staff.growthChanceForAge(member.age);
           if (_random.nextDouble() < chance) {
-            final grown = member.copyWith(
-              previousAttributes: member.attributes,
-              attributes: _bumpAttribute(member.attributes, member.role),
+            final grown = baseline.copyWith(
+              attributes: _bumpAttribute(baseline.attributes, baseline.role),
             );
             staff = staff.withMember(role, grown);
-            changed = true;
             state = _msg(
               state,
               MessageType.staffGrowth,
@@ -154,18 +164,22 @@ class StaffService {
         1 => a.copyWith(motivation: up(a.motivation)),
         _ => a.copyWith(development: up(a.development)),
       },
-      StaffRole.youthCoach => _random.nextBool()
-          ? a.copyWith(development: up(a.development))
-          : a.copyWith(mentoring: up(a.mentoring)),
-      StaffRole.scout => _random.nextBool()
-          ? a.copyWith(coverage: up(a.coverage))
-          : a.copyWith(evaluation: up(a.evaluation)),
-      StaffRole.physio => _random.nextBool()
-          ? a.copyWith(rehabilitation: up(a.rehabilitation))
-          : a.copyWith(regenaration: up(a.regenaration)),
-      StaffRole.doctor => _random.nextBool()
-          ? a.copyWith(prevention: up(a.prevention))
-          : a.copyWith(care: up(a.care)),
+      StaffRole.youthCoach =>
+        _random.nextBool()
+            ? a.copyWith(development: up(a.development))
+            : a.copyWith(mentoring: up(a.mentoring)),
+      StaffRole.scout =>
+        _random.nextBool()
+            ? a.copyWith(coverage: up(a.coverage))
+            : a.copyWith(evaluation: up(a.evaluation)),
+      StaffRole.physio =>
+        _random.nextBool()
+            ? a.copyWith(rehabilitation: up(a.rehabilitation))
+            : a.copyWith(regenaration: up(a.regenaration)),
+      StaffRole.doctor =>
+        _random.nextBool()
+            ? a.copyWith(prevention: up(a.prevention))
+            : a.copyWith(care: up(a.care)),
       StaffRole.cfo => a.copyWith(negotiation: up(a.negotiation)),
     };
   }

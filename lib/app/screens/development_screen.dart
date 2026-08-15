@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:new_football/app/providers/development_provider.dart';
 import 'package:new_football/app/widgets/screen_background.dart';
+import 'package:go_router/go_router.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
@@ -34,32 +35,52 @@ class _DevelopmentScreenState extends ConsumerState<DevelopmentScreen>
     final l10n = AppLocalizations.of(context)!;
     final data = ref.watch(developmentDataProvider);
     if (data == null) {
-      return ScreenBackground(child: Center(child: Text(l10n.dev_noTeam)));
+      return Scaffold(
+        appBar: AppBar(
+          title: Text(l10n.dev_title),
+          leading: IconButton(
+            tooltip: l10n.common_cancel,
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () => context.go('/game'),
+          ),
+        ),
+        body: ScreenBackground(child: Center(child: Text(l10n.dev_noTeam))),
+      );
     }
 
-    return ScreenBackground(
-      child: Column(
-        children: [
-          Material(
-            color: Theme.of(context).colorScheme.surface,
-            child: TabBar(
-              controller: _tabController,
-              tabs: [
-                Tab(text: l10n.dev_tabPlayers),
-                Tab(text: l10n.dev_tabStaff),
-              ],
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(l10n.dev_title),
+        leading: IconButton(
+          tooltip: l10n.common_cancel,
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => context.go('/game'),
+        ),
+      ),
+      body: ScreenBackground(
+        child: Column(
+          children: [
+            Material(
+              color: Theme.of(context).colorScheme.surface,
+              child: TabBar(
+                controller: _tabController,
+                tabs: [
+                  Tab(text: l10n.dev_tabPlayers),
+                  Tab(text: l10n.dev_tabStaff),
+                ],
+              ),
             ),
-          ),
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildPlayersTab(context, l10n, data),
-                _buildStaffTab(context, l10n, data),
-              ],
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _buildPlayersTab(context, l10n, data),
+                  _buildStaffTab(context, l10n, data),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -126,8 +147,8 @@ class _DevelopmentScreenState extends ConsumerState<DevelopmentScreen>
                     color: ovrDelta > 0
                         ? Colors.green
                         : ovrDelta < 0
-                            ? Colors.red
-                            : null,
+                        ? Colors.red
+                        : null,
                   ),
                 ),
               ),

@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:new_football/app/screens/contract_screen.dart';
+import 'package:new_football/app/screens/draft_history_screen.dart';
+import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/app/screens/draft_screen.dart';
 import 'package:new_football/app/screens/load_game_screen.dart';
 import 'package:new_football/app/screens/main_menu_screen.dart';
@@ -12,6 +14,13 @@ import 'package:new_football/app/screens/player_detail_screen.dart';
 import 'package:new_football/app/screens/settings_screen.dart';
 import 'package:new_football/app/screens/shell_screen.dart';
 import 'package:new_football/app/screens/development_screen.dart';
+import 'package:new_football/app/screens/finance_screen.dart';
+import 'package:new_football/app/screens/free_agency_screen.dart';
+import 'package:new_football/app/screens/rankings_screen.dart';
+import 'package:new_football/app/screens/rewards_screen.dart';
+import 'package:new_football/app/screens/search_screen.dart';
+import 'package:new_football/app/screens/stats_screen.dart';
+import 'package:new_football/app/screens/team_overview_screen.dart';
 import 'package:new_football/app/screens/lottery_screen.dart';
 import 'package:new_football/app/screens/prospects_screen.dart';
 import 'package:new_football/app/screens/staff_screen.dart';
@@ -25,11 +34,17 @@ final goRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     navigatorKey: _rootKey,
     initialLocation: '/',
+    redirect: (context, state) {
+      final isGameRoute =
+          state.matchedLocation == '/game' ||
+          state.matchedLocation.startsWith('/game/');
+      final hasActiveGame =
+          ref.read(gameControllerProvider).valueOrNull != null;
+      if (isGameRoute && !hasActiveGame) return '/';
+      return null;
+    },
     routes: [
-      GoRoute(
-        path: '/',
-        builder: (context, state) => const MainMenuScreen(),
-      ),
+      GoRoute(path: '/', builder: (context, state) => const MainMenuScreen()),
       GoRoute(
         path: '/new-game',
         builder: (context, state) => const NewGameScreen(),
@@ -54,13 +69,17 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final match = state.extra;
           if (match is! ScheduledMatch) {
+            final l10n = AppLocalizations.of(context)!;
             return Scaffold(
-              body: Center(
-                child: Builder(
-                  builder: (context) =>
-                      Text(AppLocalizations.of(context)!.router_noMatchData),
+              appBar: AppBar(
+                title: Text(l10n.matchday_defaultTitle),
+                leading: IconButton(
+                  tooltip: l10n.common_cancel,
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => context.go('/game'),
                 ),
               ),
+              body: Center(child: Text(l10n.router_noMatchData)),
             );
           }
           return MatchdayScreen(match: match);
@@ -79,11 +98,19 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/game/trade',
-        builder: (context, state) => const TradeScreen(),
+        builder: (context, state) => TradeScreen(
+          initialOwnPlayerId: state.uri.queryParameters['ownPlayerId'],
+          initialTargetTeamId: state.uri.queryParameters['targetTeamId'],
+          initialTheirPlayerId: state.uri.queryParameters['theirPlayerId'],
+        ),
       ),
       GoRoute(
         path: '/game/contracts',
         builder: (context, state) => const ContractScreen(),
+      ),
+      GoRoute(
+        path: '/game/free-agency',
+        builder: (context, state) => const FreeAgencyScreen(),
       ),
       GoRoute(
         path: '/game/staff',
@@ -91,15 +118,45 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/game/prospects',
-        builder: (context, state) => const ProspectsScreen(),
+        builder: (context, state) => ProspectsScreen(
+          initialWatchOnly: state.uri.queryParameters['watchlist'] == 'true',
+        ),
       ),
       GoRoute(
         path: '/game/lottery',
         builder: (context, state) => const LotteryScreen(),
       ),
       GoRoute(
+        path: '/game/finance',
+        builder: (context, state) => const FinanceScreen(),
+      ),
+      GoRoute(
         path: '/game/development',
         builder: (context, state) => const DevelopmentScreen(),
+      ),
+      GoRoute(
+        path: '/game/draft-history',
+        builder: (context, state) => const DraftHistoryScreen(),
+      ),
+      GoRoute(
+        path: '/game/rankings',
+        builder: (context, state) => const RankingsScreen(),
+      ),
+      GoRoute(
+        path: '/game/stats',
+        builder: (context, state) => const StatsScreen(),
+      ),
+      GoRoute(
+        path: '/game/team-overview',
+        builder: (context, state) => const TeamOverviewScreen(),
+      ),
+      GoRoute(
+        path: '/game/rewards',
+        builder: (context, state) => const RewardsScreen(),
+      ),
+      GoRoute(
+        path: '/game/search',
+        builder: (context, state) => const SearchScreen(),
       ),
     ],
   );

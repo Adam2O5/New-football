@@ -28,7 +28,8 @@ class LotteryService {
   }) {
     final rng = random ?? Random();
     final weights = DraftBalance.lotteryWeights;
-    final remaining = List<Standing>.from(lotteryTeams);
+    if (lotteryTeams.length < weights.length) return const [];
+    final remaining = List<Standing>.from(lotteryTeams.take(weights.length));
     final remainingWeights = List<int>.from(weights);
     final results = <LotteryResult>[];
     final totalOdds = weights.fold<int>(0, (s, w) => s + w);
@@ -48,13 +49,15 @@ class LotteryService {
         LotteryResult(
           teamId: remaining[idx].teamId,
           originalRank:
-              lotteryTeams.indexWhere((s) => s.teamId == remaining[idx].teamId) +
-                  1,
+              lotteryTeams.indexWhere(
+                (s) => s.teamId == remaining[idx].teamId,
+              ) +
+              1,
           assignedPick: pick,
           oddsForFirstPick:
               weights[lotteryTeams.indexWhere(
-                    (s) => s.teamId == remaining[idx].teamId,
-                  )] /
+                (s) => s.teamId == remaining[idx].teamId,
+              )] /
               totalOdds,
         ),
       );

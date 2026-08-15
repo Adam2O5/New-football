@@ -518,7 +518,7 @@ Future<void> _runBatch(
     return;
   }
   if (result.stopReason == SimulationStopReason.urgent) {
-    // Tabs: Home(0) Calendar(1) Squad(2) Standings(3) Finance(4) Inbox(5).
+    // Tabs: Home(0) Calendar(1) Squad(2) Standings(3) Other(4) Inbox(5).
     ref.read(shellTabIndexProvider.notifier).state = 5;
     ScaffoldMessenger.of(
       context,
@@ -526,7 +526,7 @@ Future<void> _runBatch(
     return;
   }
   if (result.stopReason == SimulationStopReason.event) {
-    if (result.eventId == 'draft') {
+    if (result.eventId == CalendarEventId.draft) {
       context.push('/game/draft');
       return;
     }

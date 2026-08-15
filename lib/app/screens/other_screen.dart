@@ -19,18 +19,35 @@ class OtherScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final items = <(IconData, String, String?)>[
       (Icons.swap_horiz, l10n.other_tradeHistory, null),
-      (Icons.account_balance_wallet_outlined, l10n.other_finances, null),
-      (Icons.description_outlined, l10n.other_contracts, null),
-      (Icons.person_search_outlined, l10n.other_freeAgency, null),
+      (Icons.groups_outlined, l10n.other_teamOverview, '/game/team-overview'),
+      (
+        Icons.account_balance_wallet_outlined,
+        l10n.other_finances,
+        '/game/finance',
+      ),
+      (Icons.description_outlined, l10n.other_contracts, '/game/contracts'),
+      (
+        Icons.person_search_outlined,
+        l10n.other_freeAgency,
+        '/game/free-agency',
+      ),
       (Icons.emoji_people_outlined, l10n.other_prospects, '/game/prospects'),
-      (Icons.groups_outlined, l10n.other_staff, null),
+      (Icons.groups_outlined, l10n.other_staff, '/game/staff'),
       (Icons.trending_up, l10n.other_development, '/game/development'),
-      (Icons.bar_chart, l10n.other_playerStats, null),
-      (Icons.emoji_events_outlined, l10n.other_rewards, null),
-      (Icons.search, l10n.other_search, null),
-      (Icons.how_to_vote_outlined, l10n.other_draftHistory, null),
-      (Icons.leaderboard_outlined, l10n.other_rankings, null),
-      (Icons.visibility_outlined, l10n.other_watchlist, null),
+      (Icons.bar_chart, l10n.other_playerStats, '/game/stats'),
+      (Icons.emoji_events_outlined, l10n.other_rewards, '/game/rewards'),
+      (Icons.search, l10n.other_search, '/game/search'),
+      (
+        Icons.how_to_vote_outlined,
+        l10n.other_draftHistory,
+        '/game/draft-history',
+      ),
+      (Icons.leaderboard_outlined, l10n.other_rankings, '/game/rankings'),
+      (
+        Icons.visibility_outlined,
+        l10n.other_watchlist,
+        '/game/prospects?watchlist=true',
+      ),
     ];
 
     return ScreenBackground(

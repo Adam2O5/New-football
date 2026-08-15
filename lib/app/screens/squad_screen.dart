@@ -19,6 +19,10 @@ import 'package:new_football/app/widgets/tactics/substitute_sheet.dart';
 import 'package:new_football/core/tactics/tactics_setup.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
+enum _RosterAvailabilityFilter { all, available, injured }
+
+enum _RosterZoneFilter { all, xi, bench, reserve }
+
 class SquadScreen extends ConsumerStatefulWidget {
   const SquadScreen({super.key});
 
@@ -36,6 +40,12 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
   AttackWidth? width;
   bool tacticsDirty = false;
   PlayerSortMode sortMode = PlayerSortMode.assignedZone;
+  final _rosterSearchController = TextEditingController();
+  String _positionFilterCode = '';
+  _RosterZoneFilter _zoneFilter = _RosterZoneFilter.all;
+  _RosterAvailabilityFilter _availabilityFilter = _RosterAvailabilityFilter.all;
+  int _minimumOvr = 0;
+  int _minimumForm = 0;
 
   late final TabController _tabController;
 
@@ -47,6 +57,7 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
 
   @override
   void dispose() {
+    _rosterSearchController.dispose();
     _tabController.dispose();
     super.dispose();
   }
@@ -93,6 +104,253 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
     );
   }
 
+  List<Player> _filteredRoster(Team team) {
+    final query = _rosterSearchController.text.trim().toLowerCase();
+    return team.roster.where((player) {
+      if (query.isNotEmpty && !player.name.toLowerCase().contains(query)) {
+        return false;
+      }
+      if (_positionFilterCode.isNotEmpty &&
+          player.position.code != _positionFilterCode) {
+        return false;
+      }
+      final zone = rosterZoneOf(team, player.id);
+      if (_zoneFilter != _RosterZoneFilter.all &&
+          ((_zoneFilter == _RosterZoneFilter.xi && zone != RosterZone.xi) ||
+              (_zoneFilter == _RosterZoneFilter.bench &&
+                  zone != RosterZone.bench) ||
+              (_zoneFilter == _RosterZoneFilter.reserve &&
+                  zone != RosterZone.reserve))) {
+        return false;
+      }
+      if (_availabilityFilter == _RosterAvailabilityFilter.available &&
+          !player.isAvailable) {
+        return false;
+      }
+      if (_availabilityFilter == _RosterAvailabilityFilter.injured &&
+          player.isAvailable) {
+        return false;
+      }
+      if (player.overall().round() < _minimumOvr ||
+          player.state.form < _minimumForm) {
+        return false;
+      }
+      return true;
+    }).toList();
+  }
+
+  Widget _buildRosterFilters(BuildContext context, AppLocalizations l10n) {
+    return Card(
+      margin: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  l10n.squad_filters,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                TextButton(
+                  onPressed: () {
+                    _rosterSearchController.clear();
+                    setState(() {
+                      _positionFilterCode = '';
+                      _zoneFilter = _RosterZoneFilter.all;
+                      _availabilityFilter = _RosterAvailabilityFilter.all;
+                      _minimumOvr = 0;
+                      _minimumForm = 0;
+                    });
+                  },
+                  child: Text(l10n.squad_clearFilters),
+                ),
+              ],
+            ),
+            TextField(
+              controller: _rosterSearchController,
+              decoration: InputDecoration(
+                labelText: l10n.squad_search,
+                prefixIcon: const Icon(Icons.search),
+              ),
+              onChanged: (_) => setState(() {}),
+            ),
+            const SizedBox(height: 8),
+            Wrap(
+              spacing: 12,
+              runSpacing: 8,
+              children: [
+                DropdownButton<String>(
+                  value: _positionFilterCode,
+                  hint: Text(l10n.squad_position),
+                  items: [
+                    DropdownMenuItem(
+                      value: '',
+                      child: Text(l10n.squad_allPositions),
+                    ),
+                    ...Position.values.map(
+                      (position) => DropdownMenuItem(
+                        value: position.code,
+                        child: Text(position.code),
+                      ),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() => _positionFilterCode = value);
+                    }
+                  },
+                ),
+                DropdownButton<_RosterZoneFilter>(
+                  value: _zoneFilter,
+                  hint: Text(l10n.squad_zone),
+                  items: [
+                    DropdownMenuItem(
+                      value: _RosterZoneFilter.all,
+                      child: Text(l10n.squad_allZones),
+                    ),
+                    DropdownMenuItem(
+                      value: _RosterZoneFilter.xi,
+                      child: Text(l10n.squad_zoneXi),
+                    ),
+                    DropdownMenuItem(
+                      value: _RosterZoneFilter.bench,
+                      child: Text(l10n.squad_zoneBench),
+                    ),
+                    DropdownMenuItem(
+                      value: _RosterZoneFilter.reserve,
+                      child: Text(l10n.squad_zoneReserves),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) setState(() => _zoneFilter = value);
+                  },
+                ),
+                DropdownButton<_RosterAvailabilityFilter>(
+                  value: _availabilityFilter,
+                  hint: Text(l10n.squad_availability),
+                  items: [
+                    DropdownMenuItem(
+                      value: _RosterAvailabilityFilter.all,
+                      child: Text(l10n.squad_allPlayers),
+                    ),
+                    DropdownMenuItem(
+                      value: _RosterAvailabilityFilter.available,
+                      child: Text(l10n.squad_available),
+                    ),
+                    DropdownMenuItem(
+                      value: _RosterAvailabilityFilter.injured,
+                      child: Text(l10n.squad_injuredOnly),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) {
+                      setState(() => _availabilityFilter = value);
+                    }
+                  },
+                ),
+                DropdownButton<int>(
+                  value: _minimumOvr,
+                  hint: Text(l10n.squad_minOvr),
+                  items: [0, 60, 70, 80, 90]
+                      .map(
+                        (value) => DropdownMenuItem(
+                          value: value,
+                          child: Text(
+                            value == 0
+                                ? '${l10n.squad_minOvr}: ${l10n.squad_any}'
+                                : '${l10n.squad_minOvr}: $value',
+                          ),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) {
+                    if (value != null) setState(() => _minimumOvr = value);
+                  },
+                ),
+                DropdownButton<int>(
+                  value: _minimumForm,
+                  hint: Text(l10n.squad_minForm),
+                  items: [0, 4, 6, 8, 10]
+                      .map(
+                        (value) => DropdownMenuItem(
+                          value: value,
+                          child: Text(
+                            value == 0
+                                ? '${l10n.squad_minForm}: ${l10n.squad_any}'
+                                : '${l10n.squad_minForm}: $value',
+                          ),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: (value) {
+                    if (value != null) setState(() => _minimumForm = value);
+                  },
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMatchdaySummary(
+    BuildContext context,
+    AppLocalizations l10n,
+    Team team,
+  ) {
+    final healthy = team.availablePlayers.length;
+    final belowXi = healthy < 11;
+    return Card(
+      margin: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+      color: belowXi
+          ? Theme.of(context).colorScheme.errorContainer
+          : Theme.of(context).colorScheme.surfaceContainerHigh,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.squad_matchday,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const SizedBox(height: 6),
+            Wrap(
+              spacing: 16,
+              runSpacing: 6,
+              children: [
+                Text(l10n.squad_xiCount(team.lineupPlayerIds.length)),
+                Text(l10n.squad_benchCount(team.benchPlayerIds.length)),
+                Text(
+                  l10n.squad_reserveCount(
+                    team.roster.length -
+                        team.lineupPlayerIds.length -
+                        team.benchPlayerIds.length,
+                  ),
+                ),
+                Text(l10n.squad_healthy(healthy)),
+              ],
+            ),
+            if (belowXi) ...[
+              const SizedBox(height: 6),
+              Row(
+                children: [
+                  const Icon(Icons.warning_amber, size: 18),
+                  const SizedBox(width: 6),
+                  Expanded(child: Text(l10n.squad_belowXi)),
+                ],
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+
   // -- Zakładka "Skład": pitch (tap → SubstituteSheet) + sortowalna lista.
   Widget _buildSquadTab(
     BuildContext context,
@@ -104,7 +362,8 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
     final size = team.roster.length;
     final sizeOk = size >= min && size <= max;
     final byId = {for (final p in team.roster) p.id: p};
-    final sortedRoster = sortRoster(team, team.roster, sortMode);
+    final filteredRoster = _filteredRoster(team);
+    final sortedRoster = sortRoster(team, filteredRoster, sortMode);
 
     return ListView(
       padding: EdgeInsets.zero,
@@ -124,6 +383,8 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
             ),
           ),
         ),
+        _buildMatchdaySummary(context, l10n, team),
+        _buildRosterFilters(context, l10n),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
           child: Text(
@@ -148,10 +409,9 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
         Container(
           margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
           decoration: BoxDecoration(
-            color: Theme.of(context)
-                .colorScheme
-                .surface
-                .withValues(alpha: 0.85),
+            color: Theme.of(
+              context,
+            ).colorScheme.surface.withValues(alpha: 0.85),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Column(
@@ -196,24 +456,30 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
                   ],
                 ),
               ),
-              ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: sortedRoster.length,
-                itemBuilder: (context, i) {
-                  final p = sortedRoster[i];
-                  return PlayerListTile(
-                    l10n: l10n,
-                    player: p,
-                    zone: rosterZoneOf(team, p.id),
-                    selected: selectedId == p.id,
-                    enableDragDrop: true,
-                    onAcceptDrop: (draggedId) =>
-                        _trySwap(context, team, draggedId, p.id),
-                    onTap: () => _onTapPlayer(context, team, p),
-                  );
-                },
-              ),
+              if (sortedRoster.isEmpty)
+                Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Text(l10n.squad_noPlayers),
+                )
+              else
+                ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: sortedRoster.length,
+                  itemBuilder: (context, i) {
+                    final p = sortedRoster[i];
+                    return PlayerListTile(
+                      l10n: l10n,
+                      player: p,
+                      zone: rosterZoneOf(team, p.id),
+                      selected: selectedId == p.id,
+                      enableDragDrop: true,
+                      onAcceptDrop: (draggedId) =>
+                          _trySwap(context, team, draggedId, p.id),
+                      onTap: () => _onTapPlayer(context, team, p),
+                    );
+                  },
+                ),
             ],
           ),
         ),

@@ -38,17 +38,14 @@ class _ShellScreenState extends ConsumerState<ShellScreen> {
   void initState() {
     super.initState();
     final tab = widget.initialTab;
-    if (tab != null && tab >= 0 && tab < _tabs.length) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        ref.read(shellTabIndexProvider.notifier).state = tab;
-      });
-    }
-  }
-
-  void _showWorkInProgress(BuildContext context, AppLocalizations l10n) {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(l10n.other_workInProgress)));
+    final normalizedTab = tab != null && tab >= 0 && tab < _tabs.length
+        ? tab
+        : 0;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ref.read(shellTabIndexProvider.notifier).state = normalizedTab;
+      }
+    });
   }
 
   @override
@@ -84,12 +81,19 @@ class _ShellScreenState extends ConsumerState<ShellScreen> {
         actions: [
           IconButton(
             tooltip: l10n.shell_settingsTooltip,
-            onPressed: () => _showWorkInProgress(context, l10n),
+            onPressed: () => context.push('/settings'),
             icon: const Icon(Icons.settings_outlined),
           ),
           IconButton(
             tooltip: l10n.shell_saveTooltip,
-            onPressed: () => _showWorkInProgress(context, l10n),
+            onPressed: () async {
+              await ref.read(gameControllerProvider.notifier).persist();
+              if (context.mounted) {
+                ScaffoldMessenger.of(
+                  context,
+                ).showSnackBar(SnackBar(content: Text(l10n.common_save)));
+              }
+            },
             icon: const Icon(Icons.save_outlined),
           ),
           IconButton(

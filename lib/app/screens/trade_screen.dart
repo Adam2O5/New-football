@@ -13,7 +13,16 @@ import 'package:new_football/core/services/trade_service.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
 class TradeScreen extends ConsumerStatefulWidget {
-  const TradeScreen({super.key});
+  const TradeScreen({
+    super.key,
+    this.initialOwnPlayerId,
+    this.initialTargetTeamId,
+    this.initialTheirPlayerId,
+  });
+
+  final String? initialOwnPlayerId;
+  final String? initialTargetTeamId;
+  final String? initialTheirPlayerId;
 
   @override
   ConsumerState<TradeScreen> createState() => _TradeScreenState();
@@ -28,6 +37,14 @@ class _TradeScreenState extends ConsumerState<TradeScreen> {
   String? _status;
 
   @override
+  void initState() {
+    super.initState();
+    _ownPlayerId = widget.initialOwnPlayerId;
+    _targetTeamId = widget.initialTargetTeamId;
+    _theirPlayerId = widget.initialTheirPlayerId;
+  }
+
+  @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final league = ref.watch(activeLeagueProvider);
@@ -40,9 +57,25 @@ class _TradeScreenState extends ConsumerState<TradeScreen> {
     }
 
     final others = league.teams.where((t) => t.id != own.id).toList();
-    final target = _targetTeamId == null
+    final rawTarget = _targetTeamId == null
         ? null
         : league.teamById(_targetTeamId!);
+    final target = rawTarget?.id == own.id ? null : rawTarget;
+    final ownPlayerId = own.roster.any((p) => p.id == _ownPlayerId)
+        ? _ownPlayerId
+        : null;
+    final ownPickId = own.ownedPicks.any((p) => p.id == _ownPickId)
+        ? _ownPickId
+        : null;
+    final targetId = target?.id;
+    final theirPlayerId =
+        target?.roster.any((p) => p.id == _theirPlayerId) == true
+        ? _theirPlayerId
+        : null;
+    final theirPickId =
+        target?.ownedPicks.any((p) => p.id == _theirPickId) == true
+        ? _theirPickId
+        : null;
 
     return Scaffold(
       appBar: AppBar(
@@ -57,7 +90,7 @@ class _TradeScreenState extends ConsumerState<TradeScreen> {
           padding: const EdgeInsets.all(16),
           children: [
             DropdownButtonFormField<String>(
-              value: _ownPlayerId,
+              value: ownPlayerId,
               decoration: InputDecoration(labelText: l10n.trade_yourPlayer),
               items: own.roster
                   .map(
@@ -77,8 +110,8 @@ class _TradeScreenState extends ConsumerState<TradeScreen> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              value: _ownPickId,
-              //todo decoration: InputDecoration(labelText: l10n.trade_yourPick),
+              value: ownPickId,
+              decoration: InputDecoration(labelText: l10n.trade_yourPick),
               items: own.ownedPicks
                   .map(
                     (p) => DropdownMenuItem(
@@ -91,7 +124,7 @@ class _TradeScreenState extends ConsumerState<TradeScreen> {
             ),
             const SizedBox(height: 20),
             DropdownButtonFormField<String>(
-              value: _targetTeamId,
+              value: targetId,
               decoration: InputDecoration(labelText: l10n.trade_targetTeam),
               items: others
                   .map(
@@ -106,7 +139,7 @@ class _TradeScreenState extends ConsumerState<TradeScreen> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              value: _theirPlayerId,
+              value: theirPlayerId,
               decoration: InputDecoration(labelText: l10n.trade_theirPlayer),
               items: (target?.roster ?? <Player>[])
                   .map(
@@ -128,8 +161,8 @@ class _TradeScreenState extends ConsumerState<TradeScreen> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              value: _theirPickId,
-              //todo decoration: InputDecoration(labelText: l10n.trade_theirPick),
+              value: theirPickId,
+              decoration: InputDecoration(labelText: l10n.trade_theirPick),
               items: (target?.ownedPicks ?? <DraftPick>[])
                   .map(
                     (p) => DropdownMenuItem(

@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:new_football/app/widgets/screen_background.dart';
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/app/utils/formatters.dart';
+import 'package:new_football/app/widgets/screen_background.dart';
+import 'package:new_football/core/models/assigned_role.dart';
+import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
@@ -20,11 +22,11 @@ class PlayerDetailScreen extends ConsumerWidget {
     Player? player;
     String? teamName;
     if (league != null) {
-      for (final t in league.teams) {
-        for (final p in t.roster) {
-          if (p.id == playerId) {
-            player = p;
-            teamName = t.name;
+      for (final team in league.teams) {
+        for (final candidate in team.roster) {
+          if (candidate.id == playerId) {
+            player = candidate;
+            teamName = team.name;
             break;
           }
         }
@@ -42,6 +44,14 @@ class PlayerDetailScreen extends ConsumerWidget {
     }
 
     final p = player;
+    final currentRole = roleDisplayInfo(p.state.role).label;
+    final optimalRole = roleDisplayInfo(p.optimalRole).label;
+    final injuryLabel = switch (p.state.injuryType) {
+      InjuryType.minor => l10n.matchEvent_minorInjury,
+      InjuryType.major => l10n.matchEvent_majorInjury,
+      null => l10n.playerDetail_health,
+    };
+
     return Scaffold(
       appBar: AppBar(
         title: Text(p.name),
@@ -81,17 +91,54 @@ class PlayerDetailScreen extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 16),
-            Text(
-              l10n.playerDetail_attributes,
-              style: Theme.of(context).textTheme.titleMedium,
+            _sectionTitle(context, l10n.playerDetail_health),
+            Card(
+              child: ListTile(
+                leading: Icon(
+                  p.isAvailable ? Icons.check_circle : Icons.healing,
+                  color: p.isAvailable ? Colors.green : Colors.orange,
+                ),
+                title: Text(
+                  p.isAvailable
+                      ? l10n.playerDetail_available
+                      : l10n.playerDetail_injury(injuryLabel),
+                ),
+                subtitle: p.state.injured
+                    ? Text(
+                        l10n.playerDetail_injuryDays(
+                          p.state.injuryDaysRemaining,
+                        ),
+                      )
+                    : Text('${l10n.stat_cond}: ${p.state.stamina}%'),
+              ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 16),
+            _sectionTitle(context, l10n.playerDetail_roleTeam),
+            Card(
+              child: Column(
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.sports_soccer),
+                    title: Text(l10n.playerDetail_currentRole(currentRole)),
+                    subtitle: Text(l10n.playerDetail_optimalRole(optimalRole)),
+                  ),
+                  ListTile(
+                    leading: const Icon(Icons.groups_outlined),
+                    title: Text(teamName ?? l10n.playerDetail_notFound),
+                    subtitle: Text(
+                      l10n.playerDetail_seasonsWithTeam(
+                        p.state.seasonsWithTeam,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            _sectionTitle(context, l10n.playerDetail_attributes),
             ..._attributeRows(p),
             const SizedBox(height: 16),
-            Text(
-              l10n.playerDetail_contract,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
+            _sectionTitle(context, l10n.playerDetail_contract),
             Card(
               child: ListTile(
                 title: Text(
@@ -110,6 +157,9 @@ class PlayerDetailScreen extends ConsumerWidget {
                 ),
               ),
             ),
+            const SizedBox(height: 16),
+            _sectionTitle(context, l10n.playerDetail_history),
+            _historySection(context, l10n, p),
             const SizedBox(height: 8),
             Text(
               l10n.playerDetail_personality(p.personality.name),
@@ -118,6 +168,69 @@ class PlayerDetailScreen extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+
+  Widget _historySection(
+    BuildContext context,
+    AppLocalizations l10n,
+    Player p,
+  ) {
+    if (p.seasonStats.isEmpty) {
+      return Text(l10n.playerDetail_noHistory);
+    }
+
+    final seasons = [...p.seasonStats]
+      ..sort((a, b) => b.year.compareTo(a.year));
+    final career = p.careerSeasonStats;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _statsCard(context, l10n.playerDetail_career, career, l10n),
+        const SizedBox(height: 8),
+        ...seasons.map(
+          (season) => _statsCard(
+            context,
+            '${l10n.playerDetail_season} ${season.year}',
+            season,
+            l10n,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _statsCard(
+    BuildContext context,
+    String title,
+    PlayerSeasonStats stats,
+    AppLocalizations l10n,
+  ) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Wrap(
+          spacing: 16,
+          runSpacing: 8,
+          children: [
+            Text(title, style: Theme.of(context).textTheme.titleSmall),
+            Text('${l10n.playerDetail_appearances}: ${stats.appearances}'),
+            Text('${l10n.playerDetail_minutes}: ${stats.minutes}'),
+            Text('${l10n.playerDetail_goals}: ${stats.goals}'),
+            Text('${l10n.playerDetail_assists}: ${stats.assists}'),
+            Text(
+              '${l10n.playerDetail_rating}: ${stats.ratingAvg.toStringAsFixed(2)}',
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _sectionTitle(BuildContext context, String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Text(title, style: Theme.of(context).textTheme.titleMedium),
     );
   }
 
