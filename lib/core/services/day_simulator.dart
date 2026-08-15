@@ -9,6 +9,7 @@ import 'package:new_football/core/models/message.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/standing.dart';
 import 'package:new_football/core/models/team.dart';
+import 'package:new_football/core/services/calendar_event_registry.dart';
 import 'package:new_football/core/services/calendar_service.dart';
 import 'package:new_football/core/services/contract_service.dart';
 import 'package:new_football/core/services/development_service.dart';
@@ -24,6 +25,7 @@ class DaySimulationResult {
     required this.pauseForUrgent,
     this.playerMatch,
     this.simulatedResults = const [],
+    this.eventId,
   });
 
   final LeagueState league;
@@ -32,6 +34,11 @@ class DaySimulationResult {
   /// Non-null when the player's team has a match today — UI should open matchday.
   final ScheduledMatch? playerMatch;
   final List<MatchResult> simulatedResults;
+
+  /// If the simulation stopped because a calendar event needs attention, this
+  /// is the event id. `null` when the stop reason is the player's match or
+  /// other non-calendar reasons.
+  final CalendarEventId? eventId;
 }
 
 /// Advances the calendar by one day and resolves non-interactive events.

@@ -11,6 +11,7 @@ import 'package:new_football/app/screens/shell_screen.dart';
 import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/match_models.dart';
+import 'package:new_football/core/services/calendar_event_registry.dart';
 import 'package:new_football/core/services/schedule_generator.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
@@ -156,7 +157,7 @@ class CalendarScreen extends ConsumerWidget {
 
       final eventLabels = <String>[];
       for (final e in calendar.eventsOn(w, d)) {
-        if (e.id == 'draft') {
+        if (e.id == CalendarEventId.draft) {
           final draft = league.currentSeason.draftState;
           if (draft != null) {
             final total = draft.order.length;

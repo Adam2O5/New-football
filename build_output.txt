@@ -1,0 +1,178 @@
+﻿[ +315 ms] Artifact Instance of 'MaterialFonts' is not required, skipping update.
+[   +2 ms] Artifact Instance of 'GradleWrapper' is not required, skipping update.
+[        ] Artifact Instance of 'AndroidGenSnapshotArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'AndroidInternalBuildArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterWebSdk' is not required, skipping update.
+[  +15 ms] Artifact Instance of 'LegacyCanvasKitRemover' is not required, skipping update.
+[   +1 ms] Artifact Instance of 'FlutterSdk' is not required, skipping update.
+[        ] Artifact Instance of 'WindowsEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerDebugSymbols' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[   +1 ms] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FontSubsetArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'PubDependencies' is not required, skipping update.
+[   +1 ms] executing: [C:\Flutter\flutter/] git -c log.showSignature=false log HEAD -n 1 --pretty=format:%ad --date=iso
+[ +104 ms] Exit code 0 from: git -c log.showSignature=false log HEAD -n 1 --pretty=format:%ad --date=iso
+[        ] 2026-03-03 16:03:22 -0800
+[  +65 ms] Artifact Instance of 'AndroidGenSnapshotArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'AndroidInternalBuildArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterWebSdk' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterEngineStamp' is not required, skipping update.
+[        ] Artifact Instance of 'LegacyCanvasKitRemover' is not required, skipping update.
+[   +5 ms] Artifact Instance of 'WindowsEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerDebugSymbols' is not required, skipping update.
+[ +199 ms] Artifact Instance of 'MaterialFonts' is not required, skipping update.
+[        ] Artifact Instance of 'GradleWrapper' is not required, skipping update.
+[        ] Artifact Instance of 'AndroidGenSnapshotArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'AndroidInternalBuildArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterWebSdk' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterEngineStamp' is not required, skipping update.
+[        ] Artifact Instance of 'LegacyCanvasKitRemover' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterSdk' is not required, skipping update.
+[        ] Artifact Instance of 'WindowsEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxEngineArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'LinuxFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'MacOSFuchsiaSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerSDKArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FlutterRunnerDebugSymbols' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'IosUsbArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'FontSubsetArtifacts' is not required, skipping update.
+[        ] Artifact Instance of 'PubDependencies' is not required, skipping update.
+[ +124 ms] executing: [C:\Users\dadam\New-football/] C:\Flutter\flutter\bin\cache\dart-sdk\bin\dart pub --suppress-analytics run build_runner build --delete-conflicting-outputs --verbose
+flutter : FINE: Pub 3.11.1
+At line:1 char:34
++ ... -football ; flutter pub run build_runner build --delete-conflicting-o ...
++                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (FINE: Pub 3.11.1:String) [], Remo 
+   teException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+MSG : Deprecated. Use `dart run` instead.
+FINE: Package Config up to date.
+FINE: Package Config up to date.
+  Generating the build script.
+  Reading the asset graph.
+  Checking for updates.
+
+
+You have hit a bug in build_runner
+Please file an issue with reproduction steps at https://github.com/dart-lang/bu
+ild/issues
+
+
+AssetNotFoundException: new_football|.dart_tool/build/entrypoint/.packageLocati
+ons (c:\users\dadam\new-football\.dart_tool/build/entrypoint/.packageLocations)
+package:build_runner_core/src/asset/reader_writer.dart 109:15        ReaderWrit
+er.readAsBytes.<fn>.<fn>
+package:build/src/state/filesystem_cache.dart 90:15                  Passthroug
+hFilesystemCache.readAsBytes
+package:build_runner_core/src/asset/reader_writer.dart 104:21        ReaderWrit
+er.readAsBytes.<fn>
+package:build_runner_core/src/logging/timed_activities.dart 123:22   TimedActiv
+ities._run
+package:build_runner_core/src/logging/timed_activities.dart 57:58    TimedActiv
+ity.run
+package:build_runner_core/src/asset/reader_writer.dart 103:26        ReaderWrit
+er.readAsBytes
+package:build/src/asset/reader.dart 53:19                            AssetReade
+r.digest
+package:build_runner_core/src/generate/asset_tracker.dart 119:41     AssetTrack
+er.computeSourceUpdates
+package:build_runner_core/src/generate/build_definition.dart 199:19  _Loader._c
+omputeUpdates
+package:build_runner_core/src/generate/build_definition.dart 86:17   _Loader.pr
+epareWorkspace
+package:build_runner_core/src/generate/build_series.dart 158:27      BuildSerie
+s.create
+package:build_runner_core/src/generate/build_runner.dart 37:7        BuildRunne
+r.create
+package:build_runner/src/generate/build.dart 110:17                  build
+package:build_runner/src/entrypoint/build.dart 44:18                 BuildComma
+nd._run
+package:args/command_runner.dart 212:13                              CommandRun
+ner.runCommand
+package:build_runner/src/entrypoint/run.dart 26:18                   run
+.dart_tool\build\entrypoint\build.dart 46:43                         main
+
+IO  : Writing 6652 characters to text file C:\Users\dadam\AppData\Local\Pub\Cac
+he\log\pub_log.txt.
+MSG : Logs written to C:\Users\dadam\AppData\Local\Pub\Cache\log\pub_log.txt.
+[+34499 ms] pub failed
+            command: "C:\Flutter\flutter\bin\cache\dart-sdk\bin\dart pub --suppress-analytics run build_runner build --delete-conflicting-outputs --verbose"
+            pub env: {
+              "FLUTTER_ROOT": "C:\Flutter\flutter",
+              "PUB_ENVIRONMENT": "flutter_cli:forward",
+            }
+            exit code: 1
+
+[  +12 ms] "flutter run" took 34┬á884ms.
+[ +114 ms] Failed to update packages.
+[   +2 ms] 
+           #0      throwToolExit (package:flutter_tools/src/base/common.dart:34
+:3)
+           #1      _DefaultPub._runWithStdioInherited (package:flutter_tools/sr
+c/dart/pub.dart:486:7)
+           <asynchronous suspension>
+           #2      _DefaultPub.interactively (package:flutter_tools/src/dart/pu
+b.dart:559:5)
+           <asynchronous suspension>
+           #3      PackagesForwardCommand.runCommand (package:flutter_tools/src
+/commands/packages.dart:166:5)
+           <asynchronous suspension>
+           #4      FlutterCommand.run.<anonymous closure> (package:flutter_tool
+s/src/runner/flutter_command.dart:1590:27)
+           <asynchronous suspension>
+           #5      AppContext.run.<anonymous closure> (package:flutter_tools/sr
+c/base/context.dart:154:19)
+           <asynchronous suspension>
+           #6      CommandRunner.runCommand (package:args/command_runner.dart:2
+12:13)
+           <asynchronous suspension>
+           #7      FlutterCommandRunner.runCommand.<anonymous closure> (package
+:flutter_tools/src/runner/flutter_command_runner.dart:496:9)
+           <asynchronous suspension>
+           #8      AppContext.run.<anonymous closure> (package:flutter_tools/sr
+c/base/context.dart:154:19)
+           <asynchronous suspension>
+           #9      FlutterCommandRunner.runCommand (package:flutter_tools/src/r
+unner/flutter_command_runner.dart:431:5)
+           <asynchronous suspension>
+           #10     FlutterCommandRunner.run.<anonymous closure> (package:flutte
+r_tools/src/runner/flutter_command_runner.dart:307:33)
+           <asynchronous suspension>
+           #11     run.<anonymous closure>.<anonymous closure> (package:flutter
+_tools/runner.dart:104:11)
+           <asynchronous suspension>
+           #12     AppContext.run.<anonymous closure> (package:flutter_tools/sr
+c/base/context.dart:154:19)
+           <asynchronous suspension>
+           #13     main (package:flutter_tools/executable.dart:103:3)
+           <asynchronous suspension>
+
+
+[        ] Running 1 shutdown hook
+[   +2 ms] Shutdown hooks complete
+[ +145 ms] exiting with code 1

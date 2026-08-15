@@ -1049,13 +1049,13 @@ abstract class AppLocalizations {
   /// No description provided for @standings_tabEast.
   ///
   /// In pl, this message translates to:
-  /// **'Wschód'**
+  /// **'Europa'**
   String get standings_tabEast;
 
   /// No description provided for @standings_tabWest.
   ///
   /// In pl, this message translates to:
-  /// **'Zachód'**
+  /// **'Reszta świata'**
   String get standings_tabWest;
 
   /// No description provided for @standings_empty.

@@ -67,12 +67,12 @@ void _refreshCalendarCursor(WidgetRef ref) {
 /// without one (e.g. `scoutReport`, `nextClassGeneration` today) fall back
 /// to the draft screen, since that's where the related watchlist/board UI
 /// currently lives.
-String? _routeForEvent(String id) => switch (id) {
-  'lottery' => '/game/lottery',
-  'draft' => '/game/draft',
-  'scoutReport' => '/game/draft',
-  'nextClassGeneration' => '/game/draft',
-  'freeAgencyOpen' => '/game/contracts',
+String? _routeForEvent(CalendarEventId id) => switch (id) {
+  CalendarEventId.lottery => '/game/lottery',
+  CalendarEventId.draft => '/game/draft',
+  CalendarEventId.scoutReport => '/game/draft',
+  CalendarEventId.nextClassGeneration => '/game/draft',
+  CalendarEventId.freeAgencyOpen => '/game/contracts',
   _ => null,
 };
 
@@ -180,7 +180,7 @@ Future<void> _goToEvent(
     return;
   }
 
-  final route = _routeForEvent(action.id);
+  final route = _routeForEvent(action.calendarEventId!);
   if (route != null) {
     context.push(route);
     return;
@@ -224,7 +224,7 @@ Future<void> _simulateEvent(
   }
 
   final controller = ref.read(gameControllerProvider.notifier);
-  await controller.runEventAtCurrentDay(action.id);
+  await controller.runEventAtCurrentDay(action.calendarEventId!);
   final dayResult = await controller.advanceOneDay();
   if (!context.mounted) return;
   _refreshCalendarCursor(ref);
@@ -241,7 +241,9 @@ Future<void> _simulateEvent(
     return;
   }
 
-  final label = calendarEventLabel(context, action.id) ?? action.id;
+  final label = action.calendarEventId == null
+      ? action.id
+      : calendarEventLabel(context, action.calendarEventId!) ?? action.id;
   ScaffoldMessenger.of(
     context,
   ).showSnackBar(SnackBar(content: Text('Wykonano: $label')));
@@ -277,27 +279,26 @@ Future<void> _simulateMatch(
   _showBatchSnack(context, l10n, result);
 }
 
-bool _isGoToOnlyEvent(String id) {
+bool _isGoToOnlyEvent(CalendarEventId id) {
   switch (id) {
-    case 'lottery':
-    case 'draft':
-    case 'contractExtension':
-    case 'freeAgencyOpen':
-    case 'nextClassGeneration':
-    case 'scoutReport':
+    case CalendarEventId.lottery:
+    case CalendarEventId.draft:
+    case CalendarEventId.freeAgencyOpen:
+    case CalendarEventId.nextClassGeneration:
+    case CalendarEventId.scoutReport:
       return true;
-    case 'staffGrowth':
+    case CalendarEventId.staffGrowth:
       return false;
     default:
       return false;
   }
 }
 
-bool _isSimulateOnlyEvent(String id) {
+bool _isSimulateOnlyEvent(CalendarEventId id) {
   switch (id) {
-    case 'combine':
-    case 'finalMock':
-    case 'staffGrowth':
+    case CalendarEventId.combine:
+    case CalendarEventId.finalMock:
+    case CalendarEventId.staffGrowth:
       return true;
     default:
       return false;
@@ -345,7 +346,7 @@ Widget _buildNextActionSection(
       CalendarEventKind.automatic ||
       CalendarEventKind.informational =>
         action != null
-            ? 'Symuluj do: ${calendarEventLabel(context, action.id) ?? action.id}'
+            ? 'Symuluj do: ${calendarEventLabel(context, action.calendarEventId!) ?? action.id}'
             : 'Symuluj do wydarzenia',
       null => 'Symuluj do wydarzenia',
     };
@@ -391,9 +392,11 @@ Widget _buildNextActionSection(
     );
   }
 
-  final label = calendarEventLabel(context, action.id) ?? action.id;
-  final goToOnly = _isGoToOnlyEvent(action.id);
-  final simulateOnly = _isSimulateOnlyEvent(action.id);
+  final label = action.calendarEventId == null
+      ? action.id
+      : calendarEventLabel(context, action.calendarEventId!) ?? action.id;
+  final goToOnly = action.calendarEventId != null && _isGoToOnlyEvent(action.calendarEventId!);
+  final simulateOnly = action.calendarEventId != null && _isSimulateOnlyEvent(action.calendarEventId!);
 
   if (goToOnly) {
     return SizedBox(

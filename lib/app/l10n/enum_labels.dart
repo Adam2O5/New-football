@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
 import 'package:new_football/core/models/enums.dart';
+import 'package:new_football/core/services/calendar_event_registry.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
 String seasonPhaseLabel(BuildContext context, SeasonPhase phase) {
@@ -14,24 +15,21 @@ String seasonPhaseLabel(BuildContext context, SeasonPhase phase) {
   };
 }
 
-/// Maps a `CalendarEventSlot.id` to its display label.
-String? calendarEventLabel(BuildContext context, String eventId) {
+/// Maps a `CalendarEventId` to its display label.
+String? calendarEventLabel(BuildContext context, CalendarEventId eventId) {
   final l10n = AppLocalizations.of(context)!;
   return switch (eventId) {
-    // TODO: brak dedykowanego klucza l10n — dodać do app_*.arb.
-    'staffGrowth' => 'Rozwój i emerytury sztabu',
-    'awards' => l10n.calendar_event_awards,
-    'retirements' => l10n.calendar_event_retirements,
-    'lottery' => l10n.calendar_event_draftLottery,
-    'scoutReport' => l10n.calendar_event_scoutReport,
-    'combine' => l10n.calendar_event_combine,
-    'finalMock' => l10n.calendar_event_mockDraft,
-    'draft' => l10n.calendar_event_draft,
-    // TODO: brak dedykowanego klucza l10n — dodać do app_*.arb.
-    'nextClassGeneration' => 'Generacja nowej klasy draftowej',
-    'freeAgencyOpen' => l10n.calendar_event_freeAgency,
-    'tradeDeadline' => l10n.calendar_event_tradeDeadline,
-    _ => null,
+    CalendarEventId.staffGrowth => 'Rozwój i emerytury sztabu',
+    CalendarEventId.awards => l10n.calendar_event_awards,
+    CalendarEventId.retirements => l10n.calendar_event_retirements,
+    CalendarEventId.lottery => l10n.calendar_event_draftLottery,
+    CalendarEventId.scoutReport => l10n.calendar_event_scoutReport,
+    CalendarEventId.combine => l10n.calendar_event_combine,
+    CalendarEventId.finalMock => l10n.calendar_event_mockDraft,
+    CalendarEventId.draft => l10n.calendar_event_draft,
+    CalendarEventId.nextClassGeneration => 'Generacja nowej klasy draftowej',
+    CalendarEventId.freeAgencyOpen => l10n.calendar_event_freeAgency,
+    CalendarEventId.tradeDeadline => l10n.calendar_event_tradeDeadline,
   };
 }
 
@@ -73,6 +71,7 @@ String messageTypeLabel(BuildContext context, MessageType type) {
     MessageType.atmosphere => l10n.messageType_atmosphere,
     MessageType.calendar => l10n.messageType_calendar,
     MessageType.system => l10n.messageType_system,
+    _ => type.name,
   };
 }
 

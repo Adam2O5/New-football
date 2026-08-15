@@ -86,8 +86,9 @@ class BatchSimulationResult {
   final DaySimulationResult? lastResult;
 
   /// Set when [stopReason] is [SimulationStopReason.event] — the id of the
-  /// `CalendarEventSlot` that needs attention.
-  final String? eventId;
+  /// `CalendarEventSlot` that needs attention. `null` when the stop reason is
+  /// the player's match or other non-calendar reasons.
+  final CalendarEventId? eventId;
 }
 
 /// Next actionable thing on the calendar: the player's upcoming fixture, or
@@ -97,6 +98,7 @@ class UpcomingAction {
   const UpcomingAction({
     required this.kind,
     required this.id,
+    this.calendarEventId,
     required this.week,
     required this.day,
   });
@@ -105,6 +107,9 @@ class UpcomingAction {
 
   /// Registry event id, or `'match'` for the player's next fixture.
   final String id;
+  /// If this action corresponds to a calendar event from the registry, this
+  /// is its typed id. `null` for the player's match.
+  final CalendarEventId? calendarEventId;
   final int week;
   final int day;
 }
@@ -228,7 +233,8 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     if (matchDate == null) {
       return UpcomingAction(
         kind: eventSlot.kind,
-        id: eventSlot.id,
+        id: eventSlot.id.name,
+        calendarEventId: eventSlot.id,
         week: eventSlot.week,
         day: eventSlot.day,
       );
@@ -256,7 +262,8 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
           )
         : UpcomingAction(
             kind: eventSlot.kind,
-            id: eventSlot.id,
+            id: eventSlot.id.name,
+            calendarEventId: eventSlot.id,
             week: eventSlot.week,
             day: eventSlot.day,
           );
@@ -275,9 +282,9 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   /// Returns true if the calendar event due today is a `playerAction` that
   /// the batch must stop for (currently only the draft, when it's the
   /// player's turn to pick, or the lottery which requires interactive UI).
-  bool _isBlockingPlayerEvent(LeagueState league, String eventId) {
-    if (eventId == 'lottery') return true;
-    if (eventId != 'draft') return false;
+  bool _isBlockingPlayerEvent(LeagueState league, CalendarEventId eventId) {
+    if (eventId == CalendarEventId.lottery) return true;
+    if (eventId != CalendarEventId.draft) return false;
     final draft = league.currentSeason.draftState;
     if (draft == null) return false;
     if (draft.currentPickIndex >= draft.order.length) return false;
@@ -288,39 +295,37 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   /// [eventId] at the current date. No-op (besides validation) for
   /// `playerAction` events like `draft` — those are driven entirely by the
   /// dedicated UI + `makeDraftPick`.
-  Future<void> runEventAtCurrentDay(String eventId) async {
+  Future<void> runEventAtCurrentDay(CalendarEventId eventId) async {
     await updateLeague((league) {
       switch (eventId) {
-        case 'staffGrowth':
+        case CalendarEventId.staffGrowth:
           return _season.runStaffGrowthAndRetire(league);
-        case 'retirements':
+        case CalendarEventId.retirements:
           return _season.runPlayerRetirements(league);
-        case 'awards':
+        case CalendarEventId.awards:
           return _season.runAwards(league);
-        case 'lottery':
+        case CalendarEventId.lottery:
           // playerAction — handled by the lottery screen interactively.
           return league;
-        case 'scoutReport':
+        case CalendarEventId.scoutReport:
           return _season.runScoutReport(league);
-        case 'combine':
+        case CalendarEventId.combine:
           return _season.runCombine(league);
-        case 'finalMock':
+        case CalendarEventId.finalMock:
           return _season.runFinalMock(league);
-        case 'nextClassGeneration':
+        case CalendarEventId.nextClassGeneration:
           return _season.runNextClassGeneration(league);
-        case 'draft':
+        case CalendarEventId.draft:
           // playerAction — handled by the draft screen + makeDraftPick.
           return league;
-        case 'freeAgencyOpen':
+        case CalendarEventId.freeAgencyOpen:
           return _season.runFreeAgencyOpen(league);
-        case 'tradeDeadline':
+        case CalendarEventId.tradeDeadline:
           return league.copyWith(
             currentSeason: league.currentSeason.copyWith(
               tradeDeadlineAcked: true,
             ),
           );
-        default:
-          return league;
       }
     });
   }
@@ -396,7 +401,7 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
       final league = current.leagueState;
       final due = _dueActionToday(league);
       final dueEventId = (due != null && due.kind != CalendarEventKind.match)
-          ? due.id
+          ? due.calendarEventId
           : null;
 
       if (dueEventId != null && _isBlockingPlayerEvent(league, dueEventId)) {
@@ -458,6 +463,7 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
               league: leagueAfter,
               pauseForUrgent: leagueAfter.inbox.pendingUrgent.isNotEmpty,
               simulatedResults: [autoResult],
+              eventId: null,
             );
             if (leagueAfter.inbox.pendingUrgent.isNotEmpty) {
               return BatchSimulationResult(

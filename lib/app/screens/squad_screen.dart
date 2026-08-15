@@ -11,11 +11,11 @@ import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/models/league_state.dart';
-import 'package:new_football/core/tactics/pitch_field.dart';
-import 'package:new_football/core/tactics/player_list_tile.dart';
+import 'package:new_football/app/widgets/tactics/pitch_field.dart';
+import 'package:new_football/app/widgets/tactics/player_list_tile.dart';
 import 'package:new_football/core/tactics/player_sort.dart';
-import 'package:new_football/core/tactics/role_picker_sheet.dart';
-import 'package:new_football/core/tactics/substitute_sheet.dart';
+import 'package:new_football/app/widgets/tactics/role_picker_sheet.dart';
+import 'package:new_football/app/widgets/tactics/substitute_sheet.dart';
 import 'package:new_football/core/tactics/tactics_setup.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 

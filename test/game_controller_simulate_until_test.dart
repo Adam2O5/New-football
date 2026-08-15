@@ -7,6 +7,7 @@ import 'package:new_football/core/models/draft_models.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/draft_pick.dart';
 import 'package:new_football/core/models/message.dart';
+import 'package:new_football/core/services/calendar_event_registry.dart';
 import 'package:new_football/core/services/game_factory.dart';
 import 'package:new_football/data/save_repository.dart';
 
@@ -130,7 +131,7 @@ void main() {
     );
     final result = await controller.simulateToDate(48, 1);
     expect(result.stopReason, SimulationStopReason.event);
-    expect(result.eventId, 'draft');
+    expect(result.eventId, CalendarEventId.draft);
     expect(result.daysSimulated, 0);
   });
 }
