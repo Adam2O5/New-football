@@ -74,9 +74,9 @@ _$PlayerStateImpl _$$PlayerStateImplFromJson(Map<String, dynamic> json) =>
     _$PlayerStateImpl(
       stamina: (json['stamina'] as num?)?.toInt() ?? 100,
       form: (json['form'] as num?)?.toInt() ?? 5,
-      injured: json['injured'] as bool? ?? false,
-      injuryDaysRemaining: (json['injuryDaysRemaining'] as num?)?.toInt() ?? 0,
-      injuryType: $enumDecodeNullable(_$InjuryTypeEnumMap, json['injuryType']),
+      injury: json['injury'] == null
+          ? null
+          : Injury.fromJson(json['injury'] as Map<String, dynamic>),
       role: json['role'] == null
           ? const AssignedRole.cm()
           : AssignedRole.fromJson(json['role'] as Map<String, dynamic>),
@@ -87,17 +87,10 @@ Map<String, dynamic> _$$PlayerStateImplToJson(_$PlayerStateImpl instance) =>
     <String, dynamic>{
       'stamina': instance.stamina,
       'form': instance.form,
-      'injured': instance.injured,
-      'injuryDaysRemaining': instance.injuryDaysRemaining,
-      'injuryType': _$InjuryTypeEnumMap[instance.injuryType],
+      'injury': instance.injury,
       'role': instance.role,
       'seasonsWithTeam': instance.seasonsWithTeam,
     };
-
-const _$InjuryTypeEnumMap = {
-  InjuryType.minor: 'minor',
-  InjuryType.major: 'major',
-};
 
 _$PlayerImpl _$$PlayerImplFromJson(Map<String, dynamic> json) => _$PlayerImpl(
   id: json['id'] as String,

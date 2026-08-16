@@ -37,6 +37,24 @@ const _$MatchEventTypeEnumMap = {
   MatchEventType.fullTime: 'fullTime',
 };
 
+_$MatchInjuryImpl _$$MatchInjuryImplFromJson(Map<String, dynamic> json) =>
+    _$MatchInjuryImpl(
+      teamId: json['teamId'] as String,
+      playerId: json['playerId'] as String,
+      injury: Injury.fromJson(json['injury'] as Map<String, dynamic>),
+      playerInStartingXi: json['playerInStartingXi'] as bool,
+      potentialLoss: json['potentialLoss'] as bool? ?? false,
+    );
+
+Map<String, dynamic> _$$MatchInjuryImplToJson(_$MatchInjuryImpl instance) =>
+    <String, dynamic>{
+      'teamId': instance.teamId,
+      'playerId': instance.playerId,
+      'injury': instance.injury,
+      'playerInStartingXi': instance.playerInStartingXi,
+      'potentialLoss': instance.potentialLoss,
+    };
+
 _$TeamMatchStatsImpl _$$TeamMatchStatsImplFromJson(Map<String, dynamic> json) =>
     _$TeamMatchStatsImpl(
       teamId: json['teamId'] as String,
@@ -85,6 +103,11 @@ _$MatchResultImpl _$$MatchResultImplFromJson(
           ?.map((e) => MatchEvent.fromJson(e as Map<String, dynamic>))
           .toList() ??
       const [],
+  injuries:
+      (json['injuries'] as List<dynamic>?)
+          ?.map((e) => MatchInjury.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
 );
 
 Map<String, dynamic> _$$MatchResultImplToJson(_$MatchResultImpl instance) =>
@@ -97,6 +120,7 @@ Map<String, dynamic> _$$MatchResultImplToJson(_$MatchResultImpl instance) =>
       'awayStats': instance.awayStats,
       'playerStats': instance.playerStats,
       'events': instance.events,
+      'injuries': instance.injuries,
     };
 
 _$MatchSetupImpl _$$MatchSetupImplFromJson(Map<String, dynamic> json) =>

@@ -412,33 +412,33 @@ Legenda: `⬜` do zrobienia · `🔄` w trakcie · `✅` gotowe
 
 > Dane, na których stoi silnik meczowy. Bez nich pipeline `effAttr` i efekty pomeczowe wymagają zaślepek.
 
-### ⬜ Task 10: Katalog kontuzji
+### ✅ Task 10: Katalog kontuzji
 
 **Cel:** `player_management.md` — 26 urazów w 5 grupach anatomicznych z rozkładem prawdopodobieństwa.
 
-- [ ] `InjuryCatalog` w `/balance` z 26 wpisami
-- [ ] Grupa: głowa i twarz (6 urazów)
-- [ ] Grupa: ramiona i klatka piersiowa (5 urazów)
-- [ ] Grupa: mięśnie nóg (6 urazów)
-- [ ] Grupa: stawy — kolana (4 urazy)
-- [ ] Grupa: stawy — kostki i stopy (5 urazów)
-- [ ] Każdy wpis: `id`, `group`, `type` (Minor/Major), zakres dni, waga prawdopodobieństwa
-- [ ] Zamienić `PlayerState.injuryType` na model `Injury{id, group, type, daysTotal, daysRemaining}`
-- [ ] Losowanie typu z wag rozkładu
-- [ ] Czas trwania × `doctorCareMult` ze sztabu
-- [ ] Major → 10% szans na −0,5★ potencjału, clamp dolny 0,5★
-- [ ] Minor nie obniża potencjału
-- [ ] `growthRate` clampowany do `(min, 0)` na czas kontuzji
-- [ ] Zawodnik kontuzjowany nie wchodzi do protokołu meczowego
-- [ ] Wiadomości `injury` (eskalacja: XI lub Major), `injuryReturn`, `potentialLoss`
-- [ ] `dedupKey = injury:{playerId}:{injuryId}`
-- [ ] Podnieść `currentSchemaVersion`
+- [x] `InjuryCatalog` w `/balance` z 26 wpisami
+- [x] Grupa: głowa i twarz (6 urazów)
+- [x] Grupa: ramiona i klatka piersiowa (5 urazów)
+- [x] Grupa: mięśnie nóg (6 urazów)
+- [x] Grupa: stawy — kolana (4 urazy)
+- [x] Grupa: stawy — kostki i stopy (5 urazów)
+- [x] Każdy wpis: `id`, `group`, `type` (Minor/Major), zakres dni, waga prawdopodobieństwa
+- [x] Zamienić `PlayerState.injuryType` na model `Injury{id, group, type, daysTotal, daysRemaining}`
+- [x] Losowanie typu z wag rozkładu
+- [x] Czas trwania × `doctorCareMult` ze sztabu
+- [x] Major → 10% szans na −0,5★ potencjału, clamp dolny 0,5★
+- [x] Minor nie obniża potencjału
+- [x] `growthRate` clampowany do `(min, 0)` na czas kontuzji
+- [x] Zawodnik kontuzjowany nie wchodzi do protokołu meczowego
+- [x] Wiadomości `injury` (eskalacja: XI lub Major), `injuryReturn`, `potentialLoss`
+- [x] `dedupKey = injury:{playerId}:{injuryId}`
+- [x] Podnieść `currentSchemaVersion`
 
 **Testy**
-- [ ] Rozkład 100 000 rolli mieści się w wagach z docs (±0,3 pp)
-- [ ] Major obniża potencjał w ~10% przypadków
-- [ ] Kontuzja blokuje wzrost OVR, ale nie blokuje spadku przy ujemnym `growthRate`
-- [ ] Czas trwania mieści się w zakresie dla danego urazu
+- [x] Rozkład 100 000 rolli mieści się w wagach z docs (±0,3 pp)
+- [x] Major obniża potencjał w ~10% przypadków
+- [x] Kontuzja blokuje wzrost OVR, ale nie blokuje spadku przy ujemnym `growthRate`
+- [x] Czas trwania mieści się w zakresie dla danego urazu
 
 **Demo:** profil zawodnika pokazuje nazwaną kontuzję z grupą anatomiczną i przewidywaną datą powrotu.
 

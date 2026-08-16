@@ -261,6 +261,275 @@ abstract class _MatchEvent implements MatchEvent {
       throw _privateConstructorUsedError;
 }
 
+MatchInjury _$MatchInjuryFromJson(Map<String, dynamic> json) {
+  return _MatchInjury.fromJson(json);
+}
+
+/// @nodoc
+mixin _$MatchInjury {
+  String get teamId => throw _privateConstructorUsedError;
+  String get playerId => throw _privateConstructorUsedError;
+  Injury get injury => throw _privateConstructorUsedError;
+  bool get playerInStartingXi => throw _privateConstructorUsedError;
+  bool get potentialLoss => throw _privateConstructorUsedError;
+
+  /// Serializes this MatchInjury to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of MatchInjury
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $MatchInjuryCopyWith<MatchInjury> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $MatchInjuryCopyWith<$Res> {
+  factory $MatchInjuryCopyWith(
+    MatchInjury value,
+    $Res Function(MatchInjury) then,
+  ) = _$MatchInjuryCopyWithImpl<$Res, MatchInjury>;
+  @useResult
+  $Res call({
+    String teamId,
+    String playerId,
+    Injury injury,
+    bool playerInStartingXi,
+    bool potentialLoss,
+  });
+
+  $InjuryCopyWith<$Res> get injury;
+}
+
+/// @nodoc
+class _$MatchInjuryCopyWithImpl<$Res, $Val extends MatchInjury>
+    implements $MatchInjuryCopyWith<$Res> {
+  _$MatchInjuryCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of MatchInjury
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? teamId = null,
+    Object? playerId = null,
+    Object? injury = null,
+    Object? playerInStartingXi = null,
+    Object? potentialLoss = null,
+  }) {
+    return _then(
+      _value.copyWith(
+            teamId: null == teamId
+                ? _value.teamId
+                : teamId // ignore: cast_nullable_to_non_nullable
+                      as String,
+            playerId: null == playerId
+                ? _value.playerId
+                : playerId // ignore: cast_nullable_to_non_nullable
+                      as String,
+            injury: null == injury
+                ? _value.injury
+                : injury // ignore: cast_nullable_to_non_nullable
+                      as Injury,
+            playerInStartingXi: null == playerInStartingXi
+                ? _value.playerInStartingXi
+                : playerInStartingXi // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            potentialLoss: null == potentialLoss
+                ? _value.potentialLoss
+                : potentialLoss // ignore: cast_nullable_to_non_nullable
+                      as bool,
+          )
+          as $Val,
+    );
+  }
+
+  /// Create a copy of MatchInjury
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $InjuryCopyWith<$Res> get injury {
+    return $InjuryCopyWith<$Res>(_value.injury, (value) {
+      return _then(_value.copyWith(injury: value) as $Val);
+    });
+  }
+}
+
+/// @nodoc
+abstract class _$$MatchInjuryImplCopyWith<$Res>
+    implements $MatchInjuryCopyWith<$Res> {
+  factory _$$MatchInjuryImplCopyWith(
+    _$MatchInjuryImpl value,
+    $Res Function(_$MatchInjuryImpl) then,
+  ) = __$$MatchInjuryImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({
+    String teamId,
+    String playerId,
+    Injury injury,
+    bool playerInStartingXi,
+    bool potentialLoss,
+  });
+
+  @override
+  $InjuryCopyWith<$Res> get injury;
+}
+
+/// @nodoc
+class __$$MatchInjuryImplCopyWithImpl<$Res>
+    extends _$MatchInjuryCopyWithImpl<$Res, _$MatchInjuryImpl>
+    implements _$$MatchInjuryImplCopyWith<$Res> {
+  __$$MatchInjuryImplCopyWithImpl(
+    _$MatchInjuryImpl _value,
+    $Res Function(_$MatchInjuryImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of MatchInjury
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? teamId = null,
+    Object? playerId = null,
+    Object? injury = null,
+    Object? playerInStartingXi = null,
+    Object? potentialLoss = null,
+  }) {
+    return _then(
+      _$MatchInjuryImpl(
+        teamId: null == teamId
+            ? _value.teamId
+            : teamId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        playerId: null == playerId
+            ? _value.playerId
+            : playerId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        injury: null == injury
+            ? _value.injury
+            : injury // ignore: cast_nullable_to_non_nullable
+                  as Injury,
+        playerInStartingXi: null == playerInStartingXi
+            ? _value.playerInStartingXi
+            : playerInStartingXi // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        potentialLoss: null == potentialLoss
+            ? _value.potentialLoss
+            : potentialLoss // ignore: cast_nullable_to_non_nullable
+                  as bool,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$MatchInjuryImpl implements _MatchInjury {
+  const _$MatchInjuryImpl({
+    required this.teamId,
+    required this.playerId,
+    required this.injury,
+    required this.playerInStartingXi,
+    this.potentialLoss = false,
+  });
+
+  factory _$MatchInjuryImpl.fromJson(Map<String, dynamic> json) =>
+      _$$MatchInjuryImplFromJson(json);
+
+  @override
+  final String teamId;
+  @override
+  final String playerId;
+  @override
+  final Injury injury;
+  @override
+  final bool playerInStartingXi;
+  @override
+  @JsonKey()
+  final bool potentialLoss;
+
+  @override
+  String toString() {
+    return 'MatchInjury(teamId: $teamId, playerId: $playerId, injury: $injury, playerInStartingXi: $playerInStartingXi, potentialLoss: $potentialLoss)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$MatchInjuryImpl &&
+            (identical(other.teamId, teamId) || other.teamId == teamId) &&
+            (identical(other.playerId, playerId) ||
+                other.playerId == playerId) &&
+            (identical(other.injury, injury) || other.injury == injury) &&
+            (identical(other.playerInStartingXi, playerInStartingXi) ||
+                other.playerInStartingXi == playerInStartingXi) &&
+            (identical(other.potentialLoss, potentialLoss) ||
+                other.potentialLoss == potentialLoss));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    teamId,
+    playerId,
+    injury,
+    playerInStartingXi,
+    potentialLoss,
+  );
+
+  /// Create a copy of MatchInjury
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$MatchInjuryImplCopyWith<_$MatchInjuryImpl> get copyWith =>
+      __$$MatchInjuryImplCopyWithImpl<_$MatchInjuryImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$MatchInjuryImplToJson(this);
+  }
+}
+
+abstract class _MatchInjury implements MatchInjury {
+  const factory _MatchInjury({
+    required final String teamId,
+    required final String playerId,
+    required final Injury injury,
+    required final bool playerInStartingXi,
+    final bool potentialLoss,
+  }) = _$MatchInjuryImpl;
+
+  factory _MatchInjury.fromJson(Map<String, dynamic> json) =
+      _$MatchInjuryImpl.fromJson;
+
+  @override
+  String get teamId;
+  @override
+  String get playerId;
+  @override
+  Injury get injury;
+  @override
+  bool get playerInStartingXi;
+  @override
+  bool get potentialLoss;
+
+  /// Create a copy of MatchInjury
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$MatchInjuryImplCopyWith<_$MatchInjuryImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
 TeamMatchStats _$TeamMatchStatsFromJson(Map<String, dynamic> json) {
   return _TeamMatchStats.fromJson(json);
 }
@@ -646,6 +915,7 @@ mixin _$MatchResult {
   TeamMatchStats get awayStats => throw _privateConstructorUsedError;
   List<PlayerMatchStats> get playerStats => throw _privateConstructorUsedError;
   List<MatchEvent> get events => throw _privateConstructorUsedError;
+  List<MatchInjury> get injuries => throw _privateConstructorUsedError;
 
   /// Serializes this MatchResult to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -673,6 +943,7 @@ abstract class $MatchResultCopyWith<$Res> {
     TeamMatchStats awayStats,
     List<PlayerMatchStats> playerStats,
     List<MatchEvent> events,
+    List<MatchInjury> injuries,
   });
 
   $TeamMatchStatsCopyWith<$Res> get homeStats;
@@ -702,6 +973,7 @@ class _$MatchResultCopyWithImpl<$Res, $Val extends MatchResult>
     Object? awayStats = null,
     Object? playerStats = null,
     Object? events = null,
+    Object? injuries = null,
   }) {
     return _then(
       _value.copyWith(
@@ -737,6 +1009,10 @@ class _$MatchResultCopyWithImpl<$Res, $Val extends MatchResult>
                 ? _value.events
                 : events // ignore: cast_nullable_to_non_nullable
                       as List<MatchEvent>,
+            injuries: null == injuries
+                ? _value.injuries
+                : injuries // ignore: cast_nullable_to_non_nullable
+                      as List<MatchInjury>,
           )
           as $Val,
     );
@@ -781,6 +1057,7 @@ abstract class _$$MatchResultImplCopyWith<$Res>
     TeamMatchStats awayStats,
     List<PlayerMatchStats> playerStats,
     List<MatchEvent> events,
+    List<MatchInjury> injuries,
   });
 
   @override
@@ -811,6 +1088,7 @@ class __$$MatchResultImplCopyWithImpl<$Res>
     Object? awayStats = null,
     Object? playerStats = null,
     Object? events = null,
+    Object? injuries = null,
   }) {
     return _then(
       _$MatchResultImpl(
@@ -846,6 +1124,10 @@ class __$$MatchResultImplCopyWithImpl<$Res>
             ? _value._events
             : events // ignore: cast_nullable_to_non_nullable
                   as List<MatchEvent>,
+        injuries: null == injuries
+            ? _value._injuries
+            : injuries // ignore: cast_nullable_to_non_nullable
+                  as List<MatchInjury>,
       ),
     );
   }
@@ -863,8 +1145,10 @@ class _$MatchResultImpl implements _MatchResult {
     required this.awayStats,
     final List<PlayerMatchStats> playerStats = const [],
     final List<MatchEvent> events = const [],
+    final List<MatchInjury> injuries = const [],
   }) : _playerStats = playerStats,
-       _events = events;
+       _events = events,
+       _injuries = injuries;
 
   factory _$MatchResultImpl.fromJson(Map<String, dynamic> json) =>
       _$$MatchResultImplFromJson(json);
@@ -899,9 +1183,18 @@ class _$MatchResultImpl implements _MatchResult {
     return EqualUnmodifiableListView(_events);
   }
 
+  final List<MatchInjury> _injuries;
+  @override
+  @JsonKey()
+  List<MatchInjury> get injuries {
+    if (_injuries is EqualUnmodifiableListView) return _injuries;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_injuries);
+  }
+
   @override
   String toString() {
-    return 'MatchResult(homeTeamId: $homeTeamId, awayTeamId: $awayTeamId, homeGoals: $homeGoals, awayGoals: $awayGoals, homeStats: $homeStats, awayStats: $awayStats, playerStats: $playerStats, events: $events)';
+    return 'MatchResult(homeTeamId: $homeTeamId, awayTeamId: $awayTeamId, homeGoals: $homeGoals, awayGoals: $awayGoals, homeStats: $homeStats, awayStats: $awayStats, playerStats: $playerStats, events: $events, injuries: $injuries)';
   }
 
   @override
@@ -925,7 +1218,8 @@ class _$MatchResultImpl implements _MatchResult {
               other._playerStats,
               _playerStats,
             ) &&
-            const DeepCollectionEquality().equals(other._events, _events));
+            const DeepCollectionEquality().equals(other._events, _events) &&
+            const DeepCollectionEquality().equals(other._injuries, _injuries));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -940,6 +1234,7 @@ class _$MatchResultImpl implements _MatchResult {
     awayStats,
     const DeepCollectionEquality().hash(_playerStats),
     const DeepCollectionEquality().hash(_events),
+    const DeepCollectionEquality().hash(_injuries),
   );
 
   /// Create a copy of MatchResult
@@ -966,6 +1261,7 @@ abstract class _MatchResult implements MatchResult {
     required final TeamMatchStats awayStats,
     final List<PlayerMatchStats> playerStats,
     final List<MatchEvent> events,
+    final List<MatchInjury> injuries,
   }) = _$MatchResultImpl;
 
   factory _MatchResult.fromJson(Map<String, dynamic> json) =
@@ -987,6 +1283,8 @@ abstract class _MatchResult implements MatchResult {
   List<PlayerMatchStats> get playerStats;
   @override
   List<MatchEvent> get events;
+  @override
+  List<MatchInjury> get injuries;
 
   /// Create a copy of MatchResult
   /// with the given fields replaced by the non-null parameter values.

@@ -720,9 +720,7 @@ PlayerState _$PlayerStateFromJson(Map<String, dynamic> json) {
 mixin _$PlayerState {
   int get stamina => throw _privateConstructorUsedError;
   int get form => throw _privateConstructorUsedError;
-  bool get injured => throw _privateConstructorUsedError;
-  int get injuryDaysRemaining => throw _privateConstructorUsedError;
-  InjuryType? get injuryType => throw _privateConstructorUsedError;
+  Injury? get injury => throw _privateConstructorUsedError;
   AssignedRole get role => throw _privateConstructorUsedError;
   int get seasonsWithTeam => throw _privateConstructorUsedError;
 
@@ -746,13 +744,12 @@ abstract class $PlayerStateCopyWith<$Res> {
   $Res call({
     int stamina,
     int form,
-    bool injured,
-    int injuryDaysRemaining,
-    InjuryType? injuryType,
+    Injury? injury,
     AssignedRole role,
     int seasonsWithTeam,
   });
 
+  $InjuryCopyWith<$Res>? get injury;
   $AssignedRoleCopyWith<$Res> get role;
 }
 
@@ -773,9 +770,7 @@ class _$PlayerStateCopyWithImpl<$Res, $Val extends PlayerState>
   $Res call({
     Object? stamina = null,
     Object? form = null,
-    Object? injured = null,
-    Object? injuryDaysRemaining = null,
-    Object? injuryType = freezed,
+    Object? injury = freezed,
     Object? role = null,
     Object? seasonsWithTeam = null,
   }) {
@@ -789,18 +784,10 @@ class _$PlayerStateCopyWithImpl<$Res, $Val extends PlayerState>
                 ? _value.form
                 : form // ignore: cast_nullable_to_non_nullable
                       as int,
-            injured: null == injured
-                ? _value.injured
-                : injured // ignore: cast_nullable_to_non_nullable
-                      as bool,
-            injuryDaysRemaining: null == injuryDaysRemaining
-                ? _value.injuryDaysRemaining
-                : injuryDaysRemaining // ignore: cast_nullable_to_non_nullable
-                      as int,
-            injuryType: freezed == injuryType
-                ? _value.injuryType
-                : injuryType // ignore: cast_nullable_to_non_nullable
-                      as InjuryType?,
+            injury: freezed == injury
+                ? _value.injury
+                : injury // ignore: cast_nullable_to_non_nullable
+                      as Injury?,
             role: null == role
                 ? _value.role
                 : role // ignore: cast_nullable_to_non_nullable
@@ -812,6 +799,20 @@ class _$PlayerStateCopyWithImpl<$Res, $Val extends PlayerState>
           )
           as $Val,
     );
+  }
+
+  /// Create a copy of PlayerState
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $InjuryCopyWith<$Res>? get injury {
+    if (_value.injury == null) {
+      return null;
+    }
+
+    return $InjuryCopyWith<$Res>(_value.injury!, (value) {
+      return _then(_value.copyWith(injury: value) as $Val);
+    });
   }
 
   /// Create a copy of PlayerState
@@ -837,13 +838,13 @@ abstract class _$$PlayerStateImplCopyWith<$Res>
   $Res call({
     int stamina,
     int form,
-    bool injured,
-    int injuryDaysRemaining,
-    InjuryType? injuryType,
+    Injury? injury,
     AssignedRole role,
     int seasonsWithTeam,
   });
 
+  @override
+  $InjuryCopyWith<$Res>? get injury;
   @override
   $AssignedRoleCopyWith<$Res> get role;
 }
@@ -864,9 +865,7 @@ class __$$PlayerStateImplCopyWithImpl<$Res>
   $Res call({
     Object? stamina = null,
     Object? form = null,
-    Object? injured = null,
-    Object? injuryDaysRemaining = null,
-    Object? injuryType = freezed,
+    Object? injury = freezed,
     Object? role = null,
     Object? seasonsWithTeam = null,
   }) {
@@ -880,18 +879,10 @@ class __$$PlayerStateImplCopyWithImpl<$Res>
             ? _value.form
             : form // ignore: cast_nullable_to_non_nullable
                   as int,
-        injured: null == injured
-            ? _value.injured
-            : injured // ignore: cast_nullable_to_non_nullable
-                  as bool,
-        injuryDaysRemaining: null == injuryDaysRemaining
-            ? _value.injuryDaysRemaining
-            : injuryDaysRemaining // ignore: cast_nullable_to_non_nullable
-                  as int,
-        injuryType: freezed == injuryType
-            ? _value.injuryType
-            : injuryType // ignore: cast_nullable_to_non_nullable
-                  as InjuryType?,
+        injury: freezed == injury
+            ? _value.injury
+            : injury // ignore: cast_nullable_to_non_nullable
+                  as Injury?,
         role: null == role
             ? _value.role
             : role // ignore: cast_nullable_to_non_nullable
@@ -911,9 +902,7 @@ class _$PlayerStateImpl implements _PlayerState {
   const _$PlayerStateImpl({
     this.stamina = 100,
     this.form = 5,
-    this.injured = false,
-    this.injuryDaysRemaining = 0,
-    this.injuryType,
+    this.injury,
     this.role = const AssignedRole.cm(),
     this.seasonsWithTeam = 0,
   });
@@ -928,13 +917,7 @@ class _$PlayerStateImpl implements _PlayerState {
   @JsonKey()
   final int form;
   @override
-  @JsonKey()
-  final bool injured;
-  @override
-  @JsonKey()
-  final int injuryDaysRemaining;
-  @override
-  final InjuryType? injuryType;
+  final Injury? injury;
   @override
   @JsonKey()
   final AssignedRole role;
@@ -944,7 +927,7 @@ class _$PlayerStateImpl implements _PlayerState {
 
   @override
   String toString() {
-    return 'PlayerState(stamina: $stamina, form: $form, injured: $injured, injuryDaysRemaining: $injuryDaysRemaining, injuryType: $injuryType, role: $role, seasonsWithTeam: $seasonsWithTeam)';
+    return 'PlayerState(stamina: $stamina, form: $form, injury: $injury, role: $role, seasonsWithTeam: $seasonsWithTeam)';
   }
 
   @override
@@ -954,11 +937,7 @@ class _$PlayerStateImpl implements _PlayerState {
             other is _$PlayerStateImpl &&
             (identical(other.stamina, stamina) || other.stamina == stamina) &&
             (identical(other.form, form) || other.form == form) &&
-            (identical(other.injured, injured) || other.injured == injured) &&
-            (identical(other.injuryDaysRemaining, injuryDaysRemaining) ||
-                other.injuryDaysRemaining == injuryDaysRemaining) &&
-            (identical(other.injuryType, injuryType) ||
-                other.injuryType == injuryType) &&
+            (identical(other.injury, injury) || other.injury == injury) &&
             (identical(other.role, role) || other.role == role) &&
             (identical(other.seasonsWithTeam, seasonsWithTeam) ||
                 other.seasonsWithTeam == seasonsWithTeam));
@@ -966,16 +945,8 @@ class _$PlayerStateImpl implements _PlayerState {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    stamina,
-    form,
-    injured,
-    injuryDaysRemaining,
-    injuryType,
-    role,
-    seasonsWithTeam,
-  );
+  int get hashCode =>
+      Object.hash(runtimeType, stamina, form, injury, role, seasonsWithTeam);
 
   /// Create a copy of PlayerState
   /// with the given fields replaced by the non-null parameter values.
@@ -995,9 +966,7 @@ abstract class _PlayerState implements PlayerState {
   const factory _PlayerState({
     final int stamina,
     final int form,
-    final bool injured,
-    final int injuryDaysRemaining,
-    final InjuryType? injuryType,
+    final Injury? injury,
     final AssignedRole role,
     final int seasonsWithTeam,
   }) = _$PlayerStateImpl;
@@ -1010,11 +979,7 @@ abstract class _PlayerState implements PlayerState {
   @override
   int get form;
   @override
-  bool get injured;
-  @override
-  int get injuryDaysRemaining;
-  @override
-  InjuryType? get injuryType;
+  Injury? get injury;
   @override
   AssignedRole get role;
   @override

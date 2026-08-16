@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:new_football/core/models/enums.dart';
+import 'package:new_football/core/models/injury.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/tactics/tactics_setup.dart';
 
@@ -18,6 +19,20 @@ class MatchEvent with _$MatchEvent {
 
   factory MatchEvent.fromJson(Map<String, dynamic> json) =>
       _$MatchEventFromJson(json);
+}
+
+@freezed
+class MatchInjury with _$MatchInjury {
+  const factory MatchInjury({
+    required String teamId,
+    required String playerId,
+    required Injury injury,
+    required bool playerInStartingXi,
+    @Default(false) bool potentialLoss,
+  }) = _MatchInjury;
+
+  factory MatchInjury.fromJson(Map<String, dynamic> json) =>
+      _$MatchInjuryFromJson(json);
 }
 
 @freezed
@@ -50,6 +65,7 @@ class MatchResult with _$MatchResult {
     required TeamMatchStats awayStats,
     @Default([]) List<PlayerMatchStats> playerStats,
     @Default([]) List<MatchEvent> events,
+    @Default([]) List<MatchInjury> injuries,
   }) = _MatchResult;
 
   factory MatchResult.fromJson(Map<String, dynamic> json) =>

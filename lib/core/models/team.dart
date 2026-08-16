@@ -62,7 +62,9 @@ extension TeamX on Team {
       final fromIds = <Player>[];
       for (final id in lineupPlayerIds) {
         final matches = roster.where((p) => p.id == id);
-        if (matches.isNotEmpty) fromIds.add(matches.first);
+        if (matches.isNotEmpty && matches.first.isAvailable) {
+          fromIds.add(matches.first);
+        }
         if (fromIds.length >= 11) break;
       }
       if (fromIds.length >= 11) return fromIds;

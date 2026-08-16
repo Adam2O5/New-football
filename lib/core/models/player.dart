@@ -3,6 +3,7 @@ import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/assigned_role.dart';
 import 'package:new_football/core/models/contract.dart';
 import 'package:new_football/core/models/enums.dart';
+import 'package:new_football/core/models/injury.dart';
 import 'package:new_football/core/models/player_attributes.dart';
 
 part 'player.freezed.dart';
@@ -108,15 +109,22 @@ class PlayerState with _$PlayerState {
   const factory PlayerState({
     @Default(100) int stamina,
     @Default(5) int form,
-    @Default(false) bool injured,
-    @Default(0) int injuryDaysRemaining,
-    InjuryType? injuryType,
+    Injury? injury,
     @Default(AssignedRole.cm()) AssignedRole role,
     @Default(0) int seasonsWithTeam,
   }) = _PlayerState;
 
   factory PlayerState.fromJson(Map<String, dynamic> json) =>
       _$PlayerStateFromJson(json);
+}
+
+extension PlayerStateX on PlayerState {
+  /// Compatibility projections for call-sites that used the old flat model.
+  bool get injured => injury?.isActive ?? false;
+
+  int get injuryDaysRemaining => injury?.daysRemaining ?? 0;
+
+  InjuryType? get injuryType => injury?.type;
 }
 
 @freezed
@@ -160,7 +168,7 @@ extension PlayerX on Player {
 
   /// Available for selection unless injured. Low stamina still allows play
   /// but hurts performance and raises injury risk (`PlayerBalance`).
-  bool get isAvailable => !state.injured;
+  bool get isAvailable => !(state.injury?.isActive ?? false);
 
   /// Career totals across all seasons (profile UI).
   PlayerSeasonStats get careerSeasonStats =>
@@ -188,8 +196,12 @@ extension PlayerX on Player {
     // 2. Komponent potencjału: potentialGap * (4.5*youngFactor + olderFactor)
     final ceilingOvr = _ceilingOvrForStars(potentialStars);
     final potentialGap = (ceilingOvr - ovr).clamp(0.0, 50.0);
-    final youngFactor = age <= 26 ? (4.5 - 0.5 * (age - 18)).clamp(0.0, 4.5) : 0.0;
-    final olderFactor = age >= 27 ? (0.8 - 0.08 * (age - 27)).clamp(0.15, 0.8) : 0.0;
+    final youngFactor = age <= 26
+        ? (4.5 - 0.5 * (age - 18)).clamp(0.0, 4.5)
+        : 0.0;
+    final olderFactor = age >= 27
+        ? (0.8 - 0.08 * (age - 27)).clamp(0.15, 0.8)
+        : 0.0;
     final potentialComponent = potentialGap * (4.5 * youngFactor + olderFactor);
 
     // 3. Komponent wieku: ageScore * 150  →  -150 … +150
@@ -207,14 +219,17 @@ extension PlayerX on Player {
     const pvMinSalary = 1000000;
     const pvMaxSalary = 60000000;
     final ovrNorm = ((ovr - 50) * 2 / 100).clamp(0.0, 1.0);
-    final estimatedSalary = pvMinSalary + (pvMaxSalary - pvMinSalary) * (ovrNorm * ovrNorm * ovrNorm);
+    final estimatedSalary =
+        pvMinSalary +
+        (pvMaxSalary - pvMinSalary) * (ovrNorm * ovrNorm * ovrNorm);
     final salaryScore = estimatedSalary > 0
         ? (1.0 - contract.salary / estimatedSalary).clamp(-1.0, 1.0)
         : 0.0;
     final lengthFactor = (contract.yearsRemaining / 5.0).clamp(0.0, 1.0);
     final contractComponent = salaryScore * 260 * (0.5 + 0.5 * lengthFactor);
 
-    final raw = ovrComponent + potentialComponent + ageComponent + contractComponent;
+    final raw =
+        ovrComponent + potentialComponent + ageComponent + contractComponent;
     return raw.round().clamp(-1000, 1000);
   }
 
@@ -255,14 +270,18 @@ extension PlayerX on Player {
     BalanceConfig balance = BalanceConfig.defaults,
   ]) {
     final b = balance.player;
-    final days = state.injured
-        ? (state.injuryDaysRemaining - 1).clamp(0, b.injuryDaysClampMax)
-        : state.injuryDaysRemaining;
+    final activeInjury = state.injury;
+    final remaining = activeInjury == null
+        ? null
+        : (activeInjury.daysRemaining - 1).clamp(0, b.injuryDaysClampMax);
+    final nextInjury =
+        activeInjury == null || remaining == null || remaining == 0
+        ? null
+        : activeInjury.copyWith(daysRemaining: remaining);
     return copyWith(
       state: state.copyWith(
         stamina: b.clampStamina(state.stamina + b.recoveryBetweenMatches),
-        injuryDaysRemaining: days,
-        injured: state.injured && state.injuryDaysRemaining > 1,
+        injury: nextInjury,
       ),
     );
   }

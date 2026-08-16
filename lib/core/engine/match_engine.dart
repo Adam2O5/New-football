@@ -7,6 +7,7 @@ import 'package:new_football/core/models/match_state.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/services/cohesion_service.dart';
+import 'package:new_football/core/services/injury_service.dart';
 import 'package:new_football/core/tactics/tactics_setup.dart';
 
 class LiveMatch {
@@ -16,6 +17,7 @@ class LiveMatch {
     required this.awayTeamId,
     this.balance = BalanceConfig.defaults,
     List<MatchEvent>? events,
+    List<MatchInjury>? injuries,
     this.homeSubsUsed = 0,
     this.awaySubsUsed = 0,
     this.homeSubWindows = 0,
@@ -24,13 +26,19 @@ class LiveMatch {
     this.awayCohesionMult = 1.03,
     this.homeChemistry = 50,
     this.awayChemistry = 50,
-  }) : events = events ?? [];
+    this.homeDoctorCareMult = 1.0,
+    this.awayDoctorCareMult = 1.0,
+    this.homeDoctorPreventionMult = 1.0,
+    this.awayDoctorPreventionMult = 1.0,
+  }) : events = events ?? [],
+       injuries = injuries ?? [];
 
   MatchState state;
   final String homeTeamId;
   final String awayTeamId;
   final BalanceConfig balance;
   final List<MatchEvent> events;
+  final List<MatchInjury> injuries;
   int homeSubsUsed;
   int awaySubsUsed;
   int homeSubWindows;
@@ -43,6 +51,10 @@ class LiveMatch {
   /// Team zgranie (0–100) from Team.chemistry, frozen at start.
   final int homeChemistry;
   final int awayChemistry;
+  final double homeDoctorCareMult;
+  final double awayDoctorCareMult;
+  final double homeDoctorPreventionMult;
+  final double awayDoctorPreventionMult;
 
   bool get isFinished => state.minute >= 90;
 
@@ -89,6 +101,7 @@ class LiveMatch {
         redCards: _cardCount(awayTeamId, yellow: false),
       ),
       events: List.unmodifiable(events),
+      injuries: List.unmodifiable(injuries),
     );
   }
 
@@ -192,6 +205,18 @@ class MatchEngine {
       ),
       homeChemistry: home.chemistry,
       awayChemistry: away.chemistry,
+      homeDoctorCareMult: const InjuryService().doctorCareMult(
+        home.staff.doctor,
+      ),
+      awayDoctorCareMult: const InjuryService().doctorCareMult(
+        away.staff.doctor,
+      ),
+      homeDoctorPreventionMult: const InjuryService().doctorPreventionMult(
+        home.staff.doctor,
+      ),
+      awayDoctorPreventionMult: const InjuryService().doctorPreventionMult(
+        away.staff.doctor,
+      ),
     );
   }
 
@@ -294,28 +319,49 @@ class MatchEngine {
           state = state.copyWith(yellowCardCounts: yellows);
         }
       }
-    } else if (rng.nextDouble() < 0.004) {
+    } else {
       final homeSide = rng.nextBool();
       final lineup = homeSide ? state.homeLineup : state.awayLineup;
-      if (lineup.length > 1) {
+      final prevention = homeSide
+          ? live.homeDoctorPreventionMult
+          : live.awayDoctorPreventionMult;
+      final injuryChance = 0.004 * prevention;
+      if (lineup.length > 1 && rng.nextDouble() < injuryChance) {
         final player = lineup[rng.nextInt(lineup.length)];
-        final major = rng.nextDouble() < 0.25;
+        final diagnosis = const InjuryService().diagnose(
+          random: rng,
+          doctorCareMultiplier: homeSide
+              ? live.homeDoctorCareMult
+              : live.awayDoctorCareMult,
+        );
+        final playerInStartingXi =
+            (homeSide ? live.state.homeLineup : live.state.awayLineup).any(
+              (candidate) => candidate.id == player.id,
+            );
         newEvents.add(
           MatchEvent(
-            type: major
+            type: diagnosis.injury.type == InjuryType.major
                 ? MatchEventType.majorInjury
                 : MatchEventType.minorInjury,
             minute: nextMinute,
             teamId: homeSide ? live.homeTeamId : live.awayTeamId,
             playerId: player.id,
-            description:
-                '${major ? 'Poważna' : 'Lekka'} kontuzja — ${player.name}',
+            description: '${diagnosis.definition.name} — ${player.name}',
+          ),
+        );
+        live.injuries.add(
+          MatchInjury(
+            teamId: homeSide ? live.homeTeamId : live.awayTeamId,
+            playerId: player.id,
+            injury: diagnosis.injury,
+            playerInStartingXi: playerInStartingXi,
+            potentialLoss: diagnosis.potentialLoss,
           ),
         );
         state = state.copyWith(
           injuriesThisMatch: [...state.injuriesThisMatch, player.id],
         );
-        if (major) {
+        if (diagnosis.injury.type == InjuryType.major) {
           state = _forceInjurySub(live, state, player.id, homeSide, newEvents);
         }
       }
@@ -640,6 +686,7 @@ class MatchEngine {
             }
           })
           .whereType<Player>()
+          .where((p) => p.isAvailable)
           .toList();
     }
     final xi = team.lineupPlayerIds.toSet();
@@ -772,6 +819,9 @@ class MatchEngine {
 
   bool _legalRoster(Team team) {
     final n = team.roster.length;
-    return n >= balance.roster.minSize && n <= balance.roster.maxSize;
+    final available = team.roster.where((p) => p.isAvailable).length;
+    return n >= balance.roster.minSize &&
+        n <= balance.roster.maxSize &&
+        available >= 11;
   }
 }

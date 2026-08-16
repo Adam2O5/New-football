@@ -2,16 +2,15 @@ import 'dart:math';
 
 import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/enums.dart';
+import 'package:new_football/core/models/injury.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/player_attributes.dart';
 import 'package:new_football/core/models/team.dart';
 
 /// Weekly player development tick (`docs/player_management.md`).
 class DevelopmentService {
-  DevelopmentService({
-    this.balance = BalanceConfig.defaults,
-    Random? random,
-  }) : _random = random ?? Random();
+  DevelopmentService({this.balance = BalanceConfig.defaults, Random? random})
+    : _random = random ?? Random();
 
   final BalanceConfig balance;
   final Random _random;
@@ -36,11 +35,14 @@ class DevelopmentService {
   Player developPlayer(Player player, {double staffMultiplier = 1.0}) {
     final b = balance.development;
     final age = player.age;
+    final growthRate = player.state.injury?.isActive == true
+        ? min(player.hidden.growthRate, 0.0)
+        : player.hidden.growthRate;
     double delta;
     if (age <= b.developmentAgeMax) {
-      delta = 0.4 * player.hidden.growthRate;
+      delta = 0.4 * growthRate;
     } else if (age <= b.plateauAgeMax) {
-      delta = 0.4 * player.hidden.growthRate * b.plateauGrowthMult;
+      delta = 0.4 * growthRate * b.plateauGrowthMult;
     } else {
       delta = -0.25 * (1.0 + (age - b.declineAgeMin) * 0.05);
     }
@@ -52,8 +54,9 @@ class DevelopmentService {
       DevelopmentOutcome.under => 0.65,
     };
 
-    final progress =
-        (player.hidden.overallProgress + delta).clamp(0.0, 99.0).round();
+    final progress = (player.hidden.overallProgress + delta)
+        .clamp(0.0, 99.0)
+        .round();
     var attrs = player.attributes;
     if (delta > 0 && _random.nextDouble() < (delta / 25).clamp(0.0, 0.35)) {
       attrs = _nudgeAttributes(attrs, 1);

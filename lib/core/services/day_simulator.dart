@@ -1,3 +1,4 @@
+import 'package:new_football/core/balance/injury_catalog.dart';
 import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/engine/match_engine.dart';
 import 'package:new_football/core/models/enums.dart';
@@ -298,14 +299,29 @@ class DaySimulator {
         .toList();
 
     var teams = league.teams;
+    final recoveryReturns =
+        <({Player player, String injuryId, String teamId})>[];
     teams = teams.map((t) {
-      if (t.id != result.homeTeamId && t.id != result.awayTeamId) {
-        return _recoverTeam(t);
+      final next = t.id == result.homeTeamId || t.id == result.awayTeamId
+          ? _applyFatigue(t, result)
+          : _recoverTeam(t);
+      for (final oldPlayer in t.roster) {
+        final nextPlayer = next.roster.firstWhere(
+          (p) => p.id == oldPlayer.id,
+          orElse: () => oldPlayer,
+        );
+        if (oldPlayer.state.injured && !nextPlayer.state.injured) {
+          recoveryReturns.add((
+            player: oldPlayer,
+            injuryId: oldPlayer.state.injury?.id ?? '',
+            teamId: t.id,
+          ));
+        }
       }
-      return _applyFatigue(t, result);
+      return next;
     }).toList();
 
-    return league.copyWith(
+    var state = league.copyWith(
       teams: teams,
       currentSeason: league.currentSeason.copyWith(
         schedule: newSchedule,
@@ -313,13 +329,93 @@ class DaySimulator {
       ),
       currentRound: match.round,
     );
+
+    for (final injury in result.injuries) {
+      final team = state.teamById(injury.teamId);
+      final player = team?.roster.firstWhere(
+        (p) => p.id == injury.playerId,
+        orElse: () => throw StateError('Missing injured player'),
+      );
+      if (team == null || player == null) continue;
+      if (state.playerTeamId != team.id) continue;
+      final definition = InjuryCatalog.byId(injury.injury.id);
+      state = messages.send(
+        state,
+        type: MessageType.injury,
+        domain: MessageDomain.health,
+        args: {
+          'playerName': player.name,
+          'injuryName': definition.name,
+          'injuryType': injury.injury.type.name,
+          'days': injury.injury.daysTotal,
+        },
+        payload: {
+          'playerId': player.id,
+          'teamId': team.id,
+          'injuryId': injury.injury.id,
+          'injuryType': injury.injury.type.name,
+          'playerInStartingXi': injury.playerInStartingXi,
+        },
+        dedupKey: 'injury:${player.id}:${injury.injury.id}',
+      );
+      if (injury.potentialLoss) {
+        state = messages.send(
+          state,
+          type: MessageType.potentialLoss,
+          domain: MessageDomain.health,
+          args: {'playerName': player.name},
+          payload: {'playerId': player.id, 'injuryId': injury.injury.id},
+          dedupKey: 'potentialLoss:${player.id}:${injury.injury.id}',
+        );
+      }
+    }
+
+    for (final returned in recoveryReturns) {
+      if (state.playerTeamId != returned.teamId) continue;
+      final definition = InjuryCatalog.byId(returned.injuryId);
+      state = messages.send(
+        state,
+        type: MessageType.injuryReturn,
+        domain: MessageDomain.health,
+        args: {
+          'playerName': returned.player.name,
+          'injuryName': definition.name,
+        },
+        payload: {
+          'playerId': returned.player.id,
+          'injuryId': returned.injuryId,
+        },
+      );
+    }
+    return state;
   }
 
   Team _applyFatigue(Team team, MatchResult result) {
     final onPitch = {...team.lineupPlayerIds, ...team.benchPlayerIds};
+    final injuries = {
+      for (final injury in result.injuries.where((i) => i.teamId == team.id))
+        injury.playerId: injury,
+    };
     final roster = team.roster.map((p) {
-      if (!onPitch.contains(p.id)) return p.recoverBetweenMatches(balance);
-      return p.withMatchFatigue(90, balance);
+      var next = onPitch.contains(p.id)
+          ? p.withMatchFatigue(90, balance)
+          : p.recoverBetweenMatches(balance);
+      final matchInjury = injuries[p.id];
+      if (matchInjury != null) {
+        next = next.copyWith(
+          state: next.state.copyWith(injury: matchInjury.injury),
+        );
+        if (matchInjury.potentialLoss) {
+          next = next
+              .copyWith(
+                potentialStars: (next.potentialStars - 0.5)
+                    .clamp(0.5, 5.0)
+                    .toDouble(),
+              )
+              .recalculatePointValue(balance);
+        }
+      }
+      return next;
     }).toList();
     return team.copyWith(roster: roster);
   }
@@ -382,16 +478,48 @@ class DaySimulator {
   }
 
   LeagueState _dailyRecovery(LeagueState league) {
-    return league.copyWith(
-      teams: league.teams.map((t) {
-        return t.copyWith(
-          roster: t.roster.map((p) {
-            if (!p.state.injured) return p;
-            return p.recoverBetweenMatches(balance);
-          }).toList(),
+    var state = league;
+    for (final team in league.teams) {
+      var updatedTeam = team;
+      for (final player in team.roster) {
+        if (!player.state.injured) continue;
+        final recovered = player.recoverBetweenMatches(balance);
+        updatedTeam = updatedTeam.copyWith(
+          roster: updatedTeam.roster
+              .map(
+                (candidate) =>
+                    candidate.id == player.id ? recovered : candidate,
+              )
+              .toList(),
         );
-      }).toList(),
-    );
+        if (recovered.state.injured || state.playerTeamId != team.id) continue;
+        final injuryId = player.state.injury?.id;
+        if (injuryId == null) continue;
+        final definition = InjuryCatalog.byId(injuryId);
+        state = messages.send(
+          state.copyWith(
+            teams: state.teams
+                .map(
+                  (candidate) =>
+                      candidate.id == team.id ? updatedTeam : candidate,
+                )
+                .toList(),
+          ),
+          type: MessageType.injuryReturn,
+          domain: MessageDomain.health,
+          args: {'playerName': player.name, 'injuryName': definition.name},
+          payload: {'playerId': player.id, 'injuryId': injuryId},
+        );
+      }
+      state = state.copyWith(
+        teams: state.teams
+            .map(
+              (candidate) => candidate.id == team.id ? updatedTeam : candidate,
+            )
+            .toList(),
+      );
+    }
+    return state;
   }
 
   LeagueState _notifyMatchResult(LeagueState league, MatchResult result) {
