@@ -992,7 +992,10 @@ MessageSettings _$MessageSettingsFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$MessageSettings {
+  /// Type-level settings take precedence over domain-level settings.
   Map<MessageType, NotificationLevel> get overrides =>
+      throw _privateConstructorUsedError;
+  Map<MessageDomain, NotificationLevel> get domainOverrides =>
       throw _privateConstructorUsedError;
 
   /// Serializes this MessageSettings to a JSON map.
@@ -1012,7 +1015,10 @@ abstract class $MessageSettingsCopyWith<$Res> {
     $Res Function(MessageSettings) then,
   ) = _$MessageSettingsCopyWithImpl<$Res, MessageSettings>;
   @useResult
-  $Res call({Map<MessageType, NotificationLevel> overrides});
+  $Res call({
+    Map<MessageType, NotificationLevel> overrides,
+    Map<MessageDomain, NotificationLevel> domainOverrides,
+  });
 }
 
 /// @nodoc
@@ -1029,13 +1035,17 @@ class _$MessageSettingsCopyWithImpl<$Res, $Val extends MessageSettings>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? overrides = null}) {
+  $Res call({Object? overrides = null, Object? domainOverrides = null}) {
     return _then(
       _value.copyWith(
             overrides: null == overrides
                 ? _value.overrides
                 : overrides // ignore: cast_nullable_to_non_nullable
                       as Map<MessageType, NotificationLevel>,
+            domainOverrides: null == domainOverrides
+                ? _value.domainOverrides
+                : domainOverrides // ignore: cast_nullable_to_non_nullable
+                      as Map<MessageDomain, NotificationLevel>,
           )
           as $Val,
     );
@@ -1051,7 +1061,10 @@ abstract class _$$MessageSettingsImplCopyWith<$Res>
   ) = __$$MessageSettingsImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({Map<MessageType, NotificationLevel> overrides});
+  $Res call({
+    Map<MessageType, NotificationLevel> overrides,
+    Map<MessageDomain, NotificationLevel> domainOverrides,
+  });
 }
 
 /// @nodoc
@@ -1067,13 +1080,17 @@ class __$$MessageSettingsImplCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? overrides = null}) {
+  $Res call({Object? overrides = null, Object? domainOverrides = null}) {
     return _then(
       _$MessageSettingsImpl(
         overrides: null == overrides
             ? _value._overrides
             : overrides // ignore: cast_nullable_to_non_nullable
                   as Map<MessageType, NotificationLevel>,
+        domainOverrides: null == domainOverrides
+            ? _value._domainOverrides
+            : domainOverrides // ignore: cast_nullable_to_non_nullable
+                  as Map<MessageDomain, NotificationLevel>,
       ),
     );
   }
@@ -1084,12 +1101,17 @@ class __$$MessageSettingsImplCopyWithImpl<$Res>
 class _$MessageSettingsImpl implements _MessageSettings {
   const _$MessageSettingsImpl({
     final Map<MessageType, NotificationLevel> overrides = const {},
-  }) : _overrides = overrides;
+    final Map<MessageDomain, NotificationLevel> domainOverrides = const {},
+  }) : _overrides = overrides,
+       _domainOverrides = domainOverrides;
 
   factory _$MessageSettingsImpl.fromJson(Map<String, dynamic> json) =>
       _$$MessageSettingsImplFromJson(json);
 
+  /// Type-level settings take precedence over domain-level settings.
   final Map<MessageType, NotificationLevel> _overrides;
+
+  /// Type-level settings take precedence over domain-level settings.
   @override
   @JsonKey()
   Map<MessageType, NotificationLevel> get overrides {
@@ -1098,9 +1120,18 @@ class _$MessageSettingsImpl implements _MessageSettings {
     return EqualUnmodifiableMapView(_overrides);
   }
 
+  final Map<MessageDomain, NotificationLevel> _domainOverrides;
+  @override
+  @JsonKey()
+  Map<MessageDomain, NotificationLevel> get domainOverrides {
+    if (_domainOverrides is EqualUnmodifiableMapView) return _domainOverrides;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableMapView(_domainOverrides);
+  }
+
   @override
   String toString() {
-    return 'MessageSettings(overrides: $overrides)';
+    return 'MessageSettings(overrides: $overrides, domainOverrides: $domainOverrides)';
   }
 
   @override
@@ -1111,13 +1142,20 @@ class _$MessageSettingsImpl implements _MessageSettings {
             const DeepCollectionEquality().equals(
               other._overrides,
               _overrides,
+            ) &&
+            const DeepCollectionEquality().equals(
+              other._domainOverrides,
+              _domainOverrides,
             ));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, const DeepCollectionEquality().hash(_overrides));
+  int get hashCode => Object.hash(
+    runtimeType,
+    const DeepCollectionEquality().hash(_overrides),
+    const DeepCollectionEquality().hash(_domainOverrides),
+  );
 
   /// Create a copy of MessageSettings
   /// with the given fields replaced by the non-null parameter values.
@@ -1139,13 +1177,17 @@ class _$MessageSettingsImpl implements _MessageSettings {
 abstract class _MessageSettings implements MessageSettings {
   const factory _MessageSettings({
     final Map<MessageType, NotificationLevel> overrides,
+    final Map<MessageDomain, NotificationLevel> domainOverrides,
   }) = _$MessageSettingsImpl;
 
   factory _MessageSettings.fromJson(Map<String, dynamic> json) =
       _$MessageSettingsImpl.fromJson;
 
+  /// Type-level settings take precedence over domain-level settings.
   @override
   Map<MessageType, NotificationLevel> get overrides;
+  @override
+  Map<MessageDomain, NotificationLevel> get domainOverrides;
 
   /// Create a copy of MessageSettings
   /// with the given fields replaced by the non-null parameter values.
@@ -1163,6 +1205,7 @@ Inbox _$InboxFromJson(Map<String, dynamic> json) {
 mixin _$Inbox {
   List<GameMessage> get messages => throw _privateConstructorUsedError;
   List<GameMessage> get scheduled => throw _privateConstructorUsedError;
+  List<GameMessage> get archive => throw _privateConstructorUsedError;
 
   /// Serializes this Inbox to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -1178,7 +1221,11 @@ abstract class $InboxCopyWith<$Res> {
   factory $InboxCopyWith(Inbox value, $Res Function(Inbox) then) =
       _$InboxCopyWithImpl<$Res, Inbox>;
   @useResult
-  $Res call({List<GameMessage> messages, List<GameMessage> scheduled});
+  $Res call({
+    List<GameMessage> messages,
+    List<GameMessage> scheduled,
+    List<GameMessage> archive,
+  });
 }
 
 /// @nodoc
@@ -1195,7 +1242,11 @@ class _$InboxCopyWithImpl<$Res, $Val extends Inbox>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? messages = null, Object? scheduled = null}) {
+  $Res call({
+    Object? messages = null,
+    Object? scheduled = null,
+    Object? archive = null,
+  }) {
     return _then(
       _value.copyWith(
             messages: null == messages
@@ -1205,6 +1256,10 @@ class _$InboxCopyWithImpl<$Res, $Val extends Inbox>
             scheduled: null == scheduled
                 ? _value.scheduled
                 : scheduled // ignore: cast_nullable_to_non_nullable
+                      as List<GameMessage>,
+            archive: null == archive
+                ? _value.archive
+                : archive // ignore: cast_nullable_to_non_nullable
                       as List<GameMessage>,
           )
           as $Val,
@@ -1220,7 +1275,11 @@ abstract class _$$InboxImplCopyWith<$Res> implements $InboxCopyWith<$Res> {
   ) = __$$InboxImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({List<GameMessage> messages, List<GameMessage> scheduled});
+  $Res call({
+    List<GameMessage> messages,
+    List<GameMessage> scheduled,
+    List<GameMessage> archive,
+  });
 }
 
 /// @nodoc
@@ -1236,7 +1295,11 @@ class __$$InboxImplCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? messages = null, Object? scheduled = null}) {
+  $Res call({
+    Object? messages = null,
+    Object? scheduled = null,
+    Object? archive = null,
+  }) {
     return _then(
       _$InboxImpl(
         messages: null == messages
@@ -1246,6 +1309,10 @@ class __$$InboxImplCopyWithImpl<$Res>
         scheduled: null == scheduled
             ? _value._scheduled
             : scheduled // ignore: cast_nullable_to_non_nullable
+                  as List<GameMessage>,
+        archive: null == archive
+            ? _value._archive
+            : archive // ignore: cast_nullable_to_non_nullable
                   as List<GameMessage>,
       ),
     );
@@ -1258,8 +1325,10 @@ class _$InboxImpl implements _Inbox {
   const _$InboxImpl({
     final List<GameMessage> messages = const [],
     final List<GameMessage> scheduled = const [],
+    final List<GameMessage> archive = const [],
   }) : _messages = messages,
-       _scheduled = scheduled;
+       _scheduled = scheduled,
+       _archive = archive;
 
   factory _$InboxImpl.fromJson(Map<String, dynamic> json) =>
       _$$InboxImplFromJson(json);
@@ -1282,9 +1351,18 @@ class _$InboxImpl implements _Inbox {
     return EqualUnmodifiableListView(_scheduled);
   }
 
+  final List<GameMessage> _archive;
+  @override
+  @JsonKey()
+  List<GameMessage> get archive {
+    if (_archive is EqualUnmodifiableListView) return _archive;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_archive);
+  }
+
   @override
   String toString() {
-    return 'Inbox(messages: $messages, scheduled: $scheduled)';
+    return 'Inbox(messages: $messages, scheduled: $scheduled, archive: $archive)';
   }
 
   @override
@@ -1296,7 +1374,8 @@ class _$InboxImpl implements _Inbox {
             const DeepCollectionEquality().equals(
               other._scheduled,
               _scheduled,
-            ));
+            ) &&
+            const DeepCollectionEquality().equals(other._archive, _archive));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1305,6 +1384,7 @@ class _$InboxImpl implements _Inbox {
     runtimeType,
     const DeepCollectionEquality().hash(_messages),
     const DeepCollectionEquality().hash(_scheduled),
+    const DeepCollectionEquality().hash(_archive),
   );
 
   /// Create a copy of Inbox
@@ -1325,6 +1405,7 @@ abstract class _Inbox implements Inbox {
   const factory _Inbox({
     final List<GameMessage> messages,
     final List<GameMessage> scheduled,
+    final List<GameMessage> archive,
   }) = _$InboxImpl;
 
   factory _Inbox.fromJson(Map<String, dynamic> json) = _$InboxImpl.fromJson;
@@ -1333,6 +1414,8 @@ abstract class _Inbox implements Inbox {
   List<GameMessage> get messages;
   @override
   List<GameMessage> get scheduled;
+  @override
+  List<GameMessage> get archive;
 
   /// Create a copy of Inbox
   /// with the given fields replaced by the non-null parameter values.

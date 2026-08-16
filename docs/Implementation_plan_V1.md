@@ -160,7 +160,7 @@ Tryb **1a**: każda pozycja dostaje osobne pytanie w momencie, gdy zablokuje zad
 | 3 | Progi `playerOfferScore`: pasmo 40–59 „Counter" nachodzi na 55–69 „Waiting/Counter/Accept" | Task 28 | **40–54 Counter, 55–69 pasmo mieszane** z losowaniem z docs (50/50 w punkcie 62, ±6 pkt rozkładu na punkt odchylenia). | ⏳ |
 | 4 | Rookie scale: `contracts.md` §8 `baseScale / (1 + pickSlot × 0,06)`; kod `rookiePickDecay = 0,08` | Task 27 | **0,06** za docs; kod zsynchronizować. | ⏳ |
 | 5 | `publicCriticism` → „Kara dyscyplinarna: −2 atmosfera, −2 atmosfera" (duplikat) | Task 26 | **−2 atmosfera, −2 zgranie** — przez analogię do pozostałych opcji eventu. | ⏳ |
-| 6 | `messages.md` §13 wymienia `ovrDigest`, §9 definiuje `groupKey = ovr:own:{week}` bez odpowiadającego `type` | Task 7 | Dodać wzorzec **`ovrDigest`** do katalogu (domain `playerEvent`, `silenced`). | ⏳ |
+| 6 | `messages.md` §13 wymienia `ovrDigest`, §9 definiuje `groupKey = ovr:own:{week}` bez odpowiadającego `type` | Task 7 | Dodać wzorzec **`ovrDigest`** do katalogu (domain `playerEvent`, `silenced`). | ✅ |
 | 7 | Literówki formatowania: „zaokrąglane do 2 miejsc po przecinku.0" oraz zdublowana kolumna w tabeli skutków atmosfery (`team_management.md`) | Task 14 | Poprawka kosmetyczna w docs. | ⏳ |
 | 8 | `game_rules.md`: cap „uzgadniany co 5–7 lat przy nowej umowie TV" — mechanizm nieopisany w szczegółach | Task 27 | Doczytać `salary_cap.md`; jeśli brak reguły, zaproponować: zmiana +4…+12% w losowym roku z przedziału 5–7 lat, termin znany przy podpisaniu. | ⏳ |
 
@@ -319,43 +319,43 @@ Legenda: `⬜` do zrobienia · `🔄` w trakcie · `✅` gotowe
 
 ---
 
-### ⬜ Task 7: Model danych i silnik systemu wiadomości
+### ✅ Task 7: Model danych i silnik systemu wiadomości
 
 **Cel:** infrastruktura, na której oprą się wszystkie późniejsze eventy, negocjacje i wymiany.
 
-- [ ] **Rozstrzygnąć sprzeczność #6** (`ovrDigest`)
-- [ ] `MessageCatalog` jako dane: type × kind → domain, defaultPriority, escalateIf, klucze, payload, actions, decision, groupKey, dedupKey
-- [ ] Pokryć grupę A — Matchday (7 wzorców)
-- [ ] Pokryć grupę B — Zdrowie (4 wzorce)
-- [ ] Pokryć grupę C — `playerEvent` (11 kinds)
-- [ ] Pokryć grupę D — `teamEvent` (9 kinds)
-- [ ] Pokryć grupę E — Roster (4 wzorce)
-- [ ] Pokryć grupę F — Kontrakty (10 wzorców)
-- [ ] Pokryć grupę G — Sztab (5 wzorców)
-- [ ] Pokryć grupę H — Wymiany (8 wzorców)
-- [ ] Pokryć grupę I — Draft i skauting (11 wzorców)
-- [ ] Pokryć grupę J — Finanse (3 wzorce)
-- [ ] Pokryć grupę K — Sezon i nagrody (6 wzorców)
-- [ ] Pokryć grupę L — System (2 wzorce) + `ovrDigest`
-- [ ] Eskalacja warunkowa (§5): 6 predykatów (zawodnik w XI, kontuzja Major, własny klub, podmiot z ligi, payroll > 2. apron, brak GK)
-- [ ] Rozstrzyganie decyzji po `expiresAt` przez `defaultOnExpiry`
-- [ ] Digesty przy `DIGEST_MIN_ITEMS = 3` — 5 kubełków z §9
-- [ ] Digesty nie obejmują `urgent`
-- [ ] Deduplikacja przez `dedupKey`
-- [ ] Retencja 2 sezonów w inboksie + archiwum bez limitu
-- [ ] `MAX_UNREAD_INBOX = 50` z auto-read najstarszych
-- [ ] `silenced` trafia wyłącznie do archiwum
-- [ ] Respektowanie `MessageSettings` per type i per domain
-- [ ] Zakaz wyciszania wiadomości decyzyjnych
-- [ ] Degradacja wiadomości z `payload` wskazującym na nieistniejący byt (usunięte CTA)
+- [x] **Rozstrzygnąć sprzeczność #6** (`ovrDigest`)
+- [x] `MessageCatalog` jako dane: type × kind → domain, defaultPriority, escalateIf, klucze, payload, actions, decision, groupKey, dedupKey
+- [x] Pokryć grupę A — Matchday (7 wzorców)
+- [x] Pokryć grupę B — Zdrowie (4 wzorce)
+- [x] Pokryć grupę C — `playerEvent` (11 kinds)
+- [x] Pokryć grupę D — `teamEvent` (9 kinds)
+- [x] Pokryć grupę E — Roster (4 wzorce)
+- [x] Pokryć grupę F — Kontrakty (10 wzorców)
+- [x] Pokryć grupę G — Sztab (5 wzorców)
+- [x] Pokryć grupę H — Wymiany (8 wzorców)
+- [x] Pokryć grupę I — Draft i skauting (11 wzorców)
+- [x] Pokryć grupę J — Finanse (3 wzorce)
+- [x] Pokryć grupę K — Sezon i nagrody (6 wzorców)
+- [x] Pokryć grupę L — System (2 wzorce) + `ovrDigest`
+- [x] Eskalacja warunkowa (§5): 6 predykatów (zawodnik w XI, kontuzja Major, własny klub, podmiot z ligi, payroll > 2. apron, brak GK)
+- [x] Rozstrzyganie decyzji po `expiresAt` przez `defaultOnExpiry`
+- [x] Digesty przy `DIGEST_MIN_ITEMS = 3` — 5 kubełków z §9
+- [x] Digesty nie obejmują `urgent`
+- [x] Deduplikacja przez `dedupKey`
+- [x] Retencja 2 sezonów w inboksie + archiwum bez limitu
+- [x] `MAX_UNREAD_INBOX = 50` z auto-read najstarszych
+- [x] `silenced` trafia wyłącznie do archiwum
+- [x] Respektowanie `MessageSettings` per type i per domain
+- [x] Zakaz wyciszania wiadomości decyzyjnych
+- [x] Degradacja wiadomości z `payload` wskazującym na nieistniejący byt (usunięte CTA)
 
 **Testy**
-- [ ] Przeterminowana decyzja wykonuje `defaultOnExpiry`
-- [ ] 3 wiadomości tego samego `groupKey` zwijają się w digest
-- [ ] `urgent` nigdy nie wchodzi do digestu
-- [ ] `dedupKey` blokuje duplikat tej samej kontuzji
-- [ ] Wyciszony typ nie pojawia się w inboksie, tylko w archiwum
-- [ ] Próba wyciszenia typu decyzyjnego jest odrzucana
+- [x] Przeterminowana decyzja wykonuje `defaultOnExpiry`
+- [x] 3 wiadomości tego samego `groupKey` zwijają się w digest
+- [x] `urgent` nigdy nie wchodzi do digestu
+- [x] `dedupKey` blokuje duplikat tej samej kontuzji
+- [x] Wyciszony typ nie pojawia się w inboksie, tylko w archiwum
+- [x] Próba wyciszenia typu decyzyjnego jest odrzucana
 
 **Demo:** symulacja tygodnia produkuje inbox z digestami i automatycznie rozstrzygniętą przeterminowaną decyzją.
 

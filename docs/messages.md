@@ -337,12 +337,13 @@ Wszystkie generują wiadomość w inboksie (`player_management.md`).
 | `seasonSummary` | — | normal | — | „Podsumowanie sezonu {year}" | „Pozycja: #{place}. W-D-L: {w}-{d}-{l}. Top scorer: {scorer} ({goals})." |
 | `teamStatusChange` | — | normal | — | „Zmiana statusu: {newStatus}" | „Twoja drużyna: {oldStatus} → {newStatus}." |
 
-### L. System (2 wzorce)
+### L. System (2 wzorce) + `ovrDigest`
 
-| type | default | title | body |
-| ---- | ------- | ----- | ---- |
-| `calendarReminder` | normal | „Nadchodzący event: {eventName}" | „{eventName} w {day}, tyg. {week}." |
-| `system` | wg kontekstu | „Komunikat systemowy" | „{message}" |
+| type | default | domain | groupKey | title | body |
+| ---- | ------- | ------ | -------- | ----- | ---- |
+| `calendarReminder` | normal | system | — | „Nadchodzący event: {eventName}" | „{eventName} w {day}, tyg. {week}." |
+| `system` | wg kontekstu | system | — | „Komunikat systemowy" | „{message}" |
+| `ovrDigest` | silenced | playerEvent | `ovr:own:{week}` | „Rozwój OVR" | „{count} zawodników poprawiło OVR w tym tygodniu." |
 
 ---
 

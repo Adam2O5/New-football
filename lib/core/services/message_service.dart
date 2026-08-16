@@ -1,33 +1,37 @@
 import 'package:uuid/uuid.dart';
 
+import 'package:new_football/core/balance/message_catalog.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/message.dart';
 
-/// Centralized message creation (`messages.md` §4–6).
-///
-/// Replaces the duplicated `_msg` / `_addMessage` helpers in
-/// `DaySimulator`, `SeasonService`, and `StaffService`.
+/// Applies a player's choice to a message and returns the updated game state.
+typedef MessageDecisionHandler =
+    LeagueState Function(
+      LeagueState league,
+      GameMessage message,
+      String optionId,
+    );
+
+/// Centralized message creation and lifecycle rules (`messages.md` §4–12).
 class MessageService {
   MessageService({Uuid? uuid}) : _uuid = uuid ?? const Uuid();
 
   final Uuid _uuid;
 
-  /// Create and deliver a message to the league inbox.
+  /// Creates and delivers a message to the league inbox.
   ///
-  /// Respects player notification config: `muted` → silenced priority (skipped
-  /// by Inbox.addMessage), `important` → forced urgent.
-  ///
-  /// Returns updated [LeagueState] with the message added (or unchanged if
-  /// silenced by config).
+  /// Existing callers may continue supplying [titleKey] and [bodyKey]. When
+  /// omitted, the catalog supplies them along with actions, decisions, default
+  /// priority, group keys, and deduplication keys.
   LeagueState send(
     LeagueState league, {
     required MessageType type,
     String? kind,
-    MessageDomain domain = MessageDomain.system,
+    MessageDomain? domain,
     MessagePriority priority = MessagePriority.normal,
-    required String titleKey,
-    required String bodyKey,
+    String? titleKey,
+    String? bodyKey,
     Map<String, dynamic> args = const {},
     Map<String, dynamic> payload = const {},
     List<MessageAction> actions = const [],
@@ -40,42 +44,57 @@ class MessageService {
     int? deliveryDay,
     int? deliveryHour,
   }) {
-    // Player config override (`messages.md` §5).
-    final level = league.messageSettings.levelFor(type);
-    final MessagePriority effectivePriority;
-    if (decision != null) {
-      // Decision messages are always urgent — cannot be silenced.
-      effectivePriority = MessagePriority.urgent;
-    } else if (level == NotificationLevel.muted) {
-      effectivePriority = MessagePriority.silenced;
-    } else if (level == NotificationLevel.important) {
-      effectivePriority = MessagePriority.urgent;
-    } else {
-      effectivePriority = priority;
-    }
+    final template = MessageCatalog.resolve(type, kind: kind);
+    final messageDomain = domain ?? template.domain;
+    final selectedDecision = decision ?? _decisionFromTemplate(template);
+    final selectedActions = actions.isNotEmpty
+        ? actions
+        : _actionsFromTemplate(template);
+    final catalogPriority = priority == MessagePriority.normal
+        ? _escalatedPriority(template, args, payload)
+        : priority;
+
+    // Player config override (`messages.md` §5). Decision messages always win.
+    final level = league.messageSettings.levelFor(type, messageDomain);
+    final effectivePriority = selectedDecision != null
+        ? MessagePriority.urgent
+        : switch (level) {
+            NotificationLevel.muted => MessagePriority.silenced,
+            NotificationLevel.important => MessagePriority.urgent,
+            NotificationLevel.normal => MessagePriority.normal,
+            NotificationLevel.auto => catalogPriority,
+          };
 
     final targetWeek = deliveryWeek ?? league.currentWeek;
     final targetDay = deliveryDay ?? league.currentDay;
     final targetHour = deliveryHour ?? hour;
+    final expandedArgs = Map<String, dynamic>.from(args);
+    final expansionValues = <String, dynamic>{
+      'week': targetWeek,
+      'day': targetDay,
+      'year': league.currentSeason.year,
+      ...args,
+      ...payload,
+    };
     final msg = GameMessage(
       id: _uuid.v4(),
       type: type,
       kind: kind,
-      domain: domain,
+      domain: messageDomain,
       priority: effectivePriority,
       seasonYear: league.currentSeason.year,
       week: targetWeek,
       day: targetDay,
       hour: targetHour,
-      titleKey: titleKey,
-      bodyKey: bodyKey,
-      args: args,
+      titleKey: titleKey ?? template.titleKey,
+      bodyKey: bodyKey ?? template.bodyKey,
+      args: expandedArgs,
       payload: payload,
-      actions: actions,
-      decision: decision,
+      actions: selectedActions,
+      decision: selectedDecision,
       expiresAt: expiresAt,
-      groupKey: groupKey,
-      dedupKey: dedupKey,
+      groupKey: _expand(groupKey ?? template.groupKey, expansionValues),
+      dedupKey: _expand(dedupKey ?? template.dedupKey, expansionValues),
     );
 
     final isFuture =
@@ -86,10 +105,119 @@ class MessageService {
             targetHour != null &&
             league.currentHour != null &&
             targetHour > league.currentHour!);
-    return league.copyWith(
-      inbox: isFuture
-          ? league.inbox.scheduleMessage(msg)
-          : league.inbox.addMessage(msg),
+
+    var inbox = isFuture
+        ? league.inbox.scheduleMessage(msg)
+        : league.inbox.addMessage(msg);
+    inbox = inbox
+        .degradeMissingPayload(
+          playerIds: {
+            for (final team in league.teams) ...team.roster.map((p) => p.id),
+            ...league.freeAgents.map((p) => p.id),
+          },
+          teamIds: {for (final team in league.teams) team.id},
+        )
+        .retainSeasons(league.currentSeason.year);
+    return league.copyWith(inbox: inbox);
+  }
+
+  /// Executes [DecisionSpec.defaultOnExpiry] for every expired, unanswered
+  /// decision. The callback is the game-specific effect dispatcher; omitting
+  /// it still acknowledges the default option and prevents a permanent pause.
+  LeagueState resolveExpiredDecisions(
+    LeagueState league,
+    DateTime now, {
+    MessageDecisionHandler? onDecision,
+  }) {
+    var state = league;
+    for (final message in league.inbox.messages) {
+      final expiresAt = message.expiresAt;
+      final decision = message.decision;
+      if (message.acknowledged || expiresAt == null || decision == null) {
+        continue;
+      }
+      final expiry = DateTime.tryParse(expiresAt);
+      if (expiry == null || now.isBefore(expiry)) continue;
+
+      final option = decision.defaultOnExpiry;
+      if (onDecision != null) {
+        state = onDecision(state, message, option);
+      }
+      state = state.copyWith(inbox: state.inbox.acknowledge(message.id));
+    }
+    return state;
+  }
+
+  MessagePriority _escalatedPriority(
+    MessageTemplate template,
+    Map<String, dynamic> args,
+    Map<String, dynamic> payload,
+  ) {
+    var result = template.defaultPriority;
+    for (final predicate in template.escalateIf) {
+      if (!_matches(predicate, args, payload)) continue;
+      if (predicate == MessageEscalationPredicate.leagueSubject) {
+        result = switch (result) {
+          MessagePriority.urgent => MessagePriority.normal,
+          MessagePriority.normal => MessagePriority.silenced,
+          MessagePriority.silenced => MessagePriority.silenced,
+        };
+      } else {
+        result = MessagePriority.urgent;
+      }
+    }
+    return result;
+  }
+
+  bool _matches(
+    MessageEscalationPredicate predicate,
+    Map<String, dynamic> args,
+    Map<String, dynamic> payload,
+  ) {
+    final values = {...args, ...payload};
+    return switch (predicate) {
+      MessageEscalationPredicate.playerInStartingXi =>
+        values['playerInStartingXi'] == true || values['inStartingXi'] == true,
+      MessageEscalationPredicate.majorInjury =>
+        values['injuryType'] == 'major' || values['isMajor'] == true,
+      MessageEscalationPredicate.ownClub => values['ownClub'] == true,
+      MessageEscalationPredicate.leagueSubject =>
+        values['leagueSubject'] == true || values['isLeagueMessage'] == true,
+      MessageEscalationPredicate.payrollAboveSecondApron =>
+        values['payrollAboveSecondApron'] == true,
+      MessageEscalationPredicate.missingGoalkeeper =>
+        values['missingGoalkeeper'] == true,
+    };
+  }
+
+  DecisionSpec? _decisionFromTemplate(MessageTemplate template) {
+    final definition = template.decision;
+    if (definition == null) return null;
+    return DecisionSpec(
+      options: [
+        for (final option in definition.options)
+          MessageAction(id: option.id, labelKey: option.labelKey),
+      ],
+      defaultOnExpiry: definition.defaultOnExpiry,
     );
+  }
+
+  List<MessageAction> _actionsFromTemplate(MessageTemplate template) => [
+    for (final action in template.actions)
+      MessageAction(id: action.id, labelKey: action.labelKey),
+  ];
+
+  String? _expand(String? pattern, Map<String, dynamic> values) {
+    if (pattern == null) return null;
+    var unresolved = false;
+    final expanded = pattern.replaceAllMapped(RegExp(r'\{(\w+)\}'), (match) {
+      final value = values[match.group(1)];
+      if (value == null) {
+        unresolved = true;
+        return match.group(0)!;
+      }
+      return value.toString();
+    });
+    return unresolved ? null : expanded;
   }
 }

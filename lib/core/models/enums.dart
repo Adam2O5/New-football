@@ -325,6 +325,8 @@ enum MessageType {
   // System (L)
   calendar,
   system,
+  // Own-player OVR digest (messages.md §9, §13)
+  ovrDigest,
 }
 
 /// Message domain for grouping and per-domain configuration (`messages.md` §4).
@@ -345,7 +347,7 @@ enum MessageDomain {
 
 enum MessagePriority { silenced, normal, urgent }
 
-enum NotificationLevel { important, normal, muted }
+enum NotificationLevel { auto, important, normal, muted }
 
 enum InjuryType { minor, major }
 

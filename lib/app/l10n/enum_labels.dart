@@ -81,6 +81,7 @@ String messageTypeLabel(BuildContext context, MessageType type) {
 String notificationLevelLabel(BuildContext context, NotificationLevel level) {
   final l10n = AppLocalizations.of(context)!;
   return switch (level) {
+    NotificationLevel.auto => level.name,
     NotificationLevel.important => l10n.notificationLevel_important,
     NotificationLevel.normal => l10n.notificationLevel_normal,
     NotificationLevel.muted => l10n.notificationLevel_muted,

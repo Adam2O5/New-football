@@ -133,6 +133,7 @@ const _$MessageTypeEnumMap = {
   MessageType.playoffMissed: 'playoffMissed',
   MessageType.calendar: 'calendar',
   MessageType.system: 'system',
+  MessageType.ovrDigest: 'ovrDigest',
 };
 
 const _$MessageDomainEnumMap = {
@@ -167,6 +168,14 @@ _$MessageSettingsImpl _$$MessageSettingsImplFromJson(
         ),
       ) ??
       const {},
+  domainOverrides:
+      (json['domainOverrides'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(
+          $enumDecode(_$MessageDomainEnumMap, k),
+          $enumDecode(_$NotificationLevelEnumMap, e),
+        ),
+      ) ??
+      const {},
 );
 
 Map<String, dynamic> _$$MessageSettingsImplToJson(
@@ -176,9 +185,14 @@ Map<String, dynamic> _$$MessageSettingsImplToJson(
     (k, e) =>
         MapEntry(_$MessageTypeEnumMap[k]!, _$NotificationLevelEnumMap[e]!),
   ),
+  'domainOverrides': instance.domainOverrides.map(
+    (k, e) =>
+        MapEntry(_$MessageDomainEnumMap[k]!, _$NotificationLevelEnumMap[e]!),
+  ),
 };
 
 const _$NotificationLevelEnumMap = {
+  NotificationLevel.auto: 'auto',
   NotificationLevel.important: 'important',
   NotificationLevel.normal: 'normal',
   NotificationLevel.muted: 'muted',
@@ -195,10 +209,16 @@ _$InboxImpl _$$InboxImplFromJson(Map<String, dynamic> json) => _$InboxImpl(
           ?.map((e) => GameMessage.fromJson(e as Map<String, dynamic>))
           .toList() ??
       const [],
+  archive:
+      (json['archive'] as List<dynamic>?)
+          ?.map((e) => GameMessage.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
 );
 
 Map<String, dynamic> _$$InboxImplToJson(_$InboxImpl instance) =>
     <String, dynamic>{
       'messages': instance.messages,
       'scheduled': instance.scheduled,
+      'archive': instance.archive,
     };
