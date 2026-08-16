@@ -220,20 +220,20 @@ Legenda: `⬜` do zrobienia · `🔄` w trakcie · `✅` gotowe
 
 ---
 
-### ⬜ Task 3: Szkielet brakujących plików balansu
+### ✅ Task 3: Szkielet brakujących plików balansu
 
 **Cel:** `general_rules.md` — wszystkie stałe w `/balance`; utworzyć raz, żeby kolejne zadania nie tworzyły plików ad hoc.
 
-- [ ] `lib/core/balance/matchday_balance.dart` — 28 stałych z `matchday_model.md` §19
-- [ ] `lib/core/balance/ai_balance.dart` — 40 stałych z `AI_behaviour.md` §12
-- [ ] `lib/core/balance/messages_balance.dart` — 11 stałych z `messages.md` §15
-- [ ] `lib/core/balance/events_balance.dart` — progi i szanse rolli z `team_management.md` i `player_management.md`
-- [ ] Podpiąć wszystkie cztery sekcje do `BalanceConfig` i `BalanceConfig.defaults`
-- [ ] Wartości wypełniać wg polityki 2b — w zadaniu konsumującym; tu tylko sygnatury i wartości z docs tam, gdzie są jednoznaczne
+- [x] `lib/core/balance/matchday_balance.dart` — 28 stałych z `matchday_model.md` §19
+- [x] `lib/core/balance/ai_balance.dart` — 40 stałych z `AI_behaviour.md` §12
+- [x] `lib/core/balance/messages_balance.dart` — 11 stałych z `messages.md` §15
+- [x] `lib/core/balance/events_balance.dart` — progi i szanse rolli z `team_management.md` i `player_management.md`
+- [x] Podpiąć wszystkie cztery sekcje do `BalanceConfig` i `BalanceConfig.defaults`
+- [x] Wartości wypełniać wg polityki 2b — w zadaniu konsumującym; tu tylko sygnatury i wartości z docs tam, gdzie są jednoznaczne
 
 **Testy**
-- [ ] `BalanceConfig.defaults` eksponuje wszystkie cztery nowe sekcje
-- [ ] Sanity check zakresów (prawdopodobieństwa 0–1, mnożniki > 0)
+- [x] `BalanceConfig.defaults` eksponuje wszystkie cztery nowe sekcje
+- [x] Sanity check zakresów (prawdopodobieństwa 0–1, mnożniki > 0)
 
 **Demo:** pełna lista stałych z docs jest adresowalna z kodu.
 

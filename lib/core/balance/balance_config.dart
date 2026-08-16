@@ -1,8 +1,17 @@
 import 'package:new_football/core/models/enums.dart';
-import 'package:new_football/core/balance/trade_value_balance.dart';
+import 'package:new_football/core/balance/ai_balance.dart';
+import 'package:new_football/core/balance/events_balance.dart';
+import 'package:new_football/core/balance/matchday_balance.dart';
+import 'package:new_football/core/balance/messages_balance.dart';
 import 'package:new_football/core/balance/tactics_balance.dart';
-export 'package:new_football/core/balance/trade_value_balance.dart';
+import 'package:new_football/core/balance/trade_value_balance.dart';
+
+export 'package:new_football/core/balance/ai_balance.dart';
+export 'package:new_football/core/balance/events_balance.dart';
+export 'package:new_football/core/balance/matchday_balance.dart';
+export 'package:new_football/core/balance/messages_balance.dart';
 export 'package:new_football/core/balance/tactics_balance.dart';
+export 'package:new_football/core/balance/trade_value_balance.dart';
 
 /// Immutable game balance knobs for the simulation core.
 ///
@@ -27,6 +36,9 @@ class BalanceConfig {
     this.chemistry = const ChemistryBalance(),
     this.tactics = const TacticsBalance(),
     this.tradeValue = const TradeValueBalance(),
+    this.ai = const AiBalance(),
+    this.messages = const MessagesBalance(),
+    this.events = const EventsBalance(),
   });
 
   final RosterBalance roster;
@@ -44,6 +56,9 @@ class BalanceConfig {
   final ChemistryBalance chemistry;
   final TacticsBalance tactics;
   final TradeValueBalance tradeValue;
+  final AiBalance ai;
+  final MessagesBalance messages;
+  final EventsBalance events;
 
   static const defaults = BalanceConfig();
 }
@@ -68,28 +83,6 @@ class RosterBalance {
   final int benchSize;
 
   int get matchdaySquadSize => startingXi + benchSize;
-}
-
-class MatchdayBalance {
-  const MatchdayBalance({
-    this.walkoverGoalsFor = 0,
-    this.walkoverGoalsAgainst = 3,
-    this.noGkGoalsFor = 0,
-    this.noGkGoalsAgainst = 5,
-    this.maxSubstitutions = 5,
-    this.maxSubstitutionWindows = 3,
-  });
-
-  /// Illegal roster → walkover score for the offending side.
-  final int walkoverGoalsFor;
-  final int walkoverGoalsAgainst;
-
-  /// Outfield / empty GK slot → hard penalty score.
-  final int noGkGoalsFor;
-  final int noGkGoalsAgainst;
-
-  final int maxSubstitutions;
-  final int maxSubstitutionWindows;
 }
 
 /// Stamina, fatigue and form knobs (`player_management.md`). Trade-value
