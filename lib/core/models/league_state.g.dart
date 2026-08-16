@@ -23,6 +23,9 @@ _$LeagueStateImpl _$$LeagueStateImplFromJson(Map<String, dynamic> json) =>
       currentRound: (json['currentRound'] as num?)?.toInt() ?? 0,
       currentWeek: (json['currentWeek'] as num?)?.toInt() ?? 1,
       currentDay: (json['currentDay'] as num?)?.toInt() ?? 1,
+      currentHour: (json['currentHour'] as num?)?.toInt(),
+      hourlyPlayerOfferUsed: json['hourlyPlayerOfferUsed'] as bool? ?? false,
+      hourlyStaffOfferUsed: json['hourlyStaffOfferUsed'] as bool? ?? false,
       inbox: json['inbox'] == null
           ? const Inbox()
           : Inbox.fromJson(json['inbox'] as Map<String, dynamic>),
@@ -57,6 +60,9 @@ Map<String, dynamic> _$$LeagueStateImplToJson(_$LeagueStateImpl instance) =>
       'currentRound': instance.currentRound,
       'currentWeek': instance.currentWeek,
       'currentDay': instance.currentDay,
+      'currentHour': instance.currentHour,
+      'hourlyPlayerOfferUsed': instance.hourlyPlayerOfferUsed,
+      'hourlyStaffOfferUsed': instance.hourlyStaffOfferUsed,
       'inbox': instance.inbox,
       'messageSettings': instance.messageSettings,
       'staffFreeAgents': instance.staffFreeAgents,

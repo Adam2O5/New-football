@@ -36,6 +36,9 @@ class MessageService {
     String? groupKey,
     String? dedupKey,
     int? hour,
+    int? deliveryWeek,
+    int? deliveryDay,
+    int? deliveryHour,
   }) {
     // Player config override (`messages.md` §5).
     final level = league.messageSettings.levelFor(type);
@@ -51,6 +54,9 @@ class MessageService {
       effectivePriority = priority;
     }
 
+    final targetWeek = deliveryWeek ?? league.currentWeek;
+    final targetDay = deliveryDay ?? league.currentDay;
+    final targetHour = deliveryHour ?? hour;
     final msg = GameMessage(
       id: _uuid.v4(),
       type: type,
@@ -58,9 +64,9 @@ class MessageService {
       domain: domain,
       priority: effectivePriority,
       seasonYear: league.currentSeason.year,
-      week: league.currentWeek,
-      day: league.currentDay,
-      hour: hour,
+      week: targetWeek,
+      day: targetDay,
+      hour: targetHour,
       titleKey: titleKey,
       bodyKey: bodyKey,
       args: args,
@@ -72,6 +78,18 @@ class MessageService {
       dedupKey: dedupKey,
     );
 
-    return league.copyWith(inbox: league.inbox.addMessage(msg));
+    final isFuture =
+        targetWeek > league.currentWeek ||
+        (targetWeek == league.currentWeek && targetDay > league.currentDay) ||
+        (targetWeek == league.currentWeek &&
+            targetDay == league.currentDay &&
+            targetHour != null &&
+            league.currentHour != null &&
+            targetHour > league.currentHour!);
+    return league.copyWith(
+      inbox: isFuture
+          ? league.inbox.scheduleMessage(msg)
+          : league.inbox.addMessage(msg),
+    );
   }
 }

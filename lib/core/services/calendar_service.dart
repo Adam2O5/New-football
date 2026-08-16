@@ -33,7 +33,18 @@ class CalendarService {
   bool isRegularSeasonWeek(int week) =>
       week >= 1 && week <= _c.regularSeasonWeeks;
 
-  bool isBreakWeek(int week) => week == 30;
+  bool isBreakWeek(int week) => week == _c.breakWeek;
+
+  /// Contract extensions run Tuesday–Sunday of draft week; FA phase I runs
+  /// Monday–Sunday of the following week.
+  bool isHourlyContractMode(int week, int day) {
+    final validDay = day >= 1 && day <= 7;
+    if (!validDay) return false;
+    return (week == _c.draftWeek && day >= 2) || (week == _c.freeAgencyWeek);
+  }
+
+  int? initialHourForDate(int week, int day) =>
+      isHourlyContractMode(week, day) ? 1 : null;
 
   bool isTradeDeadline(int week, int day) =>
       week == _c.tradeDeadlineWeek && day == 1;

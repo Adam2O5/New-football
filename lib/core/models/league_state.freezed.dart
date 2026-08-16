@@ -30,6 +30,12 @@ mixin _$LeagueState {
 
   /// 1 = Monday … 7 = Sunday within [currentWeek].
   int get currentDay => throw _privateConstructorUsedError;
+
+  /// Hourly contract mode clock. Null outside extensions/FA phase I;
+  /// otherwise 1–10 identifies the current offer slot.
+  int? get currentHour => throw _privateConstructorUsedError;
+  bool get hourlyPlayerOfferUsed => throw _privateConstructorUsedError;
+  bool get hourlyStaffOfferUsed => throw _privateConstructorUsedError;
   Inbox get inbox => throw _privateConstructorUsedError;
   MessageSettings get messageSettings => throw _privateConstructorUsedError;
 
@@ -71,6 +77,9 @@ abstract class $LeagueStateCopyWith<$Res> {
     int currentRound,
     int currentWeek,
     int currentDay,
+    int? currentHour,
+    bool hourlyPlayerOfferUsed,
+    bool hourlyStaffOfferUsed,
     Inbox inbox,
     MessageSettings messageSettings,
     List<StaffMember> staffFreeAgents,
@@ -106,6 +115,9 @@ class _$LeagueStateCopyWithImpl<$Res, $Val extends LeagueState>
     Object? currentRound = null,
     Object? currentWeek = null,
     Object? currentDay = null,
+    Object? currentHour = freezed,
+    Object? hourlyPlayerOfferUsed = null,
+    Object? hourlyStaffOfferUsed = null,
     Object? inbox = null,
     Object? messageSettings = null,
     Object? staffFreeAgents = null,
@@ -142,6 +154,18 @@ class _$LeagueStateCopyWithImpl<$Res, $Val extends LeagueState>
                 ? _value.currentDay
                 : currentDay // ignore: cast_nullable_to_non_nullable
                       as int,
+            currentHour: freezed == currentHour
+                ? _value.currentHour
+                : currentHour // ignore: cast_nullable_to_non_nullable
+                      as int?,
+            hourlyPlayerOfferUsed: null == hourlyPlayerOfferUsed
+                ? _value.hourlyPlayerOfferUsed
+                : hourlyPlayerOfferUsed // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            hourlyStaffOfferUsed: null == hourlyStaffOfferUsed
+                ? _value.hourlyStaffOfferUsed
+                : hourlyStaffOfferUsed // ignore: cast_nullable_to_non_nullable
+                      as bool,
             inbox: null == inbox
                 ? _value.inbox
                 : inbox // ignore: cast_nullable_to_non_nullable
@@ -229,6 +253,9 @@ abstract class _$$LeagueStateImplCopyWith<$Res>
     int currentRound,
     int currentWeek,
     int currentDay,
+    int? currentHour,
+    bool hourlyPlayerOfferUsed,
+    bool hourlyStaffOfferUsed,
     Inbox inbox,
     MessageSettings messageSettings,
     List<StaffMember> staffFreeAgents,
@@ -267,6 +294,9 @@ class __$$LeagueStateImplCopyWithImpl<$Res>
     Object? currentRound = null,
     Object? currentWeek = null,
     Object? currentDay = null,
+    Object? currentHour = freezed,
+    Object? hourlyPlayerOfferUsed = null,
+    Object? hourlyStaffOfferUsed = null,
     Object? inbox = null,
     Object? messageSettings = null,
     Object? staffFreeAgents = null,
@@ -303,6 +333,18 @@ class __$$LeagueStateImplCopyWithImpl<$Res>
             ? _value.currentDay
             : currentDay // ignore: cast_nullable_to_non_nullable
                   as int,
+        currentHour: freezed == currentHour
+            ? _value.currentHour
+            : currentHour // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        hourlyPlayerOfferUsed: null == hourlyPlayerOfferUsed
+            ? _value.hourlyPlayerOfferUsed
+            : hourlyPlayerOfferUsed // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        hourlyStaffOfferUsed: null == hourlyStaffOfferUsed
+            ? _value.hourlyStaffOfferUsed
+            : hourlyStaffOfferUsed // ignore: cast_nullable_to_non_nullable
+                  as bool,
         inbox: null == inbox
             ? _value.inbox
             : inbox // ignore: cast_nullable_to_non_nullable
@@ -339,6 +381,9 @@ class _$LeagueStateImpl implements _LeagueState {
     this.currentRound = 0,
     this.currentWeek = 1,
     this.currentDay = 1,
+    this.currentHour,
+    this.hourlyPlayerOfferUsed = false,
+    this.hourlyStaffOfferUsed = false,
     this.inbox = const Inbox(),
     this.messageSettings = const MessageSettings(),
     final List<StaffMember> staffFreeAgents = const [],
@@ -384,6 +429,17 @@ class _$LeagueStateImpl implements _LeagueState {
   @override
   @JsonKey()
   final int currentDay;
+
+  /// Hourly contract mode clock. Null outside extensions/FA phase I;
+  /// otherwise 1–10 identifies the current offer slot.
+  @override
+  final int? currentHour;
+  @override
+  @JsonKey()
+  final bool hourlyPlayerOfferUsed;
+  @override
+  @JsonKey()
+  final bool hourlyStaffOfferUsed;
   @override
   @JsonKey()
   final Inbox inbox;
@@ -426,7 +482,7 @@ class _$LeagueStateImpl implements _LeagueState {
 
   @override
   String toString() {
-    return 'LeagueState(teams: $teams, currentSeason: $currentSeason, history: $history, playerTeamId: $playerTeamId, currentRound: $currentRound, currentWeek: $currentWeek, currentDay: $currentDay, inbox: $inbox, messageSettings: $messageSettings, staffFreeAgents: $staffFreeAgents, freeAgents: $freeAgents, strengthTable: $strengthTable)';
+    return 'LeagueState(teams: $teams, currentSeason: $currentSeason, history: $history, playerTeamId: $playerTeamId, currentRound: $currentRound, currentWeek: $currentWeek, currentDay: $currentDay, currentHour: $currentHour, hourlyPlayerOfferUsed: $hourlyPlayerOfferUsed, hourlyStaffOfferUsed: $hourlyStaffOfferUsed, inbox: $inbox, messageSettings: $messageSettings, staffFreeAgents: $staffFreeAgents, freeAgents: $freeAgents, strengthTable: $strengthTable)';
   }
 
   @override
@@ -446,6 +502,12 @@ class _$LeagueStateImpl implements _LeagueState {
                 other.currentWeek == currentWeek) &&
             (identical(other.currentDay, currentDay) ||
                 other.currentDay == currentDay) &&
+            (identical(other.currentHour, currentHour) ||
+                other.currentHour == currentHour) &&
+            (identical(other.hourlyPlayerOfferUsed, hourlyPlayerOfferUsed) ||
+                other.hourlyPlayerOfferUsed == hourlyPlayerOfferUsed) &&
+            (identical(other.hourlyStaffOfferUsed, hourlyStaffOfferUsed) ||
+                other.hourlyStaffOfferUsed == hourlyStaffOfferUsed) &&
             (identical(other.inbox, inbox) || other.inbox == inbox) &&
             (identical(other.messageSettings, messageSettings) ||
                 other.messageSettings == messageSettings) &&
@@ -472,6 +534,9 @@ class _$LeagueStateImpl implements _LeagueState {
     currentRound,
     currentWeek,
     currentDay,
+    currentHour,
+    hourlyPlayerOfferUsed,
+    hourlyStaffOfferUsed,
     inbox,
     messageSettings,
     const DeepCollectionEquality().hash(_staffFreeAgents),
@@ -502,6 +567,9 @@ abstract class _LeagueState implements LeagueState {
     final int currentRound,
     final int currentWeek,
     final int currentDay,
+    final int? currentHour,
+    final bool hourlyPlayerOfferUsed,
+    final bool hourlyStaffOfferUsed,
     final Inbox inbox,
     final MessageSettings messageSettings,
     final List<StaffMember> staffFreeAgents,
@@ -528,6 +596,15 @@ abstract class _LeagueState implements LeagueState {
   /// 1 = Monday … 7 = Sunday within [currentWeek].
   @override
   int get currentDay;
+
+  /// Hourly contract mode clock. Null outside extensions/FA phase I;
+  /// otherwise 1–10 identifies the current offer slot.
+  @override
+  int? get currentHour;
+  @override
+  bool get hourlyPlayerOfferUsed;
+  @override
+  bool get hourlyStaffOfferUsed;
   @override
   Inbox get inbox;
   @override

@@ -13,6 +13,7 @@ import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/match_models.dart';
+import 'package:new_football/core/models/message.dart';
 import 'package:new_football/core/models/standing.dart';
 import 'package:new_football/core/services/calendar_event_registry.dart';
 import 'package:new_football/core/services/schedule_generator.dart';
@@ -305,6 +306,24 @@ bool _isSimulateOnlyEvent(CalendarEventId id) {
   }
 }
 
+Future<void> _advanceOneHour(
+  BuildContext context,
+  WidgetRef ref,
+  AppLocalizations l10n,
+) async {
+  final controller = ref.read(gameControllerProvider.notifier);
+  final result = await controller.advanceOneHour();
+  if (!context.mounted) return;
+  _refreshCalendarCursor(ref);
+  if (result == null &&
+      ref.read(activeLeagueProvider)?.inbox.pendingUrgent.isNotEmpty == true) {
+    ref.read(shellTabIndexProvider.notifier).state = 5;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.calendar_urgentMessage)));
+  }
+}
+
 Future<void> _advanceOneDay(
   BuildContext context,
   WidgetRef ref,
@@ -334,6 +353,36 @@ Widget _buildNextActionSection(
   LeagueState league,
   UpcomingAction? action,
 ) {
+  final calendar = ref.read(calendarServiceProvider);
+  final hourly = calendar.isHourlyContractMode(
+    league.currentWeek,
+    league.currentDay,
+  );
+  final blockedByUrgent = league.inbox.pendingUrgent.isNotEmpty;
+
+  if (blockedByUrgent) {
+    return SizedBox(
+      width: double.infinity,
+      child: FilledButton.icon(
+        onPressed: null,
+        icon: const Icon(Icons.lock_outline),
+        label: const Text('Odczytaj pilną wiadomość'),
+      ),
+    );
+  }
+
+  if (hourly) {
+    final hour = league.currentHour ?? 1;
+    return SizedBox(
+      width: double.infinity,
+      child: FilledButton.icon(
+        onPressed: () => _advanceOneHour(context, ref, l10n),
+        icon: const Icon(Icons.schedule),
+        label: Text('Symuluj godzinę · $hour/10'),
+      ),
+    );
+  }
+
   final actionIsToday =
       action != null &&
       action.week == league.currentWeek &&
@@ -359,10 +408,9 @@ Widget _buildNextActionSection(
             icon: const Icon(Icons.skip_next_outlined),
             label: const Text('Symuluj dzień'),
             style: OutlinedButton.styleFrom(
-              backgroundColor: Theme.of(context)
-                  .colorScheme
-                  .surface
-                  .withValues(alpha: 0.85),
+              backgroundColor: Theme.of(
+                context,
+              ).colorScheme.surface.withValues(alpha: 0.85),
             ),
           ),
         ),
@@ -395,8 +443,12 @@ Widget _buildNextActionSection(
   final label = action.calendarEventId == null
       ? action.id
       : calendarEventLabel(context, action.calendarEventId!) ?? action.id;
-  final goToOnly = action.calendarEventId != null && _isGoToOnlyEvent(action.calendarEventId!);
-  final simulateOnly = action.calendarEventId != null && _isSimulateOnlyEvent(action.calendarEventId!);
+  final goToOnly =
+      action.calendarEventId != null &&
+      _isGoToOnlyEvent(action.calendarEventId!);
+  final simulateOnly =
+      action.calendarEventId != null &&
+      _isSimulateOnlyEvent(action.calendarEventId!);
 
   if (goToOnly) {
     return SizedBox(
@@ -426,10 +478,9 @@ Widget _buildNextActionSection(
         child: OutlinedButton(
           onPressed: () => _goToEvent(context, ref, l10n, action),
           style: OutlinedButton.styleFrom(
-            backgroundColor: Theme.of(context)
-                .colorScheme
-                .surface
-                .withValues(alpha: 0.85),
+            backgroundColor: Theme.of(
+              context,
+            ).colorScheme.surface.withValues(alpha: 0.85),
           ),
           child: Text('Przejdź do: $label'),
         ),

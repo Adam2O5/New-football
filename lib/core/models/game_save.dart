@@ -11,7 +11,7 @@ part 'game_save.g.dart';
 /// not migrate old saves; it keeps them visible so the user can remove them.
 abstract final class SaveSchema {
   static const unknownVersion = 0;
-  static const currentVersion = 2;
+  static const currentVersion = 3;
 }
 
 enum SaveCompatibility { compatible, older, newer }

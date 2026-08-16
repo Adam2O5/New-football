@@ -190,7 +190,15 @@ _$InboxImpl _$$InboxImplFromJson(Map<String, dynamic> json) => _$InboxImpl(
           ?.map((e) => GameMessage.fromJson(e as Map<String, dynamic>))
           .toList() ??
       const [],
+  scheduled:
+      (json['scheduled'] as List<dynamic>?)
+          ?.map((e) => GameMessage.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
 );
 
 Map<String, dynamic> _$$InboxImplToJson(_$InboxImpl instance) =>
-    <String, dynamic>{'messages': instance.messages};
+    <String, dynamic>{
+      'messages': instance.messages,
+      'scheduled': instance.scheduled,
+    };

@@ -192,25 +192,30 @@ class DaySimulator {
     );
   }
 
-  /// Apply a finished player match and advance the day.
+  /// Apply a finished player match and advance the day. Match-result
+  /// messages are created after the date advances, so they are delivered as
+  /// part of the next day's start-of-day package.
   LeagueState applyPlayerMatchResult(
     LeagueState league,
     ScheduledMatch match,
     MatchResult result,
   ) {
     var state = _applyResult(league, match, result);
-    state = _notifyMatchResult(state, result);
     final (nextWeek, nextDay) = calendar.advanceDay(
       state.currentWeek,
       state.currentDay,
     );
-    return state.copyWith(
+    state = state.copyWith(
       currentWeek: nextWeek,
       currentDay: nextDay,
+      currentHour: calendar.initialHourForDate(nextWeek, nextDay),
+      hourlyPlayerOfferUsed: false,
+      hourlyStaffOfferUsed: false,
       currentSeason: state.currentSeason.copyWith(
         phase: calendar.phaseForWeek(nextWeek),
       ),
     );
+    return _notifyMatchResult(state, result);
   }
 
   ({LeagueState league, List<MatchResult> results, ScheduledMatch? playerMatch})

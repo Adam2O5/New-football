@@ -22,6 +22,12 @@ class LeagueState with _$LeagueState {
 
     /// 1 = Monday … 7 = Sunday within [currentWeek].
     @Default(1) int currentDay,
+
+    /// Hourly contract mode clock. Null outside extensions/FA phase I;
+    /// otherwise 1–10 identifies the current offer slot.
+    int? currentHour,
+    @Default(false) bool hourlyPlayerOfferUsed,
+    @Default(false) bool hourlyStaffOfferUsed,
     @Default(Inbox()) Inbox inbox,
     @Default(MessageSettings()) MessageSettings messageSettings,
 

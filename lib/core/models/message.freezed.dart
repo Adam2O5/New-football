@@ -1162,6 +1162,7 @@ Inbox _$InboxFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$Inbox {
   List<GameMessage> get messages => throw _privateConstructorUsedError;
+  List<GameMessage> get scheduled => throw _privateConstructorUsedError;
 
   /// Serializes this Inbox to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -1177,7 +1178,7 @@ abstract class $InboxCopyWith<$Res> {
   factory $InboxCopyWith(Inbox value, $Res Function(Inbox) then) =
       _$InboxCopyWithImpl<$Res, Inbox>;
   @useResult
-  $Res call({List<GameMessage> messages});
+  $Res call({List<GameMessage> messages, List<GameMessage> scheduled});
 }
 
 /// @nodoc
@@ -1194,12 +1195,16 @@ class _$InboxCopyWithImpl<$Res, $Val extends Inbox>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? messages = null}) {
+  $Res call({Object? messages = null, Object? scheduled = null}) {
     return _then(
       _value.copyWith(
             messages: null == messages
                 ? _value.messages
                 : messages // ignore: cast_nullable_to_non_nullable
+                      as List<GameMessage>,
+            scheduled: null == scheduled
+                ? _value.scheduled
+                : scheduled // ignore: cast_nullable_to_non_nullable
                       as List<GameMessage>,
           )
           as $Val,
@@ -1215,7 +1220,7 @@ abstract class _$$InboxImplCopyWith<$Res> implements $InboxCopyWith<$Res> {
   ) = __$$InboxImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({List<GameMessage> messages});
+  $Res call({List<GameMessage> messages, List<GameMessage> scheduled});
 }
 
 /// @nodoc
@@ -1231,12 +1236,16 @@ class __$$InboxImplCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? messages = null}) {
+  $Res call({Object? messages = null, Object? scheduled = null}) {
     return _then(
       _$InboxImpl(
         messages: null == messages
             ? _value._messages
             : messages // ignore: cast_nullable_to_non_nullable
+                  as List<GameMessage>,
+        scheduled: null == scheduled
+            ? _value._scheduled
+            : scheduled // ignore: cast_nullable_to_non_nullable
                   as List<GameMessage>,
       ),
     );
@@ -1246,8 +1255,11 @@ class __$$InboxImplCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$InboxImpl implements _Inbox {
-  const _$InboxImpl({final List<GameMessage> messages = const []})
-    : _messages = messages;
+  const _$InboxImpl({
+    final List<GameMessage> messages = const [],
+    final List<GameMessage> scheduled = const [],
+  }) : _messages = messages,
+       _scheduled = scheduled;
 
   factory _$InboxImpl.fromJson(Map<String, dynamic> json) =>
       _$$InboxImplFromJson(json);
@@ -1261,9 +1273,18 @@ class _$InboxImpl implements _Inbox {
     return EqualUnmodifiableListView(_messages);
   }
 
+  final List<GameMessage> _scheduled;
+  @override
+  @JsonKey()
+  List<GameMessage> get scheduled {
+    if (_scheduled is EqualUnmodifiableListView) return _scheduled;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_scheduled);
+  }
+
   @override
   String toString() {
-    return 'Inbox(messages: $messages)';
+    return 'Inbox(messages: $messages, scheduled: $scheduled)';
   }
 
   @override
@@ -1271,13 +1292,20 @@ class _$InboxImpl implements _Inbox {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$InboxImpl &&
-            const DeepCollectionEquality().equals(other._messages, _messages));
+            const DeepCollectionEquality().equals(other._messages, _messages) &&
+            const DeepCollectionEquality().equals(
+              other._scheduled,
+              _scheduled,
+            ));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, const DeepCollectionEquality().hash(_messages));
+  int get hashCode => Object.hash(
+    runtimeType,
+    const DeepCollectionEquality().hash(_messages),
+    const DeepCollectionEquality().hash(_scheduled),
+  );
 
   /// Create a copy of Inbox
   /// with the given fields replaced by the non-null parameter values.
@@ -1294,12 +1322,17 @@ class _$InboxImpl implements _Inbox {
 }
 
 abstract class _Inbox implements Inbox {
-  const factory _Inbox({final List<GameMessage> messages}) = _$InboxImpl;
+  const factory _Inbox({
+    final List<GameMessage> messages,
+    final List<GameMessage> scheduled,
+  }) = _$InboxImpl;
 
   factory _Inbox.fromJson(Map<String, dynamic> json) = _$InboxImpl.fromJson;
 
   @override
   List<GameMessage> get messages;
+  @override
+  List<GameMessage> get scheduled;
 
   /// Create a copy of Inbox
   /// with the given fields replaced by the non-null parameter values.

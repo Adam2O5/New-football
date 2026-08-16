@@ -291,28 +291,29 @@ Legenda: `⬜` do zrobienia · `🔄` w trakcie · `✅` gotowe
 
 ---
 
-### ⬜ Task 6: Przepływ dnia i tryb godzinowy
+### ✅ Task 6: Przepływ dnia i tryb godzinowy
 
 **Cel:** `messages.md` §2–3 — wiadomości na start dnia, event/mecz na koniec dnia, 10 h/dzień w oknach kontraktowych.
 
-- [ ] Wiadomości dostarczane **całym pakietem na start dnia**, przed jakąkolwiek akcją gracza
-- [ ] Event / mecz wykonywany **na koniec dnia**, po kliknięciu „Symuluj"
-- [ ] Gdy w jednym dniu event i mecz: **event przed meczem**
-- [ ] Wiadomości wynikające z meczu (`injury`, `matchResult`) trafiają do **następnego dnia**
-- [ ] Pauza przy nieodczytanej wiadomości `urgent` — blokada „Symuluj"
-- [ ] Dodać `currentHour` do `LeagueState` (null poza trybem godzinowym)
-- [ ] Tryb godzinowy aktywny wyłącznie: tyg. 46 wt–niedz oraz tyg. 47 pon–niedz
-- [ ] `GameController.advanceOneHour()` jako nowy primitive
-- [ ] 10 godzin = 1 dzień kalendarzowy; niezużyta godzina przepada
-- [ ] `simulateToEvent` rozgałęzia się na tryb dzienny i godzinowy
-- [ ] `HomeScreen`: przycisk zmienia się na „Symuluj godzinę" z licznikiem `h/10`
-- [ ] Podnieść `currentSchemaVersion`
+- [x] Wiadomości dostarczane **całym pakietem na start dnia**, przed jakąkolwiek akcją gracza
+- [x] Event / mecz wykonywany **na koniec dnia**, po kliknięciu „Symuluj"
+- [x] Gdy w jednym dniu event i mecz: **event przed meczem** (`nextEvent` + ścieżka event → `advanceOneDay`)
+- [x] Wiadomości wynikające z meczu (`injury`, `matchResult`) trafiają do **następnego dnia**
+- [x] Pauza przy nieodczytanej wiadomości `urgent` — blokada „Symuluj"
+- [x] Dodać `currentHour` do `LeagueState` (null poza trybem godzinowym)
+- [x] Tryb godzinowy aktywny wyłącznie: tyg. 46 wt–niedz oraz tyg. 47 pon–niedz
+- [x] `GameController.advanceOneHour()` jako nowy primitive
+- [x] 10 godzin = 1 dzień kalendarzowy; niezużyta godzina przepada
+- [x] `simulateToEvent` rozgałęzia się na tryb dzienny i godzinowy
+- [x] `HomeScreen`: przycisk zmienia się na „Symuluj godzinę" z licznikiem `h/10`
+- [x] Podnieść `currentSchemaVersion` do 3
 
 **Testy**
-- [ ] Dzień z eventem i meczem wykonuje je w kolejności event → mecz
-- [ ] 10 kliknięć godziny przechodzi do następnego dnia
-- [ ] Niezużyta godzina nie przenosi slotu oferty
-- [ ] Nieodczytany `urgent` blokuje przejście dnia i godziny
+- [x] Dzień z eventem i meczem wykonuje je w kolejności event → mecz przez istniejący tie-break i pipeline kontrolera
+- [x] 10 kliknięć godziny przechodzi do następnego dnia
+- [x] Niezużyta godzina nie przenosi slotu oferty
+- [x] Nieodczytany `urgent` blokuje przejście dnia i godziny
+- [x] `currentHour` przechodzi round-trip przez zapis i znika poza oknem godzinowym
 
 **Demo:** w tyg. 47 przycisk pokazuje licznik 1/10, a mecze i eventy dzieją się na koniec dnia.
 

@@ -176,6 +176,31 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     _cancelRequested = true;
   }
 
+  bool _hasPendingUrgent(LeagueState league) =>
+      league.inbox.pendingUrgent.isNotEmpty;
+
+  LeagueState _deliverStartOfDay(LeagueState league, {int? hour}) {
+    return league.copyWith(
+      inbox: league.inbox.deliverScheduled(
+        league.currentWeek,
+        league.currentDay,
+        hour: hour,
+      ),
+    );
+  }
+
+  LeagueState _setClockForDate(LeagueState league) {
+    final hour = _calendar.initialHourForDate(
+      league.currentWeek,
+      league.currentDay,
+    );
+    return league.copyWith(
+      currentHour: hour,
+      hourlyPlayerOfferUsed: false,
+      hourlyStaffOfferUsed: false,
+    );
+  }
+
   /// Advances the calendar by exactly one day: no phase hooks, no
   /// calendar-event auto-resolution, no auto-simulating the player's match.
   /// This is the raw primitive `simulateToEvent`/`simulateToDate` build on.
@@ -183,7 +208,14 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     final current = save;
     if (current == null) return null;
 
-    var league = current.leagueState;
+    var league = _deliverStartOfDay(
+      current.leagueState,
+      hour: current.leagueState.currentHour,
+    );
+    if (_hasPendingUrgent(league)) {
+      await updateLeague((_) => league);
+      return null;
+    }
     final calendar = _calendar;
     if (calendar
         .playInSlotsForDay(league.currentWeek, league.currentDay)
@@ -219,6 +251,11 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     if (isCycleEnd) {
       updatedLeague = _season.rolloverSeason(updatedLeague);
     }
+    updatedLeague = _setClockForDate(updatedLeague);
+    updatedLeague = _deliverStartOfDay(
+      updatedLeague,
+      hour: updatedLeague.currentHour,
+    );
     if (isCycleEnd) {
       final updatedResult = DaySimulationResult(
         league: updatedLeague,
@@ -232,6 +269,46 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     }
     await updateLeague((_) => updatedLeague);
     return result;
+  }
+
+  /// Advances one offer hour during extensions/FA phase I. The tenth hour
+  /// delegates to the regular end-of-day pipeline, so matches and events are
+  /// still resolved exactly once at the end of the calendar day.
+  Future<DaySimulationResult?> advanceOneHour() async {
+    final current = save;
+    if (current == null) return null;
+
+    var league = _deliverStartOfDay(
+      current.leagueState,
+      hour: current.leagueState.currentHour,
+    );
+    if (!_calendar.isHourlyContractMode(
+      league.currentWeek,
+      league.currentDay,
+    )) {
+      return null;
+    }
+    if (_hasPendingUrgent(league)) {
+      await updateLeague((_) => league);
+      return null;
+    }
+
+    final hour = league.currentHour ?? 1;
+    if (hour >= 10) {
+      await updateLeague(
+        (_) => league.copyWith(currentHour: 10),
+        autosave: true,
+      );
+      return advanceOneDay();
+    }
+
+    final next = league.copyWith(
+      currentHour: hour + 1,
+      hourlyPlayerOfferUsed: false,
+      hourlyStaffOfferUsed: false,
+    );
+    await updateLeague((_) => next);
+    return DaySimulationResult(league: next, pauseForUrgent: false);
   }
 
   /// Earliest unplayed fixture of the player's team, mapped to its
@@ -494,7 +571,16 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
         );
       }
 
-      final result = await advanceOneDay();
+      final wasHourlyEnd =
+          _calendar.isHourlyContractMode(
+            league.currentWeek,
+            league.currentDay,
+          ) &&
+          (league.currentHour ?? 1) >= 10;
+      final result =
+          _calendar.isHourlyContractMode(league.currentWeek, league.currentDay)
+          ? await advanceOneHour()
+          : await advanceOneDay();
       if (result == null) {
         return BatchSimulationResult(
           stopReason: SimulationStopReason.noSave,
@@ -503,7 +589,15 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
         );
       }
       lastResult = result;
-      daysSimulated++;
+      if (!wasHourlyEnd &&
+          !_calendar.isHourlyContractMode(
+            league.currentWeek,
+            league.currentDay,
+          )) {
+        daysSimulated++;
+      } else if (wasHourlyEnd) {
+        daysSimulated++;
+      }
 
       if (result.playerMatch != null) {
         if (autoSimulatePlayerMatch) {
@@ -620,6 +714,13 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     final current = save;
     if (current == null) return ContractReaction.hardReject;
     final league = current.leagueState;
+    final hourly = _calendar.isHourlyContractMode(
+      league.currentWeek,
+      league.currentDay,
+    );
+    if (hourly && league.hourlyPlayerOfferUsed) {
+      return ContractReaction.hardReject;
+    }
     final team = league.playerTeam;
     Player? player;
     for (final p in league.freeAgents) {
@@ -635,15 +736,19 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
         offer: offer,
       );
       if (signed == null) return ContractReaction.hardReject;
-      await updateLeague(
-        (l) => l
+      await updateLeague((l) {
+        var next = l
             .updateTeam(signed)
             .copyWith(
               freeAgents: l.freeAgents
                   .where((p) => p.id != freeAgentId)
                   .toList(),
-            ),
-      );
+            );
+        if (hourly) next = next.copyWith(hourlyPlayerOfferUsed: true);
+        return next;
+      });
+    } else if (hourly) {
+      await updateLeague((l) => l.copyWith(hourlyPlayerOfferUsed: true));
     }
     return reaction;
   }
@@ -656,24 +761,34 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     final current = save;
     if (current == null) return false;
     final league = current.leagueState;
+    final hourly = _calendar.isHourlyContractMode(
+      league.currentWeek,
+      league.currentDay,
+    );
+    if (hourly && league.hourlyStaffOfferUsed) return false;
     final team = league.playerTeam;
     if (team == null) return false;
 
+    if (hourly) {
+      await updateLeague((l) => l.copyWith(hourlyStaffOfferUsed: true));
+    }
     final reaction = _staff.evaluateOffer(candidate, offer);
     if (reaction != StaffReaction.accept) return false;
 
     final hired = _staff.hire(team: team, member: candidate, offer: offer);
     if (hired == null) return false;
 
-    await updateLeague(
-      (l) => l
+    await updateLeague((l) {
+      var next = l
           .updateTeam(hired)
           .copyWith(
             staffFreeAgents: l.staffFreeAgents
                 .where((m) => m.id != candidate.id)
                 .toList(),
-          ),
-    );
+          );
+      if (hourly) next = next.copyWith(hourlyStaffOfferUsed: true);
+      return next;
+    });
     return true;
   }
 
