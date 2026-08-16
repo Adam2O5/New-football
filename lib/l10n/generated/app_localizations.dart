@@ -1244,6 +1244,12 @@ abstract class AppLocalizations {
   /// **'Wybierz zawodnika do zamiany miejscami'**
   String get substitute_sheetSubtitle;
 
+  /// No description provided for @substitute_sheetEmpty.
+  ///
+  /// In pl, this message translates to:
+  /// **'Brak dostępnych zawodników do zmiany'**
+  String get substitute_sheetEmpty;
+
   /// No description provided for @standings_noLeague.
   ///
   /// In pl, this message translates to:

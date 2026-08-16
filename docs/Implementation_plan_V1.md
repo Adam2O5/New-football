@@ -239,21 +239,21 @@ Legenda: `⬜` do zrobienia · `🔄` w trakcie · `✅` gotowe
 
 ---
 
-### ⬜ Task 4: Usunięcie martwego kodu przed przebudową silnika
+### ✅ Task 4: Usunięcie martwego kodu przed przebudową silnika
 
 **Cel:** nie utrzymywać trzech silników i osieroconych ekranów w trakcie Fazy 3.
 
-- [ ] Usunąć `lib/core/engine/simple_match_engine.dart` (217 linii, nieużywany)
-- [ ] Usunąć eksport `SimpleMatchEngine` z `lib/core/core.dart`
-- [ ] Usunąć osierocony `lib/app/screens/tactics_screen.dart` (166 linii, brak importów)
-- [ ] Podmienić literał `'Wybierz zmiennika'` w `substitute_sheet.dart:68` na klucz `substitute_sheetTitle`
-- [ ] Podmienić literał `'Brak dostępnych zawodników do zmiany'` w `substitute_sheet.dart:75` na `substitute_sheetSubtitle`
-- [ ] Uzupełnić TODO w `trade_value_balance.dart:115` tymczasowym `projectedFinish` z `expectedRank` + notatka, że pełna wersja przychodzi w Task 32
-- [ ] Odkomentować lub usunąć zakomentowany test `simulateUntilNextMatch` w `game_controller_simulate_until_test.dart:43-49`
+- [x] Usunąć `lib/core/engine/simple_match_engine.dart` (217 linii, nieużywany)
+- [x] Usunąć eksport `SimpleMatchEngine` z `lib/core/core.dart`
+- [x] Usunąć osierocony `lib/app/screens/tactics_screen.dart` (166 linii, brak importów)
+- [x] Podmienić literał `'Wybierz zmiennika'` w `substitute_sheet.dart:68` na klucz `substitute_sheetTitle`
+- [x] Podmienić literał `'Brak dostępnych zawodników do zmiany'` w `substitute_sheet.dart:75` na klucz `substitute_sheetEmpty` oraz użyć `substitute_sheetSubtitle` jako instrukcji
+- [x] Uzupełnić TODO w `trade_value_balance.dart:115` tymczasowym `projectedFinish` z opcjonalnym `expectedRank` + notatka, że pełna wersja przychodzi w Task 32
+- [x] Usunąć zakomentowany test `simulateUntilNextMatch` w `game_controller_simulate_until_test.dart:43-49`, ponieważ kontroler nie udostępnia tej metody
 
 **Testy**
-- [ ] `flutter analyze` bez ostrzeżeń
-- [ ] Wszystkie istniejące testy przechodzą
+- [x] `flutter analyze` bez błędów (pozostają istniejące komunikaty informacyjne w innych plikach)
+- [x] Wszystkie istniejące testy przechodzą
 
 **Demo:** brak nieosiągalnych ekranów i literałów tekstowych w widgetach taktyki.
 

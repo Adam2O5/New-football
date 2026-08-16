@@ -41,17 +41,22 @@ extension DraftPickX on DraftPick {
   /// wyborem.
   int computeTradeValue({
     required int currentYear,
+    int? expectedRank,
     BalanceConfig balance = BalanceConfig.defaults,
   }) {
     final tv = balance.tradeValue;
     final range = tv.rangeForRound(round);
-    final finish = tv.projectedFinish(originalTeamId);
-    final rankT =
-        (tv.leagueTeamsCount - finish) / (tv.leagueTeamsCount - 1);
+    final finish = tv.projectedFinish(
+      originalTeamId,
+      expectedRank: expectedRank,
+    );
+    final rankT = (tv.leagueTeamsCount - finish) / (tv.leagueTeamsCount - 1);
 
     final yearsUntilUsable = (year - currentYear).clamp(0, 100);
-    final timeDiscount = (1.0 - tv.yearsDecayPerYear * yearsUntilUsable)
-        .clamp(tv.minTimeDiscount, 1.0);
+    final timeDiscount = (1.0 - tv.yearsDecayPerYear * yearsUntilUsable).clamp(
+      tv.minTimeDiscount,
+      1.0,
+    );
 
     final effectiveT = (rankT * timeDiscount).clamp(0.0, 1.0);
     final value =
@@ -64,8 +69,13 @@ extension DraftPickX on DraftPick {
   /// zmienia).
   DraftPick recalculateTradeValue({
     required int currentYear,
+    int? expectedRank,
     BalanceConfig balance = BalanceConfig.defaults,
   }) => copyWith(
-    tradeValue: computeTradeValue(currentYear: currentYear, balance: balance),
+    tradeValue: computeTradeValue(
+      currentYear: currentYear,
+      expectedRank: expectedRank,
+      balance: balance,
+    ),
   );
 }

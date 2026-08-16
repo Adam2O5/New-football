@@ -288,6 +288,7 @@
     }
   },
   "substitute_sheetSubtitle": "Wybierz zawodnika do zamiany miejscami",
+  "substitute_sheetEmpty": "Brak dostępnych zawodników do zmiany",
   "@substitute_sheetSubtitle": {
     "description": "Subtitle/hint shown below the title in the substitute bottom sheet."
   },

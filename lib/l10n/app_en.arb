@@ -243,6 +243,7 @@
     }
   },
   "substitute_sheetSubtitle": "Choose a player to swap places with",
+  "substitute_sheetEmpty": "No available players to substitute",
   "@substitute_sheetSubtitle": {
     "description": "Subtitle/hint shown below the title in the substitute bottom sheet."
   },

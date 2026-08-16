@@ -607,6 +607,9 @@ class AppLocalizationsPl extends AppLocalizations {
       'Wybierz zawodnika do zamiany miejscami';
 
   @override
+  String get substitute_sheetEmpty => 'Brak dostępnych zawodników do zmiany';
+
+  @override
   String get standings_noLeague => 'Brak ligi';
 
   @override

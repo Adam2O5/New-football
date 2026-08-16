@@ -112,10 +112,12 @@ class TradeValueBalance {
     return ovrComponent + potentialBonus;
   }
 
-  // TODO: placeholder — docelowo ma zwracać prognozowane miejsce drużyny
-  // [teamId] w tabeli/lidze na koniec sezonu (na podstawie formy, siły
-  // składu, ewentualnie symulacji pozostałych meczów). Na razie zawsze
-  // zwraca 1, żeby wycena picków była deterministyczna do czasu
-  // implementacji właściwej prognozy.
-  int projectedFinish(String teamId) => 1;
+  /// Temporary bridge until Task 32 wires [expectedRank] from the league
+  /// strength table into pick valuation. When supplied, the rank is clamped
+  /// to the valid league range; otherwise the deterministic first-place
+  /// fallback preserves the existing valuation contract.
+  int projectedFinish(String teamId, {int? expectedRank}) {
+    if (expectedRank == null) return 1;
+    return expectedRank.clamp(1, leagueTeamsCount).toInt();
+  }
 }

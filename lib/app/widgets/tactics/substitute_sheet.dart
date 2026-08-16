@@ -64,16 +64,14 @@ class SubstituteSheet extends StatelessWidget {
                 style: const TextStyle(fontSize: 11),
               ),
             ),
-            title: Text(outPlayer.name),
-            // TODO: brak dedykowanego klucza l10n — dodać do app_*.arb.
-            subtitle: const Text('Wybierz zmiennika'),
+            title: Text(l10n.substitute_sheetTitle(outPlayer.name)),
+            subtitle: Text(l10n.substitute_sheetSubtitle),
           ),
           const Divider(height: 1),
           if (candidates.isEmpty)
-            const Padding(
-              padding: EdgeInsets.all(16),
-              // TODO: brak dedykowanego klucza l10n — dodać do app_*.arb.
-              child: Text('Brak dostępnych zawodników do zmiany'),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(l10n.substitute_sheetEmpty),
             ),
           for (final candidate in candidates)
             ListTile(

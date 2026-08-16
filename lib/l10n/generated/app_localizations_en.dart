@@ -605,6 +605,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get substitute_sheetSubtitle => 'Choose a player to swap places with';
 
   @override
+  String get substitute_sheetEmpty => 'No available players to substitute';
+
+  @override
   String get standings_noLeague => 'No league';
 
   @override
