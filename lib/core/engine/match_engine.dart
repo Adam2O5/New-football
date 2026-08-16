@@ -10,6 +10,7 @@ import 'package:new_football/core/services/cohesion_service.dart';
 import 'package:new_football/core/services/discipline_service.dart';
 import 'package:new_football/core/services/injury_service.dart';
 import 'package:new_football/core/services/team_management_service.dart';
+import 'package:new_football/core/simulation/pre_match_validator.dart';
 import 'package:new_football/core/tactics/tactics_setup.dart';
 
 class LiveMatch {
@@ -37,6 +38,11 @@ class LiveMatch {
     this.awayDoctorCareMult = 1.0,
     this.homeDoctorPreventionMult = 1.0,
     this.awayDoctorPreventionMult = 1.0,
+    this.administrativeResult,
+    this.homeSnapshot,
+    this.awaySnapshot,
+    this.homeNoGkPenalty = false,
+    this.awayNoGkPenalty = false,
   }) : homeStartingLineup = List.unmodifiable(
          startingHomeLineup ?? state.homeLineup,
        ),
@@ -87,6 +93,11 @@ class LiveMatch {
   final double awayDoctorCareMult;
   final double homeDoctorPreventionMult;
   final double awayDoctorPreventionMult;
+  final MatchResult? administrativeResult;
+  final MatchTeamSnapshot? homeSnapshot;
+  final MatchTeamSnapshot? awaySnapshot;
+  final bool homeNoGkPenalty;
+  final bool awayNoGkPenalty;
 
   bool get isFinished => state.minute >= 90;
 
@@ -122,6 +133,9 @@ class LiveMatch {
   );
 
   MatchResult toResult() {
+    final administrative = administrativeResult;
+    if (administrative != null) return administrative;
+
     final homeShots = events
         .where(
           (e) =>
@@ -138,6 +152,32 @@ class LiveMatch {
                   e.type == MatchEventType.scoredPenalty),
         )
         .length;
+    final homeSnapshotValue =
+        homeSnapshot ??
+        _fallbackSnapshot(
+          teamId: homeTeamId,
+          startingXi: homeStartingLineup,
+          bench: state.homeBench,
+          tactics: state.homeTactics,
+          chemistry: homeChemistry,
+          atmosphere: homeAtmosphere,
+          cohesionMultiplier: homeCohesionMult,
+        );
+    final awaySnapshotValue =
+        awaySnapshot ??
+        _fallbackSnapshot(
+          teamId: awayTeamId,
+          startingXi: awayStartingLineup,
+          bench: state.awayBench,
+          tactics: state.awayTactics,
+          chemistry: awayChemistry,
+          atmosphere: awayAtmosphere,
+          cohesionMultiplier: awayCohesionMult,
+        );
+    final noGkTeams = [
+      if (homeNoGkPenalty) homeTeamId,
+      if (awayNoGkPenalty) awayTeamId,
+    ];
     return MatchResult(
       homeTeamId: homeTeamId,
       awayTeamId: awayTeamId,
@@ -163,26 +203,44 @@ class LiveMatch {
         yellowCards: _cardCount(awayTeamId, yellow: true),
         redCards: _cardCount(awayTeamId, yellow: false),
       ),
-      isWalkover: events.any(
-        (event) => event.description?.startsWith('Walkower') ?? false,
-      ),
+      status: MatchStatus.played,
+      noGkPenalty: noGkTeams.isNotEmpty,
+      noGkPenaltyTeamIds: noGkTeams,
       context: state.context,
       homeTactics: state.homeTactics,
       awayTactics: state.awayTactics,
       homeLineup: homeStartingLineup,
       awayLineup: awayStartingLineup,
-      homeLineupPositions: [
-        for (final player in homeStartingLineup) player.position,
-      ],
-      awayLineupPositions: [
-        for (final player in awayStartingLineup) player.position,
-      ],
+      homeLineupPositions: homeSnapshotValue.assignedPositions,
+      awayLineupPositions: awaySnapshotValue.assignedPositions,
+      homeSnapshot: homeSnapshotValue,
+      awaySnapshot: awaySnapshotValue,
       playerStats: _playerStats(),
       events: List.unmodifiable(events),
       injuries: List.unmodifiable(injuries),
       disciplines: List.unmodifiable(disciplines),
     );
   }
+
+  MatchTeamSnapshot _fallbackSnapshot({
+    required String teamId,
+    required List<Player> startingXi,
+    required List<Player> bench,
+    required TacticsSetup tactics,
+    required double chemistry,
+    required int atmosphere,
+    required double cohesionMultiplier,
+  }) => MatchTeamSnapshot(
+    teamId: teamId,
+    startingXi: startingXi,
+    bench: bench,
+    assignedPositions: [for (final player in startingXi) player.position],
+    assignedRoles: [for (final player in startingXi) player.state.role],
+    tactics: tactics,
+    chemistry: chemistry,
+    atmosphere: atmosphere,
+    cohesionMultiplier: cohesionMultiplier,
+  );
 
   List<PlayerMatchStats> _playerStats() {
     return playersById.values.map((player) {
@@ -284,80 +342,119 @@ class MatchEngine {
     MatchContext context = const MatchContext(),
     required int rngSeed,
   }) {
-    final walkover = _precheckWalkover(home, away);
-    if (walkover != null) {
-      final live = LiveMatch(
-        state: MatchState(
-          minute: 90,
-          homeGoals: walkover.homeGoals,
-          awayGoals: walkover.awayGoals,
-          homeLineup: home.startingEleven,
-          awayLineup: away.startingEleven,
-          homeBench: _benchPlayers(home),
-          awayBench: _benchPlayers(away),
-          homeTactics: home.tactics,
-          awayTactics: away.tactics,
-          context: context,
-          rngSeed: rngSeed,
-        ),
+    final report = PreMatchValidator(
+      balance: balance,
+    ).validate(home: home, away: away);
+    final matchContext = context.copyWith(
+      homeTeamId: context.homeTeamId.isEmpty ? home.id : context.homeTeamId,
+      awayTeamId: context.awayTeamId.isEmpty ? away.id : context.awayTeamId,
+      seed: context.seed == 0 ? rngSeed : context.seed,
+    );
+
+    final cohesionService = const CohesionService();
+    final homeCohesionMult = cohesionService.cohesionMult(
+      cohesionService.computeCohesion(report.home.startingXi),
+      headCoach: home.staff.headCoach,
+    );
+    final awayCohesionMult = cohesionService.cohesionMult(
+      cohesionService.computeCohesion(report.away.startingXi),
+      headCoach: away.staff.headCoach,
+    );
+    final homeSnapshot = _snapshotFor(
+      home,
+      report.home,
+      cohesionMultiplier: homeCohesionMult,
+    );
+    final awaySnapshot = _snapshotFor(
+      away,
+      report.away,
+      cohesionMultiplier: awayCohesionMult,
+    );
+
+    if (report.status != MatchStatus.played) {
+      final homeGoals = report.status == MatchStatus.dsq
+          ? 0
+          : report.violatingTeamIds.contains(home.id)
+          ? balance.matchday.walkoverGoalsFor
+          : balance.matchday.walkoverGoalsAgainst;
+      final awayGoals = report.status == MatchStatus.dsq
+          ? 0
+          : report.violatingTeamIds.contains(away.id)
+          ? balance.matchday.walkoverGoalsFor
+          : balance.matchday.walkoverGoalsAgainst;
+      final administrativeResult = MatchResult(
         homeTeamId: home.id,
         awayTeamId: away.id,
-        balance: balance,
-        events: List.of(walkover.events),
+        homeGoals: homeGoals,
+        awayGoals: awayGoals,
+        homeStats: TeamMatchStats(teamId: home.id, goals: homeGoals),
+        awayStats: TeamMatchStats(teamId: away.id, goals: awayGoals),
+        status: report.status,
+        reasonCode: report.reasonCode,
+        violatingTeamIds: report.violatingTeamIds,
+        isWalkover: true,
+        context: matchContext,
+        homeTactics: home.tactics,
+        awayTactics: away.tactics,
+        homeLineup: report.home.startingXi,
+        awayLineup: report.away.startingXi,
+        homeLineupPositions: homeSnapshot.assignedPositions,
+        awayLineupPositions: awaySnapshot.assignedPositions,
+        homeSnapshot: homeSnapshot,
+        awaySnapshot: awaySnapshot,
       );
-      return live;
-    }
-
-    final noGk = _precheckNoGk(home, away);
-    if (noGk != null) {
       return LiveMatch(
         state: MatchState(
           minute: 90,
-          homeGoals: noGk.homeGoals,
-          awayGoals: noGk.awayGoals,
-          homeLineup: home.startingEleven,
-          awayLineup: away.startingEleven,
-          homeBench: _benchPlayers(home),
-          awayBench: _benchPlayers(away),
+          homeGoals: homeGoals,
+          awayGoals: awayGoals,
+          homeLineup: report.home.startingXi,
+          awayLineup: report.away.startingXi,
+          homeBench: report.home.bench,
+          awayBench: report.away.bench,
           homeTactics: home.tactics,
           awayTactics: away.tactics,
-          context: context,
+          context: matchContext,
           rngSeed: rngSeed,
         ),
         homeTeamId: home.id,
         awayTeamId: away.id,
+        startingHomeLineup: report.home.startingXi,
+        startingAwayLineup: report.away.startingXi,
         balance: balance,
-        events: List.of(noGk.events),
+        events: const [],
+        administrativeResult: administrativeResult,
+        homeSnapshot: homeSnapshot,
+        awaySnapshot: awaySnapshot,
       );
     }
 
-    final cohesionSvc = const CohesionService();
-    final homeCohesion = cohesionSvc.computeCohesion(home.startingEleven);
-    final awayCohesion = cohesionSvc.computeCohesion(away.startingEleven);
-
+    final homeNoGk = report.noGkPenaltyTeamIds.contains(home.id);
+    final awayNoGk = report.noGkPenaltyTeamIds.contains(away.id);
     return LiveMatch(
       state: MatchState(
         minute: 0,
-        homeLineup: List.of(home.startingEleven),
-        awayLineup: List.of(away.startingEleven),
-        homeBench: _benchPlayers(home),
-        awayBench: _benchPlayers(away),
+        homeLineup: List.of(report.home.startingXi),
+        awayLineup: List.of(report.away.startingXi),
+        homeBench: report.home.bench,
+        awayBench: report.away.bench,
         homeTactics: home.tactics,
         awayTactics: away.tactics,
-        context: context,
+        context: matchContext,
+        momentum: matchContext.crowdIntensity / 8,
         rngSeed: rngSeed,
       ),
       homeTeamId: home.id,
       awayTeamId: away.id,
+      startingHomeLineup: report.home.startingXi,
+      startingAwayLineup: report.away.startingXi,
       balance: balance,
-      homeCohesionMult: cohesionSvc.cohesionMult(
-        homeCohesion,
-        headCoach: home.staff.headCoach,
-      ),
-      awayCohesionMult: cohesionSvc.cohesionMult(
-        awayCohesion,
-        headCoach: away.staff.headCoach,
-      ),
+      homeSnapshot: homeSnapshot,
+      awaySnapshot: awaySnapshot,
+      homeNoGkPenalty: homeNoGk,
+      awayNoGkPenalty: awayNoGk,
+      homeCohesionMult: homeCohesionMult,
+      awayCohesionMult: awayCohesionMult,
       homeChemistry: home.chemistry,
       awayChemistry: away.chemistry,
       homeAtmosphere: home.atmosphere,
@@ -376,6 +473,25 @@ class MatchEngine {
       ),
     );
   }
+
+  MatchTeamSnapshot _snapshotFor(
+    Team team,
+    PreMatchTeamReport report, {
+    required double cohesionMultiplier,
+  }) => MatchTeamSnapshot(
+    teamId: team.id,
+    startingXi: report.startingXi,
+    bench: report.bench,
+    assignedPositions: [
+      for (final player in report.startingXi) player.position,
+    ],
+    assignedRoles: [for (final player in report.startingXi) player.state.role],
+    tactics: team.tactics,
+    chemistry: team.chemistry,
+    atmosphere: team.atmosphere,
+    cohesionMultiplier: cohesionMultiplier,
+    staff: team.staff,
+  );
 
   /// Simulate one minute. Returns new events produced this minute.
   List<MatchEvent> simulateMinute(LiveMatch live) {
@@ -422,6 +538,7 @@ class MatchEngine {
       context: state.context,
       opponentTactics: state.awayTactics,
       staminaRemaining: live.staminaRemaining,
+      noGkPenalty: live.homeNoGkPenalty,
     );
     final awayPower = _teamPower(
       state.awayLineup,
@@ -435,6 +552,7 @@ class MatchEngine {
       context: state.context,
       opponentTactics: state.homeTactics,
       staminaRemaining: live.staminaRemaining,
+      noGkPenalty: live.awayNoGkPenalty,
     );
 
     final total = homePower + awayPower;
@@ -709,6 +827,7 @@ class MatchEngine {
     required MatchContext context,
     required TacticsSetup opponentTactics,
     required Map<String, double> staminaRemaining,
+    required bool noGkPenalty,
   }) {
     if (lineup.isEmpty) return 1;
     final chemMult = TeamManagementService.chemistryMultiplier(chemistry);
@@ -737,9 +856,11 @@ class MatchEngine {
 
     final tacticsMult = _tacticsMultiplier(tactics, opponentTactics);
     final homeAdv = isHome ? (1.0 + context.homeAdvantage) : 1.0;
+    final noGkMult = noGkPenalty ? 0.72 : 1.0;
     return sum *
         tacticsMult *
         homeAdv *
+        noGkMult *
         (1.0 + momentum * 0.08 + morale * 0.05);
   }
 
@@ -790,16 +911,23 @@ class MatchEngine {
 
     final attacker = _pickAttacker(lineup, rng);
     final teamId = attackingHome ? live.homeTeamId : live.awayTeamId;
+    final defendingNoGk = attackingHome
+        ? live.awayNoGkPenalty
+        : live.homeNoGkPenalty;
     final atk = attacker.overall(balance);
-    final def = defense.isEmpty
+    final baseDefense = defense.isEmpty
         ? 50.0
         : defense.map((p) => p.overall(balance)).reduce((a, b) => a + b) /
               defense.length;
+    // A makeshift goalkeeper is deliberately much less effective than the
+    // rest of the defensive block. This keeps a no-GK match playable while
+    // reproducing the documented ~0-5 penalty through normal chance rolls.
+    final def = defendingNoGk ? baseDefense * 0.55 : baseDefense;
     final finishProb = (0.35 + (atk - def) / 200).clamp(0.15, 0.65);
 
     if (rng.nextDouble() < 0.08) {
       // Penalty
-      final scored = rng.nextDouble() < 0.75;
+      final scored = rng.nextDouble() < (defendingNoGk ? 0.95 : 0.75);
       final events = <MatchEvent>[
         MatchEvent(
           type: scored
@@ -958,155 +1086,5 @@ class MatchEngine {
       playerInId: incoming.id,
     );
     return live.state;
-  }
-
-  List<Player> _benchPlayers(Team team) {
-    if (team.benchPlayerIds.isNotEmpty) {
-      return team.benchPlayerIds
-          .map((id) {
-            try {
-              return team.roster.firstWhere((p) => p.id == id);
-            } catch (_) {
-              return null;
-            }
-          })
-          .whereType<Player>()
-          .where((p) => p.isAvailable)
-          .toList();
-    }
-    final xi = team.lineupPlayerIds.toSet();
-    return team.availablePlayers
-        .where((p) => !xi.contains(p.id))
-        .take(balance.roster.benchSize)
-        .toList();
-  }
-
-  MatchResult? _precheckWalkover(Team home, Team away) {
-    final homeOk = _legalRoster(home);
-    final awayOk = _legalRoster(away);
-    if (homeOk && awayOk) return null;
-    final b = balance.matchday;
-    if (!homeOk && !awayOk) {
-      return MatchResult(
-        homeTeamId: home.id,
-        awayTeamId: away.id,
-        homeGoals: 0,
-        awayGoals: 0,
-        homeStats: TeamMatchStats(teamId: home.id),
-        awayStats: TeamMatchStats(teamId: away.id),
-        events: [
-          MatchEvent(
-            type: MatchEventType.fullTime,
-            minute: 0,
-            teamId: home.id,
-            description: 'Walkower — obie drużyny, nielegalny roster',
-          ),
-        ],
-      );
-    }
-    if (!homeOk) {
-      return MatchResult(
-        homeTeamId: home.id,
-        awayTeamId: away.id,
-        homeGoals: b.walkoverGoalsFor,
-        awayGoals: b.walkoverGoalsAgainst,
-        homeStats: TeamMatchStats(teamId: home.id, goals: b.walkoverGoalsFor),
-        awayStats: TeamMatchStats(
-          teamId: away.id,
-          goals: b.walkoverGoalsAgainst,
-        ),
-        events: [
-          MatchEvent(
-            type: MatchEventType.fullTime,
-            minute: 0,
-            teamId: home.id,
-            description: 'Walkower — nielegalny roster gospodarzy',
-          ),
-        ],
-      );
-    }
-    return MatchResult(
-      homeTeamId: home.id,
-      awayTeamId: away.id,
-      homeGoals: b.walkoverGoalsAgainst,
-      awayGoals: b.walkoverGoalsFor,
-      homeStats: TeamMatchStats(teamId: home.id, goals: b.walkoverGoalsAgainst),
-      awayStats: TeamMatchStats(teamId: away.id, goals: b.walkoverGoalsFor),
-      events: [
-        MatchEvent(
-          type: MatchEventType.fullTime,
-          minute: 0,
-          teamId: away.id,
-          description: 'Walkower — nielegalny roster gości',
-        ),
-      ],
-    );
-  }
-
-  MatchResult? _precheckNoGk(Team home, Team away) {
-    final homeGk = home.startingEleven.any((p) => p.position == Position.gk);
-    final awayGk = away.startingEleven.any((p) => p.position == Position.gk);
-    if (homeGk && awayGk) return null;
-    final b = balance.matchday;
-    if (!homeGk && !awayGk) {
-      return MatchResult(
-        homeTeamId: home.id,
-        awayTeamId: away.id,
-        homeGoals: 0,
-        awayGoals: 0,
-        homeStats: TeamMatchStats(teamId: home.id),
-        awayStats: TeamMatchStats(teamId: away.id),
-        events: [
-          MatchEvent(
-            type: MatchEventType.fullTime,
-            minute: 0,
-            teamId: home.id,
-            description: 'Obie drużyny bez BR — 0:0',
-          ),
-        ],
-      );
-    }
-    if (!homeGk) {
-      return MatchResult(
-        homeTeamId: home.id,
-        awayTeamId: away.id,
-        homeGoals: b.noGkGoalsFor,
-        awayGoals: b.noGkGoalsAgainst,
-        homeStats: TeamMatchStats(teamId: home.id, goals: b.noGkGoalsFor),
-        awayStats: TeamMatchStats(teamId: away.id, goals: b.noGkGoalsAgainst),
-        events: [
-          MatchEvent(
-            type: MatchEventType.fullTime,
-            minute: 0,
-            teamId: home.id,
-            description: 'Brak bramkarza gospodarzy — kara',
-          ),
-        ],
-      );
-    }
-    return MatchResult(
-      homeTeamId: home.id,
-      awayTeamId: away.id,
-      homeGoals: b.noGkGoalsAgainst,
-      awayGoals: b.noGkGoalsFor,
-      homeStats: TeamMatchStats(teamId: home.id, goals: b.noGkGoalsAgainst),
-      awayStats: TeamMatchStats(teamId: away.id, goals: b.noGkGoalsFor),
-      events: [
-        MatchEvent(
-          type: MatchEventType.fullTime,
-          minute: 0,
-          teamId: away.id,
-          description: 'Brak bramkarza gości — kara',
-        ),
-      ],
-    );
-  }
-
-  bool _legalRoster(Team team) {
-    final n = team.roster.length;
-    final available = team.roster.where((p) => p.isAvailable).length;
-    return n >= balance.roster.minSize &&
-        n <= balance.roster.maxSize &&
-        available >= 11;
   }
 }

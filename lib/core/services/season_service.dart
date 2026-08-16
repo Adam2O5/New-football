@@ -4,20 +4,21 @@ import 'package:uuid/uuid.dart';
 
 import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/engine/match_engine.dart';
+import 'package:new_football/core/simulation/match_context_factory.dart';
+import 'package:new_football/core/simulation/match_message_emitter.dart';
+import 'package:new_football/core/simulation/pre_match_validator.dart';
 import 'package:new_football/core/models/contract.dart';
 import 'package:new_football/core/models/draft_models.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/league_strength.dart';
 import 'package:new_football/core/models/match_models.dart';
-import 'package:new_football/core/models/match_state.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/draft_pick.dart';
 import 'package:new_football/core/models/season_awards.dart';
 import 'package:new_football/core/models/seed_data_generator.dart';
 import 'package:new_football/core/models/standing.dart';
 import 'package:new_football/core/models/team.dart';
-import 'package:new_football/core/random/seeds.dart';
 import 'package:new_football/core/services/calendar_service.dart';
 import 'package:new_football/core/services/development_service.dart';
 import 'package:new_football/core/services/discipline_service.dart';
@@ -35,6 +36,8 @@ class SeasonService {
     this.balance = BalanceConfig.defaults,
     MatchEngine? matchEngine,
     CalendarService? calendar,
+    MatchContextFactory? contextFactory,
+    MatchMessageEmitter? matchMessageEmitter,
     DevelopmentService? development,
     SalaryCapService? capService,
     StaffService? staffService,
@@ -43,6 +46,14 @@ class SeasonService {
     Random? random,
   }) : matchEngine = matchEngine ?? MatchEngine(balance: balance),
        calendar = calendar ?? CalendarService(balance: balance),
+       contextFactory =
+           contextFactory ??
+           MatchContextFactory(
+             calendar: calendar ?? CalendarService(balance: balance),
+           ),
+       matchMessageEmitter =
+           matchMessageEmitter ??
+           MatchMessageEmitter(messages: messages ?? MessageService()),
        development = development ?? DevelopmentService(balance: balance),
        capService = capService ?? SalaryCapService(balance: balance),
        staffService = staffService ?? StaffService(balance: balance),
@@ -53,6 +64,8 @@ class SeasonService {
   final BalanceConfig balance;
   final MatchEngine matchEngine;
   final CalendarService calendar;
+  final MatchContextFactory contextFactory;
+  final MatchMessageEmitter matchMessageEmitter;
   final DevelopmentService development;
   final SalaryCapService capService;
   final StaffService staffService;
@@ -372,7 +385,12 @@ class SeasonService {
             west.conferenceFinal.first.winnerTeamId!,
           );
       if (!leagueFinal.isComplete) {
-        final played = _playOneGame(state, leagueFinal, saveSeed);
+        final played = _playOneGame(
+          state,
+          leagueFinal,
+          saveSeed,
+          stake: MatchStake.leagueFinal,
+        );
         state = played.league;
         leagueFinal = played.series;
       }
@@ -1018,14 +1036,32 @@ class SeasonService {
     required int saveSeed,
     required String matchId,
     SeasonPhase phase = SeasonPhase.regular,
+    MatchStake? stake,
   }) {
+    final home = league.teamById(homeId)!;
+    final away = league.teamById(awayId)!;
+    final context = contextFactory.createForPostseason(
+      home: home,
+      away: away,
+      seasonYear: league.currentSeason.year,
+      matchId: matchId,
+      saveSeed: saveSeed,
+      stake: stake ?? _stakeForPhase(phase),
+      week: league.currentWeek,
+    );
     return matchEngine.simulateFull(
-      home: league.teamById(homeId)!,
-      away: league.teamById(awayId)!,
-      context: MatchContext(stakes: phase),
-      rngSeed: matchSeed(saveSeed, league.currentSeason.year, matchId),
+      home: home,
+      away: away,
+      context: context,
+      rngSeed: context.seed,
     );
   }
+
+  MatchStake _stakeForPhase(SeasonPhase phase) => switch (phase) {
+    SeasonPhase.playIn => MatchStake.playIn,
+    SeasonPhase.playoff => MatchStake.playoff,
+    _ => MatchStake.regular,
+  };
 
   ({LeagueState league, MatchResult result}) _simPostseason(
     LeagueState league,
@@ -1034,17 +1070,49 @@ class SeasonService {
     required int saveSeed,
     required String matchId,
     required SeasonPhase phase,
+    MatchStake? stake,
   }) {
+    var state = league;
+    final effectiveStake = stake ?? _stakeForPhase(phase);
+    final home = league.teamById(homeId);
+    final away = league.teamById(awayId);
+    if (home != null && away != null && league.playerTeamId != null) {
+      final playerInFixture =
+          league.playerTeamId == homeId || league.playerTeamId == awayId;
+      if (playerInFixture) {
+        final context = contextFactory.createForPostseason(
+          home: home,
+          away: away,
+          seasonYear: league.currentSeason.year,
+          matchId: matchId,
+          saveSeed: saveSeed,
+          stake: effectiveStake,
+          week: league.currentWeek,
+        );
+        final report = PreMatchValidator(
+          balance: balance,
+        ).validate(home: home, away: away);
+        state = matchMessageEmitter.emitPreMatch(
+          league: state,
+          matchId: matchId,
+          homeTeamId: homeId,
+          awayTeamId: awayId,
+          context: context,
+          report: report,
+        );
+      }
+    }
     final result = _sim(
-      league,
+      state,
       homeId,
       awayId,
       saveSeed: saveSeed,
       matchId: matchId,
       phase: phase,
+      stake: effectiveStake,
     );
     return (
-      league: _applyPostseasonDiscipline(league, result, phase),
+      league: _applyPostseasonDiscipline(state, result, phase),
       result: result,
     );
   }
@@ -1129,11 +1197,21 @@ class SeasonService {
     );
   }
 
+  MatchStake _stakeForSeries(PlayoffSeries series) {
+    final winsNeededForElimination = series.winsNeeded - 1;
+    final eliminationGame =
+        winsNeededForElimination > 0 &&
+        (series.higherSeedWins >= winsNeededForElimination ||
+            series.lowerSeedWins >= winsNeededForElimination);
+    return eliminationGame ? MatchStake.playoffElimination : MatchStake.playoff;
+  }
+
   ({LeagueState league, PlayoffSeries series}) _playOneGame(
     LeagueState league,
     PlayoffSeries series,
-    int saveSeed,
-  ) {
+    int saveSeed, {
+    MatchStake? stake,
+  }) {
     final homeFirst = calendar.higherSeedHomeForGame(series.games.length);
     final homeId = homeFirst ? series.higherSeedTeamId : series.lowerSeedTeamId;
     final awayId = homeFirst ? series.lowerSeedTeamId : series.higherSeedTeamId;
@@ -1144,6 +1222,7 @@ class SeasonService {
       saveSeed: saveSeed,
       matchId: 'playoff:${series.id}:${series.games.length}',
       phase: SeasonPhase.playoff,
+      stake: stake ?? _stakeForSeries(series),
     );
     return (league: played.league, series: series.recordGame(played.result));
   }
@@ -1154,11 +1233,18 @@ class SeasonService {
     SeasonPhase phase,
   ) {
     final disciplineService = const DisciplineService();
+    final administrativeTeamIds = TeamManagementService.walkoverTeamIds(result);
+    final isAdministrative = TeamManagementService.isWalkoverResult(result);
     final notifications =
         <({String teamId, DisciplineNotification notification})>[];
     final teams = league.teams.map((team) {
       if (team.id != result.homeTeamId && team.id != result.awayTeamId) {
         return team;
+      }
+      if (isAdministrative) {
+        return administrativeTeamIds.contains(team.id)
+            ? const TeamManagementService().applyAtmosphereDelta(team, -15)
+            : team;
       }
       final application = disciplineService.applyToTeam(
         team: team,

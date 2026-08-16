@@ -9,9 +9,17 @@ part 'match_state.g.dart';
 @freezed
 class MatchContext with _$MatchContext {
   const factory MatchContext({
-    @Default(false) bool isDerby,
+    @Default('') String homeTeamId,
+    @Default('') String awayTeamId,
     @Default(Weather.clear) Weather weather,
-    @Default(SeasonPhase.regular) SeasonPhase stakes,
+    @Default(0) int temperatureC,
+    @Default(false) bool isDerby,
+    @Default(MatchStake.regular) MatchStake stake,
+    @Default(1.0) double refereeStrictness,
+    @Default(0) int crowdIntensity,
+    @Default(1) int homeMatchInWeek,
+    @Default(1) int awayMatchInWeek,
+    @Default(0) int seed,
     @Default(0.05) double homeAdvantage,
   }) = _MatchContext;
 

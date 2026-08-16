@@ -21,9 +21,17 @@ MatchContext _$MatchContextFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$MatchContext {
-  bool get isDerby => throw _privateConstructorUsedError;
+  String get homeTeamId => throw _privateConstructorUsedError;
+  String get awayTeamId => throw _privateConstructorUsedError;
   Weather get weather => throw _privateConstructorUsedError;
-  SeasonPhase get stakes => throw _privateConstructorUsedError;
+  int get temperatureC => throw _privateConstructorUsedError;
+  bool get isDerby => throw _privateConstructorUsedError;
+  MatchStake get stake => throw _privateConstructorUsedError;
+  double get refereeStrictness => throw _privateConstructorUsedError;
+  int get crowdIntensity => throw _privateConstructorUsedError;
+  int get homeMatchInWeek => throw _privateConstructorUsedError;
+  int get awayMatchInWeek => throw _privateConstructorUsedError;
+  int get seed => throw _privateConstructorUsedError;
   double get homeAdvantage => throw _privateConstructorUsedError;
 
   /// Serializes this MatchContext to a JSON map.
@@ -44,9 +52,17 @@ abstract class $MatchContextCopyWith<$Res> {
   ) = _$MatchContextCopyWithImpl<$Res, MatchContext>;
   @useResult
   $Res call({
-    bool isDerby,
+    String homeTeamId,
+    String awayTeamId,
     Weather weather,
-    SeasonPhase stakes,
+    int temperatureC,
+    bool isDerby,
+    MatchStake stake,
+    double refereeStrictness,
+    int crowdIntensity,
+    int homeMatchInWeek,
+    int awayMatchInWeek,
+    int seed,
     double homeAdvantage,
   });
 }
@@ -66,25 +82,65 @@ class _$MatchContextCopyWithImpl<$Res, $Val extends MatchContext>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? isDerby = null,
+    Object? homeTeamId = null,
+    Object? awayTeamId = null,
     Object? weather = null,
-    Object? stakes = null,
+    Object? temperatureC = null,
+    Object? isDerby = null,
+    Object? stake = null,
+    Object? refereeStrictness = null,
+    Object? crowdIntensity = null,
+    Object? homeMatchInWeek = null,
+    Object? awayMatchInWeek = null,
+    Object? seed = null,
     Object? homeAdvantage = null,
   }) {
     return _then(
       _value.copyWith(
-            isDerby: null == isDerby
-                ? _value.isDerby
-                : isDerby // ignore: cast_nullable_to_non_nullable
-                      as bool,
+            homeTeamId: null == homeTeamId
+                ? _value.homeTeamId
+                : homeTeamId // ignore: cast_nullable_to_non_nullable
+                      as String,
+            awayTeamId: null == awayTeamId
+                ? _value.awayTeamId
+                : awayTeamId // ignore: cast_nullable_to_non_nullable
+                      as String,
             weather: null == weather
                 ? _value.weather
                 : weather // ignore: cast_nullable_to_non_nullable
                       as Weather,
-            stakes: null == stakes
-                ? _value.stakes
-                : stakes // ignore: cast_nullable_to_non_nullable
-                      as SeasonPhase,
+            temperatureC: null == temperatureC
+                ? _value.temperatureC
+                : temperatureC // ignore: cast_nullable_to_non_nullable
+                      as int,
+            isDerby: null == isDerby
+                ? _value.isDerby
+                : isDerby // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            stake: null == stake
+                ? _value.stake
+                : stake // ignore: cast_nullable_to_non_nullable
+                      as MatchStake,
+            refereeStrictness: null == refereeStrictness
+                ? _value.refereeStrictness
+                : refereeStrictness // ignore: cast_nullable_to_non_nullable
+                      as double,
+            crowdIntensity: null == crowdIntensity
+                ? _value.crowdIntensity
+                : crowdIntensity // ignore: cast_nullable_to_non_nullable
+                      as int,
+            homeMatchInWeek: null == homeMatchInWeek
+                ? _value.homeMatchInWeek
+                : homeMatchInWeek // ignore: cast_nullable_to_non_nullable
+                      as int,
+            awayMatchInWeek: null == awayMatchInWeek
+                ? _value.awayMatchInWeek
+                : awayMatchInWeek // ignore: cast_nullable_to_non_nullable
+                      as int,
+            seed: null == seed
+                ? _value.seed
+                : seed // ignore: cast_nullable_to_non_nullable
+                      as int,
             homeAdvantage: null == homeAdvantage
                 ? _value.homeAdvantage
                 : homeAdvantage // ignore: cast_nullable_to_non_nullable
@@ -105,9 +161,17 @@ abstract class _$$MatchContextImplCopyWith<$Res>
   @override
   @useResult
   $Res call({
-    bool isDerby,
+    String homeTeamId,
+    String awayTeamId,
     Weather weather,
-    SeasonPhase stakes,
+    int temperatureC,
+    bool isDerby,
+    MatchStake stake,
+    double refereeStrictness,
+    int crowdIntensity,
+    int homeMatchInWeek,
+    int awayMatchInWeek,
+    int seed,
     double homeAdvantage,
   });
 }
@@ -126,25 +190,65 @@ class __$$MatchContextImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? isDerby = null,
+    Object? homeTeamId = null,
+    Object? awayTeamId = null,
     Object? weather = null,
-    Object? stakes = null,
+    Object? temperatureC = null,
+    Object? isDerby = null,
+    Object? stake = null,
+    Object? refereeStrictness = null,
+    Object? crowdIntensity = null,
+    Object? homeMatchInWeek = null,
+    Object? awayMatchInWeek = null,
+    Object? seed = null,
     Object? homeAdvantage = null,
   }) {
     return _then(
       _$MatchContextImpl(
-        isDerby: null == isDerby
-            ? _value.isDerby
-            : isDerby // ignore: cast_nullable_to_non_nullable
-                  as bool,
+        homeTeamId: null == homeTeamId
+            ? _value.homeTeamId
+            : homeTeamId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        awayTeamId: null == awayTeamId
+            ? _value.awayTeamId
+            : awayTeamId // ignore: cast_nullable_to_non_nullable
+                  as String,
         weather: null == weather
             ? _value.weather
             : weather // ignore: cast_nullable_to_non_nullable
                   as Weather,
-        stakes: null == stakes
-            ? _value.stakes
-            : stakes // ignore: cast_nullable_to_non_nullable
-                  as SeasonPhase,
+        temperatureC: null == temperatureC
+            ? _value.temperatureC
+            : temperatureC // ignore: cast_nullable_to_non_nullable
+                  as int,
+        isDerby: null == isDerby
+            ? _value.isDerby
+            : isDerby // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        stake: null == stake
+            ? _value.stake
+            : stake // ignore: cast_nullable_to_non_nullable
+                  as MatchStake,
+        refereeStrictness: null == refereeStrictness
+            ? _value.refereeStrictness
+            : refereeStrictness // ignore: cast_nullable_to_non_nullable
+                  as double,
+        crowdIntensity: null == crowdIntensity
+            ? _value.crowdIntensity
+            : crowdIntensity // ignore: cast_nullable_to_non_nullable
+                  as int,
+        homeMatchInWeek: null == homeMatchInWeek
+            ? _value.homeMatchInWeek
+            : homeMatchInWeek // ignore: cast_nullable_to_non_nullable
+                  as int,
+        awayMatchInWeek: null == awayMatchInWeek
+            ? _value.awayMatchInWeek
+            : awayMatchInWeek // ignore: cast_nullable_to_non_nullable
+                  as int,
+        seed: null == seed
+            ? _value.seed
+            : seed // ignore: cast_nullable_to_non_nullable
+                  as int,
         homeAdvantage: null == homeAdvantage
             ? _value.homeAdvantage
             : homeAdvantage // ignore: cast_nullable_to_non_nullable
@@ -158,9 +262,17 @@ class __$$MatchContextImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$MatchContextImpl implements _MatchContext {
   const _$MatchContextImpl({
-    this.isDerby = false,
+    this.homeTeamId = '',
+    this.awayTeamId = '',
     this.weather = Weather.clear,
-    this.stakes = SeasonPhase.regular,
+    this.temperatureC = 0,
+    this.isDerby = false,
+    this.stake = MatchStake.regular,
+    this.refereeStrictness = 1.0,
+    this.crowdIntensity = 0,
+    this.homeMatchInWeek = 1,
+    this.awayMatchInWeek = 1,
+    this.seed = 0,
     this.homeAdvantage = 0.05,
   });
 
@@ -169,20 +281,44 @@ class _$MatchContextImpl implements _MatchContext {
 
   @override
   @JsonKey()
-  final bool isDerby;
+  final String homeTeamId;
+  @override
+  @JsonKey()
+  final String awayTeamId;
   @override
   @JsonKey()
   final Weather weather;
   @override
   @JsonKey()
-  final SeasonPhase stakes;
+  final int temperatureC;
+  @override
+  @JsonKey()
+  final bool isDerby;
+  @override
+  @JsonKey()
+  final MatchStake stake;
+  @override
+  @JsonKey()
+  final double refereeStrictness;
+  @override
+  @JsonKey()
+  final int crowdIntensity;
+  @override
+  @JsonKey()
+  final int homeMatchInWeek;
+  @override
+  @JsonKey()
+  final int awayMatchInWeek;
+  @override
+  @JsonKey()
+  final int seed;
   @override
   @JsonKey()
   final double homeAdvantage;
 
   @override
   String toString() {
-    return 'MatchContext(isDerby: $isDerby, weather: $weather, stakes: $stakes, homeAdvantage: $homeAdvantage)';
+    return 'MatchContext(homeTeamId: $homeTeamId, awayTeamId: $awayTeamId, weather: $weather, temperatureC: $temperatureC, isDerby: $isDerby, stake: $stake, refereeStrictness: $refereeStrictness, crowdIntensity: $crowdIntensity, homeMatchInWeek: $homeMatchInWeek, awayMatchInWeek: $awayMatchInWeek, seed: $seed, homeAdvantage: $homeAdvantage)';
   }
 
   @override
@@ -190,17 +326,45 @@ class _$MatchContextImpl implements _MatchContext {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$MatchContextImpl &&
-            (identical(other.isDerby, isDerby) || other.isDerby == isDerby) &&
+            (identical(other.homeTeamId, homeTeamId) ||
+                other.homeTeamId == homeTeamId) &&
+            (identical(other.awayTeamId, awayTeamId) ||
+                other.awayTeamId == awayTeamId) &&
             (identical(other.weather, weather) || other.weather == weather) &&
-            (identical(other.stakes, stakes) || other.stakes == stakes) &&
+            (identical(other.temperatureC, temperatureC) ||
+                other.temperatureC == temperatureC) &&
+            (identical(other.isDerby, isDerby) || other.isDerby == isDerby) &&
+            (identical(other.stake, stake) || other.stake == stake) &&
+            (identical(other.refereeStrictness, refereeStrictness) ||
+                other.refereeStrictness == refereeStrictness) &&
+            (identical(other.crowdIntensity, crowdIntensity) ||
+                other.crowdIntensity == crowdIntensity) &&
+            (identical(other.homeMatchInWeek, homeMatchInWeek) ||
+                other.homeMatchInWeek == homeMatchInWeek) &&
+            (identical(other.awayMatchInWeek, awayMatchInWeek) ||
+                other.awayMatchInWeek == awayMatchInWeek) &&
+            (identical(other.seed, seed) || other.seed == seed) &&
             (identical(other.homeAdvantage, homeAdvantage) ||
                 other.homeAdvantage == homeAdvantage));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, isDerby, weather, stakes, homeAdvantage);
+  int get hashCode => Object.hash(
+    runtimeType,
+    homeTeamId,
+    awayTeamId,
+    weather,
+    temperatureC,
+    isDerby,
+    stake,
+    refereeStrictness,
+    crowdIntensity,
+    homeMatchInWeek,
+    awayMatchInWeek,
+    seed,
+    homeAdvantage,
+  );
 
   /// Create a copy of MatchContext
   /// with the given fields replaced by the non-null parameter values.
@@ -218,9 +382,17 @@ class _$MatchContextImpl implements _MatchContext {
 
 abstract class _MatchContext implements MatchContext {
   const factory _MatchContext({
-    final bool isDerby,
+    final String homeTeamId,
+    final String awayTeamId,
     final Weather weather,
-    final SeasonPhase stakes,
+    final int temperatureC,
+    final bool isDerby,
+    final MatchStake stake,
+    final double refereeStrictness,
+    final int crowdIntensity,
+    final int homeMatchInWeek,
+    final int awayMatchInWeek,
+    final int seed,
     final double homeAdvantage,
   }) = _$MatchContextImpl;
 
@@ -228,11 +400,27 @@ abstract class _MatchContext implements MatchContext {
       _$MatchContextImpl.fromJson;
 
   @override
-  bool get isDerby;
+  String get homeTeamId;
+  @override
+  String get awayTeamId;
   @override
   Weather get weather;
   @override
-  SeasonPhase get stakes;
+  int get temperatureC;
+  @override
+  bool get isDerby;
+  @override
+  MatchStake get stake;
+  @override
+  double get refereeStrictness;
+  @override
+  int get crowdIntensity;
+  @override
+  int get homeMatchInWeek;
+  @override
+  int get awayMatchInWeek;
+  @override
+  int get seed;
   @override
   double get homeAdvantage;
 

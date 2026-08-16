@@ -1184,6 +1184,442 @@ abstract class _TeamMatchStats implements TeamMatchStats {
       throw _privateConstructorUsedError;
 }
 
+MatchTeamSnapshot _$MatchTeamSnapshotFromJson(Map<String, dynamic> json) {
+  return _MatchTeamSnapshot.fromJson(json);
+}
+
+/// @nodoc
+mixin _$MatchTeamSnapshot {
+  String get teamId => throw _privateConstructorUsedError;
+  List<Player> get startingXi => throw _privateConstructorUsedError;
+  List<Player> get bench => throw _privateConstructorUsedError;
+  List<Position> get assignedPositions => throw _privateConstructorUsedError;
+  List<AssignedRole> get assignedRoles => throw _privateConstructorUsedError;
+  TacticsSetup get tactics => throw _privateConstructorUsedError;
+  double get chemistry => throw _privateConstructorUsedError;
+  int get atmosphere => throw _privateConstructorUsedError;
+  double get cohesionMultiplier => throw _privateConstructorUsedError;
+  TeamStaff get staff => throw _privateConstructorUsedError;
+
+  /// Serializes this MatchTeamSnapshot to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of MatchTeamSnapshot
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $MatchTeamSnapshotCopyWith<MatchTeamSnapshot> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $MatchTeamSnapshotCopyWith<$Res> {
+  factory $MatchTeamSnapshotCopyWith(
+    MatchTeamSnapshot value,
+    $Res Function(MatchTeamSnapshot) then,
+  ) = _$MatchTeamSnapshotCopyWithImpl<$Res, MatchTeamSnapshot>;
+  @useResult
+  $Res call({
+    String teamId,
+    List<Player> startingXi,
+    List<Player> bench,
+    List<Position> assignedPositions,
+    List<AssignedRole> assignedRoles,
+    TacticsSetup tactics,
+    double chemistry,
+    int atmosphere,
+    double cohesionMultiplier,
+    TeamStaff staff,
+  });
+
+  $TacticsSetupCopyWith<$Res> get tactics;
+  $TeamStaffCopyWith<$Res> get staff;
+}
+
+/// @nodoc
+class _$MatchTeamSnapshotCopyWithImpl<$Res, $Val extends MatchTeamSnapshot>
+    implements $MatchTeamSnapshotCopyWith<$Res> {
+  _$MatchTeamSnapshotCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of MatchTeamSnapshot
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? teamId = null,
+    Object? startingXi = null,
+    Object? bench = null,
+    Object? assignedPositions = null,
+    Object? assignedRoles = null,
+    Object? tactics = null,
+    Object? chemistry = null,
+    Object? atmosphere = null,
+    Object? cohesionMultiplier = null,
+    Object? staff = null,
+  }) {
+    return _then(
+      _value.copyWith(
+            teamId: null == teamId
+                ? _value.teamId
+                : teamId // ignore: cast_nullable_to_non_nullable
+                      as String,
+            startingXi: null == startingXi
+                ? _value.startingXi
+                : startingXi // ignore: cast_nullable_to_non_nullable
+                      as List<Player>,
+            bench: null == bench
+                ? _value.bench
+                : bench // ignore: cast_nullable_to_non_nullable
+                      as List<Player>,
+            assignedPositions: null == assignedPositions
+                ? _value.assignedPositions
+                : assignedPositions // ignore: cast_nullable_to_non_nullable
+                      as List<Position>,
+            assignedRoles: null == assignedRoles
+                ? _value.assignedRoles
+                : assignedRoles // ignore: cast_nullable_to_non_nullable
+                      as List<AssignedRole>,
+            tactics: null == tactics
+                ? _value.tactics
+                : tactics // ignore: cast_nullable_to_non_nullable
+                      as TacticsSetup,
+            chemistry: null == chemistry
+                ? _value.chemistry
+                : chemistry // ignore: cast_nullable_to_non_nullable
+                      as double,
+            atmosphere: null == atmosphere
+                ? _value.atmosphere
+                : atmosphere // ignore: cast_nullable_to_non_nullable
+                      as int,
+            cohesionMultiplier: null == cohesionMultiplier
+                ? _value.cohesionMultiplier
+                : cohesionMultiplier // ignore: cast_nullable_to_non_nullable
+                      as double,
+            staff: null == staff
+                ? _value.staff
+                : staff // ignore: cast_nullable_to_non_nullable
+                      as TeamStaff,
+          )
+          as $Val,
+    );
+  }
+
+  /// Create a copy of MatchTeamSnapshot
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $TacticsSetupCopyWith<$Res> get tactics {
+    return $TacticsSetupCopyWith<$Res>(_value.tactics, (value) {
+      return _then(_value.copyWith(tactics: value) as $Val);
+    });
+  }
+
+  /// Create a copy of MatchTeamSnapshot
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $TeamStaffCopyWith<$Res> get staff {
+    return $TeamStaffCopyWith<$Res>(_value.staff, (value) {
+      return _then(_value.copyWith(staff: value) as $Val);
+    });
+  }
+}
+
+/// @nodoc
+abstract class _$$MatchTeamSnapshotImplCopyWith<$Res>
+    implements $MatchTeamSnapshotCopyWith<$Res> {
+  factory _$$MatchTeamSnapshotImplCopyWith(
+    _$MatchTeamSnapshotImpl value,
+    $Res Function(_$MatchTeamSnapshotImpl) then,
+  ) = __$$MatchTeamSnapshotImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({
+    String teamId,
+    List<Player> startingXi,
+    List<Player> bench,
+    List<Position> assignedPositions,
+    List<AssignedRole> assignedRoles,
+    TacticsSetup tactics,
+    double chemistry,
+    int atmosphere,
+    double cohesionMultiplier,
+    TeamStaff staff,
+  });
+
+  @override
+  $TacticsSetupCopyWith<$Res> get tactics;
+  @override
+  $TeamStaffCopyWith<$Res> get staff;
+}
+
+/// @nodoc
+class __$$MatchTeamSnapshotImplCopyWithImpl<$Res>
+    extends _$MatchTeamSnapshotCopyWithImpl<$Res, _$MatchTeamSnapshotImpl>
+    implements _$$MatchTeamSnapshotImplCopyWith<$Res> {
+  __$$MatchTeamSnapshotImplCopyWithImpl(
+    _$MatchTeamSnapshotImpl _value,
+    $Res Function(_$MatchTeamSnapshotImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of MatchTeamSnapshot
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? teamId = null,
+    Object? startingXi = null,
+    Object? bench = null,
+    Object? assignedPositions = null,
+    Object? assignedRoles = null,
+    Object? tactics = null,
+    Object? chemistry = null,
+    Object? atmosphere = null,
+    Object? cohesionMultiplier = null,
+    Object? staff = null,
+  }) {
+    return _then(
+      _$MatchTeamSnapshotImpl(
+        teamId: null == teamId
+            ? _value.teamId
+            : teamId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        startingXi: null == startingXi
+            ? _value._startingXi
+            : startingXi // ignore: cast_nullable_to_non_nullable
+                  as List<Player>,
+        bench: null == bench
+            ? _value._bench
+            : bench // ignore: cast_nullable_to_non_nullable
+                  as List<Player>,
+        assignedPositions: null == assignedPositions
+            ? _value._assignedPositions
+            : assignedPositions // ignore: cast_nullable_to_non_nullable
+                  as List<Position>,
+        assignedRoles: null == assignedRoles
+            ? _value._assignedRoles
+            : assignedRoles // ignore: cast_nullable_to_non_nullable
+                  as List<AssignedRole>,
+        tactics: null == tactics
+            ? _value.tactics
+            : tactics // ignore: cast_nullable_to_non_nullable
+                  as TacticsSetup,
+        chemistry: null == chemistry
+            ? _value.chemistry
+            : chemistry // ignore: cast_nullable_to_non_nullable
+                  as double,
+        atmosphere: null == atmosphere
+            ? _value.atmosphere
+            : atmosphere // ignore: cast_nullable_to_non_nullable
+                  as int,
+        cohesionMultiplier: null == cohesionMultiplier
+            ? _value.cohesionMultiplier
+            : cohesionMultiplier // ignore: cast_nullable_to_non_nullable
+                  as double,
+        staff: null == staff
+            ? _value.staff
+            : staff // ignore: cast_nullable_to_non_nullable
+                  as TeamStaff,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$MatchTeamSnapshotImpl implements _MatchTeamSnapshot {
+  const _$MatchTeamSnapshotImpl({
+    this.teamId = '',
+    final List<Player> startingXi = const [],
+    final List<Player> bench = const [],
+    final List<Position> assignedPositions = const [],
+    final List<AssignedRole> assignedRoles = const [],
+    this.tactics = const TacticsSetup(),
+    this.chemistry = 50.0,
+    this.atmosphere = 50,
+    this.cohesionMultiplier = 1.0,
+    this.staff = const TeamStaff(),
+  }) : _startingXi = startingXi,
+       _bench = bench,
+       _assignedPositions = assignedPositions,
+       _assignedRoles = assignedRoles;
+
+  factory _$MatchTeamSnapshotImpl.fromJson(Map<String, dynamic> json) =>
+      _$$MatchTeamSnapshotImplFromJson(json);
+
+  @override
+  @JsonKey()
+  final String teamId;
+  final List<Player> _startingXi;
+  @override
+  @JsonKey()
+  List<Player> get startingXi {
+    if (_startingXi is EqualUnmodifiableListView) return _startingXi;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_startingXi);
+  }
+
+  final List<Player> _bench;
+  @override
+  @JsonKey()
+  List<Player> get bench {
+    if (_bench is EqualUnmodifiableListView) return _bench;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_bench);
+  }
+
+  final List<Position> _assignedPositions;
+  @override
+  @JsonKey()
+  List<Position> get assignedPositions {
+    if (_assignedPositions is EqualUnmodifiableListView)
+      return _assignedPositions;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_assignedPositions);
+  }
+
+  final List<AssignedRole> _assignedRoles;
+  @override
+  @JsonKey()
+  List<AssignedRole> get assignedRoles {
+    if (_assignedRoles is EqualUnmodifiableListView) return _assignedRoles;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_assignedRoles);
+  }
+
+  @override
+  @JsonKey()
+  final TacticsSetup tactics;
+  @override
+  @JsonKey()
+  final double chemistry;
+  @override
+  @JsonKey()
+  final int atmosphere;
+  @override
+  @JsonKey()
+  final double cohesionMultiplier;
+  @override
+  @JsonKey()
+  final TeamStaff staff;
+
+  @override
+  String toString() {
+    return 'MatchTeamSnapshot(teamId: $teamId, startingXi: $startingXi, bench: $bench, assignedPositions: $assignedPositions, assignedRoles: $assignedRoles, tactics: $tactics, chemistry: $chemistry, atmosphere: $atmosphere, cohesionMultiplier: $cohesionMultiplier, staff: $staff)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$MatchTeamSnapshotImpl &&
+            (identical(other.teamId, teamId) || other.teamId == teamId) &&
+            const DeepCollectionEquality().equals(
+              other._startingXi,
+              _startingXi,
+            ) &&
+            const DeepCollectionEquality().equals(other._bench, _bench) &&
+            const DeepCollectionEquality().equals(
+              other._assignedPositions,
+              _assignedPositions,
+            ) &&
+            const DeepCollectionEquality().equals(
+              other._assignedRoles,
+              _assignedRoles,
+            ) &&
+            (identical(other.tactics, tactics) || other.tactics == tactics) &&
+            (identical(other.chemistry, chemistry) ||
+                other.chemistry == chemistry) &&
+            (identical(other.atmosphere, atmosphere) ||
+                other.atmosphere == atmosphere) &&
+            (identical(other.cohesionMultiplier, cohesionMultiplier) ||
+                other.cohesionMultiplier == cohesionMultiplier) &&
+            (identical(other.staff, staff) || other.staff == staff));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    teamId,
+    const DeepCollectionEquality().hash(_startingXi),
+    const DeepCollectionEquality().hash(_bench),
+    const DeepCollectionEquality().hash(_assignedPositions),
+    const DeepCollectionEquality().hash(_assignedRoles),
+    tactics,
+    chemistry,
+    atmosphere,
+    cohesionMultiplier,
+    staff,
+  );
+
+  /// Create a copy of MatchTeamSnapshot
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$MatchTeamSnapshotImplCopyWith<_$MatchTeamSnapshotImpl> get copyWith =>
+      __$$MatchTeamSnapshotImplCopyWithImpl<_$MatchTeamSnapshotImpl>(
+        this,
+        _$identity,
+      );
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$MatchTeamSnapshotImplToJson(this);
+  }
+}
+
+abstract class _MatchTeamSnapshot implements MatchTeamSnapshot {
+  const factory _MatchTeamSnapshot({
+    final String teamId,
+    final List<Player> startingXi,
+    final List<Player> bench,
+    final List<Position> assignedPositions,
+    final List<AssignedRole> assignedRoles,
+    final TacticsSetup tactics,
+    final double chemistry,
+    final int atmosphere,
+    final double cohesionMultiplier,
+    final TeamStaff staff,
+  }) = _$MatchTeamSnapshotImpl;
+
+  factory _MatchTeamSnapshot.fromJson(Map<String, dynamic> json) =
+      _$MatchTeamSnapshotImpl.fromJson;
+
+  @override
+  String get teamId;
+  @override
+  List<Player> get startingXi;
+  @override
+  List<Player> get bench;
+  @override
+  List<Position> get assignedPositions;
+  @override
+  List<AssignedRole> get assignedRoles;
+  @override
+  TacticsSetup get tactics;
+  @override
+  double get chemistry;
+  @override
+  int get atmosphere;
+  @override
+  double get cohesionMultiplier;
+  @override
+  TeamStaff get staff;
+
+  /// Create a copy of MatchTeamSnapshot
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$MatchTeamSnapshotImplCopyWith<_$MatchTeamSnapshotImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
 MatchResult _$MatchResultFromJson(Map<String, dynamic> json) {
   return _MatchResult.fromJson(json);
 }
@@ -1196,7 +1632,12 @@ mixin _$MatchResult {
   int get awayGoals => throw _privateConstructorUsedError;
   TeamMatchStats get homeStats => throw _privateConstructorUsedError;
   TeamMatchStats get awayStats => throw _privateConstructorUsedError;
+  MatchStatus get status => throw _privateConstructorUsedError;
+  String? get reasonCode => throw _privateConstructorUsedError;
+  List<String> get violatingTeamIds => throw _privateConstructorUsedError;
   bool get isWalkover => throw _privateConstructorUsedError;
+  bool get noGkPenalty => throw _privateConstructorUsedError;
+  List<String> get noGkPenaltyTeamIds => throw _privateConstructorUsedError;
   MatchContext get context => throw _privateConstructorUsedError;
   TacticsSetup get homeTactics => throw _privateConstructorUsedError;
   TacticsSetup get awayTactics => throw _privateConstructorUsedError;
@@ -1204,6 +1645,8 @@ mixin _$MatchResult {
   List<Player> get awayLineup => throw _privateConstructorUsedError;
   List<Position> get homeLineupPositions => throw _privateConstructorUsedError;
   List<Position> get awayLineupPositions => throw _privateConstructorUsedError;
+  MatchTeamSnapshot get homeSnapshot => throw _privateConstructorUsedError;
+  MatchTeamSnapshot get awaySnapshot => throw _privateConstructorUsedError;
   List<PlayerMatchStats> get playerStats => throw _privateConstructorUsedError;
   List<MatchEvent> get events => throw _privateConstructorUsedError;
   List<MatchInjury> get injuries => throw _privateConstructorUsedError;
@@ -1233,7 +1676,12 @@ abstract class $MatchResultCopyWith<$Res> {
     int awayGoals,
     TeamMatchStats homeStats,
     TeamMatchStats awayStats,
+    MatchStatus status,
+    String? reasonCode,
+    List<String> violatingTeamIds,
     bool isWalkover,
+    bool noGkPenalty,
+    List<String> noGkPenaltyTeamIds,
     MatchContext context,
     TacticsSetup homeTactics,
     TacticsSetup awayTactics,
@@ -1241,6 +1689,8 @@ abstract class $MatchResultCopyWith<$Res> {
     List<Player> awayLineup,
     List<Position> homeLineupPositions,
     List<Position> awayLineupPositions,
+    MatchTeamSnapshot homeSnapshot,
+    MatchTeamSnapshot awaySnapshot,
     List<PlayerMatchStats> playerStats,
     List<MatchEvent> events,
     List<MatchInjury> injuries,
@@ -1252,6 +1702,8 @@ abstract class $MatchResultCopyWith<$Res> {
   $MatchContextCopyWith<$Res> get context;
   $TacticsSetupCopyWith<$Res> get homeTactics;
   $TacticsSetupCopyWith<$Res> get awayTactics;
+  $MatchTeamSnapshotCopyWith<$Res> get homeSnapshot;
+  $MatchTeamSnapshotCopyWith<$Res> get awaySnapshot;
 }
 
 /// @nodoc
@@ -1275,7 +1727,12 @@ class _$MatchResultCopyWithImpl<$Res, $Val extends MatchResult>
     Object? awayGoals = null,
     Object? homeStats = null,
     Object? awayStats = null,
+    Object? status = null,
+    Object? reasonCode = freezed,
+    Object? violatingTeamIds = null,
     Object? isWalkover = null,
+    Object? noGkPenalty = null,
+    Object? noGkPenaltyTeamIds = null,
     Object? context = null,
     Object? homeTactics = null,
     Object? awayTactics = null,
@@ -1283,6 +1740,8 @@ class _$MatchResultCopyWithImpl<$Res, $Val extends MatchResult>
     Object? awayLineup = null,
     Object? homeLineupPositions = null,
     Object? awayLineupPositions = null,
+    Object? homeSnapshot = null,
+    Object? awaySnapshot = null,
     Object? playerStats = null,
     Object? events = null,
     Object? injuries = null,
@@ -1314,10 +1773,30 @@ class _$MatchResultCopyWithImpl<$Res, $Val extends MatchResult>
                 ? _value.awayStats
                 : awayStats // ignore: cast_nullable_to_non_nullable
                       as TeamMatchStats,
+            status: null == status
+                ? _value.status
+                : status // ignore: cast_nullable_to_non_nullable
+                      as MatchStatus,
+            reasonCode: freezed == reasonCode
+                ? _value.reasonCode
+                : reasonCode // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            violatingTeamIds: null == violatingTeamIds
+                ? _value.violatingTeamIds
+                : violatingTeamIds // ignore: cast_nullable_to_non_nullable
+                      as List<String>,
             isWalkover: null == isWalkover
                 ? _value.isWalkover
                 : isWalkover // ignore: cast_nullable_to_non_nullable
                       as bool,
+            noGkPenalty: null == noGkPenalty
+                ? _value.noGkPenalty
+                : noGkPenalty // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            noGkPenaltyTeamIds: null == noGkPenaltyTeamIds
+                ? _value.noGkPenaltyTeamIds
+                : noGkPenaltyTeamIds // ignore: cast_nullable_to_non_nullable
+                      as List<String>,
             context: null == context
                 ? _value.context
                 : context // ignore: cast_nullable_to_non_nullable
@@ -1346,6 +1825,14 @@ class _$MatchResultCopyWithImpl<$Res, $Val extends MatchResult>
                 ? _value.awayLineupPositions
                 : awayLineupPositions // ignore: cast_nullable_to_non_nullable
                       as List<Position>,
+            homeSnapshot: null == homeSnapshot
+                ? _value.homeSnapshot
+                : homeSnapshot // ignore: cast_nullable_to_non_nullable
+                      as MatchTeamSnapshot,
+            awaySnapshot: null == awaySnapshot
+                ? _value.awaySnapshot
+                : awaySnapshot // ignore: cast_nullable_to_non_nullable
+                      as MatchTeamSnapshot,
             playerStats: null == playerStats
                 ? _value.playerStats
                 : playerStats // ignore: cast_nullable_to_non_nullable
@@ -1416,6 +1903,26 @@ class _$MatchResultCopyWithImpl<$Res, $Val extends MatchResult>
       return _then(_value.copyWith(awayTactics: value) as $Val);
     });
   }
+
+  /// Create a copy of MatchResult
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $MatchTeamSnapshotCopyWith<$Res> get homeSnapshot {
+    return $MatchTeamSnapshotCopyWith<$Res>(_value.homeSnapshot, (value) {
+      return _then(_value.copyWith(homeSnapshot: value) as $Val);
+    });
+  }
+
+  /// Create a copy of MatchResult
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $MatchTeamSnapshotCopyWith<$Res> get awaySnapshot {
+    return $MatchTeamSnapshotCopyWith<$Res>(_value.awaySnapshot, (value) {
+      return _then(_value.copyWith(awaySnapshot: value) as $Val);
+    });
+  }
 }
 
 /// @nodoc
@@ -1434,7 +1941,12 @@ abstract class _$$MatchResultImplCopyWith<$Res>
     int awayGoals,
     TeamMatchStats homeStats,
     TeamMatchStats awayStats,
+    MatchStatus status,
+    String? reasonCode,
+    List<String> violatingTeamIds,
     bool isWalkover,
+    bool noGkPenalty,
+    List<String> noGkPenaltyTeamIds,
     MatchContext context,
     TacticsSetup homeTactics,
     TacticsSetup awayTactics,
@@ -1442,6 +1954,8 @@ abstract class _$$MatchResultImplCopyWith<$Res>
     List<Player> awayLineup,
     List<Position> homeLineupPositions,
     List<Position> awayLineupPositions,
+    MatchTeamSnapshot homeSnapshot,
+    MatchTeamSnapshot awaySnapshot,
     List<PlayerMatchStats> playerStats,
     List<MatchEvent> events,
     List<MatchInjury> injuries,
@@ -1458,6 +1972,10 @@ abstract class _$$MatchResultImplCopyWith<$Res>
   $TacticsSetupCopyWith<$Res> get homeTactics;
   @override
   $TacticsSetupCopyWith<$Res> get awayTactics;
+  @override
+  $MatchTeamSnapshotCopyWith<$Res> get homeSnapshot;
+  @override
+  $MatchTeamSnapshotCopyWith<$Res> get awaySnapshot;
 }
 
 /// @nodoc
@@ -1480,7 +1998,12 @@ class __$$MatchResultImplCopyWithImpl<$Res>
     Object? awayGoals = null,
     Object? homeStats = null,
     Object? awayStats = null,
+    Object? status = null,
+    Object? reasonCode = freezed,
+    Object? violatingTeamIds = null,
     Object? isWalkover = null,
+    Object? noGkPenalty = null,
+    Object? noGkPenaltyTeamIds = null,
     Object? context = null,
     Object? homeTactics = null,
     Object? awayTactics = null,
@@ -1488,6 +2011,8 @@ class __$$MatchResultImplCopyWithImpl<$Res>
     Object? awayLineup = null,
     Object? homeLineupPositions = null,
     Object? awayLineupPositions = null,
+    Object? homeSnapshot = null,
+    Object? awaySnapshot = null,
     Object? playerStats = null,
     Object? events = null,
     Object? injuries = null,
@@ -1519,10 +2044,30 @@ class __$$MatchResultImplCopyWithImpl<$Res>
             ? _value.awayStats
             : awayStats // ignore: cast_nullable_to_non_nullable
                   as TeamMatchStats,
+        status: null == status
+            ? _value.status
+            : status // ignore: cast_nullable_to_non_nullable
+                  as MatchStatus,
+        reasonCode: freezed == reasonCode
+            ? _value.reasonCode
+            : reasonCode // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        violatingTeamIds: null == violatingTeamIds
+            ? _value._violatingTeamIds
+            : violatingTeamIds // ignore: cast_nullable_to_non_nullable
+                  as List<String>,
         isWalkover: null == isWalkover
             ? _value.isWalkover
             : isWalkover // ignore: cast_nullable_to_non_nullable
                   as bool,
+        noGkPenalty: null == noGkPenalty
+            ? _value.noGkPenalty
+            : noGkPenalty // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        noGkPenaltyTeamIds: null == noGkPenaltyTeamIds
+            ? _value._noGkPenaltyTeamIds
+            : noGkPenaltyTeamIds // ignore: cast_nullable_to_non_nullable
+                  as List<String>,
         context: null == context
             ? _value.context
             : context // ignore: cast_nullable_to_non_nullable
@@ -1551,6 +2096,14 @@ class __$$MatchResultImplCopyWithImpl<$Res>
             ? _value._awayLineupPositions
             : awayLineupPositions // ignore: cast_nullable_to_non_nullable
                   as List<Position>,
+        homeSnapshot: null == homeSnapshot
+            ? _value.homeSnapshot
+            : homeSnapshot // ignore: cast_nullable_to_non_nullable
+                  as MatchTeamSnapshot,
+        awaySnapshot: null == awaySnapshot
+            ? _value.awaySnapshot
+            : awaySnapshot // ignore: cast_nullable_to_non_nullable
+                  as MatchTeamSnapshot,
         playerStats: null == playerStats
             ? _value._playerStats
             : playerStats // ignore: cast_nullable_to_non_nullable
@@ -1582,7 +2135,12 @@ class _$MatchResultImpl implements _MatchResult {
     required this.awayGoals,
     required this.homeStats,
     required this.awayStats,
+    this.status = MatchStatus.played,
+    this.reasonCode,
+    final List<String> violatingTeamIds = const [],
     this.isWalkover = false,
+    this.noGkPenalty = false,
+    final List<String> noGkPenaltyTeamIds = const [],
     this.context = const MatchContext(),
     this.homeTactics = const TacticsSetup(),
     this.awayTactics = const TacticsSetup(),
@@ -1590,11 +2148,15 @@ class _$MatchResultImpl implements _MatchResult {
     final List<Player> awayLineup = const [],
     final List<Position> homeLineupPositions = const [],
     final List<Position> awayLineupPositions = const [],
+    this.homeSnapshot = const MatchTeamSnapshot(),
+    this.awaySnapshot = const MatchTeamSnapshot(),
     final List<PlayerMatchStats> playerStats = const [],
     final List<MatchEvent> events = const [],
     final List<MatchInjury> injuries = const [],
     final List<MatchDiscipline> disciplines = const [],
-  }) : _homeLineup = homeLineup,
+  }) : _violatingTeamIds = violatingTeamIds,
+       _noGkPenaltyTeamIds = noGkPenaltyTeamIds,
+       _homeLineup = homeLineup,
        _awayLineup = awayLineup,
        _homeLineupPositions = homeLineupPositions,
        _awayLineupPositions = awayLineupPositions,
@@ -1620,7 +2182,35 @@ class _$MatchResultImpl implements _MatchResult {
   final TeamMatchStats awayStats;
   @override
   @JsonKey()
+  final MatchStatus status;
+  @override
+  final String? reasonCode;
+  final List<String> _violatingTeamIds;
+  @override
+  @JsonKey()
+  List<String> get violatingTeamIds {
+    if (_violatingTeamIds is EqualUnmodifiableListView)
+      return _violatingTeamIds;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_violatingTeamIds);
+  }
+
+  @override
+  @JsonKey()
   final bool isWalkover;
+  @override
+  @JsonKey()
+  final bool noGkPenalty;
+  final List<String> _noGkPenaltyTeamIds;
+  @override
+  @JsonKey()
+  List<String> get noGkPenaltyTeamIds {
+    if (_noGkPenaltyTeamIds is EqualUnmodifiableListView)
+      return _noGkPenaltyTeamIds;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_noGkPenaltyTeamIds);
+  }
+
   @override
   @JsonKey()
   final MatchContext context;
@@ -1668,6 +2258,12 @@ class _$MatchResultImpl implements _MatchResult {
     return EqualUnmodifiableListView(_awayLineupPositions);
   }
 
+  @override
+  @JsonKey()
+  final MatchTeamSnapshot homeSnapshot;
+  @override
+  @JsonKey()
+  final MatchTeamSnapshot awaySnapshot;
   final List<PlayerMatchStats> _playerStats;
   @override
   @JsonKey()
@@ -1706,7 +2302,7 @@ class _$MatchResultImpl implements _MatchResult {
 
   @override
   String toString() {
-    return 'MatchResult(homeTeamId: $homeTeamId, awayTeamId: $awayTeamId, homeGoals: $homeGoals, awayGoals: $awayGoals, homeStats: $homeStats, awayStats: $awayStats, isWalkover: $isWalkover, context: $context, homeTactics: $homeTactics, awayTactics: $awayTactics, homeLineup: $homeLineup, awayLineup: $awayLineup, homeLineupPositions: $homeLineupPositions, awayLineupPositions: $awayLineupPositions, playerStats: $playerStats, events: $events, injuries: $injuries, disciplines: $disciplines)';
+    return 'MatchResult(homeTeamId: $homeTeamId, awayTeamId: $awayTeamId, homeGoals: $homeGoals, awayGoals: $awayGoals, homeStats: $homeStats, awayStats: $awayStats, status: $status, reasonCode: $reasonCode, violatingTeamIds: $violatingTeamIds, isWalkover: $isWalkover, noGkPenalty: $noGkPenalty, noGkPenaltyTeamIds: $noGkPenaltyTeamIds, context: $context, homeTactics: $homeTactics, awayTactics: $awayTactics, homeLineup: $homeLineup, awayLineup: $awayLineup, homeLineupPositions: $homeLineupPositions, awayLineupPositions: $awayLineupPositions, homeSnapshot: $homeSnapshot, awaySnapshot: $awaySnapshot, playerStats: $playerStats, events: $events, injuries: $injuries, disciplines: $disciplines)';
   }
 
   @override
@@ -1726,8 +2322,21 @@ class _$MatchResultImpl implements _MatchResult {
                 other.homeStats == homeStats) &&
             (identical(other.awayStats, awayStats) ||
                 other.awayStats == awayStats) &&
+            (identical(other.status, status) || other.status == status) &&
+            (identical(other.reasonCode, reasonCode) ||
+                other.reasonCode == reasonCode) &&
+            const DeepCollectionEquality().equals(
+              other._violatingTeamIds,
+              _violatingTeamIds,
+            ) &&
             (identical(other.isWalkover, isWalkover) ||
                 other.isWalkover == isWalkover) &&
+            (identical(other.noGkPenalty, noGkPenalty) ||
+                other.noGkPenalty == noGkPenalty) &&
+            const DeepCollectionEquality().equals(
+              other._noGkPenaltyTeamIds,
+              _noGkPenaltyTeamIds,
+            ) &&
             (identical(other.context, context) || other.context == context) &&
             (identical(other.homeTactics, homeTactics) ||
                 other.homeTactics == homeTactics) &&
@@ -1749,6 +2358,10 @@ class _$MatchResultImpl implements _MatchResult {
               other._awayLineupPositions,
               _awayLineupPositions,
             ) &&
+            (identical(other.homeSnapshot, homeSnapshot) ||
+                other.homeSnapshot == homeSnapshot) &&
+            (identical(other.awaySnapshot, awaySnapshot) ||
+                other.awaySnapshot == awaySnapshot) &&
             const DeepCollectionEquality().equals(
               other._playerStats,
               _playerStats,
@@ -1763,7 +2376,7 @@ class _$MatchResultImpl implements _MatchResult {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     runtimeType,
     homeTeamId,
     awayTeamId,
@@ -1771,7 +2384,12 @@ class _$MatchResultImpl implements _MatchResult {
     awayGoals,
     homeStats,
     awayStats,
+    status,
+    reasonCode,
+    const DeepCollectionEquality().hash(_violatingTeamIds),
     isWalkover,
+    noGkPenalty,
+    const DeepCollectionEquality().hash(_noGkPenaltyTeamIds),
     context,
     homeTactics,
     awayTactics,
@@ -1779,11 +2397,13 @@ class _$MatchResultImpl implements _MatchResult {
     const DeepCollectionEquality().hash(_awayLineup),
     const DeepCollectionEquality().hash(_homeLineupPositions),
     const DeepCollectionEquality().hash(_awayLineupPositions),
+    homeSnapshot,
+    awaySnapshot,
     const DeepCollectionEquality().hash(_playerStats),
     const DeepCollectionEquality().hash(_events),
     const DeepCollectionEquality().hash(_injuries),
     const DeepCollectionEquality().hash(_disciplines),
-  );
+  ]);
 
   /// Create a copy of MatchResult
   /// with the given fields replaced by the non-null parameter values.
@@ -1807,7 +2427,12 @@ abstract class _MatchResult implements MatchResult {
     required final int awayGoals,
     required final TeamMatchStats homeStats,
     required final TeamMatchStats awayStats,
+    final MatchStatus status,
+    final String? reasonCode,
+    final List<String> violatingTeamIds,
     final bool isWalkover,
+    final bool noGkPenalty,
+    final List<String> noGkPenaltyTeamIds,
     final MatchContext context,
     final TacticsSetup homeTactics,
     final TacticsSetup awayTactics,
@@ -1815,6 +2440,8 @@ abstract class _MatchResult implements MatchResult {
     final List<Player> awayLineup,
     final List<Position> homeLineupPositions,
     final List<Position> awayLineupPositions,
+    final MatchTeamSnapshot homeSnapshot,
+    final MatchTeamSnapshot awaySnapshot,
     final List<PlayerMatchStats> playerStats,
     final List<MatchEvent> events,
     final List<MatchInjury> injuries,
@@ -1837,7 +2464,17 @@ abstract class _MatchResult implements MatchResult {
   @override
   TeamMatchStats get awayStats;
   @override
+  MatchStatus get status;
+  @override
+  String? get reasonCode;
+  @override
+  List<String> get violatingTeamIds;
+  @override
   bool get isWalkover;
+  @override
+  bool get noGkPenalty;
+  @override
+  List<String> get noGkPenaltyTeamIds;
   @override
   MatchContext get context;
   @override
@@ -1852,6 +2489,10 @@ abstract class _MatchResult implements MatchResult {
   List<Position> get homeLineupPositions;
   @override
   List<Position> get awayLineupPositions;
+  @override
+  MatchTeamSnapshot get homeSnapshot;
+  @override
+  MatchTeamSnapshot get awaySnapshot;
   @override
   List<PlayerMatchStats> get playerStats;
   @override

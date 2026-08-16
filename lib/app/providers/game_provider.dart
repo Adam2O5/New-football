@@ -5,7 +5,6 @@ import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/match_models.dart';
-import 'package:new_football/core/random/seeds.dart';
 import 'package:new_football/core/models/message.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/staff.dart';
@@ -19,6 +18,7 @@ import 'package:new_football/core/services/schedule_generator.dart';
 import 'package:new_football/core/services/scouting_service.dart';
 import 'package:new_football/core/services/season_service.dart';
 import 'package:new_football/core/services/message_service.dart';
+import 'package:new_football/core/simulation/match_context_factory.dart';
 import 'package:new_football/core/services/staff_service.dart';
 import 'package:new_football/data/save_repository.dart';
 
@@ -29,6 +29,10 @@ final saveRepositoryProvider = Provider((ref) {
 final gameFactoryProvider = Provider((ref) => GameFactory());
 
 final calendarServiceProvider = Provider((ref) => const CalendarService());
+
+final matchContextFactoryProvider = Provider(
+  (ref) => MatchContextFactory(calendar: ref.watch(calendarServiceProvider)),
+);
 
 final matchEngineProvider = Provider((ref) => const MatchEngine());
 
@@ -478,10 +482,19 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     if (home == null || away == null) return null;
 
     final engine = _ref.read(matchEngineProvider);
+    final context = _ref
+        .read(matchContextFactoryProvider)
+        .create(
+          league: league,
+          match: match,
+          saveSeed: current.saveSeed,
+          stake: MatchStake.regular,
+        );
     final result = engine.simulateFull(
       home: home,
       away: away,
-      rngSeed: matchSeed(current.saveSeed, league.currentSeason.year, match.id),
+      context: context,
+      rngSeed: context.seed,
     );
     await updateLeague((l) => _days.applyPlayerMatchResult(l, match, result));
     return result;

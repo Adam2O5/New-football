@@ -108,9 +108,11 @@ class TeamManagementService {
     return points / (values.length * 3);
   }
 
-  /// Returns true for roster/no-goalkeeper administrative results.
+  /// Returns true for structural administrative results. The description
+  /// fallback keeps old saved/test results compatible; real Task 15 no-GK
+  /// matches remain `played` and are therefore not classified as walkovers.
   static bool isWalkoverResult(MatchResult result) {
-    if (result.isWalkover) return true;
+    if (result.status != MatchStatus.played || result.isWalkover) return true;
     return result.events.any(
       (event) => _isAdministrativeDescription(event.description ?? ''),
     );
@@ -120,6 +122,32 @@ class TeamManagementService {
   /// the one-off atmosphere penalty.
   static Set<String> walkoverTeamIds(MatchResult result) {
     if (!isWalkoverResult(result)) return const {};
+    if (result.violatingTeamIds.isNotEmpty) {
+      return result.violatingTeamIds.toSet();
+    }
+    if (result.status != MatchStatus.played || result.isWalkover) {
+      final descriptions = result.events
+          .map((event) => event.description ?? '')
+          .where(_isAdministrativeDescription)
+          .toList();
+      if (descriptions.isEmpty) {
+        return {result.homeTeamId, result.awayTeamId};
+      }
+      if (descriptions.any(
+        (description) => description.toLowerCase().contains('obie drużyny'),
+      )) {
+        return {result.homeTeamId, result.awayTeamId};
+      }
+      return {
+        for (final event in result.events)
+          if (_isAdministrativeDescription(event.description ?? '') &&
+              !(event.description ?? '').toLowerCase().contains('obie drużyny'))
+            event.teamId,
+      };
+    }
+
+    // Legacy results were sometimes marked only by a Polish event
+    // description while retaining the default `played` status.
     final descriptions = result.events
         .map((event) => event.description ?? '')
         .where(_isAdministrativeDescription)

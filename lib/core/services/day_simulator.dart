@@ -1,17 +1,18 @@
 import 'package:new_football/core/balance/injury_catalog.dart';
 import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/engine/match_engine.dart';
+import 'package:new_football/core/simulation/match_context_factory.dart';
+import 'package:new_football/core/simulation/match_message_emitter.dart';
+import 'package:new_football/core/simulation/pre_match_validator.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/league_strength.dart';
 import 'package:new_football/core/models/match_models.dart';
-import 'package:new_football/core/models/match_state.dart';
 import 'package:new_football/core/ai/team_ai_service.dart';
 import 'package:new_football/core/models/message.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/standing.dart';
 import 'package:new_football/core/models/team.dart';
-import 'package:new_football/core/random/seeds.dart';
 import 'package:new_football/core/services/calendar_event_registry.dart';
 import 'package:new_football/core/services/calendar_service.dart';
 import 'package:new_football/core/services/contract_service.dart';
@@ -52,6 +53,8 @@ class DaySimulator {
     this.balance = BalanceConfig.defaults,
     MatchEngine? matchEngine,
     CalendarService? calendar,
+    MatchContextFactory? contextFactory,
+    MatchMessageEmitter? matchMessageEmitter,
     DevelopmentService? development,
     ScoutingService? scouting,
     ContractService? contracts,
@@ -60,6 +63,14 @@ class DaySimulator {
     TeamManagementService? teamManagement,
   }) : matchEngine = matchEngine ?? MatchEngine(balance: balance),
        calendar = calendar ?? CalendarService(balance: balance),
+       contextFactory =
+           contextFactory ??
+           MatchContextFactory(
+             calendar: calendar ?? CalendarService(balance: balance),
+           ),
+       matchMessageEmitter =
+           matchMessageEmitter ??
+           MatchMessageEmitter(messages: messages ?? MessageService()),
        development = development ?? DevelopmentService(balance: balance),
        scouting = scouting ?? ScoutingService(balance: balance),
        contracts = contracts ?? ContractService(balance: balance),
@@ -70,6 +81,8 @@ class DaySimulator {
   final BalanceConfig balance;
   final MatchEngine matchEngine;
   final CalendarService calendar;
+  final MatchContextFactory contextFactory;
+  final MatchMessageEmitter matchMessageEmitter;
   final DevelopmentService development;
   final ScoutingService scouting;
   final ContractService contracts;
@@ -154,8 +167,13 @@ class DaySimulator {
       }
     }
 
-    // Recover stamina lightly each day.
-    state = _dailyRecovery(state);
+    // Recover stamina lightly each day. Administrative participants are
+    // excluded: a walkover/DSQ has no matchday recovery side effect.
+    final administrativeTeamIds = <String>{
+      for (final result in results)
+        ...TeamManagementService.walkoverTeamIds(result),
+    };
+    state = _dailyRecovery(state, excludedTeamIds: administrativeTeamIds);
 
     // Free agency (`docs/contract_signing.md`): AI clubs bid on FA players
     // every day of the FA window; highest legal offerScore wins.
@@ -300,8 +318,12 @@ class DaySimulator {
     );
     // A player-controlled match follows the same end-of-day recovery stage as
     // an AI match: +20 immediately after the match and +20 for the day.
-    state = _dailyRecovery(state);
-    return _notifyMatchResult(state, result);
+    // Administrative results are explicitly excluded from daily recovery.
+    state = _dailyRecovery(
+      state,
+      excludedTeamIds: TeamManagementService.walkoverTeamIds(result),
+    );
+    return _notifyMatchResult(state, result, matchId: match.id);
   }
 
   ({LeagueState league, List<MatchResult> results, ScheduledMatch? playerMatch})
@@ -332,17 +354,47 @@ class DaySimulator {
       final home = state.teamById(f.homeTeamId);
       final away = state.teamById(f.awayTeamId);
       if (home == null || away == null) continue;
+      final context = contextFactory.create(
+        league: state,
+        match: f,
+        saveSeed: saveSeed,
+        stake: MatchStake.regular,
+      );
       final result = matchEngine.simulateFull(
         home: home,
         away: away,
-        context: const MatchContext(stakes: SeasonPhase.regular),
-        rngSeed: matchSeed(saveSeed, state.currentSeason.year, f.id),
+        context: context,
+        rngSeed: context.seed,
       );
       state = _applyResult(state, f, result);
       results.add(result);
-      if (playerId != null &&
-          (f.homeTeamId == playerId || f.awayTeamId == playerId)) {
-        state = _notifyMatchResult(state, result);
+    }
+
+    // The interactive fixture is not simulated here, but its pre-match
+    // validation and context are created at the same boundary as AI matches.
+    // This makes the preview deterministic and ensures warnings arrive before
+    // MatchdayScreen starts the engine.
+    if (playerFixture != null) {
+      final home = state.teamById(playerFixture.homeTeamId);
+      final away = state.teamById(playerFixture.awayTeamId);
+      if (home != null && away != null) {
+        final context = contextFactory.create(
+          league: state,
+          match: playerFixture,
+          saveSeed: saveSeed,
+          stake: MatchStake.regular,
+        );
+        final report = PreMatchValidator(
+          balance: balance,
+        ).validate(home: home, away: away);
+        state = matchMessageEmitter.emitPreMatch(
+          league: state,
+          matchId: playerFixture.id,
+          homeTeamId: home.id,
+          awayTeamId: away.id,
+          context: context,
+          report: report,
+        );
       }
     }
 
@@ -359,37 +411,45 @@ class DaySimulator {
       return m.copyWith(result: result);
     }).toList();
 
-    var standings = league.currentSeason.standings.map((cs) {
-      final updated = cs.standings.map((s) {
-        if (s.teamId == result.homeTeamId) {
-          return s.applyResult(
-            goalsFor: result.homeGoals,
-            goalsAgainst: result.awayGoals,
-          );
-        }
-        if (s.teamId == result.awayTeamId) {
-          return s.applyResult(
-            goalsFor: result.awayGoals,
-            goalsAgainst: result.homeGoals,
-          );
-        }
-        return s;
-      }).toList();
-      return cs.copyWith(standings: updated);
-    }).toList();
+    var standings = result.status == MatchStatus.dsq
+        ? league.currentSeason.standings
+        : league.currentSeason.standings.map((cs) {
+            final updated = cs.standings.map((s) {
+              if (s.teamId == result.homeTeamId) {
+                return s.applyResult(
+                  goalsFor: result.homeGoals,
+                  goalsAgainst: result.awayGoals,
+                );
+              }
+              if (s.teamId == result.awayTeamId) {
+                return s.applyResult(
+                  goalsFor: result.awayGoals,
+                  goalsAgainst: result.homeGoals,
+                );
+              }
+              return s;
+            }).toList();
+            return cs.copyWith(standings: updated);
+          }).toList();
 
     // Re-rank conferences.
     standings = standings
         .map((cs) => cs.copyWith(standings: cs.sorted))
         .toList();
 
+    final isAdministrativeResult = TeamManagementService.isWalkoverResult(
+      result,
+    );
+    final administrativeTeamIds = TeamManagementService.walkoverTeamIds(result);
     var teams = league.teams;
     final recoveryReturns =
         <({Player player, String injuryId, String teamId})>[];
     final disciplineNotifications =
         <({String teamId, DisciplineNotification notification})>[];
     teams = teams.map((t) {
-      final next = t.id == result.homeTeamId || t.id == result.awayTeamId
+      final isParticipant =
+          t.id == result.homeTeamId || t.id == result.awayTeamId;
+      final next = isParticipant && !isAdministrativeResult
           ? _applyFatigue(t, result)
           : _recoverTeam(t);
       for (final oldPlayer in t.roster) {
@@ -408,25 +468,26 @@ class DaySimulator {
       return next;
     }).toList();
 
-    final disciplineService = const DisciplineService();
-    teams = teams.map((team) {
-      if (team.id != result.homeTeamId && team.id != result.awayTeamId) {
-        return team;
-      }
-      final application = disciplineService.applyToTeam(
-        team: team,
-        result: result,
-        phase: league.currentSeason.phase,
-      );
-      disciplineNotifications.addAll(
-        application.notifications.map(
-          (notification) => (teamId: team.id, notification: notification),
-        ),
-      );
-      return application.team;
-    }).toList();
+    if (!isAdministrativeResult) {
+      final disciplineService = const DisciplineService();
+      teams = teams.map((team) {
+        if (team.id != result.homeTeamId && team.id != result.awayTeamId) {
+          return team;
+        }
+        final application = disciplineService.applyToTeam(
+          team: team,
+          result: result,
+          phase: league.currentSeason.phase,
+        );
+        disciplineNotifications.addAll(
+          application.notifications.map(
+            (notification) => (teamId: team.id, notification: notification),
+          ),
+        );
+        return application.team;
+      }).toList();
+    }
 
-    final walkoverTeams = TeamManagementService.walkoverTeamIds(result);
     final immediateAtmosphereDeltas = <String, int>{};
     teams = teams.map((team) {
       if (team.id != result.homeTeamId && team.id != result.awayTeamId) {
@@ -448,7 +509,7 @@ class DaySimulator {
         assignedPositions: assignedPositions.isEmpty ? null : assignedPositions,
       );
       var next = update.team;
-      if (walkoverTeams.contains(team.id)) {
+      if (administrativeTeamIds.contains(team.id)) {
         next = teamManagement.applyAtmosphereDelta(next, -15);
         immediateAtmosphereDeltas[team.id] = -15;
       }
@@ -709,9 +770,13 @@ class DaySimulator {
     return state.copyWith(freeAgents: remaining);
   }
 
-  LeagueState _dailyRecovery(LeagueState league) {
+  LeagueState _dailyRecovery(
+    LeagueState league, {
+    Set<String> excludedTeamIds = const {},
+  }) {
     var state = league;
     for (final team in league.teams) {
+      if (excludedTeamIds.contains(team.id)) continue;
       final recoveryReturns = <({Player player, String injuryId})>[];
       final roster = team.roster.map((player) {
         final recovered = player.recoverBetweenMatches(balance);
@@ -787,13 +852,24 @@ class DaySimulator {
     );
   }
 
-  LeagueState _notifyMatchResult(LeagueState league, MatchResult result) {
+  LeagueState _notifyMatchResult(
+    LeagueState league,
+    MatchResult result, {
+    String? matchId,
+  }) {
+    final administrative = TeamManagementService.isWalkoverResult(result);
+    final type = administrative
+        ? MessageType.walkover
+        : MessageType.matchResult;
+    final responsibleTeamId = result.violatingTeamIds.isEmpty
+        ? result.homeTeamId
+        : result.violatingTeamIds.first;
     return messages.send(
       league,
-      type: MessageType.matchResult,
-      domain: MessageDomain.matchday,
-      titleKey: 'msg_matchResult_title',
-      bodyKey: 'msg_matchResult_body',
+      type: type,
+      priority: administrative
+          ? MessagePriority.urgent
+          : MessagePriority.normal,
       args: {
         'homeTeam':
             league.teamById(result.homeTeamId)?.name ?? result.homeTeamId,
@@ -801,13 +877,20 @@ class DaySimulator {
             league.teamById(result.awayTeamId)?.name ?? result.awayTeamId,
         'homeGoals': result.homeGoals,
         'awayGoals': result.awayGoals,
+        'team': league.teamById(responsibleTeamId)?.name ?? responsibleTeamId,
+        'reason': result.reasonCode ?? 'administrative_result',
       },
       payload: {
+        'matchId': matchId,
         'homeTeamId': result.homeTeamId,
         'awayTeamId': result.awayTeamId,
         'homeGoals': result.homeGoals,
         'awayGoals': result.awayGoals,
+        'status': result.status.name,
+        'reasonCode': result.reasonCode,
+        'violatingTeamIds': result.violatingTeamIds,
       },
+      dedupKey: matchId == null ? null : '${type.name}:result:$matchId',
     );
   }
 }

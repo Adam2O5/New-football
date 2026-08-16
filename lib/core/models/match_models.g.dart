@@ -114,6 +114,73 @@ Map<String, dynamic> _$$TeamMatchStatsImplToJson(
   'redCards': instance.redCards,
 };
 
+_$MatchTeamSnapshotImpl _$$MatchTeamSnapshotImplFromJson(
+  Map<String, dynamic> json,
+) => _$MatchTeamSnapshotImpl(
+  teamId: json['teamId'] as String? ?? '',
+  startingXi:
+      (json['startingXi'] as List<dynamic>?)
+          ?.map((e) => Player.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+  bench:
+      (json['bench'] as List<dynamic>?)
+          ?.map((e) => Player.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+  assignedPositions:
+      (json['assignedPositions'] as List<dynamic>?)
+          ?.map((e) => $enumDecode(_$PositionEnumMap, e))
+          .toList() ??
+      const [],
+  assignedRoles:
+      (json['assignedRoles'] as List<dynamic>?)
+          ?.map((e) => AssignedRole.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+  tactics: json['tactics'] == null
+      ? const TacticsSetup()
+      : TacticsSetup.fromJson(json['tactics'] as Map<String, dynamic>),
+  chemistry: (json['chemistry'] as num?)?.toDouble() ?? 50.0,
+  atmosphere: (json['atmosphere'] as num?)?.toInt() ?? 50,
+  cohesionMultiplier: (json['cohesionMultiplier'] as num?)?.toDouble() ?? 1.0,
+  staff: json['staff'] == null
+      ? const TeamStaff()
+      : TeamStaff.fromJson(json['staff'] as Map<String, dynamic>),
+);
+
+Map<String, dynamic> _$$MatchTeamSnapshotImplToJson(
+  _$MatchTeamSnapshotImpl instance,
+) => <String, dynamic>{
+  'teamId': instance.teamId,
+  'startingXi': instance.startingXi,
+  'bench': instance.bench,
+  'assignedPositions': instance.assignedPositions
+      .map((e) => _$PositionEnumMap[e]!)
+      .toList(),
+  'assignedRoles': instance.assignedRoles,
+  'tactics': instance.tactics,
+  'chemistry': instance.chemistry,
+  'atmosphere': instance.atmosphere,
+  'cohesionMultiplier': instance.cohesionMultiplier,
+  'staff': instance.staff,
+};
+
+const _$PositionEnumMap = {
+  Position.gk: 'gk',
+  Position.cb: 'cb',
+  Position.lb: 'lb',
+  Position.rb: 'rb',
+  Position.lwb: 'lwb',
+  Position.rwb: 'rwb',
+  Position.cdm: 'cdm',
+  Position.cm: 'cm',
+  Position.cam: 'cam',
+  Position.lw: 'lw',
+  Position.rw: 'rw',
+  Position.st: 'st',
+};
+
 _$MatchResultImpl _$$MatchResultImplFromJson(
   Map<String, dynamic> json,
 ) => _$MatchResultImpl(
@@ -123,7 +190,22 @@ _$MatchResultImpl _$$MatchResultImplFromJson(
   awayGoals: (json['awayGoals'] as num).toInt(),
   homeStats: TeamMatchStats.fromJson(json['homeStats'] as Map<String, dynamic>),
   awayStats: TeamMatchStats.fromJson(json['awayStats'] as Map<String, dynamic>),
+  status:
+      $enumDecodeNullable(_$MatchStatusEnumMap, json['status']) ??
+      MatchStatus.played,
+  reasonCode: json['reasonCode'] as String?,
+  violatingTeamIds:
+      (json['violatingTeamIds'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
   isWalkover: json['isWalkover'] as bool? ?? false,
+  noGkPenalty: json['noGkPenalty'] as bool? ?? false,
+  noGkPenaltyTeamIds:
+      (json['noGkPenaltyTeamIds'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const [],
   context: json['context'] == null
       ? const MatchContext()
       : MatchContext.fromJson(json['context'] as Map<String, dynamic>),
@@ -153,6 +235,16 @@ _$MatchResultImpl _$$MatchResultImplFromJson(
           ?.map((e) => $enumDecode(_$PositionEnumMap, e))
           .toList() ??
       const [],
+  homeSnapshot: json['homeSnapshot'] == null
+      ? const MatchTeamSnapshot()
+      : MatchTeamSnapshot.fromJson(
+          json['homeSnapshot'] as Map<String, dynamic>,
+        ),
+  awaySnapshot: json['awaySnapshot'] == null
+      ? const MatchTeamSnapshot()
+      : MatchTeamSnapshot.fromJson(
+          json['awaySnapshot'] as Map<String, dynamic>,
+        ),
   playerStats:
       (json['playerStats'] as List<dynamic>?)
           ?.map((e) => PlayerMatchStats.fromJson(e as Map<String, dynamic>))
@@ -183,7 +275,12 @@ Map<String, dynamic> _$$MatchResultImplToJson(_$MatchResultImpl instance) =>
       'awayGoals': instance.awayGoals,
       'homeStats': instance.homeStats,
       'awayStats': instance.awayStats,
+      'status': _$MatchStatusEnumMap[instance.status]!,
+      'reasonCode': instance.reasonCode,
+      'violatingTeamIds': instance.violatingTeamIds,
       'isWalkover': instance.isWalkover,
+      'noGkPenalty': instance.noGkPenalty,
+      'noGkPenaltyTeamIds': instance.noGkPenaltyTeamIds,
       'context': instance.context,
       'homeTactics': instance.homeTactics,
       'awayTactics': instance.awayTactics,
@@ -195,25 +292,18 @@ Map<String, dynamic> _$$MatchResultImplToJson(_$MatchResultImpl instance) =>
       'awayLineupPositions': instance.awayLineupPositions
           .map((e) => _$PositionEnumMap[e]!)
           .toList(),
+      'homeSnapshot': instance.homeSnapshot,
+      'awaySnapshot': instance.awaySnapshot,
       'playerStats': instance.playerStats,
       'events': instance.events,
       'injuries': instance.injuries,
       'disciplines': instance.disciplines,
     };
 
-const _$PositionEnumMap = {
-  Position.gk: 'gk',
-  Position.cb: 'cb',
-  Position.lb: 'lb',
-  Position.rb: 'rb',
-  Position.lwb: 'lwb',
-  Position.rwb: 'rwb',
-  Position.cdm: 'cdm',
-  Position.cm: 'cm',
-  Position.cam: 'cam',
-  Position.lw: 'lw',
-  Position.rw: 'rw',
-  Position.st: 'st',
+const _$MatchStatusEnumMap = {
+  MatchStatus.played: 'played',
+  MatchStatus.walkover: 'walkover',
+  MatchStatus.dsq: 'dsq',
 };
 
 _$MatchSetupImpl _$$MatchSetupImplFromJson(Map<String, dynamic> json) =>

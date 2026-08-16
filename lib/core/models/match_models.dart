@@ -1,7 +1,9 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:new_football/core/models/assigned_role.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/injury.dart';
 import 'package:new_football/core/models/player.dart';
+import 'package:new_football/core/models/staff.dart';
 import 'package:new_football/core/models/match_state.dart';
 import 'package:new_football/core/tactics/tactics_setup.dart';
 
@@ -71,6 +73,25 @@ class TeamMatchStats with _$TeamMatchStats {
 }
 
 @freezed
+class MatchTeamSnapshot with _$MatchTeamSnapshot {
+  const factory MatchTeamSnapshot({
+    @Default('') String teamId,
+    @Default([]) List<Player> startingXi,
+    @Default([]) List<Player> bench,
+    @Default([]) List<Position> assignedPositions,
+    @Default([]) List<AssignedRole> assignedRoles,
+    @Default(TacticsSetup()) TacticsSetup tactics,
+    @Default(50.0) double chemistry,
+    @Default(50) int atmosphere,
+    @Default(1.0) double cohesionMultiplier,
+    @Default(TeamStaff()) TeamStaff staff,
+  }) = _MatchTeamSnapshot;
+
+  factory MatchTeamSnapshot.fromJson(Map<String, dynamic> json) =>
+      _$MatchTeamSnapshotFromJson(json);
+}
+
+@freezed
 class MatchResult with _$MatchResult {
   const factory MatchResult({
     required String homeTeamId,
@@ -79,7 +100,12 @@ class MatchResult with _$MatchResult {
     required int awayGoals,
     required TeamMatchStats homeStats,
     required TeamMatchStats awayStats,
+    @Default(MatchStatus.played) MatchStatus status,
+    String? reasonCode,
+    @Default([]) List<String> violatingTeamIds,
     @Default(false) bool isWalkover,
+    @Default(false) bool noGkPenalty,
+    @Default([]) List<String> noGkPenaltyTeamIds,
     @Default(MatchContext()) MatchContext context,
     @Default(TacticsSetup()) TacticsSetup homeTactics,
     @Default(TacticsSetup()) TacticsSetup awayTactics,
@@ -87,6 +113,8 @@ class MatchResult with _$MatchResult {
     @Default([]) List<Player> awayLineup,
     @Default([]) List<Position> homeLineupPositions,
     @Default([]) List<Position> awayLineupPositions,
+    @Default(MatchTeamSnapshot()) MatchTeamSnapshot homeSnapshot,
+    @Default(MatchTeamSnapshot()) MatchTeamSnapshot awaySnapshot,
     @Default([]) List<PlayerMatchStats> playerStats,
     @Default([]) List<MatchEvent> events,
     @Default([]) List<MatchInjury> injuries,

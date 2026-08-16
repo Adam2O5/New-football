@@ -582,35 +582,37 @@ Legenda: `⬜` do zrobienia · `🔄` w trakcie · `✅` gotowe
 
 > Nowy silnik powstaje w `core/simulation/` obok istniejącego. Providery przełączają się w **Task 22**, wtedy `match_engine.dart` zostaje usunięty. Do tego momentu gra działa na starym silniku, a nowy jest testowany przez harness.
 
-### ⬜ Task 15: Etap 1 — walidacja pre-match i `MatchContext`
+### ✅ Task 15: Etap 1 — walidacja pre-match i `MatchContext`
 
 **Cel:** `matchday_model.md` §3.
 
-- [ ] Utworzyć pakiet `lib/core/simulation/`
-- [ ] Walidacja w kolejności: roster <20 lub >30 → walkower 0–3
-- [ ] Obie strony nielegalne → `dsq`, brak punktów dla obu
-- [ ] <11 zdolnych do gry → walkower 0–3
-- [ ] Brak `Position.gk` w XI → mecz rozgrywany z karą bramkarską (§9.4)
-- [ ] Ławka <7 → mecz rozgrywany, mniej zmienników, komunikat informacyjny
-- [ ] Walkower nie generuje zdarzeń boiskowych, staminy ani statystyk indywidualnych
-- [ ] Walkower → −15 atmosfery
-- [ ] `MatchContext.weather` — losowanie z rozkładu zależnego od tygodnia sezonu
-- [ ] `MatchContext.temperatureC` — zakres −5…38, rozkład zależny od tygodnia
-- [ ] `MatchContext.isDerby` — tabela rywalizacji + ta sama konferencja
-- [ ] `MatchContext.stake` — `regular` / `playIn` / `playoff` / `playoffElimination` / `leagueFinal`
-- [ ] `MatchContext.refereeStrictness` — 0,80…1,20 losowane na mecz
-- [ ] `MatchContext.crowdIntensity` — z formy gospodarza, stawki i derby
-- [ ] `MatchContext.homeMatchInWeek` / `awayMatchInWeek` — 1 lub 2
-- [ ] Snapshot składów: XI, ławka, pozycje, role, taktyka, atrybuty, stamina, forma, zgranie, atmosfera, cohesion, sztab
-- [ ] Wiadomości `matchPreview`, `walkover`, `lineupNoGk`, `benchIncomplete`
+- [x] Utworzyć pakiet `lib/core/simulation/`
+- [x] Walidacja w kolejności: roster <20 lub >30 → walkower 0–3
+- [x] Obie strony nielegalne → `dsq`, brak punktów dla obu
+- [x] <11 zdolnych do gry → walkower 0–3
+- [x] Brak `Position.gk` w XI → mecz rozgrywany z karą bramkarską (§9.4)
+- [x] Ławka <7 → mecz rozgrywany, mniej zmienników, komunikat informacyjny
+- [x] Walkower nie generuje zdarzeń boiskowych, staminy ani statystyk indywidualnych
+- [x] Walkower → −15 atmosfery
+- [x] `MatchContext.weather` — losowanie z rozkładu zależnego od tygodnia sezonu
+- [x] `MatchContext.temperatureC` — zakres −5…38, rozkład zależny od tygodnia
+- [x] `MatchContext.isDerby` — tabela rywalizacji + ta sama konferencja
+- [x] `MatchContext.stake` — `regular` / `playIn` / `playoff` / `playoffElimination` / `leagueFinal`
+- [x] Routing postseason: mecz zamykający serię → `playoffElimination`, każdy mecz finału ligi → `leagueFinal`
+- [x] `MatchContext.refereeStrictness` — 0,80…1,20 losowane na mecz
+- [x] `MatchContext.crowdIntensity` — z formy gospodarza, stawki i derby
+- [x] `MatchContext.homeMatchInWeek` / `awayMatchInWeek` — 1 lub 2
+- [x] Snapshot składów: XI, ławka, pozycje, role, taktyka, atrybuty, stamina, forma, zgranie, atmosfera, cohesion, sztab
+- [x] Wiadomości `matchPreview`, `walkover`, `lineupNoGk`, `benchIncomplete`
 
 **Testy**
-- [ ] Każdy z 5 warunków walidacji daje przewidziany skutek
-- [ ] Walkower nie tworzy `PlayerMatchStats`
-- [ ] Obie strony nielegalne → `dsq` bez punktów
-- [ ] Rozkład pogody w sierpniu różni się od zimowego
+- [x] Każdy z 5 warunków walidacji daje przewidziany skutek
+- [x] Walkower nie tworzy `PlayerMatchStats`
+- [x] Obie strony nielegalne → `dsq` bez punktów
+- [x] Rozkład pogody w początku sezonu różni się od zimowego
+- [x] Routing stawki jest spójny między preview i `MatchResult` dla eliminacji oraz finału ligi
 
-**Demo:** mecz z 19-osobowym rosterem kończy się walkowerem z `urgent` w inboksie i spadkiem atmosfery; podgląd meczu pokazuje pogodę i temperaturę.
+**Demo:** ✅ mecz z 19-osobowym rosterem kończy się walkowerem bez eventów boiskowych, z `urgent` w inboksie i spadkiem atmosfery; podgląd grywalnego meczu pokazuje kontekst pogodowy, temperaturę i ostrzeżenia składu.
 
 ---
 

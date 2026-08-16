@@ -11,7 +11,6 @@ import 'package:new_football/core/engine/match_engine.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/match_models.dart';
 import 'package:new_football/core/models/team.dart';
-import 'package:new_football/core/random/seeds.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
 class MatchdayScreen extends ConsumerStatefulWidget {
@@ -45,19 +44,25 @@ class _MatchdayScreenState extends ConsumerState<MatchdayScreen> {
     final away = league.teamById(widget.match.awayTeamId);
     if (home == null || away == null) return;
     final engine = ref.read(matchEngineProvider);
+    final matchContext = ref
+        .read(matchContextFactoryProvider)
+        .create(league: league, match: widget.match, saveSeed: save.saveSeed);
+    final live = engine.start(
+      home: home,
+      away: away,
+      context: matchContext,
+      rngSeed: matchContext.seed,
+    );
     setState(() {
       _home = home;
       _away = away;
-      _live = engine.start(
-        home: home,
-        away: away,
-        rngSeed: matchSeed(
-          save.saveSeed,
-          league.currentSeason.year,
-          widget.match.id,
-        ),
-      );
+      _live = live;
     });
+    if (live.isFinished) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _onFinished();
+      });
+    }
   }
 
   void _tick() {

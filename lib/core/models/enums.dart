@@ -357,7 +357,11 @@ enum RedCardKind { none, secondYellow, direct }
 
 enum DevelopmentOutcome { exceed, hit, under }
 
-enum Weather { clear, rain, snow, heat }
+enum MatchStatus { played, walkover, dsq }
+
+enum MatchStake { regular, playIn, playoff, playoffElimination, leagueFinal }
+
+enum Weather { clear, overcast, rain, heavyRain, wind, snow, heat, cold }
 
 // 1-5 poziom wiedzy scouta o prospectcie
 enum ScoutingTier { tier1, tier2, tier3, tier4, tier5 }

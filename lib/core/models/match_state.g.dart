@@ -8,37 +8,57 @@ part of 'match_state.dart';
 
 _$MatchContextImpl _$$MatchContextImplFromJson(Map<String, dynamic> json) =>
     _$MatchContextImpl(
-      isDerby: json['isDerby'] as bool? ?? false,
+      homeTeamId: json['homeTeamId'] as String? ?? '',
+      awayTeamId: json['awayTeamId'] as String? ?? '',
       weather:
           $enumDecodeNullable(_$WeatherEnumMap, json['weather']) ??
           Weather.clear,
-      stakes:
-          $enumDecodeNullable(_$SeasonPhaseEnumMap, json['stakes']) ??
-          SeasonPhase.regular,
+      temperatureC: (json['temperatureC'] as num?)?.toInt() ?? 0,
+      isDerby: json['isDerby'] as bool? ?? false,
+      stake:
+          $enumDecodeNullable(_$MatchStakeEnumMap, json['stake']) ??
+          MatchStake.regular,
+      refereeStrictness: (json['refereeStrictness'] as num?)?.toDouble() ?? 1.0,
+      crowdIntensity: (json['crowdIntensity'] as num?)?.toInt() ?? 0,
+      homeMatchInWeek: (json['homeMatchInWeek'] as num?)?.toInt() ?? 1,
+      awayMatchInWeek: (json['awayMatchInWeek'] as num?)?.toInt() ?? 1,
+      seed: (json['seed'] as num?)?.toInt() ?? 0,
       homeAdvantage: (json['homeAdvantage'] as num?)?.toDouble() ?? 0.05,
     );
 
 Map<String, dynamic> _$$MatchContextImplToJson(_$MatchContextImpl instance) =>
     <String, dynamic>{
-      'isDerby': instance.isDerby,
+      'homeTeamId': instance.homeTeamId,
+      'awayTeamId': instance.awayTeamId,
       'weather': _$WeatherEnumMap[instance.weather]!,
-      'stakes': _$SeasonPhaseEnumMap[instance.stakes]!,
+      'temperatureC': instance.temperatureC,
+      'isDerby': instance.isDerby,
+      'stake': _$MatchStakeEnumMap[instance.stake]!,
+      'refereeStrictness': instance.refereeStrictness,
+      'crowdIntensity': instance.crowdIntensity,
+      'homeMatchInWeek': instance.homeMatchInWeek,
+      'awayMatchInWeek': instance.awayMatchInWeek,
+      'seed': instance.seed,
       'homeAdvantage': instance.homeAdvantage,
     };
 
 const _$WeatherEnumMap = {
   Weather.clear: 'clear',
+  Weather.overcast: 'overcast',
   Weather.rain: 'rain',
+  Weather.heavyRain: 'heavyRain',
+  Weather.wind: 'wind',
   Weather.snow: 'snow',
   Weather.heat: 'heat',
+  Weather.cold: 'cold',
 };
 
-const _$SeasonPhaseEnumMap = {
-  SeasonPhase.preseason: 'preseason',
-  SeasonPhase.regular: 'regular',
-  SeasonPhase.playIn: 'playIn',
-  SeasonPhase.playoff: 'playoff',
-  SeasonPhase.offseason: 'offseason',
+const _$MatchStakeEnumMap = {
+  MatchStake.regular: 'regular',
+  MatchStake.playIn: 'playIn',
+  MatchStake.playoff: 'playoff',
+  MatchStake.playoffElimination: 'playoffElimination',
+  MatchStake.leagueFinal: 'leagueFinal',
 };
 
 _$MatchStateImpl _$$MatchStateImplFromJson(Map<String, dynamic> json) =>

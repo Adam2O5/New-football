@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:new_football/core/engine/match_engine.dart';
+import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/seed_data_generator.dart';
 import 'package:new_football/core/random/seeds.dart';
 import 'package:new_football/core/services/schedule_generator.dart';
@@ -50,10 +51,15 @@ void main() {
         lineupPlayerIds: tinyRoster.map((p) => p.id).toList(),
         benchPlayerIds: const [],
       );
-      final result = engine.simulateFull(home: tiny, away: teams[1], rngSeed: 1);
+      final result = engine.simulateFull(
+        home: tiny,
+        away: teams[1],
+        rngSeed: 1,
+      );
       expect(result.homeGoals, 0);
       expect(result.awayGoals, 3);
-      expect(result.events.first.description, contains('Walkower'));
+      expect(result.status, MatchStatus.walkover);
+      expect(result.events, isEmpty);
     });
 
     test('scoreline stays in sensible bounds over many sims', () {
