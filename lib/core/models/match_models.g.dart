@@ -55,6 +55,36 @@ Map<String, dynamic> _$$MatchInjuryImplToJson(_$MatchInjuryImpl instance) =>
       'potentialLoss': instance.potentialLoss,
     };
 
+_$MatchDisciplineImpl _$$MatchDisciplineImplFromJson(
+  Map<String, dynamic> json,
+) => _$MatchDisciplineImpl(
+  teamId: json['teamId'] as String,
+  playerId: json['playerId'] as String,
+  yellowCardsInMatch: (json['yellowCardsInMatch'] as num?)?.toInt() ?? 0,
+  redCardKind:
+      $enumDecodeNullable(_$RedCardKindEnumMap, json['redCardKind']) ??
+      RedCardKind.none,
+  directRedSeverity: (json['directRedSeverity'] as num?)?.toInt() ?? 0,
+  playerInStartingXi: json['playerInStartingXi'] as bool? ?? false,
+);
+
+Map<String, dynamic> _$$MatchDisciplineImplToJson(
+  _$MatchDisciplineImpl instance,
+) => <String, dynamic>{
+  'teamId': instance.teamId,
+  'playerId': instance.playerId,
+  'yellowCardsInMatch': instance.yellowCardsInMatch,
+  'redCardKind': _$RedCardKindEnumMap[instance.redCardKind]!,
+  'directRedSeverity': instance.directRedSeverity,
+  'playerInStartingXi': instance.playerInStartingXi,
+};
+
+const _$RedCardKindEnumMap = {
+  RedCardKind.none: 'none',
+  RedCardKind.secondYellow: 'secondYellow',
+  RedCardKind.direct: 'direct',
+};
+
 _$TeamMatchStatsImpl _$$TeamMatchStatsImplFromJson(Map<String, dynamic> json) =>
     _$TeamMatchStatsImpl(
       teamId: json['teamId'] as String,
@@ -108,6 +138,11 @@ _$MatchResultImpl _$$MatchResultImplFromJson(
           ?.map((e) => MatchInjury.fromJson(e as Map<String, dynamic>))
           .toList() ??
       const [],
+  disciplines:
+      (json['disciplines'] as List<dynamic>?)
+          ?.map((e) => MatchDiscipline.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
 );
 
 Map<String, dynamic> _$$MatchResultImplToJson(_$MatchResultImpl instance) =>
@@ -121,6 +156,7 @@ Map<String, dynamic> _$$MatchResultImplToJson(_$MatchResultImpl instance) =>
       'playerStats': instance.playerStats,
       'events': instance.events,
       'injuries': instance.injuries,
+      'disciplines': instance.disciplines,
     };
 
 _$MatchSetupImpl _$$MatchSetupImplFromJson(Map<String, dynamic> json) =>

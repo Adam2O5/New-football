@@ -110,6 +110,9 @@ class PlayerState with _$PlayerState {
     @Default(100) int stamina,
     @Default(5) int form,
     Injury? injury,
+    @Default(0) int regularSeasonYellowCards,
+    @Default(0) int playoffYellowCards,
+    @Default(0) int suspensionGamesRemaining,
     @Default(AssignedRole.cm()) AssignedRole role,
     @Default(0) int seasonsWithTeam,
   }) = _PlayerState;
@@ -166,9 +169,10 @@ extension PlayerX on Player {
   double overall([BalanceConfig balance = BalanceConfig.defaults]) =>
       attributes.overallForPosition(position, balance);
 
-  /// Available for selection unless injured. Low stamina still allows play
-  /// but hurts performance and raises injury risk (`PlayerBalance`).
-  bool get isAvailable => !(state.injury?.isActive ?? false);
+  /// Available for selection unless injured or suspended. Low stamina still
+  /// allows play but hurts performance and raises injury risk.
+  bool get isAvailable =>
+      !(state.injury?.isActive ?? false) && state.suspensionGamesRemaining <= 0;
 
   /// Career totals across all seasons (profile UI).
   PlayerSeasonStats get careerSeasonStats =>

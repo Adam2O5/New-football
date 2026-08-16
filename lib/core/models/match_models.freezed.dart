@@ -530,6 +530,289 @@ abstract class _MatchInjury implements MatchInjury {
       throw _privateConstructorUsedError;
 }
 
+MatchDiscipline _$MatchDisciplineFromJson(Map<String, dynamic> json) {
+  return _MatchDiscipline.fromJson(json);
+}
+
+/// @nodoc
+mixin _$MatchDiscipline {
+  String get teamId => throw _privateConstructorUsedError;
+  String get playerId => throw _privateConstructorUsedError;
+  int get yellowCardsInMatch => throw _privateConstructorUsedError;
+  RedCardKind get redCardKind => throw _privateConstructorUsedError;
+  int get directRedSeverity => throw _privateConstructorUsedError;
+  bool get playerInStartingXi => throw _privateConstructorUsedError;
+
+  /// Serializes this MatchDiscipline to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of MatchDiscipline
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $MatchDisciplineCopyWith<MatchDiscipline> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $MatchDisciplineCopyWith<$Res> {
+  factory $MatchDisciplineCopyWith(
+    MatchDiscipline value,
+    $Res Function(MatchDiscipline) then,
+  ) = _$MatchDisciplineCopyWithImpl<$Res, MatchDiscipline>;
+  @useResult
+  $Res call({
+    String teamId,
+    String playerId,
+    int yellowCardsInMatch,
+    RedCardKind redCardKind,
+    int directRedSeverity,
+    bool playerInStartingXi,
+  });
+}
+
+/// @nodoc
+class _$MatchDisciplineCopyWithImpl<$Res, $Val extends MatchDiscipline>
+    implements $MatchDisciplineCopyWith<$Res> {
+  _$MatchDisciplineCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of MatchDiscipline
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? teamId = null,
+    Object? playerId = null,
+    Object? yellowCardsInMatch = null,
+    Object? redCardKind = null,
+    Object? directRedSeverity = null,
+    Object? playerInStartingXi = null,
+  }) {
+    return _then(
+      _value.copyWith(
+            teamId: null == teamId
+                ? _value.teamId
+                : teamId // ignore: cast_nullable_to_non_nullable
+                      as String,
+            playerId: null == playerId
+                ? _value.playerId
+                : playerId // ignore: cast_nullable_to_non_nullable
+                      as String,
+            yellowCardsInMatch: null == yellowCardsInMatch
+                ? _value.yellowCardsInMatch
+                : yellowCardsInMatch // ignore: cast_nullable_to_non_nullable
+                      as int,
+            redCardKind: null == redCardKind
+                ? _value.redCardKind
+                : redCardKind // ignore: cast_nullable_to_non_nullable
+                      as RedCardKind,
+            directRedSeverity: null == directRedSeverity
+                ? _value.directRedSeverity
+                : directRedSeverity // ignore: cast_nullable_to_non_nullable
+                      as int,
+            playerInStartingXi: null == playerInStartingXi
+                ? _value.playerInStartingXi
+                : playerInStartingXi // ignore: cast_nullable_to_non_nullable
+                      as bool,
+          )
+          as $Val,
+    );
+  }
+}
+
+/// @nodoc
+abstract class _$$MatchDisciplineImplCopyWith<$Res>
+    implements $MatchDisciplineCopyWith<$Res> {
+  factory _$$MatchDisciplineImplCopyWith(
+    _$MatchDisciplineImpl value,
+    $Res Function(_$MatchDisciplineImpl) then,
+  ) = __$$MatchDisciplineImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({
+    String teamId,
+    String playerId,
+    int yellowCardsInMatch,
+    RedCardKind redCardKind,
+    int directRedSeverity,
+    bool playerInStartingXi,
+  });
+}
+
+/// @nodoc
+class __$$MatchDisciplineImplCopyWithImpl<$Res>
+    extends _$MatchDisciplineCopyWithImpl<$Res, _$MatchDisciplineImpl>
+    implements _$$MatchDisciplineImplCopyWith<$Res> {
+  __$$MatchDisciplineImplCopyWithImpl(
+    _$MatchDisciplineImpl _value,
+    $Res Function(_$MatchDisciplineImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of MatchDiscipline
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? teamId = null,
+    Object? playerId = null,
+    Object? yellowCardsInMatch = null,
+    Object? redCardKind = null,
+    Object? directRedSeverity = null,
+    Object? playerInStartingXi = null,
+  }) {
+    return _then(
+      _$MatchDisciplineImpl(
+        teamId: null == teamId
+            ? _value.teamId
+            : teamId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        playerId: null == playerId
+            ? _value.playerId
+            : playerId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        yellowCardsInMatch: null == yellowCardsInMatch
+            ? _value.yellowCardsInMatch
+            : yellowCardsInMatch // ignore: cast_nullable_to_non_nullable
+                  as int,
+        redCardKind: null == redCardKind
+            ? _value.redCardKind
+            : redCardKind // ignore: cast_nullable_to_non_nullable
+                  as RedCardKind,
+        directRedSeverity: null == directRedSeverity
+            ? _value.directRedSeverity
+            : directRedSeverity // ignore: cast_nullable_to_non_nullable
+                  as int,
+        playerInStartingXi: null == playerInStartingXi
+            ? _value.playerInStartingXi
+            : playerInStartingXi // ignore: cast_nullable_to_non_nullable
+                  as bool,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$MatchDisciplineImpl implements _MatchDiscipline {
+  const _$MatchDisciplineImpl({
+    required this.teamId,
+    required this.playerId,
+    this.yellowCardsInMatch = 0,
+    this.redCardKind = RedCardKind.none,
+    this.directRedSeverity = 0,
+    this.playerInStartingXi = false,
+  });
+
+  factory _$MatchDisciplineImpl.fromJson(Map<String, dynamic> json) =>
+      _$$MatchDisciplineImplFromJson(json);
+
+  @override
+  final String teamId;
+  @override
+  final String playerId;
+  @override
+  @JsonKey()
+  final int yellowCardsInMatch;
+  @override
+  @JsonKey()
+  final RedCardKind redCardKind;
+  @override
+  @JsonKey()
+  final int directRedSeverity;
+  @override
+  @JsonKey()
+  final bool playerInStartingXi;
+
+  @override
+  String toString() {
+    return 'MatchDiscipline(teamId: $teamId, playerId: $playerId, yellowCardsInMatch: $yellowCardsInMatch, redCardKind: $redCardKind, directRedSeverity: $directRedSeverity, playerInStartingXi: $playerInStartingXi)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$MatchDisciplineImpl &&
+            (identical(other.teamId, teamId) || other.teamId == teamId) &&
+            (identical(other.playerId, playerId) ||
+                other.playerId == playerId) &&
+            (identical(other.yellowCardsInMatch, yellowCardsInMatch) ||
+                other.yellowCardsInMatch == yellowCardsInMatch) &&
+            (identical(other.redCardKind, redCardKind) ||
+                other.redCardKind == redCardKind) &&
+            (identical(other.directRedSeverity, directRedSeverity) ||
+                other.directRedSeverity == directRedSeverity) &&
+            (identical(other.playerInStartingXi, playerInStartingXi) ||
+                other.playerInStartingXi == playerInStartingXi));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    teamId,
+    playerId,
+    yellowCardsInMatch,
+    redCardKind,
+    directRedSeverity,
+    playerInStartingXi,
+  );
+
+  /// Create a copy of MatchDiscipline
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$MatchDisciplineImplCopyWith<_$MatchDisciplineImpl> get copyWith =>
+      __$$MatchDisciplineImplCopyWithImpl<_$MatchDisciplineImpl>(
+        this,
+        _$identity,
+      );
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$MatchDisciplineImplToJson(this);
+  }
+}
+
+abstract class _MatchDiscipline implements MatchDiscipline {
+  const factory _MatchDiscipline({
+    required final String teamId,
+    required final String playerId,
+    final int yellowCardsInMatch,
+    final RedCardKind redCardKind,
+    final int directRedSeverity,
+    final bool playerInStartingXi,
+  }) = _$MatchDisciplineImpl;
+
+  factory _MatchDiscipline.fromJson(Map<String, dynamic> json) =
+      _$MatchDisciplineImpl.fromJson;
+
+  @override
+  String get teamId;
+  @override
+  String get playerId;
+  @override
+  int get yellowCardsInMatch;
+  @override
+  RedCardKind get redCardKind;
+  @override
+  int get directRedSeverity;
+  @override
+  bool get playerInStartingXi;
+
+  /// Create a copy of MatchDiscipline
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$MatchDisciplineImplCopyWith<_$MatchDisciplineImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
 TeamMatchStats _$TeamMatchStatsFromJson(Map<String, dynamic> json) {
   return _TeamMatchStats.fromJson(json);
 }
@@ -916,6 +1199,7 @@ mixin _$MatchResult {
   List<PlayerMatchStats> get playerStats => throw _privateConstructorUsedError;
   List<MatchEvent> get events => throw _privateConstructorUsedError;
   List<MatchInjury> get injuries => throw _privateConstructorUsedError;
+  List<MatchDiscipline> get disciplines => throw _privateConstructorUsedError;
 
   /// Serializes this MatchResult to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -944,6 +1228,7 @@ abstract class $MatchResultCopyWith<$Res> {
     List<PlayerMatchStats> playerStats,
     List<MatchEvent> events,
     List<MatchInjury> injuries,
+    List<MatchDiscipline> disciplines,
   });
 
   $TeamMatchStatsCopyWith<$Res> get homeStats;
@@ -974,6 +1259,7 @@ class _$MatchResultCopyWithImpl<$Res, $Val extends MatchResult>
     Object? playerStats = null,
     Object? events = null,
     Object? injuries = null,
+    Object? disciplines = null,
   }) {
     return _then(
       _value.copyWith(
@@ -1013,6 +1299,10 @@ class _$MatchResultCopyWithImpl<$Res, $Val extends MatchResult>
                 ? _value.injuries
                 : injuries // ignore: cast_nullable_to_non_nullable
                       as List<MatchInjury>,
+            disciplines: null == disciplines
+                ? _value.disciplines
+                : disciplines // ignore: cast_nullable_to_non_nullable
+                      as List<MatchDiscipline>,
           )
           as $Val,
     );
@@ -1058,6 +1348,7 @@ abstract class _$$MatchResultImplCopyWith<$Res>
     List<PlayerMatchStats> playerStats,
     List<MatchEvent> events,
     List<MatchInjury> injuries,
+    List<MatchDiscipline> disciplines,
   });
 
   @override
@@ -1089,6 +1380,7 @@ class __$$MatchResultImplCopyWithImpl<$Res>
     Object? playerStats = null,
     Object? events = null,
     Object? injuries = null,
+    Object? disciplines = null,
   }) {
     return _then(
       _$MatchResultImpl(
@@ -1128,6 +1420,10 @@ class __$$MatchResultImplCopyWithImpl<$Res>
             ? _value._injuries
             : injuries // ignore: cast_nullable_to_non_nullable
                   as List<MatchInjury>,
+        disciplines: null == disciplines
+            ? _value._disciplines
+            : disciplines // ignore: cast_nullable_to_non_nullable
+                  as List<MatchDiscipline>,
       ),
     );
   }
@@ -1146,9 +1442,11 @@ class _$MatchResultImpl implements _MatchResult {
     final List<PlayerMatchStats> playerStats = const [],
     final List<MatchEvent> events = const [],
     final List<MatchInjury> injuries = const [],
+    final List<MatchDiscipline> disciplines = const [],
   }) : _playerStats = playerStats,
        _events = events,
-       _injuries = injuries;
+       _injuries = injuries,
+       _disciplines = disciplines;
 
   factory _$MatchResultImpl.fromJson(Map<String, dynamic> json) =>
       _$$MatchResultImplFromJson(json);
@@ -1192,9 +1490,18 @@ class _$MatchResultImpl implements _MatchResult {
     return EqualUnmodifiableListView(_injuries);
   }
 
+  final List<MatchDiscipline> _disciplines;
+  @override
+  @JsonKey()
+  List<MatchDiscipline> get disciplines {
+    if (_disciplines is EqualUnmodifiableListView) return _disciplines;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_disciplines);
+  }
+
   @override
   String toString() {
-    return 'MatchResult(homeTeamId: $homeTeamId, awayTeamId: $awayTeamId, homeGoals: $homeGoals, awayGoals: $awayGoals, homeStats: $homeStats, awayStats: $awayStats, playerStats: $playerStats, events: $events, injuries: $injuries)';
+    return 'MatchResult(homeTeamId: $homeTeamId, awayTeamId: $awayTeamId, homeGoals: $homeGoals, awayGoals: $awayGoals, homeStats: $homeStats, awayStats: $awayStats, playerStats: $playerStats, events: $events, injuries: $injuries, disciplines: $disciplines)';
   }
 
   @override
@@ -1219,7 +1526,11 @@ class _$MatchResultImpl implements _MatchResult {
               _playerStats,
             ) &&
             const DeepCollectionEquality().equals(other._events, _events) &&
-            const DeepCollectionEquality().equals(other._injuries, _injuries));
+            const DeepCollectionEquality().equals(other._injuries, _injuries) &&
+            const DeepCollectionEquality().equals(
+              other._disciplines,
+              _disciplines,
+            ));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1235,6 +1546,7 @@ class _$MatchResultImpl implements _MatchResult {
     const DeepCollectionEquality().hash(_playerStats),
     const DeepCollectionEquality().hash(_events),
     const DeepCollectionEquality().hash(_injuries),
+    const DeepCollectionEquality().hash(_disciplines),
   );
 
   /// Create a copy of MatchResult
@@ -1262,6 +1574,7 @@ abstract class _MatchResult implements MatchResult {
     final List<PlayerMatchStats> playerStats,
     final List<MatchEvent> events,
     final List<MatchInjury> injuries,
+    final List<MatchDiscipline> disciplines,
   }) = _$MatchResultImpl;
 
   factory _MatchResult.fromJson(Map<String, dynamic> json) =
@@ -1285,6 +1598,8 @@ abstract class _MatchResult implements MatchResult {
   List<MatchEvent> get events;
   @override
   List<MatchInjury> get injuries;
+  @override
+  List<MatchDiscipline> get disciplines;
 
   /// Create a copy of MatchResult
   /// with the given fields replaced by the non-null parameter values.

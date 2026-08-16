@@ -15,6 +15,7 @@ import 'package:new_football/core/services/calendar_event_registry.dart';
 import 'package:new_football/core/services/calendar_service.dart';
 import 'package:new_football/core/services/contract_service.dart';
 import 'package:new_football/core/services/development_service.dart';
+import 'package:new_football/core/services/discipline_service.dart';
 import 'package:new_football/core/services/league_strength_service.dart';
 import 'package:new_football/core/services/message_service.dart';
 import 'package:new_football/core/services/salary_cap_service.dart';
@@ -301,6 +302,8 @@ class DaySimulator {
     var teams = league.teams;
     final recoveryReturns =
         <({Player player, String injuryId, String teamId})>[];
+    final disciplineNotifications =
+        <({String teamId, DisciplineNotification notification})>[];
     teams = teams.map((t) {
       final next = t.id == result.homeTeamId || t.id == result.awayTeamId
           ? _applyFatigue(t, result)
@@ -319,6 +322,24 @@ class DaySimulator {
         }
       }
       return next;
+    }).toList();
+
+    final disciplineService = const DisciplineService();
+    teams = teams.map((team) {
+      if (team.id != result.homeTeamId && team.id != result.awayTeamId) {
+        return team;
+      }
+      final application = disciplineService.applyToTeam(
+        team: team,
+        result: result,
+        phase: league.currentSeason.phase,
+      );
+      disciplineNotifications.addAll(
+        application.notifications.map(
+          (notification) => (teamId: team.id, notification: notification),
+        ),
+      );
+      return application.team;
     }).toList();
 
     var state = league.copyWith(
@@ -386,6 +407,40 @@ class DaySimulator {
           'injuryId': returned.injuryId,
         },
       );
+    }
+    for (final item in disciplineNotifications) {
+      if (state.playerTeamId != item.teamId) continue;
+      final notification = item.notification;
+      if (notification.started) {
+        state = messages.send(
+          state,
+          type: MessageType.suspensionStart,
+          domain: MessageDomain.matchday,
+          priority: notification.playerInStartingXi
+              ? MessagePriority.urgent
+              : MessagePriority.normal,
+          args: {
+            'playerName': notification.player.name,
+            'games': notification.games,
+          },
+          payload: {
+            'playerId': notification.player.id,
+            'teamId': item.teamId,
+            'games': notification.games,
+            'reason': notification.reason,
+            'playerInStartingXi': notification.playerInStartingXi,
+          },
+        );
+      }
+      if (notification.ended) {
+        state = messages.send(
+          state,
+          type: MessageType.suspensionEnd,
+          domain: MessageDomain.matchday,
+          args: {'playerName': notification.player.name},
+          payload: {'playerId': notification.player.id, 'teamId': item.teamId},
+        );
+      }
     }
     return state;
   }

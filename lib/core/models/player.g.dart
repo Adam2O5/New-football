@@ -77,6 +77,11 @@ _$PlayerStateImpl _$$PlayerStateImplFromJson(Map<String, dynamic> json) =>
       injury: json['injury'] == null
           ? null
           : Injury.fromJson(json['injury'] as Map<String, dynamic>),
+      regularSeasonYellowCards:
+          (json['regularSeasonYellowCards'] as num?)?.toInt() ?? 0,
+      playoffYellowCards: (json['playoffYellowCards'] as num?)?.toInt() ?? 0,
+      suspensionGamesRemaining:
+          (json['suspensionGamesRemaining'] as num?)?.toInt() ?? 0,
       role: json['role'] == null
           ? const AssignedRole.cm()
           : AssignedRole.fromJson(json['role'] as Map<String, dynamic>),
@@ -88,6 +93,9 @@ Map<String, dynamic> _$$PlayerStateImplToJson(_$PlayerStateImpl instance) =>
       'stamina': instance.stamina,
       'form': instance.form,
       'injury': instance.injury,
+      'regularSeasonYellowCards': instance.regularSeasonYellowCards,
+      'playoffYellowCards': instance.playoffYellowCards,
+      'suspensionGamesRemaining': instance.suspensionGamesRemaining,
       'role': instance.role,
       'seasonsWithTeam': instance.seasonsWithTeam,
     };

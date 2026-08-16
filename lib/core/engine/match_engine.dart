@@ -7,6 +7,7 @@ import 'package:new_football/core/models/match_state.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/services/cohesion_service.dart';
+import 'package:new_football/core/services/discipline_service.dart';
 import 'package:new_football/core/services/injury_service.dart';
 import 'package:new_football/core/tactics/tactics_setup.dart';
 
@@ -18,6 +19,7 @@ class LiveMatch {
     this.balance = BalanceConfig.defaults,
     List<MatchEvent>? events,
     List<MatchInjury>? injuries,
+    List<MatchDiscipline>? disciplines,
     this.homeSubsUsed = 0,
     this.awaySubsUsed = 0,
     this.homeSubWindows = 0,
@@ -31,7 +33,8 @@ class LiveMatch {
     this.homeDoctorPreventionMult = 1.0,
     this.awayDoctorPreventionMult = 1.0,
   }) : events = events ?? [],
-       injuries = injuries ?? [];
+       injuries = injuries ?? [],
+       disciplines = disciplines ?? [];
 
   MatchState state;
   final String homeTeamId;
@@ -39,6 +42,7 @@ class LiveMatch {
   final BalanceConfig balance;
   final List<MatchEvent> events;
   final List<MatchInjury> injuries;
+  final List<MatchDiscipline> disciplines;
   int homeSubsUsed;
   int awaySubsUsed;
   int homeSubWindows;
@@ -102,6 +106,7 @@ class LiveMatch {
       ),
       events: List.unmodifiable(events),
       injuries: List.unmodifiable(injuries),
+      disciplines: List.unmodifiable(disciplines),
     );
   }
 
@@ -292,31 +297,73 @@ class MatchEngine {
       final lineup = homeAttack ? state.homeLineup : state.awayLineup;
       if (lineup.isNotEmpty) {
         final player = lineup[rng.nextInt(lineup.length)];
-        final yellows = Map<String, int>.from(state.yellowCardCounts);
-        final count = (yellows[player.id] ?? 0) + 1;
-        yellows[player.id] = count;
-        if (count >= 2) {
+        final playerInStartingXi =
+            (homeAttack ? live.state.homeLineup : live.state.awayLineup).any(
+              (candidate) => candidate.id == player.id,
+            );
+        if (rng.nextDouble() < balance.matchday.redDirect) {
+          final severity = DisciplineService.rollDirectRedSeverity(rng);
           newEvents.add(
             MatchEvent(
               type: MatchEventType.redCard,
               minute: nextMinute,
               teamId: teamId,
               playerId: player.id,
-              description: 'Czerwona kartka — ${player.name} (2× żółta)',
+              description:
+                  'Czerwona kartka — ${player.name} (bezpośrednia, poziom $severity)',
             ),
+          );
+          _recordDiscipline(
+            live,
+            teamId: teamId,
+            playerId: player.id,
+            playerInStartingXi: playerInStartingXi,
+            redCardKind: RedCardKind.direct,
+            directRedSeverity: severity,
           );
           state = _sendOff(state, player.id, homeAttack);
         } else {
-          newEvents.add(
-            MatchEvent(
-              type: MatchEventType.yellowCard,
-              minute: nextMinute,
+          final yellows = Map<String, int>.from(state.yellowCardCounts);
+          final count = (yellows[player.id] ?? 0) + 1;
+          yellows[player.id] = count;
+          if (count >= 2) {
+            newEvents.add(
+              MatchEvent(
+                type: MatchEventType.redCard,
+                minute: nextMinute,
+                teamId: teamId,
+                playerId: player.id,
+                description: 'Czerwona kartka — ${player.name} (2× żółta)',
+              ),
+            );
+            _recordDiscipline(
+              live,
               teamId: teamId,
               playerId: player.id,
-              description: 'Żółta kartka — ${player.name}',
-            ),
-          );
-          state = state.copyWith(yellowCardCounts: yellows);
+              playerInStartingXi: playerInStartingXi,
+              yellowCardsInMatch: 1,
+              redCardKind: RedCardKind.secondYellow,
+            );
+            state = _sendOff(state, player.id, homeAttack, secondYellow: true);
+          } else {
+            newEvents.add(
+              MatchEvent(
+                type: MatchEventType.yellowCard,
+                minute: nextMinute,
+                teamId: teamId,
+                playerId: player.id,
+                description: 'Żółta kartka — ${player.name}',
+              ),
+            );
+            _recordDiscipline(
+              live,
+              teamId: teamId,
+              playerId: player.id,
+              playerInStartingXi: playerInStartingXi,
+              yellowCardsInMatch: 1,
+            );
+            state = state.copyWith(yellowCardCounts: yellows);
+          }
         }
       }
     } else {
@@ -634,7 +681,56 @@ class MatchEngine {
     return pool[rng.nextInt(pool.length)];
   }
 
-  MatchState _sendOff(MatchState state, String playerId, bool homeSide) {
+  void _recordDiscipline(
+    LiveMatch live, {
+    required String teamId,
+    required String playerId,
+    required bool playerInStartingXi,
+    int yellowCardsInMatch = 0,
+    RedCardKind redCardKind = RedCardKind.none,
+    int directRedSeverity = 0,
+  }) {
+    final index = live.disciplines.indexWhere(
+      (discipline) =>
+          discipline.teamId == teamId && discipline.playerId == playerId,
+    );
+    final item = MatchDiscipline(
+      teamId: teamId,
+      playerId: playerId,
+      yellowCardsInMatch: yellowCardsInMatch,
+      redCardKind: redCardKind,
+      directRedSeverity: directRedSeverity,
+      playerInStartingXi: playerInStartingXi,
+    );
+    if (index < 0) {
+      live.disciplines.add(item);
+      return;
+    }
+    final previous = live.disciplines[index];
+    live.disciplines[index] = previous.copyWith(
+      yellowCardsInMatch: previous.yellowCardsInMatch + item.yellowCardsInMatch,
+      redCardKind:
+          item.redCardKind == RedCardKind.direct ||
+              previous.redCardKind == RedCardKind.direct
+          ? RedCardKind.direct
+          : item.redCardKind == RedCardKind.secondYellow ||
+                previous.redCardKind == RedCardKind.secondYellow
+          ? RedCardKind.secondYellow
+          : RedCardKind.none,
+      directRedSeverity: item.directRedSeverity > 0
+          ? item.directRedSeverity
+          : previous.directRedSeverity,
+      playerInStartingXi:
+          previous.playerInStartingXi || item.playerInStartingXi,
+    );
+  }
+
+  MatchState _sendOff(
+    MatchState state,
+    String playerId,
+    bool homeSide, {
+    bool secondYellow = false,
+  }) {
     final lineup = List<Player>.from(
       homeSide ? state.homeLineup : state.awayLineup,
     );
@@ -643,13 +739,17 @@ class MatchEngine {
         ? state.copyWith(
             homeLineup: lineup,
             sentOffPlayerIds: [...state.sentOffPlayerIds, playerId],
-            yellowCardCounts: {...state.yellowCardCounts, playerId: 2},
+            yellowCardCounts: secondYellow
+                ? {...state.yellowCardCounts, playerId: 2}
+                : state.yellowCardCounts,
             momentum: (state.momentum - 0.2).clamp(-1.0, 1.0),
           )
         : state.copyWith(
             awayLineup: lineup,
             sentOffPlayerIds: [...state.sentOffPlayerIds, playerId],
-            yellowCardCounts: {...state.yellowCardCounts, playerId: 2},
+            yellowCardCounts: secondYellow
+                ? {...state.yellowCardCounts, playerId: 2}
+                : state.yellowCardCounts,
             momentum: (state.momentum + 0.2).clamp(-1.0, 1.0),
           );
   }

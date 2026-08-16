@@ -721,6 +721,9 @@ mixin _$PlayerState {
   int get stamina => throw _privateConstructorUsedError;
   int get form => throw _privateConstructorUsedError;
   Injury? get injury => throw _privateConstructorUsedError;
+  int get regularSeasonYellowCards => throw _privateConstructorUsedError;
+  int get playoffYellowCards => throw _privateConstructorUsedError;
+  int get suspensionGamesRemaining => throw _privateConstructorUsedError;
   AssignedRole get role => throw _privateConstructorUsedError;
   int get seasonsWithTeam => throw _privateConstructorUsedError;
 
@@ -745,6 +748,9 @@ abstract class $PlayerStateCopyWith<$Res> {
     int stamina,
     int form,
     Injury? injury,
+    int regularSeasonYellowCards,
+    int playoffYellowCards,
+    int suspensionGamesRemaining,
     AssignedRole role,
     int seasonsWithTeam,
   });
@@ -771,6 +777,9 @@ class _$PlayerStateCopyWithImpl<$Res, $Val extends PlayerState>
     Object? stamina = null,
     Object? form = null,
     Object? injury = freezed,
+    Object? regularSeasonYellowCards = null,
+    Object? playoffYellowCards = null,
+    Object? suspensionGamesRemaining = null,
     Object? role = null,
     Object? seasonsWithTeam = null,
   }) {
@@ -788,6 +797,18 @@ class _$PlayerStateCopyWithImpl<$Res, $Val extends PlayerState>
                 ? _value.injury
                 : injury // ignore: cast_nullable_to_non_nullable
                       as Injury?,
+            regularSeasonYellowCards: null == regularSeasonYellowCards
+                ? _value.regularSeasonYellowCards
+                : regularSeasonYellowCards // ignore: cast_nullable_to_non_nullable
+                      as int,
+            playoffYellowCards: null == playoffYellowCards
+                ? _value.playoffYellowCards
+                : playoffYellowCards // ignore: cast_nullable_to_non_nullable
+                      as int,
+            suspensionGamesRemaining: null == suspensionGamesRemaining
+                ? _value.suspensionGamesRemaining
+                : suspensionGamesRemaining // ignore: cast_nullable_to_non_nullable
+                      as int,
             role: null == role
                 ? _value.role
                 : role // ignore: cast_nullable_to_non_nullable
@@ -839,6 +860,9 @@ abstract class _$$PlayerStateImplCopyWith<$Res>
     int stamina,
     int form,
     Injury? injury,
+    int regularSeasonYellowCards,
+    int playoffYellowCards,
+    int suspensionGamesRemaining,
     AssignedRole role,
     int seasonsWithTeam,
   });
@@ -866,6 +890,9 @@ class __$$PlayerStateImplCopyWithImpl<$Res>
     Object? stamina = null,
     Object? form = null,
     Object? injury = freezed,
+    Object? regularSeasonYellowCards = null,
+    Object? playoffYellowCards = null,
+    Object? suspensionGamesRemaining = null,
     Object? role = null,
     Object? seasonsWithTeam = null,
   }) {
@@ -883,6 +910,18 @@ class __$$PlayerStateImplCopyWithImpl<$Res>
             ? _value.injury
             : injury // ignore: cast_nullable_to_non_nullable
                   as Injury?,
+        regularSeasonYellowCards: null == regularSeasonYellowCards
+            ? _value.regularSeasonYellowCards
+            : regularSeasonYellowCards // ignore: cast_nullable_to_non_nullable
+                  as int,
+        playoffYellowCards: null == playoffYellowCards
+            ? _value.playoffYellowCards
+            : playoffYellowCards // ignore: cast_nullable_to_non_nullable
+                  as int,
+        suspensionGamesRemaining: null == suspensionGamesRemaining
+            ? _value.suspensionGamesRemaining
+            : suspensionGamesRemaining // ignore: cast_nullable_to_non_nullable
+                  as int,
         role: null == role
             ? _value.role
             : role // ignore: cast_nullable_to_non_nullable
@@ -903,6 +942,9 @@ class _$PlayerStateImpl implements _PlayerState {
     this.stamina = 100,
     this.form = 5,
     this.injury,
+    this.regularSeasonYellowCards = 0,
+    this.playoffYellowCards = 0,
+    this.suspensionGamesRemaining = 0,
     this.role = const AssignedRole.cm(),
     this.seasonsWithTeam = 0,
   });
@@ -920,6 +962,15 @@ class _$PlayerStateImpl implements _PlayerState {
   final Injury? injury;
   @override
   @JsonKey()
+  final int regularSeasonYellowCards;
+  @override
+  @JsonKey()
+  final int playoffYellowCards;
+  @override
+  @JsonKey()
+  final int suspensionGamesRemaining;
+  @override
+  @JsonKey()
   final AssignedRole role;
   @override
   @JsonKey()
@@ -927,7 +978,7 @@ class _$PlayerStateImpl implements _PlayerState {
 
   @override
   String toString() {
-    return 'PlayerState(stamina: $stamina, form: $form, injury: $injury, role: $role, seasonsWithTeam: $seasonsWithTeam)';
+    return 'PlayerState(stamina: $stamina, form: $form, injury: $injury, regularSeasonYellowCards: $regularSeasonYellowCards, playoffYellowCards: $playoffYellowCards, suspensionGamesRemaining: $suspensionGamesRemaining, role: $role, seasonsWithTeam: $seasonsWithTeam)';
   }
 
   @override
@@ -938,6 +989,18 @@ class _$PlayerStateImpl implements _PlayerState {
             (identical(other.stamina, stamina) || other.stamina == stamina) &&
             (identical(other.form, form) || other.form == form) &&
             (identical(other.injury, injury) || other.injury == injury) &&
+            (identical(
+                  other.regularSeasonYellowCards,
+                  regularSeasonYellowCards,
+                ) ||
+                other.regularSeasonYellowCards == regularSeasonYellowCards) &&
+            (identical(other.playoffYellowCards, playoffYellowCards) ||
+                other.playoffYellowCards == playoffYellowCards) &&
+            (identical(
+                  other.suspensionGamesRemaining,
+                  suspensionGamesRemaining,
+                ) ||
+                other.suspensionGamesRemaining == suspensionGamesRemaining) &&
             (identical(other.role, role) || other.role == role) &&
             (identical(other.seasonsWithTeam, seasonsWithTeam) ||
                 other.seasonsWithTeam == seasonsWithTeam));
@@ -945,8 +1008,17 @@ class _$PlayerStateImpl implements _PlayerState {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, stamina, form, injury, role, seasonsWithTeam);
+  int get hashCode => Object.hash(
+    runtimeType,
+    stamina,
+    form,
+    injury,
+    regularSeasonYellowCards,
+    playoffYellowCards,
+    suspensionGamesRemaining,
+    role,
+    seasonsWithTeam,
+  );
 
   /// Create a copy of PlayerState
   /// with the given fields replaced by the non-null parameter values.
@@ -967,6 +1039,9 @@ abstract class _PlayerState implements PlayerState {
     final int stamina,
     final int form,
     final Injury? injury,
+    final int regularSeasonYellowCards,
+    final int playoffYellowCards,
+    final int suspensionGamesRemaining,
     final AssignedRole role,
     final int seasonsWithTeam,
   }) = _$PlayerStateImpl;
@@ -980,6 +1055,12 @@ abstract class _PlayerState implements PlayerState {
   int get form;
   @override
   Injury? get injury;
+  @override
+  int get regularSeasonYellowCards;
+  @override
+  int get playoffYellowCards;
+  @override
+  int get suspensionGamesRemaining;
   @override
   AssignedRole get role;
   @override

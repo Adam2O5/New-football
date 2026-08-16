@@ -36,6 +36,21 @@ class MatchInjury with _$MatchInjury {
 }
 
 @freezed
+class MatchDiscipline with _$MatchDiscipline {
+  const factory MatchDiscipline({
+    required String teamId,
+    required String playerId,
+    @Default(0) int yellowCardsInMatch,
+    @Default(RedCardKind.none) RedCardKind redCardKind,
+    @Default(0) int directRedSeverity,
+    @Default(false) bool playerInStartingXi,
+  }) = _MatchDiscipline;
+
+  factory MatchDiscipline.fromJson(Map<String, dynamic> json) =>
+      _$MatchDisciplineFromJson(json);
+}
+
+@freezed
 class TeamMatchStats with _$TeamMatchStats {
   const factory TeamMatchStats({
     required String teamId,
@@ -66,6 +81,7 @@ class MatchResult with _$MatchResult {
     @Default([]) List<PlayerMatchStats> playerStats,
     @Default([]) List<MatchEvent> events,
     @Default([]) List<MatchInjury> injuries,
+    @Default([]) List<MatchDiscipline> disciplines,
   }) = _MatchResult;
 
   factory MatchResult.fromJson(Map<String, dynamic> json) =>

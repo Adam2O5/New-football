@@ -444,27 +444,27 @@ Legenda: `⬜` do zrobienia · `🔄` w trakcie · `✅` gotowe
 
 ---
 
-### ⬜ Task 11: Zawieszenia
+### ✅ Task 11: Zawieszenia
 
 **Cel:** `matchday_model.md` §8.4 + `squad_management.md`.
 
-- [ ] Licznik żółtych kartek per sezon regularny w stanie zawodnika
-- [ ] Osobny licznik żółtych dla playoff
-- [ ] Próg 5 żółtych w sezonie regularnym → 1 mecz pauzy, reset licznika
-- [ ] Próg 3 żółtych w playoff → 1 mecz pauzy
-- [ ] Czerwona za drugą żółtą → 1 mecz
-- [ ] Czerwona bezpośrednia → 1–3 mecze ważone ciężkością
-- [ ] Pole `suspensionGamesRemaining` w stanie zawodnika
-- [ ] Zawieszony nie wchodzi do protokołu 18-osobowego
-- [ ] Dekrementacja po każdym meczu drużyny
-- [ ] Wiadomości `suspensionStart` (eskalacja dla XI) i `suspensionEnd` (`silenced`)
-- [ ] Podnieść `currentSchemaVersion`
+- [x] Licznik żółtych kartek per sezon regularny w stanie zawodnika
+- [x] Osobny licznik żółtych dla playoff
+- [x] Próg 5 żółtych w sezonie regularnym → 1 mecz pauzy, reset licznika
+- [x] Próg 3 żółtych w playoff → 1 mecz pauzy
+- [x] Czerwona za drugą żółtą → 1 mecz
+- [x] Czerwona bezpośrednia → 1–3 mecze ważone ciężkością
+- [x] Pole `suspensionGamesRemaining` w stanie zawodnika
+- [x] Zawieszony nie wchodzi do protokołu 18-osobowego
+- [x] Dekrementacja po każdym meczu drużyny
+- [x] Wiadomości `suspensionStart` (eskalacja dla XI) i `suspensionEnd` (`silenced`)
+- [x] Podnieść `currentSchemaVersion` do 6
 
 **Testy**
-- [ ] 5. żółta nakłada pauzę i resetuje licznik
-- [ ] Zawieszony odfiltrowany z listy dostępnych do składu
-- [ ] Licznik playoff niezależny od licznika sezonu regularnego
-- [ ] Pauza dekrementuje się tylko po meczach własnej drużyny
+- [x] 5. żółta nakłada pauzę i resetuje licznik
+- [x] Zawieszony odfiltrowany z listy dostępnych do składu
+- [x] Licznik playoff niezależny od licznika sezonu regularnego
+- [x] Pauza dekrementuje się tylko po meczach własnej drużyny
 
 **Demo:** po 5. żółtej zawodnik znika z dostępnych na kolejny mecz i wraca po odbyciu pauzy, z parą wiadomości w inboksie.
 

@@ -353,6 +353,8 @@ enum InjuryType { minor, major }
 
 enum InjuryGroup { headFace, shouldersChest, legMuscles, knees, anklesFeet }
 
+enum RedCardKind { none, secondYellow, direct }
+
 enum DevelopmentOutcome { exceed, hit, under }
 
 enum Weather { clear, rain, snow, heat }

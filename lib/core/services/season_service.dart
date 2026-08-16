@@ -9,6 +9,7 @@ import 'package:new_football/core/models/draft_models.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/match_models.dart';
+import 'package:new_football/core/models/match_state.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/draft_pick.dart';
 import 'package:new_football/core/models/season_awards.dart';
@@ -18,6 +19,7 @@ import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/random/seeds.dart';
 import 'package:new_football/core/services/calendar_service.dart';
 import 'package:new_football/core/services/development_service.dart';
+import 'package:new_football/core/services/discipline_service.dart';
 import 'package:new_football/core/services/prospect_service.dart';
 import 'package:new_football/core/services/message_service.dart';
 import 'package:new_football/core/services/salary_cap_service.dart';
@@ -69,6 +71,7 @@ class SeasonService {
   }) {
     if (calendar.playInSlotsForDay(week, day).isEmpty) return league;
 
+    var state = league;
     final season = league.currentSeason;
     if (day == 3) {
       final progress = <PlayInProgress>[];
@@ -79,7 +82,7 @@ class SeasonService {
         final existing = progressForConference.isEmpty
             ? null
             : progressForConference.first;
-        final seeds = _playInSeeds(league, conference);
+        final seeds = _playInSeeds(state, conference);
         if (seeds == null) continue;
         final current =
             existing ??
@@ -90,31 +93,37 @@ class SeasonService {
               seed9TeamId: seeds.s9,
               seed10TeamId: seeds.s10,
             );
-        progress.add(
-          current.copyWith(
-            game7v8:
-                current.game7v8 ??
-                _sim(
-                  league,
-                  current.seed7TeamId,
-                  current.seed8TeamId,
-                  saveSeed: saveSeed,
-                  matchId: 'playIn:${conference.name}:7v8',
-                ),
-            game9v10:
-                current.game9v10 ??
-                _sim(
-                  league,
-                  current.seed9TeamId,
-                  current.seed10TeamId,
-                  saveSeed: saveSeed,
-                  matchId: 'playIn:${conference.name}:9v10',
-                ),
-          ),
-        );
+
+        var game7v8 = current.game7v8;
+        if (game7v8 == null) {
+          final played = _simPostseason(
+            state,
+            current.seed7TeamId,
+            current.seed8TeamId,
+            saveSeed: saveSeed,
+            matchId: 'playIn:${conference.name}:7v8',
+            phase: SeasonPhase.playIn,
+          );
+          state = played.league;
+          game7v8 = played.result;
+        }
+        var game9v10 = current.game9v10;
+        if (game9v10 == null) {
+          final played = _simPostseason(
+            state,
+            current.seed9TeamId,
+            current.seed10TeamId,
+            saveSeed: saveSeed,
+            matchId: 'playIn:${conference.name}:9v10',
+            phase: SeasonPhase.playIn,
+          );
+          state = played.league;
+          game9v10 = played.result;
+        }
+        progress.add(current.copyWith(game7v8: game7v8, game9v10: game9v10));
       }
-      return league.copyWith(
-        currentSeason: season.copyWith(
+      return state.copyWith(
+        currentSeason: state.currentSeason.copyWith(
           phase: SeasonPhase.playIn,
           playInProgress: progress,
         ),
@@ -130,18 +139,22 @@ class SeasonService {
         remaining.add(progress);
         continue;
       }
-      final finalGame =
-          progress.gameFinal ??
-          _sim(
-            league,
-            _winnerId(game7v8, progress.seed7TeamId, progress.seed8TeamId) ==
-                    progress.seed7TeamId
-                ? progress.seed8TeamId
-                : progress.seed7TeamId,
-            _winnerId(game9v10, progress.seed9TeamId, progress.seed10TeamId),
-            saveSeed: saveSeed,
-            matchId: 'playIn:${progress.conference.name}:final',
-          );
+      var finalGame = progress.gameFinal;
+      if (finalGame == null) {
+        final played = _simPostseason(
+          state,
+          _winnerId(game7v8, progress.seed7TeamId, progress.seed8TeamId) ==
+                  progress.seed7TeamId
+              ? progress.seed8TeamId
+              : progress.seed7TeamId,
+          _winnerId(game9v10, progress.seed9TeamId, progress.seed10TeamId),
+          saveSeed: saveSeed,
+          matchId: 'playIn:${progress.conference.name}:final',
+          phase: SeasonPhase.playIn,
+        );
+        state = played.league;
+        finalGame = played.result;
+      }
       final loser78 =
           _winnerId(game7v8, progress.seed7TeamId, progress.seed8TeamId) ==
               progress.seed7TeamId
@@ -172,8 +185,8 @@ class SeasonService {
         ),
       );
     }
-    return league.copyWith(
-      currentSeason: season.copyWith(
+    return state.copyWith(
+      currentSeason: state.currentSeason.copyWith(
         phase: SeasonPhase.playIn,
         playInResults: results,
         playInProgress: remaining,
@@ -199,8 +212,9 @@ class SeasonService {
 
   LeagueState setupPlayIn(LeagueState league, {int saveSeed = 0}) {
     final results = <PlayInResult>[];
+    var state = league;
     for (final conf in Conference.values) {
-      final cs = league.currentSeason.standings.firstWhere(
+      final cs = state.currentSeason.standings.firstWhere(
         (s) => s.conference == conf,
       );
       final sorted = cs.sorted;
@@ -210,29 +224,38 @@ class SeasonService {
       final s9 = sorted[8].teamId;
       final s10 = sorted[9].teamId;
 
-      final g78 = _sim(
-        league,
+      final first = _simPostseason(
+        state,
         s7,
         s8,
         saveSeed: saveSeed,
         matchId: 'playIn:${conf.name}:7v8',
+        phase: SeasonPhase.playIn,
       );
-      final g910 = _sim(
-        league,
+      state = first.league;
+      final second = _simPostseason(
+        state,
         s9,
         s10,
         saveSeed: saveSeed,
         matchId: 'playIn:${conf.name}:9v10',
+        phase: SeasonPhase.playIn,
       );
+      state = second.league;
+      final g78 = first.result;
+      final g910 = second.result;
       final loser78 = _winnerId(g78, s7, s8) == s7 ? s8 : s7;
       final winner910 = _winnerId(g910, s9, s10);
-      final gFinal = _sim(
-        league,
+      final third = _simPostseason(
+        state,
         loser78,
         winner910,
         saveSeed: saveSeed,
         matchId: 'playIn:${conf.name}:final',
+        phase: SeasonPhase.playIn,
       );
+      state = third.league;
+      final gFinal = third.result;
       final playoff8 = _winnerId(gFinal, loser78, winner910);
       final playoff7 = _winnerId(g78, s7, s8);
 
@@ -250,8 +273,8 @@ class SeasonService {
       );
     }
     return _msg(
-      league.copyWith(
-        currentSeason: league.currentSeason.copyWith(
+      state.copyWith(
+        currentSeason: state.currentSeason.copyWith(
           phase: SeasonPhase.playIn,
           playInResults: results,
         ),
@@ -320,7 +343,9 @@ class SeasonService {
     var brackets = <PlayoffBracket>[];
     var state = league;
     for (final b in league.currentSeason.playoffBrackets) {
-      brackets.add(_advanceBracket(state, b, saveSeed));
+      final advanced = _advanceBracket(state, b, saveSeed);
+      state = advanced.league;
+      brackets.add(advanced.bracket);
     }
 
     String? champion;
@@ -345,7 +370,9 @@ class SeasonService {
             west.conferenceFinal.first.winnerTeamId!,
           );
       if (!leagueFinal.isComplete) {
-        leagueFinal = _playOneGame(state, leagueFinal, saveSeed);
+        final played = _playOneGame(state, leagueFinal, saveSeed);
+        state = played.league;
+        leagueFinal = played.series;
       }
       champion = leagueFinal.winnerTeamId;
       brackets = brackets
@@ -807,6 +834,8 @@ class SeasonService {
               state: p.state.copyWith(
                 seasonsWithTeam: p.state.seasonsWithTeam + 1,
                 stamina: 90,
+                regularSeasonYellowCards: 0,
+                playoffYellowCards: 0,
               ),
             )
             .recalculatePointValue(balance);
@@ -879,11 +908,35 @@ class SeasonService {
     String awayId, {
     required int saveSeed,
     required String matchId,
+    SeasonPhase phase = SeasonPhase.regular,
   }) {
     return matchEngine.simulateFull(
       home: league.teamById(homeId)!,
       away: league.teamById(awayId)!,
+      context: MatchContext(stakes: phase),
       rngSeed: matchSeed(saveSeed, league.currentSeason.year, matchId),
+    );
+  }
+
+  ({LeagueState league, MatchResult result}) _simPostseason(
+    LeagueState league,
+    String homeId,
+    String awayId, {
+    required int saveSeed,
+    required String matchId,
+    required SeasonPhase phase,
+  }) {
+    final result = _sim(
+      league,
+      homeId,
+      awayId,
+      saveSeed: saveSeed,
+      matchId: matchId,
+      phase: phase,
+    );
+    return (
+      league: _applyPostseasonDiscipline(league, result, phase),
+      result: result,
     );
   }
 
@@ -901,14 +954,22 @@ class SeasonService {
     winsNeeded: 3,
   );
 
-  PlayoffBracket _advanceBracket(
+  ({LeagueState league, PlayoffBracket bracket}) _advanceBracket(
     LeagueState league,
     PlayoffBracket b,
     int saveSeed,
   ) {
-    final quarters = b.quarterFinals
-        .map((s) => s.isComplete ? s : _playOneGame(league, s, saveSeed))
-        .toList();
+    var state = league;
+    final quarters = <PlayoffSeries>[];
+    for (final series in b.quarterFinals) {
+      if (series.isComplete) {
+        quarters.add(series);
+      } else {
+        final played = _playOneGame(state, series, saveSeed);
+        state = played.league;
+        quarters.add(played.series);
+      }
+    }
 
     var semis = b.semiFinals;
     if (semis.isEmpty && quarters.every((s) => s.isComplete)) {
@@ -917,9 +978,17 @@ class SeasonService {
         _series(quarters[1].winnerTeamId!, quarters[2].winnerTeamId!),
       ];
     } else {
-      semis = semis
-          .map((s) => s.isComplete ? s : _playOneGame(league, s, saveSeed))
-          .toList();
+      final advanced = <PlayoffSeries>[];
+      for (final series in semis) {
+        if (series.isComplete) {
+          advanced.add(series);
+        } else {
+          final played = _playOneGame(state, series, saveSeed);
+          state = played.league;
+          advanced.add(played.series);
+        }
+      }
+      semis = advanced;
     }
 
     var confFinal = b.conferenceFinal;
@@ -928,19 +997,30 @@ class SeasonService {
         semis.every((s) => s.isComplete)) {
       confFinal = [_series(semis[0].winnerTeamId!, semis[1].winnerTeamId!)];
     } else {
-      confFinal = confFinal
-          .map((s) => s.isComplete ? s : _playOneGame(league, s, saveSeed))
-          .toList();
+      final advanced = <PlayoffSeries>[];
+      for (final series in confFinal) {
+        if (series.isComplete) {
+          advanced.add(series);
+        } else {
+          final played = _playOneGame(state, series, saveSeed);
+          state = played.league;
+          advanced.add(played.series);
+        }
+      }
+      confFinal = advanced;
     }
 
-    return b.copyWith(
-      quarterFinals: quarters,
-      semiFinals: semis,
-      conferenceFinal: confFinal,
+    return (
+      league: state,
+      bracket: b.copyWith(
+        quarterFinals: quarters,
+        semiFinals: semis,
+        conferenceFinal: confFinal,
+      ),
     );
   }
 
-  PlayoffSeries _playOneGame(
+  ({LeagueState league, PlayoffSeries series}) _playOneGame(
     LeagueState league,
     PlayoffSeries series,
     int saveSeed,
@@ -948,15 +1028,78 @@ class SeasonService {
     final homeFirst = calendar.higherSeedHomeForGame(series.games.length);
     final homeId = homeFirst ? series.higherSeedTeamId : series.lowerSeedTeamId;
     final awayId = homeFirst ? series.lowerSeedTeamId : series.higherSeedTeamId;
-    return series.recordGame(
-      _sim(
-        league,
-        homeId,
-        awayId,
-        saveSeed: saveSeed,
-        matchId: 'playoff:${series.id}:${series.games.length}',
-      ),
+    final played = _simPostseason(
+      league,
+      homeId,
+      awayId,
+      saveSeed: saveSeed,
+      matchId: 'playoff:${series.id}:${series.games.length}',
+      phase: SeasonPhase.playoff,
     );
+    return (league: played.league, series: series.recordGame(played.result));
+  }
+
+  LeagueState _applyPostseasonDiscipline(
+    LeagueState league,
+    MatchResult result,
+    SeasonPhase phase,
+  ) {
+    final disciplineService = const DisciplineService();
+    final notifications =
+        <({String teamId, DisciplineNotification notification})>[];
+    final teams = league.teams.map((team) {
+      if (team.id != result.homeTeamId && team.id != result.awayTeamId) {
+        return team;
+      }
+      final application = disciplineService.applyToTeam(
+        team: team,
+        result: result,
+        phase: phase,
+      );
+      notifications.addAll(
+        application.notifications.map(
+          (notification) => (teamId: team.id, notification: notification),
+        ),
+      );
+      return application.team;
+    }).toList();
+
+    var state = league.copyWith(teams: teams);
+    for (final item in notifications) {
+      if (state.playerTeamId != item.teamId) continue;
+      final notification = item.notification;
+      if (notification.started) {
+        state = _messages.send(
+          state,
+          type: MessageType.suspensionStart,
+          domain: MessageDomain.matchday,
+          priority: notification.playerInStartingXi
+              ? MessagePriority.urgent
+              : MessagePriority.normal,
+          args: {
+            'playerName': notification.player.name,
+            'games': notification.games,
+          },
+          payload: {
+            'playerId': notification.player.id,
+            'teamId': item.teamId,
+            'games': notification.games,
+            'reason': notification.reason,
+            'playerInStartingXi': notification.playerInStartingXi,
+          },
+        );
+      }
+      if (notification.ended) {
+        state = _messages.send(
+          state,
+          type: MessageType.suspensionEnd,
+          domain: MessageDomain.matchday,
+          args: {'playerName': notification.player.name},
+          payload: {'playerId': notification.player.id, 'teamId': item.teamId},
+        );
+      }
+    }
+    return state;
   }
 
   SeasonAwards _computeAwards(LeagueState league) {
