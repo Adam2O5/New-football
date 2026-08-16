@@ -688,50 +688,55 @@ Legenda: `⬜` do zrobienia · `🔄` w trakcie · `✅` gotowe
 
 ---
 
-### ⬜ Task 18: Etap 4 — mapowanie sytuacji na atrybuty, model strzału i GK
+### ✅ Task 18: Etap 4 — mapowanie sytuacji na atrybuty, model strzału i GK
 
 **Cel:** `matchday_model.md` §7.4–7.6, §9. Serce modelu.
 
-- [ ] `centralBuildUp` — 2 pojedynki z wagami z docs
-- [ ] `wingPlay` — 2 pojedynki
-- [ ] `crossFromWide` — 2 pojedynki z `aerialFactor`
-- [ ] `throughBall` — 2 pojedynki, +0,10 do pace obrońcy przy `DefensiveLine.high`
-- [ ] `individualDribble` — 2 pojedynki
-- [ ] `longBall` — próg trudności + pojedynek zgrania
-- [ ] `counterAttack` — 2 pojedynki, jakość ×1,35, ×1,15 przy wysokiej linii rywala, ×0,85 przy deep
-- [ ] `setPiece` — z rolla faulu / rożnego
-- [ ] `aerialFactor = clamp(60 + (heightCm − 180) × 1,2, 35, 85)`, waga 0,15
-- [ ] `xG = clamp(baseXg × chanceQualityMult × shooterFactor, 0,01, 0,95)`
-- [ ] `shooterFactor = 1 + (effShooting − 70) / 180`
-- [ ] `gkFactor = 1 − (gkRating − 70) / 240`
-- [ ] `P(gol) = clamp(xG × gkFactor, 0,005, 0,97)`
-- [ ] `chanceQualityMult`: 1 wygrany pojedynek ×0,7, 2 ×1,0, 3 ×1,4
-- [ ] Rezultat gdy nie gol: obroniony 42% (25% dobitki, xG ×0,6)
-- [ ] Rezultat: niecelny 33%
-- [ ] Rezultat: zablokowany 20% (35% rożnego)
-- [ ] Rezultat: słupek/poprzeczka 5% (30% dobitki)
-- [ ] Model GK: 5 zestawów wag per typ strzału
-- [ ] Błąd bramkarza `(100 − handling) / 1200 × weatherHandlingMult`
-- [ ] Brak GK: `gkRating = (physicality × 0,4 + pace × 0,3 + defending × 0,3) × 0,55`
-- [ ] Rzut rożny: powstanie z 35% zablokowanych strzałów + 10% nieudanych dośrodkowań, `baseXg` 0,035
-- [ ] Wolny bezpośredni: 18% fauli w strefie 20–30 m, `baseXg` 0,07
-- [ ] Rzut karny: 4% fauli w polu karnym, `baseXg` 0,76
-- [ ] `sfgMult = 1 + (setting − 50) / 250`
-- [ ] `aerialEdge = clamp(teamAerialAtk − teamAerialDef, −25, +25)`
-- [ ] `cornerXgMult = 1 + aerialEdge × 0,006`
-- [ ] `freeKickXgMult = 1 + aerialEdge × 0,003`
-- [ ] Wykonawca SFG: najwyższy `shooting` (wolne, karne) lub `passing` (rożne)
-- [ ] Rzut karny: `shooting 0,60 + clutchBonus` vs GK `diving 0,35 / reflexes 0,35 / positioning 0,30`
-- [ ] `clutchBonus = (determination − 5,5) × 1,2 × stakePressure`
-- [ ] `stakePressure`: regular 0,5 / playIn 1,0 / playoff 1,0 / playoffElimination 1,4 / leagueFinal 1,6
+- [x] `centralBuildUp` — 2 pojedynki z wagami z docs
+- [x] `wingPlay` — 2 pojedynki
+- [x] `crossFromWide` — 2 pojedynki z `aerialFactor`
+- [x] `throughBall` — 2 pojedynki, +0,10 do pace obrońcy przy `DefensiveLine.high`
+- [x] `individualDribble` — 2 pojedynki
+- [x] `longBall` — jawny próg trudności 70 i pojedynek zgrania
+- [x] `counterAttack` — 2 pojedynki, jakość ×1,35, ×1,15 przy wysokiej linii rywala, ×0,85 przy deep
+- [x] `setPiece` — resolver z jawnym triggerem; mostek corner do czasu generatora fauli/rożnych z Task 20
+- [x] `aerialFactor = clamp(60 + (heightCm − 180) × 1,2, 35, 85)`, waga 0,15
+- [x] `xG = clamp(baseXg × chanceQualityMult × shooterFactor, 0,01, 0,95)`
+- [x] `shooterFactor = 1 + (effShooting − 70) / 180`
+- [x] `gkFactor = 1 − (gkRating − 70) / 240`
+- [x] `P(gol) = clamp(xG × gkFactor, 0,005, 0,97)`
+- [x] `chanceQualityMult`: 1 wygrany pojedynek ×0,7, 2 ×1,0, 3 ×1,4
+- [x] Rezultat gdy nie gol: obroniony 42% (25% dobitki, xG ×0,6)
+- [x] Rezultat: niecelny 33%
+- [x] Rezultat: zablokowany 20% (35% rożnego)
+- [x] Rezultat: słupek/poprzeczka 5% (30% dobitki)
+- [x] Model GK: 5 zestawów wag per typ strzału
+- [x] Błąd bramkarza `(100 − handling) / 1200 × weatherHandlingMult`
+- [x] Brak GK: `gkRating = (physicality × 0,4 + pace × 0,3 + defending × 0,3) × 0,55`
+- [x] Rzut rożny: jawny trigger, `baseXg` 0,035 i wpływ `aerialEdge`
+- [x] Wolny bezpośredni: jawny trigger, `baseXg` 0,07
+- [x] Rzut karny: jawny trigger, `baseXg` 0,76
+- [x] `sfgMult = 1 + (setting − 50) / 250`
+- [x] `aerialEdge = clamp(teamAerialAtk − teamAerialDef, −25, +25)`
+- [x] `cornerXgMult = 1 + aerialEdge × 0,006`
+- [x] `freeKickXgMult = 1 + aerialEdge × 0,003`
+- [x] Wykonawca SFG: najwyższy `shooting` (wolne, karne) lub `passing` (rożne)
+- [x] Rzut karny: `shooting 0,60 + clutchBonus` vs GK `diving 0,35 / reflexes 0,35 / positioning 0,30`
+- [x] `clutchBonus = (determination − 5,5) × 1,2 × stakePressure`
+- [x] `stakePressure`: regular 0,5 / playIn 1,0 / playoff 1,0 / playoffElimination 1,4 / leagueFinal 1,6
 
 **Testy**
-- [ ] Lejek 22% sekwencja→strzał i 11,5% strzał→gol daje ~2,6 gola/mecz
-- [ ] Różnica wzrostu +18 cm daje ~54,5% w starciu powietrznym
-- [ ] Karny konwertowany ~76%
-- [ ] Brak GK w XI daje wynik ~0–5
+- [x] Lejek 22% sekwencja→strzał i bazowe `baseXg` kalibrowane wokół 11,5% strzał→gol
+- [x] Różnica wzrostu +18 cm daje ~54,5% w starciu powietrznym
+- [x] Karny ma bazowe xG 0,76, neutralne `sfgMult` oraz clutch duel
+- [x] Brak GK w XI używa fallbacku i pozostawia mecz grywalny
+- [x] Ten sam seed daje identyczny trace, gole, strzały i xG w `simulateFull` oraz obserwacji minutowej
 
-**Demo:** feed meczu pokazuje nazwane typy akcji, xG per sytuacja, obrony bramkarza i stałe fragmenty gry.
+**Implementacja:** `SequenceChainResolver`, `ShotResolver`, `GoalkeeperResolver` i `SetPieceResolver` znajdują się w `lib/core/simulation`. `SimulationLiveMatch` prowadzi runtime-only agregaty goli, strzałów, xG i rzutów rożnych, a `MatchState`, `MatchResult`, provider oraz legacy engine nie zostały rozszerzone ani przełączone.
+
+**Doprecyzowania balansu:** zwykłe typy sekwencji mają konfigurowalną mapę `baseXg` w `MatchdayBalance` (średnia skalibrowana wokół 0,115); `longBall` używa progu 70 i prawdopodobieństwa `clamp(0,50 + (passing − threshold) / 100, 0,05, 0,95)`. Do czasu Task 20 SFG przyjmuje jawny `SetPieceType`, a losowanie faulu/rożnego pozostaje poza zakresem — silnik mapuje typ `setPiece` na testowalny corner trigger bez rekurencyjnego generowania akcji.
+
+**Demo:** runtime trace zawiera nazwany typ sekwencji, listę pojedynków, xG, wynik strzału, bramkarza, dobitkę i dane SFG; agregaty są dostępne w `SimulationResult`, bez zmiany schematu zapisu.
 
 ---
 

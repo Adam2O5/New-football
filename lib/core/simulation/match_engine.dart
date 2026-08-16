@@ -7,7 +7,11 @@ import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/random/match_random.dart';
 import 'package:new_football/core/simulation/duel_resolver.dart';
 import 'package:new_football/core/simulation/effective_attributes.dart';
+import 'package:new_football/core/simulation/sequence_chain_resolver.dart';
 import 'package:new_football/core/simulation/sequence_resolver.dart';
+import 'package:new_football/core/simulation/set_piece_resolver.dart';
+import 'package:new_football/core/simulation/shot_models.dart';
+import 'package:new_football/core/simulation/shot_resolver.dart';
 import 'package:new_football/core/simulation/team_shape.dart';
 import 'package:new_football/core/simulation/unit_ratings.dart';
 import 'package:new_football/core/tactics/tactics_setup.dart';
@@ -19,13 +23,26 @@ class SimulationSequenceTrace {
     required this.attackerId,
     required this.defenderId,
     required this.duel,
+    this.duels = const [],
+    this.chain,
+    this.shot,
+    this.setPiece,
   });
 
   final SequenceType type;
   final bool attackingHome;
   final String attackerId;
   final String defenderId;
-  final DuelResult duel;
+
+  /// Backwards-compatible first duel from Task 17. It is null for a pure
+  /// set-piece sequence that has no outfield chain.
+  final DuelResult? duel;
+  final List<SequenceDuelTrace> duels;
+  final SequenceResolution? chain;
+  final ShotResolution? shot;
+  final SetPieceResolution? setPiece;
+
+  bool get isGoal => shot?.isGoal ?? false;
 }
 
 class SimulationMinuteTrace {
@@ -67,8 +84,8 @@ class SimulationMinuteTrace {
   final int randomCursorEnd;
 }
 
-/// Runtime-only result for Task 17. It intentionally does not replace
-/// [MatchResult] until Tasks 18–22 complete the shot, event and UI pipeline.
+/// Runtime-only result for Task 18. It intentionally does not replace
+/// [MatchResult] until the later event, UI and persistence cutover tasks.
 class SimulationResult {
   SimulationResult({
     required this.seed,
@@ -79,6 +96,14 @@ class SimulationResult {
     required this.awaySequences,
     required this.totalSequences,
     required this.homePossessionPercent,
+    required this.homeShots,
+    required this.awayShots,
+    required this.homeShotsOnTarget,
+    required this.awayShotsOnTarget,
+    required this.homeXg,
+    required this.awayXg,
+    required this.homeCorners,
+    required this.awayCorners,
   }) : minuteTraces = List.unmodifiable(minuteTraces);
 
   final int seed;
@@ -89,11 +114,22 @@ class SimulationResult {
   final int awaySequences;
   final int totalSequences;
   final double homePossessionPercent;
+  final int homeShots;
+  final int awayShots;
+  final int homeShotsOnTarget;
+  final int awayShotsOnTarget;
+  final double homeXg;
+  final double awayXg;
+  final int homeCorners;
+  final int awayCorners;
 
   double get awayPossessionPercent => 100.0 - homePossessionPercent;
   int get minutesSimulated => minuteTraces.length;
+  int get homeGoals => finalState.homeGoals;
+  int get awayGoals => finalState.awayGoals;
+  int get totalGoals => homeGoals + awayGoals;
 
-  /// Stable, human-readable digest of the complete Task 17 roll trace.
+  /// Stable digest including Task 17 duels and Task 18 shot outcomes.
   String get traceSignature => minuteTraces
       .map(
         (minute) => [
@@ -107,8 +143,12 @@ class SimulationResult {
               sequence.attackingHome ? 'H' : 'A',
               sequence.attackerId,
               sequence.defenderId,
-              sequence.duel.attackerProbability.toStringAsFixed(8),
-              sequence.duel.attackerWon == true ? 'W' : 'L',
+              sequence.duel?.attackerProbability.toStringAsFixed(8) ?? 'none',
+              sequence.duel?.attackerWon == true ? 'W' : 'L',
+              sequence.chain?.wonDuels ?? 0,
+              sequence.shot?.outcome?.name ?? 'no-shot',
+              sequence.shot?.xg.toStringAsFixed(8) ?? '0.00000000',
+              sequence.shot?.reboundGoal == true ? 'R' : '-',
             ].join(','),
         ].join(':'),
       )
@@ -135,6 +175,16 @@ class SimulationLiveMatch {
   double _homePossessionSum = 0;
   int _homeSequences = 0;
   int _awaySequences = 0;
+  int _homeShots = 0;
+  int _awayShots = 0;
+  int _homeShotsOnTarget = 0;
+  int _awayShotsOnTarget = 0;
+  double _homeXg = 0;
+  double _awayXg = 0;
+  int _homeCorners = 0;
+  int _awayCorners = 0;
+  bool _homeCounterAttackEligible = false;
+  bool _awayCounterAttackEligible = false;
 
   MatchState get state => legacyMatch.state;
   bool get isFinished => legacyMatch.isFinished;
@@ -152,6 +202,14 @@ class SimulationLiveMatch {
   int get totalSequences => _homeSequences + _awaySequences;
   int get homeSequences => _homeSequences;
   int get awaySequences => _awaySequences;
+  int get homeShots => _homeShots;
+  int get awayShots => _awayShots;
+  int get homeShotsOnTarget => _homeShotsOnTarget;
+  int get awayShotsOnTarget => _awayShotsOnTarget;
+  double get homeXg => _homeXg;
+  double get awayXg => _awayXg;
+  int get homeCorners => _homeCorners;
+  int get awayCorners => _awayCorners;
 
   SimulationResult toResult() => SimulationResult(
     seed: seed,
@@ -164,6 +222,14 @@ class SimulationLiveMatch {
     homePossessionPercent: minuteTraces.isEmpty
         ? 50.0
         : _homePossessionSum / minuteTraces.length * 100.0,
+    homeShots: _homeShots,
+    awayShots: _awayShots,
+    homeShotsOnTarget: _homeShotsOnTarget,
+    awayShotsOnTarget: _awayShotsOnTarget,
+    homeXg: _homeXg,
+    awayXg: _awayXg,
+    homeCorners: _homeCorners,
+    awayCorners: _awayCorners,
   );
 }
 
@@ -252,43 +318,134 @@ class SimulationMatchEngine {
     var homeSequenceCount = 0;
     var awaySequenceCount = 0;
 
-    // Task 17 order 5: each sequence consumes side, type, player selection,
-    // then one noisy core duel. Task 18 will expand this into multi-duel shot
-    // chains without changing the RNG ownership contract.
+    // Task 18 order 5: resolve each selected sequence as a multi-duel chain,
+    // then pass successful sequences through the shot/GK funnel. The same
+    // MatchRandom remains the owner of every additional draw.
+    final chainResolver = SequenceChainResolver(balance: balance);
+    final shotResolver = ShotResolver(balance: balance);
+    final setPieceResolver = SetPieceResolver(balance: balance);
     for (var index = 0; index < sequenceCount; index++) {
       final attackingHome = live.random.nextDouble() < possessionProbability;
-      final context = _sequenceContext(live, attackingHome: attackingHome);
+      final sequenceContext = _sequenceContext(
+        live,
+        attackingHome: attackingHome,
+        counterAttackEligible: attackingHome
+            ? live._homeCounterAttackEligible
+            : live._awayCounterAttackEligible,
+      );
       final selection = SequenceSelector(
         balance: balance,
-      ).select(context: context, random: live.random);
-      final attackerAttributes =
-          context.attackingEffectiveAttributes[selection.attacker.id];
-      final defenderAttributes =
-          context.defendingEffectiveAttributes[selection.defender.id];
-      final attackerRating = attackerAttributes == null
-          ? context.attackingRatings.atkRating
-          : const DuelResolver().weightedRating(
-              attackerAttributes,
-              selection.attackerAttributeWeights,
-            );
-      final defenderRating = defenderAttributes == null
-          ? context.defendingRatings.defRating
-          : const DuelResolver().weightedRating(
-              defenderAttributes,
-              selection.defenderAttributeWeights,
-            );
-      final duel = DuelResolver(balance: balance).contest(
-        attackerRating: attackerRating,
-        defenderRating: defenderRating,
+      ).select(context: sequenceContext, random: live.random);
+      final chain = chainResolver.resolve(
+        selection: selection,
+        context: sequenceContext,
         random: live.random,
       );
+      if (attackingHome) {
+        live._awayCounterAttackEligible = chain.wonDuels > 0;
+        live._homeCounterAttackEligible = false;
+      } else {
+        live._homeCounterAttackEligible = chain.wonDuels > 0;
+        live._awayCounterAttackEligible = false;
+      }
+
+      ShotResolution? shot;
+      SetPieceResolution? setPiece;
+      if (selection.type == SequenceType.setPiece) {
+        final attackingLineup = attackingHome
+            ? state.homeLineup
+            : state.awayLineup;
+        final defendingLineup = attackingHome
+            ? state.awayLineup
+            : state.homeLineup;
+        final attackingAttributes = attackingHome
+            ? live.homeEffectiveAttributes
+            : live.awayEffectiveAttributes;
+        final defendingAttributes = attackingHome
+            ? live.awayEffectiveAttributes
+            : live.homeEffectiveAttributes;
+        final attackingTactics = attackingHome
+            ? state.homeTactics
+            : state.awayTactics;
+        // Task 20 will replace this explicit bridge with foul/corner events.
+        setPiece = setPieceResolver.resolve(
+          type: SetPieceType.corner,
+          attackingLineup: attackingLineup,
+          defendingLineup: defendingLineup,
+          attackingAttributes: attackingAttributes,
+          defendingAttributes: defendingAttributes,
+          attackingTactics: attackingTactics,
+          context: state.context,
+          random: live.random,
+        );
+        shot = setPiece.shot;
+      } else if (chain.canShoot && chain.shooter != null) {
+        final defendingLineup = attackingHome
+            ? state.awayLineup
+            : state.homeLineup;
+        final defendingAttributes = attackingHome
+            ? live.awayEffectiveAttributes
+            : live.homeEffectiveAttributes;
+        shot = shotResolver.resolve(
+          sequenceType: selection.type,
+          shotKind: chain.shotKind,
+          shooter: chain.shooter!,
+          defendingLineup: defendingLineup,
+          context: state.context,
+          random: live.random,
+          shooterAttributes: sequenceContext.attackingEffectiveAttributes,
+          defendingAttributes: defendingAttributes,
+          wonDuels: chain.wonDuels,
+          chanceQualityMultiplier: chain.chanceQualityMultiplier,
+          minute: nextMinute,
+        );
+      }
+
+      if (shot != null && shot.isShot) {
+        final xg = shot.xg + shot.reboundXg;
+        if (attackingHome) {
+          live._homeShots++;
+          live._homeXg += xg;
+          if (shot.isOnTarget) live._homeShotsOnTarget++;
+          if (shot.reboundAttempted) live._homeShots++;
+          if (shot.reboundGoal) live._homeShotsOnTarget++;
+          if (shot.isGoal) {
+            state = state.copyWith(homeGoals: state.homeGoals + 1);
+          }
+          if (shot.cornerAwarded || setPiece?.type == SetPieceType.corner) {
+            live._homeCorners++;
+          }
+        } else {
+          live._awayShots++;
+          live._awayXg += xg;
+          if (shot.isOnTarget) live._awayShotsOnTarget++;
+          if (shot.reboundAttempted) live._awayShots++;
+          if (shot.reboundGoal) live._awayShotsOnTarget++;
+          if (shot.isGoal) {
+            state = state.copyWith(awayGoals: state.awayGoals + 1);
+          }
+          if (shot.cornerAwarded || setPiece?.type == SetPieceType.corner) {
+            live._awayCorners++;
+          }
+        }
+      }
+
+      final primaryDuel = chain.primaryDuel ?? setPiece?.penaltyDuel;
       sequenceTraces.add(
         SimulationSequenceTrace(
           type: selection.type,
           attackingHome: attackingHome,
-          attackerId: selection.attacker.id,
-          defenderId: selection.defender.id,
-          duel: duel,
+          attackerId: chain.duels.isNotEmpty
+              ? chain.duels.first.attackerId
+              : selection.attacker.id,
+          defenderId: chain.duels.isNotEmpty
+              ? chain.duels.first.defenderId
+              : selection.defender.id,
+          duel: primaryDuel,
+          duels: chain.duels,
+          chain: chain,
+          shot: shot,
+          setPiece: setPiece,
         ),
       );
       if (attackingHome) {
@@ -297,6 +454,8 @@ class SimulationMatchEngine {
         awaySequenceCount++;
       }
     }
+
+    live.legacyMatch.state = state;
 
     live._homeSequences += homeSequenceCount;
     live._awaySequences += awaySequenceCount;
@@ -405,6 +564,7 @@ class SimulationMatchEngine {
   SequenceContext _sequenceContext(
     SimulationLiveMatch live, {
     required bool attackingHome,
+    required bool counterAttackEligible,
   }) {
     final state = live.state;
     final attackingLineup = attackingHome ? state.homeLineup : state.awayLineup;
@@ -444,6 +604,7 @@ class SimulationMatchEngine {
       attackingRatings: attackingRatings,
       defendingRatings: defendingRatings,
       weather: state.context.weather,
+      counterAttackEligible: counterAttackEligible,
       attackingAssignedPositions: _assignedPositions(attackingSnapshot),
       defendingAssignedPositions: _assignedPositions(defendingSnapshot),
     );

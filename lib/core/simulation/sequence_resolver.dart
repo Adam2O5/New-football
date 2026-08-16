@@ -32,6 +32,7 @@ class SequenceContext {
     required this.weather,
     this.attackingAssignedPositions = const {},
     this.defendingAssignedPositions = const {},
+    this.counterAttackEligible = true,
   });
 
   final TacticsSetup attackingTactics;
@@ -45,6 +46,7 @@ class SequenceContext {
   final Weather weather;
   final Map<String, Position> attackingAssignedPositions;
   final Map<String, Position> defendingAssignedPositions;
+  final bool counterAttackEligible;
 }
 
 class SequenceSelection {
@@ -174,6 +176,9 @@ class SequenceSelector {
           weights[SequenceType.throughBall]! + normalBonus;
       weights[SequenceType.counterAttack] =
           weights[SequenceType.counterAttack]! + normalBonus;
+    }
+    if (!context.counterAttackEligible) {
+      weights[SequenceType.counterAttack] = 0.0;
     }
 
     return weights;

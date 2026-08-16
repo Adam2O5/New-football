@@ -1,4 +1,5 @@
 import 'package:new_football/core/models/enums.dart';
+import 'package:new_football/core/tactics/tactics_setup.dart';
 
 /// Tunable constants from `docs/matchday_model.md` §19.
 ///
@@ -68,6 +69,79 @@ class MatchdayBalance {
     this.stakePlayoffSequenceMultiplier = 1.04,
     this.stakePlayoffEliminationSequenceMultiplier = 1.08,
     this.stakeLeagueFinalSequenceMultiplier = 1.10,
+    this.sequenceBaseXg = const <String, double>{
+      'centralBuildUp': 0.118,
+      'wingPlay': 0.112,
+      'crossFromWide': 0.145,
+      'throughBall': 0.138,
+      'individualDribble': 0.115,
+      'counterAttack': 0.155,
+      'longBall': 0.125,
+      'setPiece': 0.035,
+    },
+    this.shootingBaseline = 70.0,
+    this.gkRatingBaseline = 70.0,
+    this.gkRatingDivisor = 240.0,
+    this.shotSavedWeight = 0.42,
+    this.shotOffTargetWeight = 0.33,
+    this.shotBlockedWeight = 0.20,
+    this.shotPostWeight = 0.05,
+    this.reboundAfterSave = 0.25,
+    this.reboundAfterPost = 0.30,
+    this.reboundXgMultiplier = 0.60,
+    this.cornerAfterBlock = 0.35,
+    this.noGkRatingMultiplier = 0.55,
+    this.longBallPassThreshold = 70.0,
+    this.longBallPassBase = 0.50,
+    this.counterAttackQualityMultiplier = 1.35,
+    this.counterAttackHighLineMultiplier = 1.15,
+    this.counterAttackDeepLineMultiplier = 0.85,
+    this.penaltyDuelInfluence = 0.05,
+    this.cornerBaseXg = 0.035,
+    this.directFreeKickBaseXg = 0.07,
+    this.penaltyBaseXg = 0.76,
+    this.stakeRegularPressure = 0.5,
+    this.stakePlayInPressure = 1.0,
+    this.stakePlayoffPressure = 1.0,
+    this.stakePlayoffEliminationPressure = 1.4,
+    this.stakeLeagueFinalPressure = 1.6,
+    this.weatherHandlingMultipliers = const <String, double>{
+      'clear': 1.0,
+      'overcast': 1.0,
+      'rain': 1.25,
+      'heavyRain': 1.60,
+      'wind': 1.30,
+      'snow': 1.45,
+      'heat': 1.05,
+      'cold': 1.08,
+    },
+    this.goalkeeperProfileWeights = const <String, Map<String, double>>{
+      'distance': <String, double>{
+        'reflexes': 0.40,
+        'positioning': 0.35,
+        'diving': 0.25,
+      },
+      'box': <String, double>{
+        'reflexes': 0.35,
+        'diving': 0.35,
+        'positioning': 0.30,
+      },
+      'header': <String, double>{
+        'positioning': 0.40,
+        'handling': 0.35,
+        'diving': 0.25,
+      },
+      'oneOnOne': <String, double>{
+        'positioning': 0.35,
+        'speed': 0.30,
+        'diving': 0.35,
+      },
+      'penalty': <String, double>{
+        'diving': 0.35,
+        'reflexes': 0.35,
+        'positioning': 0.30,
+      },
+    },
   });
 
   /// Illegal roster → walkover score for the offending side.
@@ -142,6 +216,38 @@ class MatchdayBalance {
   final double stakePlayoffEliminationSequenceMultiplier;
   final double stakeLeagueFinalSequenceMultiplier;
 
+  /// Task 18 ordinary-sequence xG calibration. `setPiece` is overridden by
+  /// the explicit SFG base values below.
+  final Map<String, double> sequenceBaseXg;
+  final double shootingBaseline;
+  final double gkRatingBaseline;
+  final double gkRatingDivisor;
+  final double shotSavedWeight;
+  final double shotOffTargetWeight;
+  final double shotBlockedWeight;
+  final double shotPostWeight;
+  final double reboundAfterSave;
+  final double reboundAfterPost;
+  final double reboundXgMultiplier;
+  final double cornerAfterBlock;
+  final double noGkRatingMultiplier;
+  final double longBallPassThreshold;
+  final double longBallPassBase;
+  final double counterAttackQualityMultiplier;
+  final double counterAttackHighLineMultiplier;
+  final double counterAttackDeepLineMultiplier;
+  final double penaltyDuelInfluence;
+  final double cornerBaseXg;
+  final double directFreeKickBaseXg;
+  final double penaltyBaseXg;
+  final double stakeRegularPressure;
+  final double stakePlayInPressure;
+  final double stakePlayoffPressure;
+  final double stakePlayoffEliminationPressure;
+  final double stakeLeagueFinalPressure;
+  final Map<String, double> weatherHandlingMultipliers;
+  final Map<String, Map<String, double>> goalkeeperProfileWeights;
+
   double tempoMultiplier(Tempo tempo) => switch (tempo) {
     Tempo.slow => tempoSlowMultiplier,
     Tempo.balanced => tempoBalancedMultiplier,
@@ -162,6 +268,51 @@ class MatchdayBalance {
     MatchStake.playoffElimination => stakePlayoffEliminationSequenceMultiplier,
     MatchStake.leagueFinal => stakeLeagueFinalSequenceMultiplier,
   };
+
+  double stakePressure(MatchStake stake) => switch (stake) {
+    MatchStake.regular => stakeRegularPressure,
+    MatchStake.playIn => stakePlayInPressure,
+    MatchStake.playoff => stakePlayoffPressure,
+    MatchStake.playoffElimination => stakePlayoffEliminationPressure,
+    MatchStake.leagueFinal => stakeLeagueFinalPressure,
+  };
+
+  double aerialFactor(int heightCm) =>
+      (aerialBase + (heightCm - 180) * aerialSlope)
+          .clamp(aerialClampMin.toDouble(), aerialClampMax.toDouble())
+          .toDouble();
+
+  double weatherHandlingMultiplier(Weather weather) =>
+      weatherHandlingMultipliers[weather.name] ?? 1.0;
+
+  Map<String, double> goalkeeperProfileFor(String shotKind) =>
+      goalkeeperProfileWeights[shotKind] ?? goalkeeperProfileWeights['box']!;
+
+  double setPieceBaseXg(String type) => switch (type) {
+    'corner' => cornerBaseXg,
+    'directFreeKick' => directFreeKickBaseXg,
+    'penalty' => penaltyBaseXg,
+    _ => sequenceBaseXg['setPiece'] ?? shotToGoal,
+  };
+
+  double sfgMultiplier(String type, TacticsSetup tactics) {
+    final setting = switch (type) {
+      'corner' => tactics.cornersAttack,
+      'directFreeKick' => tactics.freeKicks,
+      'penalty' => tactics.penalties,
+      _ => 50,
+    };
+    return 1.0 + (setting - 50) / 250.0;
+  }
+
+  double clutchBonus({
+    required int determination,
+    required MatchStake stake,
+    required bool ambitious,
+  }) {
+    final base = (determination - 5.5) * clutchWeight * stakePressure(stake);
+    return base * (ambitious ? 1.03 : 1.0);
+  }
 
   /// Documentation names for the substitution limits.
   int get subLimit => maxSubstitutions;
