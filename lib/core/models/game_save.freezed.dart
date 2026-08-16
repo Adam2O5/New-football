@@ -28,6 +28,7 @@ mixin _$GameSaveMeta {
   int get seasonYear => throw _privateConstructorUsedError;
   SeasonPhase get phase => throw _privateConstructorUsedError;
   String? get playerTeamName => throw _privateConstructorUsedError;
+  int get schemaVersion => throw _privateConstructorUsedError;
 
   /// Serializes this GameSaveMeta to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -54,6 +55,7 @@ abstract class $GameSaveMetaCopyWith<$Res> {
     int seasonYear,
     SeasonPhase phase,
     String? playerTeamName,
+    int schemaVersion,
   });
 }
 
@@ -79,6 +81,7 @@ class _$GameSaveMetaCopyWithImpl<$Res, $Val extends GameSaveMeta>
     Object? seasonYear = null,
     Object? phase = null,
     Object? playerTeamName = freezed,
+    Object? schemaVersion = null,
   }) {
     return _then(
       _value.copyWith(
@@ -110,6 +113,10 @@ class _$GameSaveMetaCopyWithImpl<$Res, $Val extends GameSaveMeta>
                 ? _value.playerTeamName
                 : playerTeamName // ignore: cast_nullable_to_non_nullable
                       as String?,
+            schemaVersion: null == schemaVersion
+                ? _value.schemaVersion
+                : schemaVersion // ignore: cast_nullable_to_non_nullable
+                      as int,
           )
           as $Val,
     );
@@ -133,6 +140,7 @@ abstract class _$$GameSaveMetaImplCopyWith<$Res>
     int seasonYear,
     SeasonPhase phase,
     String? playerTeamName,
+    int schemaVersion,
   });
 }
 
@@ -157,6 +165,7 @@ class __$$GameSaveMetaImplCopyWithImpl<$Res>
     Object? seasonYear = null,
     Object? phase = null,
     Object? playerTeamName = freezed,
+    Object? schemaVersion = null,
   }) {
     return _then(
       _$GameSaveMetaImpl(
@@ -188,6 +197,10 @@ class __$$GameSaveMetaImplCopyWithImpl<$Res>
             ? _value.playerTeamName
             : playerTeamName // ignore: cast_nullable_to_non_nullable
                   as String?,
+        schemaVersion: null == schemaVersion
+            ? _value.schemaVersion
+            : schemaVersion // ignore: cast_nullable_to_non_nullable
+                  as int,
       ),
     );
   }
@@ -204,6 +217,7 @@ class _$GameSaveMetaImpl implements _GameSaveMeta {
     required this.seasonYear,
     required this.phase,
     this.playerTeamName,
+    this.schemaVersion = SaveSchema.unknownVersion,
   });
 
   factory _$GameSaveMetaImpl.fromJson(Map<String, dynamic> json) =>
@@ -223,10 +237,13 @@ class _$GameSaveMetaImpl implements _GameSaveMeta {
   final SeasonPhase phase;
   @override
   final String? playerTeamName;
+  @override
+  @JsonKey()
+  final int schemaVersion;
 
   @override
   String toString() {
-    return 'GameSaveMeta(id: $id, name: $name, createdAt: $createdAt, updatedAt: $updatedAt, seasonYear: $seasonYear, phase: $phase, playerTeamName: $playerTeamName)';
+    return 'GameSaveMeta(id: $id, name: $name, createdAt: $createdAt, updatedAt: $updatedAt, seasonYear: $seasonYear, phase: $phase, playerTeamName: $playerTeamName, schemaVersion: $schemaVersion)';
   }
 
   @override
@@ -244,7 +261,9 @@ class _$GameSaveMetaImpl implements _GameSaveMeta {
                 other.seasonYear == seasonYear) &&
             (identical(other.phase, phase) || other.phase == phase) &&
             (identical(other.playerTeamName, playerTeamName) ||
-                other.playerTeamName == playerTeamName));
+                other.playerTeamName == playerTeamName) &&
+            (identical(other.schemaVersion, schemaVersion) ||
+                other.schemaVersion == schemaVersion));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -258,6 +277,7 @@ class _$GameSaveMetaImpl implements _GameSaveMeta {
     seasonYear,
     phase,
     playerTeamName,
+    schemaVersion,
   );
 
   /// Create a copy of GameSaveMeta
@@ -283,6 +303,7 @@ abstract class _GameSaveMeta implements GameSaveMeta {
     required final int seasonYear,
     required final SeasonPhase phase,
     final String? playerTeamName,
+    final int schemaVersion,
   }) = _$GameSaveMetaImpl;
 
   factory _GameSaveMeta.fromJson(Map<String, dynamic> json) =
@@ -302,6 +323,8 @@ abstract class _GameSaveMeta implements GameSaveMeta {
   SeasonPhase get phase;
   @override
   String? get playerTeamName;
+  @override
+  int get schemaVersion;
 
   /// Create a copy of GameSaveMeta
   /// with the given fields replaced by the non-null parameter values.
@@ -483,7 +506,7 @@ class _$GameSaveImpl implements _GameSave {
     required this.meta,
     required this.leagueState,
     required this.saveSeed,
-    this.schemaVersion = 2,
+    this.schemaVersion = SaveSchema.unknownVersion,
   });
 
   factory _$GameSaveImpl.fromJson(Map<String, dynamic> json) =>

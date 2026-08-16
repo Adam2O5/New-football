@@ -104,10 +104,11 @@ class GameFactory {
         seasonYear: request.seasonYear,
         phase: SeasonPhase.regular,
         playerTeamName: playerTeam?.name,
+        schemaVersion: SaveSchema.currentVersion,
       ),
       leagueState: league,
       saveSeed: saveSeed,
-      schemaVersion: 2,
+      schemaVersion: SaveSchema.currentVersion,
     );
   }
 

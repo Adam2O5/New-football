@@ -296,6 +296,16 @@ class AppLocalizationsPl extends AppLocalizations {
   String get loadGame_loadFailed => 'Nie udało się wczytać zapisu';
 
   @override
+  String loadGame_incompatibleOlder(Object currentVersion, Object version) {
+    return 'Zapis pochodzi ze starszej wersji ($version), wymagane jest $currentVersion.';
+  }
+
+  @override
+  String loadGame_incompatibleNewer(Object currentVersion, Object version) {
+    return 'Zapis pochodzi z nowszej wersji ($version), obsługiwana jest wersja $currentVersion.';
+  }
+
+  @override
   String get loadGame_delete => 'Usuń';
 
   @override

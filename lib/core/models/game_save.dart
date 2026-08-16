@@ -5,6 +5,17 @@ import 'package:new_football/core/models/league_state.dart';
 part 'game_save.freezed.dart';
 part 'game_save.g.dart';
 
+/// Versioning contract for persisted saves.
+///
+/// Any change to a serialized model must increase [currentVersion]. V1 does
+/// not migrate old saves; it keeps them visible so the user can remove them.
+abstract final class SaveSchema {
+  static const unknownVersion = 0;
+  static const currentVersion = 2;
+}
+
+enum SaveCompatibility { compatible, older, newer }
+
 @freezed
 class GameSaveMeta with _$GameSaveMeta {
   const factory GameSaveMeta({
@@ -15,10 +26,22 @@ class GameSaveMeta with _$GameSaveMeta {
     required int seasonYear,
     required SeasonPhase phase,
     String? playerTeamName,
+    @Default(SaveSchema.unknownVersion) int schemaVersion,
   }) = _GameSaveMeta;
 
   factory GameSaveMeta.fromJson(Map<String, dynamic> json) =>
       _$GameSaveMetaFromJson(json);
+}
+
+extension GameSaveMetaCompatibility on GameSaveMeta {
+  SaveCompatibility compatibilityWith(int supportedVersion) {
+    if (schemaVersion == supportedVersion) {
+      return SaveCompatibility.compatible;
+    }
+    return schemaVersion < supportedVersion
+        ? SaveCompatibility.older
+        : SaveCompatibility.newer;
+  }
 }
 
 @freezed
@@ -27,7 +50,7 @@ class GameSave with _$GameSave {
     required GameSaveMeta meta,
     required LeagueState leagueState,
     required int saveSeed,
-    @Default(2) int schemaVersion,
+    @Default(SaveSchema.unknownVersion) int schemaVersion,
   }) = _GameSave;
 
   factory GameSave.fromJson(Map<String, dynamic> json) =>

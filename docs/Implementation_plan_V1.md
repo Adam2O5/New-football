@@ -198,21 +198,23 @@ Legenda: `⬜` do zrobienia · `🔄` w trakcie · `✅` gotowe
 
 ---
 
-### ⬜ Task 2: Ochrona przed niekompatybilnymi zapisami (bez migracji)
+### ✅ Task 2: Ochrona przed niekompatybilnymi zapisami (bez migracji)
 
 **Cel:** realizacja decyzji 2c — brak migracji, ale bez crashy i bez cichej utraty danych.
 
-- [ ] `SaveRepository.load()` odrzuca `schemaVersion != currentSchemaVersion`
-- [ ] Rozróżnić komunikat „zapis starszy" i „zapis nowszy" (klucze w `.arb`)
-- [ ] `listSaves()` nie wywala się na niekompatybilnym wpisie — zwraca metę z flagą
-- [ ] Dodać `GameSaveMeta.schemaVersion` do indeksu, żeby lista nie musiała czytać całych plików
-- [ ] `LoadGameScreen`: niekompatybilne pozycje nieaktywne, z powodem i przyciskiem usunięcia
-- [ ] Udokumentować w pliku dyscyplinę: każde zadanie zmieniające model podnosi `currentSchemaVersion`
+- [x] `SaveRepository.load()` odrzuca `schemaVersion != currentSchemaVersion`
+- [x] Rozróżnić komunikat „zapis starszy" i „zapis nowszy" (klucze w `.arb`)
+- [x] `listSaves()` nie wywala się na niekompatybilnym wpisie — zwraca metę z wyliczaną kompatybilnością
+- [x] Dodać `GameSaveMeta.schemaVersion` do indeksu, żeby lista nie musiała czytać całych plików
+- [x] `LoadGameScreen`: niekompatybilne pozycje nieaktywne, z powodem i przyciskiem usunięcia
+- [x] Udokumentować w pliku dyscyplinę: każde zadanie zmieniające model podnosi `currentSchemaVersion`
+
+**Dyscyplina wersjonowania:** każda zmiana modelu zapisywanego w JSON musi podnieść `SaveSchema.currentVersion` (alias `SaveRepository.currentSchemaVersion` pozostaje stabilny dla wywołań). W V1 nie dodajemy migracji — starsze i nowsze zapisy pozostają widoczne w indeksie, ale ich ładowanie jest odrzucane z kierunkowym komunikatem.
 
 **Testy**
-- [ ] Zapis z niższą wersją odrzucony z komunikatem „starszy"
-- [ ] Zapis z wyższą wersją odrzucony z komunikatem „nowszy"
-- [ ] Lista zapisów z jednym niekompatybilnym wpisem renderuje się poprawnie
+- [x] Zapis z niższą wersją odrzucony z komunikatem „starszy"
+- [x] Zapis z wyższą wersją odrzucony z komunikatem „nowszy"
+- [x] Lista zapisów z niekompatybilnymi wpisami zachowuje je w indeksie i wylicza kierunek niezgodności
 
 **Demo:** po podniesieniu schematu stary save widnieje na liście jako niekompatybilny z jasnym powodem, zamiast crashować.
 

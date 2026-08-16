@@ -296,6 +296,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loadGame_loadFailed => 'Failed to load save';
 
   @override
+  String loadGame_incompatibleOlder(Object currentVersion, Object version) {
+    return 'This save is from an older version ($version); version $currentVersion is required.';
+  }
+
+  @override
+  String loadGame_incompatibleNewer(Object currentVersion, Object version) {
+    return 'This save is from a newer version ($version); version $currentVersion is supported.';
+  }
+
+  @override
   String get loadGame_delete => 'Delete';
 
   @override

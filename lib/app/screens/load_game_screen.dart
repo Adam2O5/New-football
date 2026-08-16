@@ -6,6 +6,7 @@ import 'package:new_football/app/widgets/screen_background.dart';
 import 'package:new_football/app/l10n/enum_labels.dart';
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/core/models/game_save.dart';
+import 'package:new_football/data/save_repository.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
 class LoadGameScreen extends ConsumerWidget {
@@ -34,10 +35,9 @@ class LoadGameScreen extends ConsumerWidget {
             return Container(
               margin: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Theme.of(context)
-                    .colorScheme
-                    .surface
-                    .withValues(alpha: 0.85),
+                color: Theme.of(
+                  context,
+                ).colorScheme.surface.withValues(alpha: 0.85),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: ListView.separated(
@@ -46,15 +46,35 @@ class LoadGameScreen extends ConsumerWidget {
                 separatorBuilder: (_, _) => const SizedBox(height: 8),
                 itemBuilder: (context, i) {
                   final meta = list[i];
+                  final compatibility = meta.compatibilityWith(
+                    SaveRepository.currentSchemaVersion,
+                  );
+                  final reason = _incompatibilityReason(
+                    l10n,
+                    meta,
+                    compatibility,
+                  );
                   return Card(
                     child: ListTile(
                       title: Text(meta.name),
-                      subtitle: Text(
-                        l10n.loadGame_subtitle(
-                          meta.playerTeamName ?? '—',
-                          meta.seasonYear,
-                          seasonPhaseLabel(context, meta.phase),
-                        ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.loadGame_subtitle(
+                              meta.playerTeamName ?? '—',
+                              meta.seasonYear,
+                              seasonPhaseLabel(context, meta.phase),
+                            ),
+                          ),
+                          if (reason != null)
+                            Text(
+                              reason,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.error,
+                              ),
+                            ),
+                        ],
                       ),
                       trailing: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -65,22 +85,30 @@ class LoadGameScreen extends ConsumerWidget {
                             onPressed: () =>
                                 _confirmDeleteSave(context, ref, meta),
                           ),
-                          const Icon(Icons.chevron_right),
+                          Icon(
+                            compatibility == SaveCompatibility.compatible
+                                ? Icons.chevron_right
+                                : Icons.lock_outline,
+                          ),
                         ],
                       ),
-                      onTap: () async {
-                        await ref
-                            .read(gameControllerProvider.notifier)
-                            .loadGame(meta.id);
-                        if (!context.mounted) return;
-                        if (ref.read(gameControllerProvider).hasError) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(l10n.loadGame_loadFailed)),
-                          );
-                          return;
-                        }
-                        context.go('/game');
-                      },
+                      onTap: compatibility == SaveCompatibility.compatible
+                          ? () async {
+                              await ref
+                                  .read(gameControllerProvider.notifier)
+                                  .loadGame(meta.id);
+                              if (!context.mounted) return;
+                              if (ref.read(gameControllerProvider).hasError) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(l10n.loadGame_loadFailed),
+                                  ),
+                                );
+                                return;
+                              }
+                              context.go('/game');
+                            }
+                          : null,
                     ),
                   );
                 },
@@ -90,6 +118,24 @@ class LoadGameScreen extends ConsumerWidget {
         ),
       ),
     );
+  }
+
+  String? _incompatibilityReason(
+    AppLocalizations l10n,
+    GameSaveMeta meta,
+    SaveCompatibility compatibility,
+  ) {
+    return switch (compatibility) {
+      SaveCompatibility.compatible => null,
+      SaveCompatibility.older => l10n.loadGame_incompatibleOlder(
+        SaveRepository.currentSchemaVersion,
+        meta.schemaVersion,
+      ),
+      SaveCompatibility.newer => l10n.loadGame_incompatibleNewer(
+        SaveRepository.currentSchemaVersion,
+        meta.schemaVersion,
+      ),
+    };
   }
 
   Future<void> _confirmDeleteSave(

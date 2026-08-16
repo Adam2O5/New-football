@@ -656,6 +656,18 @@ abstract class AppLocalizations {
   /// **'Nie udało się wczytać zapisu'**
   String get loadGame_loadFailed;
 
+  /// No description provided for @loadGame_incompatibleOlder.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zapis pochodzi ze starszej wersji ({version}), wymagane jest {currentVersion}.'**
+  String loadGame_incompatibleOlder(Object currentVersion, Object version);
+
+  /// No description provided for @loadGame_incompatibleNewer.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zapis pochodzi z nowszej wersji ({version}), obsługiwana jest wersja {currentVersion}.'**
+  String loadGame_incompatibleNewer(Object currentVersion, Object version);
+
   /// No description provided for @loadGame_delete.
   ///
   /// In pl, this message translates to:

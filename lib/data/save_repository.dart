@@ -15,13 +15,30 @@ class SaveRepositoryException implements Exception {
       'SaveRepositoryException: $message${cause != null ? ' ($cause)' : ''}';
 }
 
+class SaveSchemaMismatchException extends SaveRepositoryException {
+  SaveSchemaMismatchException({
+    required this.foundVersion,
+    required this.supportedVersion,
+  }) : super(
+         'Save schema $foundVersion is not compatible with supported '
+         'schema $supportedVersion',
+       );
+
+  final int foundVersion;
+  final int supportedVersion;
+
+  bool get isOlder => foundVersion < supportedVersion;
+  bool get isNewer => foundVersion > supportedVersion;
+}
+
 class SaveRepository {
   SaveRepository({Directory? overrideDirectory})
     : _overrideDirectory = overrideDirectory;
 
   final Directory? _overrideDirectory;
 
-  static const currentSchemaVersion = 2;
+  /// Keep this alias stable for callers; the source of truth is [SaveSchema].
+  static const currentSchemaVersion = SaveSchema.currentVersion;
   static const _indexFileName = 'saves_index.json';
 
   Future<Directory> _savesDir() async {
@@ -69,6 +86,20 @@ class SaveRepository {
     );
   }
 
+  int _readSchemaVersion(Map<String, dynamic> json, String key) {
+    final value = json[key];
+    return value is num ? value.toInt() : SaveSchema.unknownVersion;
+  }
+
+  void _assertCompatible(int foundVersion) {
+    if (foundVersion != currentSchemaVersion) {
+      throw SaveSchemaMismatchException(
+        foundVersion: foundVersion,
+        supportedVersion: currentSchemaVersion,
+      );
+    }
+  }
+
   Future<GameSave> load(String id) async {
     final file = await _saveFile(id);
     if (!await file.exists()) {
@@ -77,14 +108,17 @@ class SaveRepository {
     try {
       final json =
           jsonDecode(await file.readAsString()) as Map<String, dynamic>;
-      final save = GameSave.fromJson(json);
-      if (save.schemaVersion > currentSchemaVersion) {
-        throw SaveRepositoryException(
-          'Save schema ${save.schemaVersion} is newer than supported '
-          '$currentSchemaVersion',
-        );
-      }
-      return save;
+
+      // Check versions before decoding LeagueState. A future schema may no
+      // longer be parseable by the current model.
+      _assertCompatible(_readSchemaVersion(json, 'schemaVersion'));
+      final metaJson = json['meta'];
+      final metaVersion = metaJson is Map<String, dynamic>
+          ? _readSchemaVersion(metaJson, 'schemaVersion')
+          : SaveSchema.unknownVersion;
+      _assertCompatible(metaVersion);
+
+      return GameSave.fromJson(json);
     } catch (e) {
       if (e is SaveRepositoryException) rethrow;
       throw SaveRepositoryException('Failed to load save $id', cause: e);
@@ -94,7 +128,10 @@ class SaveRepository {
   Future<void> save(GameSave gameSave) async {
     final stamped = gameSave.copyWith(
       schemaVersion: currentSchemaVersion,
-      meta: gameSave.meta.copyWith(updatedAt: DateTime.now()),
+      meta: gameSave.meta.copyWith(
+        schemaVersion: currentSchemaVersion,
+        updatedAt: DateTime.now(),
+      ),
     );
     final file = await _saveFile(stamped.meta.id);
     try {

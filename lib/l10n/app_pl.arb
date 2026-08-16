@@ -132,6 +132,8 @@
     }
   },
   "loadGame_loadFailed": "Nie udało się wczytać zapisu",
+  "loadGame_incompatibleOlder": "Zapis pochodzi ze starszej wersji ({version}), wymagane jest {currentVersion}.",
+  "loadGame_incompatibleNewer": "Zapis pochodzi z nowszej wersji ({version}), obsługiwana jest wersja {currentVersion}.",
   "loadGame_delete": "Usuń",
   "loadGame_deleteConfirmTitle": "Usunąć zapis?",
   "loadGame_deleteConfirmMessage": "Zapis „{name}” zostanie trwale usunięty.",

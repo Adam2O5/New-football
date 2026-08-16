@@ -110,6 +110,8 @@
   "loadGame_empty": "No saves found",
   "loadGame_subtitle": "{teamName} · Season {year} · {phase}",
   "loadGame_loadFailed": "Failed to load save",
+  "loadGame_incompatibleOlder": "This save is from an older version ({version}); version {currentVersion} is required.",
+  "loadGame_incompatibleNewer": "This save is from a newer version ({version}); version {currentVersion} is supported.",
   "loadGame_delete": "Delete",
   "loadGame_deleteConfirmTitle": "Delete save?",
   "loadGame_deleteConfirmMessage": "Save \"{name}\" will be permanently deleted.",

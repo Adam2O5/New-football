@@ -15,6 +15,8 @@ _$GameSaveMetaImpl _$$GameSaveMetaImplFromJson(Map<String, dynamic> json) =>
       seasonYear: (json['seasonYear'] as num).toInt(),
       phase: $enumDecode(_$SeasonPhaseEnumMap, json['phase']),
       playerTeamName: json['playerTeamName'] as String?,
+      schemaVersion:
+          (json['schemaVersion'] as num?)?.toInt() ?? SaveSchema.unknownVersion,
     );
 
 Map<String, dynamic> _$$GameSaveMetaImplToJson(_$GameSaveMetaImpl instance) =>
@@ -26,6 +28,7 @@ Map<String, dynamic> _$$GameSaveMetaImplToJson(_$GameSaveMetaImpl instance) =>
       'seasonYear': instance.seasonYear,
       'phase': _$SeasonPhaseEnumMap[instance.phase]!,
       'playerTeamName': instance.playerTeamName,
+      'schemaVersion': instance.schemaVersion,
     };
 
 const _$SeasonPhaseEnumMap = {
@@ -43,7 +46,8 @@ _$GameSaveImpl _$$GameSaveImplFromJson(Map<String, dynamic> json) =>
         json['leagueState'] as Map<String, dynamic>,
       ),
       saveSeed: (json['saveSeed'] as num).toInt(),
-      schemaVersion: (json['schemaVersion'] as num?)?.toInt() ?? 2,
+      schemaVersion:
+          (json['schemaVersion'] as num?)?.toInt() ?? SaveSchema.unknownVersion,
     );
 
 Map<String, dynamic> _$$GameSaveImplToJson(_$GameSaveImpl instance) =>
