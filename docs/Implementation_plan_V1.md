@@ -383,26 +383,26 @@ Legenda: `⬜` do zrobienia · `🔄` w trakcie · `✅` gotowe
 
 ---
 
-### ⬜ Task 9: Przebudowa `InboxScreen`, ustawienia powiadomień, archiwum
+### ✅ Task 9: Przebudowa `InboxScreen`, ustawienia powiadomień, archiwum
 
 **Cel:** UX z `messages.md` §14 — inbox jako jedyne źródło informacji.
 
-- [ ] Filtry po `MessageDomain`
-- [ ] Przypięte `urgent` na górze, z czerwoną flagą
-- [ ] Blokada przycisku „Symuluj" do acknowledge wszystkich `urgent`
-- [ ] Widok szczegółowy wiadomości: treść, termin, CTA nawigacyjne
-- [ ] Widok szczegółowy decyzji: opcje, termin, konsekwencja domyślna
-- [ ] Sekcja „Przeczytane" oddzielona od nieprzeczytanych
-- [ ] Zakładka archiwum (z `silenced` i wiadomościami starszymi niż 2 sezony)
-- [ ] Ekran ustawień powiadomień: per `type` i grupowo per `domain` (Ważne / Normalne / Wyciszone / Auto)
-- [ ] Blokada wyciszania typów decyzyjnych w UI
-- [ ] Badge z liczbą nieprzeczytanych w shellu
+- [x] Filtry po `MessageDomain`
+- [x] Przypięte `urgent` na górze, z czerwoną flagą
+- [x] Blokada przycisku „Symuluj" do acknowledge wszystkich `urgent`
+- [x] Widok szczegółowy wiadomości: treść, termin, CTA nawigacyjne
+- [x] Widok szczegółowy decyzji: opcje, termin, konsekwencja domyślna
+- [x] Sekcja „Przeczytane" oddzielona od nieprzeczytanych
+- [x] Zakładka archiwum (z `silenced` i wiadomościami starszymi niż 2 sezony)
+- [x] Ekran ustawień powiadomień: per `type` i grupowo per `domain` (Ważne / Normalne / Wyciszone / Auto)
+- [x] Blokada wyciszania typów decyzyjnych w UI
+- [x] Badge z liczbą nieprzeczytanych w shellu
 
 **Testy widgetów**
-- [ ] Nieodczytany `urgent` blokuje symulację
-- [ ] Wybór opcji decyzji zmienia stan gry
-- [ ] Wyciszony typ nie pojawia się w inboksie
-- [ ] Digest rozwija się do listy składowych
+- [x] Nieodczytany `urgent` blokuje symulację
+- [x] Wybór opcji decyzji zmienia stan gry
+- [x] Wyciszony typ nie pojawia się w inboksie
+- [x] Digest rozwija się do listy składowych
 
 **Demo:** gracz wycisza kategorię, podnosi inną do `urgent`, rozstrzyga decyzję z inboxa i widzi efekt w stanie gry.
 

@@ -72,6 +72,7 @@
   "messageType_calendar": "Kalendarz",
   "messageType_system": "System",
 
+  "notificationLevel_auto": "Automatyczne",
   "notificationLevel_important": "Ważne",
   "notificationLevel_normal": "Normalne",
   "notificationLevel_muted": "Wyciszone",
@@ -389,6 +390,64 @@
     }
   },
   "inbox_settingsTitle": "Poziomy powiadomień",
+  "inbox_tabInbox": "Skrzynka",
+  "inbox_tabArchive": "Archiwum",
+  "inbox_filterAll": "Wszystkie",
+  "inbox_sectionUrgent": "Pilne",
+  "inbox_sectionUnread": "Nieprzeczytane",
+  "inbox_sectionRead": "Przeczytane",
+  "inbox_emptyArchive": "Archiwum jest puste",
+  "inbox_detailTitle": "Szczegóły wiadomości",
+  "inbox_bodyFallback": "Nowa informacja dotycząca: {type}.",
+  "@inbox_bodyFallback": {
+    "placeholders": {"type": {"type": "String"}}
+  },
+  "inbox_metadata": "Tydzień {week} · dzień {day} · {domain}",
+  "@inbox_metadata": {
+    "placeholders": {
+      "week": {"type": "int"},
+      "day": {"type": "int"},
+      "domain": {"type": "String"}
+    }
+  },
+  "inbox_deadline": "Termin: {value}",
+  "@inbox_deadline": {
+    "placeholders": {"value": {"type": "String"}}
+  },
+  "inbox_defaultOnExpiry": "Po terminie: {value}",
+  "@inbox_defaultOnExpiry": {
+    "placeholders": {"value": {"type": "String"}}
+  },
+  "inbox_decisionOptions": "Wybierz opcję",
+  "inbox_actions": "Akcje",
+  "inbox_acknowledge": "Potwierdź",
+  "inbox_close": "Zamknij",
+  "inbox_digestMembers": "Wiadomości składowe ({count})",
+  "@inbox_digestMembers": {
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "inbox_actionAccept": "Akceptuj",
+  "inbox_actionDecline": "Odrzuć",
+  "inbox_actionCounter": "Kontroferta",
+  "inbox_actionReject": "Odrzuć",
+  "inbox_actionOpen": "Otwórz",
+  "inbox_actionFallback": "Wykonaj akcję",
+  "inbox_settingsDomain": "Ustawienia domen",
+  "inbox_settingsType": "Ustawienia typów",
+  "inbox_settingsDecisionMuted": "Typów decyzyjnych nie można wyciszyć.",
+  "inbox_settingsDomainDecisionMuted": "Domena zawiera decyzje i nie może być wyciszona.",
+  "messageDomain_matchday": "Mecze",
+  "messageDomain_health": "Zdrowie",
+  "messageDomain_playerEvent": "Zawodnicy",
+  "messageDomain_teamEvent": "Zespół",
+  "messageDomain_roster": "Skład",
+  "messageDomain_contracts": "Kontrakty",
+  "messageDomain_staff": "Sztab",
+  "messageDomain_trades": "Wymiany",
+  "messageDomain_draft": "Draft i scouting",
+  "messageDomain_finance": "Finanse",
+  "messageDomain_season": "Sezon",
+  "messageDomain_system": "System",
 
   "draft_title": "Draft",
   "draft_notActive": "Draft jeszcze nieaktywny",

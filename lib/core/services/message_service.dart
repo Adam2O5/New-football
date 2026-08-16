@@ -121,7 +121,35 @@ class MessageService {
     return league.copyWith(inbox: inbox);
   }
 
-  /// Executes [DecisionSpec.defaultOnExpiry] for every expired, unanswered
+  /// Applies a validated player choice and acknowledges the message.
+  ///
+  /// Domain effects are supplied by [onDecision]; the inbox lifecycle remains
+  /// centralized here so every caller preserves the urgent pause semantics.
+  LeagueState resolveDecision(
+    LeagueState league,
+    String messageId,
+    String optionId, {
+    MessageDecisionHandler? onDecision,
+  }) {
+    GameMessage? message;
+    for (final item in league.inbox.messages) {
+      if (item.id == messageId) {
+        message = item;
+        break;
+      }
+    }
+    if (message == null || message.decision == null) return league;
+    if (!message.decision!.options.any((option) => option.id == optionId)) {
+      return league;
+    }
+    final selectedMessage = message;
+    final afterEffect =
+        onDecision?.call(league, selectedMessage, optionId) ?? league;
+    return afterEffect.copyWith(
+      inbox: afterEffect.inbox.acknowledge(selectedMessage.id),
+    );
+  }
+
   /// decision. The callback is the game-specific effect dispatcher; omitting
   /// it still acknowledges the default option and prevents a permanent pause.
   LeagueState resolveExpiredDecisions(

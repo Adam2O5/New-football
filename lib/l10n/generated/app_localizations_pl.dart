@@ -172,6 +172,9 @@ class AppLocalizationsPl extends AppLocalizations {
   String get messageType_system => 'System';
 
   @override
+  String get notificationLevel_auto => 'Automatyczne';
+
+  @override
   String get notificationLevel_important => 'Ważne';
 
   @override
@@ -869,6 +872,135 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get inbox_settingsTitle => 'Poziomy powiadomień';
+
+  @override
+  String get inbox_tabInbox => 'Skrzynka';
+
+  @override
+  String get inbox_tabArchive => 'Archiwum';
+
+  @override
+  String get inbox_filterAll => 'Wszystkie';
+
+  @override
+  String get inbox_sectionUrgent => 'Pilne';
+
+  @override
+  String get inbox_sectionUnread => 'Nieprzeczytane';
+
+  @override
+  String get inbox_sectionRead => 'Przeczytane';
+
+  @override
+  String get inbox_emptyArchive => 'Archiwum jest puste';
+
+  @override
+  String get inbox_detailTitle => 'Szczegóły wiadomości';
+
+  @override
+  String inbox_bodyFallback(String type) {
+    return 'Nowa informacja dotycząca: $type.';
+  }
+
+  @override
+  String inbox_metadata(int week, int day, String domain) {
+    return 'Tydzień $week · dzień $day · $domain';
+  }
+
+  @override
+  String inbox_deadline(String value) {
+    return 'Termin: $value';
+  }
+
+  @override
+  String inbox_defaultOnExpiry(String value) {
+    return 'Po terminie: $value';
+  }
+
+  @override
+  String get inbox_decisionOptions => 'Wybierz opcję';
+
+  @override
+  String get inbox_actions => 'Akcje';
+
+  @override
+  String get inbox_acknowledge => 'Potwierdź';
+
+  @override
+  String get inbox_close => 'Zamknij';
+
+  @override
+  String inbox_digestMembers(int count) {
+    return 'Wiadomości składowe ($count)';
+  }
+
+  @override
+  String get inbox_actionAccept => 'Akceptuj';
+
+  @override
+  String get inbox_actionDecline => 'Odrzuć';
+
+  @override
+  String get inbox_actionCounter => 'Kontroferta';
+
+  @override
+  String get inbox_actionReject => 'Odrzuć';
+
+  @override
+  String get inbox_actionOpen => 'Otwórz';
+
+  @override
+  String get inbox_actionFallback => 'Wykonaj akcję';
+
+  @override
+  String get inbox_settingsDomain => 'Ustawienia domen';
+
+  @override
+  String get inbox_settingsType => 'Ustawienia typów';
+
+  @override
+  String get inbox_settingsDecisionMuted =>
+      'Typów decyzyjnych nie można wyciszyć.';
+
+  @override
+  String get inbox_settingsDomainDecisionMuted =>
+      'Domena zawiera decyzje i nie może być wyciszona.';
+
+  @override
+  String get messageDomain_matchday => 'Mecze';
+
+  @override
+  String get messageDomain_health => 'Zdrowie';
+
+  @override
+  String get messageDomain_playerEvent => 'Zawodnicy';
+
+  @override
+  String get messageDomain_teamEvent => 'Zespół';
+
+  @override
+  String get messageDomain_roster => 'Skład';
+
+  @override
+  String get messageDomain_contracts => 'Kontrakty';
+
+  @override
+  String get messageDomain_staff => 'Sztab';
+
+  @override
+  String get messageDomain_trades => 'Wymiany';
+
+  @override
+  String get messageDomain_draft => 'Draft i scouting';
+
+  @override
+  String get messageDomain_finance => 'Finanse';
+
+  @override
+  String get messageDomain_season => 'Sezon';
+
+  @override
+  String get messageDomain_system => 'System';
 
   @override
   String get draft_title => 'Draft';

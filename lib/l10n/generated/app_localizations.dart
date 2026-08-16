@@ -416,6 +416,12 @@ abstract class AppLocalizations {
   /// **'System'**
   String get messageType_system;
 
+  /// No description provided for @notificationLevel_auto.
+  ///
+  /// In pl, this message translates to:
+  /// **'Automatyczne'**
+  String get notificationLevel_auto;
+
   /// No description provided for @notificationLevel_important.
   ///
   /// In pl, this message translates to:
@@ -1729,6 +1735,240 @@ abstract class AppLocalizations {
   /// In pl, this message translates to:
   /// **'Poziomy powiadomień'**
   String get inbox_settingsTitle;
+
+  /// No description provided for @inbox_tabInbox.
+  ///
+  /// In pl, this message translates to:
+  /// **'Skrzynka'**
+  String get inbox_tabInbox;
+
+  /// No description provided for @inbox_tabArchive.
+  ///
+  /// In pl, this message translates to:
+  /// **'Archiwum'**
+  String get inbox_tabArchive;
+
+  /// No description provided for @inbox_filterAll.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wszystkie'**
+  String get inbox_filterAll;
+
+  /// No description provided for @inbox_sectionUrgent.
+  ///
+  /// In pl, this message translates to:
+  /// **'Pilne'**
+  String get inbox_sectionUrgent;
+
+  /// No description provided for @inbox_sectionUnread.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nieprzeczytane'**
+  String get inbox_sectionUnread;
+
+  /// No description provided for @inbox_sectionRead.
+  ///
+  /// In pl, this message translates to:
+  /// **'Przeczytane'**
+  String get inbox_sectionRead;
+
+  /// No description provided for @inbox_emptyArchive.
+  ///
+  /// In pl, this message translates to:
+  /// **'Archiwum jest puste'**
+  String get inbox_emptyArchive;
+
+  /// No description provided for @inbox_detailTitle.
+  ///
+  /// In pl, this message translates to:
+  /// **'Szczegóły wiadomości'**
+  String get inbox_detailTitle;
+
+  /// No description provided for @inbox_bodyFallback.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nowa informacja dotycząca: {type}.'**
+  String inbox_bodyFallback(String type);
+
+  /// No description provided for @inbox_metadata.
+  ///
+  /// In pl, this message translates to:
+  /// **'Tydzień {week} · dzień {day} · {domain}'**
+  String inbox_metadata(int week, int day, String domain);
+
+  /// No description provided for @inbox_deadline.
+  ///
+  /// In pl, this message translates to:
+  /// **'Termin: {value}'**
+  String inbox_deadline(String value);
+
+  /// No description provided for @inbox_defaultOnExpiry.
+  ///
+  /// In pl, this message translates to:
+  /// **'Po terminie: {value}'**
+  String inbox_defaultOnExpiry(String value);
+
+  /// No description provided for @inbox_decisionOptions.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wybierz opcję'**
+  String get inbox_decisionOptions;
+
+  /// No description provided for @inbox_actions.
+  ///
+  /// In pl, this message translates to:
+  /// **'Akcje'**
+  String get inbox_actions;
+
+  /// No description provided for @inbox_acknowledge.
+  ///
+  /// In pl, this message translates to:
+  /// **'Potwierdź'**
+  String get inbox_acknowledge;
+
+  /// No description provided for @inbox_close.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zamknij'**
+  String get inbox_close;
+
+  /// No description provided for @inbox_digestMembers.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wiadomości składowe ({count})'**
+  String inbox_digestMembers(int count);
+
+  /// No description provided for @inbox_actionAccept.
+  ///
+  /// In pl, this message translates to:
+  /// **'Akceptuj'**
+  String get inbox_actionAccept;
+
+  /// No description provided for @inbox_actionDecline.
+  ///
+  /// In pl, this message translates to:
+  /// **'Odrzuć'**
+  String get inbox_actionDecline;
+
+  /// No description provided for @inbox_actionCounter.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kontroferta'**
+  String get inbox_actionCounter;
+
+  /// No description provided for @inbox_actionReject.
+  ///
+  /// In pl, this message translates to:
+  /// **'Odrzuć'**
+  String get inbox_actionReject;
+
+  /// No description provided for @inbox_actionOpen.
+  ///
+  /// In pl, this message translates to:
+  /// **'Otwórz'**
+  String get inbox_actionOpen;
+
+  /// No description provided for @inbox_actionFallback.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wykonaj akcję'**
+  String get inbox_actionFallback;
+
+  /// No description provided for @inbox_settingsDomain.
+  ///
+  /// In pl, this message translates to:
+  /// **'Ustawienia domen'**
+  String get inbox_settingsDomain;
+
+  /// No description provided for @inbox_settingsType.
+  ///
+  /// In pl, this message translates to:
+  /// **'Ustawienia typów'**
+  String get inbox_settingsType;
+
+  /// No description provided for @inbox_settingsDecisionMuted.
+  ///
+  /// In pl, this message translates to:
+  /// **'Typów decyzyjnych nie można wyciszyć.'**
+  String get inbox_settingsDecisionMuted;
+
+  /// No description provided for @inbox_settingsDomainDecisionMuted.
+  ///
+  /// In pl, this message translates to:
+  /// **'Domena zawiera decyzje i nie może być wyciszona.'**
+  String get inbox_settingsDomainDecisionMuted;
+
+  /// No description provided for @messageDomain_matchday.
+  ///
+  /// In pl, this message translates to:
+  /// **'Mecze'**
+  String get messageDomain_matchday;
+
+  /// No description provided for @messageDomain_health.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zdrowie'**
+  String get messageDomain_health;
+
+  /// No description provided for @messageDomain_playerEvent.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zawodnicy'**
+  String get messageDomain_playerEvent;
+
+  /// No description provided for @messageDomain_teamEvent.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zespół'**
+  String get messageDomain_teamEvent;
+
+  /// No description provided for @messageDomain_roster.
+  ///
+  /// In pl, this message translates to:
+  /// **'Skład'**
+  String get messageDomain_roster;
+
+  /// No description provided for @messageDomain_contracts.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kontrakty'**
+  String get messageDomain_contracts;
+
+  /// No description provided for @messageDomain_staff.
+  ///
+  /// In pl, this message translates to:
+  /// **'Sztab'**
+  String get messageDomain_staff;
+
+  /// No description provided for @messageDomain_trades.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wymiany'**
+  String get messageDomain_trades;
+
+  /// No description provided for @messageDomain_draft.
+  ///
+  /// In pl, this message translates to:
+  /// **'Draft i scouting'**
+  String get messageDomain_draft;
+
+  /// No description provided for @messageDomain_finance.
+  ///
+  /// In pl, this message translates to:
+  /// **'Finanse'**
+  String get messageDomain_finance;
+
+  /// No description provided for @messageDomain_season.
+  ///
+  /// In pl, this message translates to:
+  /// **'Sezon'**
+  String get messageDomain_season;
+
+  /// No description provided for @messageDomain_system.
+  ///
+  /// In pl, this message translates to:
+  /// **'System'**
+  String get messageDomain_system;
 
   /// No description provided for @draft_title.
   ///

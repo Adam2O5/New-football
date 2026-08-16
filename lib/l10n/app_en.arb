@@ -62,6 +62,7 @@
   "messageType_calendar": "Calendar",
   "messageType_system": "System",
 
+  "notificationLevel_auto": "Automatic",
   "notificationLevel_important": "Important",
   "notificationLevel_normal": "Normal",
   "notificationLevel_muted": "Muted",
@@ -338,6 +339,64 @@
   "inbox_empty": "Inbox is empty",
   "inbox_messageSubtitle": "Week {week}\n{body}",
   "inbox_settingsTitle": "Notification levels",
+  "inbox_tabInbox": "Inbox",
+  "inbox_tabArchive": "Archive",
+  "inbox_filterAll": "All",
+  "inbox_sectionUrgent": "Urgent",
+  "inbox_sectionUnread": "Unread",
+  "inbox_sectionRead": "Read",
+  "inbox_emptyArchive": "Archive is empty",
+  "inbox_detailTitle": "Message details",
+  "inbox_bodyFallback": "New information about: {type}.",
+  "@inbox_bodyFallback": {
+    "placeholders": {"type": {"type": "String"}}
+  },
+  "inbox_metadata": "Week {week} · day {day} · {domain}",
+  "@inbox_metadata": {
+    "placeholders": {
+      "week": {"type": "int"},
+      "day": {"type": "int"},
+      "domain": {"type": "String"}
+    }
+  },
+  "inbox_deadline": "Deadline: {value}",
+  "@inbox_deadline": {
+    "placeholders": {"value": {"type": "String"}}
+  },
+  "inbox_defaultOnExpiry": "After deadline: {value}",
+  "@inbox_defaultOnExpiry": {
+    "placeholders": {"value": {"type": "String"}}
+  },
+  "inbox_decisionOptions": "Choose an option",
+  "inbox_actions": "Actions",
+  "inbox_acknowledge": "Acknowledge",
+  "inbox_close": "Close",
+  "inbox_digestMembers": "Included messages ({count})",
+  "@inbox_digestMembers": {
+    "placeholders": {"count": {"type": "int"}}
+  },
+  "inbox_actionAccept": "Accept",
+  "inbox_actionDecline": "Decline",
+  "inbox_actionCounter": "Counter",
+  "inbox_actionReject": "Reject",
+  "inbox_actionOpen": "Open",
+  "inbox_actionFallback": "Run action",
+  "inbox_settingsDomain": "Domain settings",
+  "inbox_settingsType": "Type settings",
+  "inbox_settingsDecisionMuted": "Decision types cannot be muted.",
+  "inbox_settingsDomainDecisionMuted": "This domain contains decisions and cannot be muted.",
+  "messageDomain_matchday": "Matchday",
+  "messageDomain_health": "Health",
+  "messageDomain_playerEvent": "Players",
+  "messageDomain_teamEvent": "Team",
+  "messageDomain_roster": "Roster",
+  "messageDomain_contracts": "Contracts",
+  "messageDomain_staff": "Staff",
+  "messageDomain_trades": "Trades",
+  "messageDomain_draft": "Draft and scouting",
+  "messageDomain_finance": "Finance",
+  "messageDomain_season": "Season",
+  "messageDomain_system": "System",
 
   "draft_title": "Draft",
   "draft_notActive": "Draft is not active yet",

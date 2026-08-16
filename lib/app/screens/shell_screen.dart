@@ -10,6 +10,7 @@ import 'package:new_football/app/screens/other_screen.dart';
 import 'package:new_football/app/screens/squad_screen.dart';
 import 'package:new_football/app/screens/standings_screen.dart';
 import 'package:new_football/app/widgets/screen_background.dart';
+import 'package:new_football/core/models/message.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
@@ -141,12 +142,42 @@ class _ShellScreenState extends ConsumerState<ShellScreen> {
             label: l10n.shell_tab_other,
           ),
           NavigationDestination(
-            icon: const Icon(Icons.mail_outline),
-            selectedIcon: const Icon(Icons.mail),
+            icon: _InboxBadge(
+              unreadCount: league.inbox.unread.length,
+              urgent: league.inbox.pendingUrgent.isNotEmpty,
+              icon: Icons.mail_outline,
+            ),
+            selectedIcon: _InboxBadge(
+              unreadCount: league.inbox.unread.length,
+              urgent: league.inbox.pendingUrgent.isNotEmpty,
+              icon: Icons.mail,
+            ),
             label: l10n.shell_tab_inbox,
           ),
         ],
       ),
+    );
+  }
+}
+
+class _InboxBadge extends StatelessWidget {
+  const _InboxBadge({
+    required this.unreadCount,
+    required this.urgent,
+    required this.icon,
+  });
+
+  final int unreadCount;
+  final bool urgent;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    return Badge(
+      isLabelVisible: unreadCount > 0,
+      backgroundColor: urgent ? Theme.of(context).colorScheme.error : null,
+      label: Text('$unreadCount'),
+      child: Icon(icon),
     );
   }
 }

@@ -63,7 +63,7 @@ void main() {
     var guard = 0;
     while (result.stopReason == SimulationStopReason.urgent && guard < 5) {
       for (final m in controller.save!.leagueState.inbox.pendingUrgent) {
-        await controller.markMessageRead(m.id);
+        await controller.acknowledgeMessage(m.id);
       }
       result = await controller.simulateUntilPhaseEnd(SeasonPhase.regular);
       guard++;

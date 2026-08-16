@@ -18,6 +18,7 @@ import 'package:new_football/core/services/game_factory.dart';
 import 'package:new_football/core/services/schedule_generator.dart';
 import 'package:new_football/core/services/scouting_service.dart';
 import 'package:new_football/core/services/season_service.dart';
+import 'package:new_football/core/services/message_service.dart';
 import 'package:new_football/core/services/staff_service.dart';
 import 'package:new_football/data/save_repository.dart';
 
@@ -685,8 +686,34 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     await updateLeague((l) => _days.applyPlayerMatchResult(l, match, result));
   }
 
+  /// Marks a message as read without acknowledging an urgent pause.
   Future<void> markMessageRead(String id) async {
+    await updateLeague((l) => l.copyWith(inbox: l.inbox.markRead(id)));
+  }
+
+  /// Acknowledges an urgent message and releases its simulation pause.
+  Future<void> acknowledgeMessage(String id) async {
     await updateLeague((l) => l.copyWith(inbox: l.inbox.acknowledge(id)));
+  }
+
+  /// Applies a decision effect, then acknowledges the message.
+  ///
+  /// The optional dispatcher is deliberately injected by the caller because
+  /// message effects belong to their owning domain service. Without one, the
+  /// choice is still recorded and the urgent pause is released safely.
+  Future<void> resolveMessageDecision(
+    String id,
+    String optionId, {
+    MessageDecisionHandler? onDecision,
+  }) async {
+    await updateLeague(
+      (league) => MessageService().resolveDecision(
+        league,
+        id,
+        optionId,
+        onDecision: onDecision,
+      ),
+    );
   }
 
   Future<void> makeDraftPick(String prospectId) async {

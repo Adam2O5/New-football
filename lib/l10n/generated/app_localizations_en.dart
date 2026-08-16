@@ -172,6 +172,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get messageType_system => 'System';
 
   @override
+  String get notificationLevel_auto => 'Automatic';
+
+  @override
   String get notificationLevel_important => 'Important';
 
   @override
@@ -867,6 +870,134 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get inbox_settingsTitle => 'Notification levels';
+
+  @override
+  String get inbox_tabInbox => 'Inbox';
+
+  @override
+  String get inbox_tabArchive => 'Archive';
+
+  @override
+  String get inbox_filterAll => 'All';
+
+  @override
+  String get inbox_sectionUrgent => 'Urgent';
+
+  @override
+  String get inbox_sectionUnread => 'Unread';
+
+  @override
+  String get inbox_sectionRead => 'Read';
+
+  @override
+  String get inbox_emptyArchive => 'Archive is empty';
+
+  @override
+  String get inbox_detailTitle => 'Message details';
+
+  @override
+  String inbox_bodyFallback(String type) {
+    return 'New information about: $type.';
+  }
+
+  @override
+  String inbox_metadata(int week, int day, String domain) {
+    return 'Week $week · day $day · $domain';
+  }
+
+  @override
+  String inbox_deadline(String value) {
+    return 'Deadline: $value';
+  }
+
+  @override
+  String inbox_defaultOnExpiry(String value) {
+    return 'After deadline: $value';
+  }
+
+  @override
+  String get inbox_decisionOptions => 'Choose an option';
+
+  @override
+  String get inbox_actions => 'Actions';
+
+  @override
+  String get inbox_acknowledge => 'Acknowledge';
+
+  @override
+  String get inbox_close => 'Close';
+
+  @override
+  String inbox_digestMembers(int count) {
+    return 'Included messages ($count)';
+  }
+
+  @override
+  String get inbox_actionAccept => 'Accept';
+
+  @override
+  String get inbox_actionDecline => 'Decline';
+
+  @override
+  String get inbox_actionCounter => 'Counter';
+
+  @override
+  String get inbox_actionReject => 'Reject';
+
+  @override
+  String get inbox_actionOpen => 'Open';
+
+  @override
+  String get inbox_actionFallback => 'Run action';
+
+  @override
+  String get inbox_settingsDomain => 'Domain settings';
+
+  @override
+  String get inbox_settingsType => 'Type settings';
+
+  @override
+  String get inbox_settingsDecisionMuted => 'Decision types cannot be muted.';
+
+  @override
+  String get inbox_settingsDomainDecisionMuted =>
+      'This domain contains decisions and cannot be muted.';
+
+  @override
+  String get messageDomain_matchday => 'Matchday';
+
+  @override
+  String get messageDomain_health => 'Health';
+
+  @override
+  String get messageDomain_playerEvent => 'Players';
+
+  @override
+  String get messageDomain_teamEvent => 'Team';
+
+  @override
+  String get messageDomain_roster => 'Roster';
+
+  @override
+  String get messageDomain_contracts => 'Contracts';
+
+  @override
+  String get messageDomain_staff => 'Staff';
+
+  @override
+  String get messageDomain_trades => 'Trades';
+
+  @override
+  String get messageDomain_draft => 'Draft and scouting';
+
+  @override
+  String get messageDomain_finance => 'Finance';
+
+  @override
+  String get messageDomain_season => 'Season';
+
+  @override
+  String get messageDomain_system => 'System';
 
   @override
   String get draft_title => 'Draft';

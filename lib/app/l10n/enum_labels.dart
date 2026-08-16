@@ -81,7 +81,7 @@ String messageTypeLabel(BuildContext context, MessageType type) {
 String notificationLevelLabel(BuildContext context, NotificationLevel level) {
   final l10n = AppLocalizations.of(context)!;
   return switch (level) {
-    NotificationLevel.auto => level.name,
+    NotificationLevel.auto => l10n.notificationLevel_auto,
     NotificationLevel.important => l10n.notificationLevel_important,
     NotificationLevel.normal => l10n.notificationLevel_normal,
     NotificationLevel.muted => l10n.notificationLevel_muted,
@@ -147,5 +147,23 @@ String dayName(BuildContext context, int weekday1to7) {
     5 => l10n.day_fri,
     6 => l10n.day_sat,
     _ => l10n.day_sun,
+  };
+}
+
+String messageDomainLabel(BuildContext context, MessageDomain domain) {
+  final l10n = AppLocalizations.of(context)!;
+  return switch (domain) {
+    MessageDomain.matchday => l10n.messageDomain_matchday,
+    MessageDomain.health => l10n.messageDomain_health,
+    MessageDomain.playerEvent => l10n.messageDomain_playerEvent,
+    MessageDomain.teamEvent => l10n.messageDomain_teamEvent,
+    MessageDomain.roster => l10n.messageDomain_roster,
+    MessageDomain.contracts => l10n.messageDomain_contracts,
+    MessageDomain.staff => l10n.messageDomain_staff,
+    MessageDomain.trades => l10n.messageDomain_trades,
+    MessageDomain.draft => l10n.messageDomain_draft,
+    MessageDomain.finance => l10n.messageDomain_finance,
+    MessageDomain.season => l10n.messageDomain_season,
+    MessageDomain.system => l10n.messageDomain_system,
   };
 }
