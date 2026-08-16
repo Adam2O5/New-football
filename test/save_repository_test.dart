@@ -34,5 +34,7 @@ void main() {
     expect(loaded.leagueState.teams.length, 30);
     expect(loaded.leagueState.currentSeason.schedule.length, 870);
     expect(loaded.leagueState.playerTeamId, 'team_europe_0');
+    expect(loaded.saveSeed, 99);
+    expect(loaded.schemaVersion, SaveRepository.currentSchemaVersion);
   });
 }

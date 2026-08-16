@@ -26,7 +26,8 @@ class GameSave with _$GameSave {
   const factory GameSave({
     required GameSaveMeta meta,
     required LeagueState leagueState,
-    @Default(1) int schemaVersion,
+    required int saveSeed,
+    @Default(2) int schemaVersion,
   }) = _GameSave;
 
   factory GameSave.fromJson(Map<String, dynamic> json) =>

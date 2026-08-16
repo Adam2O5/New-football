@@ -319,6 +319,7 @@ GameSave _$GameSaveFromJson(Map<String, dynamic> json) {
 mixin _$GameSave {
   GameSaveMeta get meta => throw _privateConstructorUsedError;
   LeagueState get leagueState => throw _privateConstructorUsedError;
+  int get saveSeed => throw _privateConstructorUsedError;
   int get schemaVersion => throw _privateConstructorUsedError;
 
   /// Serializes this GameSave to a JSON map.
@@ -336,7 +337,12 @@ abstract class $GameSaveCopyWith<$Res> {
   factory $GameSaveCopyWith(GameSave value, $Res Function(GameSave) then) =
       _$GameSaveCopyWithImpl<$Res, GameSave>;
   @useResult
-  $Res call({GameSaveMeta meta, LeagueState leagueState, int schemaVersion});
+  $Res call({
+    GameSaveMeta meta,
+    LeagueState leagueState,
+    int saveSeed,
+    int schemaVersion,
+  });
 
   $GameSaveMetaCopyWith<$Res> get meta;
   $LeagueStateCopyWith<$Res> get leagueState;
@@ -359,6 +365,7 @@ class _$GameSaveCopyWithImpl<$Res, $Val extends GameSave>
   $Res call({
     Object? meta = null,
     Object? leagueState = null,
+    Object? saveSeed = null,
     Object? schemaVersion = null,
   }) {
     return _then(
@@ -371,6 +378,10 @@ class _$GameSaveCopyWithImpl<$Res, $Val extends GameSave>
                 ? _value.leagueState
                 : leagueState // ignore: cast_nullable_to_non_nullable
                       as LeagueState,
+            saveSeed: null == saveSeed
+                ? _value.saveSeed
+                : saveSeed // ignore: cast_nullable_to_non_nullable
+                      as int,
             schemaVersion: null == schemaVersion
                 ? _value.schemaVersion
                 : schemaVersion // ignore: cast_nullable_to_non_nullable
@@ -410,7 +421,12 @@ abstract class _$$GameSaveImplCopyWith<$Res>
   ) = __$$GameSaveImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({GameSaveMeta meta, LeagueState leagueState, int schemaVersion});
+  $Res call({
+    GameSaveMeta meta,
+    LeagueState leagueState,
+    int saveSeed,
+    int schemaVersion,
+  });
 
   @override
   $GameSaveMetaCopyWith<$Res> get meta;
@@ -434,6 +450,7 @@ class __$$GameSaveImplCopyWithImpl<$Res>
   $Res call({
     Object? meta = null,
     Object? leagueState = null,
+    Object? saveSeed = null,
     Object? schemaVersion = null,
   }) {
     return _then(
@@ -446,6 +463,10 @@ class __$$GameSaveImplCopyWithImpl<$Res>
             ? _value.leagueState
             : leagueState // ignore: cast_nullable_to_non_nullable
                   as LeagueState,
+        saveSeed: null == saveSeed
+            ? _value.saveSeed
+            : saveSeed // ignore: cast_nullable_to_non_nullable
+                  as int,
         schemaVersion: null == schemaVersion
             ? _value.schemaVersion
             : schemaVersion // ignore: cast_nullable_to_non_nullable
@@ -461,7 +482,8 @@ class _$GameSaveImpl implements _GameSave {
   const _$GameSaveImpl({
     required this.meta,
     required this.leagueState,
-    this.schemaVersion = 1,
+    required this.saveSeed,
+    this.schemaVersion = 2,
   });
 
   factory _$GameSaveImpl.fromJson(Map<String, dynamic> json) =>
@@ -472,12 +494,14 @@ class _$GameSaveImpl implements _GameSave {
   @override
   final LeagueState leagueState;
   @override
+  final int saveSeed;
+  @override
   @JsonKey()
   final int schemaVersion;
 
   @override
   String toString() {
-    return 'GameSave(meta: $meta, leagueState: $leagueState, schemaVersion: $schemaVersion)';
+    return 'GameSave(meta: $meta, leagueState: $leagueState, saveSeed: $saveSeed, schemaVersion: $schemaVersion)';
   }
 
   @override
@@ -488,6 +512,8 @@ class _$GameSaveImpl implements _GameSave {
             (identical(other.meta, meta) || other.meta == meta) &&
             (identical(other.leagueState, leagueState) ||
                 other.leagueState == leagueState) &&
+            (identical(other.saveSeed, saveSeed) ||
+                other.saveSeed == saveSeed) &&
             (identical(other.schemaVersion, schemaVersion) ||
                 other.schemaVersion == schemaVersion));
   }
@@ -495,7 +521,7 @@ class _$GameSaveImpl implements _GameSave {
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
   int get hashCode =>
-      Object.hash(runtimeType, meta, leagueState, schemaVersion);
+      Object.hash(runtimeType, meta, leagueState, saveSeed, schemaVersion);
 
   /// Create a copy of GameSave
   /// with the given fields replaced by the non-null parameter values.
@@ -515,6 +541,7 @@ abstract class _GameSave implements GameSave {
   const factory _GameSave({
     required final GameSaveMeta meta,
     required final LeagueState leagueState,
+    required final int saveSeed,
     final int schemaVersion,
   }) = _$GameSaveImpl;
 
@@ -525,6 +552,8 @@ abstract class _GameSave implements GameSave {
   GameSaveMeta get meta;
   @override
   LeagueState get leagueState;
+  @override
+  int get saveSeed;
   @override
   int get schemaVersion;
 

@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:new_football/core/engine/match_engine.dart';
 import 'package:new_football/core/models/seed_data_generator.dart';
+import 'package:new_football/core/random/seeds.dart';
 import 'package:new_football/core/services/schedule_generator.dart';
 
 void main() {
@@ -13,8 +14,16 @@ void main() {
       const engine = MatchEngine();
       final home = teams[0];
       final away = teams[1];
-      final a = engine.simulateFull(home: home, away: away, rngSeed: 123);
-      final b = engine.simulateFull(home: home, away: away, rngSeed: 123);
+      final a = engine.simulateFull(
+        home: home,
+        away: away,
+        rngSeed: matchSeed(1234, 2026, 'match-17'),
+      );
+      final b = engine.simulateFull(
+        home: home,
+        away: away,
+        rngSeed: matchSeed(1234, 2026, 'match-17'),
+      );
       expect(a.homeGoals, b.homeGoals);
       expect(a.awayGoals, b.awayGoals);
       expect(a.events.length, b.events.length);

@@ -1,6 +1,7 @@
 export 'ai/team_ai_service.dart';
 export 'balance/balance_config.dart';
 export 'engine/match_engine.dart';
+export 'random/seeds.dart';
 export 'engine/simple_match_engine.dart';
 export 'models/assigned_role.dart';
 export 'models/contract.dart';

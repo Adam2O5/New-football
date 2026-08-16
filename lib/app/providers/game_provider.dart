@@ -5,6 +5,7 @@ import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/match_models.dart';
+import 'package:new_football/core/random/seeds.dart';
 import 'package:new_football/core/models/message.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/staff.dart';
@@ -107,6 +108,7 @@ class UpcomingAction {
 
   /// Registry event id, or `'match'` for the player's next fixture.
   final String id;
+
   /// If this action corresponds to a calendar event from the registry, this
   /// is its typed id. `null` for the player's match.
   final CalendarEventId? calendarEventId;
@@ -180,7 +182,10 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   Future<DaySimulationResult?> advanceOneDay() async {
     final current = save;
     if (current == null) return null;
-    final result = _days.simulateDay(current.leagueState);
+    final result = _days.simulateDay(
+      current.leagueState,
+      saveSeed: current.saveSeed,
+    );
     await updateLeague((_) => result.league);
     return result;
   }
@@ -349,7 +354,7 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     final result = engine.simulateFull(
       home: home,
       away: away,
-      rngSeed: Object.hash(match.id, league.currentWeek, league.currentDay),
+      rngSeed: matchSeed(current.saveSeed, league.currentSeason.year, match.id),
     );
     await updateLeague((l) => _days.applyPlayerMatchResult(l, match, result));
     return result;

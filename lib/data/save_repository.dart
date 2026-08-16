@@ -17,11 +17,11 @@ class SaveRepositoryException implements Exception {
 
 class SaveRepository {
   SaveRepository({Directory? overrideDirectory})
-      : _overrideDirectory = overrideDirectory;
+    : _overrideDirectory = overrideDirectory;
 
   final Directory? _overrideDirectory;
 
-  static const currentSchemaVersion = 1;
+  static const currentSchemaVersion = 2;
   static const _indexFileName = 'saves_index.json';
 
   Future<Directory> _savesDir() async {
@@ -63,9 +63,9 @@ class SaveRepository {
   Future<void> _writeIndex(List<GameSaveMeta> metas) async {
     final file = await _indexFile();
     await file.writeAsString(
-      const JsonEncoder.withIndent('  ').convert(
-        metas.map((m) => m.toJson()).toList(),
-      ),
+      const JsonEncoder.withIndent(
+        '  ',
+      ).convert(metas.map((m) => m.toJson()).toList()),
     );
   }
 
@@ -75,7 +75,8 @@ class SaveRepository {
       throw SaveRepositoryException('Save not found: $id');
     }
     try {
-      final json = jsonDecode(await file.readAsString()) as Map<String, dynamic>;
+      final json =
+          jsonDecode(await file.readAsString()) as Map<String, dynamic>;
       final save = GameSave.fromJson(json);
       if (save.schemaVersion > currentSchemaVersion) {
         throw SaveRepositoryException(

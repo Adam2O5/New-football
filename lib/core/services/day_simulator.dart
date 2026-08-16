@@ -9,6 +9,7 @@ import 'package:new_football/core/models/message.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/standing.dart';
 import 'package:new_football/core/models/team.dart';
+import 'package:new_football/core/random/seeds.dart';
 import 'package:new_football/core/services/calendar_event_registry.dart';
 import 'package:new_football/core/services/calendar_service.dart';
 import 'package:new_football/core/services/contract_service.dart';
@@ -69,7 +70,7 @@ class DaySimulator {
   final SalaryCapService capService;
   final MessageService messages;
 
-  DaySimulationResult simulateDay(LeagueState league) {
+  DaySimulationResult simulateDay(LeagueState league, {int saveSeed = 0}) {
     final week = league.currentWeek;
     final day = league.currentDay;
     var state = league;
@@ -109,7 +110,7 @@ class DaySimulator {
       final slot = calendar.regularSeasonSlotForDay(day);
       if (slot != null && calendar.isActualMatchDay(week, day)) {
         final round = scheduleRoundForWeekSlot(week, slot);
-        final outcome = _resolveRound(state, round);
+        final outcome = _resolveRound(state, round, saveSeed);
         state = outcome.league;
         results.addAll(outcome.results);
         playerMatch = outcome.playerMatch;
@@ -199,7 +200,7 @@ class DaySimulator {
   }
 
   ({LeagueState league, List<MatchResult> results, ScheduledMatch? playerMatch})
-  _resolveRound(LeagueState league, int round) {
+  _resolveRound(LeagueState league, int round, int saveSeed) {
     final schedule = league.currentSeason.schedule;
     final fixtures = schedule
         .where((m) => m.round == round && m.result == null)
@@ -230,7 +231,7 @@ class DaySimulator {
         home: home,
         away: away,
         context: const MatchContext(stakes: SeasonPhase.regular),
-        rngSeed: Object.hash(f.id, state.currentWeek, state.currentDay),
+        rngSeed: matchSeed(saveSeed, state.currentSeason.year, f.id),
       );
       state = _applyResult(state, f, result);
       results.add(result);
@@ -382,8 +383,10 @@ class DaySimulator {
       titleKey: 'msg_matchResult_title',
       bodyKey: 'msg_matchResult_body',
       args: {
-        'homeTeam': league.teamById(result.homeTeamId)?.name ?? result.homeTeamId,
-        'awayTeam': league.teamById(result.awayTeamId)?.name ?? result.awayTeamId,
+        'homeTeam':
+            league.teamById(result.homeTeamId)?.name ?? result.homeTeamId,
+        'awayTeam':
+            league.teamById(result.awayTeamId)?.name ?? result.awayTeamId,
         'homeGoals': result.homeGoals,
         'awayGoals': result.awayGoals,
       },
@@ -395,5 +398,4 @@ class DaySimulator {
       },
     );
   }
-
 }

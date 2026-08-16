@@ -98,9 +98,7 @@ class LiveMatch {
           (e) =>
               e.teamId == teamId &&
               e.type ==
-                  (yellow
-                      ? MatchEventType.yellowCard
-                      : MatchEventType.redCard),
+                  (yellow ? MatchEventType.yellowCard : MatchEventType.redCard),
         )
         .length;
   }
@@ -116,7 +114,7 @@ class MatchEngine {
     required Team home,
     required Team away,
     MatchContext context = const MatchContext(),
-    int? rngSeed,
+    required int rngSeed,
   }) {
     final walkover = _precheckWalkover(home, away);
     if (walkover != null) {
@@ -179,7 +177,7 @@ class MatchEngine {
         homeTactics: home.tactics,
         awayTactics: away.tactics,
         context: context,
-        rngSeed: rngSeed ?? Object.hash(home.id, away.id),
+        rngSeed: rngSeed,
       ),
       homeTeamId: home.id,
       awayTeamId: away.id,
@@ -329,8 +327,7 @@ class MatchEngine {
           type: MatchEventType.fullTime,
           minute: 90,
           teamId: live.homeTeamId,
-          description:
-              'Koniec meczu ${state.homeGoals}:${state.awayGoals}',
+          description: 'Koniec meczu ${state.homeGoals}:${state.awayGoals}',
         ),
       );
     }
@@ -353,7 +350,7 @@ class MatchEngine {
     required Team home,
     required Team away,
     MatchContext context = const MatchContext(),
-    int? rngSeed,
+    required int rngSeed,
   }) {
     final live = start(
       home: home,
@@ -462,7 +459,10 @@ class MatchEngine {
 
     final tacticsMult = _tacticsMultiplier(tactics, opponentTactics);
     final homeAdv = isHome ? (1.0 + context.homeAdvantage) : 1.0;
-    return sum * tacticsMult * homeAdv * (1.0 + momentum * 0.08 + morale * 0.05);
+    return sum *
+        tacticsMult *
+        homeAdv *
+        (1.0 + momentum * 0.08 + morale * 0.05);
   }
 
   double _roleFitMult(Player p) {
@@ -472,8 +472,7 @@ class MatchEngine {
       gk: (_) => p.position == Position.gk,
       cb: (_) => p.position == Position.cb,
       fullBack: (_) => p.position == Position.lb || p.position == Position.rb,
-      wingBack: (_) =>
-          p.position == Position.lwb || p.position == Position.rwb,
+      wingBack: (_) => p.position == Position.lwb || p.position == Position.rwb,
       cdm: (_) => p.position == Position.cdm,
       cm: (_) => p.position == Position.cm,
       cam: (_) => p.position == Position.cam,
@@ -699,10 +698,7 @@ class MatchEngine {
       awayTeamId: away.id,
       homeGoals: b.walkoverGoalsAgainst,
       awayGoals: b.walkoverGoalsFor,
-      homeStats: TeamMatchStats(
-        teamId: home.id,
-        goals: b.walkoverGoalsAgainst,
-      ),
+      homeStats: TeamMatchStats(teamId: home.id, goals: b.walkoverGoalsAgainst),
       awayStats: TeamMatchStats(teamId: away.id, goals: b.walkoverGoalsFor),
       events: [
         MatchEvent(

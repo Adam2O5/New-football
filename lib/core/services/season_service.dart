@@ -15,6 +15,7 @@ import 'package:new_football/core/models/season_awards.dart';
 import 'package:new_football/core/models/seed_data_generator.dart';
 import 'package:new_football/core/models/standing.dart';
 import 'package:new_football/core/models/team.dart';
+import 'package:new_football/core/random/seeds.dart';
 import 'package:new_football/core/services/calendar_service.dart';
 import 'package:new_football/core/services/development_service.dart';
 import 'package:new_football/core/services/prospect_service.dart';
@@ -56,7 +57,7 @@ class SeasonService {
   final Random _random;
   final _uuid = const Uuid();
 
-  LeagueState setupPlayIn(LeagueState league) {
+  LeagueState setupPlayIn(LeagueState league, {int saveSeed = 0}) {
     final results = <PlayInResult>[];
     for (final conf in Conference.values) {
       final cs = league.currentSeason.standings.firstWhere(
@@ -69,11 +70,29 @@ class SeasonService {
       final s9 = sorted[8].teamId;
       final s10 = sorted[9].teamId;
 
-      final g78 = _sim(league, s7, s8);
-      final g910 = _sim(league, s9, s10);
+      final g78 = _sim(
+        league,
+        s7,
+        s8,
+        saveSeed: saveSeed,
+        matchId: 'playIn:${conf.name}:7v8',
+      );
+      final g910 = _sim(
+        league,
+        s9,
+        s10,
+        saveSeed: saveSeed,
+        matchId: 'playIn:${conf.name}:9v10',
+      );
       final loser78 = _winnerId(g78, s7, s8) == s7 ? s8 : s7;
       final winner910 = _winnerId(g910, s9, s10);
-      final gFinal = _sim(league, loser78, winner910);
+      final gFinal = _sim(
+        league,
+        loser78,
+        winner910,
+        saveSeed: saveSeed,
+        matchId: 'playIn:${conf.name}:final',
+      );
       final playoff8 = _winnerId(gFinal, loser78, winner910);
       final playoff7 = _winnerId(g78, s7, s8);
 
@@ -143,11 +162,11 @@ class SeasonService {
     );
   }
 
-  LeagueState advancePlayoffs(LeagueState league) {
+  LeagueState advancePlayoffs(LeagueState league, {int saveSeed = 0}) {
     var brackets = <PlayoffBracket>[];
     var state = league;
     for (final b in league.currentSeason.playoffBrackets) {
-      brackets.add(_advanceBracket(state, b));
+      brackets.add(_advanceBracket(state, b, saveSeed));
     }
 
     String? champion;
@@ -172,7 +191,7 @@ class SeasonService {
             west.conferenceFinal.first.winnerTeamId!,
           );
       if (!leagueFinal.isComplete) {
-        leagueFinal = _playOneGame(state, leagueFinal);
+        leagueFinal = _playOneGame(state, leagueFinal, saveSeed);
       }
       champion = leagueFinal.winnerTeamId;
       brackets = brackets
@@ -700,11 +719,17 @@ class SeasonService {
     );
   }
 
-  MatchResult _sim(LeagueState league, String homeId, String awayId) {
+  MatchResult _sim(
+    LeagueState league,
+    String homeId,
+    String awayId, {
+    required int saveSeed,
+    required String matchId,
+  }) {
     return matchEngine.simulateFull(
       home: league.teamById(homeId)!,
       away: league.teamById(awayId)!,
-      rngSeed: Object.hash(homeId, awayId, league.currentWeek),
+      rngSeed: matchSeed(saveSeed, league.currentSeason.year, matchId),
     );
   }
 
@@ -722,9 +747,13 @@ class SeasonService {
     winsNeeded: 3,
   );
 
-  PlayoffBracket _advanceBracket(LeagueState league, PlayoffBracket b) {
+  PlayoffBracket _advanceBracket(
+    LeagueState league,
+    PlayoffBracket b,
+    int saveSeed,
+  ) {
     final quarters = b.quarterFinals
-        .map((s) => s.isComplete ? s : _playOneGame(league, s))
+        .map((s) => s.isComplete ? s : _playOneGame(league, s, saveSeed))
         .toList();
 
     var semis = b.semiFinals;
@@ -735,7 +764,7 @@ class SeasonService {
       ];
     } else {
       semis = semis
-          .map((s) => s.isComplete ? s : _playOneGame(league, s))
+          .map((s) => s.isComplete ? s : _playOneGame(league, s, saveSeed))
           .toList();
     }
 
@@ -746,7 +775,7 @@ class SeasonService {
       confFinal = [_series(semis[0].winnerTeamId!, semis[1].winnerTeamId!)];
     } else {
       confFinal = confFinal
-          .map((s) => s.isComplete ? s : _playOneGame(league, s))
+          .map((s) => s.isComplete ? s : _playOneGame(league, s, saveSeed))
           .toList();
     }
 
@@ -757,11 +786,23 @@ class SeasonService {
     );
   }
 
-  PlayoffSeries _playOneGame(LeagueState league, PlayoffSeries series) {
+  PlayoffSeries _playOneGame(
+    LeagueState league,
+    PlayoffSeries series,
+    int saveSeed,
+  ) {
     final homeFirst = series.games.length.isEven;
     final homeId = homeFirst ? series.higherSeedTeamId : series.lowerSeedTeamId;
     final awayId = homeFirst ? series.lowerSeedTeamId : series.higherSeedTeamId;
-    return series.recordGame(_sim(league, homeId, awayId));
+    return series.recordGame(
+      _sim(
+        league,
+        homeId,
+        awayId,
+        saveSeed: saveSeed,
+        matchId: 'playoff:${series.id}:${series.games.length}',
+      ),
+    );
   }
 
   SeasonAwards _computeAwards(LeagueState league) {

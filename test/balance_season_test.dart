@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:new_football/core/engine/match_engine.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/standing.dart';
+import 'package:new_football/core/random/seeds.dart';
 import 'package:new_football/core/services/game_factory.dart';
 
 /// Lightweight multi-season balance smoke test (Etap 6).
@@ -27,7 +28,7 @@ void main() {
         final result = engine.simulateFull(
           home: home,
           away: away,
-          rngSeed: Object.hash(match.id, 123),
+          rngSeed: matchSeed(game.saveSeed, league.currentSeason.year, match.id),
         );
         final newSchedule = league.currentSeason.schedule
             .map((m) => m.id == match.id ? m.copyWith(result: result) : m)

@@ -42,12 +42,14 @@ _$GameSaveImpl _$$GameSaveImplFromJson(Map<String, dynamic> json) =>
       leagueState: LeagueState.fromJson(
         json['leagueState'] as Map<String, dynamic>,
       ),
-      schemaVersion: (json['schemaVersion'] as num?)?.toInt() ?? 1,
+      saveSeed: (json['saveSeed'] as num).toInt(),
+      schemaVersion: (json['schemaVersion'] as num?)?.toInt() ?? 2,
     );
 
 Map<String, dynamic> _$$GameSaveImplToJson(_$GameSaveImpl instance) =>
     <String, dynamic>{
       'meta': instance.meta,
       'leagueState': instance.leagueState,
+      'saveSeed': instance.saveSeed,
       'schemaVersion': instance.schemaVersion,
     };

@@ -39,21 +39,20 @@ class GameFactory {
     final league = _seedGenerator.generateLeague(year: 2026, seed: 1);
     return league.teams
         .map(
-          (t) => (
-            id: t.id,
-            name: t.name,
-            city: t.city,
-            conference: t.conference,
-          ),
+          (t) =>
+              (id: t.id, name: t.name, city: t.city, conference: t.conference),
         )
         .toList();
   }
 
   GameSave create(NewGameRequest request) {
+    // Generate the seed once so the initial world and every later match share
+    // the same persisted deterministic root, even when the request omitted it.
+    final saveSeed = request.seed ?? Random().nextInt(1 << 32);
     var league = _seedGenerator.generateLeague(
       year: request.seasonYear,
       playerTeamId: request.playerTeamId,
-      seed: request.seed,
+      seed: saveSeed,
     );
 
     final schedule = const ScheduleGenerator().generateDoubleRoundRobin(
@@ -63,14 +62,18 @@ class GameFactory {
     final ai = TeamAiService();
     var teams = league.teams.map(ai.autoSelectLineup).toList();
 
-    final staffRng = Random(request.seed ?? Object.hash(request.saveName, 1));
+    final staffRng = Random(saveSeed);
     final staffService = StaffService();
-    teams = teams.map((t) => _seedInitialStaff(t, staffRng, staffService)).toList();
+    teams = teams
+        .map((t) => _seedInitialStaff(t, staffRng, staffService))
+        .toList();
     final staffPool = _seedGenerator
         .generateStaffPool(36, random: staffRng)
-        .map((m) => m.copyWith(
-              contract: null, // free agents: no contract until hired
-            ))
+        .map(
+          (m) => m.copyWith(
+            contract: null, // free agents: no contract until hired
+          ),
+        )
         .toList();
 
     league = league.copyWith(
@@ -87,11 +90,7 @@ class GameFactory {
 
     // Initial strength table — no hysteresis on first calculation.
     final strengthService = const LeagueStrengthService();
-    final strengthTable = strengthService.calculate(
-      league,
-      week: 1,
-      day: 1,
-    );
+    final strengthTable = strengthService.calculate(league, week: 1, day: 1);
     league = league.copyWith(strengthTable: strengthTable);
 
     final playerTeam = league.playerTeam;
@@ -107,7 +106,8 @@ class GameFactory {
         playerTeamName: playerTeam?.name,
       ),
       leagueState: league,
-      schemaVersion: 1,
+      saveSeed: saveSeed,
+      schemaVersion: 2,
     );
   }
 
@@ -120,7 +120,10 @@ class GameFactory {
       final member = _seedGenerator.generateStaffMember(rng, role);
       final salary = staffService.marketSalary(member).round();
       final hired = member.copyWith(
-        contract: StaffContract(salary: salary, yearsRemaining: 2 + rng.nextInt(3)),
+        contract: StaffContract(
+          salary: salary,
+          yearsRemaining: 2 + rng.nextInt(3),
+        ),
       );
       staff = staff.withMember(role, hired);
     }
