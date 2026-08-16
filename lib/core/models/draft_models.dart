@@ -134,6 +134,26 @@ class PlayInResult with _$PlayInResult {
       _$PlayInResultFromJson(json);
 }
 
+/// Persisted intermediate play-in state used by the dated calendar flow.
+/// It keeps the existing atomic [PlayInResult] API intact while allowing the
+/// Wednesday games and Saturday decider to be resolved on their own dates.
+@freezed
+class PlayInProgress with _$PlayInProgress {
+  const factory PlayInProgress({
+    required Conference conference,
+    required String seed7TeamId,
+    required String seed8TeamId,
+    required String seed9TeamId,
+    required String seed10TeamId,
+    MatchResult? game7v8,
+    MatchResult? game9v10,
+    MatchResult? gameFinal,
+  }) = _PlayInProgress;
+
+  factory PlayInProgress.fromJson(Map<String, dynamic> json) =>
+      _$PlayInProgressFromJson(json);
+}
+
 @freezed
 class PlayoffBracket with _$PlayoffBracket {
   const factory PlayoffBracket({
@@ -156,6 +176,7 @@ class Season with _$Season {
     @Default([]) List<ScheduledMatch> schedule,
     @Default([]) List<ConferenceStandings> standings,
     @Default([]) List<PlayInResult> playInResults,
+    @Default([]) List<PlayInProgress> playInProgress,
     @Default([]) List<PlayoffBracket> playoffBrackets,
     String? championTeamId,
     DraftState? draftState,

@@ -29,6 +29,9 @@ String? calendarEventLabel(BuildContext context, CalendarEventId eventId) {
     CalendarEventId.draft => l10n.calendar_event_draft,
     CalendarEventId.nextClassGeneration => 'Generacja nowej klasy draftowej',
     CalendarEventId.freeAgencyOpen => l10n.calendar_event_freeAgency,
+    CalendarEventId.tradeWindowOpen => l10n.calendar_event_tradeWindowOpen,
+    CalendarEventId.contractExtensions =>
+      l10n.calendar_event_contractExtensions,
     CalendarEventId.tradeDeadline => l10n.calendar_event_tradeDeadline,
   };
 }

@@ -16,6 +16,8 @@ enum CalendarEventId {
   finalMock,
   draft,
   nextClassGeneration,
+  tradeWindowOpen,
+  contractExtensions,
   tradeDeadline,
   freeAgencyOpen,
 }
@@ -27,6 +29,8 @@ class CalendarEventSlot {
     required this.day,
     required this.order,
     required this.kind,
+    this.endWeek,
+    this.endDay,
   });
 
   final CalendarEventId id;
@@ -34,6 +38,39 @@ class CalendarEventSlot {
   final int day;
   final int order;
   final CalendarEventKind kind;
+  final int? endWeek;
+  final int? endDay;
+}
+
+/// A non-point calendar window, such as the trade, extension or FA window.
+class CalendarEventWindow {
+  const CalendarEventWindow({
+    required this.id,
+    required this.startWeek,
+    required this.startDay,
+    required this.endWeek,
+    required this.endDay,
+    required this.kind,
+    this.wrapsYear = false,
+  });
+
+  final CalendarEventId id;
+  final int startWeek;
+  final int startDay;
+  final int endWeek;
+  final int endDay;
+  final CalendarEventKind kind;
+  final bool wrapsYear;
+
+  bool contains(int week, int day, int cycleWeeks) {
+    final current = (week - 1) * 7 + (day - 1);
+    final start = (startWeek - 1) * 7 + (startDay - 1);
+    final end = (endWeek - 1) * 7 + (endDay - 1);
+    final cycleDays = cycleWeeks * 7;
+    if (current < 0 || current >= cycleDays) return false;
+    if (!wrapsYear) return current >= start && current <= end;
+    return current >= start || current <= end;
+  }
 }
 
 /// Statyczny rejestr eventów offseasonu, budowany z [BalanceConfig.calendar]
@@ -47,18 +84,18 @@ class CalendarEventRegistry {
     final scoutWeek = awardsWeek + 1;
     return [
       CalendarEventSlot(
-        id: CalendarEventId.staffGrowth,
-        week: awardsWeek,
-        day: 1,
-        order: 0,
-        kind: CalendarEventKind.automatic,
-      ),
-      CalendarEventSlot(
         id: CalendarEventId.awards,
         week: awardsWeek,
         day: 1,
-        order: 1,
+        order: 0,
         kind: CalendarEventKind.informational,
+      ),
+      CalendarEventSlot(
+        id: CalendarEventId.staffGrowth,
+        week: awardsWeek,
+        day: 2,
+        order: 0,
+        kind: CalendarEventKind.automatic,
       ),
       CalendarEventSlot(
         id: CalendarEventId.retirements,
@@ -73,6 +110,13 @@ class CalendarEventRegistry {
         day: 5,
         order: 0,
         kind: CalendarEventKind.playerAction,
+      ),
+      CalendarEventSlot(
+        id: CalendarEventId.tradeWindowOpen,
+        week: calendar.tradeWindowOpenWeek,
+        day: 1,
+        order: -1,
+        kind: CalendarEventKind.automatic,
       ),
       CalendarEventSlot(
         id: CalendarEventId.scoutReport,
@@ -126,6 +170,37 @@ class CalendarEventRegistry {
     ];
   }
 
+  /// Builds ranges that are intentionally not actionable point events.
+  static List<CalendarEventWindow> buildWindows(CalendarBalance calendar) {
+    return [
+      CalendarEventWindow(
+        id: CalendarEventId.tradeWindowOpen,
+        startWeek: calendar.tradeWindowOpenWeek,
+        startDay: 1,
+        endWeek: calendar.tradeDeadlineWeek,
+        endDay: 1,
+        kind: CalendarEventKind.automatic,
+        wrapsYear: true,
+      ),
+      CalendarEventWindow(
+        id: CalendarEventId.contractExtensions,
+        startWeek: calendar.draftWeek,
+        startDay: 2,
+        endWeek: calendar.draftWeek,
+        endDay: 7,
+        kind: CalendarEventKind.playerAction,
+      ),
+      CalendarEventWindow(
+        id: CalendarEventId.freeAgencyOpen,
+        startWeek: calendar.freeAgencyWeek,
+        startDay: 1,
+        endWeek: calendar.seasonCycleWeeks,
+        endDay: 7,
+        kind: CalendarEventKind.playerAction,
+      ),
+    ];
+  }
+
   /// Czy akcja przypisana do [id] została już wykonana w bieżącym sezonie.
   static bool isDone(Season season, CalendarEventId id) {
     switch (id) {
@@ -148,6 +223,10 @@ class CalendarEventRegistry {
         return draft != null && draft.currentPickIndex >= draft.order.length;
       case CalendarEventId.nextClassGeneration:
         return season.nextDraftState != null;
+      case CalendarEventId.tradeWindowOpen:
+      case CalendarEventId.contractExtensions:
+        // These are derived ranges, not one-shot stateful events.
+        return true;
       case CalendarEventId.tradeDeadline:
         return season.tradeDeadlineAcked;
       case CalendarEventId.freeAgencyOpen:
@@ -163,13 +242,14 @@ class CalendarEventRegistry {
     int fromWeek,
     int fromDay,
     int fromOrder,
+    int cycleWeeks,
   ) {
     final isPast =
         slot.week < fromWeek ||
         (slot.week == fromWeek &&
             (slot.day < fromDay ||
                 (slot.day == fromDay && slot.order < fromOrder)));
-    return isPast ? slot.week + 52 : slot.week;
+    return isPast ? slot.week + cycleWeeks : slot.week;
   }
 
   /// Zwraca najbliższy nieukończony slot kalendarzowy od bieżącej daty
@@ -196,8 +276,20 @@ class CalendarEventRegistry {
     if (candidates.isEmpty) return null;
 
     candidates.sort((a, b) {
-      final wa = _normalizedWeek(a, fromWeek, fromDay, fromOrder);
-      final wb = _normalizedWeek(b, fromWeek, fromDay, fromOrder);
+      final wa = _normalizedWeek(
+        a,
+        fromWeek,
+        fromDay,
+        fromOrder,
+        balance.calendar.seasonCycleWeeks,
+      );
+      final wb = _normalizedWeek(
+        b,
+        fromWeek,
+        fromDay,
+        fromOrder,
+        balance.calendar.seasonCycleWeeks,
+      );
       if (wa != wb) return wa.compareTo(wb);
       if (a.day != b.day) return a.day.compareTo(b.day);
       return a.order.compareTo(b.order);

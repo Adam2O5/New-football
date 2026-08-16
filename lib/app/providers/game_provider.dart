@@ -182,11 +182,55 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   Future<DaySimulationResult?> advanceOneDay() async {
     final current = save;
     if (current == null) return null;
-    final result = _days.simulateDay(
-      current.leagueState,
-      saveSeed: current.saveSeed,
-    );
-    await updateLeague((_) => result.league);
+
+    var league = current.leagueState;
+    final calendar = _calendar;
+    if (calendar
+        .playInSlotsForDay(league.currentWeek, league.currentDay)
+        .isNotEmpty) {
+      league = _season.advancePlayInForDate(
+        league,
+        week: league.currentWeek,
+        day: league.currentDay,
+        saveSeed: current.saveSeed,
+      );
+    }
+    if (calendar.phaseForWeek(league.currentWeek) == SeasonPhase.playoff &&
+        league.currentSeason.playoffBrackets.isEmpty &&
+        league.currentSeason.playInResults.isNotEmpty) {
+      league = _season.setupPlayoffs(league);
+    }
+    if (calendar.postseasonSlotForDay(league.currentWeek, league.currentDay) !=
+        null) {
+      league = _season.advancePlayoffsForDate(
+        league,
+        week: league.currentWeek,
+        day: league.currentDay,
+        saveSeed: current.saveSeed,
+      );
+    }
+
+    final result = _days.simulateDay(league, saveSeed: current.saveSeed);
+    var updatedLeague = result.league;
+    final isCycleEnd =
+        current.leagueState.currentWeek ==
+            calendar.balance.calendar.seasonCycleWeeks &&
+        current.leagueState.currentDay == 7;
+    if (isCycleEnd) {
+      updatedLeague = _season.rolloverSeason(updatedLeague);
+    }
+    if (isCycleEnd) {
+      final updatedResult = DaySimulationResult(
+        league: updatedLeague,
+        pauseForUrgent: updatedLeague.inbox.pendingUrgent.isNotEmpty,
+        playerMatch: result.playerMatch,
+        simulatedResults: result.simulatedResults,
+        eventId: result.eventId,
+      );
+      await updateLeague((_) => updatedLeague);
+      return updatedResult;
+    }
+    await updateLeague((_) => updatedLeague);
     return result;
   }
 
@@ -249,14 +293,14 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     final fromDay = state.currentDay;
     int normWeek(int week, int day) =>
         (week < fromWeek || (week == fromWeek && day < fromDay))
-        ? week + 52
+        ? week + _calendar.balance.calendar.seasonCycleWeeks
         : week;
 
     final matchNorm = normWeek(matchDate.$1, matchDate.$2);
     final eventNorm = normWeek(eventSlot.week, eventSlot.day);
     final matchFirst = matchNorm != eventNorm
         ? matchNorm < eventNorm
-        : matchDate.$2 <= eventSlot.day;
+        : matchDate.$2 < eventSlot.day;
 
     return matchFirst
         ? UpcomingAction(
@@ -320,6 +364,10 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
           return _season.runFinalMock(league);
         case CalendarEventId.nextClassGeneration:
           return _season.runNextClassGeneration(league);
+        case CalendarEventId.tradeWindowOpen:
+        case CalendarEventId.contractExtensions:
+          // Ranges are derived windows, not one-shot actions.
+          return league;
         case CalendarEventId.draft:
           // playerAction — handled by the draft screen + makeDraftPick.
           return league;

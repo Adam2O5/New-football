@@ -22,7 +22,8 @@ Tyg. 1 ────────────────────────�
 Tyg. 30 ──► Przerwa przed play-in
 Tyg. 31 ──► Play-in
 Tyg. 32–43 ──► Playoff (12 tyg.)
-           └──► Staff growth/retire (po finale, przed Awards)
+           └──► Tyg. 44: Awards (pon), Staff growth/retire (wt),
+                    Retirements (śr), Lottery (pt)
 Tyg. 44–45 ──► Awards, retirements, lottery, scout, combine, mock
               (okno wymian już otwarte od końca playoff)
 Tyg. 46     ──► Draft + mock wstępny klasy N+1 + przedłużenia
@@ -109,7 +110,8 @@ Format: **best-of-5** (do 3 wygranych). Przy 2 slotach/tydz. maksymalnie **4 mec
 
 > Trzy tygodnie na finał ligi to **świadomy bufor** — realnie seria BO5 często kończy się w 2 tygodnie; trzeci tydzień absorbuje dogrywki i daje margines na UI/symulację.
 
-Po finale, **przed Awards (pon 44):** roll wzrostu / emerytury sztabu — `staff.md`.
+Po finale rozpoczyna się offseason: Awards odbywa się w poniedziałek tygodnia 44,
+a roll wzrostu i emerytury sztabu w następny dzień, wtorek tygodnia 44 — `staff.md`.
 
 ---
 
@@ -165,8 +167,8 @@ Szczegóły: **`offseason.md`**.
 | **32–34** | Playoff — runda 1 |
 | **35–37** | Playoff — runda 2 |
 | **38–40** | Finały konferencji |
-| **41–43** | Finał ligi (+ staff growth/retire przed Awards) |
-| **44** | StaffGrowth (pon), Awards (wt), Retirements (śr), Lottery (pt) |
+| **41–43** | Finał ligi |
+| **44** | Awards (pon), StaffGrowth/retire (wt), Retirements (śr), Lottery (pt) |
 | **45** | Scout Report (pon), Draft Combine (śr), Mock Draft finalny (pt) |
 | **46** | Draft (pon) + mock wstępny N+1 + przedłużenia (wt–niedz) |
 | **47+** | Free agency + skauting ciągły + przygotowania |
@@ -183,8 +185,8 @@ Szczegóły: **`offseason.md`**.
 | Play-in | Tyg. **31** (śr ×2, sob) |
 | Koniec playoff | Niedziela tyg. **43** |
 | Otwarcie okna wymian | Poniedziałek tyg. **44** (po finale) |
-| Staff growth / retire | Poniedziałek tyg. **44** |
-| Awards | Wtorek tyg. **44** |
+| Awards | Poniedziałek tyg. **44** |
+| Staff growth / retire | Wtorek tyg. **44** |
 | Retirements | Środa tyg. **44** |
 | Lottery | Piątek tyg. **44** |
 | Scout Report | Poniedziałek tyg. **45** |

@@ -1814,6 +1814,18 @@ abstract class AppLocalizations {
   /// **'Deadline wymiany'**
   String get calendar_event_tradeDeadline;
 
+  /// No description provided for @calendar_event_tradeWindowOpen.
+  ///
+  /// In pl, this message translates to:
+  /// **'Otwarcie okna wymian'**
+  String get calendar_event_tradeWindowOpen;
+
+  /// No description provided for @calendar_event_contractExtensions.
+  ///
+  /// In pl, this message translates to:
+  /// **'Przedłużenia kontraktów'**
+  String get calendar_event_contractExtensions;
+
   /// No description provided for @calendar_event_awards.
   ///
   /// In pl, this message translates to:

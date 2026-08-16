@@ -12,9 +12,15 @@ class CalendarService {
   CalendarBalance get _c => balance.calendar;
 
   SeasonPhase phaseForWeek(int week) {
-    if (week < 1) return SeasonPhase.preseason;
-    if (week <= _c.regularSeasonWeeks) return SeasonPhase.regular;
-    if (week == 30) return SeasonPhase.regular; // break before play-in
+    if (week < 1) {
+      return SeasonPhase.preseason;
+    }
+    if (week <= _c.regularSeasonWeeks) {
+      return SeasonPhase.regular;
+    }
+    if (week == _c.breakWeek) {
+      return SeasonPhase.regular; // break before play-in
+    }
     if (week == _c.playInWeek) return SeasonPhase.playIn;
     if (week >= _c.playoffStartWeek && week <= _c.playoffEndWeek) {
       return SeasonPhase.playoff;
@@ -32,11 +38,12 @@ class CalendarService {
   bool isTradeDeadline(int week, int day) =>
       week == _c.tradeDeadlineWeek && day == 1;
 
-  bool isTradeWindowOpen(int week) {
-    // Open from week 44 until deadline Monday of week 23 (wraps seasons).
+  bool isTradeWindowOpen(int week, {int day = 1}) {
+    // Open from week 44 until the week 23 deadline, which closes the window
+    // at the start of deadline day. The optional day keeps old callers valid.
     if (week >= _c.tradeWindowOpenWeek) return true;
     if (week < _c.tradeDeadlineWeek) return true;
-    if (week == _c.tradeDeadlineWeek) return false; // closed after Mon
+    if (week == _c.tradeDeadlineWeek) return false;
     return false;
   }
 
@@ -62,6 +69,47 @@ class CalendarService {
     };
   }
 
+  /// Returns all play-in slots for a date. Wednesday hosts two games and
+  /// Saturday hosts the deciding game for each conference.
+  List<int> playInSlotsForDay(int week, int day) {
+    if (week != _c.playInWeek) return const [];
+    return switch (day) {
+      3 => const [0, 1],
+      6 => const [2],
+      _ => const [],
+    };
+  }
+
+  /// Backwards-compatible single-slot view of the play-in calendar.
+  /// Wednesday returns its first slot; Saturday returns slot 2.
+  int? playInSlotForDay(int week, int day) {
+    final slots = playInSlotsForDay(week, day);
+    return slots.isEmpty ? null : slots.first;
+  }
+
+  /// Postseason uses two weekly slots: a midweek slot and a weekend slot.
+  int? postseasonSlotForDay(int week, int day) {
+    if (week < _c.playoffStartWeek || week > _c.playoffEndWeek) {
+      return null;
+    }
+    if (day == 3 || day == 4) return 0;
+    if (day == 6 || day == 7) return 1;
+    return null;
+  }
+
+  /// Playoff round block: conference quarter-finals, semi-finals,
+  /// conference finals, then league final.
+  int? playoffRoundForWeek(int week) {
+    if (week < _c.playoffStartWeek || week > _c.playoffEndWeek) {
+      return null;
+    }
+    final offset = week - _c.playoffStartWeek;
+    return offset ~/ 3 + 1;
+  }
+
+  /// Home-team pattern for BO5 format 1-2-2 (game index is zero-based).
+  bool higherSeedHomeForGame(int gameIndex) => gameIndex == 0 || gameIndex >= 3;
+
   String dayName(int day) {
     const names = [
       '',
@@ -77,9 +125,12 @@ class CalendarService {
     return names[day];
   }
 
-  /// Advance one day. Returns (week, day).
+  /// Advance one day and wrap to week 1 after the configured calendar cycle.
+  /// The controller is responsible for calling `rolloverSeason` at this
+  /// boundary; this helper only owns the date arithmetic.
   (int week, int day) advanceDay(int week, int day) {
     if (day < 7) return (week, day + 1);
+    if (week >= _c.seasonCycleWeeks) return (1, 1);
     return (week + 1, 1);
   }
 
@@ -103,7 +154,7 @@ class CalendarService {
       case SeasonPhase.playoff:
         return (_c.playoffEndWeek, 7);
       case SeasonPhase.offseason:
-        return (_c.freeAgencyWeek, 7);
+        return (_c.seasonCycleWeeks, 7);
     }
   }
 
@@ -114,6 +165,15 @@ class CalendarService {
   List<CalendarEventSlot> eventsOn(int week, int day) {
     return CalendarEventRegistry.build(
       _c,
-    ).where((e) => e.week == week && e.day == day).toList();
+    ).where((event) => event.week == week && event.day == day).toList();
+  }
+
+  /// All registered event windows containing (week, day). Windows are kept
+  /// separate from [eventsOn] so existing point-event consumers remain
+  /// source-compatible.
+  List<CalendarEventWindow> windowsOn(int week, int day) {
+    return CalendarEventRegistry.buildWindows(_c)
+        .where((window) => window.contains(week, day, _c.seasonCycleWeeks))
+        .toList();
   }
 }

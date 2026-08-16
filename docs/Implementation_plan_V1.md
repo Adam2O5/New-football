@@ -155,7 +155,7 @@ Tryb **1a**: każda pozycja dostaje osobne pytanie w momencie, gdy zablokuje zad
 
 | # | Rozbieżność | Blokuje | Rekomendacja | Status |
 | - | ----------- | ------- | ------------ | ------ |
-| 1 | Tyg. 44: tabela „Exact schedule" mówi Awards pon / StaffGrowth wt; checklist „Kluczowe eventy" mówi StaffGrowth pon / Awards wt | Task 5 | **StaffGrowth pon, Awards wt, Retirements śr, Lottery pt** — dwa inne miejsca w `game_calendar.md` mówią wprost „po finale, **przed** Awards: roll wzrostu / emerytury sztabu". Okno wymian otwiera się w pon tyg. 44 niezależnie od Awards. | ⏳ |
+| 1 | Tyg. 44: tabela „Exact schedule" mówi Awards pon / StaffGrowth wt; checklist „Kluczowe eventy" mówi StaffGrowth pon / Awards wt | Task 5 | **Rozstrzygnięto: Awards pon, StaffGrowth/retire wt, Retirements śr, Lottery pt.** Tabela „Exact schedule" jest kanoniczna; okno wymian otwiera się w pon tyg. 44 niezależnie od Awards. | ✅ |
 | 2 | Przeliczanie tabeli siły ligi: `team_management.md` „co miesiąc 1. dnia miesiąca + pon tyg. 23 + start kariery"; `AI_behaviour.md` §2.1 „wtorek tyg. 44 i poniedziałek tyg. 23" | Task 14 | Kanonem `team_management.md`. Gra liczy tygodnie, nie miesiące → **co 4 tygodnie (tyg. 1, 5, 9, 13, 17, 21) + pon tyg. 23 + wt tyg. 44 + start kariery**. Wtorek tyg. 44 dochodzi, bo AI potrzebuje świeżej wyceny przed loterią. | ⏳ |
 | 3 | Progi `playerOfferScore`: pasmo 40–59 „Counter" nachodzi na 55–69 „Waiting/Counter/Accept" | Task 28 | **40–54 Counter, 55–69 pasmo mieszane** z losowaniem z docs (50/50 w punkcie 62, ±6 pkt rozkładu na punkt odchylenia). | ⏳ |
 | 4 | Rookie scale: `contracts.md` §8 `baseScale / (1 + pickSlot × 0,06)`; kod `rookiePickDecay = 0,08` | Task 27 | **0,06** za docs; kod zsynchronizować. | ⏳ |
@@ -263,30 +263,31 @@ Legenda: `⬜` do zrobienia · `🔄` w trakcie · `✅` gotowe
 
 > Kręgosłup pętli gry. Wszystko, co dzieje się „w czasie" i wszystko, co komunikuje się z graczem, opiera się na tej fazie.
 
-### ⬜ Task 5: Kalendarz zgodny z `game_calendar.md`
+### ✅ Task 5: Kalendarz zgodny z `game_calendar.md`
 
 **Cel:** kanoniczna oś czasu; wszystkie eventy pod właściwymi numerami tygodni i dniami.
 
-- [ ] **Rozstrzygnąć sprzeczność #1** (kolejność StaffGrowth / Awards w tyg. 44)
-- [ ] `CalendarBalance`: tyg. 1–29 regular, 30 przerwa, 31 play-in, 32–34/35–37/38–40/41–43 playoff, 44+ offseason
-- [ ] `CalendarService.phaseForWeek` zgodne z pełną mapą tygodni z docs
-- [ ] Play-in: śr ×2 sloty + sob tyg. 31
-- [ ] Playoff BO5 z formatem 1-2-2, 2 sloty/tydzień, serie w 2–3 tygodniach
-- [ ] Eventy tyg. 44: StaffGrowth, Awards, Retirements, Lottery — właściwe dni
-- [ ] Eventy tyg. 45: Scout Report (pon), Combine (śr), Mock finalny (pt)
-- [ ] Tyg. 46: Draft (pon), generacja klasy N+1 + mock wstępny, extensions (wt–niedz)
-- [ ] Tyg. 47: FA phase I; tyg. 48 → niedziela tyg. 45: FA phase II
-- [ ] Trade deadline: pon tyg. 23; okno wymian od pon tyg. 44
-- [ ] Rozszerzyć `CalendarEventRegistry` o **okna** (zakres dni), nie tylko punktowe eventy
-- [ ] Dodać `CalendarEventId.tradeWindowOpen`
-- [ ] `SeasonPhase.preseason` jako faza techniczna — nic się nie dzieje
+- [x] **Rozstrzygnąć sprzeczność #1** — Awards poniedziałek, StaffGrowth/retire wtorek tyg. 44
+- [x] `CalendarBalance`: tyg. 1–29 regular, 30 przerwa, 31 play-in, 32–34/35–37/38–40/41–43 playoff, 44+ offseason
+- [x] `CalendarService.phaseForWeek` zgodne z pełną mapą tygodni z docs
+- [x] Play-in: śr ×2 sloty + sob tyg. 31, z datowanym stanem pośrednim
+- [x] Playoff BO5 z formatem 1-2-2, 2 sloty/tydzień, serie w 2–3 tygodniach
+- [x] Eventy tyg. 44: Awards (pon), StaffGrowth/retire (wt), Retirements (śr), Lottery (pt)
+- [x] Eventy tyg. 45: Scout Report (pon), Combine (śr), Mock finalny (pt)
+- [x] Tyg. 46: Draft (pon), generacja klasy N+1 + mock wstępny, extensions (wt–niedz)
+- [x] Tyg. 47: FA phase I; okno FA i przygotowania obejmują dalszą część cyklu
+- [x] Trade deadline: pon tyg. 23; okno wymian od pon tyg. 44
+- [x] Rozszerzyć `CalendarEventRegistry` o **okna** (zakres dni), nie tylko punktowe eventy
+- [x] Dodać `CalendarEventId.tradeWindowOpen`
+- [x] `SeasonPhase.preseason` jako faza techniczna — nic się nie dzieje
 
 **Testy**
-- [ ] Pełny cykl tyg. 1 → tyg. 1 trafia w każdy event dokładnie raz
-- [ ] `nextEvent` poprawnie zawija rok
-- [ ] `isTradeDeadline`, `isRegularSeasonWeek`, `endOfPhase` zgodne z tabelą docs
+- [x] Pełny cykl tyg. 1 → tyg. 1 trafia w każdy event dokładnie raz
+- [x] `nextEvent` poprawnie zawija rok
+- [x] `isTradeDeadline`, `isRegularSeasonWeek`, `endOfPhase` zgodne z tabelą docs
+- [x] Play-in datowany: mecze środowe i sobotni mecz decydujący
 
-**Demo:** symulacja całego roku loguje eventy w dniach zgodnych z tabelą „Kluczowe eventy".
+**Demo:** symulacja całego roku loguje eventy w dniach zgodnych z tabelą „Kluczowe eventy”.
 
 ---
 

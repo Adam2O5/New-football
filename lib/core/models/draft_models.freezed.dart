@@ -1599,6 +1599,382 @@ abstract class _PlayInResult implements PlayInResult {
       throw _privateConstructorUsedError;
 }
 
+PlayInProgress _$PlayInProgressFromJson(Map<String, dynamic> json) {
+  return _PlayInProgress.fromJson(json);
+}
+
+/// @nodoc
+mixin _$PlayInProgress {
+  Conference get conference => throw _privateConstructorUsedError;
+  String get seed7TeamId => throw _privateConstructorUsedError;
+  String get seed8TeamId => throw _privateConstructorUsedError;
+  String get seed9TeamId => throw _privateConstructorUsedError;
+  String get seed10TeamId => throw _privateConstructorUsedError;
+  MatchResult? get game7v8 => throw _privateConstructorUsedError;
+  MatchResult? get game9v10 => throw _privateConstructorUsedError;
+  MatchResult? get gameFinal => throw _privateConstructorUsedError;
+
+  /// Serializes this PlayInProgress to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of PlayInProgress
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $PlayInProgressCopyWith<PlayInProgress> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $PlayInProgressCopyWith<$Res> {
+  factory $PlayInProgressCopyWith(
+    PlayInProgress value,
+    $Res Function(PlayInProgress) then,
+  ) = _$PlayInProgressCopyWithImpl<$Res, PlayInProgress>;
+  @useResult
+  $Res call({
+    Conference conference,
+    String seed7TeamId,
+    String seed8TeamId,
+    String seed9TeamId,
+    String seed10TeamId,
+    MatchResult? game7v8,
+    MatchResult? game9v10,
+    MatchResult? gameFinal,
+  });
+
+  $MatchResultCopyWith<$Res>? get game7v8;
+  $MatchResultCopyWith<$Res>? get game9v10;
+  $MatchResultCopyWith<$Res>? get gameFinal;
+}
+
+/// @nodoc
+class _$PlayInProgressCopyWithImpl<$Res, $Val extends PlayInProgress>
+    implements $PlayInProgressCopyWith<$Res> {
+  _$PlayInProgressCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of PlayInProgress
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? conference = null,
+    Object? seed7TeamId = null,
+    Object? seed8TeamId = null,
+    Object? seed9TeamId = null,
+    Object? seed10TeamId = null,
+    Object? game7v8 = freezed,
+    Object? game9v10 = freezed,
+    Object? gameFinal = freezed,
+  }) {
+    return _then(
+      _value.copyWith(
+            conference: null == conference
+                ? _value.conference
+                : conference // ignore: cast_nullable_to_non_nullable
+                      as Conference,
+            seed7TeamId: null == seed7TeamId
+                ? _value.seed7TeamId
+                : seed7TeamId // ignore: cast_nullable_to_non_nullable
+                      as String,
+            seed8TeamId: null == seed8TeamId
+                ? _value.seed8TeamId
+                : seed8TeamId // ignore: cast_nullable_to_non_nullable
+                      as String,
+            seed9TeamId: null == seed9TeamId
+                ? _value.seed9TeamId
+                : seed9TeamId // ignore: cast_nullable_to_non_nullable
+                      as String,
+            seed10TeamId: null == seed10TeamId
+                ? _value.seed10TeamId
+                : seed10TeamId // ignore: cast_nullable_to_non_nullable
+                      as String,
+            game7v8: freezed == game7v8
+                ? _value.game7v8
+                : game7v8 // ignore: cast_nullable_to_non_nullable
+                      as MatchResult?,
+            game9v10: freezed == game9v10
+                ? _value.game9v10
+                : game9v10 // ignore: cast_nullable_to_non_nullable
+                      as MatchResult?,
+            gameFinal: freezed == gameFinal
+                ? _value.gameFinal
+                : gameFinal // ignore: cast_nullable_to_non_nullable
+                      as MatchResult?,
+          )
+          as $Val,
+    );
+  }
+
+  /// Create a copy of PlayInProgress
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $MatchResultCopyWith<$Res>? get game7v8 {
+    if (_value.game7v8 == null) {
+      return null;
+    }
+
+    return $MatchResultCopyWith<$Res>(_value.game7v8!, (value) {
+      return _then(_value.copyWith(game7v8: value) as $Val);
+    });
+  }
+
+  /// Create a copy of PlayInProgress
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $MatchResultCopyWith<$Res>? get game9v10 {
+    if (_value.game9v10 == null) {
+      return null;
+    }
+
+    return $MatchResultCopyWith<$Res>(_value.game9v10!, (value) {
+      return _then(_value.copyWith(game9v10: value) as $Val);
+    });
+  }
+
+  /// Create a copy of PlayInProgress
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $MatchResultCopyWith<$Res>? get gameFinal {
+    if (_value.gameFinal == null) {
+      return null;
+    }
+
+    return $MatchResultCopyWith<$Res>(_value.gameFinal!, (value) {
+      return _then(_value.copyWith(gameFinal: value) as $Val);
+    });
+  }
+}
+
+/// @nodoc
+abstract class _$$PlayInProgressImplCopyWith<$Res>
+    implements $PlayInProgressCopyWith<$Res> {
+  factory _$$PlayInProgressImplCopyWith(
+    _$PlayInProgressImpl value,
+    $Res Function(_$PlayInProgressImpl) then,
+  ) = __$$PlayInProgressImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({
+    Conference conference,
+    String seed7TeamId,
+    String seed8TeamId,
+    String seed9TeamId,
+    String seed10TeamId,
+    MatchResult? game7v8,
+    MatchResult? game9v10,
+    MatchResult? gameFinal,
+  });
+
+  @override
+  $MatchResultCopyWith<$Res>? get game7v8;
+  @override
+  $MatchResultCopyWith<$Res>? get game9v10;
+  @override
+  $MatchResultCopyWith<$Res>? get gameFinal;
+}
+
+/// @nodoc
+class __$$PlayInProgressImplCopyWithImpl<$Res>
+    extends _$PlayInProgressCopyWithImpl<$Res, _$PlayInProgressImpl>
+    implements _$$PlayInProgressImplCopyWith<$Res> {
+  __$$PlayInProgressImplCopyWithImpl(
+    _$PlayInProgressImpl _value,
+    $Res Function(_$PlayInProgressImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of PlayInProgress
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? conference = null,
+    Object? seed7TeamId = null,
+    Object? seed8TeamId = null,
+    Object? seed9TeamId = null,
+    Object? seed10TeamId = null,
+    Object? game7v8 = freezed,
+    Object? game9v10 = freezed,
+    Object? gameFinal = freezed,
+  }) {
+    return _then(
+      _$PlayInProgressImpl(
+        conference: null == conference
+            ? _value.conference
+            : conference // ignore: cast_nullable_to_non_nullable
+                  as Conference,
+        seed7TeamId: null == seed7TeamId
+            ? _value.seed7TeamId
+            : seed7TeamId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        seed8TeamId: null == seed8TeamId
+            ? _value.seed8TeamId
+            : seed8TeamId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        seed9TeamId: null == seed9TeamId
+            ? _value.seed9TeamId
+            : seed9TeamId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        seed10TeamId: null == seed10TeamId
+            ? _value.seed10TeamId
+            : seed10TeamId // ignore: cast_nullable_to_non_nullable
+                  as String,
+        game7v8: freezed == game7v8
+            ? _value.game7v8
+            : game7v8 // ignore: cast_nullable_to_non_nullable
+                  as MatchResult?,
+        game9v10: freezed == game9v10
+            ? _value.game9v10
+            : game9v10 // ignore: cast_nullable_to_non_nullable
+                  as MatchResult?,
+        gameFinal: freezed == gameFinal
+            ? _value.gameFinal
+            : gameFinal // ignore: cast_nullable_to_non_nullable
+                  as MatchResult?,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$PlayInProgressImpl implements _PlayInProgress {
+  const _$PlayInProgressImpl({
+    required this.conference,
+    required this.seed7TeamId,
+    required this.seed8TeamId,
+    required this.seed9TeamId,
+    required this.seed10TeamId,
+    this.game7v8,
+    this.game9v10,
+    this.gameFinal,
+  });
+
+  factory _$PlayInProgressImpl.fromJson(Map<String, dynamic> json) =>
+      _$$PlayInProgressImplFromJson(json);
+
+  @override
+  final Conference conference;
+  @override
+  final String seed7TeamId;
+  @override
+  final String seed8TeamId;
+  @override
+  final String seed9TeamId;
+  @override
+  final String seed10TeamId;
+  @override
+  final MatchResult? game7v8;
+  @override
+  final MatchResult? game9v10;
+  @override
+  final MatchResult? gameFinal;
+
+  @override
+  String toString() {
+    return 'PlayInProgress(conference: $conference, seed7TeamId: $seed7TeamId, seed8TeamId: $seed8TeamId, seed9TeamId: $seed9TeamId, seed10TeamId: $seed10TeamId, game7v8: $game7v8, game9v10: $game9v10, gameFinal: $gameFinal)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$PlayInProgressImpl &&
+            (identical(other.conference, conference) ||
+                other.conference == conference) &&
+            (identical(other.seed7TeamId, seed7TeamId) ||
+                other.seed7TeamId == seed7TeamId) &&
+            (identical(other.seed8TeamId, seed8TeamId) ||
+                other.seed8TeamId == seed8TeamId) &&
+            (identical(other.seed9TeamId, seed9TeamId) ||
+                other.seed9TeamId == seed9TeamId) &&
+            (identical(other.seed10TeamId, seed10TeamId) ||
+                other.seed10TeamId == seed10TeamId) &&
+            (identical(other.game7v8, game7v8) || other.game7v8 == game7v8) &&
+            (identical(other.game9v10, game9v10) ||
+                other.game9v10 == game9v10) &&
+            (identical(other.gameFinal, gameFinal) ||
+                other.gameFinal == gameFinal));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    conference,
+    seed7TeamId,
+    seed8TeamId,
+    seed9TeamId,
+    seed10TeamId,
+    game7v8,
+    game9v10,
+    gameFinal,
+  );
+
+  /// Create a copy of PlayInProgress
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$PlayInProgressImplCopyWith<_$PlayInProgressImpl> get copyWith =>
+      __$$PlayInProgressImplCopyWithImpl<_$PlayInProgressImpl>(
+        this,
+        _$identity,
+      );
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$PlayInProgressImplToJson(this);
+  }
+}
+
+abstract class _PlayInProgress implements PlayInProgress {
+  const factory _PlayInProgress({
+    required final Conference conference,
+    required final String seed7TeamId,
+    required final String seed8TeamId,
+    required final String seed9TeamId,
+    required final String seed10TeamId,
+    final MatchResult? game7v8,
+    final MatchResult? game9v10,
+    final MatchResult? gameFinal,
+  }) = _$PlayInProgressImpl;
+
+  factory _PlayInProgress.fromJson(Map<String, dynamic> json) =
+      _$PlayInProgressImpl.fromJson;
+
+  @override
+  Conference get conference;
+  @override
+  String get seed7TeamId;
+  @override
+  String get seed8TeamId;
+  @override
+  String get seed9TeamId;
+  @override
+  String get seed10TeamId;
+  @override
+  MatchResult? get game7v8;
+  @override
+  MatchResult? get game9v10;
+  @override
+  MatchResult? get gameFinal;
+
+  /// Create a copy of PlayInProgress
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$PlayInProgressImplCopyWith<_$PlayInProgressImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
 PlayoffBracket _$PlayoffBracketFromJson(Map<String, dynamic> json) {
   return _PlayoffBracket.fromJson(json);
 }
@@ -1916,6 +2292,7 @@ mixin _$Season {
   List<ScheduledMatch> get schedule => throw _privateConstructorUsedError;
   List<ConferenceStandings> get standings => throw _privateConstructorUsedError;
   List<PlayInResult> get playInResults => throw _privateConstructorUsedError;
+  List<PlayInProgress> get playInProgress => throw _privateConstructorUsedError;
   List<PlayoffBracket> get playoffBrackets =>
       throw _privateConstructorUsedError;
   String? get championTeamId => throw _privateConstructorUsedError;
@@ -1950,6 +2327,7 @@ abstract class $SeasonCopyWith<$Res> {
     List<ScheduledMatch> schedule,
     List<ConferenceStandings> standings,
     List<PlayInResult> playInResults,
+    List<PlayInProgress> playInProgress,
     List<PlayoffBracket> playoffBrackets,
     String? championTeamId,
     DraftState? draftState,
@@ -1989,6 +2367,7 @@ class _$SeasonCopyWithImpl<$Res, $Val extends Season>
     Object? schedule = null,
     Object? standings = null,
     Object? playInResults = null,
+    Object? playInProgress = null,
     Object? playoffBrackets = null,
     Object? championTeamId = freezed,
     Object? draftState = freezed,
@@ -2024,6 +2403,10 @@ class _$SeasonCopyWithImpl<$Res, $Val extends Season>
                 ? _value.playInResults
                 : playInResults // ignore: cast_nullable_to_non_nullable
                       as List<PlayInResult>,
+            playInProgress: null == playInProgress
+                ? _value.playInProgress
+                : playInProgress // ignore: cast_nullable_to_non_nullable
+                      as List<PlayInProgress>,
             playoffBrackets: null == playoffBrackets
                 ? _value.playoffBrackets
                 : playoffBrackets // ignore: cast_nullable_to_non_nullable
@@ -2134,6 +2517,7 @@ abstract class _$$SeasonImplCopyWith<$Res> implements $SeasonCopyWith<$Res> {
     List<ScheduledMatch> schedule,
     List<ConferenceStandings> standings,
     List<PlayInResult> playInResults,
+    List<PlayInProgress> playInProgress,
     List<PlayoffBracket> playoffBrackets,
     String? championTeamId,
     DraftState? draftState,
@@ -2175,6 +2559,7 @@ class __$$SeasonImplCopyWithImpl<$Res>
     Object? schedule = null,
     Object? standings = null,
     Object? playInResults = null,
+    Object? playInProgress = null,
     Object? playoffBrackets = null,
     Object? championTeamId = freezed,
     Object? draftState = freezed,
@@ -2210,6 +2595,10 @@ class __$$SeasonImplCopyWithImpl<$Res>
             ? _value._playInResults
             : playInResults // ignore: cast_nullable_to_non_nullable
                   as List<PlayInResult>,
+        playInProgress: null == playInProgress
+            ? _value._playInProgress
+            : playInProgress // ignore: cast_nullable_to_non_nullable
+                  as List<PlayInProgress>,
         playoffBrackets: null == playoffBrackets
             ? _value._playoffBrackets
             : playoffBrackets // ignore: cast_nullable_to_non_nullable
@@ -2272,6 +2661,7 @@ class _$SeasonImpl implements _Season {
     final List<ScheduledMatch> schedule = const [],
     final List<ConferenceStandings> standings = const [],
     final List<PlayInResult> playInResults = const [],
+    final List<PlayInProgress> playInProgress = const [],
     final List<PlayoffBracket> playoffBrackets = const [],
     this.championTeamId,
     this.draftState,
@@ -2287,6 +2677,7 @@ class _$SeasonImpl implements _Season {
   }) : _schedule = schedule,
        _standings = standings,
        _playInResults = playInResults,
+       _playInProgress = playInProgress,
        _playoffBrackets = playoffBrackets;
 
   factory _$SeasonImpl.fromJson(Map<String, dynamic> json) =>
@@ -2322,6 +2713,15 @@ class _$SeasonImpl implements _Season {
     if (_playInResults is EqualUnmodifiableListView) return _playInResults;
     // ignore: implicit_dynamic_type
     return EqualUnmodifiableListView(_playInResults);
+  }
+
+  final List<PlayInProgress> _playInProgress;
+  @override
+  @JsonKey()
+  List<PlayInProgress> get playInProgress {
+    if (_playInProgress is EqualUnmodifiableListView) return _playInProgress;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_playInProgress);
   }
 
   final List<PlayoffBracket> _playoffBrackets;
@@ -2365,7 +2765,7 @@ class _$SeasonImpl implements _Season {
 
   @override
   String toString() {
-    return 'Season(year: $year, phase: $phase, schedule: $schedule, standings: $standings, playInResults: $playInResults, playoffBrackets: $playoffBrackets, championTeamId: $championTeamId, draftState: $draftState, awards: $awards, staffGrowthDone: $staffGrowthDone, playerRetirementsDone: $playerRetirementsDone, combineDone: $combineDone, finalMockDone: $finalMockDone, faOpenDone: $faOpenDone, scoutReportDone: $scoutReportDone, tradeDeadlineAcked: $tradeDeadlineAcked, nextDraftState: $nextDraftState)';
+    return 'Season(year: $year, phase: $phase, schedule: $schedule, standings: $standings, playInResults: $playInResults, playInProgress: $playInProgress, playoffBrackets: $playoffBrackets, championTeamId: $championTeamId, draftState: $draftState, awards: $awards, staffGrowthDone: $staffGrowthDone, playerRetirementsDone: $playerRetirementsDone, combineDone: $combineDone, finalMockDone: $finalMockDone, faOpenDone: $faOpenDone, scoutReportDone: $scoutReportDone, tradeDeadlineAcked: $tradeDeadlineAcked, nextDraftState: $nextDraftState)';
   }
 
   @override
@@ -2383,6 +2783,10 @@ class _$SeasonImpl implements _Season {
             const DeepCollectionEquality().equals(
               other._playInResults,
               _playInResults,
+            ) &&
+            const DeepCollectionEquality().equals(
+              other._playInProgress,
+              _playInProgress,
             ) &&
             const DeepCollectionEquality().equals(
               other._playoffBrackets,
@@ -2420,6 +2824,7 @@ class _$SeasonImpl implements _Season {
     const DeepCollectionEquality().hash(_schedule),
     const DeepCollectionEquality().hash(_standings),
     const DeepCollectionEquality().hash(_playInResults),
+    const DeepCollectionEquality().hash(_playInProgress),
     const DeepCollectionEquality().hash(_playoffBrackets),
     championTeamId,
     draftState,
@@ -2455,6 +2860,7 @@ abstract class _Season implements Season {
     final List<ScheduledMatch> schedule,
     final List<ConferenceStandings> standings,
     final List<PlayInResult> playInResults,
+    final List<PlayInProgress> playInProgress,
     final List<PlayoffBracket> playoffBrackets,
     final String? championTeamId,
     final DraftState? draftState,
@@ -2481,6 +2887,8 @@ abstract class _Season implements Season {
   List<ConferenceStandings> get standings;
   @override
   List<PlayInResult> get playInResults;
+  @override
+  List<PlayInProgress> get playInProgress;
   @override
   List<PlayoffBracket> get playoffBrackets;
   @override

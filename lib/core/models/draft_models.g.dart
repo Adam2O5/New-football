@@ -190,6 +190,37 @@ const _$ConferenceEnumMap = {
   Conference.restOfTheWorld: 'restOfTheWorld',
 };
 
+_$PlayInProgressImpl _$$PlayInProgressImplFromJson(Map<String, dynamic> json) =>
+    _$PlayInProgressImpl(
+      conference: $enumDecode(_$ConferenceEnumMap, json['conference']),
+      seed7TeamId: json['seed7TeamId'] as String,
+      seed8TeamId: json['seed8TeamId'] as String,
+      seed9TeamId: json['seed9TeamId'] as String,
+      seed10TeamId: json['seed10TeamId'] as String,
+      game7v8: json['game7v8'] == null
+          ? null
+          : MatchResult.fromJson(json['game7v8'] as Map<String, dynamic>),
+      game9v10: json['game9v10'] == null
+          ? null
+          : MatchResult.fromJson(json['game9v10'] as Map<String, dynamic>),
+      gameFinal: json['gameFinal'] == null
+          ? null
+          : MatchResult.fromJson(json['gameFinal'] as Map<String, dynamic>),
+    );
+
+Map<String, dynamic> _$$PlayInProgressImplToJson(
+  _$PlayInProgressImpl instance,
+) => <String, dynamic>{
+  'conference': _$ConferenceEnumMap[instance.conference]!,
+  'seed7TeamId': instance.seed7TeamId,
+  'seed8TeamId': instance.seed8TeamId,
+  'seed9TeamId': instance.seed9TeamId,
+  'seed10TeamId': instance.seed10TeamId,
+  'game7v8': instance.game7v8,
+  'game9v10': instance.game9v10,
+  'gameFinal': instance.gameFinal,
+};
+
 _$PlayoffBracketImpl _$$PlayoffBracketImplFromJson(Map<String, dynamic> json) =>
     _$PlayoffBracketImpl(
       conference: $enumDecode(_$ConferenceEnumMap, json['conference']),
@@ -243,6 +274,11 @@ _$SeasonImpl _$$SeasonImplFromJson(Map<String, dynamic> json) => _$SeasonImpl(
           ?.map((e) => PlayInResult.fromJson(e as Map<String, dynamic>))
           .toList() ??
       const [],
+  playInProgress:
+      (json['playInProgress'] as List<dynamic>?)
+          ?.map((e) => PlayInProgress.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
   playoffBrackets:
       (json['playoffBrackets'] as List<dynamic>?)
           ?.map((e) => PlayoffBracket.fromJson(e as Map<String, dynamic>))
@@ -274,6 +310,7 @@ Map<String, dynamic> _$$SeasonImplToJson(_$SeasonImpl instance) =>
       'schedule': instance.schedule,
       'standings': instance.standings,
       'playInResults': instance.playInResults,
+      'playInProgress': instance.playInProgress,
       'playoffBrackets': instance.playoffBrackets,
       'championTeamId': instance.championTeamId,
       'draftState': instance.draftState,

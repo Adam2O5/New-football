@@ -82,6 +82,20 @@ class DaySimulator {
       currentSeason: state.currentSeason.copyWith(phase: phase),
     );
 
+    if (phase == SeasonPhase.preseason) {
+      final (nextWeek, nextDay) = calendar.advanceDay(week, day);
+      return DaySimulationResult(
+        league: state.copyWith(
+          currentWeek: nextWeek,
+          currentDay: nextDay,
+          currentSeason: state.currentSeason.copyWith(
+            phase: calendar.phaseForWeek(nextWeek),
+          ),
+        ),
+        pauseForUrgent: state.inbox.pendingUrgent.isNotEmpty,
+      );
+    }
+
     // Periodic strength table recalculation (`team_management.md`).
     const strengthService = LeagueStrengthService();
     if (strengthService.shouldRecalculate(week, day, state.strengthTable)) {

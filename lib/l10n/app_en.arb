@@ -354,6 +354,8 @@
   "calendar_phaseLine": "Phase: {phase} · Season {year}",
   "calendar_homeLabel": "Home",
   "calendar_event_tradeDeadline": "Trade deadline",
+  "calendar_event_tradeWindowOpen": "Trade window opens",
+  "calendar_event_contractExtensions": "Contract extensions",
   "calendar_event_awards": "Awards",
   "calendar_event_retirements": "Retirements",
   "calendar_event_draftLottery": "Draft lottery",

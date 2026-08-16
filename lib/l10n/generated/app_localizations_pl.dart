@@ -925,6 +925,12 @@ class AppLocalizationsPl extends AppLocalizations {
   String get calendar_event_tradeDeadline => 'Deadline wymiany';
 
   @override
+  String get calendar_event_tradeWindowOpen => 'Otwarcie okna wymian';
+
+  @override
+  String get calendar_event_contractExtensions => 'Przedłużenia kontraktów';
+
+  @override
   String get calendar_event_awards => 'Nagrody';
 
   @override

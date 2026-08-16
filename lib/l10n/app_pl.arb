@@ -439,6 +439,8 @@
   },
   "calendar_homeLabel": "Home",
   "calendar_event_tradeDeadline": "Deadline wymiany",
+  "calendar_event_tradeWindowOpen": "Otwarcie okna wymian",
+  "calendar_event_contractExtensions": "Przedłużenia kontraktów",
   "calendar_event_awards": "Nagrody",
   "calendar_event_retirements": "Emerytury",
   "calendar_event_draftLottery": "Loteria draftu",

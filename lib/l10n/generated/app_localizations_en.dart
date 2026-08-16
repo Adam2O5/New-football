@@ -923,6 +923,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calendar_event_tradeDeadline => 'Trade deadline';
 
   @override
+  String get calendar_event_tradeWindowOpen => 'Trade window opens';
+
+  @override
+  String get calendar_event_contractExtensions => 'Contract extensions';
+
+  @override
   String get calendar_event_awards => 'Awards';
 
   @override

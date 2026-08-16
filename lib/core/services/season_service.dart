@@ -57,6 +57,146 @@ class SeasonService {
   final Random _random;
   final _uuid = const Uuid();
 
+  /// Resolves the dated play-in flow without changing the existing atomic
+  /// [setupPlayIn] API. Wednesday stores the two opening games for each
+  /// conference; Saturday stores the deciding games and promotes the eight
+  /// playoff teams.
+  LeagueState advancePlayInForDate(
+    LeagueState league, {
+    required int week,
+    required int day,
+    int saveSeed = 0,
+  }) {
+    if (calendar.playInSlotsForDay(week, day).isEmpty) return league;
+
+    final season = league.currentSeason;
+    if (day == 3) {
+      final progress = <PlayInProgress>[];
+      for (final conference in Conference.values) {
+        final progressForConference = season.playInProgress
+            .where((p) => p.conference == conference)
+            .toList();
+        final existing = progressForConference.isEmpty
+            ? null
+            : progressForConference.first;
+        final seeds = _playInSeeds(league, conference);
+        if (seeds == null) continue;
+        final current =
+            existing ??
+            PlayInProgress(
+              conference: conference,
+              seed7TeamId: seeds.s7,
+              seed8TeamId: seeds.s8,
+              seed9TeamId: seeds.s9,
+              seed10TeamId: seeds.s10,
+            );
+        progress.add(
+          current.copyWith(
+            game7v8:
+                current.game7v8 ??
+                _sim(
+                  league,
+                  current.seed7TeamId,
+                  current.seed8TeamId,
+                  saveSeed: saveSeed,
+                  matchId: 'playIn:${conference.name}:7v8',
+                ),
+            game9v10:
+                current.game9v10 ??
+                _sim(
+                  league,
+                  current.seed9TeamId,
+                  current.seed10TeamId,
+                  saveSeed: saveSeed,
+                  matchId: 'playIn:${conference.name}:9v10',
+                ),
+          ),
+        );
+      }
+      return league.copyWith(
+        currentSeason: season.copyWith(
+          phase: SeasonPhase.playIn,
+          playInProgress: progress,
+        ),
+      );
+    }
+
+    final results = [...season.playInResults];
+    final remaining = <PlayInProgress>[];
+    for (final progress in season.playInProgress) {
+      final game7v8 = progress.game7v8;
+      final game9v10 = progress.game9v10;
+      if (game7v8 == null || game9v10 == null) {
+        remaining.add(progress);
+        continue;
+      }
+      final finalGame =
+          progress.gameFinal ??
+          _sim(
+            league,
+            _winnerId(game7v8, progress.seed7TeamId, progress.seed8TeamId) ==
+                    progress.seed7TeamId
+                ? progress.seed8TeamId
+                : progress.seed7TeamId,
+            _winnerId(game9v10, progress.seed9TeamId, progress.seed10TeamId),
+            saveSeed: saveSeed,
+            matchId: 'playIn:${progress.conference.name}:final',
+          );
+      final loser78 =
+          _winnerId(game7v8, progress.seed7TeamId, progress.seed8TeamId) ==
+              progress.seed7TeamId
+          ? progress.seed8TeamId
+          : progress.seed7TeamId;
+      final winner910 = _winnerId(
+        game9v10,
+        progress.seed9TeamId,
+        progress.seed10TeamId,
+      );
+      final playoff8 = _winnerId(finalGame, loser78, winner910);
+      final playoff7 = _winnerId(
+        game7v8,
+        progress.seed7TeamId,
+        progress.seed8TeamId,
+      );
+      results.removeWhere((result) => result.conference == progress.conference);
+      results.add(
+        PlayInResult(
+          conference: progress.conference,
+          seed7TeamId: progress.seed7TeamId,
+          seed8TeamId: progress.seed8TeamId,
+          game7v8: game7v8,
+          game9v10: game9v10,
+          gameFinal: finalGame,
+          playoffSeed7TeamId: playoff7,
+          playoffSeed8TeamId: playoff8,
+        ),
+      );
+    }
+    return league.copyWith(
+      currentSeason: season.copyWith(
+        phase: SeasonPhase.playIn,
+        playInResults: results,
+        playInProgress: remaining,
+      ),
+    );
+  }
+
+  ({String s7, String s8, String s9, String s10})? _playInSeeds(
+    LeagueState league,
+    Conference conference,
+  ) {
+    final standings = league.currentSeason.standings
+        .firstWhere((s) => s.conference == conference)
+        .sorted;
+    if (standings.length < 10) return null;
+    return (
+      s7: standings[6].teamId,
+      s8: standings[7].teamId,
+      s9: standings[8].teamId,
+      s10: standings[9].teamId,
+    );
+  }
+
   LeagueState setupPlayIn(LeagueState league, {int saveSeed = 0}) {
     final results = <PlayInResult>[];
     for (final conf in Conference.values) {
@@ -160,6 +300,20 @@ class SeasonService {
         playoffBrackets: brackets,
       ),
     );
+  }
+
+  /// Advances one dated playoff slot. Calls outside the canonical postseason
+  /// slots are no-ops, so the daily calendar cannot consume a series game on
+  /// an arbitrary day.
+  LeagueState advancePlayoffsForDate(
+    LeagueState league, {
+    required int week,
+    required int day,
+    int saveSeed = 0,
+  }) {
+    if (calendar.postseasonSlotForDay(week, day) == null) return league;
+    if (calendar.playoffRoundForWeek(week) == null) return league;
+    return advancePlayoffs(league, saveSeed: saveSeed);
   }
 
   LeagueState advancePlayoffs(LeagueState league, {int saveSeed = 0}) {
@@ -791,7 +945,7 @@ class SeasonService {
     PlayoffSeries series,
     int saveSeed,
   ) {
-    final homeFirst = series.games.length.isEven;
+    final homeFirst = calendar.higherSeedHomeForGame(series.games.length);
     final homeId = homeFirst ? series.higherSeedTeamId : series.lowerSeedTeamId;
     final awayId = homeFirst ? series.lowerSeedTeamId : series.higherSeedTeamId;
     return series.recordGame(

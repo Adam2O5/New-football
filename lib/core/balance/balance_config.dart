@@ -685,6 +685,8 @@ class CalendarBalance {
     this.draftWeek = 46,
     this.freeAgencyWeek = 47,
     this.tradeWindowOpenWeek = 44,
+    this.breakWeek = 30,
+    this.seasonCycleWeeks = 52,
   });
 
   final int regularSeasonWeeks;
@@ -698,6 +700,12 @@ class CalendarBalance {
 
   /// First week of open trade window after playoffs.
   final int tradeWindowOpenWeek;
+
+  /// The regular calendar has one explicit break week before play-in.
+  final int breakWeek;
+
+  /// Number of seven-day weeks in one calendar cycle.
+  final int seasonCycleWeeks;
 }
 
 class ChemistryBalance {
