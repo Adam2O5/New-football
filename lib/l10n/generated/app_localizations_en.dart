@@ -1914,4 +1914,723 @@ class AppLocalizationsEn extends AppLocalizations {
   String search_freeAgentResult(Object ovr, Object position) {
     return 'Free agent · $position · OVR $ovr';
   }
+
+  @override
+  String get msg_matchPreview_title => 'Match preview';
+
+  @override
+  String get msg_matchPreview_body => 'An upcoming league match.';
+
+  @override
+  String get msg_matchResult_title => 'Match result';
+
+  @override
+  String msg_matchResult_body(
+    String homeTeam,
+    int homeGoals,
+    int awayGoals,
+    String awayTeam,
+  ) {
+    return 'The match ended $homeTeam $homeGoals:$awayGoals $awayTeam.';
+  }
+
+  @override
+  String get msg_walkover_title => 'Walkover';
+
+  @override
+  String msg_walkover_body(Object reason) {
+    return 'The match was decided by a walkover. Reason: $reason.';
+  }
+
+  @override
+  String get msg_lineupNoGk_title => 'No goalkeeper in XI';
+
+  @override
+  String get msg_lineupNoGk_body =>
+      'The team has no goalkeeper in the starting lineup.';
+
+  @override
+  String get msg_benchIncomplete_title => 'Incomplete bench';
+
+  @override
+  String msg_benchIncomplete_body(Object missingCount) {
+    return 'The bench is missing $missingCount players.';
+  }
+
+  @override
+  String get msg_suspensionStart_title => 'Suspension started';
+
+  @override
+  String msg_suspensionStart_body(Object games, Object playerName) {
+    return '$playerName is suspended for $games games.';
+  }
+
+  @override
+  String get msg_suspensionEnd_title => 'Suspension ended';
+
+  @override
+  String msg_suspensionEnd_body(Object playerName) {
+    return '$playerName is available again.';
+  }
+
+  @override
+  String get msg_injury_title => 'Injury';
+
+  @override
+  String msg_injury_body(
+    Object days,
+    Object injuryName,
+    Object injuryType,
+    Object playerName,
+  ) {
+    return '$playerName: $injuryName ($injuryType), out for about $days days.';
+  }
+
+  @override
+  String get msg_injuryReturn_title => 'Return from injury';
+
+  @override
+  String msg_injuryReturn_body(Object injuryName, Object playerName) {
+    return '$playerName returns after $injuryName.';
+  }
+
+  @override
+  String get msg_injuryRecurrence_title => 'Recurring injury';
+
+  @override
+  String msg_injuryRecurrence_body(Object injuryName, Object playerName) {
+    return '$playerName feels the $injuryName injury again.';
+  }
+
+  @override
+  String get msg_potentialLoss_title => 'Potential decline';
+
+  @override
+  String get msg_potentialLoss_body => 'The player\'s potential has decreased.';
+
+  @override
+  String get msg_playerEvent_title => 'Player event';
+
+  @override
+  String get msg_playerEvent_body => 'The manager\'s attention is required.';
+
+  @override
+  String get msg_teamEvent_title => 'Team event';
+
+  @override
+  String get msg_teamEvent_body => 'An event affecting the team has occurred.';
+
+  @override
+  String get msg_retirementPlayer_title => 'Player retirement';
+
+  @override
+  String msg_retirementPlayer_body(Object playerName) {
+    return '$playerName is retiring.';
+  }
+
+  @override
+  String get msg_retirementStaff_title => 'Staff departure';
+
+  @override
+  String get msg_retirementStaff_body => 'A staff member is leaving the club.';
+
+  @override
+  String get msg_retirementLeagueDigest_title => 'League retirements';
+
+  @override
+  String get msg_retirementLeagueDigest_body =>
+      'League retirement information.';
+
+  @override
+  String get msg_rosterWarning_title => 'Roster problem';
+
+  @override
+  String get msg_rosterWarning_body => 'The roster needs attention.';
+
+  @override
+  String get msg_contractOffer_title => 'Contract offer';
+
+  @override
+  String get msg_contractOffer_body => 'A contract update is available.';
+
+  @override
+  String get msg_contractSigned_title => 'Contract signed';
+
+  @override
+  String get msg_contractSigned_body => 'The contract has been signed.';
+
+  @override
+  String get msg_contractExpired_title => 'Expiring contract';
+
+  @override
+  String get msg_contractExpired_body =>
+      'The player\'s contract expires after the season.';
+
+  @override
+  String get msg_declineToExtend_title => 'No extension';
+
+  @override
+  String get msg_declineToExtend_body =>
+      'The player does not want to extend the contract.';
+
+  @override
+  String get msg_rfaOfferSheet_title => 'Offer sheet';
+
+  @override
+  String get msg_rfaOfferSheet_body =>
+      'An offer from another club has arrived.';
+
+  @override
+  String get msg_staffGrowth_title => 'Staff growth';
+
+  @override
+  String get msg_staffGrowth_body => 'The staff improved its skills.';
+
+  @override
+  String get msg_staffHired_title => 'Staff member hired';
+
+  @override
+  String get msg_staffHired_body => 'A new staff member joined the club.';
+
+  @override
+  String get msg_staffFired_title => 'Staff contract ended';
+
+  @override
+  String get msg_staffFired_body => 'A staff member left the club.';
+
+  @override
+  String get msg_staffSlotEmpty_title => 'Empty staff slot';
+
+  @override
+  String get msg_staffSlotEmpty_body =>
+      'An available staff slot needs to be filled.';
+
+  @override
+  String get msg_trade_title => 'Trade';
+
+  @override
+  String get msg_trade_body => 'A trade update is available.';
+
+  @override
+  String get msg_tradeOffer_title => 'Trade offer';
+
+  @override
+  String get msg_tradeOffer_body => 'A new trade offer has arrived.';
+
+  @override
+  String get msg_tradeWindowEvent_title => 'Trade window';
+
+  @override
+  String get msg_tradeWindowEvent_body =>
+      'Trade window information was updated.';
+
+  @override
+  String get msg_lottery_title => 'Draft lottery';
+
+  @override
+  String get msg_lottery_body => 'Draft lottery results are available.';
+
+  @override
+  String get msg_scoutReport_title => 'Scout report';
+
+  @override
+  String get msg_scoutReport_body => 'New scouting information is available.';
+
+  @override
+  String get msg_combine_title => 'Combine results';
+
+  @override
+  String get msg_combine_body => 'Prospect testing results are available.';
+
+  @override
+  String get msg_mockDraft_title => 'Mock draft';
+
+  @override
+  String get msg_mockDraft_body => 'The draft projection was updated.';
+
+  @override
+  String get msg_draftPick_title => 'Draft pick';
+
+  @override
+  String get msg_draftPick_body => 'It is time to make a draft pick.';
+
+  @override
+  String get msg_draftPickLeague_title => 'Another team\'s pick';
+
+  @override
+  String get msg_draftPickLeague_body => 'Another team made a draft selection.';
+
+  @override
+  String get msg_apronWarning_title => 'Apron exceeded';
+
+  @override
+  String get msg_apronWarning_body => 'Payroll is above the allowed level.';
+
+  @override
+  String get msg_capUpdateTv_title => 'Salary cap update';
+
+  @override
+  String get msg_capUpdateTv_body => 'The salary cap has been updated.';
+
+  @override
+  String get msg_staffCapViolation_title => 'Staff cap exceeded';
+
+  @override
+  String get msg_staffCapViolation_body => 'Staff payroll is above the limit.';
+
+  @override
+  String get msg_award_title => 'Award';
+
+  @override
+  String get msg_award_body => 'A season award was granted.';
+
+  @override
+  String get msg_atmosphere_title => 'Team atmosphere';
+
+  @override
+  String get msg_atmosphere_body => 'The club\'s atmosphere level changed.';
+
+  @override
+  String get msg_teamStatusChange_title => 'Team status changed';
+
+  @override
+  String get msg_teamStatusChange_body => 'The team\'s status was updated.';
+
+  @override
+  String get msg_seasonSummary_title => 'Season summary';
+
+  @override
+  String get msg_seasonSummary_body => 'The current season summary is ready.';
+
+  @override
+  String get msg_playoffMissed_title => 'Playoffs missed';
+
+  @override
+  String get msg_playoffMissed_body =>
+      'The team did not qualify for the playoffs.';
+
+  @override
+  String get msg_calendar_title => 'Calendar';
+
+  @override
+  String get msg_calendar_body => 'A new calendar event is available.';
+
+  @override
+  String get msg_system_title => 'System message';
+
+  @override
+  String msg_system_body(String message) {
+    return '$message';
+  }
+
+  @override
+  String get msg_ovrDigest_title => 'OVR development';
+
+  @override
+  String get msg_ovrDigest_body => 'A summary of player development.';
+
+  @override
+  String get msg_playerEvent_plateau_title => 'Player plateau';
+
+  @override
+  String msg_playerEvent_plateau_body(Object playerName) {
+    return '$playerName needs a training plan change.';
+  }
+
+  @override
+  String get msg_playerEvent_coldStreak_title => 'Cold streak';
+
+  @override
+  String msg_playerEvent_coldStreak_body(Object playerName) {
+    return '$playerName is going through a cold streak.';
+  }
+
+  @override
+  String get msg_playerEvent_injuryComplication_title => 'Injury complication';
+
+  @override
+  String msg_playerEvent_injuryComplication_body(Object playerName) {
+    return 'A decision is required about $playerName\'s return.';
+  }
+
+  @override
+  String get msg_playerEvent_veteranMotivation_title =>
+      'Veteran motivation drop';
+
+  @override
+  String msg_playerEvent_veteranMotivation_body(Object playerName) {
+    return '$playerName needs support.';
+  }
+
+  @override
+  String get msg_playerEvent_extraTraining_title => 'Extra training';
+
+  @override
+  String msg_playerEvent_extraTraining_body(Object playerName) {
+    return '$playerName requests an extra session.';
+  }
+
+  @override
+  String get msg_playerEvent_personalSupport_title => 'Player support';
+
+  @override
+  String msg_playerEvent_personalSupport_body(Object playerName) {
+    return '$playerName needs club support.';
+  }
+
+  @override
+  String get msg_playerEvent_breakthrough_title => 'Development breakthrough';
+
+  @override
+  String msg_playerEvent_breakthrough_body(Object playerName) {
+    return '$playerName made a breakthrough.';
+  }
+
+  @override
+  String get msg_playerEvent_personalProblems_title => 'Personal problems';
+
+  @override
+  String msg_playerEvent_personalProblems_body(Object playerName) {
+    return '$playerName is dealing with personal problems.';
+  }
+
+  @override
+  String get msg_playerEvent_lateBloomer_title => 'Late development';
+
+  @override
+  String msg_playerEvent_lateBloomer_body(Object playerName) {
+    return '$playerName improved an attribute.';
+  }
+
+  @override
+  String get msg_playerEvent_nationalTeam_title => 'National team call-up';
+
+  @override
+  String msg_playerEvent_nationalTeam_body(Object playerName) {
+    return '$playerName received a national team call-up.';
+  }
+
+  @override
+  String get msg_playerEvent_inspiredPerformance_title =>
+      'Inspired performance';
+
+  @override
+  String msg_playerEvent_inspiredPerformance_body(Object playerName) {
+    return '$playerName delivered a great performance.';
+  }
+
+  @override
+  String get msg_teamEvent_moreMinutesRequest_title => 'Minutes request';
+
+  @override
+  String msg_teamEvent_moreMinutesRequest_body(Object playerName) {
+    return '$playerName wants more playing time.';
+  }
+
+  @override
+  String get msg_teamEvent_transferRequestI_title => 'Transfer request';
+
+  @override
+  String msg_teamEvent_transferRequestI_body(Object playerName) {
+    return '$playerName wants to leave the club.';
+  }
+
+  @override
+  String get msg_teamEvent_transferRequestII_title => 'Transfer demand';
+
+  @override
+  String msg_teamEvent_transferRequestII_body(Object playerName) {
+    return '$playerName has renewed the transfer demand.';
+  }
+
+  @override
+  String get msg_teamEvent_dressingRoomConflict_title =>
+      'Dressing-room conflict';
+
+  @override
+  String get msg_teamEvent_dressingRoomConflict_body =>
+      'A conflict has broken out in the dressing room.';
+
+  @override
+  String get msg_teamEvent_publicCriticism_title => 'Public criticism';
+
+  @override
+  String get msg_teamEvent_publicCriticism_body =>
+      'A player publicly criticized the manager.';
+
+  @override
+  String get msg_teamEvent_declineToExtend_title => 'No extension';
+
+  @override
+  String get msg_teamEvent_declineToExtend_body =>
+      'The player does not want to extend the contract.';
+
+  @override
+  String get msg_teamEvent_leaderSupport_title => 'Leader support';
+
+  @override
+  String get msg_teamEvent_leaderSupport_body =>
+      'The team leader supported the squad.';
+
+  @override
+  String get msg_teamEvent_promiseBroken_title => 'Broken promise';
+
+  @override
+  String get msg_teamEvent_promiseBroken_body =>
+      'A promise made to a player was not fulfilled.';
+
+  @override
+  String get msg_teamEvent_atmosphereShift_title => 'Atmosphere change';
+
+  @override
+  String get msg_teamEvent_atmosphereShift_body =>
+      'The team\'s atmosphere has changed.';
+
+  @override
+  String get msg_contractOffer_accept_title => 'Offer accepted';
+
+  @override
+  String msg_contractOffer_accept_body(Object subjectName) {
+    return 'The offer for $subjectName is waiting for finalization.';
+  }
+
+  @override
+  String get msg_contractOffer_reject_title => 'Offer rejected';
+
+  @override
+  String get msg_contractOffer_reject_body =>
+      'The contract offer was rejected.';
+
+  @override
+  String get msg_contractOffer_hardReject_title => 'Hard rejection';
+
+  @override
+  String get msg_contractOffer_hardReject_body =>
+      'Negotiations have been blocked.';
+
+  @override
+  String get msg_contractOffer_waiting_title => 'Offer pending';
+
+  @override
+  String get msg_contractOffer_waiting_body =>
+      'The player is considering the offer.';
+
+  @override
+  String get msg_contractOffer_counter_title => 'Counter offer';
+
+  @override
+  String get msg_contractOffer_counter_body =>
+      'A contract counter offer has arrived.';
+
+  @override
+  String get msg_contractOffer_rfaQualifyingOffer_title =>
+      'Qualifying offer required';
+
+  @override
+  String get msg_contractOffer_rfaQualifyingOffer_body =>
+      'The deadline to submit the qualifying offer is approaching.';
+
+  @override
+  String get msg_trade_counter_title => 'Trade counter offer';
+
+  @override
+  String get msg_trade_counter_body =>
+      'A counter offer has arrived from the partner.';
+
+  @override
+  String get msg_trade_accepted_title => 'Trade accepted';
+
+  @override
+  String get msg_trade_accepted_body => 'The trade has been completed.';
+
+  @override
+  String get msg_trade_rejected_title => 'Trade rejected';
+
+  @override
+  String get msg_trade_rejected_body =>
+      'The partner rejected the trade proposal.';
+
+  @override
+  String get msg_trade_hardRejected_title => 'Trade blocked';
+
+  @override
+  String get msg_trade_hardRejected_body =>
+      'Negotiations are blocked for 30 days.';
+
+  @override
+  String get msg_trade_ntcRefusal_title => 'NTC refusal';
+
+  @override
+  String get msg_trade_ntcRefusal_body =>
+      'The player did not approve the transfer.';
+
+  @override
+  String get msg_trade_leagueDigest_title => 'League trades';
+
+  @override
+  String get msg_trade_leagueDigest_body => 'A summary of league trades.';
+
+  @override
+  String get msg_tradeWindowEvent_open_title => 'Trade window opened';
+
+  @override
+  String get msg_tradeWindowEvent_open_body => 'Trades can now be completed.';
+
+  @override
+  String get msg_tradeWindowEvent_deadline_title => 'Trade deadline';
+
+  @override
+  String get msg_tradeWindowEvent_deadline_body =>
+      'The trade-window closing date is approaching.';
+
+  @override
+  String get msg_scoutReport_monthly_title => 'Monthly scout report';
+
+  @override
+  String get msg_scoutReport_monthly_body => 'A new scout report is available.';
+
+  @override
+  String get msg_scoutReport_event_title => 'Scout report — assign Combine';
+
+  @override
+  String get msg_scoutReport_event_body => 'Assign prospects to the Combine.';
+
+  @override
+  String get msg_mockDraft_initial_title => 'Initial mock draft';
+
+  @override
+  String get msg_mockDraft_initial_body =>
+      'The initial draft projection is available.';
+
+  @override
+  String get msg_mockDraft_final_title => 'Final mock draft';
+
+  @override
+  String get msg_mockDraft_final_body =>
+      'The final draft projection is available.';
+
+  @override
+  String get msg_draftPick_own_title => 'Your draft pick';
+
+  @override
+  String get msg_draftPick_own_body => 'It is your team\'s turn to pick.';
+
+  @override
+  String get msg_draftPickLeague_league_title => 'League draft pick';
+
+  @override
+  String get msg_draftPickLeague_league_body =>
+      'Another team made a selection.';
+
+  @override
+  String get msg_playerEvent_action_accept => 'Accept';
+
+  @override
+  String get msg_playerEvent_action_decline => 'Decline';
+
+  @override
+  String get msg_playerEvent_action_cautious => 'Cautious return';
+
+  @override
+  String get msg_playerEvent_action_full => 'Full workload';
+
+  @override
+  String get msg_teamEvent_action_accept => 'Accept';
+
+  @override
+  String get msg_teamEvent_action_decline => 'Decline';
+
+  @override
+  String get msg_contractOffer_action_finalize => 'Finalize';
+
+  @override
+  String get msg_contractOffer_action_cancel => 'Cancel';
+
+  @override
+  String get msg_contractOffer_action_accept => 'Accept';
+
+  @override
+  String get msg_contractOffer_action_counter => 'Counter offer';
+
+  @override
+  String get msg_contractOffer_action_decline => 'Decline';
+
+  @override
+  String get msg_contractOffer_action_submit => 'Submit QO';
+
+  @override
+  String get msg_tradeOffer_action_accept => 'Accept';
+
+  @override
+  String get msg_tradeOffer_action_counter => 'Counter offer';
+
+  @override
+  String get msg_tradeOffer_action_reject => 'Reject';
+
+  @override
+  String get msg_trade_action_accept => 'Accept';
+
+  @override
+  String get msg_trade_action_counter => 'Counter offer';
+
+  @override
+  String get msg_trade_action_reject => 'Reject';
+
+  @override
+  String get msg_scoutReport_action_openWatchlist => 'Open watchlist';
+
+  @override
+  String get msg_draftPick_action_openDraft => 'Open draft';
+
+  @override
+  String get msg_retirementLeagueDigest_digest_title => 'League retirements';
+
+  @override
+  String msg_retirementLeagueDigest_digest_body(int count, int week) {
+    return '$count players retired in week $week.';
+  }
+
+  @override
+  String get msg_draftPickLeague_digest_title => 'Draft-round picks';
+
+  @override
+  String get msg_draftPickLeague_digest_body =>
+      'A summary of other teams\' draft picks.';
+
+  @override
+  String get msg_staffGrowth_digest_title => 'Staff development';
+
+  @override
+  String get msg_staffGrowth_digest_body => 'A summary of staff changes.';
+
+  @override
+  String get msg_trade_digest_title => 'League trades';
+
+  @override
+  String msg_trade_digest_body(int week) {
+    return 'A summary of trades in week $week.';
+  }
+
+  @override
+  String get msg_ovrDigest_digest_title => 'OVR development';
+
+  @override
+  String msg_ovrDigest_digest_body(int count, int week) {
+    return '$count players improved their OVR in week $week.';
+  }
+
+  @override
+  String get msg_calendar_newWeek_title => 'New week';
+
+  @override
+  String msg_calendar_newWeek_body(Object week) {
+    return 'Week $week has started.';
+  }
+
+  @override
+  String get msg_contractSigned_fa_title => 'Contract signed';
+
+  @override
+  String get msg_contractSigned_fa_body =>
+      'The player signed a contract with the club.';
 }

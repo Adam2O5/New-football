@@ -1915,4 +1915,718 @@ class AppLocalizationsPl extends AppLocalizations {
   String search_freeAgentResult(Object ovr, Object position) {
     return 'Wolny agent · $position · OVR $ovr';
   }
+
+  @override
+  String get msg_matchPreview_title => 'Zapowiedź meczu';
+
+  @override
+  String get msg_matchPreview_body => 'Nadchodzący mecz drużyn ligowych.';
+
+  @override
+  String get msg_matchResult_title => 'Wynik meczu';
+
+  @override
+  String msg_matchResult_body(
+    String homeTeam,
+    int homeGoals,
+    int awayGoals,
+    String awayTeam,
+  ) {
+    return 'Mecz zakończył się wynikiem $homeTeam $homeGoals:$awayGoals $awayTeam.';
+  }
+
+  @override
+  String get msg_walkover_title => 'Walkower';
+
+  @override
+  String msg_walkover_body(Object reason) {
+    return 'Mecz zakończony walkowerem. Powód: $reason.';
+  }
+
+  @override
+  String get msg_lineupNoGk_title => 'Brak bramkarza w XI';
+
+  @override
+  String get msg_lineupNoGk_body =>
+      'Drużyna nie ma bramkarza w wyjściowym składzie.';
+
+  @override
+  String get msg_benchIncomplete_title => 'Niepełna ławka';
+
+  @override
+  String msg_benchIncomplete_body(Object missingCount) {
+    return 'Na ławce brakuje $missingCount zawodników.';
+  }
+
+  @override
+  String get msg_suspensionStart_title => 'Początek zawieszenia';
+
+  @override
+  String msg_suspensionStart_body(Object games, Object playerName) {
+    return '$playerName pauzuje przez $games meczów.';
+  }
+
+  @override
+  String get msg_suspensionEnd_title => 'Koniec zawieszenia';
+
+  @override
+  String msg_suspensionEnd_body(Object playerName) {
+    return '$playerName wraca do dyspozycji.';
+  }
+
+  @override
+  String get msg_injury_title => 'Kontuzja';
+
+  @override
+  String msg_injury_body(
+    Object days,
+    Object injuryName,
+    Object injuryType,
+    Object playerName,
+  ) {
+    return '$playerName: $injuryName ($injuryType), absencja potrwa około $days dni.';
+  }
+
+  @override
+  String get msg_injuryReturn_title => 'Powrót po kontuzji';
+
+  @override
+  String msg_injuryReturn_body(Object injuryName, Object playerName) {
+    return '$playerName wraca po kontuzji $injuryName.';
+  }
+
+  @override
+  String get msg_injuryRecurrence_title => 'Nawrót kontuzji';
+
+  @override
+  String msg_injuryRecurrence_body(Object injuryName, Object playerName) {
+    return '$playerName ponownie odczuwa uraz $injuryName.';
+  }
+
+  @override
+  String get msg_potentialLoss_title => 'Spadek potencjału';
+
+  @override
+  String get msg_potentialLoss_body => 'Potencjał zawodnika został obniżony.';
+
+  @override
+  String get msg_playerEvent_title => 'Wydarzenie zawodnika';
+
+  @override
+  String get msg_playerEvent_body => 'Wymagana jest uwaga menedżera.';
+
+  @override
+  String get msg_teamEvent_title => 'Wydarzenie zespołu';
+
+  @override
+  String get msg_teamEvent_body => 'Wystąpiło wydarzenie dotyczące zespołu.';
+
+  @override
+  String get msg_retirementPlayer_title => 'Emerytura zawodnika';
+
+  @override
+  String msg_retirementPlayer_body(Object playerName) {
+    return '$playerName kończy karierę.';
+  }
+
+  @override
+  String get msg_retirementStaff_title => 'Odejście członka sztabu';
+
+  @override
+  String get msg_retirementStaff_body => 'Członek sztabu opuszcza klub.';
+
+  @override
+  String get msg_retirementLeagueDigest_title => 'Emerytury w lidze';
+
+  @override
+  String get msg_retirementLeagueDigest_body =>
+      'Podsumowanie emerytur ligowych.';
+
+  @override
+  String get msg_rosterWarning_title => 'Problem ze składem';
+
+  @override
+  String get msg_rosterWarning_body => 'Skład wymaga uzupełnienia.';
+
+  @override
+  String get msg_contractOffer_title => 'Oferta kontraktu';
+
+  @override
+  String get msg_contractOffer_body =>
+      'Otrzymano informację dotyczącą kontraktu.';
+
+  @override
+  String get msg_contractSigned_title => 'Podpisany kontrakt';
+
+  @override
+  String get msg_contractSigned_body => 'Kontrakt został podpisany.';
+
+  @override
+  String get msg_contractExpired_title => 'Wygasający kontrakt';
+
+  @override
+  String get msg_contractExpired_body =>
+      'Kontrakt zawodnika wygasa po sezonie.';
+
+  @override
+  String get msg_declineToExtend_title => 'Brak przedłużenia';
+
+  @override
+  String get msg_declineToExtend_body => 'Zawodnik nie chce przedłużyć umowy.';
+
+  @override
+  String get msg_rfaOfferSheet_title => 'Offer sheet';
+
+  @override
+  String get msg_rfaOfferSheet_body => 'Otrzymano ofertę od innego klubu.';
+
+  @override
+  String get msg_staffGrowth_title => 'Rozwój sztabu';
+
+  @override
+  String get msg_staffGrowth_body => 'Sztab poprawił swoje umiejętności.';
+
+  @override
+  String get msg_staffHired_title => 'Zatrudniono członka sztabu';
+
+  @override
+  String get msg_staffHired_body => 'Nowy członek sztabu dołączył do klubu.';
+
+  @override
+  String get msg_staffFired_title => 'Rozwiązano umowę sztabu';
+
+  @override
+  String get msg_staffFired_body => 'Członek sztabu opuścił klub.';
+
+  @override
+  String get msg_staffSlotEmpty_title => 'Pusty slot sztabu';
+
+  @override
+  String get msg_staffSlotEmpty_body => 'Slot sztabu wymaga obsadzenia.';
+
+  @override
+  String get msg_trade_title => 'Wymiana';
+
+  @override
+  String get msg_trade_body => 'Aktualizacja dotycząca wymiany.';
+
+  @override
+  String get msg_tradeOffer_title => 'Oferta wymiany';
+
+  @override
+  String get msg_tradeOffer_body => 'Otrzymano nową ofertę wymiany.';
+
+  @override
+  String get msg_tradeWindowEvent_title => 'Okno wymian';
+
+  @override
+  String get msg_tradeWindowEvent_body =>
+      'Zaktualizowano informacje o oknie wymian.';
+
+  @override
+  String get msg_lottery_title => 'Loteria draftowa';
+
+  @override
+  String get msg_lottery_body => 'Wyniki loterii draftowej są dostępne.';
+
+  @override
+  String get msg_scoutReport_title => 'Raport skautingowy';
+
+  @override
+  String get msg_scoutReport_body => 'Nowe informacje skautingowe są dostępne.';
+
+  @override
+  String get msg_combine_title => 'Wyniki Combine';
+
+  @override
+  String get msg_combine_body => 'Wyniki testów prospektów są dostępne.';
+
+  @override
+  String get msg_mockDraft_title => 'Mock draft';
+
+  @override
+  String get msg_mockDraft_body => 'Zaktualizowano prognozę draftu.';
+
+  @override
+  String get msg_draftPick_title => 'Wybór w drafcie';
+
+  @override
+  String get msg_draftPick_body => 'Nadeszła kolej wyboru w drafcie.';
+
+  @override
+  String get msg_draftPickLeague_title => 'Wybór innej drużyny';
+
+  @override
+  String get msg_draftPickLeague_body =>
+      'Inna drużyna dokonała wyboru w drafcie.';
+
+  @override
+  String get msg_apronWarning_title => 'Przekroczenie apronu';
+
+  @override
+  String get msg_apronWarning_body => 'Payroll przekracza dozwolony poziom.';
+
+  @override
+  String get msg_capUpdateTv_title => 'Aktualizacja salary cap';
+
+  @override
+  String get msg_capUpdateTv_body => 'Salary cap został zaktualizowany.';
+
+  @override
+  String get msg_staffCapViolation_title => 'Przekroczenie staff cap';
+
+  @override
+  String get msg_staffCapViolation_body => 'Payroll sztabu przekracza limit.';
+
+  @override
+  String get msg_award_title => 'Nagroda';
+
+  @override
+  String get msg_award_body => 'Przyznano nagrodę sezonową.';
+
+  @override
+  String get msg_atmosphere_title => 'Atmosfera zespołu';
+
+  @override
+  String get msg_atmosphere_body => 'Zmieniono poziom atmosfery w klubie.';
+
+  @override
+  String get msg_teamStatusChange_title => 'Zmiana statusu zespołu';
+
+  @override
+  String get msg_teamStatusChange_body =>
+      'Status zespołu został zaktualizowany.';
+
+  @override
+  String get msg_seasonSummary_title => 'Podsumowanie sezonu';
+
+  @override
+  String get msg_seasonSummary_body =>
+      'Podsumowanie bieżącego sezonu jest gotowe.';
+
+  @override
+  String get msg_playoffMissed_title => 'Brak awansu do playoffów';
+
+  @override
+  String get msg_playoffMissed_body => 'Zespół nie awansował do fazy playoff.';
+
+  @override
+  String get msg_calendar_title => 'Kalendarz';
+
+  @override
+  String get msg_calendar_body => 'Nowe wydarzenie w kalendarzu.';
+
+  @override
+  String get msg_system_title => 'Komunikat systemowy';
+
+  @override
+  String msg_system_body(String message) {
+    return '$message';
+  }
+
+  @override
+  String get msg_ovrDigest_title => 'Rozwój OVR';
+
+  @override
+  String get msg_ovrDigest_body => 'Podsumowanie rozwoju zawodników.';
+
+  @override
+  String get msg_playerEvent_plateau_title => 'Plateau zawodnika';
+
+  @override
+  String msg_playerEvent_plateau_body(Object playerName) {
+    return '$playerName potrzebuje zmiany programu treningowego.';
+  }
+
+  @override
+  String get msg_playerEvent_coldStreak_title => 'Kryzys formy';
+
+  @override
+  String msg_playerEvent_coldStreak_body(Object playerName) {
+    return '$playerName przechodzi kryzys formy.';
+  }
+
+  @override
+  String get msg_playerEvent_injuryComplication_title => 'Komplikacje kontuzji';
+
+  @override
+  String msg_playerEvent_injuryComplication_body(Object playerName) {
+    return 'Powrót $playerName wymaga decyzji.';
+  }
+
+  @override
+  String get msg_playerEvent_veteranMotivation_title =>
+      'Spadek motywacji weterana';
+
+  @override
+  String msg_playerEvent_veteranMotivation_body(Object playerName) {
+    return '$playerName potrzebuje wsparcia.';
+  }
+
+  @override
+  String get msg_playerEvent_extraTraining_title => 'Dodatkowy trening';
+
+  @override
+  String msg_playerEvent_extraTraining_body(Object playerName) {
+    return '$playerName prosi o dodatkową sesję.';
+  }
+
+  @override
+  String get msg_playerEvent_personalSupport_title => 'Wsparcie zawodnika';
+
+  @override
+  String msg_playerEvent_personalSupport_body(Object playerName) {
+    return '$playerName potrzebuje wsparcia klubu.';
+  }
+
+  @override
+  String get msg_playerEvent_breakthrough_title => 'Przełom rozwojowy';
+
+  @override
+  String msg_playerEvent_breakthrough_body(Object playerName) {
+    return '$playerName zanotował przełom.';
+  }
+
+  @override
+  String get msg_playerEvent_personalProblems_title => 'Problemy osobiste';
+
+  @override
+  String msg_playerEvent_personalProblems_body(Object playerName) {
+    return '$playerName ma problemy osobiste.';
+  }
+
+  @override
+  String get msg_playerEvent_lateBloomer_title => 'Późny rozwój';
+
+  @override
+  String msg_playerEvent_lateBloomer_body(Object playerName) {
+    return '$playerName poprawił swój atrybut.';
+  }
+
+  @override
+  String get msg_playerEvent_nationalTeam_title => 'Powołanie do kadry';
+
+  @override
+  String msg_playerEvent_nationalTeam_body(Object playerName) {
+    return '$playerName otrzymał powołanie.';
+  }
+
+  @override
+  String get msg_playerEvent_inspiredPerformance_title => 'Inspirujący występ';
+
+  @override
+  String msg_playerEvent_inspiredPerformance_body(Object playerName) {
+    return '$playerName zanotował świetny występ.';
+  }
+
+  @override
+  String get msg_teamEvent_moreMinutesRequest_title => 'Prośba o minuty';
+
+  @override
+  String msg_teamEvent_moreMinutesRequest_body(Object playerName) {
+    return '$playerName prosi o więcej minut.';
+  }
+
+  @override
+  String get msg_teamEvent_transferRequestI_title => 'Prośba o transfer';
+
+  @override
+  String msg_teamEvent_transferRequestI_body(Object playerName) {
+    return '$playerName chce odejść z klubu.';
+  }
+
+  @override
+  String get msg_teamEvent_transferRequestII_title => 'Żądanie transferu';
+
+  @override
+  String msg_teamEvent_transferRequestII_body(Object playerName) {
+    return '$playerName ponawia żądanie transferu.';
+  }
+
+  @override
+  String get msg_teamEvent_dressingRoomConflict_title => 'Konflikt w szatni';
+
+  @override
+  String get msg_teamEvent_dressingRoomConflict_body =>
+      'W szatni wybuchł konflikt.';
+
+  @override
+  String get msg_teamEvent_publicCriticism_title => 'Publiczna krytyka';
+
+  @override
+  String get msg_teamEvent_publicCriticism_body =>
+      'Zawodnik publicznie skrytykował menedżera.';
+
+  @override
+  String get msg_teamEvent_declineToExtend_title => 'Brak przedłużenia';
+
+  @override
+  String get msg_teamEvent_declineToExtend_body =>
+      'Zawodnik nie chce przedłużyć umowy.';
+
+  @override
+  String get msg_teamEvent_leaderSupport_title => 'Wsparcie lidera';
+
+  @override
+  String get msg_teamEvent_leaderSupport_body =>
+      'Lider zespołu wsparł drużynę.';
+
+  @override
+  String get msg_teamEvent_promiseBroken_title => 'Złamana obietnica';
+
+  @override
+  String get msg_teamEvent_promiseBroken_body =>
+      'Nie zrealizowano obietnicy złożonej zawodnikowi.';
+
+  @override
+  String get msg_teamEvent_atmosphereShift_title => 'Zmiana atmosfery';
+
+  @override
+  String get msg_teamEvent_atmosphereShift_body =>
+      'Atmosfera zespołu uległa zmianie.';
+
+  @override
+  String get msg_contractOffer_accept_title => 'Akceptacja oferty';
+
+  @override
+  String msg_contractOffer_accept_body(Object subjectName) {
+    return 'Oferta dla $subjectName czeka na finalizację.';
+  }
+
+  @override
+  String get msg_contractOffer_reject_title => 'Odrzucenie oferty';
+
+  @override
+  String get msg_contractOffer_reject_body =>
+      'Oferta kontraktu została odrzucona.';
+
+  @override
+  String get msg_contractOffer_hardReject_title => 'Twarde odrzucenie';
+
+  @override
+  String get msg_contractOffer_hardReject_body =>
+      'Negocjacje zostały zablokowane.';
+
+  @override
+  String get msg_contractOffer_waiting_title => 'Oferta w toku';
+
+  @override
+  String get msg_contractOffer_waiting_body => 'Zawodnik rozważa ofertę.';
+
+  @override
+  String get msg_contractOffer_counter_title => 'Kontroferta';
+
+  @override
+  String get msg_contractOffer_counter_body =>
+      'Otrzymano kontrofertę kontraktu.';
+
+  @override
+  String get msg_contractOffer_rfaQualifyingOffer_title => 'QO do złożenia';
+
+  @override
+  String get msg_contractOffer_rfaQualifyingOffer_body =>
+      'Termin na złożenie Qualifying Offer.';
+
+  @override
+  String get msg_trade_counter_title => 'Kontroferta wymiany';
+
+  @override
+  String get msg_trade_counter_body => 'Otrzymano kontrofertę od partnera.';
+
+  @override
+  String get msg_trade_accepted_title => 'Wymiana zaakceptowana';
+
+  @override
+  String get msg_trade_accepted_body => 'Wymiana została wykonana.';
+
+  @override
+  String get msg_trade_rejected_title => 'Wymiana odrzucona';
+
+  @override
+  String get msg_trade_rejected_body => 'Partner odrzucił propozycję wymiany.';
+
+  @override
+  String get msg_trade_hardRejected_title => 'Blokada wymiany';
+
+  @override
+  String get msg_trade_hardRejected_body =>
+      'Negocjacje są zablokowane przez 30 dni.';
+
+  @override
+  String get msg_trade_ntcRefusal_title => 'Odmowa NTC';
+
+  @override
+  String get msg_trade_ntcRefusal_body =>
+      'Zawodnik nie wyraził zgody na transfer.';
+
+  @override
+  String get msg_trade_leagueDigest_title => 'Wymiany w lidze';
+
+  @override
+  String get msg_trade_leagueDigest_body => 'Podsumowanie wymian ligowych.';
+
+  @override
+  String get msg_tradeWindowEvent_open_title => 'Otwarcie okna wymian';
+
+  @override
+  String get msg_tradeWindowEvent_open_body =>
+      'Od dziś można wykonywać wymiany.';
+
+  @override
+  String get msg_tradeWindowEvent_deadline_title => 'Trade deadline';
+
+  @override
+  String get msg_tradeWindowEvent_deadline_body =>
+      'Zbliża się termin zamknięcia okna wymian.';
+
+  @override
+  String get msg_scoutReport_monthly_title => 'Miesięczny raport scouta';
+
+  @override
+  String get msg_scoutReport_monthly_body =>
+      'Dostępny jest nowy raport scouta.';
+
+  @override
+  String get msg_scoutReport_event_title => 'Scout Report — przydziel Combine';
+
+  @override
+  String get msg_scoutReport_event_body => 'Przypisz prospektów do Combine.';
+
+  @override
+  String get msg_mockDraft_initial_title => 'Wstępny mock draft';
+
+  @override
+  String get msg_mockDraft_initial_body =>
+      'Dostępna jest wstępna prognoza draftu.';
+
+  @override
+  String get msg_mockDraft_final_title => 'Finalny mock draft';
+
+  @override
+  String get msg_mockDraft_final_body =>
+      'Dostępna jest finalna prognoza draftu.';
+
+  @override
+  String get msg_draftPick_own_title => 'Twój wybór w drafcie';
+
+  @override
+  String get msg_draftPick_own_body => 'Nadeszła kolej Twojej drużyny.';
+
+  @override
+  String get msg_draftPickLeague_league_title => 'Wybór ligowy';
+
+  @override
+  String get msg_draftPickLeague_league_body => 'Inna drużyna dokonała wyboru.';
+
+  @override
+  String get msg_playerEvent_action_accept => 'Akceptuj';
+
+  @override
+  String get msg_playerEvent_action_decline => 'Odrzuć';
+
+  @override
+  String get msg_playerEvent_action_cautious => 'Ostrożny powrót';
+
+  @override
+  String get msg_playerEvent_action_full => 'Pełne obciążenie';
+
+  @override
+  String get msg_teamEvent_action_accept => 'Akceptuj';
+
+  @override
+  String get msg_teamEvent_action_decline => 'Odrzuć';
+
+  @override
+  String get msg_contractOffer_action_finalize => 'Finalizuj';
+
+  @override
+  String get msg_contractOffer_action_cancel => 'Anuluj';
+
+  @override
+  String get msg_contractOffer_action_accept => 'Akceptuj';
+
+  @override
+  String get msg_contractOffer_action_counter => 'Złóż kontrofertę';
+
+  @override
+  String get msg_contractOffer_action_decline => 'Odrzuć';
+
+  @override
+  String get msg_contractOffer_action_submit => 'Złóż QO';
+
+  @override
+  String get msg_tradeOffer_action_accept => 'Akceptuj';
+
+  @override
+  String get msg_tradeOffer_action_counter => 'Kontroferta';
+
+  @override
+  String get msg_tradeOffer_action_reject => 'Odrzuć';
+
+  @override
+  String get msg_trade_action_accept => 'Akceptuj';
+
+  @override
+  String get msg_trade_action_counter => 'Kontroferta';
+
+  @override
+  String get msg_trade_action_reject => 'Odrzuć';
+
+  @override
+  String get msg_scoutReport_action_openWatchlist => 'Otwórz watchlistę';
+
+  @override
+  String get msg_draftPick_action_openDraft => 'Otwórz draft';
+
+  @override
+  String get msg_retirementLeagueDigest_digest_title => 'Emerytury ligowe';
+
+  @override
+  String msg_retirementLeagueDigest_digest_body(int count, int week) {
+    return '$count zawodników zakończyło karierę w tygodniu $week.';
+  }
+
+  @override
+  String get msg_draftPickLeague_digest_title => 'Wybory w rundzie draftu';
+
+  @override
+  String get msg_draftPickLeague_digest_body =>
+      'Podsumowanie wyborów innych drużyn.';
+
+  @override
+  String get msg_staffGrowth_digest_title => 'Rozwój sztabu';
+
+  @override
+  String get msg_staffGrowth_digest_body => 'Podsumowanie zmian w sztabie.';
+
+  @override
+  String get msg_trade_digest_title => 'Wymiany w lidze';
+
+  @override
+  String msg_trade_digest_body(int week) {
+    return 'Podsumowanie wymian w tygodniu $week.';
+  }
+
+  @override
+  String get msg_ovrDigest_digest_title => 'Rozwój OVR';
+
+  @override
+  String msg_ovrDigest_digest_body(int count, int week) {
+    return '$count zawodników poprawiło OVR w tygodniu $week.';
+  }
+
+  @override
+  String get msg_calendar_newWeek_title => 'Nowy tydzień';
+
+  @override
+  String msg_calendar_newWeek_body(Object week) {
+    return 'Rozpoczął się tydzień $week.';
+  }
+
+  @override
+  String get msg_contractSigned_fa_title => 'Kontrakt podpisany';
+
+  @override
+  String get msg_contractSigned_fa_body =>
+      'Zawodnik podpisał kontrakt z klubem.';
 }

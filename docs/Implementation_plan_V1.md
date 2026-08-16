@@ -361,23 +361,23 @@ Legenda: `⬜` do zrobienia · `🔄` w trakcie · `✅` gotowe
 
 ---
 
-### ⬜ Task 8: Klucze l10n dla katalogu wiadomości
+### ✅ Task 8: Klucze l10n dla katalogu wiadomości
 
 **Cel:** kryterium §16 — zero literałów tekstowych poza `.arb`, 100% pokrycia.
 
-- [ ] Konwencja `msg_<type>_title` / `msg_<type>_body`
-- [ ] Konwencja `msg_<type>_<kind>_title` / `_body`
-- [ ] Konwencja `msg_<type>_action_<slug>`
-- [ ] Konwencja `msg_<type>_digest_title` / `_digest_body`
-- [ ] Placeholdery ICU MessageFormat: `{playerName}`, `{days}`, `{salary, number, currency}`, `{position}`, `{teamName}`, `{week}`, `{count}`
-- [ ] Wypełnić `app_pl.arb` dla wszystkich wzorców
-- [ ] Wypełnić `app_en.arb` dla wszystkich wzorców
-- [ ] Regenerować `lib/l10n/generated`
+- [x] Konwencja `msg_<type>_title` / `msg_<type>_body`
+- [x] Konwencja `msg_<type>_<kind>_title` / `_body`
+- [x] Konwencja `msg_<type>_action_<slug>`
+- [x] Konwencja `msg_<type>_digest_title` / `_digest_body`
+- [x] Placeholdery ICU MessageFormat: `{playerName}`, `{days}`, `{salary, number, currency}`, `{position}`, `{teamName}`, `{week}`, `{count}`
+- [x] Wypełnić `app_pl.arb` dla wszystkich wzorców
+- [x] Wypełnić `app_en.arb` dla wszystkich wzorców
+- [x] Regenerować `lib/l10n/generated`
 
 **Testy**
-- [ ] Każdy wzorzec z `MessageCatalog` ma istniejące klucze tytułu i treści w obu językach
-- [ ] Każda akcja z `actions` ma klucz etykiety w obu językach
-- [ ] Każdy `groupKey` ma parę kluczy digestu
+- [x] Każdy wzorzec z `MessageCatalog` ma istniejące klucze tytułu i treści w obu językach
+- [x] Każda akcja z `actions` ma klucz etykiety w obu językach
+- [x] Każdy `groupKey` ma parę kluczy digestu
 
 **Demo:** test pokrycia przechodzi dla wszystkich wzorców w dwóch językach.
 

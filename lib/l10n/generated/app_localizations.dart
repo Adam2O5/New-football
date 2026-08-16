@@ -3611,6 +3611,1252 @@ abstract class AppLocalizations {
   /// In pl, this message translates to:
   /// **'Wolny agent · {position} · OVR {ovr}'**
   String search_freeAgentResult(Object ovr, Object position);
+
+  /// No description provided for @msg_matchPreview_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zapowiedź meczu'**
+  String get msg_matchPreview_title;
+
+  /// No description provided for @msg_matchPreview_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nadchodzący mecz drużyn ligowych.'**
+  String get msg_matchPreview_body;
+
+  /// No description provided for @msg_matchResult_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wynik meczu'**
+  String get msg_matchResult_title;
+
+  /// No description provided for @msg_matchResult_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Mecz zakończył się wynikiem {homeTeam} {homeGoals}:{awayGoals} {awayTeam}.'**
+  String msg_matchResult_body(
+    String homeTeam,
+    int homeGoals,
+    int awayGoals,
+    String awayTeam,
+  );
+
+  /// No description provided for @msg_walkover_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Walkower'**
+  String get msg_walkover_title;
+
+  /// No description provided for @msg_walkover_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Mecz zakończony walkowerem. Powód: {reason}.'**
+  String msg_walkover_body(Object reason);
+
+  /// No description provided for @msg_lineupNoGk_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Brak bramkarza w XI'**
+  String get msg_lineupNoGk_title;
+
+  /// No description provided for @msg_lineupNoGk_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Drużyna nie ma bramkarza w wyjściowym składzie.'**
+  String get msg_lineupNoGk_body;
+
+  /// No description provided for @msg_benchIncomplete_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Niepełna ławka'**
+  String get msg_benchIncomplete_title;
+
+  /// No description provided for @msg_benchIncomplete_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Na ławce brakuje {missingCount} zawodników.'**
+  String msg_benchIncomplete_body(Object missingCount);
+
+  /// No description provided for @msg_suspensionStart_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Początek zawieszenia'**
+  String get msg_suspensionStart_title;
+
+  /// No description provided for @msg_suspensionStart_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'{playerName} pauzuje przez {games} meczów.'**
+  String msg_suspensionStart_body(Object games, Object playerName);
+
+  /// No description provided for @msg_suspensionEnd_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Koniec zawieszenia'**
+  String get msg_suspensionEnd_title;
+
+  /// No description provided for @msg_suspensionEnd_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'{playerName} wraca do dyspozycji.'**
+  String msg_suspensionEnd_body(Object playerName);
+
+  /// No description provided for @msg_injury_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kontuzja'**
+  String get msg_injury_title;
+
+  /// No description provided for @msg_injury_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'{playerName}: {injuryName} ({injuryType}), absencja potrwa około {days} dni.'**
+  String msg_injury_body(
+    Object days,
+    Object injuryName,
+    Object injuryType,
+    Object playerName,
+  );
+
+  /// No description provided for @msg_injuryReturn_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Powrót po kontuzji'**
+  String get msg_injuryReturn_title;
+
+  /// No description provided for @msg_injuryReturn_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'{playerName} wraca po kontuzji {injuryName}.'**
+  String msg_injuryReturn_body(Object injuryName, Object playerName);
+
+  /// No description provided for @msg_injuryRecurrence_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nawrót kontuzji'**
+  String get msg_injuryRecurrence_title;
+
+  /// No description provided for @msg_injuryRecurrence_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'{playerName} ponownie odczuwa uraz {injuryName}.'**
+  String msg_injuryRecurrence_body(Object injuryName, Object playerName);
+
+  /// No description provided for @msg_potentialLoss_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Spadek potencjału'**
+  String get msg_potentialLoss_title;
+
+  /// No description provided for @msg_potentialLoss_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Potencjał zawodnika został obniżony.'**
+  String get msg_potentialLoss_body;
+
+  /// No description provided for @msg_playerEvent_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wydarzenie zawodnika'**
+  String get msg_playerEvent_title;
+
+  /// No description provided for @msg_playerEvent_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wymagana jest uwaga menedżera.'**
+  String get msg_playerEvent_body;
+
+  /// No description provided for @msg_teamEvent_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wydarzenie zespołu'**
+  String get msg_teamEvent_title;
+
+  /// No description provided for @msg_teamEvent_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wystąpiło wydarzenie dotyczące zespołu.'**
+  String get msg_teamEvent_body;
+
+  /// No description provided for @msg_retirementPlayer_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Emerytura zawodnika'**
+  String get msg_retirementPlayer_title;
+
+  /// No description provided for @msg_retirementPlayer_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'{playerName} kończy karierę.'**
+  String msg_retirementPlayer_body(Object playerName);
+
+  /// No description provided for @msg_retirementStaff_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Odejście członka sztabu'**
+  String get msg_retirementStaff_title;
+
+  /// No description provided for @msg_retirementStaff_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Członek sztabu opuszcza klub.'**
+  String get msg_retirementStaff_body;
+
+  /// No description provided for @msg_retirementLeagueDigest_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Emerytury w lidze'**
+  String get msg_retirementLeagueDigest_title;
+
+  /// No description provided for @msg_retirementLeagueDigest_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Podsumowanie emerytur ligowych.'**
+  String get msg_retirementLeagueDigest_body;
+
+  /// No description provided for @msg_rosterWarning_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Problem ze składem'**
+  String get msg_rosterWarning_title;
+
+  /// No description provided for @msg_rosterWarning_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Skład wymaga uzupełnienia.'**
+  String get msg_rosterWarning_body;
+
+  /// No description provided for @msg_contractOffer_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Oferta kontraktu'**
+  String get msg_contractOffer_title;
+
+  /// No description provided for @msg_contractOffer_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Otrzymano informację dotyczącą kontraktu.'**
+  String get msg_contractOffer_body;
+
+  /// No description provided for @msg_contractSigned_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Podpisany kontrakt'**
+  String get msg_contractSigned_title;
+
+  /// No description provided for @msg_contractSigned_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kontrakt został podpisany.'**
+  String get msg_contractSigned_body;
+
+  /// No description provided for @msg_contractExpired_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wygasający kontrakt'**
+  String get msg_contractExpired_title;
+
+  /// No description provided for @msg_contractExpired_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kontrakt zawodnika wygasa po sezonie.'**
+  String get msg_contractExpired_body;
+
+  /// No description provided for @msg_declineToExtend_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Brak przedłużenia'**
+  String get msg_declineToExtend_title;
+
+  /// No description provided for @msg_declineToExtend_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zawodnik nie chce przedłużyć umowy.'**
+  String get msg_declineToExtend_body;
+
+  /// No description provided for @msg_rfaOfferSheet_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Offer sheet'**
+  String get msg_rfaOfferSheet_title;
+
+  /// No description provided for @msg_rfaOfferSheet_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Otrzymano ofertę od innego klubu.'**
+  String get msg_rfaOfferSheet_body;
+
+  /// No description provided for @msg_staffGrowth_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Rozwój sztabu'**
+  String get msg_staffGrowth_title;
+
+  /// No description provided for @msg_staffGrowth_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Sztab poprawił swoje umiejętności.'**
+  String get msg_staffGrowth_body;
+
+  /// No description provided for @msg_staffHired_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zatrudniono członka sztabu'**
+  String get msg_staffHired_title;
+
+  /// No description provided for @msg_staffHired_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nowy członek sztabu dołączył do klubu.'**
+  String get msg_staffHired_body;
+
+  /// No description provided for @msg_staffFired_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Rozwiązano umowę sztabu'**
+  String get msg_staffFired_title;
+
+  /// No description provided for @msg_staffFired_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Członek sztabu opuścił klub.'**
+  String get msg_staffFired_body;
+
+  /// No description provided for @msg_staffSlotEmpty_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Pusty slot sztabu'**
+  String get msg_staffSlotEmpty_title;
+
+  /// No description provided for @msg_staffSlotEmpty_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Slot sztabu wymaga obsadzenia.'**
+  String get msg_staffSlotEmpty_body;
+
+  /// No description provided for @msg_trade_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wymiana'**
+  String get msg_trade_title;
+
+  /// No description provided for @msg_trade_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Aktualizacja dotycząca wymiany.'**
+  String get msg_trade_body;
+
+  /// No description provided for @msg_tradeOffer_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Oferta wymiany'**
+  String get msg_tradeOffer_title;
+
+  /// No description provided for @msg_tradeOffer_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Otrzymano nową ofertę wymiany.'**
+  String get msg_tradeOffer_body;
+
+  /// No description provided for @msg_tradeWindowEvent_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Okno wymian'**
+  String get msg_tradeWindowEvent_title;
+
+  /// No description provided for @msg_tradeWindowEvent_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zaktualizowano informacje o oknie wymian.'**
+  String get msg_tradeWindowEvent_body;
+
+  /// No description provided for @msg_lottery_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Loteria draftowa'**
+  String get msg_lottery_title;
+
+  /// No description provided for @msg_lottery_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wyniki loterii draftowej są dostępne.'**
+  String get msg_lottery_body;
+
+  /// No description provided for @msg_scoutReport_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Raport skautingowy'**
+  String get msg_scoutReport_title;
+
+  /// No description provided for @msg_scoutReport_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nowe informacje skautingowe są dostępne.'**
+  String get msg_scoutReport_body;
+
+  /// No description provided for @msg_combine_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wyniki Combine'**
+  String get msg_combine_title;
+
+  /// No description provided for @msg_combine_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wyniki testów prospektów są dostępne.'**
+  String get msg_combine_body;
+
+  /// No description provided for @msg_mockDraft_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Mock draft'**
+  String get msg_mockDraft_title;
+
+  /// No description provided for @msg_mockDraft_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zaktualizowano prognozę draftu.'**
+  String get msg_mockDraft_body;
+
+  /// No description provided for @msg_draftPick_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wybór w drafcie'**
+  String get msg_draftPick_title;
+
+  /// No description provided for @msg_draftPick_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nadeszła kolej wyboru w drafcie.'**
+  String get msg_draftPick_body;
+
+  /// No description provided for @msg_draftPickLeague_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wybór innej drużyny'**
+  String get msg_draftPickLeague_title;
+
+  /// No description provided for @msg_draftPickLeague_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Inna drużyna dokonała wyboru w drafcie.'**
+  String get msg_draftPickLeague_body;
+
+  /// No description provided for @msg_apronWarning_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Przekroczenie apronu'**
+  String get msg_apronWarning_title;
+
+  /// No description provided for @msg_apronWarning_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Payroll przekracza dozwolony poziom.'**
+  String get msg_apronWarning_body;
+
+  /// No description provided for @msg_capUpdateTv_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Aktualizacja salary cap'**
+  String get msg_capUpdateTv_title;
+
+  /// No description provided for @msg_capUpdateTv_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Salary cap został zaktualizowany.'**
+  String get msg_capUpdateTv_body;
+
+  /// No description provided for @msg_staffCapViolation_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Przekroczenie staff cap'**
+  String get msg_staffCapViolation_title;
+
+  /// No description provided for @msg_staffCapViolation_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Payroll sztabu przekracza limit.'**
+  String get msg_staffCapViolation_body;
+
+  /// No description provided for @msg_award_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nagroda'**
+  String get msg_award_title;
+
+  /// No description provided for @msg_award_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Przyznano nagrodę sezonową.'**
+  String get msg_award_body;
+
+  /// No description provided for @msg_atmosphere_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Atmosfera zespołu'**
+  String get msg_atmosphere_title;
+
+  /// No description provided for @msg_atmosphere_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zmieniono poziom atmosfery w klubie.'**
+  String get msg_atmosphere_body;
+
+  /// No description provided for @msg_teamStatusChange_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zmiana statusu zespołu'**
+  String get msg_teamStatusChange_title;
+
+  /// No description provided for @msg_teamStatusChange_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Status zespołu został zaktualizowany.'**
+  String get msg_teamStatusChange_body;
+
+  /// No description provided for @msg_seasonSummary_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Podsumowanie sezonu'**
+  String get msg_seasonSummary_title;
+
+  /// No description provided for @msg_seasonSummary_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Podsumowanie bieżącego sezonu jest gotowe.'**
+  String get msg_seasonSummary_body;
+
+  /// No description provided for @msg_playoffMissed_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Brak awansu do playoffów'**
+  String get msg_playoffMissed_title;
+
+  /// No description provided for @msg_playoffMissed_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zespół nie awansował do fazy playoff.'**
+  String get msg_playoffMissed_body;
+
+  /// No description provided for @msg_calendar_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kalendarz'**
+  String get msg_calendar_title;
+
+  /// No description provided for @msg_calendar_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nowe wydarzenie w kalendarzu.'**
+  String get msg_calendar_body;
+
+  /// No description provided for @msg_system_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Komunikat systemowy'**
+  String get msg_system_title;
+
+  /// No description provided for @msg_system_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'{message}'**
+  String msg_system_body(String message);
+
+  /// No description provided for @msg_ovrDigest_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Rozwój OVR'**
+  String get msg_ovrDigest_title;
+
+  /// No description provided for @msg_ovrDigest_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Podsumowanie rozwoju zawodników.'**
+  String get msg_ovrDigest_body;
+
+  /// No description provided for @msg_playerEvent_plateau_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Plateau zawodnika'**
+  String get msg_playerEvent_plateau_title;
+
+  /// No description provided for @msg_playerEvent_plateau_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'{playerName} potrzebuje zmiany programu treningowego.'**
+  String msg_playerEvent_plateau_body(Object playerName);
+
+  /// No description provided for @msg_playerEvent_coldStreak_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kryzys formy'**
+  String get msg_playerEvent_coldStreak_title;
+
+  /// No description provided for @msg_playerEvent_coldStreak_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'{playerName} przechodzi kryzys formy.'**
+  String msg_playerEvent_coldStreak_body(Object playerName);
+
+  /// No description provided for @msg_playerEvent_injuryComplication_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Komplikacje kontuzji'**
+  String get msg_playerEvent_injuryComplication_title;
+
+  /// No description provided for @msg_playerEvent_injuryComplication_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Powrót {playerName} wymaga decyzji.'**
+  String msg_playerEvent_injuryComplication_body(Object playerName);
+
+  /// No description provided for @msg_playerEvent_veteranMotivation_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Spadek motywacji weterana'**
+  String get msg_playerEvent_veteranMotivation_title;
+
+  /// No description provided for @msg_playerEvent_veteranMotivation_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'{playerName} potrzebuje wsparcia.'**
+  String msg_playerEvent_veteranMotivation_body(Object playerName);
+
+  /// No description provided for @msg_playerEvent_extraTraining_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Dodatkowy trening'**
+  String get msg_playerEvent_extraTraining_title;
+
+  /// No description provided for @msg_playerEvent_extraTraining_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'{playerName} prosi o dodatkową sesję.'**
+  String msg_playerEvent_extraTraining_body(Object playerName);
+
+  /// No description provided for @msg_playerEvent_personalSupport_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wsparcie zawodnika'**
+  String get msg_playerEvent_personalSupport_title;
+
+  /// No description provided for @msg_playerEvent_personalSupport_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'{playerName} potrzebuje wsparcia klubu.'**
+  String msg_playerEvent_personalSupport_body(Object playerName);
+
+  /// No description provided for @msg_playerEvent_breakthrough_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Przełom rozwojowy'**
+  String get msg_playerEvent_breakthrough_title;
+
+  /// No description provided for @msg_playerEvent_breakthrough_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'{playerName} zanotował przełom.'**
+  String msg_playerEvent_breakthrough_body(Object playerName);
+
+  /// No description provided for @msg_playerEvent_personalProblems_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Problemy osobiste'**
+  String get msg_playerEvent_personalProblems_title;
+
+  /// No description provided for @msg_playerEvent_personalProblems_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'{playerName} ma problemy osobiste.'**
+  String msg_playerEvent_personalProblems_body(Object playerName);
+
+  /// No description provided for @msg_playerEvent_lateBloomer_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Późny rozwój'**
+  String get msg_playerEvent_lateBloomer_title;
+
+  /// No description provided for @msg_playerEvent_lateBloomer_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'{playerName} poprawił swój atrybut.'**
+  String msg_playerEvent_lateBloomer_body(Object playerName);
+
+  /// No description provided for @msg_playerEvent_nationalTeam_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Powołanie do kadry'**
+  String get msg_playerEvent_nationalTeam_title;
+
+  /// No description provided for @msg_playerEvent_nationalTeam_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'{playerName} otrzymał powołanie.'**
+  String msg_playerEvent_nationalTeam_body(Object playerName);
+
+  /// No description provided for @msg_playerEvent_inspiredPerformance_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Inspirujący występ'**
+  String get msg_playerEvent_inspiredPerformance_title;
+
+  /// No description provided for @msg_playerEvent_inspiredPerformance_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'{playerName} zanotował świetny występ.'**
+  String msg_playerEvent_inspiredPerformance_body(Object playerName);
+
+  /// No description provided for @msg_teamEvent_moreMinutesRequest_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Prośba o minuty'**
+  String get msg_teamEvent_moreMinutesRequest_title;
+
+  /// No description provided for @msg_teamEvent_moreMinutesRequest_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'{playerName} prosi o więcej minut.'**
+  String msg_teamEvent_moreMinutesRequest_body(Object playerName);
+
+  /// No description provided for @msg_teamEvent_transferRequestI_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Prośba o transfer'**
+  String get msg_teamEvent_transferRequestI_title;
+
+  /// No description provided for @msg_teamEvent_transferRequestI_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'{playerName} chce odejść z klubu.'**
+  String msg_teamEvent_transferRequestI_body(Object playerName);
+
+  /// No description provided for @msg_teamEvent_transferRequestII_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Żądanie transferu'**
+  String get msg_teamEvent_transferRequestII_title;
+
+  /// No description provided for @msg_teamEvent_transferRequestII_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'{playerName} ponawia żądanie transferu.'**
+  String msg_teamEvent_transferRequestII_body(Object playerName);
+
+  /// No description provided for @msg_teamEvent_dressingRoomConflict_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Konflikt w szatni'**
+  String get msg_teamEvent_dressingRoomConflict_title;
+
+  /// No description provided for @msg_teamEvent_dressingRoomConflict_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'W szatni wybuchł konflikt.'**
+  String get msg_teamEvent_dressingRoomConflict_body;
+
+  /// No description provided for @msg_teamEvent_publicCriticism_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Publiczna krytyka'**
+  String get msg_teamEvent_publicCriticism_title;
+
+  /// No description provided for @msg_teamEvent_publicCriticism_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zawodnik publicznie skrytykował menedżera.'**
+  String get msg_teamEvent_publicCriticism_body;
+
+  /// No description provided for @msg_teamEvent_declineToExtend_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Brak przedłużenia'**
+  String get msg_teamEvent_declineToExtend_title;
+
+  /// No description provided for @msg_teamEvent_declineToExtend_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zawodnik nie chce przedłużyć umowy.'**
+  String get msg_teamEvent_declineToExtend_body;
+
+  /// No description provided for @msg_teamEvent_leaderSupport_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wsparcie lidera'**
+  String get msg_teamEvent_leaderSupport_title;
+
+  /// No description provided for @msg_teamEvent_leaderSupport_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Lider zespołu wsparł drużynę.'**
+  String get msg_teamEvent_leaderSupport_body;
+
+  /// No description provided for @msg_teamEvent_promiseBroken_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Złamana obietnica'**
+  String get msg_teamEvent_promiseBroken_title;
+
+  /// No description provided for @msg_teamEvent_promiseBroken_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nie zrealizowano obietnicy złożonej zawodnikowi.'**
+  String get msg_teamEvent_promiseBroken_body;
+
+  /// No description provided for @msg_teamEvent_atmosphereShift_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zmiana atmosfery'**
+  String get msg_teamEvent_atmosphereShift_title;
+
+  /// No description provided for @msg_teamEvent_atmosphereShift_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Atmosfera zespołu uległa zmianie.'**
+  String get msg_teamEvent_atmosphereShift_body;
+
+  /// No description provided for @msg_contractOffer_accept_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Akceptacja oferty'**
+  String get msg_contractOffer_accept_title;
+
+  /// No description provided for @msg_contractOffer_accept_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Oferta dla {subjectName} czeka na finalizację.'**
+  String msg_contractOffer_accept_body(Object subjectName);
+
+  /// No description provided for @msg_contractOffer_reject_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Odrzucenie oferty'**
+  String get msg_contractOffer_reject_title;
+
+  /// No description provided for @msg_contractOffer_reject_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Oferta kontraktu została odrzucona.'**
+  String get msg_contractOffer_reject_body;
+
+  /// No description provided for @msg_contractOffer_hardReject_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Twarde odrzucenie'**
+  String get msg_contractOffer_hardReject_title;
+
+  /// No description provided for @msg_contractOffer_hardReject_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Negocjacje zostały zablokowane.'**
+  String get msg_contractOffer_hardReject_body;
+
+  /// No description provided for @msg_contractOffer_waiting_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Oferta w toku'**
+  String get msg_contractOffer_waiting_title;
+
+  /// No description provided for @msg_contractOffer_waiting_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zawodnik rozważa ofertę.'**
+  String get msg_contractOffer_waiting_body;
+
+  /// No description provided for @msg_contractOffer_counter_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kontroferta'**
+  String get msg_contractOffer_counter_title;
+
+  /// No description provided for @msg_contractOffer_counter_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Otrzymano kontrofertę kontraktu.'**
+  String get msg_contractOffer_counter_body;
+
+  /// No description provided for @msg_contractOffer_rfaQualifyingOffer_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'QO do złożenia'**
+  String get msg_contractOffer_rfaQualifyingOffer_title;
+
+  /// No description provided for @msg_contractOffer_rfaQualifyingOffer_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Termin na złożenie Qualifying Offer.'**
+  String get msg_contractOffer_rfaQualifyingOffer_body;
+
+  /// No description provided for @msg_trade_counter_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kontroferta wymiany'**
+  String get msg_trade_counter_title;
+
+  /// No description provided for @msg_trade_counter_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Otrzymano kontrofertę od partnera.'**
+  String get msg_trade_counter_body;
+
+  /// No description provided for @msg_trade_accepted_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wymiana zaakceptowana'**
+  String get msg_trade_accepted_title;
+
+  /// No description provided for @msg_trade_accepted_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wymiana została wykonana.'**
+  String get msg_trade_accepted_body;
+
+  /// No description provided for @msg_trade_rejected_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wymiana odrzucona'**
+  String get msg_trade_rejected_title;
+
+  /// No description provided for @msg_trade_rejected_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Partner odrzucił propozycję wymiany.'**
+  String get msg_trade_rejected_body;
+
+  /// No description provided for @msg_trade_hardRejected_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Blokada wymiany'**
+  String get msg_trade_hardRejected_title;
+
+  /// No description provided for @msg_trade_hardRejected_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Negocjacje są zablokowane przez 30 dni.'**
+  String get msg_trade_hardRejected_body;
+
+  /// No description provided for @msg_trade_ntcRefusal_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Odmowa NTC'**
+  String get msg_trade_ntcRefusal_title;
+
+  /// No description provided for @msg_trade_ntcRefusal_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zawodnik nie wyraził zgody na transfer.'**
+  String get msg_trade_ntcRefusal_body;
+
+  /// No description provided for @msg_trade_leagueDigest_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wymiany w lidze'**
+  String get msg_trade_leagueDigest_title;
+
+  /// No description provided for @msg_trade_leagueDigest_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Podsumowanie wymian ligowych.'**
+  String get msg_trade_leagueDigest_body;
+
+  /// No description provided for @msg_tradeWindowEvent_open_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Otwarcie okna wymian'**
+  String get msg_tradeWindowEvent_open_title;
+
+  /// No description provided for @msg_tradeWindowEvent_open_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Od dziś można wykonywać wymiany.'**
+  String get msg_tradeWindowEvent_open_body;
+
+  /// No description provided for @msg_tradeWindowEvent_deadline_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Trade deadline'**
+  String get msg_tradeWindowEvent_deadline_title;
+
+  /// No description provided for @msg_tradeWindowEvent_deadline_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zbliża się termin zamknięcia okna wymian.'**
+  String get msg_tradeWindowEvent_deadline_body;
+
+  /// No description provided for @msg_scoutReport_monthly_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Miesięczny raport scouta'**
+  String get msg_scoutReport_monthly_title;
+
+  /// No description provided for @msg_scoutReport_monthly_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Dostępny jest nowy raport scouta.'**
+  String get msg_scoutReport_monthly_body;
+
+  /// No description provided for @msg_scoutReport_event_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Scout Report — przydziel Combine'**
+  String get msg_scoutReport_event_title;
+
+  /// No description provided for @msg_scoutReport_event_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Przypisz prospektów do Combine.'**
+  String get msg_scoutReport_event_body;
+
+  /// No description provided for @msg_mockDraft_initial_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wstępny mock draft'**
+  String get msg_mockDraft_initial_title;
+
+  /// No description provided for @msg_mockDraft_initial_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Dostępna jest wstępna prognoza draftu.'**
+  String get msg_mockDraft_initial_body;
+
+  /// No description provided for @msg_mockDraft_final_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Finalny mock draft'**
+  String get msg_mockDraft_final_title;
+
+  /// No description provided for @msg_mockDraft_final_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Dostępna jest finalna prognoza draftu.'**
+  String get msg_mockDraft_final_body;
+
+  /// No description provided for @msg_draftPick_own_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Twój wybór w drafcie'**
+  String get msg_draftPick_own_title;
+
+  /// No description provided for @msg_draftPick_own_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nadeszła kolej Twojej drużyny.'**
+  String get msg_draftPick_own_body;
+
+  /// No description provided for @msg_draftPickLeague_league_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wybór ligowy'**
+  String get msg_draftPickLeague_league_title;
+
+  /// No description provided for @msg_draftPickLeague_league_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Inna drużyna dokonała wyboru.'**
+  String get msg_draftPickLeague_league_body;
+
+  /// No description provided for @msg_playerEvent_action_accept.
+  ///
+  /// In pl, this message translates to:
+  /// **'Akceptuj'**
+  String get msg_playerEvent_action_accept;
+
+  /// No description provided for @msg_playerEvent_action_decline.
+  ///
+  /// In pl, this message translates to:
+  /// **'Odrzuć'**
+  String get msg_playerEvent_action_decline;
+
+  /// No description provided for @msg_playerEvent_action_cautious.
+  ///
+  /// In pl, this message translates to:
+  /// **'Ostrożny powrót'**
+  String get msg_playerEvent_action_cautious;
+
+  /// No description provided for @msg_playerEvent_action_full.
+  ///
+  /// In pl, this message translates to:
+  /// **'Pełne obciążenie'**
+  String get msg_playerEvent_action_full;
+
+  /// No description provided for @msg_teamEvent_action_accept.
+  ///
+  /// In pl, this message translates to:
+  /// **'Akceptuj'**
+  String get msg_teamEvent_action_accept;
+
+  /// No description provided for @msg_teamEvent_action_decline.
+  ///
+  /// In pl, this message translates to:
+  /// **'Odrzuć'**
+  String get msg_teamEvent_action_decline;
+
+  /// No description provided for @msg_contractOffer_action_finalize.
+  ///
+  /// In pl, this message translates to:
+  /// **'Finalizuj'**
+  String get msg_contractOffer_action_finalize;
+
+  /// No description provided for @msg_contractOffer_action_cancel.
+  ///
+  /// In pl, this message translates to:
+  /// **'Anuluj'**
+  String get msg_contractOffer_action_cancel;
+
+  /// No description provided for @msg_contractOffer_action_accept.
+  ///
+  /// In pl, this message translates to:
+  /// **'Akceptuj'**
+  String get msg_contractOffer_action_accept;
+
+  /// No description provided for @msg_contractOffer_action_counter.
+  ///
+  /// In pl, this message translates to:
+  /// **'Złóż kontrofertę'**
+  String get msg_contractOffer_action_counter;
+
+  /// No description provided for @msg_contractOffer_action_decline.
+  ///
+  /// In pl, this message translates to:
+  /// **'Odrzuć'**
+  String get msg_contractOffer_action_decline;
+
+  /// No description provided for @msg_contractOffer_action_submit.
+  ///
+  /// In pl, this message translates to:
+  /// **'Złóż QO'**
+  String get msg_contractOffer_action_submit;
+
+  /// No description provided for @msg_tradeOffer_action_accept.
+  ///
+  /// In pl, this message translates to:
+  /// **'Akceptuj'**
+  String get msg_tradeOffer_action_accept;
+
+  /// No description provided for @msg_tradeOffer_action_counter.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kontroferta'**
+  String get msg_tradeOffer_action_counter;
+
+  /// No description provided for @msg_tradeOffer_action_reject.
+  ///
+  /// In pl, this message translates to:
+  /// **'Odrzuć'**
+  String get msg_tradeOffer_action_reject;
+
+  /// No description provided for @msg_trade_action_accept.
+  ///
+  /// In pl, this message translates to:
+  /// **'Akceptuj'**
+  String get msg_trade_action_accept;
+
+  /// No description provided for @msg_trade_action_counter.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kontroferta'**
+  String get msg_trade_action_counter;
+
+  /// No description provided for @msg_trade_action_reject.
+  ///
+  /// In pl, this message translates to:
+  /// **'Odrzuć'**
+  String get msg_trade_action_reject;
+
+  /// No description provided for @msg_scoutReport_action_openWatchlist.
+  ///
+  /// In pl, this message translates to:
+  /// **'Otwórz watchlistę'**
+  String get msg_scoutReport_action_openWatchlist;
+
+  /// No description provided for @msg_draftPick_action_openDraft.
+  ///
+  /// In pl, this message translates to:
+  /// **'Otwórz draft'**
+  String get msg_draftPick_action_openDraft;
+
+  /// No description provided for @msg_retirementLeagueDigest_digest_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Emerytury ligowe'**
+  String get msg_retirementLeagueDigest_digest_title;
+
+  /// No description provided for @msg_retirementLeagueDigest_digest_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'{count} zawodników zakończyło karierę w tygodniu {week}.'**
+  String msg_retirementLeagueDigest_digest_body(int count, int week);
+
+  /// No description provided for @msg_draftPickLeague_digest_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wybory w rundzie draftu'**
+  String get msg_draftPickLeague_digest_title;
+
+  /// No description provided for @msg_draftPickLeague_digest_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Podsumowanie wyborów innych drużyn.'**
+  String get msg_draftPickLeague_digest_body;
+
+  /// No description provided for @msg_staffGrowth_digest_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Rozwój sztabu'**
+  String get msg_staffGrowth_digest_title;
+
+  /// No description provided for @msg_staffGrowth_digest_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Podsumowanie zmian w sztabie.'**
+  String get msg_staffGrowth_digest_body;
+
+  /// No description provided for @msg_trade_digest_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wymiany w lidze'**
+  String get msg_trade_digest_title;
+
+  /// No description provided for @msg_trade_digest_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Podsumowanie wymian w tygodniu {week}.'**
+  String msg_trade_digest_body(int week);
+
+  /// No description provided for @msg_ovrDigest_digest_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Rozwój OVR'**
+  String get msg_ovrDigest_digest_title;
+
+  /// No description provided for @msg_ovrDigest_digest_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'{count} zawodników poprawiło OVR w tygodniu {week}.'**
+  String msg_ovrDigest_digest_body(int count, int week);
+
+  /// No description provided for @msg_calendar_newWeek_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nowy tydzień'**
+  String get msg_calendar_newWeek_title;
+
+  /// No description provided for @msg_calendar_newWeek_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Rozpoczął się tydzień {week}.'**
+  String msg_calendar_newWeek_body(Object week);
+
+  /// No description provided for @msg_contractSigned_fa_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kontrakt podpisany'**
+  String get msg_contractSigned_fa_title;
+
+  /// No description provided for @msg_contractSigned_fa_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zawodnik podpisał kontrakt z klubem.'**
+  String get msg_contractSigned_fa_body;
 }
 
 class _AppLocalizationsDelegate
