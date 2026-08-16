@@ -238,6 +238,353 @@ abstract class _TeamAiConfig implements TeamAiConfig {
       throw _privateConstructorUsedError;
 }
 
+TeamWeeklyHistory _$TeamWeeklyHistoryFromJson(Map<String, dynamic> json) {
+  return _TeamWeeklyHistory.fromJson(json);
+}
+
+/// @nodoc
+mixin _$TeamWeeklyHistory {
+  int get seasonYear => throw _privateConstructorUsedError;
+  int get week => throw _privateConstructorUsedError;
+  int get atmosphereDelta => throw _privateConstructorUsedError;
+  double get chemistryDelta => throw _privateConstructorUsedError;
+  int get atmosphere => throw _privateConstructorUsedError;
+  double get chemistry => throw _privateConstructorUsedError;
+  int get wins => throw _privateConstructorUsedError;
+  int get draws => throw _privateConstructorUsedError;
+  int get losses => throw _privateConstructorUsedError;
+
+  /// Serializes this TeamWeeklyHistory to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of TeamWeeklyHistory
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $TeamWeeklyHistoryCopyWith<TeamWeeklyHistory> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $TeamWeeklyHistoryCopyWith<$Res> {
+  factory $TeamWeeklyHistoryCopyWith(
+    TeamWeeklyHistory value,
+    $Res Function(TeamWeeklyHistory) then,
+  ) = _$TeamWeeklyHistoryCopyWithImpl<$Res, TeamWeeklyHistory>;
+  @useResult
+  $Res call({
+    int seasonYear,
+    int week,
+    int atmosphereDelta,
+    double chemistryDelta,
+    int atmosphere,
+    double chemistry,
+    int wins,
+    int draws,
+    int losses,
+  });
+}
+
+/// @nodoc
+class _$TeamWeeklyHistoryCopyWithImpl<$Res, $Val extends TeamWeeklyHistory>
+    implements $TeamWeeklyHistoryCopyWith<$Res> {
+  _$TeamWeeklyHistoryCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of TeamWeeklyHistory
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? seasonYear = null,
+    Object? week = null,
+    Object? atmosphereDelta = null,
+    Object? chemistryDelta = null,
+    Object? atmosphere = null,
+    Object? chemistry = null,
+    Object? wins = null,
+    Object? draws = null,
+    Object? losses = null,
+  }) {
+    return _then(
+      _value.copyWith(
+            seasonYear: null == seasonYear
+                ? _value.seasonYear
+                : seasonYear // ignore: cast_nullable_to_non_nullable
+                      as int,
+            week: null == week
+                ? _value.week
+                : week // ignore: cast_nullable_to_non_nullable
+                      as int,
+            atmosphereDelta: null == atmosphereDelta
+                ? _value.atmosphereDelta
+                : atmosphereDelta // ignore: cast_nullable_to_non_nullable
+                      as int,
+            chemistryDelta: null == chemistryDelta
+                ? _value.chemistryDelta
+                : chemistryDelta // ignore: cast_nullable_to_non_nullable
+                      as double,
+            atmosphere: null == atmosphere
+                ? _value.atmosphere
+                : atmosphere // ignore: cast_nullable_to_non_nullable
+                      as int,
+            chemistry: null == chemistry
+                ? _value.chemistry
+                : chemistry // ignore: cast_nullable_to_non_nullable
+                      as double,
+            wins: null == wins
+                ? _value.wins
+                : wins // ignore: cast_nullable_to_non_nullable
+                      as int,
+            draws: null == draws
+                ? _value.draws
+                : draws // ignore: cast_nullable_to_non_nullable
+                      as int,
+            losses: null == losses
+                ? _value.losses
+                : losses // ignore: cast_nullable_to_non_nullable
+                      as int,
+          )
+          as $Val,
+    );
+  }
+}
+
+/// @nodoc
+abstract class _$$TeamWeeklyHistoryImplCopyWith<$Res>
+    implements $TeamWeeklyHistoryCopyWith<$Res> {
+  factory _$$TeamWeeklyHistoryImplCopyWith(
+    _$TeamWeeklyHistoryImpl value,
+    $Res Function(_$TeamWeeklyHistoryImpl) then,
+  ) = __$$TeamWeeklyHistoryImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({
+    int seasonYear,
+    int week,
+    int atmosphereDelta,
+    double chemistryDelta,
+    int atmosphere,
+    double chemistry,
+    int wins,
+    int draws,
+    int losses,
+  });
+}
+
+/// @nodoc
+class __$$TeamWeeklyHistoryImplCopyWithImpl<$Res>
+    extends _$TeamWeeklyHistoryCopyWithImpl<$Res, _$TeamWeeklyHistoryImpl>
+    implements _$$TeamWeeklyHistoryImplCopyWith<$Res> {
+  __$$TeamWeeklyHistoryImplCopyWithImpl(
+    _$TeamWeeklyHistoryImpl _value,
+    $Res Function(_$TeamWeeklyHistoryImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of TeamWeeklyHistory
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? seasonYear = null,
+    Object? week = null,
+    Object? atmosphereDelta = null,
+    Object? chemistryDelta = null,
+    Object? atmosphere = null,
+    Object? chemistry = null,
+    Object? wins = null,
+    Object? draws = null,
+    Object? losses = null,
+  }) {
+    return _then(
+      _$TeamWeeklyHistoryImpl(
+        seasonYear: null == seasonYear
+            ? _value.seasonYear
+            : seasonYear // ignore: cast_nullable_to_non_nullable
+                  as int,
+        week: null == week
+            ? _value.week
+            : week // ignore: cast_nullable_to_non_nullable
+                  as int,
+        atmosphereDelta: null == atmosphereDelta
+            ? _value.atmosphereDelta
+            : atmosphereDelta // ignore: cast_nullable_to_non_nullable
+                  as int,
+        chemistryDelta: null == chemistryDelta
+            ? _value.chemistryDelta
+            : chemistryDelta // ignore: cast_nullable_to_non_nullable
+                  as double,
+        atmosphere: null == atmosphere
+            ? _value.atmosphere
+            : atmosphere // ignore: cast_nullable_to_non_nullable
+                  as int,
+        chemistry: null == chemistry
+            ? _value.chemistry
+            : chemistry // ignore: cast_nullable_to_non_nullable
+                  as double,
+        wins: null == wins
+            ? _value.wins
+            : wins // ignore: cast_nullable_to_non_nullable
+                  as int,
+        draws: null == draws
+            ? _value.draws
+            : draws // ignore: cast_nullable_to_non_nullable
+                  as int,
+        losses: null == losses
+            ? _value.losses
+            : losses // ignore: cast_nullable_to_non_nullable
+                  as int,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$TeamWeeklyHistoryImpl implements _TeamWeeklyHistory {
+  const _$TeamWeeklyHistoryImpl({
+    required this.seasonYear,
+    required this.week,
+    this.atmosphereDelta = 0,
+    this.chemistryDelta = 0.0,
+    required this.atmosphere,
+    required this.chemistry,
+    this.wins = 0,
+    this.draws = 0,
+    this.losses = 0,
+  });
+
+  factory _$TeamWeeklyHistoryImpl.fromJson(Map<String, dynamic> json) =>
+      _$$TeamWeeklyHistoryImplFromJson(json);
+
+  @override
+  final int seasonYear;
+  @override
+  final int week;
+  @override
+  @JsonKey()
+  final int atmosphereDelta;
+  @override
+  @JsonKey()
+  final double chemistryDelta;
+  @override
+  final int atmosphere;
+  @override
+  final double chemistry;
+  @override
+  @JsonKey()
+  final int wins;
+  @override
+  @JsonKey()
+  final int draws;
+  @override
+  @JsonKey()
+  final int losses;
+
+  @override
+  String toString() {
+    return 'TeamWeeklyHistory(seasonYear: $seasonYear, week: $week, atmosphereDelta: $atmosphereDelta, chemistryDelta: $chemistryDelta, atmosphere: $atmosphere, chemistry: $chemistry, wins: $wins, draws: $draws, losses: $losses)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$TeamWeeklyHistoryImpl &&
+            (identical(other.seasonYear, seasonYear) ||
+                other.seasonYear == seasonYear) &&
+            (identical(other.week, week) || other.week == week) &&
+            (identical(other.atmosphereDelta, atmosphereDelta) ||
+                other.atmosphereDelta == atmosphereDelta) &&
+            (identical(other.chemistryDelta, chemistryDelta) ||
+                other.chemistryDelta == chemistryDelta) &&
+            (identical(other.atmosphere, atmosphere) ||
+                other.atmosphere == atmosphere) &&
+            (identical(other.chemistry, chemistry) ||
+                other.chemistry == chemistry) &&
+            (identical(other.wins, wins) || other.wins == wins) &&
+            (identical(other.draws, draws) || other.draws == draws) &&
+            (identical(other.losses, losses) || other.losses == losses));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    seasonYear,
+    week,
+    atmosphereDelta,
+    chemistryDelta,
+    atmosphere,
+    chemistry,
+    wins,
+    draws,
+    losses,
+  );
+
+  /// Create a copy of TeamWeeklyHistory
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$TeamWeeklyHistoryImplCopyWith<_$TeamWeeklyHistoryImpl> get copyWith =>
+      __$$TeamWeeklyHistoryImplCopyWithImpl<_$TeamWeeklyHistoryImpl>(
+        this,
+        _$identity,
+      );
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$TeamWeeklyHistoryImplToJson(this);
+  }
+}
+
+abstract class _TeamWeeklyHistory implements TeamWeeklyHistory {
+  const factory _TeamWeeklyHistory({
+    required final int seasonYear,
+    required final int week,
+    final int atmosphereDelta,
+    final double chemistryDelta,
+    required final int atmosphere,
+    required final double chemistry,
+    final int wins,
+    final int draws,
+    final int losses,
+  }) = _$TeamWeeklyHistoryImpl;
+
+  factory _TeamWeeklyHistory.fromJson(Map<String, dynamic> json) =
+      _$TeamWeeklyHistoryImpl.fromJson;
+
+  @override
+  int get seasonYear;
+  @override
+  int get week;
+  @override
+  int get atmosphereDelta;
+  @override
+  double get chemistryDelta;
+  @override
+  int get atmosphere;
+  @override
+  double get chemistry;
+  @override
+  int get wins;
+  @override
+  int get draws;
+  @override
+  int get losses;
+
+  /// Create a copy of TeamWeeklyHistory
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$TeamWeeklyHistoryImplCopyWith<_$TeamWeeklyHistoryImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
 Team _$TeamFromJson(Map<String, dynamic> json) {
   return _Team.fromJson(json);
 }
@@ -254,7 +601,12 @@ mixin _$Team {
   List<String> get lineupPlayerIds => throw _privateConstructorUsedError;
   List<String> get benchPlayerIds => throw _privateConstructorUsedError;
   int get atmosphere => throw _privateConstructorUsedError;
-  int get chemistry => throw _privateConstructorUsedError;
+  double get chemistry => throw _privateConstructorUsedError;
+  List<TeamWeeklyHistory> get weeklyHistory =>
+      throw _privateConstructorUsedError;
+  List<int> get recentMatchResults => throw _privateConstructorUsedError;
+  Map<String, int> get chemistryAppearances =>
+      throw _privateConstructorUsedError;
   TeamStaff get staff => throw _privateConstructorUsedError;
   TeamScouting get scouting => throw _privateConstructorUsedError;
 
@@ -290,7 +642,10 @@ abstract class $TeamCopyWith<$Res> {
     List<String> lineupPlayerIds,
     List<String> benchPlayerIds,
     int atmosphere,
-    int chemistry,
+    double chemistry,
+    List<TeamWeeklyHistory> weeklyHistory,
+    List<int> recentMatchResults,
+    Map<String, int> chemistryAppearances,
     TeamStaff staff,
     TeamScouting scouting,
     List<DraftPick> ownedPicks,
@@ -330,6 +685,9 @@ class _$TeamCopyWithImpl<$Res, $Val extends Team>
     Object? benchPlayerIds = null,
     Object? atmosphere = null,
     Object? chemistry = null,
+    Object? weeklyHistory = null,
+    Object? recentMatchResults = null,
+    Object? chemistryAppearances = null,
     Object? staff = null,
     Object? scouting = null,
     Object? ownedPicks = null,
@@ -380,7 +738,19 @@ class _$TeamCopyWithImpl<$Res, $Val extends Team>
             chemistry: null == chemistry
                 ? _value.chemistry
                 : chemistry // ignore: cast_nullable_to_non_nullable
-                      as int,
+                      as double,
+            weeklyHistory: null == weeklyHistory
+                ? _value.weeklyHistory
+                : weeklyHistory // ignore: cast_nullable_to_non_nullable
+                      as List<TeamWeeklyHistory>,
+            recentMatchResults: null == recentMatchResults
+                ? _value.recentMatchResults
+                : recentMatchResults // ignore: cast_nullable_to_non_nullable
+                      as List<int>,
+            chemistryAppearances: null == chemistryAppearances
+                ? _value.chemistryAppearances
+                : chemistryAppearances // ignore: cast_nullable_to_non_nullable
+                      as Map<String, int>,
             staff: null == staff
                 ? _value.staff
                 : staff // ignore: cast_nullable_to_non_nullable
@@ -476,7 +846,10 @@ abstract class _$$TeamImplCopyWith<$Res> implements $TeamCopyWith<$Res> {
     List<String> lineupPlayerIds,
     List<String> benchPlayerIds,
     int atmosphere,
-    int chemistry,
+    double chemistry,
+    List<TeamWeeklyHistory> weeklyHistory,
+    List<int> recentMatchResults,
+    Map<String, int> chemistryAppearances,
     TeamStaff staff,
     TeamScouting scouting,
     List<DraftPick> ownedPicks,
@@ -518,6 +891,9 @@ class __$$TeamImplCopyWithImpl<$Res>
     Object? benchPlayerIds = null,
     Object? atmosphere = null,
     Object? chemistry = null,
+    Object? weeklyHistory = null,
+    Object? recentMatchResults = null,
+    Object? chemistryAppearances = null,
     Object? staff = null,
     Object? scouting = null,
     Object? ownedPicks = null,
@@ -568,7 +944,19 @@ class __$$TeamImplCopyWithImpl<$Res>
         chemistry: null == chemistry
             ? _value.chemistry
             : chemistry // ignore: cast_nullable_to_non_nullable
-                  as int,
+                  as double,
+        weeklyHistory: null == weeklyHistory
+            ? _value._weeklyHistory
+            : weeklyHistory // ignore: cast_nullable_to_non_nullable
+                  as List<TeamWeeklyHistory>,
+        recentMatchResults: null == recentMatchResults
+            ? _value._recentMatchResults
+            : recentMatchResults // ignore: cast_nullable_to_non_nullable
+                  as List<int>,
+        chemistryAppearances: null == chemistryAppearances
+            ? _value._chemistryAppearances
+            : chemistryAppearances // ignore: cast_nullable_to_non_nullable
+                  as Map<String, int>,
         staff: null == staff
             ? _value.staff
             : staff // ignore: cast_nullable_to_non_nullable
@@ -604,7 +992,10 @@ class _$TeamImpl implements _Team {
     final List<String> lineupPlayerIds = const [],
     final List<String> benchPlayerIds = const [],
     this.atmosphere = 50,
-    this.chemistry = 50,
+    this.chemistry = 50.0,
+    final List<TeamWeeklyHistory> weeklyHistory = const [],
+    final List<int> recentMatchResults = const [],
+    final Map<String, int> chemistryAppearances = const {},
     this.staff = const TeamStaff(),
     this.scouting = const TeamScouting(),
     final List<DraftPick> ownedPicks = const [],
@@ -612,6 +1003,9 @@ class _$TeamImpl implements _Team {
   }) : _roster = roster,
        _lineupPlayerIds = lineupPlayerIds,
        _benchPlayerIds = benchPlayerIds,
+       _weeklyHistory = weeklyHistory,
+       _recentMatchResults = recentMatchResults,
+       _chemistryAppearances = chemistryAppearances,
        _ownedPicks = ownedPicks;
 
   factory _$TeamImpl.fromJson(Map<String, dynamic> json) =>
@@ -661,7 +1055,36 @@ class _$TeamImpl implements _Team {
   final int atmosphere;
   @override
   @JsonKey()
-  final int chemistry;
+  final double chemistry;
+  final List<TeamWeeklyHistory> _weeklyHistory;
+  @override
+  @JsonKey()
+  List<TeamWeeklyHistory> get weeklyHistory {
+    if (_weeklyHistory is EqualUnmodifiableListView) return _weeklyHistory;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_weeklyHistory);
+  }
+
+  final List<int> _recentMatchResults;
+  @override
+  @JsonKey()
+  List<int> get recentMatchResults {
+    if (_recentMatchResults is EqualUnmodifiableListView)
+      return _recentMatchResults;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_recentMatchResults);
+  }
+
+  final Map<String, int> _chemistryAppearances;
+  @override
+  @JsonKey()
+  Map<String, int> get chemistryAppearances {
+    if (_chemistryAppearances is EqualUnmodifiableMapView)
+      return _chemistryAppearances;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableMapView(_chemistryAppearances);
+  }
+
   @override
   @JsonKey()
   final TeamStaff staff;
@@ -689,7 +1112,7 @@ class _$TeamImpl implements _Team {
 
   @override
   String toString() {
-    return 'Team(id: $id, name: $name, city: $city, conference: $conference, roster: $roster, finance: $finance, tactics: $tactics, lineupPlayerIds: $lineupPlayerIds, benchPlayerIds: $benchPlayerIds, atmosphere: $atmosphere, chemistry: $chemistry, staff: $staff, scouting: $scouting, ownedPicks: $ownedPicks, ai: $ai)';
+    return 'Team(id: $id, name: $name, city: $city, conference: $conference, roster: $roster, finance: $finance, tactics: $tactics, lineupPlayerIds: $lineupPlayerIds, benchPlayerIds: $benchPlayerIds, atmosphere: $atmosphere, chemistry: $chemistry, weeklyHistory: $weeklyHistory, recentMatchResults: $recentMatchResults, chemistryAppearances: $chemistryAppearances, staff: $staff, scouting: $scouting, ownedPicks: $ownedPicks, ai: $ai)';
   }
 
   @override
@@ -717,6 +1140,18 @@ class _$TeamImpl implements _Team {
                 other.atmosphere == atmosphere) &&
             (identical(other.chemistry, chemistry) ||
                 other.chemistry == chemistry) &&
+            const DeepCollectionEquality().equals(
+              other._weeklyHistory,
+              _weeklyHistory,
+            ) &&
+            const DeepCollectionEquality().equals(
+              other._recentMatchResults,
+              _recentMatchResults,
+            ) &&
+            const DeepCollectionEquality().equals(
+              other._chemistryAppearances,
+              _chemistryAppearances,
+            ) &&
             (identical(other.staff, staff) || other.staff == staff) &&
             (identical(other.scouting, scouting) ||
                 other.scouting == scouting) &&
@@ -742,6 +1177,9 @@ class _$TeamImpl implements _Team {
     const DeepCollectionEquality().hash(_benchPlayerIds),
     atmosphere,
     chemistry,
+    const DeepCollectionEquality().hash(_weeklyHistory),
+    const DeepCollectionEquality().hash(_recentMatchResults),
+    const DeepCollectionEquality().hash(_chemistryAppearances),
     staff,
     scouting,
     const DeepCollectionEquality().hash(_ownedPicks),
@@ -774,7 +1212,10 @@ abstract class _Team implements Team {
     final List<String> lineupPlayerIds,
     final List<String> benchPlayerIds,
     final int atmosphere,
-    final int chemistry,
+    final double chemistry,
+    final List<TeamWeeklyHistory> weeklyHistory,
+    final List<int> recentMatchResults,
+    final Map<String, int> chemistryAppearances,
     final TeamStaff staff,
     final TeamScouting scouting,
     final List<DraftPick> ownedPicks,
@@ -804,7 +1245,13 @@ abstract class _Team implements Team {
   @override
   int get atmosphere;
   @override
-  int get chemistry;
+  double get chemistry;
+  @override
+  List<TeamWeeklyHistory> get weeklyHistory;
+  @override
+  List<int> get recentMatchResults;
+  @override
+  Map<String, int> get chemistryAppearances;
   @override
   TeamStaff get staff;
   @override

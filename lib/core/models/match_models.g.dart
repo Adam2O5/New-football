@@ -123,6 +123,7 @@ _$MatchResultImpl _$$MatchResultImplFromJson(
   awayGoals: (json['awayGoals'] as num).toInt(),
   homeStats: TeamMatchStats.fromJson(json['homeStats'] as Map<String, dynamic>),
   awayStats: TeamMatchStats.fromJson(json['awayStats'] as Map<String, dynamic>),
+  isWalkover: json['isWalkover'] as bool? ?? false,
   context: json['context'] == null
       ? const MatchContext()
       : MatchContext.fromJson(json['context'] as Map<String, dynamic>),
@@ -132,6 +133,26 @@ _$MatchResultImpl _$$MatchResultImplFromJson(
   awayTactics: json['awayTactics'] == null
       ? const TacticsSetup()
       : TacticsSetup.fromJson(json['awayTactics'] as Map<String, dynamic>),
+  homeLineup:
+      (json['homeLineup'] as List<dynamic>?)
+          ?.map((e) => Player.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+  awayLineup:
+      (json['awayLineup'] as List<dynamic>?)
+          ?.map((e) => Player.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+  homeLineupPositions:
+      (json['homeLineupPositions'] as List<dynamic>?)
+          ?.map((e) => $enumDecode(_$PositionEnumMap, e))
+          .toList() ??
+      const [],
+  awayLineupPositions:
+      (json['awayLineupPositions'] as List<dynamic>?)
+          ?.map((e) => $enumDecode(_$PositionEnumMap, e))
+          .toList() ??
+      const [],
   playerStats:
       (json['playerStats'] as List<dynamic>?)
           ?.map((e) => PlayerMatchStats.fromJson(e as Map<String, dynamic>))
@@ -162,14 +183,38 @@ Map<String, dynamic> _$$MatchResultImplToJson(_$MatchResultImpl instance) =>
       'awayGoals': instance.awayGoals,
       'homeStats': instance.homeStats,
       'awayStats': instance.awayStats,
+      'isWalkover': instance.isWalkover,
       'context': instance.context,
       'homeTactics': instance.homeTactics,
       'awayTactics': instance.awayTactics,
+      'homeLineup': instance.homeLineup,
+      'awayLineup': instance.awayLineup,
+      'homeLineupPositions': instance.homeLineupPositions
+          .map((e) => _$PositionEnumMap[e]!)
+          .toList(),
+      'awayLineupPositions': instance.awayLineupPositions
+          .map((e) => _$PositionEnumMap[e]!)
+          .toList(),
       'playerStats': instance.playerStats,
       'events': instance.events,
       'injuries': instance.injuries,
       'disciplines': instance.disciplines,
     };
+
+const _$PositionEnumMap = {
+  Position.gk: 'gk',
+  Position.cb: 'cb',
+  Position.lb: 'lb',
+  Position.rb: 'rb',
+  Position.lwb: 'lwb',
+  Position.rwb: 'rwb',
+  Position.cdm: 'cdm',
+  Position.cm: 'cm',
+  Position.cam: 'cam',
+  Position.lw: 'lw',
+  Position.rw: 'rw',
+  Position.st: 'st',
+};
 
 _$MatchSetupImpl _$$MatchSetupImplFromJson(Map<String, dynamic> json) =>
     _$MatchSetupImpl(

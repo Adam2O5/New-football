@@ -1,6 +1,6 @@
 # Zarządzanie zespołem
 
-Dokument opisuje zarządzanie zespołem jako ogół obejmując status zespołu, atmosfere, zgranie oraz eveny związane z zespołem.
+Dokument opisuje zarządzanie zespołem jako ogół obejmujący status zespołu, atmosferę, zgranie oraz eventy związane z zespołem.
 
 ---
 
@@ -17,7 +17,7 @@ teamPower = średni overall 15 najlepszych zawodników rosteru (po overall, male
 - Liczą się **wszyscy** zawodnicy rosteru, także kontuzjowani i zawieszeni.
 - Zawodnicy draftowani bez podpisanego kontraktu (`contracts.md` §9) **nie** wchodzą do wyliczenia.
 - Roster poniżej 15 zawodników (skutek emerytur): brakujące miejsca liczone jako **50** overall.
-- Wynik zaokrąglany do **2 miejsc po przecinku**.0
+- Wynik zaokrąglany do **2 miejsc po przecinku**
 
 Wszystkie 30 drużyn sortowane malejąco po `teamPower` → pozycja **1–30** w tabeli siły ligi.
 
@@ -28,8 +28,9 @@ Wszystkie 30 drużyn sortowane malejąco po `teamPower` → pozycja **1–30** w
 | Kiedy | Zakres obowiązywania |
 | ----- | -------------------- |
 | Start nowej kariery | cały pierwszy sezon |
-| Co miesiąc każdego 1 dnia miesiąca (do trade deadline) | całe okno wymian |
+| Co 4 tygodnie: tyg. 1, 5, 9, 13, 17 i 21 (do trade deadline) | całe okno wymian |
 | **Poniedziałek tyg. 23** (trade deadline) | korekta na końcówkę sezonu i playoff |
+| **Wtorek tyg. 44** | świeża wycena rosterów AI przed loterią |
 
 Tabela nie jest przeliczana przy każdej wymianie — to stabilny wskaźnik okresowy, nie wskaźnik chwilowy.
 
@@ -125,7 +126,7 @@ Domyka tabelę zmian atmosfery poniżej (wiersze „Wynik tygodnia lepszy / gors
 ### Skutki atmosfery
 
 | Poziom | Zakres | Efekt meczowy | Dryf zgrania / tydzień | Inne efekty |
-| ------ | ------ | --------------------------------------------- | ---------------- | ----------------------- | ----------- |
+| ------ | ------ | --------------------------------------------- | ---------------- | ----------- |
 | Kryzys | 0–29 | ×0,95 | **−2** pkt | +25% szansy na negatywny event |
 | Słaba | 30–44 | ×0,97 | **−1** pkt | +10% szansy na negatywny event |
 | Neutralna | 45–69 | ×1,00  | 0 | brak modyfikatora |

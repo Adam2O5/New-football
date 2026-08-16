@@ -37,6 +37,10 @@ class LeagueStrengthTable with _$LeagueStrengthTable {
 
     /// Day when this table was last calculated.
     @Default(1) int lastCalculatedDay,
+
+    /// Season that owns this snapshot. Zero keeps legacy in-memory fixtures
+    /// compatible and is treated as unknown by the recalculation guard.
+    @Default(0) int seasonYear,
   }) = _LeagueStrengthTable;
 
   factory LeagueStrengthTable.fromJson(Map<String, dynamic> json) =>

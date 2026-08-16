@@ -9,6 +9,7 @@ import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/services/cohesion_service.dart';
 import 'package:new_football/core/services/discipline_service.dart';
 import 'package:new_football/core/services/injury_service.dart';
+import 'package:new_football/core/services/team_management_service.dart';
 import 'package:new_football/core/tactics/tactics_setup.dart';
 
 class LiveMatch {
@@ -16,6 +17,8 @@ class LiveMatch {
     required this.state,
     required this.homeTeamId,
     required this.awayTeamId,
+    List<Player>? startingHomeLineup,
+    List<Player>? startingAwayLineup,
     this.balance = BalanceConfig.defaults,
     List<MatchEvent>? events,
     List<MatchInjury>? injuries,
@@ -26,13 +29,21 @@ class LiveMatch {
     this.awaySubWindows = 0,
     this.homeCohesionMult = 1.03,
     this.awayCohesionMult = 1.03,
-    this.homeChemistry = 50,
-    this.awayChemistry = 50,
+    this.homeChemistry = 50.0,
+    this.awayChemistry = 50.0,
+    this.homeAtmosphere = 50,
+    this.awayAtmosphere = 50,
     this.homeDoctorCareMult = 1.0,
     this.awayDoctorCareMult = 1.0,
     this.homeDoctorPreventionMult = 1.0,
     this.awayDoctorPreventionMult = 1.0,
-  }) : events = events ?? [],
+  }) : homeStartingLineup = List.unmodifiable(
+         startingHomeLineup ?? state.homeLineup,
+       ),
+       awayStartingLineup = List.unmodifiable(
+         startingAwayLineup ?? state.awayLineup,
+       ),
+       events = events ?? [],
        injuries = injuries ?? [],
        disciplines = disciplines ?? [],
        playersById = _playersFromState(state),
@@ -48,6 +59,8 @@ class LiveMatch {
   MatchState state;
   final String homeTeamId;
   final String awayTeamId;
+  final List<Player> homeStartingLineup;
+  final List<Player> awayStartingLineup;
   final BalanceConfig balance;
   final List<MatchEvent> events;
   final List<MatchInjury> injuries;
@@ -66,8 +79,10 @@ class LiveMatch {
   final double awayCohesionMult;
 
   /// Team zgranie (0–100) from Team.chemistry, frozen at start.
-  final int homeChemistry;
-  final int awayChemistry;
+  final double homeChemistry;
+  final double awayChemistry;
+  final int homeAtmosphere;
+  final int awayAtmosphere;
   final double homeDoctorCareMult;
   final double awayDoctorCareMult;
   final double homeDoctorPreventionMult;
@@ -148,9 +163,20 @@ class LiveMatch {
         yellowCards: _cardCount(awayTeamId, yellow: true),
         redCards: _cardCount(awayTeamId, yellow: false),
       ),
+      isWalkover: events.any(
+        (event) => event.description?.startsWith('Walkower') ?? false,
+      ),
       context: state.context,
       homeTactics: state.homeTactics,
       awayTactics: state.awayTactics,
+      homeLineup: homeStartingLineup,
+      awayLineup: awayStartingLineup,
+      homeLineupPositions: [
+        for (final player in homeStartingLineup) player.position,
+      ],
+      awayLineupPositions: [
+        for (final player in awayStartingLineup) player.position,
+      ],
       playerStats: _playerStats(),
       events: List.unmodifiable(events),
       injuries: List.unmodifiable(injuries),
@@ -334,6 +360,8 @@ class MatchEngine {
       ),
       homeChemistry: home.chemistry,
       awayChemistry: away.chemistry,
+      homeAtmosphere: home.atmosphere,
+      awayAtmosphere: away.atmosphere,
       homeDoctorCareMult: const InjuryService().doctorCareMult(
         home.staff.doctor,
       ),
@@ -386,6 +414,7 @@ class MatchEngine {
       state.homeLineup,
       state.homeTactics,
       chemistry: live.homeChemistry,
+      atmosphere: live.homeAtmosphere,
       cohesionMult: live.homeCohesionMult,
       isHome: true,
       momentum: state.momentum,
@@ -398,6 +427,7 @@ class MatchEngine {
       state.awayLineup,
       state.awayTactics,
       chemistry: live.awayChemistry,
+      atmosphere: live.awayAtmosphere,
       cohesionMult: live.awayCohesionMult,
       isHome: false,
       momentum: -state.momentum,
@@ -670,7 +700,8 @@ class MatchEngine {
   double _teamPower(
     List<Player> lineup,
     TacticsSetup tactics, {
-    required int chemistry,
+    required double chemistry,
+    required int atmosphere,
     required double cohesionMult,
     required bool isHome,
     required double momentum,
@@ -680,10 +711,10 @@ class MatchEngine {
     required Map<String, double> staminaRemaining,
   }) {
     if (lineup.isEmpty) return 1;
-    final chem = balance.chemistry;
-    final chemMult =
-        chem.multMin +
-        (chem.multMax - chem.multMin) * (chemistry.clamp(0, 100) / 100);
+    final chemMult = TeamManagementService.chemistryMultiplier(chemistry);
+    final atmosphereMult = TeamManagementService.atmosphereMultiplier(
+      atmosphere,
+    );
 
     var sum = 0.0;
     for (final p in lineup) {
@@ -698,6 +729,7 @@ class MatchEngine {
           p.formMult(balance) *
           roleMult *
           chemMult *
+          atmosphereMult *
           cohesionMult;
       sum += contrib;
     }

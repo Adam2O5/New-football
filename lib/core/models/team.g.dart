@@ -21,6 +21,34 @@ Map<String, dynamic> _$$TeamAiConfigImplToJson(_$TeamAiConfigImpl instance) =>
       'playerPatternMemory': instance.playerPatternMemory,
     };
 
+_$TeamWeeklyHistoryImpl _$$TeamWeeklyHistoryImplFromJson(
+  Map<String, dynamic> json,
+) => _$TeamWeeklyHistoryImpl(
+  seasonYear: (json['seasonYear'] as num).toInt(),
+  week: (json['week'] as num).toInt(),
+  atmosphereDelta: (json['atmosphereDelta'] as num?)?.toInt() ?? 0,
+  chemistryDelta: (json['chemistryDelta'] as num?)?.toDouble() ?? 0.0,
+  atmosphere: (json['atmosphere'] as num).toInt(),
+  chemistry: (json['chemistry'] as num).toDouble(),
+  wins: (json['wins'] as num?)?.toInt() ?? 0,
+  draws: (json['draws'] as num?)?.toInt() ?? 0,
+  losses: (json['losses'] as num?)?.toInt() ?? 0,
+);
+
+Map<String, dynamic> _$$TeamWeeklyHistoryImplToJson(
+  _$TeamWeeklyHistoryImpl instance,
+) => <String, dynamic>{
+  'seasonYear': instance.seasonYear,
+  'week': instance.week,
+  'atmosphereDelta': instance.atmosphereDelta,
+  'chemistryDelta': instance.chemistryDelta,
+  'atmosphere': instance.atmosphere,
+  'chemistry': instance.chemistry,
+  'wins': instance.wins,
+  'draws': instance.draws,
+  'losses': instance.losses,
+};
+
 _$TeamImpl _$$TeamImplFromJson(Map<String, dynamic> json) => _$TeamImpl(
   id: json['id'] as String,
   name: json['name'] as String,
@@ -44,7 +72,22 @@ _$TeamImpl _$$TeamImplFromJson(Map<String, dynamic> json) => _$TeamImpl(
           .toList() ??
       const [],
   atmosphere: (json['atmosphere'] as num?)?.toInt() ?? 50,
-  chemistry: (json['chemistry'] as num?)?.toInt() ?? 50,
+  chemistry: (json['chemistry'] as num?)?.toDouble() ?? 50.0,
+  weeklyHistory:
+      (json['weeklyHistory'] as List<dynamic>?)
+          ?.map((e) => TeamWeeklyHistory.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+  recentMatchResults:
+      (json['recentMatchResults'] as List<dynamic>?)
+          ?.map((e) => (e as num).toInt())
+          .toList() ??
+      const [],
+  chemistryAppearances:
+      (json['chemistryAppearances'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(k, (e as num).toInt()),
+      ) ??
+      const {},
   staff: json['staff'] == null
       ? const TeamStaff()
       : TeamStaff.fromJson(json['staff'] as Map<String, dynamic>),
@@ -74,6 +117,9 @@ Map<String, dynamic> _$$TeamImplToJson(_$TeamImpl instance) =>
       'benchPlayerIds': instance.benchPlayerIds,
       'atmosphere': instance.atmosphere,
       'chemistry': instance.chemistry,
+      'weeklyHistory': instance.weeklyHistory,
+      'recentMatchResults': instance.recentMatchResults,
+      'chemistryAppearances': instance.chemistryAppearances,
       'staff': instance.staff,
       'scouting': instance.scouting,
       'ownedPicks': instance.ownedPicks,

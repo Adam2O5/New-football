@@ -436,6 +436,27 @@ class AppLocalizationsPl extends AppLocalizations {
   String get teamOverview_chemistry => 'Chemia';
 
   @override
+  String get teamOverview_atmosphereMult => 'Mnożnik atmosfery';
+
+  @override
+  String get teamOverview_chemistryMult => 'Mnożnik chemii';
+
+  @override
+  String get teamOverview_teamPower => 'Siła drużyny';
+
+  @override
+  String get teamOverview_expectedRank => 'Oczekiwane miejsce';
+
+  @override
+  String get teamOverview_status => 'Status';
+
+  @override
+  String get teamOverview_weeklyHistory => 'Historia tygodniowa';
+
+  @override
+  String get teamOverview_noHistory => 'Brak zapisanej historii';
+
+  @override
   String get teamOverview_roster => 'Skład';
 
   @override

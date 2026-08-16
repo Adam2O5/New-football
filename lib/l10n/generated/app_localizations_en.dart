@@ -436,6 +436,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get teamOverview_chemistry => 'Chemistry';
 
   @override
+  String get teamOverview_atmosphereMult => 'Atmosphere multiplier';
+
+  @override
+  String get teamOverview_chemistryMult => 'Chemistry multiplier';
+
+  @override
+  String get teamOverview_teamPower => 'Team power';
+
+  @override
+  String get teamOverview_expectedRank => 'Expected rank';
+
+  @override
+  String get teamOverview_status => 'Status';
+
+  @override
+  String get teamOverview_weeklyHistory => 'Weekly history';
+
+  @override
+  String get teamOverview_noHistory => 'No history recorded';
+
+  @override
   String get teamOverview_roster => 'Roster';
 
   @override

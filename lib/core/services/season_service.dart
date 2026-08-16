@@ -8,6 +8,7 @@ import 'package:new_football/core/models/contract.dart';
 import 'package:new_football/core/models/draft_models.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
+import 'package:new_football/core/models/league_strength.dart';
 import 'package:new_football/core/models/match_models.dart';
 import 'package:new_football/core/models/match_state.dart';
 import 'package:new_football/core/models/player.dart';
@@ -26,6 +27,7 @@ import 'package:new_football/core/services/salary_cap_service.dart';
 import 'package:new_football/core/services/schedule_generator.dart';
 import 'package:new_football/core/services/scouting_service.dart';
 import 'package:new_football/core/services/staff_service.dart';
+import 'package:new_football/core/services/team_management_service.dart';
 
 /// Offseason / playoff pipeline (`docs/offseason.md`, play-in, draft).
 class SeasonService {
@@ -387,6 +389,45 @@ class SeasonService {
       ),
     );
     if (champion != null) {
+      final alreadyApplied = state.currentSeason.championshipAtmosphereApplied;
+      if (!alreadyApplied) {
+        final championTeam = state.teamById(champion);
+        if (championTeam != null) {
+          final before = championTeam.atmosphere;
+          final updated = const TeamManagementService().applyAtmosphereDelta(
+            championTeam,
+            30,
+          );
+          state = state
+              .updateTeam(updated)
+              .copyWith(
+                currentSeason: state.currentSeason.copyWith(
+                  championshipAtmosphereApplied: true,
+                ),
+              );
+          if (state.playerTeamId == champion) {
+            state = _messages.send(
+              state,
+              type: MessageType.teamEvent,
+              kind: 'atmosphereShift',
+              domain: MessageDomain.teamEvent,
+              args: {'delta': updated.atmosphere - before},
+              payload: {
+                'teamId': champion,
+                'atmosphereDelta': updated.atmosphere - before,
+                'reason': 'championship',
+              },
+              dedupKey: 'atmosphere:championship:${state.currentSeason.year}',
+            );
+          }
+        } else {
+          state = state.copyWith(
+            currentSeason: state.currentSeason.copyWith(
+              championshipAtmosphereApplied: true,
+            ),
+          );
+        }
+      }
       final name = state.teamById(champion)?.name ?? champion;
       state = _msg(
         state,
@@ -804,6 +845,57 @@ class SeasonService {
   }
 
   LeagueState rolloverSeason(LeagueState league) {
+    if (!league.currentSeason.playoffMissAtmosphereApplied) {
+      final table = league.strengthTable;
+      final qualified = _playoffQualifiedTeamIds(league);
+      final atmosphereDeltas = <String, int>{};
+      final teams = league.teams.map((team) {
+        final status = table?.statusOf(team.id);
+        final delta = status == TeamStatus.elite
+            ? -15
+            : status == TeamStatus.contender
+            ? -12
+            : status == TeamStatus.pretender
+            ? -8
+            : 0;
+        if (delta == 0 || qualified.contains(team.id)) return team;
+        final updated = const TeamManagementService().applyAtmosphereDelta(
+          team,
+          delta,
+        );
+        atmosphereDeltas[team.id] = updated.atmosphere - team.atmosphere;
+        return updated;
+      }).toList();
+      league = league.copyWith(
+        teams: teams,
+        currentSeason: league.currentSeason.copyWith(
+          playoffMissAtmosphereApplied: true,
+        ),
+      );
+
+      final playerId = league.playerTeamId;
+      final playerDelta = playerId == null ? null : atmosphereDeltas[playerId];
+      if (playerDelta != null) {
+        final playerTeam = league.teamById(playerId!);
+        league = _messages.send(
+          league,
+          type: MessageType.playoffMissed,
+          domain: MessageDomain.season,
+          priority: MessagePriority.urgent,
+          args: {
+            'atmosphereDelta': playerDelta,
+            'atmosphere': playerTeam?.atmosphere ?? 0,
+          },
+          payload: {
+            'teamId': playerId,
+            'atmosphereDelta': playerDelta,
+            'atmosphere': playerTeam?.atmosphere ?? 0,
+          },
+          dedupKey: 'playoffMissed:${league.currentSeason.year}:$playerId',
+        );
+      }
+    }
+
     final history = SeasonHistory(
       year: league.currentSeason.year,
       finalStandings: league.currentSeason.standings,
@@ -900,6 +992,23 @@ class SeasonService {
         nextDraftState: null,
       ),
     );
+  }
+
+  Set<String> _playoffQualifiedTeamIds(LeagueState league) {
+    final qualified = <String>{};
+    for (final bracket in league.currentSeason.playoffBrackets) {
+      for (final series in [
+        ...bracket.quarterFinals,
+        ...bracket.semiFinals,
+        ...bracket.conferenceFinal,
+        if (bracket.leagueFinal != null) bracket.leagueFinal!,
+      ]) {
+        qualified
+          ..add(series.higherSeedTeamId)
+          ..add(series.lowerSeedTeamId);
+      }
+    }
+    return qualified;
   }
 
   MatchResult _sim(

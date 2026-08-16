@@ -285,6 +285,10 @@ _$SeasonImpl _$$SeasonImplFromJson(Map<String, dynamic> json) => _$SeasonImpl(
           .toList() ??
       const [],
   championTeamId: json['championTeamId'] as String?,
+  championshipAtmosphereApplied:
+      json['championshipAtmosphereApplied'] as bool? ?? false,
+  playoffMissAtmosphereApplied:
+      json['playoffMissAtmosphereApplied'] as bool? ?? false,
   draftState: json['draftState'] == null
       ? null
       : DraftState.fromJson(json['draftState'] as Map<String, dynamic>),
@@ -313,6 +317,8 @@ Map<String, dynamic> _$$SeasonImplToJson(_$SeasonImpl instance) =>
       'playInProgress': instance.playInProgress,
       'playoffBrackets': instance.playoffBrackets,
       'championTeamId': instance.championTeamId,
+      'championshipAtmosphereApplied': instance.championshipAtmosphereApplied,
+      'playoffMissAtmosphereApplied': instance.playoffMissAtmosphereApplied,
       'draftState': instance.draftState,
       'awards': instance.awards,
       'staffGrowthDone': instance.staffGrowthDone,

@@ -24,6 +24,24 @@ class TeamAiConfig with _$TeamAiConfig {
 }
 
 @freezed
+class TeamWeeklyHistory with _$TeamWeeklyHistory {
+  const factory TeamWeeklyHistory({
+    required int seasonYear,
+    required int week,
+    @Default(0) int atmosphereDelta,
+    @Default(0.0) double chemistryDelta,
+    required int atmosphere,
+    required double chemistry,
+    @Default(0) int wins,
+    @Default(0) int draws,
+    @Default(0) int losses,
+  }) = _TeamWeeklyHistory;
+
+  factory TeamWeeklyHistory.fromJson(Map<String, dynamic> json) =>
+      _$TeamWeeklyHistoryFromJson(json);
+}
+
+@freezed
 class Team with _$Team {
   const factory Team({
     required String id,
@@ -36,7 +54,10 @@ class Team with _$Team {
     @Default([]) List<String> lineupPlayerIds,
     @Default([]) List<String> benchPlayerIds,
     @Default(50) int atmosphere,
-    @Default(50) int chemistry,
+    @Default(50.0) double chemistry,
+    @Default([]) List<TeamWeeklyHistory> weeklyHistory,
+    @Default([]) List<int> recentMatchResults,
+    @Default({}) Map<String, int> chemistryAppearances,
     @Default(TeamStaff()) TeamStaff staff,
     @Default(TeamScouting()) TeamScouting scouting,
 

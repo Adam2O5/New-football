@@ -187,6 +187,8 @@ class Season with _$Season {
     @Default([]) List<PlayInProgress> playInProgress,
     @Default([]) List<PlayoffBracket> playoffBrackets,
     String? championTeamId,
+    @Default(false) bool championshipAtmosphereApplied,
+    @Default(false) bool playoffMissAtmosphereApplied,
     DraftState? draftState,
     SeasonAwards? awards,
     @Default(false) bool staffGrowthDone,

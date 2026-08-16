@@ -3,6 +3,7 @@ import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/engine/match_engine.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
+import 'package:new_football/core/models/league_strength.dart';
 import 'package:new_football/core/models/match_models.dart';
 import 'package:new_football/core/models/match_state.dart';
 import 'package:new_football/core/ai/team_ai_service.dart';
@@ -19,6 +20,7 @@ import 'package:new_football/core/services/discipline_service.dart';
 import 'package:new_football/core/services/league_strength_service.dart';
 import 'package:new_football/core/services/message_service.dart';
 import 'package:new_football/core/services/salary_cap_service.dart';
+import 'package:new_football/core/services/team_management_service.dart';
 import 'package:new_football/core/services/schedule_generator.dart';
 import 'package:new_football/core/services/scouting_service.dart';
 
@@ -55,13 +57,15 @@ class DaySimulator {
     ContractService? contracts,
     SalaryCapService? capService,
     MessageService? messages,
+    TeamManagementService? teamManagement,
   }) : matchEngine = matchEngine ?? MatchEngine(balance: balance),
        calendar = calendar ?? CalendarService(balance: balance),
        development = development ?? DevelopmentService(balance: balance),
        scouting = scouting ?? ScoutingService(balance: balance),
        contracts = contracts ?? ContractService(balance: balance),
        capService = capService ?? SalaryCapService(balance: balance),
-       messages = messages ?? MessageService();
+       messages = messages ?? MessageService(),
+       teamManagement = teamManagement ?? const TeamManagementService();
 
   final BalanceConfig balance;
   final MatchEngine matchEngine;
@@ -71,6 +75,7 @@ class DaySimulator {
   final ContractService contracts;
   final SalaryCapService capService;
   final MessageService messages;
+  final TeamManagementService teamManagement;
 
   DaySimulationResult simulateDay(LeagueState league, {int saveSeed = 0}) {
     final week = league.currentWeek;
@@ -99,15 +104,23 @@ class DaySimulator {
     }
 
     // Periodic strength table recalculation (`team_management.md`).
-    const strengthService = LeagueStrengthService();
-    if (strengthService.shouldRecalculate(week, day, state.strengthTable)) {
+    final strengthService = LeagueStrengthService(balance: balance);
+    if (strengthService.shouldRecalculate(
+      week,
+      day,
+      state.strengthTable,
+      seasonYear: state.currentSeason.year,
+    )) {
+      final previousTable = state.strengthTable;
       final table = strengthService.calculate(
         state,
-        previousTable: state.strengthTable,
+        previousTable: previousTable,
         week: week,
         day: day,
+        seasonYear: state.currentSeason.year,
       );
       state = state.copyWith(strengthTable: table);
+      state = _notifyStrengthTableChanges(state, previousTable, table);
     }
 
     if (calendar.isTradeDeadline(week, day)) {
@@ -158,9 +171,52 @@ class DaySimulator {
       currentSeason: state.currentSeason.copyWith(phase: nextPhase),
     );
 
-    // Week boundary: Sunday → Monday. Player development ticks weekly
-    // (`docs/player_management.md`), not just once per season.
+    // Week boundary: Sunday → Monday. Team indicators are updated before
+    // development so the new week's atmosphere is the development input.
     if (day == 7) {
+      final weeklyUpdates = <String, TeamWeeklyUpdate>{};
+      final strengthTable = state.strengthTable;
+      final weeklyTeams = state.teams.map((team) {
+        final update = teamManagement.updateWeekly(
+          team: team,
+          seasonYear: state.currentSeason.year,
+          week: week,
+          expectedRank: strengthTable?.rankOf(team.id) ?? 15,
+          currentRank: TeamManagementService.actualRankOf(state, team.id),
+        );
+        weeklyUpdates[team.id] = update;
+        return update.team;
+      }).toList();
+      state = state.copyWith(teams: weeklyTeams);
+
+      final playerWeeklyUpdate = state.playerTeamId == null
+          ? null
+          : weeklyUpdates[state.playerTeamId];
+      if (playerWeeklyUpdate != null &&
+          (playerWeeklyUpdate.atmosphereDelta != 0 ||
+              playerWeeklyUpdate.chemistryDelta != 0)) {
+        state = messages.send(
+          state,
+          type: MessageType.teamEvent,
+          kind: 'atmosphereShift',
+          domain: MessageDomain.teamEvent,
+          args: {
+            'delta': playerWeeklyUpdate.atmosphereDelta,
+            'chemistryDelta': playerWeeklyUpdate.chemistryDelta,
+            'atmosphere': playerWeeklyUpdate.team.atmosphere,
+            'chemistry': playerWeeklyUpdate.team.chemistry,
+          },
+          payload: {
+            'teamId': state.playerTeamId,
+            'atmosphereDelta': playerWeeklyUpdate.atmosphereDelta,
+            'chemistryDelta': playerWeeklyUpdate.chemistryDelta,
+            'atmosphere': playerWeeklyUpdate.team.atmosphere,
+            'chemistry': playerWeeklyUpdate.team.chemistry,
+          },
+          groupKey: 'atmosphere:$week',
+        );
+      }
+
       final developmentChanges = <DevelopmentChange>[];
       final developedTeams = state.teams.map((team) {
         final tick = development.developTeamWithReport(team);
@@ -370,6 +426,35 @@ class DaySimulator {
       return application.team;
     }).toList();
 
+    final walkoverTeams = TeamManagementService.walkoverTeamIds(result);
+    final immediateAtmosphereDeltas = <String, int>{};
+    teams = teams.map((team) {
+      if (team.id != result.homeTeamId && team.id != result.awayTeamId) {
+        return team;
+      }
+      final original = league.teamById(team.id);
+      final isHome = team.id == result.homeTeamId;
+      final snapshot = isHome ? result.homeLineup : result.awayLineup;
+      final startingEleven = snapshot.isNotEmpty
+          ? snapshot
+          : original?.startingEleven ?? const <Player>[];
+      final assignedPositions = isHome
+          ? result.homeLineupPositions
+          : result.awayLineupPositions;
+      final update = teamManagement.applyMatchResult(
+        team: team,
+        result: result,
+        startingEleven: startingEleven,
+        assignedPositions: assignedPositions.isEmpty ? null : assignedPositions,
+      );
+      var next = update.team;
+      if (walkoverTeams.contains(team.id)) {
+        next = teamManagement.applyAtmosphereDelta(next, -15);
+        immediateAtmosphereDeltas[team.id] = -15;
+      }
+      return next;
+    }).toList();
+
     var state = league.copyWith(
       teams: teams,
       currentSeason: league.currentSeason.copyWith(
@@ -378,6 +463,31 @@ class DaySimulator {
       ),
       currentRound: match.round,
     );
+
+    final playerAtmosphereDelta = state.playerTeamId == null
+        ? null
+        : immediateAtmosphereDeltas[state.playerTeamId];
+    if (playerAtmosphereDelta != null) {
+      final playerTeam = state.teamById(state.playerTeamId!);
+      state = messages.send(
+        state,
+        type: MessageType.teamEvent,
+        kind: 'atmosphereShift',
+        domain: MessageDomain.teamEvent,
+        priority: MessagePriority.urgent,
+        args: {
+          'delta': playerAtmosphereDelta,
+          'atmosphere': playerTeam?.atmosphere ?? 0,
+        },
+        payload: {
+          'teamId': state.playerTeamId,
+          'atmosphereDelta': playerAtmosphereDelta,
+          'atmosphere': playerTeam?.atmosphere ?? 0,
+          'reason': 'walkover',
+        },
+        dedupKey: 'atmosphere:walkover:${match.id}',
+      );
+    }
 
     for (final injury in result.injuries) {
       final team = state.teamById(injury.teamId);
@@ -639,6 +749,42 @@ class DaySimulator {
       }
     }
     return state;
+  }
+
+  LeagueState _notifyStrengthTableChanges(
+    LeagueState league,
+    LeagueStrengthTable? previous,
+    LeagueStrengthTable next,
+  ) {
+    final teamId = league.playerTeamId;
+    if (teamId == null || previous == null) return league;
+    final before = previous.entryFor(teamId);
+    final after = next.entryFor(teamId);
+    if (before == null ||
+        after == null ||
+        before.teamStatus == after.teamStatus) {
+      return league;
+    }
+    return messages.send(
+      league,
+      type: MessageType.teamStatusChange,
+      domain: MessageDomain.season,
+      args: {
+        'oldStatus': before.teamStatus.name,
+        'newStatus': after.teamStatus.name,
+        'expectedRank': after.expectedRank,
+        'teamPower': after.teamPower,
+      },
+      payload: {
+        'teamId': teamId,
+        'oldStatus': before.teamStatus.name,
+        'newStatus': after.teamStatus.name,
+        'expectedRank': after.expectedRank,
+        'teamPower': after.teamPower,
+      },
+      dedupKey:
+          'teamStatus:${teamId}:${next.lastCalculatedWeek}:${next.lastCalculatedDay}',
+    );
   }
 
   LeagueState _notifyMatchResult(LeagueState league, MatchResult result) {

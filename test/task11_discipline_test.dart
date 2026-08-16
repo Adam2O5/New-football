@@ -302,7 +302,7 @@ void main() {
     expect(after.state.suspensionGamesRemaining, 2);
   });
 
-  test('save schema is version seven', () {
-    expect(SaveSchema.currentVersion, 8);
+  test('save schema is version nine', () {
+    expect(SaveSchema.currentVersion, 9);
   });
 }

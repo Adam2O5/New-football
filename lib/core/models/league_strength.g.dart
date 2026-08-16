@@ -40,6 +40,7 @@ _$LeagueStrengthTableImpl _$$LeagueStrengthTableImplFromJson(
       .toList(),
   lastCalculatedWeek: (json['lastCalculatedWeek'] as num).toInt(),
   lastCalculatedDay: (json['lastCalculatedDay'] as num?)?.toInt() ?? 1,
+  seasonYear: (json['seasonYear'] as num?)?.toInt() ?? 0,
 );
 
 Map<String, dynamic> _$$LeagueStrengthTableImplToJson(
@@ -48,4 +49,5 @@ Map<String, dynamic> _$$LeagueStrengthTableImplToJson(
   'entries': instance.entries,
   'lastCalculatedWeek': instance.lastCalculatedWeek,
   'lastCalculatedDay': instance.lastCalculatedDay,
+  'seasonYear': instance.seasonYear,
 };

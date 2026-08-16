@@ -8,11 +8,13 @@ import 'package:new_football/app/utils/formatters.dart';
 import 'package:new_football/app/widgets/screen_background.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
+import 'package:new_football/core/models/league_strength.dart';
 import 'package:new_football/core/models/standing.dart';
 import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/models/contract.dart';
 import 'package:new_football/core/models/staff.dart';
 import 'package:new_football/core/services/calendar_event_registry.dart';
+import 'package:new_football/core/services/team_management_service.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
 class TeamOverviewScreen extends ConsumerWidget {
@@ -41,6 +43,8 @@ class TeamOverviewScreen extends ConsumerWidget {
     }
 
     final standings = _standingsFor(league, team.id);
+    final strengthEntry = league.strengthTable?.entryFor(team.id);
+    final weeklyHistory = team.weeklyHistory.reversed.take(8).toList();
     final nextAction = ref.watch(nextGameEventProvider);
     final nextMatchOpponent = _nextMatchOpponent(league, team.id);
     final nextActionLabel = nextAction == null
@@ -117,13 +121,58 @@ class TeamOverviewScreen extends ConsumerWidget {
               icon: Icons.groups_outlined,
               children: [
                 _valueRow(l10n.teamOverview_atmosphere, '${team.atmosphere}'),
-                _valueRow(l10n.teamOverview_chemistry, '${team.chemistry}'),
+                _valueRow(
+                  l10n.teamOverview_chemistry,
+                  team.chemistry.toStringAsFixed(1),
+                ),
+                _valueRow(
+                  l10n.teamOverview_atmosphereMult,
+                  TeamManagementService.atmosphereMultiplier(
+                    team.atmosphere,
+                  ).toStringAsFixed(2),
+                ),
+                _valueRow(
+                  l10n.teamOverview_chemistryMult,
+                  TeamManagementService.chemistryMultiplier(
+                    team.chemistry,
+                  ).toStringAsFixed(2),
+                ),
+                _valueRow(
+                  l10n.teamOverview_teamPower,
+                  strengthEntry?.teamPower.toStringAsFixed(2) ?? '—',
+                ),
+                _valueRow(
+                  l10n.teamOverview_expectedRank,
+                  strengthEntry == null
+                      ? '—'
+                      : '#${strengthEntry.expectedRank}',
+                ),
+                _valueRow(
+                  l10n.teamOverview_status,
+                  strengthEntry?.teamStatus.name ?? '—',
+                ),
                 _valueRow(l10n.teamOverview_roster, '${team.roster.length}'),
                 _valueRow(
                   l10n.teamOverview_staff,
                   '${team.staff.members.length}',
                 ),
               ],
+            ),
+            const SizedBox(height: 12),
+            _sectionCard(
+              context,
+              title: l10n.teamOverview_weeklyHistory,
+              icon: Icons.history,
+              children: weeklyHistory.isEmpty
+                  ? [Text(l10n.teamOverview_noHistory)]
+                  : [
+                      for (final entry in weeklyHistory)
+                        _valueRow(
+                          'Tyg. ${entry.week}',
+                          'A ${entry.atmosphereDelta >= 0 ? '+' : ''}${entry.atmosphereDelta} · '
+                              'C ${entry.chemistryDelta >= 0 ? '+' : ''}${entry.chemistryDelta.toStringAsFixed(1)}',
+                        ),
+                    ],
             ),
             const SizedBox(height: 12),
             _sectionCard(

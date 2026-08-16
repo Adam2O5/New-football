@@ -1196,9 +1196,14 @@ mixin _$MatchResult {
   int get awayGoals => throw _privateConstructorUsedError;
   TeamMatchStats get homeStats => throw _privateConstructorUsedError;
   TeamMatchStats get awayStats => throw _privateConstructorUsedError;
+  bool get isWalkover => throw _privateConstructorUsedError;
   MatchContext get context => throw _privateConstructorUsedError;
   TacticsSetup get homeTactics => throw _privateConstructorUsedError;
   TacticsSetup get awayTactics => throw _privateConstructorUsedError;
+  List<Player> get homeLineup => throw _privateConstructorUsedError;
+  List<Player> get awayLineup => throw _privateConstructorUsedError;
+  List<Position> get homeLineupPositions => throw _privateConstructorUsedError;
+  List<Position> get awayLineupPositions => throw _privateConstructorUsedError;
   List<PlayerMatchStats> get playerStats => throw _privateConstructorUsedError;
   List<MatchEvent> get events => throw _privateConstructorUsedError;
   List<MatchInjury> get injuries => throw _privateConstructorUsedError;
@@ -1228,9 +1233,14 @@ abstract class $MatchResultCopyWith<$Res> {
     int awayGoals,
     TeamMatchStats homeStats,
     TeamMatchStats awayStats,
+    bool isWalkover,
     MatchContext context,
     TacticsSetup homeTactics,
     TacticsSetup awayTactics,
+    List<Player> homeLineup,
+    List<Player> awayLineup,
+    List<Position> homeLineupPositions,
+    List<Position> awayLineupPositions,
     List<PlayerMatchStats> playerStats,
     List<MatchEvent> events,
     List<MatchInjury> injuries,
@@ -1265,9 +1275,14 @@ class _$MatchResultCopyWithImpl<$Res, $Val extends MatchResult>
     Object? awayGoals = null,
     Object? homeStats = null,
     Object? awayStats = null,
+    Object? isWalkover = null,
     Object? context = null,
     Object? homeTactics = null,
     Object? awayTactics = null,
+    Object? homeLineup = null,
+    Object? awayLineup = null,
+    Object? homeLineupPositions = null,
+    Object? awayLineupPositions = null,
     Object? playerStats = null,
     Object? events = null,
     Object? injuries = null,
@@ -1299,6 +1314,10 @@ class _$MatchResultCopyWithImpl<$Res, $Val extends MatchResult>
                 ? _value.awayStats
                 : awayStats // ignore: cast_nullable_to_non_nullable
                       as TeamMatchStats,
+            isWalkover: null == isWalkover
+                ? _value.isWalkover
+                : isWalkover // ignore: cast_nullable_to_non_nullable
+                      as bool,
             context: null == context
                 ? _value.context
                 : context // ignore: cast_nullable_to_non_nullable
@@ -1311,6 +1330,22 @@ class _$MatchResultCopyWithImpl<$Res, $Val extends MatchResult>
                 ? _value.awayTactics
                 : awayTactics // ignore: cast_nullable_to_non_nullable
                       as TacticsSetup,
+            homeLineup: null == homeLineup
+                ? _value.homeLineup
+                : homeLineup // ignore: cast_nullable_to_non_nullable
+                      as List<Player>,
+            awayLineup: null == awayLineup
+                ? _value.awayLineup
+                : awayLineup // ignore: cast_nullable_to_non_nullable
+                      as List<Player>,
+            homeLineupPositions: null == homeLineupPositions
+                ? _value.homeLineupPositions
+                : homeLineupPositions // ignore: cast_nullable_to_non_nullable
+                      as List<Position>,
+            awayLineupPositions: null == awayLineupPositions
+                ? _value.awayLineupPositions
+                : awayLineupPositions // ignore: cast_nullable_to_non_nullable
+                      as List<Position>,
             playerStats: null == playerStats
                 ? _value.playerStats
                 : playerStats // ignore: cast_nullable_to_non_nullable
@@ -1399,9 +1434,14 @@ abstract class _$$MatchResultImplCopyWith<$Res>
     int awayGoals,
     TeamMatchStats homeStats,
     TeamMatchStats awayStats,
+    bool isWalkover,
     MatchContext context,
     TacticsSetup homeTactics,
     TacticsSetup awayTactics,
+    List<Player> homeLineup,
+    List<Player> awayLineup,
+    List<Position> homeLineupPositions,
+    List<Position> awayLineupPositions,
     List<PlayerMatchStats> playerStats,
     List<MatchEvent> events,
     List<MatchInjury> injuries,
@@ -1440,9 +1480,14 @@ class __$$MatchResultImplCopyWithImpl<$Res>
     Object? awayGoals = null,
     Object? homeStats = null,
     Object? awayStats = null,
+    Object? isWalkover = null,
     Object? context = null,
     Object? homeTactics = null,
     Object? awayTactics = null,
+    Object? homeLineup = null,
+    Object? awayLineup = null,
+    Object? homeLineupPositions = null,
+    Object? awayLineupPositions = null,
     Object? playerStats = null,
     Object? events = null,
     Object? injuries = null,
@@ -1474,6 +1519,10 @@ class __$$MatchResultImplCopyWithImpl<$Res>
             ? _value.awayStats
             : awayStats // ignore: cast_nullable_to_non_nullable
                   as TeamMatchStats,
+        isWalkover: null == isWalkover
+            ? _value.isWalkover
+            : isWalkover // ignore: cast_nullable_to_non_nullable
+                  as bool,
         context: null == context
             ? _value.context
             : context // ignore: cast_nullable_to_non_nullable
@@ -1486,6 +1535,22 @@ class __$$MatchResultImplCopyWithImpl<$Res>
             ? _value.awayTactics
             : awayTactics // ignore: cast_nullable_to_non_nullable
                   as TacticsSetup,
+        homeLineup: null == homeLineup
+            ? _value._homeLineup
+            : homeLineup // ignore: cast_nullable_to_non_nullable
+                  as List<Player>,
+        awayLineup: null == awayLineup
+            ? _value._awayLineup
+            : awayLineup // ignore: cast_nullable_to_non_nullable
+                  as List<Player>,
+        homeLineupPositions: null == homeLineupPositions
+            ? _value._homeLineupPositions
+            : homeLineupPositions // ignore: cast_nullable_to_non_nullable
+                  as List<Position>,
+        awayLineupPositions: null == awayLineupPositions
+            ? _value._awayLineupPositions
+            : awayLineupPositions // ignore: cast_nullable_to_non_nullable
+                  as List<Position>,
         playerStats: null == playerStats
             ? _value._playerStats
             : playerStats // ignore: cast_nullable_to_non_nullable
@@ -1517,14 +1582,23 @@ class _$MatchResultImpl implements _MatchResult {
     required this.awayGoals,
     required this.homeStats,
     required this.awayStats,
+    this.isWalkover = false,
     this.context = const MatchContext(),
     this.homeTactics = const TacticsSetup(),
     this.awayTactics = const TacticsSetup(),
+    final List<Player> homeLineup = const [],
+    final List<Player> awayLineup = const [],
+    final List<Position> homeLineupPositions = const [],
+    final List<Position> awayLineupPositions = const [],
     final List<PlayerMatchStats> playerStats = const [],
     final List<MatchEvent> events = const [],
     final List<MatchInjury> injuries = const [],
     final List<MatchDiscipline> disciplines = const [],
-  }) : _playerStats = playerStats,
+  }) : _homeLineup = homeLineup,
+       _awayLineup = awayLineup,
+       _homeLineupPositions = homeLineupPositions,
+       _awayLineupPositions = awayLineupPositions,
+       _playerStats = playerStats,
        _events = events,
        _injuries = injuries,
        _disciplines = disciplines;
@@ -1546,6 +1620,9 @@ class _$MatchResultImpl implements _MatchResult {
   final TeamMatchStats awayStats;
   @override
   @JsonKey()
+  final bool isWalkover;
+  @override
+  @JsonKey()
   final MatchContext context;
   @override
   @JsonKey()
@@ -1553,6 +1630,44 @@ class _$MatchResultImpl implements _MatchResult {
   @override
   @JsonKey()
   final TacticsSetup awayTactics;
+  final List<Player> _homeLineup;
+  @override
+  @JsonKey()
+  List<Player> get homeLineup {
+    if (_homeLineup is EqualUnmodifiableListView) return _homeLineup;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_homeLineup);
+  }
+
+  final List<Player> _awayLineup;
+  @override
+  @JsonKey()
+  List<Player> get awayLineup {
+    if (_awayLineup is EqualUnmodifiableListView) return _awayLineup;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_awayLineup);
+  }
+
+  final List<Position> _homeLineupPositions;
+  @override
+  @JsonKey()
+  List<Position> get homeLineupPositions {
+    if (_homeLineupPositions is EqualUnmodifiableListView)
+      return _homeLineupPositions;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_homeLineupPositions);
+  }
+
+  final List<Position> _awayLineupPositions;
+  @override
+  @JsonKey()
+  List<Position> get awayLineupPositions {
+    if (_awayLineupPositions is EqualUnmodifiableListView)
+      return _awayLineupPositions;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_awayLineupPositions);
+  }
+
   final List<PlayerMatchStats> _playerStats;
   @override
   @JsonKey()
@@ -1591,7 +1706,7 @@ class _$MatchResultImpl implements _MatchResult {
 
   @override
   String toString() {
-    return 'MatchResult(homeTeamId: $homeTeamId, awayTeamId: $awayTeamId, homeGoals: $homeGoals, awayGoals: $awayGoals, homeStats: $homeStats, awayStats: $awayStats, context: $context, homeTactics: $homeTactics, awayTactics: $awayTactics, playerStats: $playerStats, events: $events, injuries: $injuries, disciplines: $disciplines)';
+    return 'MatchResult(homeTeamId: $homeTeamId, awayTeamId: $awayTeamId, homeGoals: $homeGoals, awayGoals: $awayGoals, homeStats: $homeStats, awayStats: $awayStats, isWalkover: $isWalkover, context: $context, homeTactics: $homeTactics, awayTactics: $awayTactics, homeLineup: $homeLineup, awayLineup: $awayLineup, homeLineupPositions: $homeLineupPositions, awayLineupPositions: $awayLineupPositions, playerStats: $playerStats, events: $events, injuries: $injuries, disciplines: $disciplines)';
   }
 
   @override
@@ -1611,11 +1726,29 @@ class _$MatchResultImpl implements _MatchResult {
                 other.homeStats == homeStats) &&
             (identical(other.awayStats, awayStats) ||
                 other.awayStats == awayStats) &&
+            (identical(other.isWalkover, isWalkover) ||
+                other.isWalkover == isWalkover) &&
             (identical(other.context, context) || other.context == context) &&
             (identical(other.homeTactics, homeTactics) ||
                 other.homeTactics == homeTactics) &&
             (identical(other.awayTactics, awayTactics) ||
                 other.awayTactics == awayTactics) &&
+            const DeepCollectionEquality().equals(
+              other._homeLineup,
+              _homeLineup,
+            ) &&
+            const DeepCollectionEquality().equals(
+              other._awayLineup,
+              _awayLineup,
+            ) &&
+            const DeepCollectionEquality().equals(
+              other._homeLineupPositions,
+              _homeLineupPositions,
+            ) &&
+            const DeepCollectionEquality().equals(
+              other._awayLineupPositions,
+              _awayLineupPositions,
+            ) &&
             const DeepCollectionEquality().equals(
               other._playerStats,
               _playerStats,
@@ -1638,9 +1771,14 @@ class _$MatchResultImpl implements _MatchResult {
     awayGoals,
     homeStats,
     awayStats,
+    isWalkover,
     context,
     homeTactics,
     awayTactics,
+    const DeepCollectionEquality().hash(_homeLineup),
+    const DeepCollectionEquality().hash(_awayLineup),
+    const DeepCollectionEquality().hash(_homeLineupPositions),
+    const DeepCollectionEquality().hash(_awayLineupPositions),
     const DeepCollectionEquality().hash(_playerStats),
     const DeepCollectionEquality().hash(_events),
     const DeepCollectionEquality().hash(_injuries),
@@ -1669,9 +1807,14 @@ abstract class _MatchResult implements MatchResult {
     required final int awayGoals,
     required final TeamMatchStats homeStats,
     required final TeamMatchStats awayStats,
+    final bool isWalkover,
     final MatchContext context,
     final TacticsSetup homeTactics,
     final TacticsSetup awayTactics,
+    final List<Player> homeLineup,
+    final List<Player> awayLineup,
+    final List<Position> homeLineupPositions,
+    final List<Position> awayLineupPositions,
     final List<PlayerMatchStats> playerStats,
     final List<MatchEvent> events,
     final List<MatchInjury> injuries,
@@ -1694,11 +1837,21 @@ abstract class _MatchResult implements MatchResult {
   @override
   TeamMatchStats get awayStats;
   @override
+  bool get isWalkover;
+  @override
   MatchContext get context;
   @override
   TacticsSetup get homeTactics;
   @override
   TacticsSetup get awayTactics;
+  @override
+  List<Player> get homeLineup;
+  @override
+  List<Player> get awayLineup;
+  @override
+  List<Position> get homeLineupPositions;
+  @override
+  List<Position> get awayLineupPositions;
   @override
   List<PlayerMatchStats> get playerStats;
   @override

@@ -65,7 +65,7 @@ void main() {
     );
 
     expect(restored.leagueState.currentHour, 7);
-    expect(SaveSchema.currentVersion, 8);
+    expect(SaveSchema.currentVersion, 9);
   });
 
   test('hourly mode is limited to extensions and FA phase I', () async {

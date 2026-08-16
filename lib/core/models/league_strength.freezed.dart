@@ -278,6 +278,10 @@ mixin _$LeagueStrengthTable {
   /// Day when this table was last calculated.
   int get lastCalculatedDay => throw _privateConstructorUsedError;
 
+  /// Season that owns this snapshot. Zero keeps legacy in-memory fixtures
+  /// compatible and is treated as unknown by the recalculation guard.
+  int get seasonYear => throw _privateConstructorUsedError;
+
   /// Serializes this LeagueStrengthTable to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
 
@@ -299,6 +303,7 @@ abstract class $LeagueStrengthTableCopyWith<$Res> {
     List<TeamStrengthEntry> entries,
     int lastCalculatedWeek,
     int lastCalculatedDay,
+    int seasonYear,
   });
 }
 
@@ -320,6 +325,7 @@ class _$LeagueStrengthTableCopyWithImpl<$Res, $Val extends LeagueStrengthTable>
     Object? entries = null,
     Object? lastCalculatedWeek = null,
     Object? lastCalculatedDay = null,
+    Object? seasonYear = null,
   }) {
     return _then(
       _value.copyWith(
@@ -334,6 +340,10 @@ class _$LeagueStrengthTableCopyWithImpl<$Res, $Val extends LeagueStrengthTable>
             lastCalculatedDay: null == lastCalculatedDay
                 ? _value.lastCalculatedDay
                 : lastCalculatedDay // ignore: cast_nullable_to_non_nullable
+                      as int,
+            seasonYear: null == seasonYear
+                ? _value.seasonYear
+                : seasonYear // ignore: cast_nullable_to_non_nullable
                       as int,
           )
           as $Val,
@@ -354,6 +364,7 @@ abstract class _$$LeagueStrengthTableImplCopyWith<$Res>
     List<TeamStrengthEntry> entries,
     int lastCalculatedWeek,
     int lastCalculatedDay,
+    int seasonYear,
   });
 }
 
@@ -374,6 +385,7 @@ class __$$LeagueStrengthTableImplCopyWithImpl<$Res>
     Object? entries = null,
     Object? lastCalculatedWeek = null,
     Object? lastCalculatedDay = null,
+    Object? seasonYear = null,
   }) {
     return _then(
       _$LeagueStrengthTableImpl(
@@ -389,6 +401,10 @@ class __$$LeagueStrengthTableImplCopyWithImpl<$Res>
             ? _value.lastCalculatedDay
             : lastCalculatedDay // ignore: cast_nullable_to_non_nullable
                   as int,
+        seasonYear: null == seasonYear
+            ? _value.seasonYear
+            : seasonYear // ignore: cast_nullable_to_non_nullable
+                  as int,
       ),
     );
   }
@@ -401,6 +417,7 @@ class _$LeagueStrengthTableImpl implements _LeagueStrengthTable {
     required final List<TeamStrengthEntry> entries,
     required this.lastCalculatedWeek,
     this.lastCalculatedDay = 1,
+    this.seasonYear = 0,
   }) : _entries = entries;
 
   factory _$LeagueStrengthTableImpl.fromJson(Map<String, dynamic> json) =>
@@ -426,9 +443,15 @@ class _$LeagueStrengthTableImpl implements _LeagueStrengthTable {
   @JsonKey()
   final int lastCalculatedDay;
 
+  /// Season that owns this snapshot. Zero keeps legacy in-memory fixtures
+  /// compatible and is treated as unknown by the recalculation guard.
+  @override
+  @JsonKey()
+  final int seasonYear;
+
   @override
   String toString() {
-    return 'LeagueStrengthTable(entries: $entries, lastCalculatedWeek: $lastCalculatedWeek, lastCalculatedDay: $lastCalculatedDay)';
+    return 'LeagueStrengthTable(entries: $entries, lastCalculatedWeek: $lastCalculatedWeek, lastCalculatedDay: $lastCalculatedDay, seasonYear: $seasonYear)';
   }
 
   @override
@@ -440,7 +463,9 @@ class _$LeagueStrengthTableImpl implements _LeagueStrengthTable {
             (identical(other.lastCalculatedWeek, lastCalculatedWeek) ||
                 other.lastCalculatedWeek == lastCalculatedWeek) &&
             (identical(other.lastCalculatedDay, lastCalculatedDay) ||
-                other.lastCalculatedDay == lastCalculatedDay));
+                other.lastCalculatedDay == lastCalculatedDay) &&
+            (identical(other.seasonYear, seasonYear) ||
+                other.seasonYear == seasonYear));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -450,6 +475,7 @@ class _$LeagueStrengthTableImpl implements _LeagueStrengthTable {
     const DeepCollectionEquality().hash(_entries),
     lastCalculatedWeek,
     lastCalculatedDay,
+    seasonYear,
   );
 
   /// Create a copy of LeagueStrengthTable
@@ -474,6 +500,7 @@ abstract class _LeagueStrengthTable implements LeagueStrengthTable {
     required final List<TeamStrengthEntry> entries,
     required final int lastCalculatedWeek,
     final int lastCalculatedDay,
+    final int seasonYear,
   }) = _$LeagueStrengthTableImpl;
 
   factory _LeagueStrengthTable.fromJson(Map<String, dynamic> json) =
@@ -490,6 +517,11 @@ abstract class _LeagueStrengthTable implements LeagueStrengthTable {
   /// Day when this table was last calculated.
   @override
   int get lastCalculatedDay;
+
+  /// Season that owns this snapshot. Zero keeps legacy in-memory fixtures
+  /// compatible and is treated as unknown by the recalculation guard.
+  @override
+  int get seasonYear;
 
   /// Create a copy of LeagueStrengthTable
   /// with the given fields replaced by the non-null parameter values.

@@ -156,12 +156,12 @@ Tryb **1a**: każda pozycja dostaje osobne pytanie w momencie, gdy zablokuje zad
 | # | Rozbieżność | Blokuje | Rekomendacja | Status |
 | - | ----------- | ------- | ------------ | ------ |
 | 1 | Tyg. 44: tabela „Exact schedule" mówi Awards pon / StaffGrowth wt; checklist „Kluczowe eventy" mówi StaffGrowth pon / Awards wt | Task 5 | **Rozstrzygnięto: Awards pon, StaffGrowth/retire wt, Retirements śr, Lottery pt.** Tabela „Exact schedule" jest kanoniczna; okno wymian otwiera się w pon tyg. 44 niezależnie od Awards. | ✅ |
-| 2 | Przeliczanie tabeli siły ligi: `team_management.md` „co miesiąc 1. dnia miesiąca + pon tyg. 23 + start kariery"; `AI_behaviour.md` §2.1 „wtorek tyg. 44 i poniedziałek tyg. 23" | Task 14 | Kanonem `team_management.md`. Gra liczy tygodnie, nie miesiące → **co 4 tygodnie (tyg. 1, 5, 9, 13, 17, 21) + pon tyg. 23 + wt tyg. 44 + start kariery**. Wtorek tyg. 44 dochodzi, bo AI potrzebuje świeżej wyceny przed loterią. | ⏳ |
+| 2 | Przeliczanie tabeli siły ligi: `team_management.md` „co miesiąc 1. dnia miesiąca + pon tyg. 23 + start kariery"; `AI_behaviour.md` §2.1 „wtorek tyg. 44 i poniedziałek tyg. 23" | Task 14 | Kanonem `team_management.md`. Gra liczy tygodnie, nie miesiące → **co 4 tygodnie (tyg. 1, 5, 9, 13, 17, 21) + pon tyg. 23 + wt tyg. 44 + start kariery**. Wtorek tyg. 44 dochodzi, bo AI potrzebuje świeżej wyceny przed loterią. | ✅ |
 | 3 | Progi `playerOfferScore`: pasmo 40–59 „Counter" nachodzi na 55–69 „Waiting/Counter/Accept" | Task 28 | **40–54 Counter, 55–69 pasmo mieszane** z losowaniem z docs (50/50 w punkcie 62, ±6 pkt rozkładu na punkt odchylenia). | ⏳ |
 | 4 | Rookie scale: `contracts.md` §8 `baseScale / (1 + pickSlot × 0,06)`; kod `rookiePickDecay = 0,08` | Task 27 | **0,06** za docs; kod zsynchronizować. | ⏳ |
 | 5 | `publicCriticism` → „Kara dyscyplinarna: −2 atmosfera, −2 atmosfera" (duplikat) | Task 26 | **−2 atmosfera, −2 zgranie** — przez analogię do pozostałych opcji eventu. | ⏳ |
 | 6 | `messages.md` §13 wymienia `ovrDigest`, §9 definiuje `groupKey = ovr:own:{week}` bez odpowiadającego `type` | Task 7 | Dodać wzorzec **`ovrDigest`** do katalogu (domain `playerEvent`, `silenced`). | ✅ |
-| 7 | Literówki formatowania: „zaokrąglane do 2 miejsc po przecinku.0" oraz zdublowana kolumna w tabeli skutków atmosfery (`team_management.md`) | Task 14 | Poprawka kosmetyczna w docs. | ⏳ |
+| 7 | Literówki formatowania: „zaokrąglane do 2 miejsc po przecinku.0" oraz zdublowana kolumna w tabeli skutków atmosfery (`team_management.md`) | Task 14 | Poprawka kosmetyczna w docs. | ✅ |
 | 8 | `game_rules.md`: cap „uzgadniany co 5–7 lat przy nowej umowie TV" — mechanizm nieopisany w szczegółach | Task 27 | Doczytać `salary_cap.md`; jeśli brak reguły, zaproponować: zmiana +4…+12% w losowym roku z przedziału 5–7 lat, termin znany przy podpisaniu. | ⏳ |
 
 ---
@@ -536,43 +536,43 @@ Legenda: `⬜` do zrobienia · `🔄` w trakcie · `✅` gotowe
 
 ---
 
-### ⬜ Task 14: Zgranie, atmosfera i tabela siły ligi
+### ✅ Task 14: Zgranie, atmosfera i tabela siły ligi
 
 **Cel:** `team_management.md` — dwa żyjące wskaźniki z mnożnikami meczowymi.
 
-- [ ] **Rozstrzygnąć sprzeczność #2** (moment przeliczania tabeli siły)
-- [ ] **Rozstrzygnąć sprzeczność #7** (literówki w docs)
-- [ ] Zgranie: XI w 11/11 optymalnych pozycjach → +0,3 / mecz
-- [ ] Zgranie: zawodnik poza optymalną pozycją → −0,4 / mecz za zawodnika
-- [ ] Zgranie: nowy transfer w XI → −1 / mecz, zanik liniowy do 0 po 5. meczu
-- [ ] Zgranie: `seasonsWithTeam ≥ 3` u ≥10 zawodników → +0,3 / mecz
-- [ ] Zgranie: klaster ≥4 tej samej narodowości w XI → +0,2 / mecz, max +1,0
-- [ ] Zgranie: dryf z poziomu atmosfery (−2 / −1 / 0 / +1 / +2 na tydzień)
-- [ ] `chemistryMult` z progów: 0,95 / 0,98 / 1,00 / 1,02 / 1,05
-- [ ] Clamp `chemistry ∈ [0, 100]`
-- [ ] Atmosfera: aktualizacja raz na tydzień (niedziela → poniedziałek)
-- [ ] Atmosfera: seria 3+ zwycięstw +3, seria 3+ porażek −3
-- [ ] Atmosfera: wynik tygodnia vs `expectedRank` — progi ±1 / ±2
-- [ ] Atmosfera: walkower −15 jednorazowo
-- [ ] Atmosfera: mistrzostwo +30 jednorazowo
-- [ ] Atmosfera: brak awansu do playoff −8 / −12 / −15 wg `teamStatus`
-- [ ] `atmosphereMult` z progów: 0,95 / 0,97 / 1,00 / 1,02 / 1,04
-- [ ] Wpływ atmosfery na szansę eventów: +25% / +10% negatywnych, +10% / +20% pozytywnych
-- [ ] Clamp `atmosphere ∈ [0, 100]`
-- [ ] Forma zespołu z ostatnich 8 meczów
-- [ ] `expectedWins = round(58 × (1 − (expectedRank − 1) / 29 × 0,45) × 0,5)`
-- [ ] Poprawić moment przeliczania tabeli siły wg rozstrzygnięcia #2
-- [ ] Tie-break tabeli siły: pełna precyzja `teamPower` → punkty poprzedniego sezonu → niższy payroll → `teamId`
-- [ ] Roster <15: brakujące miejsca liczone jako 50 OVR
-- [ ] Niepodpisani draftowani nie wchodzą do `teamPower`
-- [ ] Wiadomości `atmosphereShift`, `teamStatusChange`
-- [ ] Podnieść `currentSchemaVersion`
+- [x] **Rozstrzygnięto sprzeczność #2** (moment przeliczania tabeli siły): co 4 tygodnie (tyg. 1, 5, 9, 13, 17, 21), poniedziałek tyg. 23, wtorek tyg. 44 oraz start kariery
+- [x] **Rozstrzygnięto sprzeczność #7** (literówki w docs)
+- [x] Zgranie: XI w 11/11 optymalnych pozycjach → +0,3 / mecz
+- [x] Zgranie: zawodnik poza optymalną pozycją → −0,4 / mecz za zawodnika
+- [x] Zgranie: nowy transfer w XI → −1 / mecz, zanik liniowy do 0 po 5. meczu
+- [x] Zgranie: `seasonsWithTeam ≥ 3` u ≥10 zawodników → +0,3 / mecz
+- [x] Zgranie: klaster ≥4 tej samej narodowości w XI → +0,2 / mecz, max +1,0
+- [x] Zgranie: dryf z poziomu atmosfery (−2 / −1 / 0 / +1 / +2 na tydzień)
+- [x] `chemistryMult` z progów: 0,95 / 0,98 / 1,00 / 1,02 / 1,05
+- [x] Clamp `chemistry ∈ [0, 100]`
+- [x] Atmosfera: aktualizacja raz na tydzień (niedziela → poniedziałek)
+- [x] Atmosfera: seria 3+ zwycięstw +3, seria 3+ porażek −3
+- [x] Atmosfera: wynik tygodnia vs `expectedRank` — progi ±1 / ±2
+- [x] Atmosfera: walkower −15 jednorazowo
+- [x] Atmosfera: mistrzostwo +30 jednorazowo
+- [x] Atmosfera: brak awansu do playoff −8 / −12 / −15 wg `teamStatus`
+- [x] `atmosphereMult` z progów: 0,95 / 0,97 / 1,00 / 1,02 / 1,04
+- [x] Wpływ atmosfery na szansę eventów: +25% / +10% negatywnych, +10% / +20% pozytywnych
+- [x] Clamp `atmosphere ∈ [0, 100]`
+- [x] Forma zespołu z ostatnich 8 meczów
+- [x] `expectedWins = round(58 × (1 − (expectedRank − 1) / 29 × 0,45) × 0,5)`
+- [x] Poprawić moment przeliczania tabeli siły wg rozstrzygnięcia #2
+- [x] Tie-break tabeli siły: pełna precyzja `teamPower` → punkty poprzedniego sezonu → niższy payroll → `teamId`
+- [x] Roster <15: brakujące miejsca liczone jako 50 OVR
+- [x] Niepodpisani draftowani nie wchodzą do `teamPower`
+- [x] Wiadomości `atmosphereShift`, `teamStatusChange`
+- [x] Podnieść `currentSchemaVersion`
 
 **Testy**
-- [ ] Histereza: max 1 tier na przeliczenie
-- [ ] Rozkład tierów zawsze 3/6/9/7/5
-- [ ] Tie-break rozstrzyga deterministycznie
-- [ ] Zgranie rośnie wolniej niż atmosfera przy tych samych bodźcach
+- [x] Histereza: max 1 tier na przeliczenie
+- [x] Rozkład tierów zawsze 3/6/9/7/5
+- [x] Tie-break rozstrzyga deterministycznie
+- [x] Zgranie rośnie wolniej niż atmosfera przy tych samych bodźcach
 
 **Demo:** ekran drużyny pokazuje zgranie i atmosferę z aktualnymi mnożnikami oraz historią zmian tygodniowych.
 

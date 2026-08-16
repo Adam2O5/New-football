@@ -2296,6 +2296,8 @@ mixin _$Season {
   List<PlayoffBracket> get playoffBrackets =>
       throw _privateConstructorUsedError;
   String? get championTeamId => throw _privateConstructorUsedError;
+  bool get championshipAtmosphereApplied => throw _privateConstructorUsedError;
+  bool get playoffMissAtmosphereApplied => throw _privateConstructorUsedError;
   DraftState? get draftState => throw _privateConstructorUsedError;
   SeasonAwards? get awards => throw _privateConstructorUsedError;
   bool get staffGrowthDone => throw _privateConstructorUsedError;
@@ -2330,6 +2332,8 @@ abstract class $SeasonCopyWith<$Res> {
     List<PlayInProgress> playInProgress,
     List<PlayoffBracket> playoffBrackets,
     String? championTeamId,
+    bool championshipAtmosphereApplied,
+    bool playoffMissAtmosphereApplied,
     DraftState? draftState,
     SeasonAwards? awards,
     bool staffGrowthDone,
@@ -2370,6 +2374,8 @@ class _$SeasonCopyWithImpl<$Res, $Val extends Season>
     Object? playInProgress = null,
     Object? playoffBrackets = null,
     Object? championTeamId = freezed,
+    Object? championshipAtmosphereApplied = null,
+    Object? playoffMissAtmosphereApplied = null,
     Object? draftState = freezed,
     Object? awards = freezed,
     Object? staffGrowthDone = null,
@@ -2415,6 +2421,14 @@ class _$SeasonCopyWithImpl<$Res, $Val extends Season>
                 ? _value.championTeamId
                 : championTeamId // ignore: cast_nullable_to_non_nullable
                       as String?,
+            championshipAtmosphereApplied: null == championshipAtmosphereApplied
+                ? _value.championshipAtmosphereApplied
+                : championshipAtmosphereApplied // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            playoffMissAtmosphereApplied: null == playoffMissAtmosphereApplied
+                ? _value.playoffMissAtmosphereApplied
+                : playoffMissAtmosphereApplied // ignore: cast_nullable_to_non_nullable
+                      as bool,
             draftState: freezed == draftState
                 ? _value.draftState
                 : draftState // ignore: cast_nullable_to_non_nullable
@@ -2520,6 +2534,8 @@ abstract class _$$SeasonImplCopyWith<$Res> implements $SeasonCopyWith<$Res> {
     List<PlayInProgress> playInProgress,
     List<PlayoffBracket> playoffBrackets,
     String? championTeamId,
+    bool championshipAtmosphereApplied,
+    bool playoffMissAtmosphereApplied,
     DraftState? draftState,
     SeasonAwards? awards,
     bool staffGrowthDone,
@@ -2562,6 +2578,8 @@ class __$$SeasonImplCopyWithImpl<$Res>
     Object? playInProgress = null,
     Object? playoffBrackets = null,
     Object? championTeamId = freezed,
+    Object? championshipAtmosphereApplied = null,
+    Object? playoffMissAtmosphereApplied = null,
     Object? draftState = freezed,
     Object? awards = freezed,
     Object? staffGrowthDone = null,
@@ -2607,6 +2625,14 @@ class __$$SeasonImplCopyWithImpl<$Res>
             ? _value.championTeamId
             : championTeamId // ignore: cast_nullable_to_non_nullable
                   as String?,
+        championshipAtmosphereApplied: null == championshipAtmosphereApplied
+            ? _value.championshipAtmosphereApplied
+            : championshipAtmosphereApplied // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        playoffMissAtmosphereApplied: null == playoffMissAtmosphereApplied
+            ? _value.playoffMissAtmosphereApplied
+            : playoffMissAtmosphereApplied // ignore: cast_nullable_to_non_nullable
+                  as bool,
         draftState: freezed == draftState
             ? _value.draftState
             : draftState // ignore: cast_nullable_to_non_nullable
@@ -2664,6 +2690,8 @@ class _$SeasonImpl implements _Season {
     final List<PlayInProgress> playInProgress = const [],
     final List<PlayoffBracket> playoffBrackets = const [],
     this.championTeamId,
+    this.championshipAtmosphereApplied = false,
+    this.playoffMissAtmosphereApplied = false,
     this.draftState,
     this.awards,
     this.staffGrowthDone = false,
@@ -2736,6 +2764,12 @@ class _$SeasonImpl implements _Season {
   @override
   final String? championTeamId;
   @override
+  @JsonKey()
+  final bool championshipAtmosphereApplied;
+  @override
+  @JsonKey()
+  final bool playoffMissAtmosphereApplied;
+  @override
   final DraftState? draftState;
   @override
   final SeasonAwards? awards;
@@ -2765,7 +2799,7 @@ class _$SeasonImpl implements _Season {
 
   @override
   String toString() {
-    return 'Season(year: $year, phase: $phase, schedule: $schedule, standings: $standings, playInResults: $playInResults, playInProgress: $playInProgress, playoffBrackets: $playoffBrackets, championTeamId: $championTeamId, draftState: $draftState, awards: $awards, staffGrowthDone: $staffGrowthDone, playerRetirementsDone: $playerRetirementsDone, combineDone: $combineDone, finalMockDone: $finalMockDone, faOpenDone: $faOpenDone, scoutReportDone: $scoutReportDone, tradeDeadlineAcked: $tradeDeadlineAcked, nextDraftState: $nextDraftState)';
+    return 'Season(year: $year, phase: $phase, schedule: $schedule, standings: $standings, playInResults: $playInResults, playInProgress: $playInProgress, playoffBrackets: $playoffBrackets, championTeamId: $championTeamId, championshipAtmosphereApplied: $championshipAtmosphereApplied, playoffMissAtmosphereApplied: $playoffMissAtmosphereApplied, draftState: $draftState, awards: $awards, staffGrowthDone: $staffGrowthDone, playerRetirementsDone: $playerRetirementsDone, combineDone: $combineDone, finalMockDone: $finalMockDone, faOpenDone: $faOpenDone, scoutReportDone: $scoutReportDone, tradeDeadlineAcked: $tradeDeadlineAcked, nextDraftState: $nextDraftState)';
   }
 
   @override
@@ -2794,6 +2828,18 @@ class _$SeasonImpl implements _Season {
             ) &&
             (identical(other.championTeamId, championTeamId) ||
                 other.championTeamId == championTeamId) &&
+            (identical(
+                  other.championshipAtmosphereApplied,
+                  championshipAtmosphereApplied,
+                ) ||
+                other.championshipAtmosphereApplied ==
+                    championshipAtmosphereApplied) &&
+            (identical(
+                  other.playoffMissAtmosphereApplied,
+                  playoffMissAtmosphereApplied,
+                ) ||
+                other.playoffMissAtmosphereApplied ==
+                    playoffMissAtmosphereApplied) &&
             (identical(other.draftState, draftState) ||
                 other.draftState == draftState) &&
             (identical(other.awards, awards) || other.awards == awards) &&
@@ -2817,7 +2863,7 @@ class _$SeasonImpl implements _Season {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     runtimeType,
     year,
     phase,
@@ -2827,6 +2873,8 @@ class _$SeasonImpl implements _Season {
     const DeepCollectionEquality().hash(_playInProgress),
     const DeepCollectionEquality().hash(_playoffBrackets),
     championTeamId,
+    championshipAtmosphereApplied,
+    playoffMissAtmosphereApplied,
     draftState,
     awards,
     staffGrowthDone,
@@ -2837,7 +2885,7 @@ class _$SeasonImpl implements _Season {
     scoutReportDone,
     tradeDeadlineAcked,
     nextDraftState,
-  );
+  ]);
 
   /// Create a copy of Season
   /// with the given fields replaced by the non-null parameter values.
@@ -2863,6 +2911,8 @@ abstract class _Season implements Season {
     final List<PlayInProgress> playInProgress,
     final List<PlayoffBracket> playoffBrackets,
     final String? championTeamId,
+    final bool championshipAtmosphereApplied,
+    final bool playoffMissAtmosphereApplied,
     final DraftState? draftState,
     final SeasonAwards? awards,
     final bool staffGrowthDone,
@@ -2893,6 +2943,10 @@ abstract class _Season implements Season {
   List<PlayoffBracket> get playoffBrackets;
   @override
   String? get championTeamId;
+  @override
+  bool get championshipAtmosphereApplied;
+  @override
+  bool get playoffMissAtmosphereApplied;
   @override
   DraftState? get draftState;
   @override

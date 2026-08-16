@@ -920,6 +920,48 @@ abstract class AppLocalizations {
   /// **'Chemia'**
   String get teamOverview_chemistry;
 
+  /// No description provided for @teamOverview_atmosphereMult.
+  ///
+  /// In pl, this message translates to:
+  /// **'Mnożnik atmosfery'**
+  String get teamOverview_atmosphereMult;
+
+  /// No description provided for @teamOverview_chemistryMult.
+  ///
+  /// In pl, this message translates to:
+  /// **'Mnożnik chemii'**
+  String get teamOverview_chemistryMult;
+
+  /// No description provided for @teamOverview_teamPower.
+  ///
+  /// In pl, this message translates to:
+  /// **'Siła drużyny'**
+  String get teamOverview_teamPower;
+
+  /// No description provided for @teamOverview_expectedRank.
+  ///
+  /// In pl, this message translates to:
+  /// **'Oczekiwane miejsce'**
+  String get teamOverview_expectedRank;
+
+  /// No description provided for @teamOverview_status.
+  ///
+  /// In pl, this message translates to:
+  /// **'Status'**
+  String get teamOverview_status;
+
+  /// No description provided for @teamOverview_weeklyHistory.
+  ///
+  /// In pl, this message translates to:
+  /// **'Historia tygodniowa'**
+  String get teamOverview_weeklyHistory;
+
+  /// No description provided for @teamOverview_noHistory.
+  ///
+  /// In pl, this message translates to:
+  /// **'Brak zapisanej historii'**
+  String get teamOverview_noHistory;
+
   /// No description provided for @teamOverview_roster.
   ///
   /// In pl, this message translates to:
