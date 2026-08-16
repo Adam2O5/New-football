@@ -263,7 +263,7 @@ void main() {
   });
 
   test('save schema rejects versions other than current version', () {
-    expect(SaveSchema.currentVersion, 6);
+    expect(SaveSchema.currentVersion, 7);
     final meta = GameSaveMeta(
       id: 'save',
       name: 'Save',
@@ -278,6 +278,6 @@ void main() {
       SaveCompatibility.compatible,
     );
     expect(meta.compatibilityWith(5), SaveCompatibility.newer);
-    expect(meta.compatibilityWith(7), SaveCompatibility.older);
+    expect(meta.compatibilityWith(8), SaveCompatibility.older);
   });
 }

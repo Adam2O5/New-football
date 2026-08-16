@@ -166,9 +166,10 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
       ),
     );
     state = AsyncValue.data(next);
-    if (autosave) await _repo.save(next);
+    if (autosave && !_batchSimulationActive) await _repo.save(next);
   }
 
+  bool _batchSimulationActive = false;
   bool _cancelRequested = false;
 
   /// Requests that an in-progress batch stop as soon as possible (checked
@@ -486,6 +487,26 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     return result;
   }
 
+  Future<BatchSimulationResult> _simulateUntil(
+    bool Function(LeagueState league) reachedTarget, {
+    bool autoResolveEvents = false,
+    bool autoSimulatePlayerMatch = false,
+    int maxDays = 400,
+  }) async {
+    _batchSimulationActive = true;
+    try {
+      return await _simulateUntilInternal(
+        reachedTarget,
+        autoResolveEvents: autoResolveEvents,
+        autoSimulatePlayerMatch: autoSimulatePlayerMatch,
+        maxDays: maxDays,
+      );
+    } finally {
+      _batchSimulationActive = false;
+      await persist();
+    }
+  }
+
   /// Repeatedly advances one day at a time until [reachedTarget] holds
   /// (checked before each day), a due event/match/urgent condition stops
   /// the batch, cancellation is requested, or [maxDays] is hit as a safety
@@ -502,7 +523,7 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   /// so the caller can hand off to `MatchdayScreen` (`simulateToEvent`:
   /// home-screen day-by-day / next-match-or-event, matching the FIFA-style
   /// "stop right before it happens" flow).
-  Future<BatchSimulationResult> _simulateUntil(
+  Future<BatchSimulationResult> _simulateUntilInternal(
     bool Function(LeagueState league) reachedTarget, {
     bool autoResolveEvents = false,
     bool autoSimulatePlayerMatch = false,

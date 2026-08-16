@@ -217,6 +217,9 @@ class DaySimulator {
         phase: calendar.phaseForWeek(nextWeek),
       ),
     );
+    // A player-controlled match follows the same end-of-day recovery stage as
+    // an AI match: +20 immediately after the match and +20 for the day.
+    state = _dailyRecovery(state);
     return _notifyMatchResult(state, result);
   }
 
@@ -446,15 +449,48 @@ class DaySimulator {
   }
 
   Team _applyFatigue(Team team, MatchResult result) {
-    final onPitch = {...team.lineupPlayerIds, ...team.benchPlayerIds};
+    final statsByPlayer = {
+      for (final stats in result.playerStats) stats.playerId: stats,
+    };
+    final tactics = team.id == result.homeTeamId
+        ? result.homeTactics
+        : result.awayTactics;
+    final lost = team.id == result.homeTeamId
+        ? result.homeGoals < result.awayGoals
+        : result.awayGoals < result.homeGoals;
     final injuries = {
       for (final injury in result.injuries.where((i) => i.teamId == team.id))
         injury.playerId: injury,
     };
     final roster = team.roster.map((p) {
-      var next = onPitch.contains(p.id)
-          ? p.withMatchFatigue(90, balance)
-          : p.recoverBetweenMatches(balance);
+      final stats = statsByPlayer[p.id];
+      final minutes = stats?.minutes ?? 0;
+      final loss = balance.player.staminaLossForMinutes(
+        p.position,
+        minutes,
+        tempo: tactics.tempo,
+        pressing: tactics.pressing,
+        weather: result.context.weather,
+        isDerby: result.context.isDerby,
+      );
+      // Apply the loss first, then the documented immediate post-match +20.
+      final afterLoss = balance.player.clampStamina(
+        (p.state.stamina.toDouble() - loss).round(),
+      );
+      var next = p.copyWith(
+        state: p.state.copyWith(
+          stamina: balance.player.clampStamina(
+            afterLoss + balance.player.recoveryBetweenMatches,
+          ),
+        ),
+      );
+      next = next.withMatchForm(
+        minutesPlayed: minutes,
+        rating: stats?.rating ?? 6.0,
+        lost: lost,
+        balance: balance,
+      );
+
       final matchInjury = injuries[p.id];
       if (matchInjury != null) {
         next = next.copyWith(
@@ -475,11 +511,10 @@ class DaySimulator {
     return team.copyWith(roster: roster);
   }
 
-  Team _recoverTeam(Team team) {
-    return team.copyWith(
-      roster: team.roster.map((p) => p.recoverBetweenMatches(balance)).toList(),
-    );
-  }
+  /// Daily recovery is applied once by [_dailyRecovery]. Keeping this method
+  /// side-effect free prevents teams in later fixtures from recovering twice
+  /// when a round contains several matches.
+  Team _recoverTeam(Team team) => team;
 
   LeagueState _resolveFreeAgencyDay(LeagueState league) {
     if (league.freeAgents.isEmpty) return league;
@@ -535,44 +570,41 @@ class DaySimulator {
   LeagueState _dailyRecovery(LeagueState league) {
     var state = league;
     for (final team in league.teams) {
-      var updatedTeam = team;
-      for (final player in team.roster) {
-        if (!player.state.injured) continue;
+      final recoveryReturns = <({Player player, String injuryId})>[];
+      final roster = team.roster.map((player) {
         final recovered = player.recoverBetweenMatches(balance);
-        updatedTeam = updatedTeam.copyWith(
-          roster: updatedTeam.roster
-              .map(
-                (candidate) =>
-                    candidate.id == player.id ? recovered : candidate,
-              )
-              .toList(),
-        );
-        if (recovered.state.injured || state.playerTeamId != team.id) continue;
-        final injuryId = player.state.injury?.id;
-        if (injuryId == null) continue;
-        final definition = InjuryCatalog.byId(injuryId);
+        if (player.state.injured && !recovered.state.injured) {
+          final injuryId = player.state.injury?.id;
+          if (injuryId != null) {
+            recoveryReturns.add((player: player, injuryId: injuryId));
+          }
+        }
+        return recovered;
+      }).toList();
+      state = state.copyWith(
+        teams: state.teams.map((candidate) {
+          return candidate.id == team.id
+              ? team.copyWith(roster: roster)
+              : candidate;
+        }).toList(),
+      );
+      for (final returned in recoveryReturns) {
+        if (state.playerTeamId != team.id) continue;
+        final definition = InjuryCatalog.byId(returned.injuryId);
         state = messages.send(
-          state.copyWith(
-            teams: state.teams
-                .map(
-                  (candidate) =>
-                      candidate.id == team.id ? updatedTeam : candidate,
-                )
-                .toList(),
-          ),
+          state,
           type: MessageType.injuryReturn,
           domain: MessageDomain.health,
-          args: {'playerName': player.name, 'injuryName': definition.name},
-          payload: {'playerId': player.id, 'injuryId': injuryId},
+          args: {
+            'playerName': returned.player.name,
+            'injuryName': definition.name,
+          },
+          payload: {
+            'playerId': returned.player.id,
+            'injuryId': returned.injuryId,
+          },
         );
       }
-      state = state.copyWith(
-        teams: state.teams
-            .map(
-              (candidate) => candidate.id == team.id ? updatedTeam : candidate,
-            )
-            .toList(),
-      );
     }
     return state;
   }

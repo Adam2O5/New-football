@@ -719,7 +719,7 @@ PlayerState _$PlayerStateFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$PlayerState {
   int get stamina => throw _privateConstructorUsedError;
-  int get form => throw _privateConstructorUsedError;
+  double get form => throw _privateConstructorUsedError;
   Injury? get injury => throw _privateConstructorUsedError;
   int get regularSeasonYellowCards => throw _privateConstructorUsedError;
   int get playoffYellowCards => throw _privateConstructorUsedError;
@@ -746,7 +746,7 @@ abstract class $PlayerStateCopyWith<$Res> {
   @useResult
   $Res call({
     int stamina,
-    int form,
+    double form,
     Injury? injury,
     int regularSeasonYellowCards,
     int playoffYellowCards,
@@ -792,7 +792,7 @@ class _$PlayerStateCopyWithImpl<$Res, $Val extends PlayerState>
             form: null == form
                 ? _value.form
                 : form // ignore: cast_nullable_to_non_nullable
-                      as int,
+                      as double,
             injury: freezed == injury
                 ? _value.injury
                 : injury // ignore: cast_nullable_to_non_nullable
@@ -858,7 +858,7 @@ abstract class _$$PlayerStateImplCopyWith<$Res>
   @useResult
   $Res call({
     int stamina,
-    int form,
+    double form,
     Injury? injury,
     int regularSeasonYellowCards,
     int playoffYellowCards,
@@ -905,7 +905,7 @@ class __$$PlayerStateImplCopyWithImpl<$Res>
         form: null == form
             ? _value.form
             : form // ignore: cast_nullable_to_non_nullable
-                  as int,
+                  as double,
         injury: freezed == injury
             ? _value.injury
             : injury // ignore: cast_nullable_to_non_nullable
@@ -940,7 +940,7 @@ class __$$PlayerStateImplCopyWithImpl<$Res>
 class _$PlayerStateImpl implements _PlayerState {
   const _$PlayerStateImpl({
     this.stamina = 100,
-    this.form = 5,
+    this.form = 5.0,
     this.injury,
     this.regularSeasonYellowCards = 0,
     this.playoffYellowCards = 0,
@@ -957,7 +957,7 @@ class _$PlayerStateImpl implements _PlayerState {
   final int stamina;
   @override
   @JsonKey()
-  final int form;
+  final double form;
   @override
   final Injury? injury;
   @override
@@ -1037,7 +1037,7 @@ class _$PlayerStateImpl implements _PlayerState {
 abstract class _PlayerState implements PlayerState {
   const factory _PlayerState({
     final int stamina,
-    final int form,
+    final double form,
     final Injury? injury,
     final int regularSeasonYellowCards,
     final int playoffYellowCards,
@@ -1052,7 +1052,7 @@ abstract class _PlayerState implements PlayerState {
   @override
   int get stamina;
   @override
-  int get form;
+  double get form;
   @override
   Injury? get injury;
   @override

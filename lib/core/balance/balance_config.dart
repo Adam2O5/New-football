@@ -92,17 +92,28 @@ class PlayerBalance {
     this.staminaMin = 0,
     this.staminaMax = 100,
     this.minutesPerMatch = 90,
+    // Kept for compatibility with older callers; Task 12 uses positional
+    // consumption through [staminaLossForMinutes].
     this.fatiguePerFullMatch = 15,
     this.recoveryBetweenMatches = 20,
     this.injuryDaysClampMax = 999,
-    this.staminaOkThreshold = 60,
-    this.staminaSoftThreshold = 40,
-    this.injuryRiskOk = 1.0,
-    this.injuryRiskSoft = 1.25,
-    this.injuryRiskHard = 1.75,
-    this.performanceOk = 1.0,
-    this.performanceAtSoft = 0.90,
-    this.performanceAtZero = 0.35,
+    this.staminaOkThreshold = 80,
+    this.staminaSoftThreshold = 60,
+    this.staminaMidThreshold = 40,
+    this.staminaLowThreshold = 20,
+    this.injuryRiskOk = 0.90,
+    this.injuryRiskSoft = 1.00,
+    this.injuryRiskMid = 1.20,
+    this.injuryRiskLow = 1.40,
+    this.injuryRiskHard = 1.67,
+    this.performanceOk = 1.00,
+    this.performanceAtSoft = 0.97,
+    this.performanceAtMid = 0.90,
+    this.performanceAtLow = 0.75,
+    this.performanceAtZero = 0.50,
+    this.formMin = 1.0,
+    this.formMax = 10.0,
+    this.noAppearanceFormDrift = 0.2,
     this.outfieldOverallWeights = _defaultOutfieldOverallWeights,
     this.tallestOutfieldSampleSize = 5,
   });
@@ -114,21 +125,29 @@ class PlayerBalance {
   final int recoveryBetweenMatches;
   final int injuryDaysClampMax;
 
-  /// Stamina ≥ this → no injury / performance penalty.
+  /// Stamina thresholds from `player_management.md`.
   final int staminaOkThreshold;
-
-  /// Between [staminaSoftThreshold] and [staminaOkThreshold] → soft penalties.
   final int staminaSoftThreshold;
+  final int staminaMidThreshold;
+  final int staminaLowThreshold;
 
   final double injuryRiskOk;
   final double injuryRiskSoft;
+  final double injuryRiskMid;
+  final double injuryRiskLow;
   final double injuryRiskHard;
 
   final double performanceOk;
   final double performanceAtSoft;
+  final double performanceAtMid;
+  final double performanceAtLow;
 
-  /// Drastic contribution mult when stamina hits 0.
+  /// Contribution multiplier when stamina is in the critical 0–19 band.
   final double performanceAtZero;
+
+  final double formMin;
+  final double formMax;
+  final double noAppearanceFormDrift;
 
   /// Weighted OVR face-stats per outfield position (weights need not sum to 1).
   final Map<Position, OutfieldAttrWeights> outfieldOverallWeights;
@@ -228,10 +247,85 @@ class PlayerBalance {
     ),
   };
 
+  /// Legacy single-value fatigue helper retained for older call sites.
   int fatigueForMinutes(int minutesPlayed) =>
       (minutesPlayed / minutesPerMatch * fatiguePerFullMatch).round();
 
+  static const _staminaLossPer90 = <Position, double>{
+    Position.gk: 15,
+    Position.cb: 65,
+    Position.lb: 75,
+    Position.rb: 75,
+    Position.lwb: 85,
+    Position.rwb: 85,
+    Position.cdm: 70,
+    Position.cm: 70,
+    Position.cam: 70,
+    Position.lw: 80,
+    Position.rw: 80,
+    Position.st: 70,
+  };
+
+  static const formMultipliers = <double>[
+    0.90,
+    0.92,
+    0.95,
+    0.97,
+    0.99,
+    1.00,
+    1.04,
+    1.07,
+    1.09,
+    1.12,
+  ];
+
   int clampStamina(int value) => value.clamp(staminaMin, staminaMax);
+
+  double clampForm(double value) => value.clamp(formMin, formMax).toDouble();
+
+  double staminaLossPer90(Position position) => _staminaLossPer90[position]!;
+
+  double staminaConsumptionMultiplier({
+    required Tempo tempo,
+    required PressingIntensity pressing,
+    required Weather weather,
+    required bool isDerby,
+  }) {
+    var multiplier = switch (tempo) {
+      Tempo.fast => 1.15,
+      Tempo.slow => 0.90,
+      Tempo.balanced => 1.0,
+    };
+    multiplier *= switch (pressing) {
+      PressingIntensity.high => 1.10,
+      PressingIntensity.gegenpressing => 1.20,
+      PressingIntensity.low => 0.90,
+      PressingIntensity.medium => 1.0,
+    };
+    if (weather == Weather.heat) multiplier *= 1.15;
+    if (isDerby) multiplier *= 1.05;
+    return multiplier;
+  }
+
+  double staminaLossForMinutes(
+    Position position,
+    int minutesPlayed, {
+    Tempo tempo = Tempo.balanced,
+    PressingIntensity pressing = PressingIntensity.medium,
+    Weather weather = Weather.clear,
+    bool isDerby = false,
+  }) {
+    final minutes = minutesPlayed.clamp(0, minutesPerMatch);
+    return staminaLossPer90(position) *
+        minutes /
+        minutesPerMatch *
+        staminaConsumptionMultiplier(
+          tempo: tempo,
+          pressing: pressing,
+          weather: weather,
+          isDerby: isDerby,
+        );
+  }
 
   OutfieldAttrWeights outfieldWeightsFor(Position position) {
     final weights = outfieldOverallWeights[position];
@@ -248,17 +342,11 @@ class PlayerBalance {
   /// Match contribution multiplier from current stamina (1.0 = full).
   double performanceMult(int stamina) {
     final s = clampStamina(stamina);
-    if (s <= staminaMin) return performanceAtZero;
     if (s >= staminaOkThreshold) return performanceOk;
-    if (s >= staminaSoftThreshold) {
-      final t =
-          (s - staminaSoftThreshold) /
-          (staminaOkThreshold - staminaSoftThreshold);
-      return performanceAtSoft + (performanceOk - performanceAtSoft) * t;
-    }
-    // 1 … soft-1 → interpolate zero → soft
-    final t = (s - staminaMin) / (staminaSoftThreshold - staminaMin);
-    return performanceAtZero + (performanceAtSoft - performanceAtZero) * t;
+    if (s >= staminaSoftThreshold) return performanceAtSoft;
+    if (s >= staminaMidThreshold) return performanceAtMid;
+    if (s >= staminaLowThreshold) return performanceAtLow;
+    return performanceAtZero;
   }
 
   /// Injury chance multiplier from current stamina (`player_management.md` §6).
@@ -266,7 +354,24 @@ class PlayerBalance {
     final s = clampStamina(stamina);
     if (s >= staminaOkThreshold) return injuryRiskOk;
     if (s >= staminaSoftThreshold) return injuryRiskSoft;
+    if (s >= staminaMidThreshold) return injuryRiskMid;
+    if (s >= staminaLowThreshold) return injuryRiskLow;
     return injuryRiskHard;
+  }
+
+  /// Table-driven form multiplier. Fractional form values are interpolated so
+  /// the exact 0.2 no-appearance drift remains meaningful in match simulation.
+  double formMult(double form) {
+    final f = clampForm(form);
+    if (f >= formMax) return formMultipliers.last;
+    final lower = f.floor().clamp(1, formMultipliers.length);
+    final index = lower - 1;
+    final fraction = f - lower;
+    if (fraction == 0 || index == formMultipliers.length - 1) {
+      return formMultipliers[index];
+    }
+    return formMultipliers[index] +
+        (formMultipliers[index + 1] - formMultipliers[index]) * fraction;
   }
 }
 

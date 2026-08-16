@@ -123,6 +123,15 @@ _$MatchResultImpl _$$MatchResultImplFromJson(
   awayGoals: (json['awayGoals'] as num).toInt(),
   homeStats: TeamMatchStats.fromJson(json['homeStats'] as Map<String, dynamic>),
   awayStats: TeamMatchStats.fromJson(json['awayStats'] as Map<String, dynamic>),
+  context: json['context'] == null
+      ? const MatchContext()
+      : MatchContext.fromJson(json['context'] as Map<String, dynamic>),
+  homeTactics: json['homeTactics'] == null
+      ? const TacticsSetup()
+      : TacticsSetup.fromJson(json['homeTactics'] as Map<String, dynamic>),
+  awayTactics: json['awayTactics'] == null
+      ? const TacticsSetup()
+      : TacticsSetup.fromJson(json['awayTactics'] as Map<String, dynamic>),
   playerStats:
       (json['playerStats'] as List<dynamic>?)
           ?.map((e) => PlayerMatchStats.fromJson(e as Map<String, dynamic>))
@@ -153,6 +162,9 @@ Map<String, dynamic> _$$MatchResultImplToJson(_$MatchResultImpl instance) =>
       'awayGoals': instance.awayGoals,
       'homeStats': instance.homeStats,
       'awayStats': instance.awayStats,
+      'context': instance.context,
+      'homeTactics': instance.homeTactics,
+      'awayTactics': instance.awayTactics,
       'playerStats': instance.playerStats,
       'events': instance.events,
       'injuries': instance.injuries,

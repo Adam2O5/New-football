@@ -1196,6 +1196,9 @@ mixin _$MatchResult {
   int get awayGoals => throw _privateConstructorUsedError;
   TeamMatchStats get homeStats => throw _privateConstructorUsedError;
   TeamMatchStats get awayStats => throw _privateConstructorUsedError;
+  MatchContext get context => throw _privateConstructorUsedError;
+  TacticsSetup get homeTactics => throw _privateConstructorUsedError;
+  TacticsSetup get awayTactics => throw _privateConstructorUsedError;
   List<PlayerMatchStats> get playerStats => throw _privateConstructorUsedError;
   List<MatchEvent> get events => throw _privateConstructorUsedError;
   List<MatchInjury> get injuries => throw _privateConstructorUsedError;
@@ -1225,6 +1228,9 @@ abstract class $MatchResultCopyWith<$Res> {
     int awayGoals,
     TeamMatchStats homeStats,
     TeamMatchStats awayStats,
+    MatchContext context,
+    TacticsSetup homeTactics,
+    TacticsSetup awayTactics,
     List<PlayerMatchStats> playerStats,
     List<MatchEvent> events,
     List<MatchInjury> injuries,
@@ -1233,6 +1239,9 @@ abstract class $MatchResultCopyWith<$Res> {
 
   $TeamMatchStatsCopyWith<$Res> get homeStats;
   $TeamMatchStatsCopyWith<$Res> get awayStats;
+  $MatchContextCopyWith<$Res> get context;
+  $TacticsSetupCopyWith<$Res> get homeTactics;
+  $TacticsSetupCopyWith<$Res> get awayTactics;
 }
 
 /// @nodoc
@@ -1256,6 +1265,9 @@ class _$MatchResultCopyWithImpl<$Res, $Val extends MatchResult>
     Object? awayGoals = null,
     Object? homeStats = null,
     Object? awayStats = null,
+    Object? context = null,
+    Object? homeTactics = null,
+    Object? awayTactics = null,
     Object? playerStats = null,
     Object? events = null,
     Object? injuries = null,
@@ -1287,6 +1299,18 @@ class _$MatchResultCopyWithImpl<$Res, $Val extends MatchResult>
                 ? _value.awayStats
                 : awayStats // ignore: cast_nullable_to_non_nullable
                       as TeamMatchStats,
+            context: null == context
+                ? _value.context
+                : context // ignore: cast_nullable_to_non_nullable
+                      as MatchContext,
+            homeTactics: null == homeTactics
+                ? _value.homeTactics
+                : homeTactics // ignore: cast_nullable_to_non_nullable
+                      as TacticsSetup,
+            awayTactics: null == awayTactics
+                ? _value.awayTactics
+                : awayTactics // ignore: cast_nullable_to_non_nullable
+                      as TacticsSetup,
             playerStats: null == playerStats
                 ? _value.playerStats
                 : playerStats // ignore: cast_nullable_to_non_nullable
@@ -1327,6 +1351,36 @@ class _$MatchResultCopyWithImpl<$Res, $Val extends MatchResult>
       return _then(_value.copyWith(awayStats: value) as $Val);
     });
   }
+
+  /// Create a copy of MatchResult
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $MatchContextCopyWith<$Res> get context {
+    return $MatchContextCopyWith<$Res>(_value.context, (value) {
+      return _then(_value.copyWith(context: value) as $Val);
+    });
+  }
+
+  /// Create a copy of MatchResult
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $TacticsSetupCopyWith<$Res> get homeTactics {
+    return $TacticsSetupCopyWith<$Res>(_value.homeTactics, (value) {
+      return _then(_value.copyWith(homeTactics: value) as $Val);
+    });
+  }
+
+  /// Create a copy of MatchResult
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $TacticsSetupCopyWith<$Res> get awayTactics {
+    return $TacticsSetupCopyWith<$Res>(_value.awayTactics, (value) {
+      return _then(_value.copyWith(awayTactics: value) as $Val);
+    });
+  }
 }
 
 /// @nodoc
@@ -1345,6 +1399,9 @@ abstract class _$$MatchResultImplCopyWith<$Res>
     int awayGoals,
     TeamMatchStats homeStats,
     TeamMatchStats awayStats,
+    MatchContext context,
+    TacticsSetup homeTactics,
+    TacticsSetup awayTactics,
     List<PlayerMatchStats> playerStats,
     List<MatchEvent> events,
     List<MatchInjury> injuries,
@@ -1355,6 +1412,12 @@ abstract class _$$MatchResultImplCopyWith<$Res>
   $TeamMatchStatsCopyWith<$Res> get homeStats;
   @override
   $TeamMatchStatsCopyWith<$Res> get awayStats;
+  @override
+  $MatchContextCopyWith<$Res> get context;
+  @override
+  $TacticsSetupCopyWith<$Res> get homeTactics;
+  @override
+  $TacticsSetupCopyWith<$Res> get awayTactics;
 }
 
 /// @nodoc
@@ -1377,6 +1440,9 @@ class __$$MatchResultImplCopyWithImpl<$Res>
     Object? awayGoals = null,
     Object? homeStats = null,
     Object? awayStats = null,
+    Object? context = null,
+    Object? homeTactics = null,
+    Object? awayTactics = null,
     Object? playerStats = null,
     Object? events = null,
     Object? injuries = null,
@@ -1408,6 +1474,18 @@ class __$$MatchResultImplCopyWithImpl<$Res>
             ? _value.awayStats
             : awayStats // ignore: cast_nullable_to_non_nullable
                   as TeamMatchStats,
+        context: null == context
+            ? _value.context
+            : context // ignore: cast_nullable_to_non_nullable
+                  as MatchContext,
+        homeTactics: null == homeTactics
+            ? _value.homeTactics
+            : homeTactics // ignore: cast_nullable_to_non_nullable
+                  as TacticsSetup,
+        awayTactics: null == awayTactics
+            ? _value.awayTactics
+            : awayTactics // ignore: cast_nullable_to_non_nullable
+                  as TacticsSetup,
         playerStats: null == playerStats
             ? _value._playerStats
             : playerStats // ignore: cast_nullable_to_non_nullable
@@ -1439,6 +1517,9 @@ class _$MatchResultImpl implements _MatchResult {
     required this.awayGoals,
     required this.homeStats,
     required this.awayStats,
+    this.context = const MatchContext(),
+    this.homeTactics = const TacticsSetup(),
+    this.awayTactics = const TacticsSetup(),
     final List<PlayerMatchStats> playerStats = const [],
     final List<MatchEvent> events = const [],
     final List<MatchInjury> injuries = const [],
@@ -1463,6 +1544,15 @@ class _$MatchResultImpl implements _MatchResult {
   final TeamMatchStats homeStats;
   @override
   final TeamMatchStats awayStats;
+  @override
+  @JsonKey()
+  final MatchContext context;
+  @override
+  @JsonKey()
+  final TacticsSetup homeTactics;
+  @override
+  @JsonKey()
+  final TacticsSetup awayTactics;
   final List<PlayerMatchStats> _playerStats;
   @override
   @JsonKey()
@@ -1501,7 +1591,7 @@ class _$MatchResultImpl implements _MatchResult {
 
   @override
   String toString() {
-    return 'MatchResult(homeTeamId: $homeTeamId, awayTeamId: $awayTeamId, homeGoals: $homeGoals, awayGoals: $awayGoals, homeStats: $homeStats, awayStats: $awayStats, playerStats: $playerStats, events: $events, injuries: $injuries, disciplines: $disciplines)';
+    return 'MatchResult(homeTeamId: $homeTeamId, awayTeamId: $awayTeamId, homeGoals: $homeGoals, awayGoals: $awayGoals, homeStats: $homeStats, awayStats: $awayStats, context: $context, homeTactics: $homeTactics, awayTactics: $awayTactics, playerStats: $playerStats, events: $events, injuries: $injuries, disciplines: $disciplines)';
   }
 
   @override
@@ -1521,6 +1611,11 @@ class _$MatchResultImpl implements _MatchResult {
                 other.homeStats == homeStats) &&
             (identical(other.awayStats, awayStats) ||
                 other.awayStats == awayStats) &&
+            (identical(other.context, context) || other.context == context) &&
+            (identical(other.homeTactics, homeTactics) ||
+                other.homeTactics == homeTactics) &&
+            (identical(other.awayTactics, awayTactics) ||
+                other.awayTactics == awayTactics) &&
             const DeepCollectionEquality().equals(
               other._playerStats,
               _playerStats,
@@ -1543,6 +1638,9 @@ class _$MatchResultImpl implements _MatchResult {
     awayGoals,
     homeStats,
     awayStats,
+    context,
+    homeTactics,
+    awayTactics,
     const DeepCollectionEquality().hash(_playerStats),
     const DeepCollectionEquality().hash(_events),
     const DeepCollectionEquality().hash(_injuries),
@@ -1571,6 +1669,9 @@ abstract class _MatchResult implements MatchResult {
     required final int awayGoals,
     required final TeamMatchStats homeStats,
     required final TeamMatchStats awayStats,
+    final MatchContext context,
+    final TacticsSetup homeTactics,
+    final TacticsSetup awayTactics,
     final List<PlayerMatchStats> playerStats,
     final List<MatchEvent> events,
     final List<MatchInjury> injuries,
@@ -1592,6 +1693,12 @@ abstract class _MatchResult implements MatchResult {
   TeamMatchStats get homeStats;
   @override
   TeamMatchStats get awayStats;
+  @override
+  MatchContext get context;
+  @override
+  TacticsSetup get homeTactics;
+  @override
+  TacticsSetup get awayTactics;
   @override
   List<PlayerMatchStats> get playerStats;
   @override

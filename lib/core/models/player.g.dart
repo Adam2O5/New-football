@@ -73,7 +73,7 @@ const _$DevelopmentOutcomeEnumMap = {
 _$PlayerStateImpl _$$PlayerStateImplFromJson(Map<String, dynamic> json) =>
     _$PlayerStateImpl(
       stamina: (json['stamina'] as num?)?.toInt() ?? 100,
-      form: (json['form'] as num?)?.toInt() ?? 5,
+      form: (json['form'] as num?)?.toDouble() ?? 5.0,
       injury: json['injury'] == null
           ? null
           : Injury.fromJson(json['injury'] as Map<String, dynamic>),

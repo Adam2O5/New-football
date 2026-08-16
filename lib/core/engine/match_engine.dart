@@ -34,7 +34,16 @@ class LiveMatch {
     this.awayDoctorPreventionMult = 1.0,
   }) : events = events ?? [],
        injuries = injuries ?? [],
-       disciplines = disciplines ?? [];
+       disciplines = disciplines ?? [],
+       playersById = _playersFromState(state),
+       teamByPlayerId = _teamsFromState(state, homeTeamId, awayTeamId),
+       minutesPlayed = {
+         for (final player in _playersFromState(state).values) player.id: 0,
+       },
+       staminaRemaining = {
+         for (final player in _playersFromState(state).values)
+           player.id: player.state.stamina.toDouble(),
+       };
 
   MatchState state;
   final String homeTeamId;
@@ -43,6 +52,10 @@ class LiveMatch {
   final List<MatchEvent> events;
   final List<MatchInjury> injuries;
   final List<MatchDiscipline> disciplines;
+  final Map<String, Player> playersById;
+  final Map<String, String> teamByPlayerId;
+  final Map<String, int> minutesPlayed;
+  final Map<String, double> staminaRemaining;
   int homeSubsUsed;
   int awaySubsUsed;
   int homeSubWindows;
@@ -61,6 +74,37 @@ class LiveMatch {
   final double awayDoctorPreventionMult;
 
   bool get isFinished => state.minute >= 90;
+
+  /// Advances the currently selected player by one real match minute.
+  /// Fractional consumption is kept in [staminaRemaining]. Match calculations
+  /// read that map directly, avoiding a full immutable-player copy every tick.
+  List<Player> recordMinute({
+    required List<Player> lineup,
+    required bool homeSide,
+  }) {
+    final tactics = homeSide ? state.homeTactics : state.awayTactics;
+    for (final player in lineup) {
+      minutesPlayed[player.id] = (minutesPlayed[player.id] ?? 0) + 1;
+      final current = staminaRemaining[player.id] ?? player.state.stamina;
+      final loss = balance.player.staminaLossForMinutes(
+        player.position,
+        1,
+        tempo: tactics.tempo,
+        pressing: tactics.pressing,
+        weather: state.context.weather,
+        isDerby: state.context.isDerby,
+      );
+      staminaRemaining[player.id] = (current - loss).clamp(
+        balance.player.staminaMin.toDouble(),
+        balance.player.staminaMax.toDouble(),
+      );
+    }
+    return lineup;
+  }
+
+  int visibleStamina(Player player) => balance.player.clampStamina(
+    (staminaRemaining[player.id] ?? player.state.stamina.toDouble()).round(),
+  );
 
   MatchResult toResult() {
     final homeShots = events
@@ -104,11 +148,63 @@ class LiveMatch {
         yellowCards: _cardCount(awayTeamId, yellow: true),
         redCards: _cardCount(awayTeamId, yellow: false),
       ),
+      context: state.context,
+      homeTactics: state.homeTactics,
+      awayTactics: state.awayTactics,
+      playerStats: _playerStats(),
       events: List.unmodifiable(events),
       injuries: List.unmodifiable(injuries),
       disciplines: List.unmodifiable(disciplines),
     );
   }
+
+  List<PlayerMatchStats> _playerStats() {
+    return playersById.values.map((player) {
+      final minutes = minutesPlayed[player.id] ?? 0;
+      final goals = events
+          .where(
+            (event) =>
+                event.playerId == player.id &&
+                (event.type == MatchEventType.goal ||
+                    event.type == MatchEventType.scoredPenalty),
+          )
+          .length;
+      final teamId = _teamForPlayer(player.id);
+      final outcome = teamId == homeTeamId
+          ? state.homeGoals.compareTo(state.awayGoals)
+          : state.awayGoals.compareTo(state.homeGoals);
+      final visibleStamina = balance.player.clampStamina(
+        (staminaRemaining[player.id] ?? player.state.stamina.toDouble())
+            .round(),
+      );
+      final current = player.copyWith(
+        state: player.state.copyWith(stamina: visibleStamina),
+      );
+      var rating = 6.0;
+      if (minutes > 0) {
+        rating += (current.overall(balance) - 75) * 0.04;
+        rating += (current.formMult(balance) - 1.0) * 4;
+        rating += (balance.player.performanceMult(visibleStamina) - 1.0) * 2;
+        rating += outcome * 0.35;
+        rating += goals * 0.75;
+      }
+      return PlayerMatchStats(
+        playerId: player.id,
+        minutes: minutes,
+        goals: goals,
+        yellowCards: _playerCardCount(player.id, MatchEventType.yellowCard),
+        redCards: _playerCardCount(player.id, MatchEventType.redCard),
+        rating: rating.clamp(0.0, 10.0).toDouble(),
+      );
+    }).toList();
+  }
+
+  String _teamForPlayer(String playerId) =>
+      teamByPlayerId[playerId] ?? awayTeamId;
+
+  int _playerCardCount(String playerId, MatchEventType type) => events
+      .where((event) => event.playerId == playerId && event.type == type)
+      .length;
 
   int _cardCount(String teamId, {required bool yellow}) {
     return events
@@ -119,6 +215,34 @@ class LiveMatch {
                   (yellow ? MatchEventType.yellowCard : MatchEventType.redCard),
         )
         .length;
+  }
+
+  static Map<String, String> _teamsFromState(
+    MatchState state,
+    String homeTeamId,
+    String awayTeamId,
+  ) {
+    final teams = <String, String>{};
+    for (final player in [...state.homeLineup, ...state.homeBench]) {
+      teams[player.id] = homeTeamId;
+    }
+    for (final player in [...state.awayLineup, ...state.awayBench]) {
+      teams[player.id] = awayTeamId;
+    }
+    return teams;
+  }
+
+  static Map<String, Player> _playersFromState(MatchState state) {
+    final players = <String, Player>{};
+    for (final player in [
+      ...state.homeLineup,
+      ...state.awayLineup,
+      ...state.homeBench,
+      ...state.awayBench,
+    ]) {
+      players[player.id] = player;
+    }
+    return players;
   }
 }
 
@@ -236,6 +360,18 @@ class MatchEngine {
     var state = live.state.copyWith(minute: nextMinute);
     final newEvents = <MatchEvent>[];
 
+    // Count the minute with the lineup that was on the pitch at its start.
+    state = state.copyWith(
+      homeLineup: live.recordMinute(
+        lineup: live.state.homeLineup,
+        homeSide: true,
+      ),
+      awayLineup: live.recordMinute(
+        lineup: live.state.awayLineup,
+        homeSide: false,
+      ),
+    );
+
     if (nextMinute == 45) {
       final ht = MatchEvent(
         type: MatchEventType.halfTime,
@@ -256,6 +392,7 @@ class MatchEngine {
       morale: state.moraleModHome,
       context: state.context,
       opponentTactics: state.awayTactics,
+      staminaRemaining: live.staminaRemaining,
     );
     final awayPower = _teamPower(
       state.awayLineup,
@@ -267,6 +404,7 @@ class MatchEngine {
       morale: state.moraleModAway,
       context: state.context,
       opponentTactics: state.homeTactics,
+      staminaRemaining: live.staminaRemaining,
     );
 
     final total = homePower + awayPower;
@@ -369,47 +507,57 @@ class MatchEngine {
     } else {
       final homeSide = rng.nextBool();
       final lineup = homeSide ? state.homeLineup : state.awayLineup;
-      final prevention = homeSide
-          ? live.homeDoctorPreventionMult
-          : live.awayDoctorPreventionMult;
-      final injuryChance = 0.004 * prevention;
-      if (lineup.length > 1 && rng.nextDouble() < injuryChance) {
+      if (lineup.length > 1) {
         final player = lineup[rng.nextInt(lineup.length)];
-        final diagnosis = const InjuryService().diagnose(
-          random: rng,
-          doctorCareMultiplier: homeSide
-              ? live.homeDoctorCareMult
-              : live.awayDoctorCareMult,
-        );
-        final playerInStartingXi =
-            (homeSide ? live.state.homeLineup : live.state.awayLineup).any(
-              (candidate) => candidate.id == player.id,
+        final injuryChance =
+            0.004 *
+            (homeSide
+                ? live.homeDoctorPreventionMult
+                : live.awayDoctorPreventionMult) *
+            balance.player.injuryRiskMult(live.visibleStamina(player));
+        if (rng.nextDouble() < injuryChance) {
+          final diagnosis = const InjuryService().diagnose(
+            random: rng,
+            doctorCareMultiplier: homeSide
+                ? live.homeDoctorCareMult
+                : live.awayDoctorCareMult,
+          );
+          final playerInStartingXi =
+              (homeSide ? live.state.homeLineup : live.state.awayLineup).any(
+                (candidate) => candidate.id == player.id,
+              );
+          newEvents.add(
+            MatchEvent(
+              type: diagnosis.injury.type == InjuryType.major
+                  ? MatchEventType.majorInjury
+                  : MatchEventType.minorInjury,
+              minute: nextMinute,
+              teamId: homeSide ? live.homeTeamId : live.awayTeamId,
+              playerId: player.id,
+              description: '${diagnosis.definition.name} — ${player.name}',
+            ),
+          );
+          live.injuries.add(
+            MatchInjury(
+              teamId: homeSide ? live.homeTeamId : live.awayTeamId,
+              playerId: player.id,
+              injury: diagnosis.injury,
+              playerInStartingXi: playerInStartingXi,
+              potentialLoss: diagnosis.potentialLoss,
+            ),
+          );
+          state = state.copyWith(
+            injuriesThisMatch: [...state.injuriesThisMatch, player.id],
+          );
+          if (diagnosis.injury.type == InjuryType.major) {
+            state = _forceInjurySub(
+              live,
+              state,
+              player.id,
+              homeSide,
+              newEvents,
             );
-        newEvents.add(
-          MatchEvent(
-            type: diagnosis.injury.type == InjuryType.major
-                ? MatchEventType.majorInjury
-                : MatchEventType.minorInjury,
-            minute: nextMinute,
-            teamId: homeSide ? live.homeTeamId : live.awayTeamId,
-            playerId: player.id,
-            description: '${diagnosis.definition.name} — ${player.name}',
-          ),
-        );
-        live.injuries.add(
-          MatchInjury(
-            teamId: homeSide ? live.homeTeamId : live.awayTeamId,
-            playerId: player.id,
-            injury: diagnosis.injury,
-            playerInStartingXi: playerInStartingXi,
-            potentialLoss: diagnosis.potentialLoss,
-          ),
-        );
-        state = state.copyWith(
-          injuriesThisMatch: [...state.injuriesThisMatch, player.id],
-        );
-        if (diagnosis.injury.type == InjuryType.major) {
-          state = _forceInjurySub(live, state, player.id, homeSide, newEvents);
+          }
         }
       }
     }
@@ -529,6 +677,7 @@ class MatchEngine {
     required double morale,
     required MatchContext context,
     required TacticsSetup opponentTactics,
+    required Map<String, double> staminaRemaining,
   }) {
     if (lineup.isEmpty) return 1;
     final chem = balance.chemistry;
@@ -541,8 +690,12 @@ class MatchEngine {
       final roleMult = _roleFitMult(p);
       final contrib =
           p.overall(balance) *
-          p.staminaPerformanceMult(balance) *
-          (0.85 + p.state.form / 20) *
+          balance.player.performanceMult(
+            balance.player.clampStamina(
+              (staminaRemaining[p.id] ?? p.state.stamina.toDouble()).round(),
+            ),
+          ) *
+          p.formMult(balance) *
           roleMult *
           chemMult *
           cohesionMult;

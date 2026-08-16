@@ -108,7 +108,7 @@ class PlayerHidden with _$PlayerHidden {
 class PlayerState with _$PlayerState {
   const factory PlayerState({
     @Default(100) int stamina,
-    @Default(5) int form,
+    @Default(5.0) double form,
     Injury? injury,
     @Default(0) int regularSeasonYellowCards,
     @Default(0) int playoffYellowCards,
@@ -186,7 +186,41 @@ extension PlayerX on Player {
     BalanceConfig balance = BalanceConfig.defaults,
   ]) => balance.player.injuryRiskMult(state.stamina);
 
-  /// Wycena handlowa zawodnika — formuła 4-komponentowa
+  double formMult([BalanceConfig balance = BalanceConfig.defaults]) =>
+      balance.player.formMult(state.form);
+
+  /// Applies the documented post-match form change while preserving every
+  /// other PlayerState field (injury, cards, suspension and role included).
+  Player withMatchForm({
+    required int minutesPlayed,
+    required double rating,
+    required bool lost,
+    BalanceConfig balance = BalanceConfig.defaults,
+  }) {
+    final b = balance.player;
+    var nextForm = state.form;
+    if (minutesPlayed <= 0) {
+      if (nextForm < 6) {
+        nextForm += b.noAppearanceFormDrift;
+      } else if (nextForm > 6) {
+        nextForm -= b.noAppearanceFormDrift;
+      }
+    } else {
+      var delta = switch (rating) {
+        >= 8.5 => 2.0,
+        >= 7.5 => 1.0,
+        >= 6.0 => 0.0,
+        >= 4.5 => -1.0,
+        _ => -2.0,
+      };
+      if (lost && delta < 0 && personality == PlayerPersonality.temperamental) {
+        delta *= 1.5;
+      }
+      nextForm += delta;
+    }
+    return copyWith(state: state.copyWith(form: b.clampForm(nextForm)));
+  }
+
   /// (`player_management.md` §pointValue).
   ///
   /// `pointValue = clamp(round(ovrComponent + potentialComponent +

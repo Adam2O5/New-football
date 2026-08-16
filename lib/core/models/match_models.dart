@@ -2,6 +2,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/injury.dart';
 import 'package:new_football/core/models/player.dart';
+import 'package:new_football/core/models/match_state.dart';
 import 'package:new_football/core/tactics/tactics_setup.dart';
 
 part 'match_models.freezed.dart';
@@ -78,6 +79,9 @@ class MatchResult with _$MatchResult {
     required int awayGoals,
     required TeamMatchStats homeStats,
     required TeamMatchStats awayStats,
+    @Default(MatchContext()) MatchContext context,
+    @Default(TacticsSetup()) TacticsSetup homeTactics,
+    @Default(TacticsSetup()) TacticsSetup awayTactics,
     @Default([]) List<PlayerMatchStats> playerStats,
     @Default([]) List<MatchEvent> events,
     @Default([]) List<MatchInjury> injuries,

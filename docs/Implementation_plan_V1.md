@@ -470,33 +470,35 @@ Legenda: `⬜` do zrobienia · `🔄` w trakcie · `✅` gotowe
 
 ---
 
-### ⬜ Task 12: Forma i stamina zgodne z tabelami
+### ✅ Task 12: Forma i stamina zgodne z tabelami
 
 **Cel:** `player_management.md` — dokładne tabele zużycia, regeneracji, progów.
 
-- [ ] Zużycie staminy per grupa pozycji: 9 grup, 0,16–0,94 / minutę
-- [ ] Mnożniki zużycia: `Tempo.fast` ×1,15, `Tempo.slow` ×0,90
-- [ ] Mnożniki: pressing `high` ×1,10, `gegenpressing` ×1,20, `low` ×0,90
-- [ ] Mnożniki: pogoda `heat` ×1,15, derby ×1,05
-- [ ] Zużycie proporcjonalne do rozegranych minut
-- [ ] Regeneracja 20 / dzień
-- [ ] Regeneracja 20 natychmiast po meczu
-- [ ] Clamp `stamina ∈ [0, 100]`
-- [ ] `performanceMult` z progów: 1,00 / 0,97 / 0,90 / 0,75 / 0,50
-- [ ] `injuryRiskMult` z progów: 0,90 / 1,00 / 1,20 / 1,40 / 1,67
-- [ ] `formMult` z tabeli 1–10: 0,90 … 1,12
-- [ ] Aktualizacja formy z ratingu (§16.1): ≥8,5 → +2, 7,5–8,4 → +1, 6,0–7,4 → 0, 4,5–5,9 → −1, <4,5 → −2
-- [ ] `temperamental` po porażce ×1,5 na ujemnej delcie
-- [ ] Brak występu (0 min) → drift −0,2 w stronę 6
-- [ ] Clamp `form ∈ [1, 10]`
+- [x] Zużycie staminy per grupa pozycji: 9 grup, 0,16–0,94 / minutę
+- [x] Mnożniki zużycia: `Tempo.fast` ×1,15, `Tempo.slow` ×0,90
+- [x] Mnożniki: pressing `high` ×1,10, `gegenpressing` ×1,20, `low` ×0,90
+- [x] Mnożniki: pogoda `heat` ×1,15, derby ×1,05
+- [x] Zużycie proporcjonalne do rozegranych minut
+- [x] Regeneracja 20 / dzień
+- [x] Regeneracja 20 natychmiast po meczu
+- [x] Clamp `stamina ∈ [0, 100]`
+- [x] `performanceMult` z progów: 1,00 / 0,97 / 0,90 / 0,75 / 0,50
+- [x] `injuryRiskMult` z progów: 0,90 / 1,00 / 1,20 / 1,40 / 1,67
+- [x] `formMult` z tabeli 1–10: 0,90 … 1,12
+- [x] Aktualizacja formy z ratingu (§16.1): ≥8,5 → +2, 7,5–8,4 → +1, 6,0–7,4 → 0, 4,5–5,9 → −1, <4,5 → −2
+- [x] `temperamental` po porażce ×1,5 na ujemnej delcie
+- [x] Brak występu (0 min) → drift −0,2 w stronę 6
+- [x] Clamp `form ∈ [1, 10]`
 
 **Testy**
-- [ ] Zawodnik po dwóch meczach w tygodniu ma niższą staminę niż po jednym
-- [ ] 85 OVR przy formie 2 i staminie 30 działa jak ~59 OVR (§5.2)
-- [ ] Zużycie GK jest ~4,5× niższe niż wahadłowego
-- [ ] Forma dryfuje w stronę 6 przy braku występów
+- [x] Zawodnik po dwóch meczach w tygodniu ma niższą staminę niż po jednym
+- [x] 85 OVR przy formie 2 i staminie 30 działa jak ~59 OVR (§5.2)
+- [x] Zużycie GK jest ~4,5× niższe niż wahadłowego
+- [x] Forma dryfuje w stronę 6 przy braku występów
 
 **Demo:** UI składu pokazuje staminę z mnożnikiem wydajności i kierunek formy, co czyni rotację czytelną decyzją.
+
+**Implementacja:** `PlayerState.form` zapisuje wartości ułamkowe (schema `7`), a `MatchResult` przechowuje kontekst pogody/derbów i taktyki obu stron, aby post-meczowe zużycie było odtwarzalne.
 
 ---
 

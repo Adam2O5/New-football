@@ -63,7 +63,7 @@ extension ProspectX on Prospect {
       optimalRole: optimalRole,
       state: PlayerState(
         stamina: 100,
-        form: 1 + rng.nextInt(10),
+        form: (1 + rng.nextInt(10)).toDouble(),
         role: position.defaultAssignedRole,
         seasonsWithTeam: 0,
       ),

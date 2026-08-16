@@ -133,9 +133,7 @@ class SeedDataGenerator {
       lineupPlayerIds: roster.take(11).map((p) => p.id).toList(),
       benchPlayerIds: roster.skip(11).take(7).map((p) => p.id).toList(),
       ownedPicks: _generateOwnedPicks(teamId, seasonYear),
-      ai: isPlayer
-          ? null
-          : const TeamAiConfig(),
+      ai: isPlayer ? null : const TeamAiConfig(),
     );
   }
 
@@ -276,7 +274,7 @@ class SeedDataGenerator {
       ),
       state: PlayerState(
         stamina: 85 + rng.nextInt(15),
-        form: 1 + rng.nextInt(10),
+        form: (1 + rng.nextInt(10)).toDouble(),
         role: position.defaultAssignedRole,
         seasonsWithTeam: rng.nextInt(5),
       ),
