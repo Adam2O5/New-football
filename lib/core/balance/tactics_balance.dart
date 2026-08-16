@@ -228,26 +228,26 @@ class TacticsBalance {
 
   static const Map<Tempo, TacticsDelta> _defaultTempoDelta = {
     Tempo.slow: TacticsDelta(def: 2, mid: 3, atk: -4),
-    Tempo.balanced: TacticsDelta(),
-    Tempo.fast: TacticsDelta(def: -4, mid: -3, atk: 6),
+    Tempo.balanced: TacticsDelta(mid: 1),
+    Tempo.fast: TacticsDelta(def: -3, mid: -2, atk: 6),
   };
 
   static const Map<AttackWidth, TacticsDelta> _defaultAttackWidthDelta = {
     AttackWidth.narrow: TacticsDelta(def: 1, mid: 2, atk: -2),
-    AttackWidth.balanced: TacticsDelta(),
+    AttackWidth.balanced: TacticsDelta(mid: 1),
     AttackWidth.wide: TacticsDelta(def: -3, mid: -1, atk: 4),
   };
 
   static const Map<DefensiveLine, TacticsDelta> _defaultDefensiveLineDelta = {
-    DefensiveLine.deep: TacticsDelta(def: 6, atk: -3),
+    DefensiveLine.deep: TacticsDelta(def: 3, atk: -3),
     DefensiveLine.normal: TacticsDelta(),
-    DefensiveLine.high: TacticsDelta(def: -4, atk: 3),
+    DefensiveLine.high: TacticsDelta(def: -4, atk: 4),
   };
 
   static const Map<PressingIntensity, TacticsDelta> _defaultPressingDelta = {
-    PressingIntensity.low: TacticsDelta(def: 3, mid: -2, atk: -2),
+    PressingIntensity.low: TacticsDelta(def: 3, mid: -1, atk: -2),
     PressingIntensity.medium: TacticsDelta(),
-    PressingIntensity.high: TacticsDelta(def: -2, mid: 2, atk: 1),
+    PressingIntensity.high: TacticsDelta(def: -3, mid: 2, atk: 1),
     PressingIntensity.gegenpressing: TacticsDelta(def: -5, mid: 3, atk: 2),
   };
 

@@ -5,12 +5,16 @@ import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/match_models.dart';
 import 'package:new_football/core/models/match_state.dart';
 import 'package:new_football/core/models/player.dart';
+import 'package:new_football/core/models/staff.dart';
 import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/services/cohesion_service.dart';
 import 'package:new_football/core/services/discipline_service.dart';
 import 'package:new_football/core/services/injury_service.dart';
 import 'package:new_football/core/services/team_management_service.dart';
+import 'package:new_football/core/simulation/effective_attributes.dart';
 import 'package:new_football/core/simulation/pre_match_validator.dart';
+import 'package:new_football/core/simulation/team_shape.dart';
+import 'package:new_football/core/simulation/unit_ratings.dart';
 import 'package:new_football/core/tactics/tactics_setup.dart';
 
 class LiveMatch {
@@ -43,7 +47,17 @@ class LiveMatch {
     this.awaySnapshot,
     this.homeNoGkPenalty = false,
     this.awayNoGkPenalty = false,
-  }) : homeStartingLineup = List.unmodifiable(
+    this.homeHeadCoach,
+    this.awayHeadCoach,
+    this.homeTeamShape,
+    this.awayTeamShape,
+    this.homeUnitRatings,
+    this.awayUnitRatings,
+    Map<String, EffectivePlayerAttributes>? homeEffectiveAttributes,
+    Map<String, EffectivePlayerAttributes>? awayEffectiveAttributes,
+  }) : homeEffectiveAttributes = homeEffectiveAttributes ?? const {},
+       awayEffectiveAttributes = awayEffectiveAttributes ?? const {},
+       homeStartingLineup = List.unmodifiable(
          startingHomeLineup ?? state.homeLineup,
        ),
        awayStartingLineup = List.unmodifiable(
@@ -98,6 +112,21 @@ class LiveMatch {
   final MatchTeamSnapshot? awaySnapshot;
   final bool homeNoGkPenalty;
   final bool awayNoGkPenalty;
+  final StaffMember? homeHeadCoach;
+  final StaffMember? awayHeadCoach;
+
+  /// Latest runtime Task 16 diagnostics. These values are derived and are not
+  /// serialized into MatchState or MatchResult.
+  TeamShape? homeTeamShape;
+  TeamShape? awayTeamShape;
+  UnitRatings? homeUnitRatings;
+  UnitRatings? awayUnitRatings;
+  Map<String, EffectivePlayerAttributes> homeEffectiveAttributes;
+  Map<String, EffectivePlayerAttributes> awayEffectiveAttributes;
+
+  /// Runtime guards for the one-off leader momentum intervention.
+  bool homeLeaderDriftApplied = false;
+  bool awayLeaderDriftApplied = false;
 
   bool get isFinished => state.minute >= 90;
 
@@ -431,7 +460,7 @@ class MatchEngine {
 
     final homeNoGk = report.noGkPenaltyTeamIds.contains(home.id);
     final awayNoGk = report.noGkPenaltyTeamIds.contains(away.id);
-    return LiveMatch(
+    final live = LiveMatch(
       state: MatchState(
         minute: 0,
         homeLineup: List.of(report.home.startingXi),
@@ -453,6 +482,8 @@ class MatchEngine {
       awaySnapshot: awaySnapshot,
       homeNoGkPenalty: homeNoGk,
       awayNoGkPenalty: awayNoGk,
+      homeHeadCoach: home.staff.headCoach,
+      awayHeadCoach: away.staff.headCoach,
       homeCohesionMult: homeCohesionMult,
       awayCohesionMult: awayCohesionMult,
       homeChemistry: home.chemistry,
@@ -472,7 +503,112 @@ class MatchEngine {
         away.staff.doctor,
       ),
     );
+    _refreshRuntimeRatings(live);
+    return live;
   }
+
+  /// Rebuilds the derived Task 16 diagnostics from the current on-pitch state.
+  ///
+  /// The maps are intentionally kept on [LiveMatch] only. They are not part of
+  /// MatchState/MatchResult and therefore do not change save compatibility.
+  void _refreshRuntimeRatings(LiveMatch live) {
+    final homeLineup = live.state.homeLineup;
+    final awayLineup = live.state.awayLineup;
+    final shapeCalculator = TeamShapeCalculator(balance: balance);
+    final effectiveCalculator = EffectiveAttributeCalculator(balance: balance);
+    final unitCalculator = UnitRatingCalculator(balance: balance);
+
+    final homeShape = shapeCalculator.calculate(
+      tactics: live.state.homeTactics,
+      opponentTactics: live.state.awayTactics,
+      lineup: homeLineup,
+      opponentLineup: awayLineup,
+      headCoach: live.homeHeadCoach,
+    );
+    final awayShape = shapeCalculator.calculate(
+      tactics: live.state.awayTactics,
+      opponentTactics: live.state.homeTactics,
+      lineup: awayLineup,
+      opponentLineup: homeLineup,
+      headCoach: live.awayHeadCoach,
+    );
+    final homeEffective = effectiveCalculator.calculateLineup(
+      lineup: homeLineup,
+      context: live.state.context,
+      chemistry: live.homeChemistry,
+      atmosphere: live.homeAtmosphere,
+      cohesionMultiplier: live.homeCohesionMult,
+      isHome: true,
+      headCoach: live.homeHeadCoach,
+      staminaRemaining: live.staminaRemaining,
+      assignedPositions: _assignedPositionsFor(live.homeSnapshot),
+    );
+    final awayEffective = effectiveCalculator.calculateLineup(
+      lineup: awayLineup,
+      context: live.state.context,
+      chemistry: live.awayChemistry,
+      atmosphere: live.awayAtmosphere,
+      cohesionMultiplier: live.awayCohesionMult,
+      isHome: false,
+      headCoach: live.awayHeadCoach,
+      staminaRemaining: live.staminaRemaining,
+      assignedPositions: _assignedPositionsFor(live.awaySnapshot),
+    );
+
+    live.homeTeamShape = homeShape;
+    live.awayTeamShape = awayShape;
+    live.homeEffectiveAttributes = Map.unmodifiable(homeEffective);
+    live.awayEffectiveAttributes = Map.unmodifiable(awayEffective);
+    live.homeUnitRatings = unitCalculator.calculate(
+      lineup: homeLineup,
+      effectiveAttributes: homeEffective,
+      shape: homeShape,
+    );
+    live.awayUnitRatings = unitCalculator.calculate(
+      lineup: awayLineup,
+      effectiveAttributes: awayEffective,
+      shape: awayShape,
+    );
+  }
+
+  Map<String, Position> _assignedPositionsFor(MatchTeamSnapshot? snapshot) {
+    if (snapshot == null || snapshot.startingXi.isEmpty) return const {};
+    final positions = snapshot.assignedPositions;
+    return {
+      for (
+        var index = 0;
+        index < snapshot.startingXi.length && index < positions.length;
+        index++
+      )
+        snapshot.startingXi[index].id: positions[index],
+    };
+  }
+
+  MatchState _applyLeaderMomentumDrift(LiveMatch live, MatchState state) {
+    if (state.minute < 60) return state;
+
+    var next = state;
+    if (!live.homeLeaderDriftApplied &&
+        state.homeGoals < state.awayGoals &&
+        _hasLeader(state.homeLineup)) {
+      live.homeLeaderDriftApplied = true;
+      next = next.copyWith(
+        momentum: (next.momentum + 0.08).clamp(-1.0, 1.0).toDouble(),
+      );
+    }
+    if (!live.awayLeaderDriftApplied &&
+        state.awayGoals < state.homeGoals &&
+        _hasLeader(state.awayLineup)) {
+      live.awayLeaderDriftApplied = true;
+      next = next.copyWith(
+        momentum: (next.momentum - 0.08).clamp(-1.0, 1.0).toDouble(),
+      );
+    }
+    return next;
+  }
+
+  bool _hasLeader(List<Player> lineup) =>
+      lineup.any((player) => player.personality == PlayerPersonality.leader);
 
   MatchTeamSnapshot _snapshotFor(
     Team team,
@@ -515,6 +651,12 @@ class MatchEngine {
         homeSide: false,
       ),
     );
+    // The stamina tick belongs to the current minute. Make it visible before
+    // calculating team power so effAttr and UnitRatings use the fresh values.
+    live.state = state;
+    _refreshRuntimeRatings(live);
+    state = _applyLeaderMomentumDrift(live, state);
+    live.state = state;
 
     if (nextMinute == 45) {
       final ht = MatchEvent(
@@ -539,6 +681,7 @@ class MatchEngine {
       opponentTactics: state.awayTactics,
       staminaRemaining: live.staminaRemaining,
       noGkPenalty: live.homeNoGkPenalty,
+      unitRatings: live.homeUnitRatings,
     );
     final awayPower = _teamPower(
       state.awayLineup,
@@ -553,6 +696,7 @@ class MatchEngine {
       opponentTactics: state.homeTactics,
       staminaRemaining: live.staminaRemaining,
       noGkPenalty: live.awayNoGkPenalty,
+      unitRatings: live.awayUnitRatings,
     );
 
     final total = homePower + awayPower;
@@ -577,7 +721,7 @@ class MatchEngine {
       );
       state = updated;
       newEvents.addAll(ev);
-    } else if (rng.nextDouble() < 0.012) {
+    } else if (rng.nextDouble() < 0.012 * _cardChanceMultiplier(live)) {
       final homeAttack = rng.nextBool();
       final teamId = homeAttack ? live.homeTeamId : live.awayTeamId;
       final lineup = homeAttack ? state.homeLineup : state.awayLineup;
@@ -662,7 +806,10 @@ class MatchEngine {
             (homeSide
                 ? live.homeDoctorPreventionMult
                 : live.awayDoctorPreventionMult) *
-            balance.player.injuryRiskMult(live.visibleStamina(player));
+            balance.player.injuryRiskMult(live.visibleStamina(player)) *
+            EffectiveAttributeCalculator(
+              balance: balance,
+            ).injuryMultiplier(player);
         if (rng.nextDouble() < injuryChance) {
           final diagnosis = const InjuryService().diagnose(
             random: rng,
@@ -722,6 +869,7 @@ class MatchEngine {
     }
 
     live.state = state;
+    _refreshRuntimeRatings(live);
     live.events.addAll(newEvents);
     return newEvents;
   }
@@ -802,6 +950,7 @@ class MatchEngine {
         description: 'Zmiana: ${out.name} → ${incoming.name}',
       ),
     );
+    _refreshRuntimeRatings(live);
     return true;
   }
 
@@ -813,6 +962,7 @@ class MatchEngine {
     live.state = homeSide
         ? live.state.copyWith(homeTactics: tactics)
         : live.state.copyWith(awayTactics: tactics);
+    _refreshRuntimeRatings(live);
   }
 
   double _teamPower(
@@ -828,13 +978,31 @@ class MatchEngine {
     required TacticsSetup opponentTactics,
     required Map<String, double> staminaRemaining,
     required bool noGkPenalty,
+    required UnitRatings? unitRatings,
   }) {
     if (lineup.isEmpty) return 1;
+
+    final unitBase = _unitPower(unitRatings);
+    final homeAdv = isHome ? (1.0 + context.homeAdvantage) : 1.0;
+    final noGkMult = noGkPenalty ? 0.72 : 1.0;
+    if (unitBase != null) {
+      // UnitRatings already contain effAttr and TeamShape.tacticalMult. Do
+      // not multiply chemistry, form, stamina or the old formation scalar a
+      // second time here.
+      final effectiveMomentum = _averageMomentum(lineup, momentum);
+      return unitBase *
+          homeAdv *
+          noGkMult *
+          (1.0 + effectiveMomentum * 0.08 + morale * 0.05);
+    }
+
+    // Compatibility fallback for manually assembled LiveMatch instances that
+    // predate the runtime diagnostics. Normal MatchEngine.start always takes
+    // the UnitRatings branch above.
     final chemMult = TeamManagementService.chemistryMultiplier(chemistry);
     final atmosphereMult = TeamManagementService.atmosphereMultiplier(
       atmosphere,
     );
-
     var sum = 0.0;
     for (final p in lineup) {
       final roleMult = _roleFitMult(p);
@@ -855,13 +1023,48 @@ class MatchEngine {
     sum /= lineup.length;
 
     final tacticsMult = _tacticsMultiplier(tactics, opponentTactics);
-    final homeAdv = isHome ? (1.0 + context.homeAdvantage) : 1.0;
-    final noGkMult = noGkPenalty ? 0.72 : 1.0;
+    final effectiveMomentum = _averageMomentum(lineup, momentum);
     return sum *
         tacticsMult *
         homeAdv *
         noGkMult *
-        (1.0 + momentum * 0.08 + morale * 0.05);
+        (1.0 + effectiveMomentum * 0.08 + morale * 0.05);
+  }
+
+  double? _unitPower(UnitRatings? ratings) {
+    if (ratings == null) return null;
+    final values = [
+      ratings.defRating,
+      ratings.midRating,
+      ratings.atkRating,
+    ].where((rating) => rating > 0).toList(growable: false);
+    if (values.isEmpty) return null;
+    return values.reduce((a, b) => a + b) / values.length;
+  }
+
+  double _averageMomentum(List<Player> lineup, double teamMomentum) {
+    if (lineup.isEmpty) return teamMomentum;
+    final calculator = EffectiveAttributeCalculator(balance: balance);
+    final sum = lineup.fold<double>(
+      0,
+      (total, player) =>
+          total + calculator.momentumForPlayer(player, teamMomentum),
+    );
+    return sum / lineup.length;
+  }
+
+  double _cardChanceMultiplier(LiveMatch live) {
+    final players = [...live.state.homeLineup, ...live.state.awayLineup];
+    if (players.isEmpty) return 1.0;
+    final calculator = EffectiveAttributeCalculator(balance: balance);
+    final sum = players.fold<double>(
+      0,
+      (total, player) => total + calculator.cardProneMultiplier(player),
+    );
+    // The side and carded player are selected after the existing card roll.
+    // Averaging preserves that distribution while applying temperamental's
+    // documented expected ×1.35 chance without adding an RNG draw.
+    return sum / players.length;
   }
 
   double _roleFitMult(Player p) {

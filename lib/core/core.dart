@@ -1,9 +1,12 @@
 export 'ai/team_ai_service.dart';
 export 'balance/balance_config.dart';
 export 'engine/match_engine.dart';
+export 'simulation/effective_attributes.dart';
 export 'simulation/match_context_factory.dart';
 export 'simulation/match_message_emitter.dart';
 export 'simulation/pre_match_validator.dart';
+export 'simulation/team_shape.dart';
+export 'simulation/unit_ratings.dart';
 export 'models/assigned_role.dart';
 export 'models/contract.dart';
 export 'models/development.dart';

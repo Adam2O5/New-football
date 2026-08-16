@@ -616,39 +616,42 @@ Legenda: `⬜` do zrobienia · `🔄` w trakcie · `✅` gotowe
 
 ---
 
-### ⬜ Task 16: Etap 2 — `TeamShape`, `UnitRatings`, pipeline `effAttr`
+### ✅ Task 16: Etap 2 — `TeamShape`, `UnitRatings`, pipeline `effAttr`
 
 **Cel:** `matchday_model.md` §4–5.
 
-- [ ] `TeamShape` = formacja + Δtaktyka + Δrole + Σ matchupy + boost HC (Tactics ★)
-- [ ] `tacticalMult(x) = 1 + (shape'(x) − 55) × 0,0025`
-- [ ] `defRating`: linia obrony + CDM, wagi defending 0,45 / physicality 0,25 / pace 0,20 / passing 0,10
-- [ ] `midRating`: CDM/CM/CAM + skrzydłowi, wagi passing 0,35 / dribbling 0,25 / defending 0,20 / physicality 0,20
-- [ ] `atkRating`: ST + skrzydłowi + CAM, wagi shooting 0,35 / pace 0,25 / dribbling 0,25 / passing 0,15
-- [ ] Średnia ważona pozycyjnie: kluczowe pozycje 1,0, wspierające 0,5
-- [ ] Pipeline `effAttr` z 10 mnożnikami, clamp 1–120, przeliczany co minutę
-- [ ] `positionMult` 0,90 (obca pozycja) / 1,00
-- [ ] `roleFitMult` 1,00 / 1,03
-- [ ] `chemistryMult` z Task 14
-- [ ] `cohesionMult` 1,01–1,05 × HC Motivation
-- [ ] `atmosphereMult` z Task 14
-- [ ] `formMult` z Task 12
-- [ ] `staminaMult` z Task 12
-- [ ] `contextMult` 0,92–1,06
-- [ ] `leaderMult` 1,02 przy ≥1 liderze w XI, bez kumulacji
-- [ ] Efekt `temperamental`: `cardProneMult` ×1,35
-- [ ] Efekt `professional`: `injuryMult` ×0,80
-- [ ] Efekt `ambitious`: +0,03 do `clutchFactor`
-- [ ] Efekt `loyal`: przeciwne momentum działa w 80%
-- [ ] Efekt `leader`: przy przegrywaniu od 60' momentum drift +8
+- [x] `TeamShape` = formacja + Δtaktyka + Δrole + Σ matchupy + boost HC (Tactics ★)
+- [x] `tacticalMult(x) = 1 + (shape'(x) − 55) × 0,0025`
+- [x] `defRating`: linia obrony + CDM, wagi defending 0,45 / physicality 0,25 / pace 0,20 / passing 0,10
+- [x] `midRating`: CDM/CM/CAM + skrzydłowi, wagi passing 0,35 / dribbling 0,25 / defending 0,20 / physicality 0,20
+- [x] `atkRating`: ST + skrzydłowi + CAM, wagi shooting 0,35 / pace 0,25 / dribbling 0,25 / passing 0,15
+- [x] Średnia ważona pozycyjnie: kluczowe pozycje 1,0, wspierające 0,5
+- [x] Pipeline `effAttr` z 9 niezależnymi mnożnikami ze wzoru §5.1, clamp 1–120, przeliczany co minutę (tekst checklisty mówi o 10, ale wzór zawiera 9)
+- [x] `positionMult` 0,90 (obca pozycja) / 1,00
+- [x] `roleFitMult` 1,00 / 1,03
+- [x] `chemistryMult` z Task 14
+- [x] `cohesionMult` 1,01–1,05 × HC Motivation
+- [x] `atmosphereMult` z Task 14
+- [x] `formMult` z Task 12
+- [x] `staminaMult` z Task 12
+- [x] `contextMult` 0,92–1,06 (pogoda, crowd i match-in-week)
+- [x] `leaderMult` 1,02 przy ≥1 liderze w XI, bez kumulacji
+- [x] Efekt `temperamental`: `cardProneMult` ×1,35 w ryzyku kartki
+- [x] Efekt `professional`: `injuryMult` ×0,80 w ryzyku kontuzji
+- [x] Efekt `ambitious`: helper +0,03 do `clutchFactor`; użycie rolla clutch pozostaje zakresem Task 18
+- [x] Efekt `loyal`: przeciwne momentum działa w 80%
+- [x] Efekt `leader`: jednorazowy drift momentum +0,08 w obecnej skali runtime, gdy drużyna przegrywa od 60'
 
 **Testy**
-- [ ] shape 75 → ×1,05, shape 35 → ×0,95
-- [ ] 85 OVR przy formie 2 i staminie 30 działa jak ~59 OVR
-- [ ] `leaderMult` nie kumuluje się przy dwóch liderach
-- [ ] `UnitRatings` reagują na zmianę formacji
+- [x] shape 75 → ×1,05, shape 35 → ×0,95
+- [x] 85 OVR przy formie 2 i staminie 30 działa jak ~59 OVR
+- [x] `leaderMult` nie kumuluje się przy dwóch liderach
+- [x] `UnitRatings` reagują na zmianę formacji
+- [x] context weather/crowd/match-in-week oraz odświeżenie po ticku staminy, zmianie i zmianie taktyki
 
-**Demo:** panel diagnostyczny pokazuje `UnitRatings` obu drużyn i rozbicie wszystkich mnożników dla wybranego zawodnika.
+**Diagnostyka runtime:** `LiveMatch.homeTeamShape` / `awayTeamShape`, `homeUnitRatings` / `awayUnitRatings` oraz mapy `homeEffectiveAttributes` / `awayEffectiveAttributes` są pochodnymi wartościami diagnostycznymi. Dla wybranego zawodnika `EffectivePlayerAttributes.multipliers` pokazuje rozbicie mnożników, a `UnitRatings` zawiera skład jednostki i wagi pozycyjne. Wartości są odświeżane po starcie, ticku staminy, zmianie i `updateTactics`; nie są serializowane do `MatchState` ani `MatchResult`.
+
+**Demo:** API runtime meczu udostępnia `UnitRatings` obu drużyn oraz rozbicie mnożników effAttr bez migracji save’ów; warstwa UI może użyć tych pól jako panelu diagnostycznego.
 
 ---
 
