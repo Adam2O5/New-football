@@ -254,6 +254,7 @@ class SeedDataGenerator {
     final injuryProne = 1 + rng.nextInt(10);
     final determination = 1 + rng.nextInt(10);
     final heightCm = _heightCmFor(position, rng);
+    final outcome = rollDevelopmentOutcome(determination, rng);
 
     final player = Player(
       id: id,
@@ -282,9 +283,17 @@ class SeedDataGenerator {
         injuryProne: injuryProne,
         determination: determination,
         overallProgress: (age <= 26 ? 40 + rng.nextInt(50) : rng.nextInt(30))
-            .clamp(0, 99),
-        growthRate: (0.7 + rng.nextDouble() * 0.8).clamp(0.0, 2.0),
-        developmentOutcome: rollDevelopmentOutcome(determination, rng),
+            .clamp(0.0, 99.0)
+            .toDouble(),
+        growthRate: BalanceConfig.defaults.development.baseGrowthRateFor(
+          determination,
+        ),
+        developmentOutcome: outcome,
+        developmentCeilingStars: rollDevelopmentCeilingStars(
+          roundedStars,
+          outcome,
+          rng,
+        ),
       ),
     );
     return player.recalculatePointValue();

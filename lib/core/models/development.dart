@@ -12,10 +12,25 @@ DevelopmentOutcome rollDevelopmentOutcome(
   Random rng, [
   BalanceConfig balance = BalanceConfig.defaults,
 ]) {
-  final (exceedPct, hitPct) =
-      balance.development.outcomeChancesFor(determination);
+  final (exceedPct, hitPct) = balance.development.outcomeChancesFor(
+    determination,
+  );
   final roll = rng.nextInt(100);
   if (roll < exceedPct) return DevelopmentOutcome.exceed;
   if (roll < exceedPct + hitPct) return DevelopmentOutcome.hit;
   return DevelopmentOutcome.under;
+}
+
+/// Rolls the real development ceiling once when a player is created.
+double rollDevelopmentCeilingStars(
+  double potentialStars,
+  DevelopmentOutcome outcome,
+  Random rng,
+) {
+  final offset = switch (outcome) {
+    DevelopmentOutcome.exceed => rng.nextDouble() < 0.8 ? 0.5 : 1.0,
+    DevelopmentOutcome.hit => 0.0,
+    DevelopmentOutcome.under => rng.nextDouble() < 0.6 ? -0.5 : -1.0,
+  };
+  return (potentialStars + offset).clamp(0.5, 5.0).toDouble();
 }

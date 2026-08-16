@@ -14,11 +14,21 @@ class PlayerDevEntry {
     required this.player,
     required this.ovrDelta,
     required this.potentialDelta,
+    required this.progress,
+    required this.progressDelta,
+    required this.growthRate,
+    required this.weeklyOvrDelta,
   });
 
   final Player player;
   final int ovrDelta;
   final double potentialDelta;
+  final double progress;
+  final double progressDelta;
+  final double growthRate;
+  final int weeklyOvrDelta;
+
+  int get progressDirection => progressDelta.sign.toInt();
 }
 
 /// A single staff role entry in the Development screen's Staff tab.
@@ -48,10 +58,7 @@ class StaffDevEntry {
 
 /// Aggregated data for the Development screen, computed on-demand.
 class DevelopmentData {
-  const DevelopmentData({
-    required this.players,
-    required this.staff,
-  });
+  const DevelopmentData({required this.players, required this.staff});
 
   final List<PlayerDevEntry> players;
   final List<StaffDevEntry> staff;
@@ -75,12 +82,14 @@ DevelopmentData _buildDevelopmentData(Team team) {
 }
 
 List<PlayerDevEntry> _buildPlayerEntries(Team team) {
-  final sorted = [...team.roster]..sort((a, b) {
-    final groupCmp = positionGroupOrder(a.position)
-        .compareTo(positionGroupOrder(b.position));
-    if (groupCmp != 0) return groupCmp;
-    return a.name.compareTo(b.name);
-  });
+  final sorted = [...team.roster]
+    ..sort((a, b) {
+      final groupCmp = positionGroupOrder(
+        a.position,
+      ).compareTo(positionGroupOrder(b.position));
+      if (groupCmp != 0) return groupCmp;
+      return a.name.compareTo(b.name);
+    });
 
   return sorted.map((player) {
     final (ovrDelta, potDelta) = player.devDelta;
@@ -88,6 +97,10 @@ List<PlayerDevEntry> _buildPlayerEntries(Team team) {
       player: player,
       ovrDelta: ovrDelta,
       potentialDelta: potDelta,
+      progress: player.hidden.overallProgress,
+      progressDelta: player.state.lastDevelopmentProgressDelta,
+      growthRate: player.hidden.growthRate,
+      weeklyOvrDelta: player.state.lastDevelopmentOvrDelta,
     );
   }).toList();
 }

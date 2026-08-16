@@ -94,9 +94,10 @@ class PlayerHidden with _$PlayerHidden {
   const factory PlayerHidden({
     required int injuryProne,
     required int determination,
-    required int overallProgress,
+    @Default(0.0) double overallProgress,
     @Default(1.0) double growthRate,
     required DevelopmentOutcome developmentOutcome,
+    @Default(0.0) double developmentCeilingStars,
   }) = _PlayerHidden;
 
   factory PlayerHidden.fromJson(Map<String, dynamic> json) =>
@@ -115,6 +116,9 @@ class PlayerState with _$PlayerState {
     @Default(0) int suspensionGamesRemaining,
     @Default(AssignedRole.cm()) AssignedRole role,
     @Default(0) int seasonsWithTeam,
+    @Default(0) int minutesThisWeek,
+    @Default(0) int lastDevelopmentOvrDelta,
+    @Default(0.0) double lastDevelopmentProgressDelta,
   }) = _PlayerState;
 
   factory PlayerState.fromJson(Map<String, dynamic> json) =>
@@ -168,6 +172,15 @@ class Player with _$Player {
 extension PlayerX on Player {
   double overall([BalanceConfig balance = BalanceConfig.defaults]) =>
       attributes.overallForPosition(position, balance);
+
+  double developmentCeilingOvr([
+    BalanceConfig balance = BalanceConfig.defaults,
+  ]) {
+    final stars = hidden.developmentCeilingStars > 0
+        ? hidden.developmentCeilingStars
+        : potentialStars;
+    return _ceilingOvrForStars(stars);
+  }
 
   /// Available for selection unless injured or suspended. Low stamina still
   /// allows play but hurts performance and raises injury risk.

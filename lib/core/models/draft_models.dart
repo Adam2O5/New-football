@@ -49,6 +49,7 @@ extension ProspectX on Prospect {
   /// Converts prospect → player after draft pick or undrafted FA sign.
   /// Rolls [DevelopmentOutcome] here (hidden while still a prospect).
   Player toPlayer({required Contract contract, required Random rng}) {
+    final outcome = rollDevelopmentOutcome(determination, rng);
     return Player(
       id: id,
       name: name,
@@ -70,9 +71,16 @@ extension ProspectX on Prospect {
       hidden: PlayerHidden(
         injuryProne: injuryProne,
         determination: determination,
-        overallProgress: (40 + rng.nextInt(50)).clamp(0, 99),
-        growthRate: (0.7 + rng.nextDouble() * 0.8).clamp(0.0, 2.0),
-        developmentOutcome: rollDevelopmentOutcome(determination, rng),
+        overallProgress: (40 + rng.nextInt(50)).toDouble(),
+        growthRate: BalanceConfig.defaults.development.baseGrowthRateFor(
+          determination,
+        ),
+        developmentOutcome: outcome,
+        developmentCeilingStars: rollDevelopmentCeilingStars(
+          potentialStars,
+          outcome,
+          rng,
+        ),
       ),
     );
   }

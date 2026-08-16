@@ -463,10 +463,11 @@ PlayerHidden _$PlayerHiddenFromJson(Map<String, dynamic> json) {
 mixin _$PlayerHidden {
   int get injuryProne => throw _privateConstructorUsedError;
   int get determination => throw _privateConstructorUsedError;
-  int get overallProgress => throw _privateConstructorUsedError;
+  double get overallProgress => throw _privateConstructorUsedError;
   double get growthRate => throw _privateConstructorUsedError;
   DevelopmentOutcome get developmentOutcome =>
       throw _privateConstructorUsedError;
+  double get developmentCeilingStars => throw _privateConstructorUsedError;
 
   /// Serializes this PlayerHidden to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -488,9 +489,10 @@ abstract class $PlayerHiddenCopyWith<$Res> {
   $Res call({
     int injuryProne,
     int determination,
-    int overallProgress,
+    double overallProgress,
     double growthRate,
     DevelopmentOutcome developmentOutcome,
+    double developmentCeilingStars,
   });
 }
 
@@ -514,6 +516,7 @@ class _$PlayerHiddenCopyWithImpl<$Res, $Val extends PlayerHidden>
     Object? overallProgress = null,
     Object? growthRate = null,
     Object? developmentOutcome = null,
+    Object? developmentCeilingStars = null,
   }) {
     return _then(
       _value.copyWith(
@@ -528,7 +531,7 @@ class _$PlayerHiddenCopyWithImpl<$Res, $Val extends PlayerHidden>
             overallProgress: null == overallProgress
                 ? _value.overallProgress
                 : overallProgress // ignore: cast_nullable_to_non_nullable
-                      as int,
+                      as double,
             growthRate: null == growthRate
                 ? _value.growthRate
                 : growthRate // ignore: cast_nullable_to_non_nullable
@@ -537,6 +540,10 @@ class _$PlayerHiddenCopyWithImpl<$Res, $Val extends PlayerHidden>
                 ? _value.developmentOutcome
                 : developmentOutcome // ignore: cast_nullable_to_non_nullable
                       as DevelopmentOutcome,
+            developmentCeilingStars: null == developmentCeilingStars
+                ? _value.developmentCeilingStars
+                : developmentCeilingStars // ignore: cast_nullable_to_non_nullable
+                      as double,
           )
           as $Val,
     );
@@ -555,9 +562,10 @@ abstract class _$$PlayerHiddenImplCopyWith<$Res>
   $Res call({
     int injuryProne,
     int determination,
-    int overallProgress,
+    double overallProgress,
     double growthRate,
     DevelopmentOutcome developmentOutcome,
+    double developmentCeilingStars,
   });
 }
 
@@ -580,6 +588,7 @@ class __$$PlayerHiddenImplCopyWithImpl<$Res>
     Object? overallProgress = null,
     Object? growthRate = null,
     Object? developmentOutcome = null,
+    Object? developmentCeilingStars = null,
   }) {
     return _then(
       _$PlayerHiddenImpl(
@@ -594,7 +603,7 @@ class __$$PlayerHiddenImplCopyWithImpl<$Res>
         overallProgress: null == overallProgress
             ? _value.overallProgress
             : overallProgress // ignore: cast_nullable_to_non_nullable
-                  as int,
+                  as double,
         growthRate: null == growthRate
             ? _value.growthRate
             : growthRate // ignore: cast_nullable_to_non_nullable
@@ -603,6 +612,10 @@ class __$$PlayerHiddenImplCopyWithImpl<$Res>
             ? _value.developmentOutcome
             : developmentOutcome // ignore: cast_nullable_to_non_nullable
                   as DevelopmentOutcome,
+        developmentCeilingStars: null == developmentCeilingStars
+            ? _value.developmentCeilingStars
+            : developmentCeilingStars // ignore: cast_nullable_to_non_nullable
+                  as double,
       ),
     );
   }
@@ -614,9 +627,10 @@ class _$PlayerHiddenImpl implements _PlayerHidden {
   const _$PlayerHiddenImpl({
     required this.injuryProne,
     required this.determination,
-    required this.overallProgress,
+    this.overallProgress = 0.0,
     this.growthRate = 1.0,
     required this.developmentOutcome,
+    this.developmentCeilingStars = 0.0,
   });
 
   factory _$PlayerHiddenImpl.fromJson(Map<String, dynamic> json) =>
@@ -627,16 +641,20 @@ class _$PlayerHiddenImpl implements _PlayerHidden {
   @override
   final int determination;
   @override
-  final int overallProgress;
+  @JsonKey()
+  final double overallProgress;
   @override
   @JsonKey()
   final double growthRate;
   @override
   final DevelopmentOutcome developmentOutcome;
+  @override
+  @JsonKey()
+  final double developmentCeilingStars;
 
   @override
   String toString() {
-    return 'PlayerHidden(injuryProne: $injuryProne, determination: $determination, overallProgress: $overallProgress, growthRate: $growthRate, developmentOutcome: $developmentOutcome)';
+    return 'PlayerHidden(injuryProne: $injuryProne, determination: $determination, overallProgress: $overallProgress, growthRate: $growthRate, developmentOutcome: $developmentOutcome, developmentCeilingStars: $developmentCeilingStars)';
   }
 
   @override
@@ -653,7 +671,12 @@ class _$PlayerHiddenImpl implements _PlayerHidden {
             (identical(other.growthRate, growthRate) ||
                 other.growthRate == growthRate) &&
             (identical(other.developmentOutcome, developmentOutcome) ||
-                other.developmentOutcome == developmentOutcome));
+                other.developmentOutcome == developmentOutcome) &&
+            (identical(
+                  other.developmentCeilingStars,
+                  developmentCeilingStars,
+                ) ||
+                other.developmentCeilingStars == developmentCeilingStars));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -665,6 +688,7 @@ class _$PlayerHiddenImpl implements _PlayerHidden {
     overallProgress,
     growthRate,
     developmentOutcome,
+    developmentCeilingStars,
   );
 
   /// Create a copy of PlayerHidden
@@ -685,9 +709,10 @@ abstract class _PlayerHidden implements PlayerHidden {
   const factory _PlayerHidden({
     required final int injuryProne,
     required final int determination,
-    required final int overallProgress,
+    final double overallProgress,
     final double growthRate,
     required final DevelopmentOutcome developmentOutcome,
+    final double developmentCeilingStars,
   }) = _$PlayerHiddenImpl;
 
   factory _PlayerHidden.fromJson(Map<String, dynamic> json) =
@@ -698,11 +723,13 @@ abstract class _PlayerHidden implements PlayerHidden {
   @override
   int get determination;
   @override
-  int get overallProgress;
+  double get overallProgress;
   @override
   double get growthRate;
   @override
   DevelopmentOutcome get developmentOutcome;
+  @override
+  double get developmentCeilingStars;
 
   /// Create a copy of PlayerHidden
   /// with the given fields replaced by the non-null parameter values.
@@ -726,6 +753,9 @@ mixin _$PlayerState {
   int get suspensionGamesRemaining => throw _privateConstructorUsedError;
   AssignedRole get role => throw _privateConstructorUsedError;
   int get seasonsWithTeam => throw _privateConstructorUsedError;
+  int get minutesThisWeek => throw _privateConstructorUsedError;
+  int get lastDevelopmentOvrDelta => throw _privateConstructorUsedError;
+  double get lastDevelopmentProgressDelta => throw _privateConstructorUsedError;
 
   /// Serializes this PlayerState to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -753,6 +783,9 @@ abstract class $PlayerStateCopyWith<$Res> {
     int suspensionGamesRemaining,
     AssignedRole role,
     int seasonsWithTeam,
+    int minutesThisWeek,
+    int lastDevelopmentOvrDelta,
+    double lastDevelopmentProgressDelta,
   });
 
   $InjuryCopyWith<$Res>? get injury;
@@ -782,6 +815,9 @@ class _$PlayerStateCopyWithImpl<$Res, $Val extends PlayerState>
     Object? suspensionGamesRemaining = null,
     Object? role = null,
     Object? seasonsWithTeam = null,
+    Object? minutesThisWeek = null,
+    Object? lastDevelopmentOvrDelta = null,
+    Object? lastDevelopmentProgressDelta = null,
   }) {
     return _then(
       _value.copyWith(
@@ -817,6 +853,18 @@ class _$PlayerStateCopyWithImpl<$Res, $Val extends PlayerState>
                 ? _value.seasonsWithTeam
                 : seasonsWithTeam // ignore: cast_nullable_to_non_nullable
                       as int,
+            minutesThisWeek: null == minutesThisWeek
+                ? _value.minutesThisWeek
+                : minutesThisWeek // ignore: cast_nullable_to_non_nullable
+                      as int,
+            lastDevelopmentOvrDelta: null == lastDevelopmentOvrDelta
+                ? _value.lastDevelopmentOvrDelta
+                : lastDevelopmentOvrDelta // ignore: cast_nullable_to_non_nullable
+                      as int,
+            lastDevelopmentProgressDelta: null == lastDevelopmentProgressDelta
+                ? _value.lastDevelopmentProgressDelta
+                : lastDevelopmentProgressDelta // ignore: cast_nullable_to_non_nullable
+                      as double,
           )
           as $Val,
     );
@@ -865,6 +913,9 @@ abstract class _$$PlayerStateImplCopyWith<$Res>
     int suspensionGamesRemaining,
     AssignedRole role,
     int seasonsWithTeam,
+    int minutesThisWeek,
+    int lastDevelopmentOvrDelta,
+    double lastDevelopmentProgressDelta,
   });
 
   @override
@@ -895,6 +946,9 @@ class __$$PlayerStateImplCopyWithImpl<$Res>
     Object? suspensionGamesRemaining = null,
     Object? role = null,
     Object? seasonsWithTeam = null,
+    Object? minutesThisWeek = null,
+    Object? lastDevelopmentOvrDelta = null,
+    Object? lastDevelopmentProgressDelta = null,
   }) {
     return _then(
       _$PlayerStateImpl(
@@ -930,6 +984,18 @@ class __$$PlayerStateImplCopyWithImpl<$Res>
             ? _value.seasonsWithTeam
             : seasonsWithTeam // ignore: cast_nullable_to_non_nullable
                   as int,
+        minutesThisWeek: null == minutesThisWeek
+            ? _value.minutesThisWeek
+            : minutesThisWeek // ignore: cast_nullable_to_non_nullable
+                  as int,
+        lastDevelopmentOvrDelta: null == lastDevelopmentOvrDelta
+            ? _value.lastDevelopmentOvrDelta
+            : lastDevelopmentOvrDelta // ignore: cast_nullable_to_non_nullable
+                  as int,
+        lastDevelopmentProgressDelta: null == lastDevelopmentProgressDelta
+            ? _value.lastDevelopmentProgressDelta
+            : lastDevelopmentProgressDelta // ignore: cast_nullable_to_non_nullable
+                  as double,
       ),
     );
   }
@@ -947,6 +1013,9 @@ class _$PlayerStateImpl implements _PlayerState {
     this.suspensionGamesRemaining = 0,
     this.role = const AssignedRole.cm(),
     this.seasonsWithTeam = 0,
+    this.minutesThisWeek = 0,
+    this.lastDevelopmentOvrDelta = 0,
+    this.lastDevelopmentProgressDelta = 0.0,
   });
 
   factory _$PlayerStateImpl.fromJson(Map<String, dynamic> json) =>
@@ -975,10 +1044,19 @@ class _$PlayerStateImpl implements _PlayerState {
   @override
   @JsonKey()
   final int seasonsWithTeam;
+  @override
+  @JsonKey()
+  final int minutesThisWeek;
+  @override
+  @JsonKey()
+  final int lastDevelopmentOvrDelta;
+  @override
+  @JsonKey()
+  final double lastDevelopmentProgressDelta;
 
   @override
   String toString() {
-    return 'PlayerState(stamina: $stamina, form: $form, injury: $injury, regularSeasonYellowCards: $regularSeasonYellowCards, playoffYellowCards: $playoffYellowCards, suspensionGamesRemaining: $suspensionGamesRemaining, role: $role, seasonsWithTeam: $seasonsWithTeam)';
+    return 'PlayerState(stamina: $stamina, form: $form, injury: $injury, regularSeasonYellowCards: $regularSeasonYellowCards, playoffYellowCards: $playoffYellowCards, suspensionGamesRemaining: $suspensionGamesRemaining, role: $role, seasonsWithTeam: $seasonsWithTeam, minutesThisWeek: $minutesThisWeek, lastDevelopmentOvrDelta: $lastDevelopmentOvrDelta, lastDevelopmentProgressDelta: $lastDevelopmentProgressDelta)';
   }
 
   @override
@@ -1003,7 +1081,20 @@ class _$PlayerStateImpl implements _PlayerState {
                 other.suspensionGamesRemaining == suspensionGamesRemaining) &&
             (identical(other.role, role) || other.role == role) &&
             (identical(other.seasonsWithTeam, seasonsWithTeam) ||
-                other.seasonsWithTeam == seasonsWithTeam));
+                other.seasonsWithTeam == seasonsWithTeam) &&
+            (identical(other.minutesThisWeek, minutesThisWeek) ||
+                other.minutesThisWeek == minutesThisWeek) &&
+            (identical(
+                  other.lastDevelopmentOvrDelta,
+                  lastDevelopmentOvrDelta,
+                ) ||
+                other.lastDevelopmentOvrDelta == lastDevelopmentOvrDelta) &&
+            (identical(
+                  other.lastDevelopmentProgressDelta,
+                  lastDevelopmentProgressDelta,
+                ) ||
+                other.lastDevelopmentProgressDelta ==
+                    lastDevelopmentProgressDelta));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1018,6 +1109,9 @@ class _$PlayerStateImpl implements _PlayerState {
     suspensionGamesRemaining,
     role,
     seasonsWithTeam,
+    minutesThisWeek,
+    lastDevelopmentOvrDelta,
+    lastDevelopmentProgressDelta,
   );
 
   /// Create a copy of PlayerState
@@ -1044,6 +1138,9 @@ abstract class _PlayerState implements PlayerState {
     final int suspensionGamesRemaining,
     final AssignedRole role,
     final int seasonsWithTeam,
+    final int minutesThisWeek,
+    final int lastDevelopmentOvrDelta,
+    final double lastDevelopmentProgressDelta,
   }) = _$PlayerStateImpl;
 
   factory _PlayerState.fromJson(Map<String, dynamic> json) =
@@ -1065,6 +1162,12 @@ abstract class _PlayerState implements PlayerState {
   AssignedRole get role;
   @override
   int get seasonsWithTeam;
+  @override
+  int get minutesThisWeek;
+  @override
+  int get lastDevelopmentOvrDelta;
+  @override
+  double get lastDevelopmentProgressDelta;
 
   /// Create a copy of PlayerState
   /// with the given fields replaced by the non-null parameter values.

@@ -303,6 +303,6 @@ void main() {
   });
 
   test('save schema is version seven', () {
-    expect(SaveSchema.currentVersion, 7);
+    expect(SaveSchema.currentVersion, 8);
   });
 }

@@ -498,35 +498,39 @@ Legenda: `⬜` do zrobienia · `🔄` w trakcie · `✅` gotowe
 
 **Demo:** UI składu pokazuje staminę z mnożnikiem wydajności i kierunek formy, co czyni rotację czytelną decyzją.
 
-**Implementacja:** `PlayerState.form` zapisuje wartości ułamkowe (schema `7`), a `MatchResult` przechowuje kontekst pogody/derbów i taktyki obu stron, aby post-meczowe zużycie było odtwarzalne.
+**Implementacja:** `PlayerState.form` zapisuje wartości ułamkowe (schema `8`), a `MatchResult` przechowuje kontekst pogody/derbów i taktyki obu stron, aby post-meczowe zużycie było odtwarzalne.
 
 ---
 
-### ⬜ Task 13: Pełny model rozwoju
+### ✅ Task 13: Pełny model rozwoju
 
 **Cel:** `player_management.md` — `growthRate` z wszystkich czynników × `constDev` 3,67.
 
-- [ ] Bazowy `growthRate` z `determination` (tabela 0,50–1,50)
-- [ ] Czynnik formy: forma 8–10 → +0,05…+0,15, forma 1–3 → −0,15…−0,05
-- [ ] Czynnik sztabu: Head Coach / Youth Coach Development ★
-- [ ] Czynnik atmosfery: −0,10…+0,10
-- [ ] Czynnik minut: +0,01 za każdą rozegraną minutę w tym tygodniu
-- [ ] Dodatek wiekowy z tabeli 18–40 (od +0,40 do −3,00)
-- [ ] Bonus osobowości `ambitious` +10%
-- [ ] Clamp `growthRate ∈ [−3,0; 3,0]`
-- [ ] Tygodniowy postęp = `growthRate × 3,67` dodawany do `overallProgress` jako punkty procentowe
-- [ ] Przelew ponad 100% → +1 do wszystkich 6 atrybutów, `overallProgress = 0`, overflow tracony
-- [ ] Spadek poniżej 0% → −1 do wszystkich atrybutów, `overallProgress = 99`
-- [ ] Fazy wiekowe (≤26 / 27–32 / ≥33) realizowane wyłącznie przez `growthRate`
-- [ ] `DevelopmentOutcome` jako realny sufit: Exceed 80%/20% na +0,5/+1,0★, Under 60%/40% na −0,5/−1,0★
-- [ ] Digest `ovr:own:{week}` przy ≥3 zmianach OVR w tygodniu
-- [ ] Aktualizacja `pointValue` po każdej zmianie atrybutów
+- [x] Bazowy `growthRate` z `determination` (tabela 0,50–1,50)
+- [x] Czynnik formy: forma 8–10 → +0,05…+0,15, forma 1–3 → −0,15…−0,05
+- [x] Czynnik sztabu: Head Coach / Youth Coach Development ★ oraz Mentoring
+- [x] Czynnik atmosfery: −0,10…+0,10
+- [x] Czynnik minut: +0,01 za każdą rozegraną minutę w tym tygodniu
+- [x] Dodatek wiekowy z tabeli 18–40 (od +0,40 do −3,00)
+- [x] Bonus osobowości `ambitious` +10%
+- [x] Clamp `growthRate ∈ [−3,0; 3,0]`
+- [x] Tygodniowy postęp = `growthRate × 3,67` dodawany do `overallProgress` jako punkty procentowe
+- [x] Przelew ponad 100% → +1 do wszystkich 6 atrybutów, `overallProgress = 0`, overflow tracony
+- [x] Spadek poniżej 0% → −1 do wszystkich atrybutów, `overallProgress = 99`
+- [x] Fazy wiekowe (≤26 / 27–32 / ≥33) realizowane wyłącznie przez `growthRate`
+- [x] `DevelopmentOutcome` jako trwały realny sufit: Exceed 80%/20% na +0,5/+1,0★, Under 60%/40% na −0,5/−1,0★
+- [x] Digest `ovr:own:{week}` przy ≥3 zmianach OVR w tygodniu
+- [x] Aktualizacja `pointValue` po każdej zmianie atrybutów
+- [x] Licznik minut tygodniowych i raport ostatniego ticku są serializowane; schema zapisu podniesiona do `8`
+
+**Implementacja:** `DevelopmentService` zwraca raport zmian, `DaySimulator` agreguje minuty po meczach i wykonuje tick na granicy tygodnia, a istniejący `Inbox` składa wiadomości OVR własnego klubu w digest. `DevelopmentScreen` pokazuje postęp, deltę i kierunek oraz tygodniową zmianę OVR.
 
 **Testy**
-- [ ] 18-latek z `determination` 9 i pełnymi minutami rośnie szybciej niż 30-latek
-- [ ] 35-latek z ujemnym `growthRate` traci OVR
-- [ ] Overflow ponad 100% jest tracony (nie kumuluje się do +2 OVR)
-- [ ] Spadek poniżej 0% ustawia `overallProgress` na 99
+- [x] 18-latek z `determination` 9 i pełnymi minutami rośnie szybciej niż 30-latek
+- [x] 35-latek z ujemnym `growthRate` traci OVR
+- [x] Overflow ponad 100% jest tracony (nie kumuluje się do +2 OVR)
+- [x] Spadek poniżej 0% ustawia `overallProgress` na 99
+- [x] Tabele bilansu, injury clamp, outcome, serializacja, minuty i digest OVR
 
 **Demo:** `DevelopmentScreen` pokazuje tygodniowe delty, `overallProgress` i przewidywany kierunek per zawodnik.
 

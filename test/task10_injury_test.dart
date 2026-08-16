@@ -177,6 +177,7 @@ void main() {
     );
 
     final negative = player.copyWith(
+      age: 40,
       hidden: player.hidden.copyWith(growthRate: -3.0),
       state: player.state.copyWith(injury: injury),
     );
@@ -263,7 +264,7 @@ void main() {
   });
 
   test('save schema rejects versions other than current version', () {
-    expect(SaveSchema.currentVersion, 7);
+    expect(SaveSchema.currentVersion, 8);
     final meta = GameSaveMeta(
       id: 'save',
       name: 'Save',
@@ -277,7 +278,10 @@ void main() {
       meta.compatibilityWith(SaveSchema.currentVersion),
       SaveCompatibility.compatible,
     );
-    expect(meta.compatibilityWith(5), SaveCompatibility.newer);
-    expect(meta.compatibilityWith(8), SaveCompatibility.older);
+    expect(meta.compatibilityWith(7), SaveCompatibility.newer);
+    expect(
+      meta.copyWith(schemaVersion: 7).compatibilityWith(8),
+      SaveCompatibility.older,
+    );
   });
 }

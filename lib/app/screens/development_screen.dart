@@ -101,6 +101,7 @@ class _DevelopmentScreenState extends ConsumerState<DevelopmentScreen>
         final entry = data.players[index];
         final player = entry.player;
         final ovrDelta = entry.ovrDelta;
+        final weeklyOvrDelta = entry.weeklyOvrDelta;
         final potDelta = entry.potentialDelta;
 
         return Padding(
@@ -109,10 +110,21 @@ class _DevelopmentScreenState extends ConsumerState<DevelopmentScreen>
             children: [
               Expanded(
                 flex: 3,
-                child: Text(
-                  player.name,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodyMedium,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      player.name,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                    Text(
+                      '${l10n.dev_progress}: ${entry.progress.toStringAsFixed(1)}% '
+                      '${_progressDirection(entry.progressDirection)} '
+                      '${entry.progressDelta >= 0 ? '+' : ''}${entry.progressDelta.toStringAsFixed(1)}%',
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
                 ),
               ),
               SizedBox(
@@ -147,6 +159,20 @@ class _DevelopmentScreenState extends ConsumerState<DevelopmentScreen>
                     color: ovrDelta > 0
                         ? Colors.green
                         : ovrDelta < 0
+                        ? Colors.red
+                        : null,
+                  ),
+                ),
+              ),
+              SizedBox(
+                width: 42,
+                child: Text(
+                  weeklyOvrDelta > 0 ? '+$weeklyOvrDelta' : '$weeklyOvrDelta',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: weeklyOvrDelta > 0
+                        ? Colors.green
+                        : weeklyOvrDelta < 0
                         ? Colors.red
                         : null,
                   ),
@@ -323,6 +349,12 @@ class _DevelopmentScreenState extends ConsumerState<DevelopmentScreen>
     );
   }
 }
+
+String _progressDirection(int direction) => switch (direction) {
+  1 => '↑',
+  -1 => '↓',
+  _ => '→',
+};
 
 String _staffAttrLabel(AppLocalizations l10n, String attrName) =>
     switch (attrName) {

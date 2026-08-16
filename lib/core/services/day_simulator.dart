@@ -161,9 +161,34 @@ class DaySimulator {
     // Week boundary: Sunday → Monday. Player development ticks weekly
     // (`docs/player_management.md`), not just once per season.
     if (day == 7) {
-      state = state.copyWith(
-        teams: state.teams.map(development.developTeam).toList(),
-      );
+      final developmentChanges = <DevelopmentChange>[];
+      final developedTeams = state.teams.map((team) {
+        final tick = development.developTeamWithReport(team);
+        if (team.id == state.playerTeamId) {
+          developmentChanges.addAll(tick.changes.where((c) => c.ovrDelta != 0));
+        }
+        return tick.team;
+      }).toList();
+      state = state.copyWith(teams: developedTeams);
+
+      for (final change in developmentChanges) {
+        state = messages.send(
+          state,
+          type: MessageType.playerEvent,
+          kind: 'ovrChange',
+          domain: MessageDomain.playerEvent,
+          titleKey: 'msg_ovrDigest_title',
+          bodyKey: 'msg_ovrDigest_body',
+          args: {'playerName': change.playerName, 'delta': change.ovrDelta},
+          payload: {
+            'playerId': change.playerId,
+            'ovrDelta': change.ovrDelta,
+            'growthRate': change.growthRate,
+          },
+          groupKey: 'ovr:own:$week',
+        );
+      }
+
       // Continuous scouting tick (`docs/staff_rules.md` §5), while a draft
       // class is known (from lottery through draft week).
       if (state.currentSeason.draftState != null) {
@@ -482,6 +507,7 @@ class DaySimulator {
           stamina: balance.player.clampStamina(
             afterLoss + balance.player.recoveryBetweenMatches,
           ),
+          minutesThisWeek: p.state.minutesThisWeek + minutes,
         ),
       );
       next = next.withMatchForm(
@@ -502,6 +528,12 @@ class DaySimulator {
                 potentialStars: (next.potentialStars - 0.5)
                     .clamp(0.5, 5.0)
                     .toDouble(),
+                hidden: next.hidden.copyWith(
+                  developmentCeilingStars:
+                      (next.hidden.developmentCeilingStars - 0.5)
+                          .clamp(0.5, 5.0)
+                          .toDouble(),
+                ),
               )
               .recalculatePointValue(balance);
         }

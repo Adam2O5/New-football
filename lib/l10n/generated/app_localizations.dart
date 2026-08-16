@@ -2838,6 +2838,24 @@ abstract class AppLocalizations {
   /// **'+/-'**
   String get dev_colChange;
 
+  /// No description provided for @dev_progress.
+  ///
+  /// In pl, this message translates to:
+  /// **'Postęp'**
+  String get dev_progress;
+
+  /// No description provided for @dev_growth.
+  ///
+  /// In pl, this message translates to:
+  /// **'Tempo'**
+  String get dev_growth;
+
+  /// No description provided for @dev_weeklyOvr.
+  ///
+  /// In pl, this message translates to:
+  /// **'OVR tyg.'**
+  String get dev_weeklyOvr;
+
   /// No description provided for @staffAttr_tactics.
   ///
   /// In pl, this message translates to:

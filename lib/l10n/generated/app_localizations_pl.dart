@@ -1503,6 +1503,15 @@ class AppLocalizationsPl extends AppLocalizations {
   String get dev_colChange => '+/-';
 
   @override
+  String get dev_progress => 'Postęp';
+
+  @override
+  String get dev_growth => 'Tempo';
+
+  @override
+  String get dev_weeklyOvr => 'OVR tyg.';
+
+  @override
   String get staffAttr_tactics => 'Taktyka';
 
   @override

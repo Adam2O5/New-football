@@ -46,12 +46,14 @@ _$PlayerHiddenImpl _$$PlayerHiddenImplFromJson(Map<String, dynamic> json) =>
     _$PlayerHiddenImpl(
       injuryProne: (json['injuryProne'] as num).toInt(),
       determination: (json['determination'] as num).toInt(),
-      overallProgress: (json['overallProgress'] as num).toInt(),
+      overallProgress: (json['overallProgress'] as num?)?.toDouble() ?? 0.0,
       growthRate: (json['growthRate'] as num?)?.toDouble() ?? 1.0,
       developmentOutcome: $enumDecode(
         _$DevelopmentOutcomeEnumMap,
         json['developmentOutcome'],
       ),
+      developmentCeilingStars:
+          (json['developmentCeilingStars'] as num?)?.toDouble() ?? 0.0,
     );
 
 Map<String, dynamic> _$$PlayerHiddenImplToJson(_$PlayerHiddenImpl instance) =>
@@ -62,6 +64,7 @@ Map<String, dynamic> _$$PlayerHiddenImplToJson(_$PlayerHiddenImpl instance) =>
       'growthRate': instance.growthRate,
       'developmentOutcome':
           _$DevelopmentOutcomeEnumMap[instance.developmentOutcome]!,
+      'developmentCeilingStars': instance.developmentCeilingStars,
     };
 
 const _$DevelopmentOutcomeEnumMap = {
@@ -86,6 +89,11 @@ _$PlayerStateImpl _$$PlayerStateImplFromJson(Map<String, dynamic> json) =>
           ? const AssignedRole.cm()
           : AssignedRole.fromJson(json['role'] as Map<String, dynamic>),
       seasonsWithTeam: (json['seasonsWithTeam'] as num?)?.toInt() ?? 0,
+      minutesThisWeek: (json['minutesThisWeek'] as num?)?.toInt() ?? 0,
+      lastDevelopmentOvrDelta:
+          (json['lastDevelopmentOvrDelta'] as num?)?.toInt() ?? 0,
+      lastDevelopmentProgressDelta:
+          (json['lastDevelopmentProgressDelta'] as num?)?.toDouble() ?? 0.0,
     );
 
 Map<String, dynamic> _$$PlayerStateImplToJson(_$PlayerStateImpl instance) =>
@@ -98,6 +106,9 @@ Map<String, dynamic> _$$PlayerStateImplToJson(_$PlayerStateImpl instance) =>
       'suspensionGamesRemaining': instance.suspensionGamesRemaining,
       'role': instance.role,
       'seasonsWithTeam': instance.seasonsWithTeam,
+      'minutesThisWeek': instance.minutesThisWeek,
+      'lastDevelopmentOvrDelta': instance.lastDevelopmentOvrDelta,
+      'lastDevelopmentProgressDelta': instance.lastDevelopmentProgressDelta,
     };
 
 _$PlayerImpl _$$PlayerImplFromJson(Map<String, dynamic> json) => _$PlayerImpl(
