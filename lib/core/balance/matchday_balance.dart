@@ -1,3 +1,5 @@
+import 'package:new_football/core/models/enums.dart';
+
 /// Tunable constants from `docs/matchday_model.md` §19.
 ///
 /// The walkover and no-GK fields are retained for the current engine contract;
@@ -37,6 +39,35 @@ class MatchdayBalance {
     this.aerialEdgeClamp = 25,
     this.aerialCornerCoef = 0.006,
     this.aerialFkCoef = 0.003,
+    this.possessionSlowBonus = 0.03,
+    this.possessionFastPenalty = 0.03,
+    this.possessionGegenpressingBonus = 0.04,
+    this.tempoSlowMultiplier = 0.88,
+    this.tempoBalancedMultiplier = 1.0,
+    this.tempoFastMultiplier = 1.18,
+    this.pressingLowMultiplier = 0.94,
+    this.pressingMediumMultiplier = 1.0,
+    this.pressingHighMultiplier = 1.08,
+    this.pressingGegenpressingMultiplier = 1.14,
+    this.sequenceMaxPerMinute = 3,
+    this.momentumSequenceDivisor = 1500.0,
+    this.sequenceConditionBonus = 4.0,
+    this.sequenceStrongConditionBonus = 6.0,
+    this.sequenceTypeBaseWeights = const <String, double>{
+      'centralBuildUp': 22,
+      'wingPlay': 20,
+      'crossFromWide': 12,
+      'throughBall': 11,
+      'individualDribble': 10,
+      'counterAttack': 9,
+      'longBall': 8,
+      'setPiece': 8,
+    },
+    this.stakeRegularSequenceMultiplier = 1.0,
+    this.stakePlayInSequenceMultiplier = 1.02,
+    this.stakePlayoffSequenceMultiplier = 1.04,
+    this.stakePlayoffEliminationSequenceMultiplier = 1.08,
+    this.stakeLeagueFinalSequenceMultiplier = 1.10,
   });
 
   /// Illegal roster → walkover score for the offending side.
@@ -88,6 +119,49 @@ class MatchdayBalance {
   final int aerialEdgeClamp;
   final double aerialCornerCoef;
   final double aerialFkCoef;
+
+  /// Task 17 possession and sequence-loop parameters.
+  final double possessionSlowBonus;
+  final double possessionFastPenalty;
+  final double possessionGegenpressingBonus;
+  final double tempoSlowMultiplier;
+  final double tempoBalancedMultiplier;
+  final double tempoFastMultiplier;
+  final double pressingLowMultiplier;
+  final double pressingMediumMultiplier;
+  final double pressingHighMultiplier;
+  final double pressingGegenpressingMultiplier;
+  final int sequenceMaxPerMinute;
+  final double momentumSequenceDivisor;
+  final double sequenceConditionBonus;
+  final double sequenceStrongConditionBonus;
+  final Map<String, double> sequenceTypeBaseWeights;
+  final double stakeRegularSequenceMultiplier;
+  final double stakePlayInSequenceMultiplier;
+  final double stakePlayoffSequenceMultiplier;
+  final double stakePlayoffEliminationSequenceMultiplier;
+  final double stakeLeagueFinalSequenceMultiplier;
+
+  double tempoMultiplier(Tempo tempo) => switch (tempo) {
+    Tempo.slow => tempoSlowMultiplier,
+    Tempo.balanced => tempoBalancedMultiplier,
+    Tempo.fast => tempoFastMultiplier,
+  };
+
+  double pressingMultiplier(PressingIntensity pressing) => switch (pressing) {
+    PressingIntensity.low => pressingLowMultiplier,
+    PressingIntensity.medium => pressingMediumMultiplier,
+    PressingIntensity.high => pressingHighMultiplier,
+    PressingIntensity.gegenpressing => pressingGegenpressingMultiplier,
+  };
+
+  double stakeMultiplier(MatchStake stake) => switch (stake) {
+    MatchStake.regular => stakeRegularSequenceMultiplier,
+    MatchStake.playIn => stakePlayInSequenceMultiplier,
+    MatchStake.playoff => stakePlayoffSequenceMultiplier,
+    MatchStake.playoffElimination => stakePlayoffEliminationSequenceMultiplier,
+    MatchStake.leagueFinal => stakeLeagueFinalSequenceMultiplier,
+  };
 
   /// Documentation names for the substitution limits.
   int get subLimit => maxSubstitutions;

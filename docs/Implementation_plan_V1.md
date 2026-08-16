@@ -655,32 +655,36 @@ Legenda: `⬜` do zrobienia · `🔄` w trakcie · `✅` gotowe
 
 ---
 
-### ⬜ Task 17: Etap 3 — pętla minutowa: posiadanie, sekwencje, rdzeń pojedynku
+### ✅ Task 17: Etap 3 — pętla minutowa: posiadanie, sekwencje, rdzeń pojedynku
 
 **Cel:** `matchday_model.md` §6.3–6.4, §7.1–7.3.
 
-- [ ] `contest`: `P(atk) = 1 / (1 + 10^((R'def − R'atk) / 35))`
-- [ ] Szum `N(0; 6,0)` niezależny dla każdego pojedynku
-- [ ] Roll posiadania z `midRating` obu drużyn
-- [ ] Modyfikatory posiadania: `Tempo.slow` +0,03, `Tempo.fast` −0,03, `gegenpressing` +0,04
-- [ ] Posiadanie jako statystyka = średnia z minut
-- [ ] `λ = SEQ_BASE 1,15 × tempoMult × pressingMult × momentumMult × stakeMult`
-- [ ] `tempoMult`: slow 0,88 / balanced 1,00 / fast 1,18
-- [ ] `pressingMult`: low 0,94 / medium 1,00 / high 1,08 / gegenpressing 1,14
-- [ ] Liczba sekwencji `~ Poisson(λ)`, clamp 0–3
-- [ ] Wybór typu sekwencji z wag §7.3 (8 typów, wagi 8–22) z warunkami zwiększenia
-- [ ] Wybór broniącego z wag pozycyjnych §7.2 zależnych od typu sekwencji
-- [ ] Jeden `Random` per mecz, konsumowany w stałej kolejności
-- [ ] Tick staminy jako krok 1 pętli minutowej
-- [ ] Przeliczenie `effAttr` on-pitch jako krok 2
+- [x] `contest`: `P(atk) = 1 / (1 + 10^((R'def − R'atk) / 35))`
+- [x] Szum `N(0; 6,0)` niezależny dla każdego pojedynku
+- [x] Roll posiadania z `midRating` obu drużyn
+- [x] Modyfikatory posiadania: `Tempo.slow` +0,03, `Tempo.fast` −0,03, `gegenpressing` +0,04
+- [x] Posiadanie jako statystyka = średnia z minut
+- [x] `λ = SEQ_BASE 1,15 × tempoMult × pressingMult × momentumMult × stakeMult`
+- [x] `tempoMult`: slow 0,88 / balanced 1,00 / fast 1,18
+- [x] `pressingMult`: low 0,94 / medium 1,00 / high 1,08 / gegenpressing 1,14
+- [x] Liczba sekwencji `~ Poisson(λ)`, clamp 0–3
+- [x] Wybór typu sekwencji z wag §7.3 (8 typów, wagi 8–22) z warunkami zwiększenia
+- [x] Wybór broniącego z wag pozycyjnych §7.2 zależnych od typu sekwencji
+- [x] Jeden `Random` per mecz, konsumowany w stałej kolejności przez `MatchRandom`
+- [x] Tick staminy jako krok 1 pętli minutowej
+- [x] Przeliczenie `effAttr` on-pitch jako krok 2
 
 **Testy**
-- [ ] +10 przewagi → ~66% wygranych pojedynków
-- [ ] +25 przewagi → ~84% wygranych pojedynków
-- [ ] ~100–110 sekwencji na mecz, ~52 na drużynę
-- [ ] Ten sam seed daje identyczną sekwencję rolli
+- [x] +10 przewagi → ~66% wygranych pojedynków
+- [x] +25 przewagi → ~84% wygranych pojedynków
+- [x] ~100–110 sekwencji na mecz, ~52 na drużynę dla zbalansowanego fixture’u
+- [x] Ten sam seed daje identyczną sekwencję rolli
 
-**Demo:** mecz produkuje realistyczną liczbę sekwencji z podziałem posiadania odpowiadającym sile środka pola.
+**Implementacja:** `DuelResolver`, `SequenceSelector`, `MatchRandom` oraz izolowany `SimulationMatchEngine`/`SimulationLiveMatch` znajdują się w `lib/core/simulation` i korzystają ze wspólnego pre-match, snapshotów oraz pipeline’u Task 16. Legacy `core/engine/MatchEngine`, provider i zapisane modele pozostają bez zmian; przełączenie produkcyjnego providera należy do Task 22.
+
+**Uwagi balansu:** `stakeMult` i liczbowe przyrosty warunków typów sekwencji nie były kompletne w dokumentacji. Wartości zostały wyprowadzone do `MatchdayBalance`, z bazowym `regular = 1,00`, wartościami rosnącymi dla postseason oraz jawnie testowalnymi bonusami warunkowymi.
+
+**Demo:** izolowany silnik produkuje deterministyczny trace 90 minut z kolejnością stamina → effAttr → possession → Poisson → typ/obrońca → contest, realistyczną liczbą sekwencji i posiadaniem agregowanym ze średniej minutowej.
 
 ---
 

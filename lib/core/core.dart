@@ -1,7 +1,11 @@
 export 'ai/team_ai_service.dart';
 export 'balance/balance_config.dart';
+export 'random/match_random.dart';
 export 'engine/match_engine.dart';
+export 'simulation/duel_resolver.dart';
 export 'simulation/effective_attributes.dart';
+export 'simulation/match_engine.dart';
+export 'simulation/sequence_resolver.dart';
 export 'simulation/match_context_factory.dart';
 export 'simulation/match_message_emitter.dart';
 export 'simulation/pre_match_validator.dart';
