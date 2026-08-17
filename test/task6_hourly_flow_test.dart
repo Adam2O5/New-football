@@ -10,7 +10,7 @@ import 'package:new_football/core/models/message.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/services/day_simulator.dart';
 import 'package:new_football/core/services/game_factory.dart';
-import 'package:new_football/core/engine/match_engine.dart';
+import 'package:new_football/core/simulation/match_bootstrap.dart';
 import 'package:new_football/data/save_repository.dart';
 
 void main() {
@@ -65,7 +65,7 @@ void main() {
     );
 
     expect(restored.leagueState.currentHour, 7);
-    expect(SaveSchema.currentVersion, 10);
+    expect(SaveSchema.currentVersion, 11);
   });
 
   test('hourly mode is limited to extensions and FA phase I', () async {

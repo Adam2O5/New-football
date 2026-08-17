@@ -1,5 +1,5 @@
 import 'package:new_football/core/balance/balance_config.dart';
-import 'package:new_football/core/engine/match_engine.dart' as legacy;
+import 'package:new_football/core/simulation/match_bootstrap.dart' as legacy;
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/goalkeeper_attributes.dart';
 import 'package:new_football/core/models/match_models.dart';
@@ -13,6 +13,7 @@ import 'package:new_football/core/simulation/effective_attributes.dart';
 import 'package:new_football/core/simulation/match_context_effects.dart';
 import 'package:new_football/core/simulation/matchday_runtime.dart';
 import 'package:new_football/core/simulation/match_incident_resolver.dart';
+import 'package:new_football/core/simulation/match_stats.dart';
 import 'package:new_football/core/simulation/sequence_chain_resolver.dart';
 import 'package:new_football/core/simulation/sequence_resolver.dart';
 import 'package:new_football/core/simulation/set_piece_resolver.dart';
@@ -607,8 +608,11 @@ class SimulationLiveMatch {
   }
 }
 
-/// Task 17 engine. It is deliberately not wired to the production provider;
-/// Task 22 will perform the cutover after Tasks 18–21 complete.
+/// Canonical minute-by-minute match engine for production and Tasks 17–22.
+///
+/// [simulateFull] exposes the runtime trace used by deterministic tests;
+/// [simulateFullMatch] is the persisted MatchResult facade used by the
+/// provider, day simulator and postseason services.
 class SimulationMatchEngine {
   const SimulationMatchEngine({this.balance = BalanceConfig.defaults});
 
@@ -1930,6 +1934,38 @@ class SimulationMatchEngine {
     return live.toResult();
   }
 
+  /// Builds the persisted [MatchResult] contract from the canonical runtime.
+  ///
+  /// [simulateFull] remains available as the diagnostic/runtime API used by
+  /// Tasks 17–21. Production callers must use this method so player and team
+  /// statistics are assembled from the minute trace rather than legacy
+  /// score-based estimates.
+  MatchResult simulateFullMatch({
+    required Team home,
+    required Team away,
+    MatchContext context = const MatchContext(),
+    int rngSeed = 0,
+    bool includeStoppageTime = false,
+  }) {
+    final live = start(
+      home: home,
+      away: away,
+      context: context,
+      rngSeed: rngSeed,
+    );
+    runUntil(live, 90, includeStoppageTime: includeStoppageTime);
+    return toMatchResult(live: live, home: home, away: away);
+  }
+
+  /// Finalizes an observed live match with the same result assembler used by
+  /// headless simulation.
+  MatchResult toMatchResult({
+    required SimulationLiveMatch live,
+    required Team home,
+    required Team away,
+  }) => MatchResultAssembler(
+    balance: balance,
+  ).assemble(home: home, away: away, live: live, simulation: live.toResult());
   void _prepareFirstHalfStoppage(SimulationLiveMatch live) {
     if (live._firstHalfStoppageTime != null) return;
     final value = _stoppageForEvents(

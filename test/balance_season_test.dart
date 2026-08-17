@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:new_football/core/engine/match_engine.dart';
+import 'package:new_football/core/simulation/match_bootstrap.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/standing.dart';
 import 'package:new_football/core/random/seeds.dart';
@@ -28,7 +28,11 @@ void main() {
         final result = engine.simulateFull(
           home: home,
           away: away,
-          rngSeed: matchSeed(game.saveSeed, league.currentSeason.year, match.id),
+          rngSeed: matchSeed(
+            game.saveSeed,
+            league.currentSeason.year,
+            match.id,
+          ),
         );
         final newSchedule = league.currentSeason.schedule
             .map((m) => m.id == match.id ? m.copyWith(result: result) : m)

@@ -1972,6 +1972,60 @@ class AppLocalizationsPl extends AppLocalizations {
   String get stats_rating => 'Ocena';
 
   @override
+  String get stats_boxScore => 'Pełny box score';
+
+  @override
+  String get stats_shots => 'Strzały';
+
+  @override
+  String get stats_shotsOnTarget => 'Strzały celne';
+
+  @override
+  String get stats_xg => 'xG';
+
+  @override
+  String get stats_passes => 'Podania';
+
+  @override
+  String get stats_passAccuracy => 'Celność podań';
+
+  @override
+  String get stats_duelsWon => 'Wygrane pojedynki';
+
+  @override
+  String get stats_offsides => 'Spalone';
+
+  @override
+  String get stats_corners => 'Rzuty rożne';
+
+  @override
+  String get stats_fouls => 'Faule';
+
+  @override
+  String get stats_yellowCards => 'Żółte kartki';
+
+  @override
+  String get stats_redCards => 'Czerwone kartki';
+
+  @override
+  String get stats_tackles => 'Odbiory';
+
+  @override
+  String get stats_interceptions => 'Przechwyty';
+
+  @override
+  String get stats_cleanSheets => 'Czyste konta';
+
+  @override
+  String get stats_saves => 'Obrony';
+
+  @override
+  String get stats_shotsFaced => 'Strzały przeciwko';
+
+  @override
+  String get stats_possession => 'Posiadanie';
+
+  @override
   String get stats_record => 'Bilans';
 
   @override

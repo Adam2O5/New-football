@@ -94,10 +94,15 @@ _$TeamMatchStatsImpl _$$TeamMatchStatsImplFromJson(Map<String, dynamic> json) =>
       shotsOnTarget: (json['shotsOnTarget'] as num?)?.toInt() ?? 0,
       possession: (json['possession'] as num?)?.toInt() ?? 0,
       xg: (json['xg'] as num?)?.toDouble() ?? 0.0,
+      passes: (json['passes'] as num?)?.toInt() ?? 0,
+      passAccuracy: (json['passAccuracy'] as num?)?.toDouble() ?? 0.0,
+      duelsWon: (json['duelsWon'] as num?)?.toInt() ?? 0,
+      offsides: (json['offsides'] as num?)?.toInt() ?? 0,
       corners: (json['corners'] as num?)?.toInt() ?? 0,
       fouls: (json['fouls'] as num?)?.toInt() ?? 0,
       yellowCards: (json['yellowCards'] as num?)?.toInt() ?? 0,
       redCards: (json['redCards'] as num?)?.toInt() ?? 0,
+      saves: (json['saves'] as num?)?.toInt() ?? 0,
     );
 
 Map<String, dynamic> _$$TeamMatchStatsImplToJson(
@@ -109,10 +114,15 @@ Map<String, dynamic> _$$TeamMatchStatsImplToJson(
   'shotsOnTarget': instance.shotsOnTarget,
   'possession': instance.possession,
   'xg': instance.xg,
+  'passes': instance.passes,
+  'passAccuracy': instance.passAccuracy,
+  'duelsWon': instance.duelsWon,
+  'offsides': instance.offsides,
   'corners': instance.corners,
   'fouls': instance.fouls,
   'yellowCards': instance.yellowCards,
   'redCards': instance.redCards,
+  'saves': instance.saves,
 };
 
 _$MatchTeamSnapshotImpl _$$MatchTeamSnapshotImplFromJson(
@@ -266,6 +276,10 @@ _$MatchResultImpl _$$MatchResultImplFromJson(
           ?.map((e) => MatchDiscipline.fromJson(e as Map<String, dynamic>))
           .toList() ??
       const [],
+  manOfTheMatchPlayerId: json['manOfTheMatchPlayerId'] as String?,
+  inspiredPerformancePlayerId: json['inspiredPerformancePlayerId'] as String?,
+  matchEndMinute: (json['matchEndMinute'] as num?)?.toInt() ?? 90,
+  stoppageTime: (json['stoppageTime'] as num?)?.toInt() ?? 0,
 );
 
 Map<String, dynamic> _$$MatchResultImplToJson(_$MatchResultImpl instance) =>
@@ -299,6 +313,10 @@ Map<String, dynamic> _$$MatchResultImplToJson(_$MatchResultImpl instance) =>
       'events': instance.events,
       'injuries': instance.injuries,
       'disciplines': instance.disciplines,
+      'manOfTheMatchPlayerId': instance.manOfTheMatchPlayerId,
+      'inspiredPerformancePlayerId': instance.inspiredPerformancePlayerId,
+      'matchEndMinute': instance.matchEndMinute,
+      'stoppageTime': instance.stoppageTime,
     };
 
 const _$MatchStatusEnumMap = {

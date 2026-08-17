@@ -6,6 +6,7 @@ import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/app/utils/formatters.dart';
 import 'package:new_football/app/widgets/screen_background.dart';
 import 'package:new_football/core/models/league_state.dart';
+import 'package:new_football/core/models/match_models.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/standing.dart';
 import 'package:new_football/core/models/team.dart';
@@ -173,23 +174,119 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
     };
   }
 
+  Map<String, TeamMatchStats> _aggregateTeamStats(LeagueState league) {
+    final accumulators = <String, _TeamStatsAccumulator>{};
+    for (final match in league.currentSeason.schedule) {
+      final result = match.result;
+      if (result == null) continue;
+      accumulators
+          .putIfAbsent(
+            result.homeStats.teamId,
+            () => _TeamStatsAccumulator(result.homeStats.teamId),
+          )
+          .add(result.homeStats);
+      accumulators
+          .putIfAbsent(
+            result.awayStats.teamId,
+            () => _TeamStatsAccumulator(result.awayStats.teamId),
+          )
+          .add(result.awayStats);
+    }
+    return {
+      for (final entry in accumulators.entries)
+        entry.key: entry.value.toStats(),
+    };
+  }
+
   Widget _playerCard(
     BuildContext context,
     AppLocalizations l10n,
     _PlayerStatsRow row,
   ) {
+    final stats = row.stats;
     return Card(
-      child: ListTile(
-        leading: CircleAvatar(child: Text(row.player.position.code)),
-        title: Text(row.player.name),
-        subtitle: Text(
-          '${row.teamName} · ${l10n.stats_appearances}: ${row.stats.appearances} · '
-          '${l10n.stats_goals}: ${row.stats.goals} · ${l10n.stats_assists}: ${row.stats.assists}',
-        ),
-        trailing: Text(
-          '${l10n.stats_rating}: ${row.stats.ratingAvg.toStringAsFixed(2)}',
-        ),
-        onTap: () => context.push('/game/player/${row.player.id}'),
+      child: Column(
+        children: [
+          ListTile(
+            leading: CircleAvatar(child: Text(row.player.position.code)),
+            title: Text(row.player.name),
+            subtitle: Text(
+              '${row.teamName} · ${l10n.stats_appearances}: ${stats.appearances} · '
+              '${l10n.stats_goals}: ${stats.goals} · ${l10n.stats_assists}: ${stats.assists}',
+            ),
+            trailing: Text(
+              '${l10n.stats_rating}: ${stats.ratingAvg.toStringAsFixed(2)}',
+            ),
+            onTap: () => context.push('/game/player/${row.player.id}'),
+          ),
+          ExpansionTile(
+            title: Text(l10n.stats_boxScore),
+            children: [
+              _statGrid([
+                _StatLine(l10n.stats_appearances, '${stats.appearances}'),
+                _StatLine(l10n.stats_minutes, '${stats.minutes}'),
+                _StatLine(l10n.stats_goals, '${stats.goals}'),
+                _StatLine(l10n.stats_assists, '${stats.assists}'),
+                _StatLine(l10n.stats_shots, '${stats.shots}'),
+                _StatLine(l10n.stats_shotsOnTarget, '${stats.shotsOnTarget}'),
+                _StatLine(l10n.stats_xg, _formatDecimal(stats.xg)),
+                _StatLine(l10n.stats_passes, '${stats.passes}'),
+                _StatLine(
+                  l10n.stats_passAccuracy,
+                  _formatPercent(stats.passAccuracy),
+                ),
+                _StatLine(l10n.stats_duelsWon, '${stats.duelsWon}'),
+                _StatLine(l10n.stats_offsides, '${stats.offsides}'),
+                _StatLine(l10n.stats_corners, '${stats.corners}'),
+                _StatLine(l10n.stats_tackles, '${stats.tackles}'),
+                _StatLine(l10n.stats_interceptions, '${stats.interceptions}'),
+                _StatLine(l10n.stats_cleanSheets, '${stats.cleanSheets}'),
+                _StatLine(l10n.stats_saves, '${stats.saves}'),
+                _StatLine(l10n.stats_shotsFaced, '${stats.shotsFaced}'),
+                _StatLine(l10n.stats_yellowCards, '${stats.yellowCards}'),
+                _StatLine(l10n.stats_redCards, '${stats.redCards}'),
+                _StatLine(l10n.stats_rating, _formatDecimal(stats.ratingAvg)),
+              ]),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _statGrid(List<_StatLine> lines) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final columnCount = constraints.maxWidth >= 520 ? 3 : 2;
+          final width =
+              (constraints.maxWidth - (columnCount - 1) * 12) / columnCount;
+          return Wrap(
+            spacing: 12,
+            runSpacing: 8,
+            children: [
+              for (final line in lines)
+                SizedBox(
+                  width: width,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          line.label,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ),
+                      Text(
+                        line.value,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -199,7 +296,11 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
     AppLocalizations l10n,
     LeagueState league,
   ) {
-    final entries = [for (final team in league.teams) _teamRow(league, team)];
+    final matchStats = _aggregateTeamStats(league);
+    final entries = [
+      for (final team in league.teams)
+        _teamRow(league, team, matchStats[team.id]),
+    ];
     entries.sort((a, b) => b.averageOvr.compareTo(a.averageOvr));
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -213,7 +314,8 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                 title: Text(row.team.name),
                 subtitle: Text(
                   '${l10n.stats_record}: ${row.standing?.wins ?? 0}-${row.standing?.draws ?? 0}-${row.standing?.losses ?? 0} · '
-                  '${l10n.stats_averageOvr}: ${row.averageOvr.toStringAsFixed(1)}',
+                  '${l10n.stats_averageOvr}: ${row.averageOvr.toStringAsFixed(1)}'
+                  '${row.matchStats == null ? '' : ' · ${l10n.stats_xg}: ${_formatDecimal(row.matchStats!.xg)}'}',
                 ),
                 children: [
                   ListTile(
@@ -238,6 +340,70 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                     title: Text(l10n.stats_chemistry),
                     trailing: Text('${row.team.chemistry}'),
                   ),
+                  if (row.matchStats != null)
+                    ExpansionTile(
+                      title: Text(l10n.stats_boxScore),
+                      children: [
+                        _statGrid([
+                          _StatLine(
+                            l10n.stats_goals,
+                            '${row.matchStats!.goals}',
+                          ),
+                          _StatLine(
+                            l10n.stats_shots,
+                            '${row.matchStats!.shots}',
+                          ),
+                          _StatLine(
+                            l10n.stats_shotsOnTarget,
+                            '${row.matchStats!.shotsOnTarget}',
+                          ),
+                          _StatLine(
+                            l10n.stats_xg,
+                            _formatDecimal(row.matchStats!.xg),
+                          ),
+                          _StatLine(
+                            l10n.stats_possession,
+                            '${row.matchStats!.possession}%',
+                          ),
+                          _StatLine(
+                            l10n.stats_passes,
+                            '${row.matchStats!.passes}',
+                          ),
+                          _StatLine(
+                            l10n.stats_passAccuracy,
+                            _formatPercent(row.matchStats!.passAccuracy),
+                          ),
+                          _StatLine(
+                            l10n.stats_duelsWon,
+                            '${row.matchStats!.duelsWon}',
+                          ),
+                          _StatLine(
+                            l10n.stats_offsides,
+                            '${row.matchStats!.offsides}',
+                          ),
+                          _StatLine(
+                            l10n.stats_corners,
+                            '${row.matchStats!.corners}',
+                          ),
+                          _StatLine(
+                            l10n.stats_fouls,
+                            '${row.matchStats!.fouls}',
+                          ),
+                          _StatLine(
+                            l10n.stats_yellowCards,
+                            '${row.matchStats!.yellowCards}',
+                          ),
+                          _StatLine(
+                            l10n.stats_redCards,
+                            '${row.matchStats!.redCards}',
+                          ),
+                          _StatLine(
+                            l10n.stats_saves,
+                            '${row.matchStats!.saves}',
+                          ),
+                        ]),
+                      ],
+                    ),
                 ],
               ),
             ),
@@ -246,7 +412,11 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
     );
   }
 
-  _TeamOverviewRow _teamRow(LeagueState league, Team team) {
+  _TeamOverviewRow _teamRow(
+    LeagueState league,
+    Team team,
+    TeamMatchStats? matchStats,
+  ) {
     Standing? standing;
     for (final conference in league.currentSeason.standings) {
       final found = conference.forTeam(team.id);
@@ -261,8 +431,20 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
       standing: standing,
       averageOvr: average,
       injured: team.roster.where((p) => p.state.injured).length,
+      matchStats: matchStats,
     );
   }
+}
+
+String _formatDecimal(double value) => value.toStringAsFixed(2);
+
+String _formatPercent(double value) => '${value.toStringAsFixed(1)}%';
+
+class _StatLine {
+  const _StatLine(this.label, this.value);
+
+  final String label;
+  final String value;
 }
 
 class _StatsAccumulator {
@@ -272,9 +454,20 @@ class _StatsAccumulator {
   int appearances = 0;
   int yellowCards = 0;
   int redCards = 0;
+  int shots = 0;
+  int shotsOnTarget = 0;
+  double xg = 0.0;
+  int passes = 0;
+  double passAccuracyWeighted = 0.0;
+  int passAccuracyWeight = 0;
+  int duelsWon = 0;
+  int offsides = 0;
+  int corners = 0;
   int tackles = 0;
   int interceptions = 0;
+  int cleanSheets = 0;
   int saves = 0;
+  int shotsFaced = 0;
   double ratingTotal = 0;
   int ratingWeight = 0;
 
@@ -285,9 +478,20 @@ class _StatsAccumulator {
     appearances += stat.minutes > 0 ? 1 : 0;
     yellowCards += stat.yellowCards;
     redCards += stat.redCards;
+    shots += stat.shots;
+    shotsOnTarget += stat.shotsOnTarget;
+    xg += stat.xg;
+    passes += stat.passes;
+    passAccuracyWeighted += stat.passAccuracy * stat.passes;
+    passAccuracyWeight += stat.passes;
+    duelsWon += stat.duelsWon;
+    offsides += stat.offsides;
+    corners += stat.corners;
     tackles += stat.tackles;
     interceptions += stat.interceptions;
+    cleanSheets += stat.cleanSheet ? 1 : 0;
     saves += stat.saves;
+    shotsFaced += stat.shotsFaced;
     final weight = stat.minutes > 0 ? stat.minutes : 1;
     ratingTotal += stat.rating * weight;
     ratingWeight += weight;
@@ -301,10 +505,83 @@ class _StatsAccumulator {
     appearances: appearances,
     yellowCards: yellowCards,
     redCards: redCards,
+    shots: shots,
+    shotsOnTarget: shotsOnTarget,
+    xg: xg,
+    passes: passes,
+    passAccuracy: passAccuracyWeight == 0
+        ? 0.0
+        : passAccuracyWeighted / passAccuracyWeight,
+    duelsWon: duelsWon,
+    offsides: offsides,
+    corners: corners,
     tackles: tackles,
     interceptions: interceptions,
+    cleanSheets: cleanSheets,
     saves: saves,
+    shotsFaced: shotsFaced,
     ratingAvg: ratingWeight == 0 ? 0 : ratingTotal / ratingWeight,
+  );
+}
+
+class _TeamStatsAccumulator {
+  _TeamStatsAccumulator(this.teamId);
+
+  final String teamId;
+  int goals = 0;
+  int shots = 0;
+  int shotsOnTarget = 0;
+  int possessionTotal = 0;
+  double xg = 0.0;
+  int passes = 0;
+  double passAccuracyWeighted = 0.0;
+  int passAccuracyWeight = 0;
+  int duelsWon = 0;
+  int offsides = 0;
+  int corners = 0;
+  int fouls = 0;
+  int yellowCards = 0;
+  int redCards = 0;
+  int saves = 0;
+  int matches = 0;
+
+  void add(TeamMatchStats stats) {
+    matches++;
+    goals += stats.goals;
+    shots += stats.shots;
+    shotsOnTarget += stats.shotsOnTarget;
+    possessionTotal += stats.possession;
+    xg += stats.xg;
+    passes += stats.passes;
+    passAccuracyWeighted += stats.passAccuracy * stats.passes;
+    passAccuracyWeight += stats.passes;
+    duelsWon += stats.duelsWon;
+    offsides += stats.offsides;
+    corners += stats.corners;
+    fouls += stats.fouls;
+    yellowCards += stats.yellowCards;
+    redCards += stats.redCards;
+    saves += stats.saves;
+  }
+
+  TeamMatchStats toStats() => TeamMatchStats(
+    teamId: teamId,
+    goals: goals,
+    shots: shots,
+    shotsOnTarget: shotsOnTarget,
+    possession: matches == 0 ? 0 : (possessionTotal / matches).round(),
+    xg: xg,
+    passes: passes,
+    passAccuracy: passAccuracyWeight == 0
+        ? 0.0
+        : passAccuracyWeighted / passAccuracyWeight,
+    duelsWon: duelsWon,
+    offsides: offsides,
+    corners: corners,
+    fouls: fouls,
+    yellowCards: yellowCards,
+    redCards: redCards,
+    saves: saves,
   );
 }
 
@@ -326,10 +603,12 @@ class _TeamOverviewRow {
     required this.standing,
     required this.averageOvr,
     required this.injured,
+    required this.matchStats,
   });
 
   final Team team;
   final Standing? standing;
   final double averageOvr;
   final int injured;
+  final TeamMatchStats? matchStats;
 }

@@ -795,11 +795,25 @@ rating = clamp(6,0 + Σ wkłady, 1,0, 10,0)
 
 ### 15.2 Statystyki meczu
 
-Per drużyna i per zawodnik: posiadanie, strzały, strzały celne, xG, podania, celność podań, pojedynki wygrane, faule, kartki, spaliny, rzuty rożne, obrony GK, minuty, gole, asysty, rating.
+Statystyki są liczone z przebiegu meczu, a nie odtwarzane z końcowego wyniku.
+
+**`TeamMatchStats`** przechowuje per drużyna: `goals`, `shots`, `shotsOnTarget`, `possession`, `xg`, `passes`, `passAccuracy`, `duelsWon`, `offsides`, `corners`, `fouls`, `yellowCards`, `redCards` i `saves`.
+
+**`PlayerMatchStats`** przechowuje per zawodnik: `minutes`, `goals`, `assists`, `shots`, `shotsOnTarget`, `xg`, `passes`, `passAccuracy`, `duelsWon`, `offsides`, `corners`, `yellowCards`, `redCards`, `tackles`, `interceptions`, `saves`, `shotsFaced`, `ownGoals`, `cleanSheet`, `staminaAfterMatch` i `rating`.
+
+`PlayerSeasonStats` agreguje te dane per rok sezonu (bez pól jednomeczowych `ownGoals` i `staminaAfterMatch`) oraz przechowuje `appearances`, `cleanSheets` i ważoną minutami `ratingAvg`. `StatsScreen` pokazuje rozwijany pełny box score zawodników i agregaty drużynowe, w tym xG.
 
 **xG jest jawne od pierwszego meczu** — widoczne na pasku statystyk w trakcie spotkania i w podsumowaniu pomeczowym. Nie wymaga odblokowania przez sztab ani dodatkowego slotu.
 
-Agregowane do `seasonStats` (`player_management.md`) i tabeli ligowej.
+### 15.3 Zapis wyniku i zgodność trybów
+
+`MatchResult` jest granicą trwałego zapisu. Oprócz wyniku zawiera pełne `homeStats`/`awayStats`, listę `playerStats`, kontekst, snapshoty składów i taktyk, eventy, kontuzje, dyscyplinę, `manOfTheMatchPlayerId`, `inspiredPerformancePlayerId`, `matchEndMinute` i doliczony czas.
+
+`MatchResultAssembler` pobiera dane z `SimulationMinuteTrace`, łańcuchów pojedynków, rozstrzygnięć strzałów, eventów oraz runtime’owej mapy staminy. Nie stosuje heurystyk typu `goals + 4`, `goals + 2` ani stałego posiadania 50%. Wynik administracyjny (np. walkower) jest zwracany bez ponownego składania statystyk.
+
+`SimulationMatchEngine.simulateFullMatch()` jest kanonicznym facade’em nad zachowanym `simulateFull()`/`SimulationResult`, a `toMatchResult()` składa wynik przez ten sam assembler. Obserwacja minutowa i symulacja headless z tym samym seedem przechodzą przez identyczny trace i dają identyczny `MatchResult`. `staminaAfterMatch = -1` oznacza brak raportu runtime i uruchamia wyłącznie fallback legacy w efektach pomeczowych. Zmiana kontraktu podniosła `SaveSchema.currentVersion` do 11.
+
+Agregaty są zapisywane do `seasonStats` (`player_management.md`) i wykorzystywane przez tabelę oraz ekrany statystyk.
 
 ---
 
@@ -807,16 +821,18 @@ Agregowane do `seasonStats` (`player_management.md`) i tabeli ligowej.
 
 | Krok | Efekt |
 | ---- | ----- |
-| 1. Stamina | zużycie zapisane; **+20** natychmiastowej regeneracji (`player_management.md`) |
+| 1. Stamina | runtime raportuje zużycie; zapis następuje przed jednorazowym **+20** regeneracji (`player_management.md`); brak raportu (`-1`) używa wzoru legacy |
 | 2. Forma | aktualizacja na podstawie ratingu (§16.1) |
 | 3. Kontuzje | zapis typu i czasu trwania × `doctorCareMult` |
 | 4. Kartki | inkrementacja liczników, ewentualne zawieszenia |
-| 5. seasonStats | agregacja statystyk |
-| 6. growthRate | +0,01 za każdą rozegraną minutę w tym tygodniu (`player_management.md`) |
+| 5. seasonStats | agregacja pełnych statystyk per rok sezonu |
+| 6. growthRate | +0,01 za każdą rozegraną minutę w tym tygodniu (`player_management.md`), z clampem do zakresu balansu |
 | 7. Zgranie | delty per `team_management.md` |
 | 8. Atmosfera | delty per `team_management.md` |
-| 9. Eventy | rolle eventów losowych zawodnika i zespołu |
-| 10. Wiadomości | `matchResult`, `injury`, `award` |
+| 9. Eventy | deterministyczny hook `inspiredPerformance` dla MotM; pełny katalog eventów pozostaje w Fazie 4 |
+| 10. Wiadomości | `matchResult`, `injury` oraz `playerEvent/inspiredPerformance`; payload wyniku zawiera statystyki drużynowe, MotM i event inspirującego występu |
+
+Efekty są współdzielone przez `DaySimulator` i `SeasonService` przez `MatchPostMatchService`, dzięki czemu mecz ligowy oraz postseason aktualizują stamina, formę, kontuzje, dyscyplinę, `seasonStats`, rozwój, zgranie, atmosferę i komunikaty według tych samych reguł.
 
 ### 16.1 Aktualizacja formy
 

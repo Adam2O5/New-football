@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:new_football/core/balance/balance_config.dart';
-import 'package:new_football/core/engine/match_engine.dart';
+import 'package:new_football/core/simulation/match_bootstrap.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/match_models.dart';

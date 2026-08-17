@@ -1,6 +1,6 @@
 import 'package:new_football/core/balance/injury_catalog.dart';
 import 'package:new_football/core/balance/balance_config.dart';
-import 'package:new_football/core/engine/match_engine.dart';
+import 'package:new_football/core/simulation/match_engine.dart';
 import 'package:new_football/core/simulation/match_context_factory.dart';
 import 'package:new_football/core/simulation/match_message_emitter.dart';
 import 'package:new_football/core/simulation/pre_match_validator.dart';
@@ -19,6 +19,7 @@ import 'package:new_football/core/services/contract_service.dart';
 import 'package:new_football/core/services/development_service.dart';
 import 'package:new_football/core/services/discipline_service.dart';
 import 'package:new_football/core/services/league_strength_service.dart';
+import 'package:new_football/core/services/match_post_match_service.dart';
 import 'package:new_football/core/services/message_service.dart';
 import 'package:new_football/core/services/salary_cap_service.dart';
 import 'package:new_football/core/services/team_management_service.dart';
@@ -51,7 +52,7 @@ class DaySimulationResult {
 class DaySimulator {
   DaySimulator({
     this.balance = BalanceConfig.defaults,
-    MatchEngine? matchEngine,
+    SimulationMatchEngine? matchEngine,
     CalendarService? calendar,
     MatchContextFactory? contextFactory,
     MatchMessageEmitter? matchMessageEmitter,
@@ -61,7 +62,7 @@ class DaySimulator {
     SalaryCapService? capService,
     MessageService? messages,
     TeamManagementService? teamManagement,
-  }) : matchEngine = matchEngine ?? MatchEngine(balance: balance),
+  }) : matchEngine = matchEngine ?? SimulationMatchEngine(balance: balance),
        calendar = calendar ?? CalendarService(balance: balance),
        contextFactory =
            contextFactory ??
@@ -79,7 +80,7 @@ class DaySimulator {
        teamManagement = teamManagement ?? const TeamManagementService();
 
   final BalanceConfig balance;
-  final MatchEngine matchEngine;
+  final SimulationMatchEngine matchEngine;
   final CalendarService calendar;
   final MatchContextFactory contextFactory;
   final MatchMessageEmitter matchMessageEmitter;
@@ -360,7 +361,7 @@ class DaySimulator {
         saveSeed: saveSeed,
         stake: MatchStake.regular,
       );
-      final result = matchEngine.simulateFull(
+      final result = matchEngine.simulateFullMatch(
         home: home,
         away: away,
         context: context,
@@ -450,7 +451,7 @@ class DaySimulator {
       final isParticipant =
           t.id == result.homeTeamId || t.id == result.awayTeamId;
       final next = isParticipant && !isAdministrativeResult
-          ? _applyFatigue(t, result)
+          ? _applyFatigue(t, result, seasonYear: league.currentSeason.year)
           : _recoverTeam(t);
       for (final oldPlayer in t.roster) {
         final nextPlayer = next.roster.firstWhere(
@@ -641,76 +642,63 @@ class DaySimulator {
         );
       }
     }
+
+    final inspiredId = result.inspiredPerformancePlayerId;
+    final playerTeamId = state.playerTeamId;
+    if (inspiredId != null &&
+        playerTeamId != null &&
+        (playerTeamId == result.homeTeamId ||
+            playerTeamId == result.awayTeamId)) {
+      final team = state.teamById(playerTeamId);
+      final player = team?.roster.firstWhere(
+        (candidate) => candidate.id == inspiredId,
+        orElse: () => throw StateError('Missing inspired player'),
+      );
+      if (team != null && player != null) {
+        final stat = result.playerStats.firstWhere(
+          (candidate) => candidate.playerId == inspiredId,
+          orElse: () => const PlayerMatchStats(playerId: ''),
+        );
+        state = messages.send(
+          state,
+          type: MessageType.playerEvent,
+          kind: 'inspiredPerformance',
+          domain: MessageDomain.playerEvent,
+          args: {'playerName': player.name},
+          payload: {
+            'playerId': inspiredId,
+            'teamId': team.id,
+            'rating': stat.playerId.isEmpty ? 0.0 : stat.rating,
+            'manOfTheMatch': true,
+          },
+          dedupKey: 'inspired:${match.id}:$inspiredId',
+        );
+      }
+    }
     return state;
   }
 
-  Team _applyFatigue(Team team, MatchResult result) {
+  Team _applyFatigue(Team team, MatchResult result, {required int seasonYear}) {
     final statsByPlayer = {
       for (final stats in result.playerStats) stats.playerId: stats,
     };
-    final tactics = team.id == result.homeTeamId
-        ? result.homeTactics
-        : result.awayTactics;
-    final lost = team.id == result.homeTeamId
-        ? result.homeGoals < result.awayGoals
-        : result.awayGoals < result.homeGoals;
     final injuries = {
       for (final injury in result.injuries.where((i) => i.teamId == team.id))
         injury.playerId: injury,
     };
-    final roster = team.roster.map((p) {
-      final stats = statsByPlayer[p.id];
-      final minutes = stats?.minutes ?? 0;
-      final loss = balance.player.staminaLossForMinutes(
-        p.position,
-        minutes,
-        tempo: tactics.tempo,
-        pressing: tactics.pressing,
-        weather: result.context.weather,
-        isDerby: result.context.isDerby,
-      );
-      // Apply the loss first, then the documented immediate post-match +20.
-      final afterLoss = balance.player.clampStamina(
-        (p.state.stamina.toDouble() - loss).round(),
-      );
-      var next = p.copyWith(
-        state: p.state.copyWith(
-          stamina: balance.player.clampStamina(
-            afterLoss + balance.player.recoveryBetweenMatches,
+    final roster = team.roster
+        .map(
+          (player) => applyMatchPlayerEffects(
+            player: player,
+            teamId: team.id,
+            result: result,
+            seasonYear: seasonYear,
+            balance: balance,
+            stats: statsByPlayer[player.id],
+            matchInjury: injuries[player.id],
           ),
-          minutesThisWeek: p.state.minutesThisWeek + minutes,
-        ),
-      );
-      next = next.withMatchForm(
-        minutesPlayed: minutes,
-        rating: stats?.rating ?? 6.0,
-        lost: lost,
-        balance: balance,
-      );
-
-      final matchInjury = injuries[p.id];
-      if (matchInjury != null) {
-        next = next.copyWith(
-          state: next.state.copyWith(injury: matchInjury.injury),
-        );
-        if (matchInjury.potentialLoss) {
-          next = next
-              .copyWith(
-                potentialStars: (next.potentialStars - 0.5)
-                    .clamp(0.5, 5.0)
-                    .toDouble(),
-                hidden: next.hidden.copyWith(
-                  developmentCeilingStars:
-                      (next.hidden.developmentCeilingStars - 0.5)
-                          .clamp(0.5, 5.0)
-                          .toDouble(),
-                ),
-              )
-              .recalculatePointValue(balance);
-        }
-      }
-      return next;
-    }).toList();
+        )
+        .toList();
     return team.copyWith(roster: roster);
   }
 
@@ -864,6 +852,19 @@ class DaySimulator {
     final responsibleTeamId = result.violatingTeamIds.isEmpty
         ? result.homeTeamId
         : result.violatingTeamIds.first;
+    String? motm;
+    final motmId = result.manOfTheMatchPlayerId;
+    if (motmId != null) {
+      for (final team in league.teams) {
+        for (final player in team.roster) {
+          if (player.id == motmId) {
+            motm = player.name;
+            break;
+          }
+        }
+        if (motm != null) break;
+      }
+    }
     return messages.send(
       league,
       type: type,
@@ -879,6 +880,11 @@ class DaySimulator {
         'awayGoals': result.awayGoals,
         'team': league.teamById(responsibleTeamId)?.name ?? responsibleTeamId,
         'reason': result.reasonCode ?? 'administrative_result',
+        'posA': result.homeStats.possession,
+        'posB': result.awayStats.possession,
+        'xgA': result.homeStats.xg,
+        'xgB': result.awayStats.xg,
+        'motm': motm ?? '—',
       },
       payload: {
         'matchId': matchId,
@@ -889,6 +895,10 @@ class DaySimulator {
         'status': result.status.name,
         'reasonCode': result.reasonCode,
         'violatingTeamIds': result.violatingTeamIds,
+        'homeStats': result.homeStats.toJson(),
+        'awayStats': result.awayStats.toJson(),
+        'manOfTheMatchPlayerId': result.manOfTheMatchPlayerId,
+        'inspiredPerformancePlayerId': result.inspiredPerformancePlayerId,
       },
       dedupKey: matchId == null ? null : '${type.name}:result:$matchId',
     );

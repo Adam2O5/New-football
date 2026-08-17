@@ -3,10 +3,11 @@ import 'dart:math';
 import 'package:uuid/uuid.dart';
 
 import 'package:new_football/core/balance/balance_config.dart';
-import 'package:new_football/core/engine/match_engine.dart';
+import 'package:new_football/core/simulation/match_engine.dart';
 import 'package:new_football/core/simulation/match_context_factory.dart';
 import 'package:new_football/core/simulation/match_message_emitter.dart';
 import 'package:new_football/core/simulation/pre_match_validator.dart';
+import 'package:new_football/core/balance/injury_catalog.dart';
 import 'package:new_football/core/models/contract.dart';
 import 'package:new_football/core/models/draft_models.dart';
 import 'package:new_football/core/models/enums.dart';
@@ -23,6 +24,7 @@ import 'package:new_football/core/services/calendar_service.dart';
 import 'package:new_football/core/services/development_service.dart';
 import 'package:new_football/core/services/discipline_service.dart';
 import 'package:new_football/core/services/prospect_service.dart';
+import 'package:new_football/core/services/match_post_match_service.dart';
 import 'package:new_football/core/services/message_service.dart';
 import 'package:new_football/core/services/salary_cap_service.dart';
 import 'package:new_football/core/services/schedule_generator.dart';
@@ -34,7 +36,7 @@ import 'package:new_football/core/services/team_management_service.dart';
 class SeasonService {
   SeasonService({
     this.balance = BalanceConfig.defaults,
-    MatchEngine? matchEngine,
+    SimulationMatchEngine? matchEngine,
     CalendarService? calendar,
     MatchContextFactory? contextFactory,
     MatchMessageEmitter? matchMessageEmitter,
@@ -44,7 +46,7 @@ class SeasonService {
     ScoutingService? scoutingService,
     MessageService? messages,
     Random? random,
-  }) : matchEngine = matchEngine ?? MatchEngine(balance: balance),
+  }) : matchEngine = matchEngine ?? SimulationMatchEngine(balance: balance),
        calendar = calendar ?? CalendarService(balance: balance),
        contextFactory =
            contextFactory ??
@@ -62,7 +64,7 @@ class SeasonService {
        _random = random ?? Random();
 
   final BalanceConfig balance;
-  final MatchEngine matchEngine;
+  final SimulationMatchEngine matchEngine;
   final CalendarService calendar;
   final MatchContextFactory contextFactory;
   final MatchMessageEmitter matchMessageEmitter;
@@ -1049,7 +1051,7 @@ class SeasonService {
       stake: stake ?? _stakeForPhase(phase),
       week: league.currentWeek,
     );
-    return matchEngine.simulateFull(
+    return matchEngine.simulateFullMatch(
       home: home,
       away: away,
       context: context,
@@ -1112,7 +1114,12 @@ class SeasonService {
       stake: effectiveStake,
     );
     return (
-      league: _applyPostseasonDiscipline(state, result, phase),
+      league: _applyPostseasonDiscipline(
+        state,
+        result,
+        phase,
+        matchId: matchId,
+      ),
       result: result,
     );
   }
@@ -1230,33 +1237,83 @@ class SeasonService {
   LeagueState _applyPostseasonDiscipline(
     LeagueState league,
     MatchResult result,
-    SeasonPhase phase,
-  ) {
+    SeasonPhase phase, {
+    String? matchId,
+  }) {
     final disciplineService = const DisciplineService();
     final administrativeTeamIds = TeamManagementService.walkoverTeamIds(result);
     final isAdministrative = TeamManagementService.isWalkoverResult(result);
+    final statsByPlayer = {
+      for (final stats in result.playerStats) stats.playerId: stats,
+    };
+    final injuriesByPlayer = {
+      for (final injury in result.injuries)
+        if (injury.teamId == result.homeTeamId ||
+            injury.teamId == result.awayTeamId)
+          '${injury.teamId}:${injury.playerId}': injury,
+    };
     final notifications =
         <({String teamId, DisciplineNotification notification})>[];
+
     final teams = league.teams.map((team) {
-      if (team.id != result.homeTeamId && team.id != result.awayTeamId) {
-        return team;
+      final isParticipant =
+          team.id == result.homeTeamId || team.id == result.awayTeamId;
+      if (!isParticipant) return team;
+
+      var next = team;
+      if (!isAdministrative) {
+        final roster = team.roster
+            .map(
+              (player) => applyMatchPlayerEffects(
+                player: player,
+                teamId: team.id,
+                result: result,
+                seasonYear: league.currentSeason.year,
+                balance: balance,
+                stats: statsByPlayer[player.id],
+                matchInjury: injuriesByPlayer['${team.id}:${player.id}'],
+              ),
+            )
+            .toList();
+        next = team.copyWith(roster: roster);
+
+        final application = disciplineService.applyToTeam(
+          team: next,
+          result: result,
+          phase: phase,
+        );
+        notifications.addAll(
+          application.notifications.map(
+            (notification) => (teamId: team.id, notification: notification),
+          ),
+        );
+        next = application.team;
       }
-      if (isAdministrative) {
-        return administrativeTeamIds.contains(team.id)
-            ? const TeamManagementService().applyAtmosphereDelta(team, -15)
-            : team;
+
+      final original = league.teamById(team.id);
+      final snapshot = team.id == result.homeTeamId
+          ? result.homeLineup
+          : result.awayLineup;
+      final startingEleven = snapshot.isNotEmpty
+          ? snapshot
+          : original?.startingEleven ?? const <Player>[];
+      final assignedPositions = team.id == result.homeTeamId
+          ? result.homeLineupPositions
+          : result.awayLineupPositions;
+      next = const TeamManagementService()
+          .applyMatchResult(
+            team: next,
+            result: result,
+            startingEleven: startingEleven,
+            assignedPositions: assignedPositions.isEmpty
+                ? null
+                : assignedPositions,
+          )
+          .team;
+      if (isAdministrative && administrativeTeamIds.contains(team.id)) {
+        next = const TeamManagementService().applyAtmosphereDelta(next, -15);
       }
-      final application = disciplineService.applyToTeam(
-        team: team,
-        result: result,
-        phase: phase,
-      );
-      notifications.addAll(
-        application.notifications.map(
-          (notification) => (teamId: team.id, notification: notification),
-        ),
-      );
-      return application.team;
+      return next;
     }).toList();
 
     var state = league.copyWith(teams: teams);
@@ -1293,6 +1350,133 @@ class SeasonService {
           payload: {'playerId': notification.player.id, 'teamId': item.teamId},
         );
       }
+    }
+
+    for (final injury in result.injuries) {
+      final team = state.teamById(injury.teamId);
+      final player = team?.roster.cast<Player?>().firstWhere(
+        (candidate) => candidate?.id == injury.playerId,
+        orElse: () => null,
+      );
+      if (team == null || player == null || state.playerTeamId != team.id) {
+        continue;
+      }
+      final definition = InjuryCatalog.byId(injury.injury.id);
+      state = _messages.send(
+        state,
+        type: MessageType.injury,
+        domain: MessageDomain.health,
+        args: {
+          'playerName': player.name,
+          'injuryName': definition.name,
+          'injuryType': injury.injury.type.name,
+          'days': injury.injury.daysTotal,
+        },
+        payload: {
+          'playerId': player.id,
+          'teamId': team.id,
+          'injuryId': injury.injury.id,
+          'injuryType': injury.injury.type.name,
+          'playerInStartingXi': injury.playerInStartingXi,
+        },
+        dedupKey: 'injury:${player.id}:${injury.injury.id}',
+      );
+      if (injury.potentialLoss) {
+        state = _messages.send(
+          state,
+          type: MessageType.potentialLoss,
+          domain: MessageDomain.health,
+          args: {'playerName': player.name},
+          payload: {'playerId': player.id, 'injuryId': injury.injury.id},
+          dedupKey: 'potentialLoss:${player.id}:${injury.injury.id}',
+        );
+      }
+    }
+
+    final inspiredId = result.inspiredPerformancePlayerId;
+    if (inspiredId != null) {
+      final team = state.teamById(result.homeTeamId);
+      final awayTeam = state.teamById(result.awayTeamId);
+      final player =
+          team?.roster.cast<Player?>().firstWhere(
+            (candidate) => candidate?.id == inspiredId,
+            orElse: () => null,
+          ) ??
+          awayTeam?.roster.cast<Player?>().firstWhere(
+            (candidate) => candidate?.id == inspiredId,
+            orElse: () => null,
+          );
+      final inspiredTeam = team?.roster.any((p) => p.id == inspiredId) == true
+          ? team
+          : awayTeam;
+      if (player != null &&
+          inspiredTeam != null &&
+          state.playerTeamId == inspiredTeam.id) {
+        final stat = statsByPlayer[inspiredId];
+        state = _messages.send(
+          state,
+          type: MessageType.playerEvent,
+          kind: 'inspiredPerformance',
+          domain: MessageDomain.playerEvent,
+          args: {'playerName': player.name},
+          payload: {
+            'playerId': inspiredId,
+            'teamId': inspiredTeam.id,
+            'rating': stat?.rating ?? 0.0,
+            'manOfTheMatch': true,
+          },
+          dedupKey: 'inspired:${matchId ?? result.homeTeamId}:${inspiredId}',
+        );
+      }
+    }
+
+    final playerTeamId = state.playerTeamId;
+    if (playerTeamId == result.homeTeamId ||
+        playerTeamId == result.awayTeamId) {
+      final administrative = TeamManagementService.isWalkoverResult(result);
+      final type = administrative
+          ? MessageType.walkover
+          : MessageType.matchResult;
+      final responsibleTeamId = result.violatingTeamIds.isEmpty
+          ? result.homeTeamId
+          : result.violatingTeamIds.first;
+      final motm = result.manOfTheMatchPlayerId == null
+          ? null
+          : _playerName(state, result.manOfTheMatchPlayerId);
+      state = _messages.send(
+        state,
+        type: type,
+        priority: administrative
+            ? MessagePriority.urgent
+            : MessagePriority.normal,
+        args: {
+          'homeTeam': _teamName(state, result.homeTeamId),
+          'awayTeam': _teamName(state, result.awayTeamId),
+          'homeGoals': result.homeGoals,
+          'awayGoals': result.awayGoals,
+          'team': _teamName(state, responsibleTeamId),
+          'reason': result.reasonCode ?? 'administrative_result',
+          'posA': result.homeStats.possession,
+          'posB': result.awayStats.possession,
+          'xgA': result.homeStats.xg,
+          'xgB': result.awayStats.xg,
+          'motm': motm ?? '—',
+        },
+        payload: {
+          'matchId': matchId,
+          'homeTeamId': result.homeTeamId,
+          'awayTeamId': result.awayTeamId,
+          'homeGoals': result.homeGoals,
+          'awayGoals': result.awayGoals,
+          'status': result.status.name,
+          'reasonCode': result.reasonCode,
+          'violatingTeamIds': result.violatingTeamIds,
+          'homeStats': result.homeStats.toJson(),
+          'awayStats': result.awayStats.toJson(),
+          'manOfTheMatchPlayerId': result.manOfTheMatchPlayerId,
+        },
+        dedupKey: matchId == null ? null : '${type.name}:result:$matchId',
+      );
     }
     return state;
   }

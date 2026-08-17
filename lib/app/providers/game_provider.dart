@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:new_football/core/engine/match_engine.dart';
+import 'package:new_football/core/simulation/match_engine.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/core/models/league_state.dart';
@@ -34,7 +34,7 @@ final matchContextFactoryProvider = Provider(
   (ref) => MatchContextFactory(calendar: ref.watch(calendarServiceProvider)),
 );
 
-final matchEngineProvider = Provider((ref) => const MatchEngine());
+final matchEngineProvider = Provider((ref) => const SimulationMatchEngine());
 
 final daySimulatorProvider = Provider((ref) {
   return DaySimulator(matchEngine: ref.watch(matchEngineProvider));
@@ -490,7 +490,7 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
           saveSeed: current.saveSeed,
           stake: MatchStake.regular,
         );
-    final result = engine.simulateFull(
+    final result = engine.simulateFullMatch(
       home: home,
       away: away,
       context: context,

@@ -15,6 +15,10 @@ jobs:
         with:
           channel: stable
           cache: true
+      - name: Disable analytics/telemetry prompts
+        run: |
+          flutter config --no-analytics
+          dart --disable-analytics
       - run: flutter pub get
       - name: Verify core has no Flutter imports
         run: |
@@ -22,6 +26,8 @@ jobs:
             echo "ERROR: lib/core must not import Flutter"
             exit 1
           fi
-      - run: dart run build_runner build --delete-conflicting-outputs
+      - name: Build runner
+        run: dart run build_runner build --delete-conflicting-outputs --verbose
+        timeout-minutes: 10
       - run: flutter test
       - run: flutter analyze

@@ -7,7 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:new_football/app/widgets/screen_background.dart';
 import 'package:new_football/app/l10n/enum_labels.dart';
 import 'package:new_football/app/providers/game_provider.dart';
-import 'package:new_football/core/engine/match_engine.dart';
+import 'package:new_football/core/simulation/match_engine.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/match_models.dart';
 import 'package:new_football/core/models/team.dart';
@@ -23,7 +23,7 @@ class MatchdayScreen extends ConsumerStatefulWidget {
 }
 
 class _MatchdayScreenState extends ConsumerState<MatchdayScreen> {
-  LiveMatch? _live;
+  SimulationLiveMatch? _live;
   Team? _home;
   Team? _away;
   bool _paused = true;
@@ -106,8 +106,11 @@ class _MatchdayScreenState extends ConsumerState<MatchdayScreen> {
 
   Future<void> _onFinished() async {
     final live = _live;
-    if (live == null) return;
-    final result = live.toResult();
+    final home = _home;
+    final away = _away;
+    if (live == null || home == null || away == null) return;
+    final engine = ref.read(matchEngineProvider);
+    final result = engine.toMatchResult(live: live, home: home, away: away);
     await ref
         .read(gameControllerProvider.notifier)
         .applyPlayerMatch(widget.match, result);

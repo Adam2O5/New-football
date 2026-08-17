@@ -1970,6 +1970,60 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stats_rating => 'Rating';
 
   @override
+  String get stats_boxScore => 'Full box score';
+
+  @override
+  String get stats_shots => 'Shots';
+
+  @override
+  String get stats_shotsOnTarget => 'Shots on target';
+
+  @override
+  String get stats_xg => 'xG';
+
+  @override
+  String get stats_passes => 'Passes';
+
+  @override
+  String get stats_passAccuracy => 'Pass accuracy';
+
+  @override
+  String get stats_duelsWon => 'Duels won';
+
+  @override
+  String get stats_offsides => 'Offsides';
+
+  @override
+  String get stats_corners => 'Corners';
+
+  @override
+  String get stats_fouls => 'Fouls';
+
+  @override
+  String get stats_yellowCards => 'Yellow cards';
+
+  @override
+  String get stats_redCards => 'Red cards';
+
+  @override
+  String get stats_tackles => 'Tackles';
+
+  @override
+  String get stats_interceptions => 'Interceptions';
+
+  @override
+  String get stats_cleanSheets => 'Clean sheets';
+
+  @override
+  String get stats_saves => 'Saves';
+
+  @override
+  String get stats_shotsFaced => 'Shots faced';
+
+  @override
+  String get stats_possession => 'Possession';
+
+  @override
   String get stats_record => 'Record';
 
   @override

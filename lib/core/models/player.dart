@@ -19,6 +19,14 @@ class PlayerSeasonStats with _$PlayerSeasonStats {
     @Default(0) int appearances,
     @Default(0) int yellowCards,
     @Default(0) int redCards,
+    @Default(0) int shots,
+    @Default(0) int shotsOnTarget,
+    @Default(0.0) double xg,
+    @Default(0) int passes,
+    @Default(0.0) double passAccuracy,
+    @Default(0) int duelsWon,
+    @Default(0) int offsides,
+    @Default(0) int corners,
     @Default(0) int tackles,
     @Default(0) int interceptions,
     @Default(0) int cleanSheets,
@@ -42,6 +50,15 @@ PlayerSeasonStats aggregatePlayerSeasonStats(
   var appearances = 0;
   var yellowCards = 0;
   var redCards = 0;
+  var shots = 0;
+  var shotsOnTarget = 0;
+  var xg = 0.0;
+  var passes = 0;
+  var passAccuracyWeighted = 0.0;
+  var passAccuracyWeight = 0;
+  var duelsWon = 0;
+  var offsides = 0;
+  var corners = 0;
   var tackles = 0;
   var interceptions = 0;
   var cleanSheets = 0;
@@ -57,6 +74,15 @@ PlayerSeasonStats aggregatePlayerSeasonStats(
     appearances += s.appearances;
     yellowCards += s.yellowCards;
     redCards += s.redCards;
+    shots += s.shots;
+    shotsOnTarget += s.shotsOnTarget;
+    xg += s.xg;
+    passes += s.passes;
+    passAccuracyWeighted += s.passAccuracy * s.passes;
+    passAccuracyWeight += s.passes;
+    duelsWon += s.duelsWon;
+    offsides += s.offsides;
+    corners += s.corners;
     tackles += s.tackles;
     interceptions += s.interceptions;
     cleanSheets += s.cleanSheets;
@@ -79,6 +105,16 @@ PlayerSeasonStats aggregatePlayerSeasonStats(
     appearances: appearances,
     yellowCards: yellowCards,
     redCards: redCards,
+    shots: shots,
+    shotsOnTarget: shotsOnTarget,
+    xg: xg,
+    passes: passes,
+    passAccuracy: passAccuracyWeight > 0
+        ? passAccuracyWeighted / passAccuracyWeight
+        : 0.0,
+    duelsWon: duelsWon,
+    offsides: offsides,
+    corners: corners,
     tackles: tackles,
     interceptions: interceptions,
     cleanSheets: cleanSheets,
@@ -346,11 +382,22 @@ class PlayerMatchStats with _$PlayerMatchStats {
     @Default(0) int goals,
     @Default(0) int assists,
     @Default(0) int shots,
+    @Default(0) int shotsOnTarget,
+    @Default(0.0) double xg,
+    @Default(0) int passes,
+    @Default(0.0) double passAccuracy,
+    @Default(0) int duelsWon,
+    @Default(0) int offsides,
+    @Default(0) int corners,
     @Default(0) int yellowCards,
     @Default(0) int redCards,
     @Default(0) int tackles,
     @Default(0) int interceptions,
     @Default(0) int saves,
+    @Default(0) int shotsFaced,
+    @Default(0) int ownGoals,
+    @Default(false) bool cleanSheet,
+    @Default(-1) int staminaAfterMatch,
     @Default(6.0) double rating,
   }) = _PlayerMatchStats;
 

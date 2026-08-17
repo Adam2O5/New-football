@@ -28,6 +28,14 @@ mixin _$PlayerSeasonStats {
   int get appearances => throw _privateConstructorUsedError;
   int get yellowCards => throw _privateConstructorUsedError;
   int get redCards => throw _privateConstructorUsedError;
+  int get shots => throw _privateConstructorUsedError;
+  int get shotsOnTarget => throw _privateConstructorUsedError;
+  double get xg => throw _privateConstructorUsedError;
+  int get passes => throw _privateConstructorUsedError;
+  double get passAccuracy => throw _privateConstructorUsedError;
+  int get duelsWon => throw _privateConstructorUsedError;
+  int get offsides => throw _privateConstructorUsedError;
+  int get corners => throw _privateConstructorUsedError;
   int get tackles => throw _privateConstructorUsedError;
   int get interceptions => throw _privateConstructorUsedError;
   int get cleanSheets => throw _privateConstructorUsedError;
@@ -60,6 +68,14 @@ abstract class $PlayerSeasonStatsCopyWith<$Res> {
     int appearances,
     int yellowCards,
     int redCards,
+    int shots,
+    int shotsOnTarget,
+    double xg,
+    int passes,
+    double passAccuracy,
+    int duelsWon,
+    int offsides,
+    int corners,
     int tackles,
     int interceptions,
     int cleanSheets,
@@ -91,6 +107,14 @@ class _$PlayerSeasonStatsCopyWithImpl<$Res, $Val extends PlayerSeasonStats>
     Object? appearances = null,
     Object? yellowCards = null,
     Object? redCards = null,
+    Object? shots = null,
+    Object? shotsOnTarget = null,
+    Object? xg = null,
+    Object? passes = null,
+    Object? passAccuracy = null,
+    Object? duelsWon = null,
+    Object? offsides = null,
+    Object? corners = null,
     Object? tackles = null,
     Object? interceptions = null,
     Object? cleanSheets = null,
@@ -127,6 +151,38 @@ class _$PlayerSeasonStatsCopyWithImpl<$Res, $Val extends PlayerSeasonStats>
             redCards: null == redCards
                 ? _value.redCards
                 : redCards // ignore: cast_nullable_to_non_nullable
+                      as int,
+            shots: null == shots
+                ? _value.shots
+                : shots // ignore: cast_nullable_to_non_nullable
+                      as int,
+            shotsOnTarget: null == shotsOnTarget
+                ? _value.shotsOnTarget
+                : shotsOnTarget // ignore: cast_nullable_to_non_nullable
+                      as int,
+            xg: null == xg
+                ? _value.xg
+                : xg // ignore: cast_nullable_to_non_nullable
+                      as double,
+            passes: null == passes
+                ? _value.passes
+                : passes // ignore: cast_nullable_to_non_nullable
+                      as int,
+            passAccuracy: null == passAccuracy
+                ? _value.passAccuracy
+                : passAccuracy // ignore: cast_nullable_to_non_nullable
+                      as double,
+            duelsWon: null == duelsWon
+                ? _value.duelsWon
+                : duelsWon // ignore: cast_nullable_to_non_nullable
+                      as int,
+            offsides: null == offsides
+                ? _value.offsides
+                : offsides // ignore: cast_nullable_to_non_nullable
+                      as int,
+            corners: null == corners
+                ? _value.corners
+                : corners // ignore: cast_nullable_to_non_nullable
                       as int,
             tackles: null == tackles
                 ? _value.tackles
@@ -175,6 +231,14 @@ abstract class _$$PlayerSeasonStatsImplCopyWith<$Res>
     int appearances,
     int yellowCards,
     int redCards,
+    int shots,
+    int shotsOnTarget,
+    double xg,
+    int passes,
+    double passAccuracy,
+    int duelsWon,
+    int offsides,
+    int corners,
     int tackles,
     int interceptions,
     int cleanSheets,
@@ -205,6 +269,14 @@ class __$$PlayerSeasonStatsImplCopyWithImpl<$Res>
     Object? appearances = null,
     Object? yellowCards = null,
     Object? redCards = null,
+    Object? shots = null,
+    Object? shotsOnTarget = null,
+    Object? xg = null,
+    Object? passes = null,
+    Object? passAccuracy = null,
+    Object? duelsWon = null,
+    Object? offsides = null,
+    Object? corners = null,
     Object? tackles = null,
     Object? interceptions = null,
     Object? cleanSheets = null,
@@ -241,6 +313,38 @@ class __$$PlayerSeasonStatsImplCopyWithImpl<$Res>
         redCards: null == redCards
             ? _value.redCards
             : redCards // ignore: cast_nullable_to_non_nullable
+                  as int,
+        shots: null == shots
+            ? _value.shots
+            : shots // ignore: cast_nullable_to_non_nullable
+                  as int,
+        shotsOnTarget: null == shotsOnTarget
+            ? _value.shotsOnTarget
+            : shotsOnTarget // ignore: cast_nullable_to_non_nullable
+                  as int,
+        xg: null == xg
+            ? _value.xg
+            : xg // ignore: cast_nullable_to_non_nullable
+                  as double,
+        passes: null == passes
+            ? _value.passes
+            : passes // ignore: cast_nullable_to_non_nullable
+                  as int,
+        passAccuracy: null == passAccuracy
+            ? _value.passAccuracy
+            : passAccuracy // ignore: cast_nullable_to_non_nullable
+                  as double,
+        duelsWon: null == duelsWon
+            ? _value.duelsWon
+            : duelsWon // ignore: cast_nullable_to_non_nullable
+                  as int,
+        offsides: null == offsides
+            ? _value.offsides
+            : offsides // ignore: cast_nullable_to_non_nullable
+                  as int,
+        corners: null == corners
+            ? _value.corners
+            : corners // ignore: cast_nullable_to_non_nullable
                   as int,
         tackles: null == tackles
             ? _value.tackles
@@ -282,6 +386,14 @@ class _$PlayerSeasonStatsImpl implements _PlayerSeasonStats {
     this.appearances = 0,
     this.yellowCards = 0,
     this.redCards = 0,
+    this.shots = 0,
+    this.shotsOnTarget = 0,
+    this.xg = 0.0,
+    this.passes = 0,
+    this.passAccuracy = 0.0,
+    this.duelsWon = 0,
+    this.offsides = 0,
+    this.corners = 0,
     this.tackles = 0,
     this.interceptions = 0,
     this.cleanSheets = 0,
@@ -315,6 +427,30 @@ class _$PlayerSeasonStatsImpl implements _PlayerSeasonStats {
   final int redCards;
   @override
   @JsonKey()
+  final int shots;
+  @override
+  @JsonKey()
+  final int shotsOnTarget;
+  @override
+  @JsonKey()
+  final double xg;
+  @override
+  @JsonKey()
+  final int passes;
+  @override
+  @JsonKey()
+  final double passAccuracy;
+  @override
+  @JsonKey()
+  final int duelsWon;
+  @override
+  @JsonKey()
+  final int offsides;
+  @override
+  @JsonKey()
+  final int corners;
+  @override
+  @JsonKey()
   final int tackles;
   @override
   @JsonKey()
@@ -334,7 +470,7 @@ class _$PlayerSeasonStatsImpl implements _PlayerSeasonStats {
 
   @override
   String toString() {
-    return 'PlayerSeasonStats(year: $year, minutes: $minutes, goals: $goals, assists: $assists, appearances: $appearances, yellowCards: $yellowCards, redCards: $redCards, tackles: $tackles, interceptions: $interceptions, cleanSheets: $cleanSheets, saves: $saves, shotsFaced: $shotsFaced, ratingAvg: $ratingAvg)';
+    return 'PlayerSeasonStats(year: $year, minutes: $minutes, goals: $goals, assists: $assists, appearances: $appearances, yellowCards: $yellowCards, redCards: $redCards, shots: $shots, shotsOnTarget: $shotsOnTarget, xg: $xg, passes: $passes, passAccuracy: $passAccuracy, duelsWon: $duelsWon, offsides: $offsides, corners: $corners, tackles: $tackles, interceptions: $interceptions, cleanSheets: $cleanSheets, saves: $saves, shotsFaced: $shotsFaced, ratingAvg: $ratingAvg)';
   }
 
   @override
@@ -352,6 +488,18 @@ class _$PlayerSeasonStatsImpl implements _PlayerSeasonStats {
                 other.yellowCards == yellowCards) &&
             (identical(other.redCards, redCards) ||
                 other.redCards == redCards) &&
+            (identical(other.shots, shots) || other.shots == shots) &&
+            (identical(other.shotsOnTarget, shotsOnTarget) ||
+                other.shotsOnTarget == shotsOnTarget) &&
+            (identical(other.xg, xg) || other.xg == xg) &&
+            (identical(other.passes, passes) || other.passes == passes) &&
+            (identical(other.passAccuracy, passAccuracy) ||
+                other.passAccuracy == passAccuracy) &&
+            (identical(other.duelsWon, duelsWon) ||
+                other.duelsWon == duelsWon) &&
+            (identical(other.offsides, offsides) ||
+                other.offsides == offsides) &&
+            (identical(other.corners, corners) || other.corners == corners) &&
             (identical(other.tackles, tackles) || other.tackles == tackles) &&
             (identical(other.interceptions, interceptions) ||
                 other.interceptions == interceptions) &&
@@ -366,7 +514,7 @@ class _$PlayerSeasonStatsImpl implements _PlayerSeasonStats {
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     runtimeType,
     year,
     minutes,
@@ -375,13 +523,21 @@ class _$PlayerSeasonStatsImpl implements _PlayerSeasonStats {
     appearances,
     yellowCards,
     redCards,
+    shots,
+    shotsOnTarget,
+    xg,
+    passes,
+    passAccuracy,
+    duelsWon,
+    offsides,
+    corners,
     tackles,
     interceptions,
     cleanSheets,
     saves,
     shotsFaced,
     ratingAvg,
-  );
+  ]);
 
   /// Create a copy of PlayerSeasonStats
   /// with the given fields replaced by the non-null parameter values.
@@ -409,6 +565,14 @@ abstract class _PlayerSeasonStats implements PlayerSeasonStats {
     final int appearances,
     final int yellowCards,
     final int redCards,
+    final int shots,
+    final int shotsOnTarget,
+    final double xg,
+    final int passes,
+    final double passAccuracy,
+    final int duelsWon,
+    final int offsides,
+    final int corners,
     final int tackles,
     final int interceptions,
     final int cleanSheets,
@@ -434,6 +598,22 @@ abstract class _PlayerSeasonStats implements PlayerSeasonStats {
   int get yellowCards;
   @override
   int get redCards;
+  @override
+  int get shots;
+  @override
+  int get shotsOnTarget;
+  @override
+  double get xg;
+  @override
+  int get passes;
+  @override
+  double get passAccuracy;
+  @override
+  int get duelsWon;
+  @override
+  int get offsides;
+  @override
+  int get corners;
   @override
   int get tackles;
   @override
@@ -1804,11 +1984,22 @@ mixin _$PlayerMatchStats {
   int get goals => throw _privateConstructorUsedError;
   int get assists => throw _privateConstructorUsedError;
   int get shots => throw _privateConstructorUsedError;
+  int get shotsOnTarget => throw _privateConstructorUsedError;
+  double get xg => throw _privateConstructorUsedError;
+  int get passes => throw _privateConstructorUsedError;
+  double get passAccuracy => throw _privateConstructorUsedError;
+  int get duelsWon => throw _privateConstructorUsedError;
+  int get offsides => throw _privateConstructorUsedError;
+  int get corners => throw _privateConstructorUsedError;
   int get yellowCards => throw _privateConstructorUsedError;
   int get redCards => throw _privateConstructorUsedError;
   int get tackles => throw _privateConstructorUsedError;
   int get interceptions => throw _privateConstructorUsedError;
   int get saves => throw _privateConstructorUsedError;
+  int get shotsFaced => throw _privateConstructorUsedError;
+  int get ownGoals => throw _privateConstructorUsedError;
+  bool get cleanSheet => throw _privateConstructorUsedError;
+  int get staminaAfterMatch => throw _privateConstructorUsedError;
   double get rating => throw _privateConstructorUsedError;
 
   /// Serializes this PlayerMatchStats to a JSON map.
@@ -1834,11 +2025,22 @@ abstract class $PlayerMatchStatsCopyWith<$Res> {
     int goals,
     int assists,
     int shots,
+    int shotsOnTarget,
+    double xg,
+    int passes,
+    double passAccuracy,
+    int duelsWon,
+    int offsides,
+    int corners,
     int yellowCards,
     int redCards,
     int tackles,
     int interceptions,
     int saves,
+    int shotsFaced,
+    int ownGoals,
+    bool cleanSheet,
+    int staminaAfterMatch,
     double rating,
   });
 }
@@ -1863,11 +2065,22 @@ class _$PlayerMatchStatsCopyWithImpl<$Res, $Val extends PlayerMatchStats>
     Object? goals = null,
     Object? assists = null,
     Object? shots = null,
+    Object? shotsOnTarget = null,
+    Object? xg = null,
+    Object? passes = null,
+    Object? passAccuracy = null,
+    Object? duelsWon = null,
+    Object? offsides = null,
+    Object? corners = null,
     Object? yellowCards = null,
     Object? redCards = null,
     Object? tackles = null,
     Object? interceptions = null,
     Object? saves = null,
+    Object? shotsFaced = null,
+    Object? ownGoals = null,
+    Object? cleanSheet = null,
+    Object? staminaAfterMatch = null,
     Object? rating = null,
   }) {
     return _then(
@@ -1892,6 +2105,34 @@ class _$PlayerMatchStatsCopyWithImpl<$Res, $Val extends PlayerMatchStats>
                 ? _value.shots
                 : shots // ignore: cast_nullable_to_non_nullable
                       as int,
+            shotsOnTarget: null == shotsOnTarget
+                ? _value.shotsOnTarget
+                : shotsOnTarget // ignore: cast_nullable_to_non_nullable
+                      as int,
+            xg: null == xg
+                ? _value.xg
+                : xg // ignore: cast_nullable_to_non_nullable
+                      as double,
+            passes: null == passes
+                ? _value.passes
+                : passes // ignore: cast_nullable_to_non_nullable
+                      as int,
+            passAccuracy: null == passAccuracy
+                ? _value.passAccuracy
+                : passAccuracy // ignore: cast_nullable_to_non_nullable
+                      as double,
+            duelsWon: null == duelsWon
+                ? _value.duelsWon
+                : duelsWon // ignore: cast_nullable_to_non_nullable
+                      as int,
+            offsides: null == offsides
+                ? _value.offsides
+                : offsides // ignore: cast_nullable_to_non_nullable
+                      as int,
+            corners: null == corners
+                ? _value.corners
+                : corners // ignore: cast_nullable_to_non_nullable
+                      as int,
             yellowCards: null == yellowCards
                 ? _value.yellowCards
                 : yellowCards // ignore: cast_nullable_to_non_nullable
@@ -1911,6 +2152,22 @@ class _$PlayerMatchStatsCopyWithImpl<$Res, $Val extends PlayerMatchStats>
             saves: null == saves
                 ? _value.saves
                 : saves // ignore: cast_nullable_to_non_nullable
+                      as int,
+            shotsFaced: null == shotsFaced
+                ? _value.shotsFaced
+                : shotsFaced // ignore: cast_nullable_to_non_nullable
+                      as int,
+            ownGoals: null == ownGoals
+                ? _value.ownGoals
+                : ownGoals // ignore: cast_nullable_to_non_nullable
+                      as int,
+            cleanSheet: null == cleanSheet
+                ? _value.cleanSheet
+                : cleanSheet // ignore: cast_nullable_to_non_nullable
+                      as bool,
+            staminaAfterMatch: null == staminaAfterMatch
+                ? _value.staminaAfterMatch
+                : staminaAfterMatch // ignore: cast_nullable_to_non_nullable
                       as int,
             rating: null == rating
                 ? _value.rating
@@ -1937,11 +2194,22 @@ abstract class _$$PlayerMatchStatsImplCopyWith<$Res>
     int goals,
     int assists,
     int shots,
+    int shotsOnTarget,
+    double xg,
+    int passes,
+    double passAccuracy,
+    int duelsWon,
+    int offsides,
+    int corners,
     int yellowCards,
     int redCards,
     int tackles,
     int interceptions,
     int saves,
+    int shotsFaced,
+    int ownGoals,
+    bool cleanSheet,
+    int staminaAfterMatch,
     double rating,
   });
 }
@@ -1965,11 +2233,22 @@ class __$$PlayerMatchStatsImplCopyWithImpl<$Res>
     Object? goals = null,
     Object? assists = null,
     Object? shots = null,
+    Object? shotsOnTarget = null,
+    Object? xg = null,
+    Object? passes = null,
+    Object? passAccuracy = null,
+    Object? duelsWon = null,
+    Object? offsides = null,
+    Object? corners = null,
     Object? yellowCards = null,
     Object? redCards = null,
     Object? tackles = null,
     Object? interceptions = null,
     Object? saves = null,
+    Object? shotsFaced = null,
+    Object? ownGoals = null,
+    Object? cleanSheet = null,
+    Object? staminaAfterMatch = null,
     Object? rating = null,
   }) {
     return _then(
@@ -1994,6 +2273,34 @@ class __$$PlayerMatchStatsImplCopyWithImpl<$Res>
             ? _value.shots
             : shots // ignore: cast_nullable_to_non_nullable
                   as int,
+        shotsOnTarget: null == shotsOnTarget
+            ? _value.shotsOnTarget
+            : shotsOnTarget // ignore: cast_nullable_to_non_nullable
+                  as int,
+        xg: null == xg
+            ? _value.xg
+            : xg // ignore: cast_nullable_to_non_nullable
+                  as double,
+        passes: null == passes
+            ? _value.passes
+            : passes // ignore: cast_nullable_to_non_nullable
+                  as int,
+        passAccuracy: null == passAccuracy
+            ? _value.passAccuracy
+            : passAccuracy // ignore: cast_nullable_to_non_nullable
+                  as double,
+        duelsWon: null == duelsWon
+            ? _value.duelsWon
+            : duelsWon // ignore: cast_nullable_to_non_nullable
+                  as int,
+        offsides: null == offsides
+            ? _value.offsides
+            : offsides // ignore: cast_nullable_to_non_nullable
+                  as int,
+        corners: null == corners
+            ? _value.corners
+            : corners // ignore: cast_nullable_to_non_nullable
+                  as int,
         yellowCards: null == yellowCards
             ? _value.yellowCards
             : yellowCards // ignore: cast_nullable_to_non_nullable
@@ -2014,6 +2321,22 @@ class __$$PlayerMatchStatsImplCopyWithImpl<$Res>
             ? _value.saves
             : saves // ignore: cast_nullable_to_non_nullable
                   as int,
+        shotsFaced: null == shotsFaced
+            ? _value.shotsFaced
+            : shotsFaced // ignore: cast_nullable_to_non_nullable
+                  as int,
+        ownGoals: null == ownGoals
+            ? _value.ownGoals
+            : ownGoals // ignore: cast_nullable_to_non_nullable
+                  as int,
+        cleanSheet: null == cleanSheet
+            ? _value.cleanSheet
+            : cleanSheet // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        staminaAfterMatch: null == staminaAfterMatch
+            ? _value.staminaAfterMatch
+            : staminaAfterMatch // ignore: cast_nullable_to_non_nullable
+                  as int,
         rating: null == rating
             ? _value.rating
             : rating // ignore: cast_nullable_to_non_nullable
@@ -2032,11 +2355,22 @@ class _$PlayerMatchStatsImpl implements _PlayerMatchStats {
     this.goals = 0,
     this.assists = 0,
     this.shots = 0,
+    this.shotsOnTarget = 0,
+    this.xg = 0.0,
+    this.passes = 0,
+    this.passAccuracy = 0.0,
+    this.duelsWon = 0,
+    this.offsides = 0,
+    this.corners = 0,
     this.yellowCards = 0,
     this.redCards = 0,
     this.tackles = 0,
     this.interceptions = 0,
     this.saves = 0,
+    this.shotsFaced = 0,
+    this.ownGoals = 0,
+    this.cleanSheet = false,
+    this.staminaAfterMatch = -1,
     this.rating = 6.0,
   });
 
@@ -2059,6 +2393,27 @@ class _$PlayerMatchStatsImpl implements _PlayerMatchStats {
   final int shots;
   @override
   @JsonKey()
+  final int shotsOnTarget;
+  @override
+  @JsonKey()
+  final double xg;
+  @override
+  @JsonKey()
+  final int passes;
+  @override
+  @JsonKey()
+  final double passAccuracy;
+  @override
+  @JsonKey()
+  final int duelsWon;
+  @override
+  @JsonKey()
+  final int offsides;
+  @override
+  @JsonKey()
+  final int corners;
+  @override
+  @JsonKey()
   final int yellowCards;
   @override
   @JsonKey()
@@ -2074,11 +2429,23 @@ class _$PlayerMatchStatsImpl implements _PlayerMatchStats {
   final int saves;
   @override
   @JsonKey()
+  final int shotsFaced;
+  @override
+  @JsonKey()
+  final int ownGoals;
+  @override
+  @JsonKey()
+  final bool cleanSheet;
+  @override
+  @JsonKey()
+  final int staminaAfterMatch;
+  @override
+  @JsonKey()
   final double rating;
 
   @override
   String toString() {
-    return 'PlayerMatchStats(playerId: $playerId, minutes: $minutes, goals: $goals, assists: $assists, shots: $shots, yellowCards: $yellowCards, redCards: $redCards, tackles: $tackles, interceptions: $interceptions, saves: $saves, rating: $rating)';
+    return 'PlayerMatchStats(playerId: $playerId, minutes: $minutes, goals: $goals, assists: $assists, shots: $shots, shotsOnTarget: $shotsOnTarget, xg: $xg, passes: $passes, passAccuracy: $passAccuracy, duelsWon: $duelsWon, offsides: $offsides, corners: $corners, yellowCards: $yellowCards, redCards: $redCards, tackles: $tackles, interceptions: $interceptions, saves: $saves, shotsFaced: $shotsFaced, ownGoals: $ownGoals, cleanSheet: $cleanSheet, staminaAfterMatch: $staminaAfterMatch, rating: $rating)';
   }
 
   @override
@@ -2092,6 +2459,17 @@ class _$PlayerMatchStatsImpl implements _PlayerMatchStats {
             (identical(other.goals, goals) || other.goals == goals) &&
             (identical(other.assists, assists) || other.assists == assists) &&
             (identical(other.shots, shots) || other.shots == shots) &&
+            (identical(other.shotsOnTarget, shotsOnTarget) ||
+                other.shotsOnTarget == shotsOnTarget) &&
+            (identical(other.xg, xg) || other.xg == xg) &&
+            (identical(other.passes, passes) || other.passes == passes) &&
+            (identical(other.passAccuracy, passAccuracy) ||
+                other.passAccuracy == passAccuracy) &&
+            (identical(other.duelsWon, duelsWon) ||
+                other.duelsWon == duelsWon) &&
+            (identical(other.offsides, offsides) ||
+                other.offsides == offsides) &&
+            (identical(other.corners, corners) || other.corners == corners) &&
             (identical(other.yellowCards, yellowCards) ||
                 other.yellowCards == yellowCards) &&
             (identical(other.redCards, redCards) ||
@@ -2100,25 +2478,44 @@ class _$PlayerMatchStatsImpl implements _PlayerMatchStats {
             (identical(other.interceptions, interceptions) ||
                 other.interceptions == interceptions) &&
             (identical(other.saves, saves) || other.saves == saves) &&
+            (identical(other.shotsFaced, shotsFaced) ||
+                other.shotsFaced == shotsFaced) &&
+            (identical(other.ownGoals, ownGoals) ||
+                other.ownGoals == ownGoals) &&
+            (identical(other.cleanSheet, cleanSheet) ||
+                other.cleanSheet == cleanSheet) &&
+            (identical(other.staminaAfterMatch, staminaAfterMatch) ||
+                other.staminaAfterMatch == staminaAfterMatch) &&
             (identical(other.rating, rating) || other.rating == rating));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     runtimeType,
     playerId,
     minutes,
     goals,
     assists,
     shots,
+    shotsOnTarget,
+    xg,
+    passes,
+    passAccuracy,
+    duelsWon,
+    offsides,
+    corners,
     yellowCards,
     redCards,
     tackles,
     interceptions,
     saves,
+    shotsFaced,
+    ownGoals,
+    cleanSheet,
+    staminaAfterMatch,
     rating,
-  );
+  ]);
 
   /// Create a copy of PlayerMatchStats
   /// with the given fields replaced by the non-null parameter values.
@@ -2144,11 +2541,22 @@ abstract class _PlayerMatchStats implements PlayerMatchStats {
     final int goals,
     final int assists,
     final int shots,
+    final int shotsOnTarget,
+    final double xg,
+    final int passes,
+    final double passAccuracy,
+    final int duelsWon,
+    final int offsides,
+    final int corners,
     final int yellowCards,
     final int redCards,
     final int tackles,
     final int interceptions,
     final int saves,
+    final int shotsFaced,
+    final int ownGoals,
+    final bool cleanSheet,
+    final int staminaAfterMatch,
     final double rating,
   }) = _$PlayerMatchStatsImpl;
 
@@ -2166,6 +2574,20 @@ abstract class _PlayerMatchStats implements PlayerMatchStats {
   @override
   int get shots;
   @override
+  int get shotsOnTarget;
+  @override
+  double get xg;
+  @override
+  int get passes;
+  @override
+  double get passAccuracy;
+  @override
+  int get duelsWon;
+  @override
+  int get offsides;
+  @override
+  int get corners;
+  @override
   int get yellowCards;
   @override
   int get redCards;
@@ -2175,6 +2597,14 @@ abstract class _PlayerMatchStats implements PlayerMatchStats {
   int get interceptions;
   @override
   int get saves;
+  @override
+  int get shotsFaced;
+  @override
+  int get ownGoals;
+  @override
+  bool get cleanSheet;
+  @override
+  int get staminaAfterMatch;
   @override
   double get rating;
 

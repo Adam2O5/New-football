@@ -3714,6 +3714,114 @@ abstract class AppLocalizations {
   /// **'Ocena'**
   String get stats_rating;
 
+  /// No description provided for @stats_boxScore.
+  ///
+  /// In pl, this message translates to:
+  /// **'Pełny box score'**
+  String get stats_boxScore;
+
+  /// No description provided for @stats_shots.
+  ///
+  /// In pl, this message translates to:
+  /// **'Strzały'**
+  String get stats_shots;
+
+  /// No description provided for @stats_shotsOnTarget.
+  ///
+  /// In pl, this message translates to:
+  /// **'Strzały celne'**
+  String get stats_shotsOnTarget;
+
+  /// No description provided for @stats_xg.
+  ///
+  /// In pl, this message translates to:
+  /// **'xG'**
+  String get stats_xg;
+
+  /// No description provided for @stats_passes.
+  ///
+  /// In pl, this message translates to:
+  /// **'Podania'**
+  String get stats_passes;
+
+  /// No description provided for @stats_passAccuracy.
+  ///
+  /// In pl, this message translates to:
+  /// **'Celność podań'**
+  String get stats_passAccuracy;
+
+  /// No description provided for @stats_duelsWon.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wygrane pojedynki'**
+  String get stats_duelsWon;
+
+  /// No description provided for @stats_offsides.
+  ///
+  /// In pl, this message translates to:
+  /// **'Spalone'**
+  String get stats_offsides;
+
+  /// No description provided for @stats_corners.
+  ///
+  /// In pl, this message translates to:
+  /// **'Rzuty rożne'**
+  String get stats_corners;
+
+  /// No description provided for @stats_fouls.
+  ///
+  /// In pl, this message translates to:
+  /// **'Faule'**
+  String get stats_fouls;
+
+  /// No description provided for @stats_yellowCards.
+  ///
+  /// In pl, this message translates to:
+  /// **'Żółte kartki'**
+  String get stats_yellowCards;
+
+  /// No description provided for @stats_redCards.
+  ///
+  /// In pl, this message translates to:
+  /// **'Czerwone kartki'**
+  String get stats_redCards;
+
+  /// No description provided for @stats_tackles.
+  ///
+  /// In pl, this message translates to:
+  /// **'Odbiory'**
+  String get stats_tackles;
+
+  /// No description provided for @stats_interceptions.
+  ///
+  /// In pl, this message translates to:
+  /// **'Przechwyty'**
+  String get stats_interceptions;
+
+  /// No description provided for @stats_cleanSheets.
+  ///
+  /// In pl, this message translates to:
+  /// **'Czyste konta'**
+  String get stats_cleanSheets;
+
+  /// No description provided for @stats_saves.
+  ///
+  /// In pl, this message translates to:
+  /// **'Obrony'**
+  String get stats_saves;
+
+  /// No description provided for @stats_shotsFaced.
+  ///
+  /// In pl, this message translates to:
+  /// **'Strzały przeciwko'**
+  String get stats_shotsFaced;
+
+  /// No description provided for @stats_possession.
+  ///
+  /// In pl, this message translates to:
+  /// **'Posiadanie'**
+  String get stats_possession;
+
   /// No description provided for @stats_record.
   ///
   /// In pl, this message translates to:

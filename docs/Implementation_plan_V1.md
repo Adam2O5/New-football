@@ -867,47 +867,49 @@ Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, le
 
 ---
 
-### ⬜ Task 22: Etap 8 — oceny, pełne statystyki, efekty pomeczowe, przełączenie silnika
+### ✅ Task 22: Etap 8 — oceny, pełne statystyki, efekty pomeczowe, przełączenie silnika
 
 **Cel:** `matchday_model.md` §15–16 + cutover na nowy silnik.
 
-- [ ] `matchRating = clamp(6,0 + Σ wkłady, 1,0, 10,0)` z 15 pozycjami §15.1
-- [ ] Gol ST/W +1,0, CM/CAM +1,3, DEF/GK +1,6
-- [ ] Asysta +0,7, wygrany pojedynek of. +0,05, obronny +0,06
-- [ ] Przegrany pojedynek obronny prowadzący do gola −0,45
-- [ ] Obrona GK +0,10, obroniony karny +1,2
-- [ ] Czyste konto DEF/GK (≥60 min) +0,6
-- [ ] Samobój −1,5, żółta −0,3, czerwona −1,5, zmarnowana duża sytuacja −0,25
-- [ ] Poniżej 20 min: rating ważony przez `minuty / 20`
-- [ ] Man of the Match: najwyższy rating, minimum 7,0
-- [ ] MotM → 20% szans na event „Inspirujący występ"
-- [ ] Rozszerzyć `PlayerMatchStats`: podania, celność podań, pojedynki wygrane, spaliny, xG, obrony, rożne
-- [ ] Rozszerzyć `TeamMatchStats` o pełny zestaw §15.2, liczony z przebiegu
-- [ ] Usunąć fabrykowanie `shots = goals + 4` i `possession: 50`
-- [ ] xG jawne od pierwszego meczu, bez odblokowywania
-- [ ] Efekt 1: zapis zużycia staminy + 20 natychmiastowej regeneracji
-- [ ] Efekt 2: aktualizacja formy z ratingu
-- [ ] Efekt 3: zapis typu i czasu kontuzji × `doctorCareMult`
-- [ ] Efekt 4: inkrementacja liczników kartek, ewentualne zawieszenia
-- [ ] Efekt 5: agregacja do `seasonStats`
-- [ ] Efekt 6: `growthRate` +0,01 za każdą rozegraną minutę w tym tygodniu
-- [ ] Efekt 7: delty zgrania per `team_management.md`
-- [ ] Efekt 8: delty atmosfery per `team_management.md`
-- [ ] Efekt 9: rolle eventów zawodnika i zespołu (hook pod Fazę 4)
-- [ ] Efekt 10: wiadomości `matchResult`, `injury`, `award`
-- [ ] **Przełączyć `matchEngineProvider` i `DaySimulator` na `core/simulation`**
-- [ ] **Usunąć `lib/core/engine/match_engine.dart` i jego eksporty**
-- [ ] Przenieść istniejące testy silnika na nowy pakiet
-- [ ] Podnieść `currentSchemaVersion`
+- [x] `matchRating = clamp(6,0 + Σ wkłady, 1,0, 10,0)` z 15 pozycjami §15.1
+- [x] Gol ST/W +1,0, CM/CAM +1,3, DEF/GK +1,6
+- [x] Asysta +0,7, wygrany pojedynek of. +0,05, obronny +0,06
+- [x] Przegrany pojedynek obronny prowadzący do gola −0,45
+- [x] Obrona GK +0,10, obroniony karny +1,2
+- [x] Czyste konto DEF/GK (≥60 min) +0,6
+- [x] Samobój −1,5, żółta −0,3, czerwona −1,5, zmarnowana duża sytuacja −0,25
+- [x] Poniżej 20 min: rating ważony przez `minuty / 20`
+- [x] Man of the Match: najwyższy rating, minimum 7,0
+- [x] MotM → deterministyczne 20% szans na event „Inspirujący występ"
+- [x] Rozszerzyć `PlayerMatchStats` i `PlayerSeasonStats` o pełne statystyki indywidualne: podania, celność podań, pojedynki, spalone, xG, obrony, rożne, odbiory, przechwyty i statystyki GK
+- [x] Rozszerzyć `TeamMatchStats` o pełny zestaw §15.2, liczony z trace/eventów/runtime’u
+- [x] Usunąć fabrykowanie `shots = goals + 4`, `shotsOnTarget = goals + 2` i `possession: 50`
+- [x] xG jawne od pierwszego meczu, bez odblokowywania
+- [x] `MatchResultAssembler` buduje trwały `MatchResult` z `SimulationResult`, trace’ów, eventów i raportu staminy; wynik administracyjny jest zachowywany bez ponownej symulacji
+- [x] `SimulationMatchEngine.simulateFullMatch()` i `toMatchResult()` tworzą facade nad kompatybilnym `simulateFull()`/`SimulationResult`
+- [x] Efekt 1: zapis zużycia staminy z runtime’u + 20 natychmiastowej regeneracji; dla `staminaAfterMatch = -1` pozostaje fallback legacy
+- [x] Efekt 2: aktualizacja formy z ratingu
+- [x] Efekt 3: zapis typu i czasu kontuzji × `doctorCareMult`
+- [x] Efekt 4: inkrementacja liczników kartek i ewentualne zawieszenia
+- [x] Efekt 5: agregacja do `seasonStats` per rok sezonu
+- [x] Efekt 6: `growthRate` +0,01 za każdą rozegraną minutę w tym tygodniu, z clampem balansu
+- [x] Efekt 7: delty zgrania per `team_management.md`
+- [x] Efekt 8: delty atmosfery per `team_management.md`
+- [x] Efekt 9: wspólny hook `inspiredPerformance` dla przyszłej warstwy eventów
+- [x] Efekt 10: wiadomości `matchResult`, `injury` oraz `playerEvent/inspiredPerformance` z pełnym payloadem statystyk
+- [x] **Przełączyć `matchEngineProvider`, `DaySimulator`, `SeasonService`, `MatchdayScreen` i `core.dart` na `core/simulation`**
+- [x] **Usunąć legacy plik engine i jego eksporty**; bootstrap kompatybilności pozostaje w `core/simulation/match_bootstrap.dart`
+- [x] Przenieść testy runtime do importu `core/simulation`, zachowując kompatybilne API dla testów Task 10–21
+- [x] Podnieść `SaveSchema.currentVersion` do 11 i wygenerować modele Freezed/JSON
+- [x] `StatsScreen` prezentuje rozwijany pełny box score sezonu zawodników i drużyn, w tym xG
 
 **Testy**
-- [ ] Suma minut w meczu = 990 + doliczony czas
-- [ ] `seasonStats` po 58 kolejkach mają sumy goli spójne z tabelą
-- [ ] Zero odwołań do usuniętego `match_engine.dart`
-- [ ] `matchRating` mieści się w 1,0–10,0 dla 10 000 przypadków
-- [ ] Suma xG drużyny odpowiada sumie xG jej sytuacji
+- [x] `test/task22_match_result_test.dart`: realne statystyki z trace/eventów, rating 1,0–10,0, MotM, JSON round-trip, stamina, `seasonStats` i `growthRate`
+- [x] Obserwacja minutowa i symulacja headless na tym samym seedzie dają identyczny trace oraz `MatchResult`
+- [x] Regresja Task 10–21 oraz testy przepływu Task 6–7: 142 testy zakończone powodzeniem
+- [x] Wyszukiwanie kodu i dokumentacji nie znajduje importu usuniętej ścieżki legacy engine
 
-**Demo:** `StatsScreen` i `RewardsScreen` pokazują prawdziwe dane — korona strzelców, średnie oceny, xG per drużyna — zamiast zer.
+**Demo:** `StatsScreen` pokazuje prawdziwe dane z zapisanych `MatchResult`: gole, asysty, strzały, xG, podania, pojedynki, stałe fragmenty, dyscyplinę, obrony i oceny per zawodnik oraz agregaty drużynowe.
 
 ---
 

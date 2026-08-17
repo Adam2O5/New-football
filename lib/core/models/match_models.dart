@@ -62,10 +62,15 @@ class TeamMatchStats with _$TeamMatchStats {
     @Default(0) int shotsOnTarget,
     @Default(0) int possession,
     @Default(0.0) double xg,
+    @Default(0) int passes,
+    @Default(0.0) double passAccuracy,
+    @Default(0) int duelsWon,
+    @Default(0) int offsides,
     @Default(0) int corners,
     @Default(0) int fouls,
     @Default(0) int yellowCards,
     @Default(0) int redCards,
+    @Default(0) int saves,
   }) = _TeamMatchStats;
 
   factory TeamMatchStats.fromJson(Map<String, dynamic> json) =>
@@ -119,6 +124,10 @@ class MatchResult with _$MatchResult {
     @Default([]) List<MatchEvent> events,
     @Default([]) List<MatchInjury> injuries,
     @Default([]) List<MatchDiscipline> disciplines,
+    String? manOfTheMatchPlayerId,
+    String? inspiredPerformancePlayerId,
+    @Default(90) int matchEndMinute,
+    @Default(0) int stoppageTime,
   }) = _MatchResult;
 
   factory MatchResult.fromJson(Map<String, dynamic> json) =>

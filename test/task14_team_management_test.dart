@@ -650,7 +650,7 @@ void main() {
     final restoredSave = GameSave.fromJson(
       jsonDecode(jsonEncode(save.toJson())) as Map<String, dynamic>,
     );
-    expect(SaveSchema.currentVersion, 10);
+    expect(SaveSchema.currentVersion, 11);
     expect(restoredSave.schemaVersion, SaveSchema.currentVersion);
     expect(restoredSave.meta.schemaVersion, SaveSchema.currentVersion);
     expect(restoredSave.leagueState.strengthTable?.seasonYear, 2026);
