@@ -39,6 +39,29 @@ int aiSeed(
   ]);
 }
 
+/// Returns a deterministic seed for one individual-player event roll.
+///
+/// The player id and event kind are part of the key, so changing roster order
+/// or adding another event cannot silently change an existing result.
+int playerEventSeed(
+  int saveSeed,
+  int seasonYear,
+  int week,
+  String playerId,
+  String eventKind, {
+  int salt = 0,
+}) {
+  return _stableHash([
+    'player-event',
+    saveSeed,
+    seasonYear,
+    week,
+    playerId,
+    eventKind,
+    salt,
+  ]);
+}
+
 /// A stable 31-bit FNV-1a hash.
 ///
 /// [Object.hash] is deliberately avoided here: seeds are persisted game

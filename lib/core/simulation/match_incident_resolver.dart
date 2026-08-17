@@ -3,6 +3,7 @@ import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/injury.dart';
 import 'package:new_football/core/models/match_state.dart';
 import 'package:new_football/core/models/player.dart';
+import 'package:new_football/core/models/player_event_state.dart';
 import 'package:new_football/core/models/staff.dart';
 import 'package:new_football/core/services/injury_service.dart';
 import 'package:new_football/core/tactics/tactics_setup.dart';
@@ -187,6 +188,7 @@ class MatchIncidentResolver {
         balance.matchday.injuryBase *
         balance.matchday.injuryProneMultiplier(player.hidden.injuryProne) *
         balance.player.injuryRiskMult(currentStamina) *
+        (1.0 + player.state.eventState.modifierValue('injuryRiskMultiplier')) *
         injuryService.physioRehabMult(physio) *
         injuryService.doctorPreventionMult(doctor) *
         _professionalMultiplier(player) *

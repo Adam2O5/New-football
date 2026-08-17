@@ -4,6 +4,7 @@ import 'package:new_football/core/models/contract.dart';
 import 'package:new_football/core/models/draft_pick.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/player.dart';
+import 'package:new_football/core/models/player_event_state.dart';
 import 'package:new_football/core/models/scouting.dart';
 import 'package:new_football/core/models/staff.dart';
 import 'package:new_football/core/tactics/tactics_setup.dart';
@@ -79,25 +80,45 @@ extension TeamX on Team {
       roster.where((p) => p.isAvailable).toList();
 
   List<Player> get startingEleven {
-    if (lineupPlayerIds.isNotEmpty) {
-      final fromIds = <Player>[];
-      for (final id in lineupPlayerIds) {
-        final matches = roster.where((p) => p.id == id);
-        if (matches.isNotEmpty && matches.first.isAvailable) {
-          fromIds.add(matches.first);
-        }
-        if (fromIds.length >= 11) break;
-      }
-      if (fromIds.length >= 11) return fromIds;
-      if (fromIds.isNotEmpty) {
-        final used = fromIds.map((p) => p.id).toSet();
-        final fillers = availablePlayers
-            .where((p) => !used.contains(p.id))
-            .take(11 - fromIds.length);
-        return [...fromIds, ...fillers];
-      }
+    final candidates = availablePlayers
+        .where((player) => player.isEligibleForStartingEleven)
+        .toList();
+    final byId = {for (final player in candidates) player.id: player};
+    final selected = <Player>[];
+
+    for (final id in lineupPlayerIds) {
+      final player = byId[id];
+      if (player == null) continue;
+      selected.add(player);
+      if (selected.length >= 11) break;
     }
-    return availablePlayers.take(11).toList();
+
+    // A motivational event can require a player in the next XI even when the
+    // saved lineup was not updated by the UI. Insert the required player and,
+    // when necessary, replace the last non-required starter.
+    final required = candidates
+        .where(
+          (player) =>
+              player.state.eventState.hasModifier('startingElevenRequired'),
+        )
+        .toList();
+    for (final player in required) {
+      if (selected.any((item) => item.id == player.id)) continue;
+      if (selected.length < 11) {
+        selected.add(player);
+        continue;
+      }
+      final replaceIndex = selected.lastIndexWhere(
+        (item) => !item.state.eventState.hasModifier('startingElevenRequired'),
+      );
+      if (replaceIndex >= 0) selected[replaceIndex] = player;
+    }
+
+    for (final player in candidates) {
+      if (selected.length >= 11) break;
+      if (!selected.any((item) => item.id == player.id)) selected.add(player);
+    }
+    return selected;
   }
 
   double get teamStrength {

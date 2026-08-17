@@ -616,7 +616,7 @@ as double,
 /// @nodoc
 mixin _$PlayerState {
 
- int get stamina; double get form; Injury? get injury; int get regularSeasonYellowCards; int get playoffYellowCards; int get suspensionGamesRemaining; AssignedRole get role; int get seasonsWithTeam; int get minutesThisWeek; int get lastDevelopmentOvrDelta; double get lastDevelopmentProgressDelta;
+ int get stamina; double get form; Injury? get injury; int get regularSeasonYellowCards; int get playoffYellowCards; int get suspensionGamesRemaining; AssignedRole get role; int get seasonsWithTeam; int get minutesThisWeek; int get lastDevelopmentOvrDelta; double get lastDevelopmentProgressDelta; PlayerEventState get eventState;
 /// Create a copy of PlayerState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -629,16 +629,16 @@ $PlayerStateCopyWith<PlayerState> get copyWith => _$PlayerStateCopyWithImpl<Play
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PlayerState&&(identical(other.stamina, stamina) || other.stamina == stamina)&&(identical(other.form, form) || other.form == form)&&(identical(other.injury, injury) || other.injury == injury)&&(identical(other.regularSeasonYellowCards, regularSeasonYellowCards) || other.regularSeasonYellowCards == regularSeasonYellowCards)&&(identical(other.playoffYellowCards, playoffYellowCards) || other.playoffYellowCards == playoffYellowCards)&&(identical(other.suspensionGamesRemaining, suspensionGamesRemaining) || other.suspensionGamesRemaining == suspensionGamesRemaining)&&(identical(other.role, role) || other.role == role)&&(identical(other.seasonsWithTeam, seasonsWithTeam) || other.seasonsWithTeam == seasonsWithTeam)&&(identical(other.minutesThisWeek, minutesThisWeek) || other.minutesThisWeek == minutesThisWeek)&&(identical(other.lastDevelopmentOvrDelta, lastDevelopmentOvrDelta) || other.lastDevelopmentOvrDelta == lastDevelopmentOvrDelta)&&(identical(other.lastDevelopmentProgressDelta, lastDevelopmentProgressDelta) || other.lastDevelopmentProgressDelta == lastDevelopmentProgressDelta));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PlayerState&&(identical(other.stamina, stamina) || other.stamina == stamina)&&(identical(other.form, form) || other.form == form)&&(identical(other.injury, injury) || other.injury == injury)&&(identical(other.regularSeasonYellowCards, regularSeasonYellowCards) || other.regularSeasonYellowCards == regularSeasonYellowCards)&&(identical(other.playoffYellowCards, playoffYellowCards) || other.playoffYellowCards == playoffYellowCards)&&(identical(other.suspensionGamesRemaining, suspensionGamesRemaining) || other.suspensionGamesRemaining == suspensionGamesRemaining)&&(identical(other.role, role) || other.role == role)&&(identical(other.seasonsWithTeam, seasonsWithTeam) || other.seasonsWithTeam == seasonsWithTeam)&&(identical(other.minutesThisWeek, minutesThisWeek) || other.minutesThisWeek == minutesThisWeek)&&(identical(other.lastDevelopmentOvrDelta, lastDevelopmentOvrDelta) || other.lastDevelopmentOvrDelta == lastDevelopmentOvrDelta)&&(identical(other.lastDevelopmentProgressDelta, lastDevelopmentProgressDelta) || other.lastDevelopmentProgressDelta == lastDevelopmentProgressDelta)&&(identical(other.eventState, eventState) || other.eventState == eventState));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,stamina,form,injury,regularSeasonYellowCards,playoffYellowCards,suspensionGamesRemaining,role,seasonsWithTeam,minutesThisWeek,lastDevelopmentOvrDelta,lastDevelopmentProgressDelta);
+int get hashCode => Object.hash(runtimeType,stamina,form,injury,regularSeasonYellowCards,playoffYellowCards,suspensionGamesRemaining,role,seasonsWithTeam,minutesThisWeek,lastDevelopmentOvrDelta,lastDevelopmentProgressDelta,eventState);
 
 @override
 String toString() {
-  return 'PlayerState(stamina: $stamina, form: $form, injury: $injury, regularSeasonYellowCards: $regularSeasonYellowCards, playoffYellowCards: $playoffYellowCards, suspensionGamesRemaining: $suspensionGamesRemaining, role: $role, seasonsWithTeam: $seasonsWithTeam, minutesThisWeek: $minutesThisWeek, lastDevelopmentOvrDelta: $lastDevelopmentOvrDelta, lastDevelopmentProgressDelta: $lastDevelopmentProgressDelta)';
+  return 'PlayerState(stamina: $stamina, form: $form, injury: $injury, regularSeasonYellowCards: $regularSeasonYellowCards, playoffYellowCards: $playoffYellowCards, suspensionGamesRemaining: $suspensionGamesRemaining, role: $role, seasonsWithTeam: $seasonsWithTeam, minutesThisWeek: $minutesThisWeek, lastDevelopmentOvrDelta: $lastDevelopmentOvrDelta, lastDevelopmentProgressDelta: $lastDevelopmentProgressDelta, eventState: $eventState)';
 }
 
 
@@ -649,11 +649,11 @@ abstract mixin class $PlayerStateCopyWith<$Res>  {
   factory $PlayerStateCopyWith(PlayerState value, $Res Function(PlayerState) _then) = _$PlayerStateCopyWithImpl;
 @useResult
 $Res call({
- int stamina, double form, Injury? injury, int regularSeasonYellowCards, int playoffYellowCards, int suspensionGamesRemaining, AssignedRole role, int seasonsWithTeam, int minutesThisWeek, int lastDevelopmentOvrDelta, double lastDevelopmentProgressDelta
+ int stamina, double form, Injury? injury, int regularSeasonYellowCards, int playoffYellowCards, int suspensionGamesRemaining, AssignedRole role, int seasonsWithTeam, int minutesThisWeek, int lastDevelopmentOvrDelta, double lastDevelopmentProgressDelta, PlayerEventState eventState
 });
 
 
-$InjuryCopyWith<$Res>? get injury;$AssignedRoleCopyWith<$Res> get role;
+$InjuryCopyWith<$Res>? get injury;$AssignedRoleCopyWith<$Res> get role;$PlayerEventStateCopyWith<$Res> get eventState;
 
 }
 /// @nodoc
@@ -666,7 +666,7 @@ class _$PlayerStateCopyWithImpl<$Res>
 
 /// Create a copy of PlayerState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? stamina = null,Object? form = null,Object? injury = freezed,Object? regularSeasonYellowCards = null,Object? playoffYellowCards = null,Object? suspensionGamesRemaining = null,Object? role = null,Object? seasonsWithTeam = null,Object? minutesThisWeek = null,Object? lastDevelopmentOvrDelta = null,Object? lastDevelopmentProgressDelta = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? stamina = null,Object? form = null,Object? injury = freezed,Object? regularSeasonYellowCards = null,Object? playoffYellowCards = null,Object? suspensionGamesRemaining = null,Object? role = null,Object? seasonsWithTeam = null,Object? minutesThisWeek = null,Object? lastDevelopmentOvrDelta = null,Object? lastDevelopmentProgressDelta = null,Object? eventState = null,}) {
   return _then(_self.copyWith(
 stamina: null == stamina ? _self.stamina : stamina // ignore: cast_nullable_to_non_nullable
 as int,form: null == form ? _self.form : form // ignore: cast_nullable_to_non_nullable
@@ -679,7 +679,8 @@ as AssignedRole,seasonsWithTeam: null == seasonsWithTeam ? _self.seasonsWithTeam
 as int,minutesThisWeek: null == minutesThisWeek ? _self.minutesThisWeek : minutesThisWeek // ignore: cast_nullable_to_non_nullable
 as int,lastDevelopmentOvrDelta: null == lastDevelopmentOvrDelta ? _self.lastDevelopmentOvrDelta : lastDevelopmentOvrDelta // ignore: cast_nullable_to_non_nullable
 as int,lastDevelopmentProgressDelta: null == lastDevelopmentProgressDelta ? _self.lastDevelopmentProgressDelta : lastDevelopmentProgressDelta // ignore: cast_nullable_to_non_nullable
-as double,
+as double,eventState: null == eventState ? _self.eventState : eventState // ignore: cast_nullable_to_non_nullable
+as PlayerEventState,
   ));
 }
 /// Create a copy of PlayerState
@@ -699,9 +700,18 @@ $InjuryCopyWith<$Res>? get injury {
 @override
 @pragma('vm:prefer-inline')
 $AssignedRoleCopyWith<$Res> get role {
-  
+
   return $AssignedRoleCopyWith<$Res>(_self.role, (value) {
     return _then(_self.copyWith(role: value));
+  });
+}/// Create a copy of PlayerState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$PlayerEventStateCopyWith<$Res> get eventState {
+
+  return $PlayerEventStateCopyWith<$Res>(_self.eventState, (value) {
+    return _then(_self.copyWith(eventState: value));
   });
 }
 }
@@ -785,10 +795,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int stamina,  double form,  Injury? injury,  int regularSeasonYellowCards,  int playoffYellowCards,  int suspensionGamesRemaining,  AssignedRole role,  int seasonsWithTeam,  int minutesThisWeek,  int lastDevelopmentOvrDelta,  double lastDevelopmentProgressDelta)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int stamina,  double form,  Injury? injury,  int regularSeasonYellowCards,  int playoffYellowCards,  int suspensionGamesRemaining,  AssignedRole role,  int seasonsWithTeam,  int minutesThisWeek,  int lastDevelopmentOvrDelta,  double lastDevelopmentProgressDelta,  PlayerEventState eventState)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PlayerState() when $default != null:
-return $default(_that.stamina,_that.form,_that.injury,_that.regularSeasonYellowCards,_that.playoffYellowCards,_that.suspensionGamesRemaining,_that.role,_that.seasonsWithTeam,_that.minutesThisWeek,_that.lastDevelopmentOvrDelta,_that.lastDevelopmentProgressDelta);case _:
+return $default(_that.stamina,_that.form,_that.injury,_that.regularSeasonYellowCards,_that.playoffYellowCards,_that.suspensionGamesRemaining,_that.role,_that.seasonsWithTeam,_that.minutesThisWeek,_that.lastDevelopmentOvrDelta,_that.lastDevelopmentProgressDelta,_that.eventState);case _:
   return orElse();
 
 }
@@ -806,10 +816,10 @@ return $default(_that.stamina,_that.form,_that.injury,_that.regularSeasonYellowC
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int stamina,  double form,  Injury? injury,  int regularSeasonYellowCards,  int playoffYellowCards,  int suspensionGamesRemaining,  AssignedRole role,  int seasonsWithTeam,  int minutesThisWeek,  int lastDevelopmentOvrDelta,  double lastDevelopmentProgressDelta)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int stamina,  double form,  Injury? injury,  int regularSeasonYellowCards,  int playoffYellowCards,  int suspensionGamesRemaining,  AssignedRole role,  int seasonsWithTeam,  int minutesThisWeek,  int lastDevelopmentOvrDelta,  double lastDevelopmentProgressDelta,  PlayerEventState eventState)  $default,) {final _that = this;
 switch (_that) {
 case _PlayerState():
-return $default(_that.stamina,_that.form,_that.injury,_that.regularSeasonYellowCards,_that.playoffYellowCards,_that.suspensionGamesRemaining,_that.role,_that.seasonsWithTeam,_that.minutesThisWeek,_that.lastDevelopmentOvrDelta,_that.lastDevelopmentProgressDelta);case _:
+return $default(_that.stamina,_that.form,_that.injury,_that.regularSeasonYellowCards,_that.playoffYellowCards,_that.suspensionGamesRemaining,_that.role,_that.seasonsWithTeam,_that.minutesThisWeek,_that.lastDevelopmentOvrDelta,_that.lastDevelopmentProgressDelta,_that.eventState);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -826,10 +836,10 @@ return $default(_that.stamina,_that.form,_that.injury,_that.regularSeasonYellowC
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int stamina,  double form,  Injury? injury,  int regularSeasonYellowCards,  int playoffYellowCards,  int suspensionGamesRemaining,  AssignedRole role,  int seasonsWithTeam,  int minutesThisWeek,  int lastDevelopmentOvrDelta,  double lastDevelopmentProgressDelta)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int stamina,  double form,  Injury? injury,  int regularSeasonYellowCards,  int playoffYellowCards,  int suspensionGamesRemaining,  AssignedRole role,  int seasonsWithTeam,  int minutesThisWeek,  int lastDevelopmentOvrDelta,  double lastDevelopmentProgressDelta,  PlayerEventState eventState)?  $default,) {final _that = this;
 switch (_that) {
 case _PlayerState() when $default != null:
-return $default(_that.stamina,_that.form,_that.injury,_that.regularSeasonYellowCards,_that.playoffYellowCards,_that.suspensionGamesRemaining,_that.role,_that.seasonsWithTeam,_that.minutesThisWeek,_that.lastDevelopmentOvrDelta,_that.lastDevelopmentProgressDelta);case _:
+return $default(_that.stamina,_that.form,_that.injury,_that.regularSeasonYellowCards,_that.playoffYellowCards,_that.suspensionGamesRemaining,_that.role,_that.seasonsWithTeam,_that.minutesThisWeek,_that.lastDevelopmentOvrDelta,_that.lastDevelopmentProgressDelta,_that.eventState);case _:
   return null;
 
 }
@@ -841,7 +851,7 @@ return $default(_that.stamina,_that.form,_that.injury,_that.regularSeasonYellowC
 @JsonSerializable()
 
 class _PlayerState implements PlayerState {
-  const _PlayerState({this.stamina = 100, this.form = 5.0, this.injury, this.regularSeasonYellowCards = 0, this.playoffYellowCards = 0, this.suspensionGamesRemaining = 0, this.role = const AssignedRole.cm(), this.seasonsWithTeam = 0, this.minutesThisWeek = 0, this.lastDevelopmentOvrDelta = 0, this.lastDevelopmentProgressDelta = 0.0});
+  const _PlayerState({this.stamina = 100, this.form = 5.0, this.injury, this.regularSeasonYellowCards = 0, this.playoffYellowCards = 0, this.suspensionGamesRemaining = 0, this.role = const AssignedRole.cm(), this.seasonsWithTeam = 0, this.minutesThisWeek = 0, this.lastDevelopmentOvrDelta = 0, this.lastDevelopmentProgressDelta = 0.0, this.eventState = const PlayerEventState()});
   factory _PlayerState.fromJson(Map<String, dynamic> json) => _$PlayerStateFromJson(json);
 
 @override@JsonKey() final  int stamina;
@@ -855,6 +865,7 @@ class _PlayerState implements PlayerState {
 @override@JsonKey() final  int minutesThisWeek;
 @override@JsonKey() final  int lastDevelopmentOvrDelta;
 @override@JsonKey() final  double lastDevelopmentProgressDelta;
+@override@JsonKey() final  PlayerEventState eventState;
 
 /// Create a copy of PlayerState
 /// with the given fields replaced by the non-null parameter values.
@@ -869,16 +880,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PlayerState&&(identical(other.stamina, stamina) || other.stamina == stamina)&&(identical(other.form, form) || other.form == form)&&(identical(other.injury, injury) || other.injury == injury)&&(identical(other.regularSeasonYellowCards, regularSeasonYellowCards) || other.regularSeasonYellowCards == regularSeasonYellowCards)&&(identical(other.playoffYellowCards, playoffYellowCards) || other.playoffYellowCards == playoffYellowCards)&&(identical(other.suspensionGamesRemaining, suspensionGamesRemaining) || other.suspensionGamesRemaining == suspensionGamesRemaining)&&(identical(other.role, role) || other.role == role)&&(identical(other.seasonsWithTeam, seasonsWithTeam) || other.seasonsWithTeam == seasonsWithTeam)&&(identical(other.minutesThisWeek, minutesThisWeek) || other.minutesThisWeek == minutesThisWeek)&&(identical(other.lastDevelopmentOvrDelta, lastDevelopmentOvrDelta) || other.lastDevelopmentOvrDelta == lastDevelopmentOvrDelta)&&(identical(other.lastDevelopmentProgressDelta, lastDevelopmentProgressDelta) || other.lastDevelopmentProgressDelta == lastDevelopmentProgressDelta));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PlayerState&&(identical(other.stamina, stamina) || other.stamina == stamina)&&(identical(other.form, form) || other.form == form)&&(identical(other.injury, injury) || other.injury == injury)&&(identical(other.regularSeasonYellowCards, regularSeasonYellowCards) || other.regularSeasonYellowCards == regularSeasonYellowCards)&&(identical(other.playoffYellowCards, playoffYellowCards) || other.playoffYellowCards == playoffYellowCards)&&(identical(other.suspensionGamesRemaining, suspensionGamesRemaining) || other.suspensionGamesRemaining == suspensionGamesRemaining)&&(identical(other.role, role) || other.role == role)&&(identical(other.seasonsWithTeam, seasonsWithTeam) || other.seasonsWithTeam == seasonsWithTeam)&&(identical(other.minutesThisWeek, minutesThisWeek) || other.minutesThisWeek == minutesThisWeek)&&(identical(other.lastDevelopmentOvrDelta, lastDevelopmentOvrDelta) || other.lastDevelopmentOvrDelta == lastDevelopmentOvrDelta)&&(identical(other.lastDevelopmentProgressDelta, lastDevelopmentProgressDelta) || other.lastDevelopmentProgressDelta == lastDevelopmentProgressDelta)&&(identical(other.eventState, eventState) || other.eventState == eventState));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,stamina,form,injury,regularSeasonYellowCards,playoffYellowCards,suspensionGamesRemaining,role,seasonsWithTeam,minutesThisWeek,lastDevelopmentOvrDelta,lastDevelopmentProgressDelta);
+int get hashCode => Object.hash(runtimeType,stamina,form,injury,regularSeasonYellowCards,playoffYellowCards,suspensionGamesRemaining,role,seasonsWithTeam,minutesThisWeek,lastDevelopmentOvrDelta,lastDevelopmentProgressDelta,eventState);
 
 @override
 String toString() {
-  return 'PlayerState(stamina: $stamina, form: $form, injury: $injury, regularSeasonYellowCards: $regularSeasonYellowCards, playoffYellowCards: $playoffYellowCards, suspensionGamesRemaining: $suspensionGamesRemaining, role: $role, seasonsWithTeam: $seasonsWithTeam, minutesThisWeek: $minutesThisWeek, lastDevelopmentOvrDelta: $lastDevelopmentOvrDelta, lastDevelopmentProgressDelta: $lastDevelopmentProgressDelta)';
+  return 'PlayerState(stamina: $stamina, form: $form, injury: $injury, regularSeasonYellowCards: $regularSeasonYellowCards, playoffYellowCards: $playoffYellowCards, suspensionGamesRemaining: $suspensionGamesRemaining, role: $role, seasonsWithTeam: $seasonsWithTeam, minutesThisWeek: $minutesThisWeek, lastDevelopmentOvrDelta: $lastDevelopmentOvrDelta, lastDevelopmentProgressDelta: $lastDevelopmentProgressDelta, eventState: $eventState)';
 }
 
 
@@ -889,11 +900,11 @@ abstract mixin class _$PlayerStateCopyWith<$Res> implements $PlayerStateCopyWith
   factory _$PlayerStateCopyWith(_PlayerState value, $Res Function(_PlayerState) _then) = __$PlayerStateCopyWithImpl;
 @override @useResult
 $Res call({
- int stamina, double form, Injury? injury, int regularSeasonYellowCards, int playoffYellowCards, int suspensionGamesRemaining, AssignedRole role, int seasonsWithTeam, int minutesThisWeek, int lastDevelopmentOvrDelta, double lastDevelopmentProgressDelta
+ int stamina, double form, Injury? injury, int regularSeasonYellowCards, int playoffYellowCards, int suspensionGamesRemaining, AssignedRole role, int seasonsWithTeam, int minutesThisWeek, int lastDevelopmentOvrDelta, double lastDevelopmentProgressDelta, PlayerEventState eventState
 });
 
 
-@override $InjuryCopyWith<$Res>? get injury;@override $AssignedRoleCopyWith<$Res> get role;
+@override $InjuryCopyWith<$Res>? get injury;@override $AssignedRoleCopyWith<$Res> get role;@override $PlayerEventStateCopyWith<$Res> get eventState;
 
 }
 /// @nodoc
@@ -906,7 +917,7 @@ class __$PlayerStateCopyWithImpl<$Res>
 
 /// Create a copy of PlayerState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? stamina = null,Object? form = null,Object? injury = freezed,Object? regularSeasonYellowCards = null,Object? playoffYellowCards = null,Object? suspensionGamesRemaining = null,Object? role = null,Object? seasonsWithTeam = null,Object? minutesThisWeek = null,Object? lastDevelopmentOvrDelta = null,Object? lastDevelopmentProgressDelta = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? stamina = null,Object? form = null,Object? injury = freezed,Object? regularSeasonYellowCards = null,Object? playoffYellowCards = null,Object? suspensionGamesRemaining = null,Object? role = null,Object? seasonsWithTeam = null,Object? minutesThisWeek = null,Object? lastDevelopmentOvrDelta = null,Object? lastDevelopmentProgressDelta = null,Object? eventState = null,}) {
   return _then(_PlayerState(
 stamina: null == stamina ? _self.stamina : stamina // ignore: cast_nullable_to_non_nullable
 as int,form: null == form ? _self.form : form // ignore: cast_nullable_to_non_nullable
@@ -919,7 +930,8 @@ as AssignedRole,seasonsWithTeam: null == seasonsWithTeam ? _self.seasonsWithTeam
 as int,minutesThisWeek: null == minutesThisWeek ? _self.minutesThisWeek : minutesThisWeek // ignore: cast_nullable_to_non_nullable
 as int,lastDevelopmentOvrDelta: null == lastDevelopmentOvrDelta ? _self.lastDevelopmentOvrDelta : lastDevelopmentOvrDelta // ignore: cast_nullable_to_non_nullable
 as int,lastDevelopmentProgressDelta: null == lastDevelopmentProgressDelta ? _self.lastDevelopmentProgressDelta : lastDevelopmentProgressDelta // ignore: cast_nullable_to_non_nullable
-as double,
+as double,eventState: null == eventState ? _self.eventState : eventState // ignore: cast_nullable_to_non_nullable
+as PlayerEventState,
   ));
 }
 
@@ -940,9 +952,18 @@ $InjuryCopyWith<$Res>? get injury {
 @override
 @pragma('vm:prefer-inline')
 $AssignedRoleCopyWith<$Res> get role {
-  
+
   return $AssignedRoleCopyWith<$Res>(_self.role, (value) {
     return _then(_self.copyWith(role: value));
+  });
+}/// Create a copy of PlayerState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$PlayerEventStateCopyWith<$Res> get eventState {
+
+  return $PlayerEventStateCopyWith<$Res>(_self.eventState, (value) {
+    return _then(_self.copyWith(eventState: value));
   });
 }
 }
@@ -1035,7 +1056,7 @@ as double?,
 @override
 @pragma('vm:prefer-inline')
 $PlayerAttributesCopyWith<$Res> get attributes {
-  
+
   return $PlayerAttributesCopyWith<$Res>(_self.attributes, (value) {
     return _then(_self.copyWith(attributes: value));
   });
@@ -1044,7 +1065,7 @@ $PlayerAttributesCopyWith<$Res> get attributes {
 @override
 @pragma('vm:prefer-inline')
 $ContractCopyWith<$Res> get contract {
-  
+
   return $ContractCopyWith<$Res>(_self.contract, (value) {
     return _then(_self.copyWith(contract: value));
   });
@@ -1053,7 +1074,7 @@ $ContractCopyWith<$Res> get contract {
 @override
 @pragma('vm:prefer-inline')
 $PlayerStateCopyWith<$Res> get state {
-  
+
   return $PlayerStateCopyWith<$Res>(_self.state, (value) {
     return _then(_self.copyWith(state: value));
   });
@@ -1062,7 +1083,7 @@ $PlayerStateCopyWith<$Res> get state {
 @override
 @pragma('vm:prefer-inline')
 $PlayerHiddenCopyWith<$Res> get hidden {
-  
+
   return $PlayerHiddenCopyWith<$Res>(_self.hidden, (value) {
     return _then(_self.copyWith(hidden: value));
   });
@@ -1071,7 +1092,7 @@ $PlayerHiddenCopyWith<$Res> get hidden {
 @override
 @pragma('vm:prefer-inline')
 $AssignedRoleCopyWith<$Res> get optimalRole {
-  
+
   return $AssignedRoleCopyWith<$Res>(_self.optimalRole, (value) {
     return _then(_self.copyWith(optimalRole: value));
   });
@@ -1325,7 +1346,7 @@ as double?,
 @override
 @pragma('vm:prefer-inline')
 $PlayerAttributesCopyWith<$Res> get attributes {
-  
+
   return $PlayerAttributesCopyWith<$Res>(_self.attributes, (value) {
     return _then(_self.copyWith(attributes: value));
   });
@@ -1334,7 +1355,7 @@ $PlayerAttributesCopyWith<$Res> get attributes {
 @override
 @pragma('vm:prefer-inline')
 $ContractCopyWith<$Res> get contract {
-  
+
   return $ContractCopyWith<$Res>(_self.contract, (value) {
     return _then(_self.copyWith(contract: value));
   });
@@ -1343,7 +1364,7 @@ $ContractCopyWith<$Res> get contract {
 @override
 @pragma('vm:prefer-inline')
 $PlayerStateCopyWith<$Res> get state {
-  
+
   return $PlayerStateCopyWith<$Res>(_self.state, (value) {
     return _then(_self.copyWith(state: value));
   });
@@ -1352,7 +1373,7 @@ $PlayerStateCopyWith<$Res> get state {
 @override
 @pragma('vm:prefer-inline')
 $PlayerHiddenCopyWith<$Res> get hidden {
-  
+
   return $PlayerHiddenCopyWith<$Res>(_self.hidden, (value) {
     return _then(_self.copyWith(hidden: value));
   });
@@ -1361,7 +1382,7 @@ $PlayerHiddenCopyWith<$Res> get hidden {
 @override
 @pragma('vm:prefer-inline')
 $AssignedRoleCopyWith<$Res> get optimalRole {
-  
+
   return $AssignedRoleCopyWith<$Res>(_self.optimalRole, (value) {
     return _then(_self.copyWith(optimalRole: value));
   });

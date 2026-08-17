@@ -189,7 +189,7 @@ class MatchResultAssembler {
             MatchRandom(
                   _stableSeed(simulation.seed, manOfTheMatch),
                 ).nextDouble() >=
-                0.20
+                balance.events.inspiringPerformanceChance
         ? null
         : manOfTheMatch.playerId;
 
@@ -367,7 +367,13 @@ class MatchResultAssembler {
 
   PlayerMatchStats? _manOfTheMatch(List<PlayerMatchStats> stats) {
     final eligible =
-        stats.where((stat) => stat.minutes > 0 && stat.rating >= 7.0).toList()
+        stats
+            .where(
+              (stat) =>
+                  stat.minutes > 0 &&
+                  stat.rating >= balance.events.inspiringPerformanceRatingMin,
+            )
+            .toList()
           ..sort((a, b) {
             final rating = b.rating.compareTo(a.rating);
             if (rating != 0) return rating;

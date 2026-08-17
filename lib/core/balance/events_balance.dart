@@ -23,17 +23,56 @@ class EventsBalance {
     this.breakthroughFormMin = 8,
     this.breakthroughFormWeeks = 4,
     this.breakthroughChance = 0.08,
+    this.breakthroughGrowthRateBonus = 0.3,
+    this.breakthroughDurationWeeks = 6,
+    this.breakthroughCooldownSeasons = 1,
     this.coldStreakFormMax = 3,
     this.coldStreakWeeks = 3,
     this.coldStreakChance = 0.12,
+    this.coldStreakAcceptRecoveryChance = 0.60,
+    this.coldStreakAcceptFormBonus = 2.0,
+    this.coldStreakDeclineFormFloor = 2.0,
+    this.coldStreakDeclineFormFloorWeeks = 2,
+    this.coldStreakDeclineGrowthPenalty = -0.1,
+    this.coldStreakDeclineGrowthPenaltyWeeks = 4,
+    this.coldStreakLineupRestrictionWeeks = 1,
     this.majorInjuryComplicationChance = 0.15,
+    this.injuryComplicationCautiousExtraDaysMin = 7,
+    this.injuryComplicationCautiousExtraDaysMax = 14,
+    this.injuryComplicationFullRecurrenceChance = 0.25,
+    this.injuryComplicationFullRecurrenceFractionMin = 0.30,
+    this.injuryComplicationFullRecurrenceFractionMax = 0.50,
     this.veteranMotivationChance = 0.05,
+    this.veteranMotivationGrowthPenalty = -0.2,
+    this.veteranMotivationDurationWeeks = 4,
+    this.veteranMentorDeterminationMin = 6,
+    this.veteranMentorGrowthBonus = 0.1,
+    this.veteranMentorDurationWeeks = 4,
     this.extraTrainingChance = 0.04,
     this.extraTrainingCooldownMonths = 3,
+    this.extraTrainingGrowthRateBonus = 0.2,
+    this.extraTrainingDurationWeeks = 4,
+    this.extraTrainingStaminaPenalty = 5,
+    this.extraTrainingInjuryRiskMultiplier = 1.15,
     this.personalProblemsChance = 0.005,
     this.professionalPersonalProblemsChance = 0.002,
+    this.personalProblemsFormPenalty = -2.0,
+    this.personalProblemsGrowthPenalty = -0.15,
+    this.personalProblemsDurationWeeks = 3,
+    this.personalSupportChance = 0.20,
+    this.personalSupportDurationWeeks = 1,
+    this.lateBloomerAgeMin = 22,
+    this.lateBloomerAgeMax = 26,
+    this.lateBloomerProgressMax = 30,
     this.lateBloomerChance = 0.03,
+    this.lateBloomerAttributeBonus = 2,
     this.recurringInjuryChance = 0.03,
+    this.recurringInjuryCooldownMonths = 12,
+    this.nationalTeamFormBonus = 1.0,
+    this.nationalTeamStaminaPenalty = 15,
+    this.plateauWeeks = 8,
+    this.plateauGrowthRateBonus = 0.15,
+    this.plateauGrowthRateDurationWeeks = 4,
     this.inspiringPerformanceRatingMin = 8.0,
     this.inspiringPerformanceChance = 0.03,
     this.majorInjuryPotentialLossChance = 0.10,
@@ -58,17 +97,65 @@ class EventsBalance {
   final int breakthroughFormMin;
   final int breakthroughFormWeeks;
   final double breakthroughChance;
+  final double breakthroughGrowthRateBonus;
+  final int breakthroughDurationWeeks;
+  final int breakthroughCooldownSeasons;
+
   final int coldStreakFormMax;
   final int coldStreakWeeks;
   final double coldStreakChance;
+  final double coldStreakAcceptRecoveryChance;
+  final double coldStreakAcceptFormBonus;
+  final double coldStreakDeclineFormFloor;
+  final int coldStreakDeclineFormFloorWeeks;
+  final double coldStreakDeclineGrowthPenalty;
+  final int coldStreakDeclineGrowthPenaltyWeeks;
+  final int coldStreakLineupRestrictionWeeks;
+
   final double majorInjuryComplicationChance;
+  final int injuryComplicationCautiousExtraDaysMin;
+  final int injuryComplicationCautiousExtraDaysMax;
+  final double injuryComplicationFullRecurrenceChance;
+  final double injuryComplicationFullRecurrenceFractionMin;
+  final double injuryComplicationFullRecurrenceFractionMax;
+
   final double veteranMotivationChance;
+  final double veteranMotivationGrowthPenalty;
+  final int veteranMotivationDurationWeeks;
+  final int veteranMentorDeterminationMin;
+  final double veteranMentorGrowthBonus;
+  final int veteranMentorDurationWeeks;
+
   final double extraTrainingChance;
   final int extraTrainingCooldownMonths;
+  final double extraTrainingGrowthRateBonus;
+  final int extraTrainingDurationWeeks;
+  final int extraTrainingStaminaPenalty;
+  final double extraTrainingInjuryRiskMultiplier;
+
   final double personalProblemsChance;
   final double professionalPersonalProblemsChance;
+  final double personalProblemsFormPenalty;
+  final double personalProblemsGrowthPenalty;
+  final int personalProblemsDurationWeeks;
+  final double personalSupportChance;
+  final int personalSupportDurationWeeks;
+
+  final int lateBloomerAgeMin;
+  final int lateBloomerAgeMax;
+  final int lateBloomerProgressMax;
   final double lateBloomerChance;
+  final int lateBloomerAttributeBonus;
+
   final double recurringInjuryChance;
+  final int recurringInjuryCooldownMonths;
+  final double nationalTeamFormBonus;
+  final int nationalTeamStaminaPenalty;
+
+  final int plateauWeeks;
+  final double plateauGrowthRateBonus;
+  final int plateauGrowthRateDurationWeeks;
+
   final double inspiringPerformanceRatingMin;
   final double inspiringPerformanceChance;
   final double majorInjuryPotentialLossChance;

@@ -5,6 +5,7 @@ import 'package:new_football/core/models/contract.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/injury.dart';
 import 'package:new_football/core/models/player_attributes.dart';
+import 'package:new_football/core/models/player_event_state.dart';
 
 part 'player.freezed.dart';
 part 'player.g.dart';
@@ -155,6 +156,7 @@ abstract class PlayerState with _$PlayerState {
     @Default(0) int minutesThisWeek,
     @Default(0) int lastDevelopmentOvrDelta,
     @Default(0.0) double lastDevelopmentProgressDelta,
+    @Default(PlayerEventState()) PlayerEventState eventState,
   }) = _PlayerState;
 
   factory PlayerState.fromJson(Map<String, dynamic> json) =>
@@ -223,6 +225,14 @@ extension PlayerX on Player {
   bool get isAvailable =>
       !(state.injury?.isActive ?? false) && state.suspensionGamesRemaining <= 0;
 
+  /// Available for the first eleven. Some player events deliberately keep a
+  /// player selectable as a substitute while temporarily blocking the XI.
+  bool get isEligibleForStartingEleven =>
+      isAvailable && !state.eventState.hasModifier('startingElevenBlock');
+
+  /// Compatibility-friendly alias for lineup validators.
+  bool get isAvailableForStartingEleven => isEligibleForStartingEleven;
+
   /// Career totals across all seasons (profile UI).
   PlayerSeasonStats get careerSeasonStats =>
       aggregatePlayerSeasonStats(seasonStats);
@@ -267,7 +277,12 @@ extension PlayerX on Player {
       }
       nextForm += delta;
     }
-    return copyWith(state: state.copyWith(form: b.clampForm(nextForm)));
+    final formFloor = state.eventState.modifierValue('formFloor');
+    final clampedForm = b.clampForm(nextForm);
+    final finalForm = formFloor > 0
+        ? clampedForm.clamp(formFloor, 10.0).toDouble()
+        : clampedForm;
+    return copyWith(state: state.copyWith(form: finalForm));
   }
 
   /// (`player_management.md` §pointValue).

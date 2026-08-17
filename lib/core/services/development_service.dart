@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/player.dart';
+import 'package:new_football/core/models/player_event_state.dart';
 import 'package:new_football/core/models/player_attributes.dart';
 import 'package:new_football/core/models/team.dart';
 
@@ -172,6 +173,10 @@ class DevelopmentService {
       rate *= 1.0 + b.staffDevelopmentBonusFor(youthMentoring);
     }
     if (player.personality == PlayerPersonality.ambitious) rate *= 1.10;
+    // Individual event modifiers are additive and must be applied before the
+    // documented growth-rate clamp.
+    rate += player.state.eventState.modifierValue('growthRate');
+    rate += player.state.eventState.modifierValue('personalProblemsGrowth');
     if (player.state.injured) rate = min(rate, 0.0);
 
     return rate.clamp(b.growthRateMin, b.growthRateMax).toDouble();

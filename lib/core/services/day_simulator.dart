@@ -21,6 +21,7 @@ import 'package:new_football/core/services/discipline_service.dart';
 import 'package:new_football/core/services/league_strength_service.dart';
 import 'package:new_football/core/services/match_post_match_service.dart';
 import 'package:new_football/core/services/message_service.dart';
+import 'package:new_football/core/services/player_event_service.dart';
 import 'package:new_football/core/services/salary_cap_service.dart';
 import 'package:new_football/core/services/team_management_service.dart';
 import 'package:new_football/core/services/schedule_generator.dart';
@@ -62,6 +63,7 @@ class DaySimulator {
     SalaryCapService? capService,
     MessageService? messages,
     TeamManagementService? teamManagement,
+    PlayerEventService? playerEvents,
   }) : matchEngine = matchEngine ?? SimulationMatchEngine(balance: balance),
        calendar = calendar ?? CalendarService(balance: balance),
        contextFactory =
@@ -77,7 +79,10 @@ class DaySimulator {
        contracts = contracts ?? ContractService(balance: balance),
        capService = capService ?? SalaryCapService(balance: balance),
        messages = messages ?? MessageService(),
-       teamManagement = teamManagement ?? const TeamManagementService();
+       teamManagement = teamManagement ?? const TeamManagementService(),
+       playerEvents =
+           playerEvents ??
+           PlayerEventService(balance: balance, messages: messages);
 
   final BalanceConfig balance;
   final SimulationMatchEngine matchEngine;
@@ -90,6 +95,7 @@ class DaySimulator {
   final SalaryCapService capService;
   final MessageService messages;
   final TeamManagementService teamManagement;
+  final PlayerEventService playerEvents;
 
   DaySimulationResult simulateDay(LeagueState league, {int saveSeed = 0}) {
     final week = league.currentWeek;
@@ -263,6 +269,16 @@ class DaySimulator {
           groupKey: 'ovr:own:$week',
         );
       }
+
+      // Individual events consume the just-computed development result, so
+      // their counters and rolls run after the weekly development tick.
+      state = playerEvents.weeklyTick(
+        state,
+        saveSeed: saveSeed,
+        offseason:
+            phase == SeasonPhase.offseason ||
+            nextPhase == SeasonPhase.offseason,
+      );
 
       // Continuous scouting tick (`docs/staff_rules.md` §5), while a draft
       // class is known (from lottery through draft week).

@@ -229,6 +229,6 @@ void main() {
   });
 
   test('schema version is bumped for the serialized message model', () {
-    expect(SaveSchema.currentVersion, 11);
+    expect(SaveSchema.currentVersion, 12);
   });
 }

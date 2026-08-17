@@ -470,3 +470,8 @@
 
 //   String _percent(double value) => '${(value * 100).toStringAsFixed(2)}%';
 // }
+
+// The calibration harness above is intentionally disabled because it is too
+// expensive for the default test suite. Keep this file a valid test entrypoint
+// so `flutter test test` can discover it without a load error.
+void main() {}

@@ -1,4 +1,5 @@
 import 'package:new_football/core/balance/balance_config.dart';
+import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/match_models.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/tactics/tactics_setup.dart';
@@ -78,8 +79,18 @@ Player applyMatchPlayerEffects({
   }
 
   if (matchInjury != null) {
+    final eventState = matchInjury.injury.type == InjuryType.major
+        ? next.state.eventState.copyWith(
+            lastMajorInjury: matchInjury.injury,
+            majorInjuryActiveLastTick: true,
+            weeksSinceMajorInjury: 0,
+          )
+        : next.state.eventState;
     next = next.copyWith(
-      state: next.state.copyWith(injury: matchInjury.injury),
+      state: next.state.copyWith(
+        injury: matchInjury.injury,
+        eventState: eventState,
+      ),
     );
     if (matchInjury.potentialLoss) {
       next = next

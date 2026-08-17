@@ -972,43 +972,43 @@ Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, le
 
 > Warstwa narracyjna. Wymaga ratingów (Task 22), kontuzji (Task 10), atmosfery (Task 14) i decyzji w wiadomościach (Task 7).
 
-### ⬜ Task 25: 11 eventów indywidualnych zawodnika
+### ✅ Task 25: 11 eventów indywidualnych zawodnika
 
 **Cel:** `player_management.md` — sekcja „Eventy losowe".
 
-- [ ] Model `TimedModifier` w stanie zawodnika (typ, wartość, tygodnie pozostałe)
-- [ ] Wygasanie modyfikatorów przy tygodniowym ticku
-- [ ] `breakthrough` — wiek ≤26, progress ≥70%, forma ≥8 przez 4+ tyg., 8%/tyg., cooldown 1/sezon; `growthRate` +0,3 na 6 tyg.
-- [ ] `coldStreak` — forma ≤3 przez 3+ tyg., 12%/tyg., nie dla `professional`; decyzja Accept/Decline
-- [ ] `coldStreak` Accept: 60% na +2 formy, wymóg wystawienia w XI w kolejnym meczu
-- [ ] `coldStreak` Decline: forma clampowana do min. 2 na 2 tyg., −0,1 `growthRate` na 4 tyg., zakaz XI w kolejnym meczu
-- [ ] `injuryComplication` — pierwszy tydzień po Major, 15%; decyzja Ostrożny/Pełny
-- [ ] `injuryComplication` Ostrożny: +7–14 dni absencji, gwarancja pełnego wyzdrowienia
-- [ ] `injuryComplication` Pełny: 25% nawrotu tego samego typu na 30–50% oryginalnego czasu
-- [ ] `veteranMotivation` — wiek ≥32, staż ≥4, dolna połowa tabeli, 5%/tyg., nie dla `professional`/`leader`
-- [ ] `veteranMotivation` Mentor: neguje karę, +0,1 `growthRate` dla losowego ≤23 na 4 tyg., wymaga `determination` ≥6
-- [ ] `extraTraining` — `determination` ≥7, forma ≥6, brak kontuzji, 4%/tyg., cooldown 3 mies.
-- [ ] `extraTraining` Accept: +0,2 `growthRate` na 4 tyg., stamina −5/tyg., ryzyko kontuzji ×1,15
-- [ ] `extraTraining` Decline: brak efektu, `ambitious` → −1 forma
-- [ ] `personalProblems` — 0,5%/tyg. (0,2% dla `professional`); forma −2, `growthRate` −0,15 na 3 tyg.
-- [ ] `personalProblems` follow-up „wsparcie klubu" po tygodniu z 20% szansą — skraca efekt do 1 tyg.
-- [ ] `lateBloomer` — wiek 22–26, progress <30%, 3%/tyg. w offseason, raz w karierze; +2 `physicality` lub `speed`
-- [ ] `recurringInjury` — Major w ostatnich 12 mies., `injuryProne` ≥7, 3%/tyg., cooldown 1 rok
-- [ ] `inspiredPerformance` — najwyższy rating i ≥8,0, 3%; forma +1, progress +5%
-- [ ] `nationalTeam` — forma +1, stamina −15
-- [ ] `plateau` — brak przyrostu OVR od 8 tyg.; decyzja Accept/Decline, termin +2 dni
-- [ ] Wszystkie eventy emitują wiadomość z katalogu Task 7
-- [ ] Sześć decyzyjnych ma `expiresAt` i `defaultOnExpiry`
-- [ ] Podnieść `currentSchemaVersion`
+- [x] Model `TimedModifier` w stanie zawodnika (typ, wartość, tygodnie pozostałe)
+- [x] Wygasanie modyfikatorów przy tygodniowym ticku
+- [x] `breakthrough` — wiek ≤26, progress ≥70%, forma ≥8 przez 4+ tyg., 8%/tyg., cooldown 1/sezon; `growthRate` +0,3 na 6 tyg.
+- [x] `coldStreak` — forma ≤3 przez 3+ tyg., 12%/tyg., nie dla `professional`; decyzja Accept/Decline
+- [x] `coldStreak` Accept: 60% na +2 formy, wymóg wystawienia w XI w kolejnym meczu
+- [x] `coldStreak` Decline: forma clampowana do min. 2 na 2 tyg., −0,1 `growthRate` na 4 tyg., zakaz XI w kolejnym meczu
+- [x] `injuryComplication` — pierwszy tydzień po Major, 15%; decyzja Ostrożny/Pełny
+- [x] `injuryComplication` Ostrożny: +7–14 dni absencji, gwarancja pełnego wyzdrowienia
+- [x] `injuryComplication` Pełny: 25% nawrotu tego samego typu na 30–50% oryginalnego czasu
+- [x] `veteranMotivation` — wiek ≥32, staż ≥4, dolna połowa tabeli, 5%/tyg., nie dla `professional`/`leader`
+- [x] `veteranMotivation` Mentor: neguje karę, +0,1 `growthRate` dla losowego ≤23 na 4 tyg., wymaga `determination` ≥6
+- [x] `extraTraining` — `determination` ≥7, forma ≥6, brak kontuzji, 4%/tyg., cooldown 3 mies.
+- [x] `extraTraining` Accept: +0,2 `growthRate` na 4 tyg., stamina −5/tyg., ryzyko kontuzji ×1,15
+- [x] `extraTraining` Decline: brak efektu, `ambitious` → −1 forma
+- [x] `personalProblems` — 0,5%/tyg. (0,2% dla `professional`); forma −2, `growthRate` −0,15 na 3 tyg.
+- [x] `personalProblems` follow-up „wsparcie klubu" po tygodniu z 20% szansą — skraca efekt do 1 tyg.
+- [x] `lateBloomer` — wiek 22–26, progress <30%, 3%/tyg. w offseason, raz w karierze; +2 `physicality` lub `speed`
+- [x] `recurringInjury` — Major w ostatnich 12 mies., `injuryProne` ≥7, 3%/tyg., cooldown 1 rok
+- [x] `inspiredPerformance` — najwyższy rating i ≥8,0, 3%; forma +1, progress +5%
+- [x] `nationalTeam` — forma +1, stamina −15
+- [x] `plateau` — brak przyrostu OVR od 8 tyg.; decyzja Accept/Decline, termin +2 dni
+- [x] Wszystkie eventy emitują wiadomość z katalogu Task 7
+- [x] Sześć decyzyjnych ma `expiresAt` i `defaultOnExpiry`
+- [x] Podnieść `currentSchemaVersion`
 
 **Testy**
-- [ ] Każdy event odpala się tylko przy spełnionych warunkach
-- [ ] Cooldowny są respektowane
-- [ ] `TimedModifier` wygasa dokładnie po zadanej liczbie tygodni
-- [ ] Wymuszone ograniczenia składu (`coldStreak` Decline) są respektowane przez walidację XI
-- [ ] `professional` nie dostaje `coldStreak`
+- [x] Każdy event odpala się tylko przy spełnionych warunkach
+- [x] Cooldowny są respektowane
+- [x] `TimedModifier` wygasa dokładnie po zadanej liczbie tygodni
+- [x] Wymuszone ograniczenia składu (`coldStreak` Decline) są respektowane przez walidację XI
+- [x] `professional` nie dostaje `coldStreak`
 
-**Demo:** zawodnik w kryzysie formy generuje decyzję w inboksie; obie ścieżki dają różne, widoczne i wygasające efekty.
+**Demo:** ✅ zawodnik w kryzysie formy generuje decyzję w inboksie; obie ścieżki dają różne, widoczne i wygasające efekty.
 
 ---
 

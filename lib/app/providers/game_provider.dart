@@ -19,6 +19,7 @@ import 'package:new_football/core/services/schedule_generator.dart';
 import 'package:new_football/core/services/scouting_service.dart';
 import 'package:new_football/core/services/season_service.dart';
 import 'package:new_football/core/services/message_service.dart';
+import 'package:new_football/core/services/player_event_service.dart';
 import 'package:new_football/core/simulation/match_context_factory.dart';
 import 'package:new_football/core/services/staff_service.dart';
 import 'package:new_football/data/save_repository.dart';
@@ -37,8 +38,13 @@ final matchContextFactoryProvider = Provider(
 
 final matchEngineProvider = Provider((ref) => SimulationMatchEngine());
 
+final playerEventServiceProvider = Provider((ref) => PlayerEventService());
+
 final daySimulatorProvider = Provider((ref) {
-  return DaySimulator(matchEngine: ref.watch(matchEngineProvider));
+  return DaySimulator(
+    matchEngine: ref.watch(matchEngineProvider),
+    playerEvents: ref.watch(playerEventServiceProvider),
+  );
 });
 
 final seasonServiceProvider = Provider((ref) => SeasonService());
@@ -129,6 +135,7 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
 
   SaveRepository get _repo => _ref.read(saveRepositoryProvider);
   DaySimulator get _days => _ref.read(daySimulatorProvider);
+  PlayerEventService get _playerEvents => _ref.read(playerEventServiceProvider);
   SeasonService get _season => _ref.read(seasonServiceProvider);
   CalendarService get _calendar => _ref.read(calendarServiceProvider);
 
@@ -186,14 +193,19 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   bool _hasPendingUrgent(LeagueState league) =>
       league.inbox.pendingUrgent.isNotEmpty;
 
-  LeagueState _deliverStartOfDay(LeagueState league, {int? hour}) {
-    return league.copyWith(
+  LeagueState _deliverStartOfDay(
+    LeagueState league, {
+    int? hour,
+    int saveSeed = 0,
+  }) {
+    final delivered = league.copyWith(
       inbox: league.inbox.deliverScheduled(
         league.currentWeek,
         league.currentDay,
         hour: hour,
       ),
     );
+    return _playerEvents.resolveExpiredDecisions(delivered, saveSeed: saveSeed);
   }
 
   LeagueState _setClockForDate(LeagueState league) {
@@ -218,6 +230,7 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     var league = _deliverStartOfDay(
       current.leagueState,
       hour: current.leagueState.currentHour,
+      saveSeed: current.saveSeed,
     );
     if (_hasPendingUrgent(league)) {
       await updateLeague((_) => league);
@@ -262,6 +275,7 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     updatedLeague = _deliverStartOfDay(
       updatedLeague,
       hour: updatedLeague.currentHour,
+      saveSeed: current.saveSeed,
     );
     if (isCycleEnd) {
       final updatedResult = DaySimulationResult(
@@ -288,6 +302,7 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     var league = _deliverStartOfDay(
       current.leagueState,
       hour: current.leagueState.currentHour,
+      saveSeed: current.saveSeed,
     );
     if (!_calendar.isHourlyContractMode(
       league.currentWeek,
@@ -741,12 +756,22 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     String optionId, {
     MessageDecisionHandler? onDecision,
   }) async {
+    final saveSeed = save?.saveSeed ?? 0;
+    final dispatcher =
+        onDecision ??
+        (LeagueState league, GameMessage message, String option) =>
+            _playerEvents.resolveDecision(
+              league,
+              message,
+              option,
+              saveSeed: saveSeed,
+            );
     await updateLeague(
       (league) => MessageService().resolveDecision(
         league,
         id,
         optionId,
-        onDecision: onDecision,
+        onDecision: dispatcher,
       ),
     );
   }

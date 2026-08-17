@@ -107,6 +107,9 @@ _PlayerState _$PlayerStateFromJson(Map<String, dynamic> json) => _PlayerState(
       (json['lastDevelopmentOvrDelta'] as num?)?.toInt() ?? 0,
   lastDevelopmentProgressDelta:
       (json['lastDevelopmentProgressDelta'] as num?)?.toDouble() ?? 0.0,
+  eventState: json['eventState'] == null
+      ? const PlayerEventState()
+      : PlayerEventState.fromJson(json['eventState'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$PlayerStateToJson(_PlayerState instance) =>
@@ -122,6 +125,7 @@ Map<String, dynamic> _$PlayerStateToJson(_PlayerState instance) =>
       'minutesThisWeek': instance.minutesThisWeek,
       'lastDevelopmentOvrDelta': instance.lastDevelopmentOvrDelta,
       'lastDevelopmentProgressDelta': instance.lastDevelopmentProgressDelta,
+      'eventState': instance.eventState,
     };
 
 _Player _$PlayerFromJson(Map<String, dynamic> json) => _Player(
