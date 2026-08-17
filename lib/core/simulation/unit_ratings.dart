@@ -42,6 +42,7 @@ class UnitRatingCalculator {
     required Map<String, EffectivePlayerAttributes> effectiveAttributes,
     required TeamShape shape,
     Map<String, Position> assignedPositions = const {},
+    bool applyShortHanded = false,
   }) {
     final defensive = _unitMembers(
       lineup,
@@ -81,18 +82,24 @@ class UnitRatingCalculator {
         effectiveAttributes,
         shape.tacticalMult(ShapeAxis.def, balance),
         UnitKind.def,
+        playersOnPitch: lineup.length,
+        applyShortHanded: applyShortHanded,
       ),
       midRating: _rating(
         midfield,
         effectiveAttributes,
         shape.tacticalMult(ShapeAxis.mid, balance),
         UnitKind.mid,
+        playersOnPitch: lineup.length,
+        applyShortHanded: applyShortHanded,
       ),
       atkRating: _rating(
         attacking,
         effectiveAttributes,
         shape.tacticalMult(ShapeAxis.atk, balance),
         UnitKind.atk,
+        playersOnPitch: lineup.length,
+        applyShortHanded: applyShortHanded,
       ),
       defensivePlayerIds: [for (final member in defensive) member.player.id],
       midfieldPlayerIds: [for (final member in midfield) member.player.id],
@@ -113,8 +120,10 @@ class UnitRatingCalculator {
     List<_UnitMember> members,
     Map<String, EffectivePlayerAttributes> effectiveAttributes,
     double tacticalMultiplier,
-    UnitKind kind,
-  ) {
+    UnitKind kind, {
+    required int playersOnPitch,
+    required bool applyShortHanded,
+  }) {
     if (members.isEmpty) return 0;
     var weightedSum = 0.0;
     var totalPositionWeight = 0.0;
@@ -142,7 +151,20 @@ class UnitRatingCalculator {
       totalPositionWeight += member.weight;
     }
     if (totalPositionWeight == 0) return 0;
-    return weightedSum / totalPositionWeight * tacticalMultiplier;
+    return weightedSum /
+        totalPositionWeight *
+        tacticalMultiplier *
+        (applyShortHanded ? _shortHandedMultiplier(kind, playersOnPitch) : 1.0);
+  }
+
+  double _shortHandedMultiplier(UnitKind kind, int playersOnPitch) {
+    if (kind == UnitKind.atk) {
+      return balance.matchday.shortHandedAttackMultiplier(playersOnPitch);
+    }
+    if (kind == UnitKind.def) {
+      return balance.matchday.shortHandedDefenseMultiplier(playersOnPitch);
+    }
+    return 1.0;
   }
 
   List<_UnitMember> _unitMembers(

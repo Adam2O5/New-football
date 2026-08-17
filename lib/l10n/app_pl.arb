@@ -51,6 +51,7 @@
   "matchEvent_missedPenalty": "Niewykorzystany karny",
   "matchEvent_halfTime": "Przerwa",
   "matchEvent_fullTime": "Koniec meczu",
+  "matchEvent_foul": "Faul",
 
   "messageType_injury": "Kontuzja",
   "messageType_retirementPlayer": "Zakończenie kariery zawodnika",

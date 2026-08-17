@@ -256,6 +256,7 @@ enum MatchEventType {
   missedPenalty,
   halfTime,
   fullTime,
+  foul,
 }
 
 enum PlayoffRound {

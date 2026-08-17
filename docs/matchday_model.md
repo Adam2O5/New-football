@@ -542,6 +542,16 @@ Daje ~0,18 kontuzji na drużynę na mecz (~1 na 5–6 meczów).
 
 Typ losowany z rozkładu z `player_management.md`. Czas trwania × `doctorCareMult`. Kontuzjowany **musi** zostać zmieniony — jeśli nie ma zmian, drużyna gra w osłabieniu (§8.3). Wiadomość `injury` (urgent, jeśli XI).
 
+### 10.1 Implementacja runtime Task 20
+
+`SimulationMatchEngine` wykonuje rolle incydentów po rozstrzygnięciu sekwencji, ale przed zamknięciem minuty. `MatchIncidentResolver` jest bezstanowym współdzielonym miejscem wzorów: nie tworzy własnego `Random`, tylko dostaje callbacki `nextDouble`/`nextInt` z meczowego `MatchRandom`. Dzięki temu kolejność losowań i `traceSignature` pozostają deterministyczne dla tego samego seeda.
+
+Faule są sprawdzane wyłącznie dla przegranych pojedynków obronnych. Udany roll zwiększa bieżący licznik drużyny i dodaje `MatchEventType.foul`; następnie resolver może dodać żółtą kartkę, drugą żółtą z automatyczną czerwoną albo czerwoną bezpośrednią z severity 1–3. `MatchDiscipline` jest scalane po zawodniku, a `SimulationResult.homeStats`/`awayStats` wylicza z tych danych kartki i z runtime’u faule. Trwałe liczniki sezonowe oraz zawieszenia pozostają po stronie istniejącego `DisciplineService` Task 11.
+
+Po czerwonej zawodnik jest usuwany z bieżącego XI, `sentOffPlayerIds`, mapa slotów i ratingi jednostek są odświeżane, a `homeNoGkPenalty`/`awayNoGkPenalty` są wyliczane z aktualnego XI. Mnożniki gry w osłabieniu są stosowane w `UnitRatingCalculator` oraz przy ticku staminy; nie są nakładane drugi raz w mocy drużyny.
+
+Kontuzje są rolowane raz na każdego zawodnika pozostającego na boisku w danej minucie. Udział w którymkolwiek pojedynku tej minuty ustawia `duelMult = 2,5`. Diagnoza zapisuje istniejący model `Injury` w `MatchInjury` i dodaje event minor/major, po czym uruchamia wymuszoną zmianę. Brak dostępnej ławki usuwa zawodnika z XI, zapisuje ID w `unreplacedInjuryIds` i pozostawia drużynę w dynamicznym osłabieniu, również przy utracie GK.
+
 ---
 
 ## 11. Ingerencje menedżera

@@ -35,6 +35,7 @@ const _$MatchEventTypeEnumMap = {
   MatchEventType.missedPenalty: 'missedPenalty',
   MatchEventType.halfTime: 'halfTime',
   MatchEventType.fullTime: 'fullTime',
+  MatchEventType.foul: 'foul',
 };
 
 _$MatchInjuryImpl _$$MatchInjuryImplFromJson(Map<String, dynamic> json) =>

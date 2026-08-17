@@ -67,6 +67,52 @@ class InjuryService {
     );
   }
 
+  /// Callback-based counterpart used by the match-owned [MatchRandom]
+  /// stream. It deliberately does not allocate a second `Random` instance.
+  InjuryDiagnosis diagnoseWithCallbacks({
+    required double Function() nextDouble,
+    required int Function(int max) nextInt,
+    StaffMember? doctor,
+    bool potentialLossRoll = true,
+    double? doctorCareMultiplier,
+  }) {
+    final definition = pickDefinitionWithCallback(nextDouble);
+    final rawDays = definition.minDays == definition.maxDays
+        ? definition.minDays
+        : definition.minDays +
+              nextInt(definition.maxDays - definition.minDays + 1);
+    final days = (rawDays * (doctorCareMultiplier ?? doctorCareMult(doctor)))
+        .round()
+        .clamp(0, 365)
+        .toInt();
+    final injury = Injury(
+      id: definition.id,
+      group: definition.group,
+      type: definition.type,
+      daysTotal: days,
+      daysRemaining: days,
+    );
+    final potentialLoss =
+        definition.type == InjuryType.major &&
+        potentialLossRoll &&
+        nextDouble() < majorPotentialLossChance;
+    return InjuryDiagnosis(
+      definition: definition,
+      injury: injury,
+      potentialLoss: potentialLoss,
+    );
+  }
+
+  InjuryDefinition pickDefinitionWithCallback(double Function() nextDouble) {
+    final target = nextDouble() * InjuryCatalog.totalWeight;
+    var cursor = 0.0;
+    for (final definition in InjuryCatalog.definitions) {
+      cursor += definition.weight;
+      if (target < cursor) return definition;
+    }
+    return InjuryCatalog.definitions.last;
+  }
+
   /// Missing staff is slightly worse than the best 5-star specialist.
   double doctorCareMult(StaffMember? doctor) =>
       _staffMultiplier(doctor, (attributes) => attributes.care);

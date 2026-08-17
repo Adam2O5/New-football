@@ -115,6 +115,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get matchEvent_fullTime => 'Full-time';
 
   @override
+  String get matchEvent_foul => 'Foul';
+
+  @override
   String get messageType_injury => 'Injury';
 
   @override

@@ -788,43 +788,36 @@ Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, le
 
 ---
 
-### ⬜ Task 20: Etap 6 — faule, kartki, kontuzje w meczu
+### ✅ Task 20: Etap 6 — faule, kartki, kontuzje w meczu
 
 **Cel:** `matchday_model.md` §8, §10.
 
-- [ ] Faul rolowany po każdym przegranym pojedynku obronnym
-- [ ] `P(faul) = 0,085 × pressingMult × physGapMult × cardProneMult × derbyMult × refereeStrictness`
-- [ ] `pressingMult`: low 0,85 / medium 1,00 / high 1,15 / gegenpressing 1,30
-- [ ] `physGapMult = 1 + (defPhysicality − atkPace) / 300`
-- [ ] `cardProneMult` 1,00 / 1,35 (`temperamental`)
-- [ ] `derbyMult` 1,00 / 1,15
-- [ ] Żółta z faulu 13% × `refereeStrictness` × `cardProneMult`
-- [ ] Druga żółta → czerwona automatycznie
-- [ ] Czerwona bezpośrednia 0,7% faulu, ×2 przy przerwaniu sytuacji 1-na-1
-- [ ] Gra w 10: `atkRating` ×0,86, `defRating` ×0,92, stamina ×1,12
-- [ ] Gra w 9: `atkRating` ×0,70, `defRating` ×0,80, stamina ×1,20
-- [ ] Rekonfiguracja XI po czerwonej: usuwany zawodnik z najsłabszej jednostki względem stanu meczu
-- [ ] Obsługa czerwonej dla GK (przejście na karę bramkarską §9.4)
-- [ ] `P(kontuzja) = 0,00018 × 8 mnożników` per zawodnik per minuta
-- [ ] `injuryProneMult` 0,50–2,00
-- [ ] `staminaInjuryMult` 0,90–1,67
-- [ ] `physioRehabMult` 0,87–1,05, `doctorPreventionMult` 0,87–1,05
-- [ ] `professionalMult` 0,80 / 1,00
-- [ ] `intensityMult`: fast 1,15 / gegenpressing 1,20 / slow 0,92 / low press 0,92
-- [ ] `weatherMult` z tabeli §13.1
-- [ ] `duelMult` ×2,5 przy udziale w pojedynku w tej minucie
-- [ ] Typ kontuzji z katalogu Task 10
-- [ ] Kontuzjowany musi zostać zmieniony; brak zmian → gra w osłabieniu
-- [ ] Inkrementacja liczników zawieszeń z Task 11
+- [x] Faul jest rolowany po każdym przegranym pojedynku obronnym.
+- [x] `P(faul) = 0,085 × pressingMult × physGapMult × cardProneMult × derbyMult × refereeStrictness`.
+- [x] `pressingMult`: low 0,85 / medium 1,00 / high 1,15 / gegenpressing 1,30.
+- [x] `physGapMult = 1 + (defPhysicality − atkPace) / 300`.
+- [x] `cardProneMult` wynosi 1,00 lub 1,35 dla `temperamental`; derby ma mnożnik 1,15.
+- [x] Żółta z faulu, druga żółta oraz czerwona bezpośrednia (×2 dla sytuacji 1-na-1) mają osobne rolle.
+- [x] Gra w 10/9 stosuje odpowiednio `atk ×0,86/0,70`, `def ×0,92/0,80` i stamina `×1,12/1,20`.
+- [x] Czerwona usuwa zawodnika z bieżącego XI, odświeża mapę slotów i ratingi jednostek oraz synchronizuje karę za brak GK.
+- [x] `P(kontuzja) = 0,00018 × 8 mnożników` jest rolowane raz na zawodnika i minutę.
+- [x] Obsługiwane są `injuryProne` 0,50–2,00, stamina 0,90–1,67, fizjo/lekarz 0,87–1,05, profesjonalizm 0,80/1,00, intensywność, pogoda i duel `×2,5`.
+- [x] Typ i czas kontuzji pochodzą z katalogu Task 10; czas uwzględnia `doctorCareMult`.
+- [x] Kontuzjowany przechodzi przez wymuszoną zmianę; przy pustej ławce zostaje usunięty z XI i trafia do `unreplacedInjuryIds`, a brak GK jest dynamiczny.
+- [x] Zapis runtime używa istniejących `MatchEvent`, `MatchInjury`, `MatchDiscipline` i `TeamMatchStats.fouls`; trwałe liczniki kartek/zawieszeń nadal stosuje `DisciplineService` Task 11 po meczu.
+
+**Implementacja:** wspólny `MatchIncidentResolver` nie posiada własnego generatora losowego. Wszystkie rolle otrzymują callbacki z jednego `MatchRandom`, dzięki czemu incydenty nie zmieniają deterministycznej kolejności śladu Task 17–19. `SimulationResult` udostępnia incydenty, faule, statystyki kartek i flagi braku GK jako opcjonalne agregaty runtime; modele zapisu i provider pozostają bez migracji do czasu Task 22.
 
 **Testy**
-- [ ] ~11 fauli na drużynę na mecz
-- [ ] ~1,9 żółtej i ~0,06 czerwonej na drużynę
-- [ ] ~0,18 kontuzji na drużynę na mecz
-- [ ] Gegenpressing daje mierzalnie więcej fauli niż low pressing
-- [ ] Zawodnik w pojedynku ma 2,5× wyższe ryzyko kontuzji
+- [x] Wzory faulu, `physGap`, pressing, derby, osobowość i referee strictness.
+- [x] Żółta, druga żółta, direct red oraz rozkład severity 1–3.
+- [x] Formuła kontuzji, mapa `injuryProne`, katalog Task 10 i duel `×2,5`.
+- [x] Ratingi jednostek i zużycie staminy dla 10/9 graczy.
+- [x] Integracja eventów, `MatchDiscipline`, `MatchInjury`, `TeamMatchStats.fouls`, czerwonej kartki, rekonfiguracji XI, wymuszonej zmiany i braku ławki/GK w `test/task20_incidents_test.dart`.
 
-**Demo:** mecz z wysokim pressingiem w derbach generuje wyraźnie więcej kartek niż spokojne spotkanie.
+**Kalibracja:** średnie meczowe (~11 fauli, ~1,9 żółtej, ~0,06 czerwonej i ~0,18 kontuzji na drużynę) pozostają pomiarem harnessu 10 000 meczów z Task 24; test Task 20 weryfikuje mechanikę i wzory deterministycznie.
+
+**Demo:** skonfigurowany runtime może deterministycznie odtworzyć derby z wysokim pressingiem, faulami, kartkami, kontuzjami, zmianami wymuszonymi i dynamiczną karą za brak bramkarza.
 
 ---
 

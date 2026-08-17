@@ -115,6 +115,9 @@ class AppLocalizationsPl extends AppLocalizations {
   String get matchEvent_fullTime => 'Koniec meczu';
 
   @override
+  String get matchEvent_foul => 'Faul';
+
+  @override
   String get messageType_injury => 'Kontuzja';
 
   @override

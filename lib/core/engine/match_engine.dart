@@ -110,8 +110,8 @@ class LiveMatch {
   final MatchResult? administrativeResult;
   final MatchTeamSnapshot? homeSnapshot;
   final MatchTeamSnapshot? awaySnapshot;
-  final bool homeNoGkPenalty;
-  final bool awayNoGkPenalty;
+  bool homeNoGkPenalty;
+  bool awayNoGkPenalty;
   final StaffMember? homeHeadCoach;
   final StaffMember? awayHeadCoach;
 
@@ -130,12 +130,25 @@ class LiveMatch {
 
   bool get isFinished => state.minute >= 90;
 
+  /// Keeps the goalkeeper penalty aligned with the current live XI. The
+  /// legacy engine calls this only when its runtime changes the lineup; the
+  /// simulation runtime invokes it after every dismissal/injury substitution.
+  void syncNoGkPenalty() {
+    homeNoGkPenalty = !state.homeLineup.any(
+      (player) => player.position == Position.gk,
+    );
+    awayNoGkPenalty = !state.awayLineup.any(
+      (player) => player.position == Position.gk,
+    );
+  }
+
   /// Advances the currently selected player by one real match minute.
   /// Fractional consumption is kept in [staminaRemaining]. Match calculations
   /// read that map directly, avoiding a full immutable-player copy every tick.
   List<Player> recordMinute({
     required List<Player> lineup,
     required bool homeSide,
+    bool applyShortHanded = false,
   }) {
     final tactics = homeSide ? state.homeTactics : state.awayTactics;
     for (final player in lineup) {
@@ -149,10 +162,14 @@ class LiveMatch {
         weather: state.context.weather,
         isDerby: state.context.isDerby,
       );
-      staminaRemaining[player.id] = (current - loss).clamp(
-        balance.player.staminaMin.toDouble(),
-        balance.player.staminaMax.toDouble(),
-      );
+      final shortHandedMultiplier = applyShortHanded
+          ? balance.matchday.shortHandedStaminaMultiplier(lineup.length)
+          : 1.0;
+      staminaRemaining[player.id] = (current - loss * shortHandedMultiplier)
+          .clamp(
+            balance.player.staminaMin.toDouble(),
+            balance.player.staminaMax.toDouble(),
+          );
     }
     return lineup;
   }
@@ -219,6 +236,7 @@ class LiveMatch {
         shotsOnTarget: state.homeGoals + 2,
         possession: 50,
         xg: state.homeGoals * 0.9 + 0.4,
+        fouls: _foulCount(homeTeamId),
         yellowCards: _cardCount(homeTeamId, yellow: true),
         redCards: _cardCount(homeTeamId, yellow: false),
       ),
@@ -229,6 +247,7 @@ class LiveMatch {
         shotsOnTarget: state.awayGoals + 2,
         possession: 50,
         xg: state.awayGoals * 0.9 + 0.4,
+        fouls: _foulCount(awayTeamId),
         yellowCards: _cardCount(awayTeamId, yellow: true),
         redCards: _cardCount(awayTeamId, yellow: false),
       ),
@@ -317,6 +336,12 @@ class LiveMatch {
 
   int _playerCardCount(String playerId, MatchEventType type) => events
       .where((event) => event.playerId == playerId && event.type == type)
+      .length;
+
+  int _foulCount(String teamId) => events
+      .where(
+        (event) => event.teamId == teamId && event.type == MatchEventType.foul,
+      )
       .length;
 
   int _cardCount(String teamId, {required bool yellow}) {

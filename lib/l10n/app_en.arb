@@ -41,6 +41,7 @@
   "matchEvent_missedPenalty": "Penalty missed",
   "matchEvent_halfTime": "Half-time",
   "matchEvent_fullTime": "Full-time",
+  "matchEvent_foul": "Foul",
 
   "messageType_injury": "Injury",
   "messageType_retirementPlayer": "Player retirement",

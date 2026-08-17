@@ -28,6 +28,44 @@ class MatchdayBalance {
     this.foulBase = 0.085,
     this.yellowFromFoul = 0.13,
     this.redDirect = 0.007,
+    this.foulPressingLowMultiplier = 0.85,
+    this.foulPressingMediumMultiplier = 1.0,
+    this.foulPressingHighMultiplier = 1.15,
+    this.foulPressingGegenpressingMultiplier = 1.30,
+    this.physGapDivisor = 300.0,
+    this.derbyFoulMultiplier = 1.15,
+    this.shortHandedTenAttackMultiplier = 0.86,
+    this.shortHandedTenDefenseMultiplier = 0.92,
+    this.shortHandedNineAttackMultiplier = 0.70,
+    this.shortHandedNineDefenseMultiplier = 0.80,
+    this.shortHandedTenStaminaMultiplier = 1.12,
+    this.shortHandedNineStaminaMultiplier = 1.20,
+    this.injuryProneMultipliers = const <int, double>{
+      1: 0.50,
+      2: 0.625,
+      3: 0.75,
+      4: 0.875,
+      5: 1.00,
+      6: 1.20,
+      7: 1.40,
+      8: 1.60,
+      9: 1.80,
+      10: 2.00,
+    },
+    this.injuryIntensityFast = 1.15,
+    this.injuryIntensityGegenpressing = 1.20,
+    this.injuryIntensitySlow = 0.92,
+    this.injuryIntensityLowPress = 0.92,
+    this.weatherInjuryMultipliers = const <String, double>{
+      'clear': 1.00,
+      'overcast': 1.00,
+      'rain': 1.08,
+      'heavyRain': 1.15,
+      'wind': 1.00,
+      'snow': 1.18,
+      'heat': 1.10,
+      'cold': 1.12,
+    },
     this.injuryBase = 0.00018,
     this.clutchWeight = 1.2,
     this.momentumDecay = 0.96,
@@ -185,6 +223,28 @@ class MatchdayBalance {
   final double foulBase;
   final double yellowFromFoul;
   final double redDirect;
+  final double foulPressingLowMultiplier;
+  final double foulPressingMediumMultiplier;
+  final double foulPressingHighMultiplier;
+  final double foulPressingGegenpressingMultiplier;
+  final double physGapDivisor;
+  final double derbyFoulMultiplier;
+
+  /// Short-handed unit and stamina multipliers for the live runtime.
+  final double shortHandedTenAttackMultiplier;
+  final double shortHandedTenDefenseMultiplier;
+  final double shortHandedNineAttackMultiplier;
+  final double shortHandedNineDefenseMultiplier;
+  final double shortHandedTenStaminaMultiplier;
+  final double shortHandedNineStaminaMultiplier;
+
+  /// Injury multipliers from `player_management.md` and `matchday_model.md`.
+  final Map<int, double> injuryProneMultipliers;
+  final double injuryIntensityFast;
+  final double injuryIntensityGegenpressing;
+  final double injuryIntensitySlow;
+  final double injuryIntensityLowPress;
+  final Map<String, double> weatherInjuryMultipliers;
 
   final double injuryBase;
   final double clutchWeight;
@@ -272,6 +332,63 @@ class MatchdayBalance {
     PressingIntensity.high => pressingHighMultiplier,
     PressingIntensity.gegenpressing => pressingGegenpressingMultiplier,
   };
+
+  /// Pressing multipliers used only after a lost defensive duel (§8.1).
+  double foulPressingMultiplier(PressingIntensity pressing) =>
+      switch (pressing) {
+        PressingIntensity.low => foulPressingLowMultiplier,
+        PressingIntensity.medium => foulPressingMediumMultiplier,
+        PressingIntensity.high => foulPressingHighMultiplier,
+        PressingIntensity.gegenpressing => foulPressingGegenpressingMultiplier,
+      };
+
+  double physGapMultiplier({
+    required double defenderPhysicality,
+    required double attackerPace,
+  }) => 1.0 + (defenderPhysicality - attackerPace) / physGapDivisor;
+
+  double shortHandedAttackMultiplier(int playersOnPitch) {
+    if (playersOnPitch <= 9) return shortHandedNineAttackMultiplier;
+    if (playersOnPitch == 10) return shortHandedTenAttackMultiplier;
+    return 1.0;
+  }
+
+  double shortHandedDefenseMultiplier(int playersOnPitch) {
+    if (playersOnPitch <= 9) return shortHandedNineDefenseMultiplier;
+    if (playersOnPitch == 10) return shortHandedTenDefenseMultiplier;
+    return 1.0;
+  }
+
+  double shortHandedStaminaMultiplier(int playersOnPitch) {
+    if (playersOnPitch <= 9) return shortHandedNineStaminaMultiplier;
+    if (playersOnPitch == 10) return shortHandedTenStaminaMultiplier;
+    return 1.0;
+  }
+
+  double injuryProneMultiplier(int injuryProne) {
+    final key = injuryProne.clamp(1, 10).toInt();
+    return injuryProneMultipliers[key] ?? 1.0;
+  }
+
+  double injuryIntensityMultiplier({
+    required Tempo tempo,
+    required PressingIntensity pressing,
+  }) {
+    final tempoMultiplier = switch (tempo) {
+      Tempo.fast => injuryIntensityFast,
+      Tempo.slow => injuryIntensitySlow,
+      Tempo.balanced => 1.0,
+    };
+    final pressingMultiplier = switch (pressing) {
+      PressingIntensity.gegenpressing => injuryIntensityGegenpressing,
+      PressingIntensity.low => injuryIntensityLowPress,
+      PressingIntensity.medium || PressingIntensity.high => 1.0,
+    };
+    return tempoMultiplier * pressingMultiplier;
+  }
+
+  double weatherInjuryMultiplier(Weather weather) =>
+      weatherInjuryMultipliers[weather.name] ?? 1.0;
 
   double adaptationPenaltyForAppearances(int appearances) {
     if (adaptationAppearances <= 0 || appearances >= adaptationAppearances) {

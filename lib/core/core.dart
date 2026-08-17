@@ -7,6 +7,7 @@ export 'simulation/effective_attributes.dart';
 export 'simulation/goalkeeper_resolver.dart';
 export 'simulation/match_engine.dart';
 export 'simulation/matchday_runtime.dart';
+export 'simulation/match_incident_resolver.dart';
 export 'simulation/sequence_chain_resolver.dart';
 export 'simulation/sequence_resolver.dart';
 export 'simulation/set_piece_resolver.dart';

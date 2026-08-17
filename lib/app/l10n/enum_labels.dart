@@ -49,6 +49,7 @@ String matchEventLabel(BuildContext context, MatchEventType type) {
     MatchEventType.missedPenalty => l10n.matchEvent_missedPenalty,
     MatchEventType.halfTime => l10n.matchEvent_halfTime,
     MatchEventType.fullTime => l10n.matchEvent_fullTime,
+    MatchEventType.foul => l10n.matchEvent_foul,
   };
 }
 

@@ -302,6 +302,12 @@ abstract class AppLocalizations {
   /// **'Koniec meczu'**
   String get matchEvent_fullTime;
 
+  /// No description provided for @matchEvent_foul.
+  ///
+  /// In pl, this message translates to:
+  /// **'Faul'**
+  String get matchEvent_foul;
+
   /// No description provided for @messageType_injury.
   ///
   /// In pl, this message translates to:
