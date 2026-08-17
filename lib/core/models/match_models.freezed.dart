@@ -1,5 +1,5 @@
-// coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// coverage:ignore-file
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
@@ -9,3675 +9,2961 @@ part of 'match_models.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// dart format off
 T _$identity<T>(T value) => value;
-
-final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
-
-MatchEvent _$MatchEventFromJson(Map<String, dynamic> json) {
-  return _MatchEvent.fromJson(json);
-}
 
 /// @nodoc
 mixin _$MatchEvent {
-  MatchEventType get type => throw _privateConstructorUsedError;
-  int get minute => throw _privateConstructorUsedError;
-  String get teamId => throw _privateConstructorUsedError;
-  String? get playerId => throw _privateConstructorUsedError;
-  String? get description => throw _privateConstructorUsedError;
+
+ MatchEventType get type; int get minute; String get teamId; String? get playerId; String? get description;
+/// Create a copy of MatchEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$MatchEventCopyWith<MatchEvent> get copyWith => _$MatchEventCopyWithImpl<MatchEvent>(this as MatchEvent, _$identity);
 
   /// Serializes this MatchEvent to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  Map<String, dynamic> toJson();
 
-  /// Create a copy of MatchEvent
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $MatchEventCopyWith<MatchEvent> get copyWith =>
-      throw _privateConstructorUsedError;
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MatchEvent&&(identical(other.type, type) || other.type == type)&&(identical(other.minute, minute) || other.minute == minute)&&(identical(other.teamId, teamId) || other.teamId == teamId)&&(identical(other.playerId, playerId) || other.playerId == playerId)&&(identical(other.description, description) || other.description == description));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,type,minute,teamId,playerId,description);
+
+@override
+String toString() {
+  return 'MatchEvent(type: $type, minute: $minute, teamId: $teamId, playerId: $playerId, description: $description)';
+}
+
+
 }
 
 /// @nodoc
-abstract class $MatchEventCopyWith<$Res> {
-  factory $MatchEventCopyWith(
-    MatchEvent value,
-    $Res Function(MatchEvent) then,
-  ) = _$MatchEventCopyWithImpl<$Res, MatchEvent>;
-  @useResult
-  $Res call({
-    MatchEventType type,
-    int minute,
-    String teamId,
-    String? playerId,
-    String? description,
-  });
-}
+abstract mixin class $MatchEventCopyWith<$Res>  {
+  factory $MatchEventCopyWith(MatchEvent value, $Res Function(MatchEvent) _then) = _$MatchEventCopyWithImpl;
+@useResult
+$Res call({
+ MatchEventType type, int minute, String teamId, String? playerId, String? description
+});
 
+
+
+
+}
 /// @nodoc
-class _$MatchEventCopyWithImpl<$Res, $Val extends MatchEvent>
+class _$MatchEventCopyWithImpl<$Res>
     implements $MatchEventCopyWith<$Res> {
-  _$MatchEventCopyWithImpl(this._value, this._then);
+  _$MatchEventCopyWithImpl(this._self, this._then);
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final MatchEvent _self;
+  final $Res Function(MatchEvent) _then;
 
-  /// Create a copy of MatchEvent
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? type = null,
-    Object? minute = null,
-    Object? teamId = null,
-    Object? playerId = freezed,
-    Object? description = freezed,
-  }) {
-    return _then(
-      _value.copyWith(
-            type: null == type
-                ? _value.type
-                : type // ignore: cast_nullable_to_non_nullable
-                      as MatchEventType,
-            minute: null == minute
-                ? _value.minute
-                : minute // ignore: cast_nullable_to_non_nullable
-                      as int,
-            teamId: null == teamId
-                ? _value.teamId
-                : teamId // ignore: cast_nullable_to_non_nullable
-                      as String,
-            playerId: freezed == playerId
-                ? _value.playerId
-                : playerId // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            description: freezed == description
-                ? _value.description
-                : description // ignore: cast_nullable_to_non_nullable
-                      as String?,
-          )
-          as $Val,
-    );
-  }
+/// Create a copy of MatchEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? type = null,Object? minute = null,Object? teamId = null,Object? playerId = freezed,Object? description = freezed,}) {
+  return _then(_self.copyWith(
+type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
+as MatchEventType,minute: null == minute ? _self.minute : minute // ignore: cast_nullable_to_non_nullable
+as int,teamId: null == teamId ? _self.teamId : teamId // ignore: cast_nullable_to_non_nullable
+as String,playerId: freezed == playerId ? _self.playerId : playerId // ignore: cast_nullable_to_non_nullable
+as String?,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
 }
 
-/// @nodoc
-abstract class _$$MatchEventImplCopyWith<$Res>
-    implements $MatchEventCopyWith<$Res> {
-  factory _$$MatchEventImplCopyWith(
-    _$MatchEventImpl value,
-    $Res Function(_$MatchEventImpl) then,
-  ) = __$$MatchEventImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({
-    MatchEventType type,
-    int minute,
-    String teamId,
-    String? playerId,
-    String? description,
-  });
 }
 
-/// @nodoc
-class __$$MatchEventImplCopyWithImpl<$Res>
-    extends _$MatchEventCopyWithImpl<$Res, _$MatchEventImpl>
-    implements _$$MatchEventImplCopyWith<$Res> {
-  __$$MatchEventImplCopyWithImpl(
-    _$MatchEventImpl _value,
-    $Res Function(_$MatchEventImpl) _then,
-  ) : super(_value, _then);
 
-  /// Create a copy of MatchEvent
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? type = null,
-    Object? minute = null,
-    Object? teamId = null,
-    Object? playerId = freezed,
-    Object? description = freezed,
-  }) {
-    return _then(
-      _$MatchEventImpl(
-        type: null == type
-            ? _value.type
-            : type // ignore: cast_nullable_to_non_nullable
-                  as MatchEventType,
-        minute: null == minute
-            ? _value.minute
-            : minute // ignore: cast_nullable_to_non_nullable
-                  as int,
-        teamId: null == teamId
-            ? _value.teamId
-            : teamId // ignore: cast_nullable_to_non_nullable
-                  as String,
-        playerId: freezed == playerId
-            ? _value.playerId
-            : playerId // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        description: freezed == description
-            ? _value.description
-            : description // ignore: cast_nullable_to_non_nullable
-                  as String?,
-      ),
-    );
-  }
+/// Adds pattern-matching-related methods to [MatchEvent].
+extension MatchEventPatterns on MatchEvent {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _MatchEvent value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _MatchEvent() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _MatchEvent value)  $default,){
+final _that = this;
+switch (_that) {
+case _MatchEvent():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _MatchEvent value)?  $default,){
+final _that = this;
+switch (_that) {
+case _MatchEvent() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( MatchEventType type,  int minute,  String teamId,  String? playerId,  String? description)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _MatchEvent() when $default != null:
+return $default(_that.type,_that.minute,_that.teamId,_that.playerId,_that.description);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( MatchEventType type,  int minute,  String teamId,  String? playerId,  String? description)  $default,) {final _that = this;
+switch (_that) {
+case _MatchEvent():
+return $default(_that.type,_that.minute,_that.teamId,_that.playerId,_that.description);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( MatchEventType type,  int minute,  String teamId,  String? playerId,  String? description)?  $default,) {final _that = this;
+switch (_that) {
+case _MatchEvent() when $default != null:
+return $default(_that.type,_that.minute,_that.teamId,_that.playerId,_that.description);case _:
+  return null;
+
+}
+}
+
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$MatchEventImpl implements _MatchEvent {
-  const _$MatchEventImpl({
-    required this.type,
-    required this.minute,
-    required this.teamId,
-    this.playerId,
-    this.description,
-  });
 
-  factory _$MatchEventImpl.fromJson(Map<String, dynamic> json) =>
-      _$$MatchEventImplFromJson(json);
+class _MatchEvent implements MatchEvent {
+  const _MatchEvent({required this.type, required this.minute, required this.teamId, this.playerId, this.description});
+  factory _MatchEvent.fromJson(Map<String, dynamic> json) => _$MatchEventFromJson(json);
 
-  @override
-  final MatchEventType type;
-  @override
-  final int minute;
-  @override
-  final String teamId;
-  @override
-  final String? playerId;
-  @override
-  final String? description;
+@override final  MatchEventType type;
+@override final  int minute;
+@override final  String teamId;
+@override final  String? playerId;
+@override final  String? description;
 
-  @override
-  String toString() {
-    return 'MatchEvent(type: $type, minute: $minute, teamId: $teamId, playerId: $playerId, description: $description)';
-  }
+/// Create a copy of MatchEvent
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$MatchEventCopyWith<_MatchEvent> get copyWith => __$MatchEventCopyWithImpl<_MatchEvent>(this, _$identity);
 
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$MatchEventImpl &&
-            (identical(other.type, type) || other.type == type) &&
-            (identical(other.minute, minute) || other.minute == minute) &&
-            (identical(other.teamId, teamId) || other.teamId == teamId) &&
-            (identical(other.playerId, playerId) ||
-                other.playerId == playerId) &&
-            (identical(other.description, description) ||
-                other.description == description));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode =>
-      Object.hash(runtimeType, type, minute, teamId, playerId, description);
-
-  /// Create a copy of MatchEvent
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$MatchEventImplCopyWith<_$MatchEventImpl> get copyWith =>
-      __$$MatchEventImplCopyWithImpl<_$MatchEventImpl>(this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$MatchEventImplToJson(this);
-  }
+@override
+Map<String, dynamic> toJson() {
+  return _$MatchEventToJson(this, );
 }
 
-abstract class _MatchEvent implements MatchEvent {
-  const factory _MatchEvent({
-    required final MatchEventType type,
-    required final int minute,
-    required final String teamId,
-    final String? playerId,
-    final String? description,
-  }) = _$MatchEventImpl;
-
-  factory _MatchEvent.fromJson(Map<String, dynamic> json) =
-      _$MatchEventImpl.fromJson;
-
-  @override
-  MatchEventType get type;
-  @override
-  int get minute;
-  @override
-  String get teamId;
-  @override
-  String? get playerId;
-  @override
-  String? get description;
-
-  /// Create a copy of MatchEvent
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$MatchEventImplCopyWith<_$MatchEventImpl> get copyWith =>
-      throw _privateConstructorUsedError;
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MatchEvent&&(identical(other.type, type) || other.type == type)&&(identical(other.minute, minute) || other.minute == minute)&&(identical(other.teamId, teamId) || other.teamId == teamId)&&(identical(other.playerId, playerId) || other.playerId == playerId)&&(identical(other.description, description) || other.description == description));
 }
 
-MatchInjury _$MatchInjuryFromJson(Map<String, dynamic> json) {
-  return _MatchInjury.fromJson(json);
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,type,minute,teamId,playerId,description);
+
+@override
+String toString() {
+  return 'MatchEvent(type: $type, minute: $minute, teamId: $teamId, playerId: $playerId, description: $description)';
 }
+
+
+}
+
+/// @nodoc
+abstract mixin class _$MatchEventCopyWith<$Res> implements $MatchEventCopyWith<$Res> {
+  factory _$MatchEventCopyWith(_MatchEvent value, $Res Function(_MatchEvent) _then) = __$MatchEventCopyWithImpl;
+@override @useResult
+$Res call({
+ MatchEventType type, int minute, String teamId, String? playerId, String? description
+});
+
+
+
+
+}
+/// @nodoc
+class __$MatchEventCopyWithImpl<$Res>
+    implements _$MatchEventCopyWith<$Res> {
+  __$MatchEventCopyWithImpl(this._self, this._then);
+
+  final _MatchEvent _self;
+  final $Res Function(_MatchEvent) _then;
+
+/// Create a copy of MatchEvent
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? type = null,Object? minute = null,Object? teamId = null,Object? playerId = freezed,Object? description = freezed,}) {
+  return _then(_MatchEvent(
+type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
+as MatchEventType,minute: null == minute ? _self.minute : minute // ignore: cast_nullable_to_non_nullable
+as int,teamId: null == teamId ? _self.teamId : teamId // ignore: cast_nullable_to_non_nullable
+as String,playerId: freezed == playerId ? _self.playerId : playerId // ignore: cast_nullable_to_non_nullable
+as String?,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+
+}
+
 
 /// @nodoc
 mixin _$MatchInjury {
-  String get teamId => throw _privateConstructorUsedError;
-  String get playerId => throw _privateConstructorUsedError;
-  Injury get injury => throw _privateConstructorUsedError;
-  bool get playerInStartingXi => throw _privateConstructorUsedError;
-  bool get potentialLoss => throw _privateConstructorUsedError;
+
+ String get teamId; String get playerId; Injury get injury; bool get playerInStartingXi; bool get potentialLoss;
+/// Create a copy of MatchInjury
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$MatchInjuryCopyWith<MatchInjury> get copyWith => _$MatchInjuryCopyWithImpl<MatchInjury>(this as MatchInjury, _$identity);
 
   /// Serializes this MatchInjury to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  Map<String, dynamic> toJson();
 
-  /// Create a copy of MatchInjury
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $MatchInjuryCopyWith<MatchInjury> get copyWith =>
-      throw _privateConstructorUsedError;
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MatchInjury&&(identical(other.teamId, teamId) || other.teamId == teamId)&&(identical(other.playerId, playerId) || other.playerId == playerId)&&(identical(other.injury, injury) || other.injury == injury)&&(identical(other.playerInStartingXi, playerInStartingXi) || other.playerInStartingXi == playerInStartingXi)&&(identical(other.potentialLoss, potentialLoss) || other.potentialLoss == potentialLoss));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,teamId,playerId,injury,playerInStartingXi,potentialLoss);
+
+@override
+String toString() {
+  return 'MatchInjury(teamId: $teamId, playerId: $playerId, injury: $injury, playerInStartingXi: $playerInStartingXi, potentialLoss: $potentialLoss)';
+}
+
+
 }
 
 /// @nodoc
-abstract class $MatchInjuryCopyWith<$Res> {
-  factory $MatchInjuryCopyWith(
-    MatchInjury value,
-    $Res Function(MatchInjury) then,
-  ) = _$MatchInjuryCopyWithImpl<$Res, MatchInjury>;
-  @useResult
-  $Res call({
-    String teamId,
-    String playerId,
-    Injury injury,
-    bool playerInStartingXi,
-    bool potentialLoss,
-  });
+abstract mixin class $MatchInjuryCopyWith<$Res>  {
+  factory $MatchInjuryCopyWith(MatchInjury value, $Res Function(MatchInjury) _then) = _$MatchInjuryCopyWithImpl;
+@useResult
+$Res call({
+ String teamId, String playerId, Injury injury, bool playerInStartingXi, bool potentialLoss
+});
 
-  $InjuryCopyWith<$Res> get injury;
+
+$InjuryCopyWith<$Res> get injury;
+
 }
-
 /// @nodoc
-class _$MatchInjuryCopyWithImpl<$Res, $Val extends MatchInjury>
+class _$MatchInjuryCopyWithImpl<$Res>
     implements $MatchInjuryCopyWith<$Res> {
-  _$MatchInjuryCopyWithImpl(this._value, this._then);
+  _$MatchInjuryCopyWithImpl(this._self, this._then);
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final MatchInjury _self;
+  final $Res Function(MatchInjury) _then;
 
-  /// Create a copy of MatchInjury
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? teamId = null,
-    Object? playerId = null,
-    Object? injury = null,
-    Object? playerInStartingXi = null,
-    Object? potentialLoss = null,
-  }) {
-    return _then(
-      _value.copyWith(
-            teamId: null == teamId
-                ? _value.teamId
-                : teamId // ignore: cast_nullable_to_non_nullable
-                      as String,
-            playerId: null == playerId
-                ? _value.playerId
-                : playerId // ignore: cast_nullable_to_non_nullable
-                      as String,
-            injury: null == injury
-                ? _value.injury
-                : injury // ignore: cast_nullable_to_non_nullable
-                      as Injury,
-            playerInStartingXi: null == playerInStartingXi
-                ? _value.playerInStartingXi
-                : playerInStartingXi // ignore: cast_nullable_to_non_nullable
-                      as bool,
-            potentialLoss: null == potentialLoss
-                ? _value.potentialLoss
-                : potentialLoss // ignore: cast_nullable_to_non_nullable
-                      as bool,
-          )
-          as $Val,
-    );
-  }
-
-  /// Create a copy of MatchInjury
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $InjuryCopyWith<$Res> get injury {
-    return $InjuryCopyWith<$Res>(_value.injury, (value) {
-      return _then(_value.copyWith(injury: value) as $Val);
-    });
-  }
+/// Create a copy of MatchInjury
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? teamId = null,Object? playerId = null,Object? injury = null,Object? playerInStartingXi = null,Object? potentialLoss = null,}) {
+  return _then(_self.copyWith(
+teamId: null == teamId ? _self.teamId : teamId // ignore: cast_nullable_to_non_nullable
+as String,playerId: null == playerId ? _self.playerId : playerId // ignore: cast_nullable_to_non_nullable
+as String,injury: null == injury ? _self.injury : injury // ignore: cast_nullable_to_non_nullable
+as Injury,playerInStartingXi: null == playerInStartingXi ? _self.playerInStartingXi : playerInStartingXi // ignore: cast_nullable_to_non_nullable
+as bool,potentialLoss: null == potentialLoss ? _self.potentialLoss : potentialLoss // ignore: cast_nullable_to_non_nullable
+as bool,
+  ));
 }
-
-/// @nodoc
-abstract class _$$MatchInjuryImplCopyWith<$Res>
-    implements $MatchInjuryCopyWith<$Res> {
-  factory _$$MatchInjuryImplCopyWith(
-    _$MatchInjuryImpl value,
-    $Res Function(_$MatchInjuryImpl) then,
-  ) = __$$MatchInjuryImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({
-    String teamId,
-    String playerId,
-    Injury injury,
-    bool playerInStartingXi,
-    bool potentialLoss,
+/// Create a copy of MatchInjury
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$InjuryCopyWith<$Res> get injury {
+  
+  return $InjuryCopyWith<$Res>(_self.injury, (value) {
+    return _then(_self.copyWith(injury: value));
   });
-
-  @override
-  $InjuryCopyWith<$Res> get injury;
+}
 }
 
-/// @nodoc
-class __$$MatchInjuryImplCopyWithImpl<$Res>
-    extends _$MatchInjuryCopyWithImpl<$Res, _$MatchInjuryImpl>
-    implements _$$MatchInjuryImplCopyWith<$Res> {
-  __$$MatchInjuryImplCopyWithImpl(
-    _$MatchInjuryImpl _value,
-    $Res Function(_$MatchInjuryImpl) _then,
-  ) : super(_value, _then);
 
-  /// Create a copy of MatchInjury
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? teamId = null,
-    Object? playerId = null,
-    Object? injury = null,
-    Object? playerInStartingXi = null,
-    Object? potentialLoss = null,
-  }) {
-    return _then(
-      _$MatchInjuryImpl(
-        teamId: null == teamId
-            ? _value.teamId
-            : teamId // ignore: cast_nullable_to_non_nullable
-                  as String,
-        playerId: null == playerId
-            ? _value.playerId
-            : playerId // ignore: cast_nullable_to_non_nullable
-                  as String,
-        injury: null == injury
-            ? _value.injury
-            : injury // ignore: cast_nullable_to_non_nullable
-                  as Injury,
-        playerInStartingXi: null == playerInStartingXi
-            ? _value.playerInStartingXi
-            : playerInStartingXi // ignore: cast_nullable_to_non_nullable
-                  as bool,
-        potentialLoss: null == potentialLoss
-            ? _value.potentialLoss
-            : potentialLoss // ignore: cast_nullable_to_non_nullable
-                  as bool,
-      ),
-    );
-  }
+/// Adds pattern-matching-related methods to [MatchInjury].
+extension MatchInjuryPatterns on MatchInjury {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _MatchInjury value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _MatchInjury() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _MatchInjury value)  $default,){
+final _that = this;
+switch (_that) {
+case _MatchInjury():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _MatchInjury value)?  $default,){
+final _that = this;
+switch (_that) {
+case _MatchInjury() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String teamId,  String playerId,  Injury injury,  bool playerInStartingXi,  bool potentialLoss)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _MatchInjury() when $default != null:
+return $default(_that.teamId,_that.playerId,_that.injury,_that.playerInStartingXi,_that.potentialLoss);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String teamId,  String playerId,  Injury injury,  bool playerInStartingXi,  bool potentialLoss)  $default,) {final _that = this;
+switch (_that) {
+case _MatchInjury():
+return $default(_that.teamId,_that.playerId,_that.injury,_that.playerInStartingXi,_that.potentialLoss);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String teamId,  String playerId,  Injury injury,  bool playerInStartingXi,  bool potentialLoss)?  $default,) {final _that = this;
+switch (_that) {
+case _MatchInjury() when $default != null:
+return $default(_that.teamId,_that.playerId,_that.injury,_that.playerInStartingXi,_that.potentialLoss);case _:
+  return null;
+
+}
+}
+
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$MatchInjuryImpl implements _MatchInjury {
-  const _$MatchInjuryImpl({
-    required this.teamId,
-    required this.playerId,
-    required this.injury,
-    required this.playerInStartingXi,
-    this.potentialLoss = false,
+
+class _MatchInjury implements MatchInjury {
+  const _MatchInjury({required this.teamId, required this.playerId, required this.injury, required this.playerInStartingXi, this.potentialLoss = false});
+  factory _MatchInjury.fromJson(Map<String, dynamic> json) => _$MatchInjuryFromJson(json);
+
+@override final  String teamId;
+@override final  String playerId;
+@override final  Injury injury;
+@override final  bool playerInStartingXi;
+@override@JsonKey() final  bool potentialLoss;
+
+/// Create a copy of MatchInjury
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$MatchInjuryCopyWith<_MatchInjury> get copyWith => __$MatchInjuryCopyWithImpl<_MatchInjury>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$MatchInjuryToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MatchInjury&&(identical(other.teamId, teamId) || other.teamId == teamId)&&(identical(other.playerId, playerId) || other.playerId == playerId)&&(identical(other.injury, injury) || other.injury == injury)&&(identical(other.playerInStartingXi, playerInStartingXi) || other.playerInStartingXi == playerInStartingXi)&&(identical(other.potentialLoss, potentialLoss) || other.potentialLoss == potentialLoss));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,teamId,playerId,injury,playerInStartingXi,potentialLoss);
+
+@override
+String toString() {
+  return 'MatchInjury(teamId: $teamId, playerId: $playerId, injury: $injury, playerInStartingXi: $playerInStartingXi, potentialLoss: $potentialLoss)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$MatchInjuryCopyWith<$Res> implements $MatchInjuryCopyWith<$Res> {
+  factory _$MatchInjuryCopyWith(_MatchInjury value, $Res Function(_MatchInjury) _then) = __$MatchInjuryCopyWithImpl;
+@override @useResult
+$Res call({
+ String teamId, String playerId, Injury injury, bool playerInStartingXi, bool potentialLoss
+});
+
+
+@override $InjuryCopyWith<$Res> get injury;
+
+}
+/// @nodoc
+class __$MatchInjuryCopyWithImpl<$Res>
+    implements _$MatchInjuryCopyWith<$Res> {
+  __$MatchInjuryCopyWithImpl(this._self, this._then);
+
+  final _MatchInjury _self;
+  final $Res Function(_MatchInjury) _then;
+
+/// Create a copy of MatchInjury
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? teamId = null,Object? playerId = null,Object? injury = null,Object? playerInStartingXi = null,Object? potentialLoss = null,}) {
+  return _then(_MatchInjury(
+teamId: null == teamId ? _self.teamId : teamId // ignore: cast_nullable_to_non_nullable
+as String,playerId: null == playerId ? _self.playerId : playerId // ignore: cast_nullable_to_non_nullable
+as String,injury: null == injury ? _self.injury : injury // ignore: cast_nullable_to_non_nullable
+as Injury,playerInStartingXi: null == playerInStartingXi ? _self.playerInStartingXi : playerInStartingXi // ignore: cast_nullable_to_non_nullable
+as bool,potentialLoss: null == potentialLoss ? _self.potentialLoss : potentialLoss // ignore: cast_nullable_to_non_nullable
+as bool,
+  ));
+}
+
+/// Create a copy of MatchInjury
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$InjuryCopyWith<$Res> get injury {
+  
+  return $InjuryCopyWith<$Res>(_self.injury, (value) {
+    return _then(_self.copyWith(injury: value));
   });
-
-  factory _$MatchInjuryImpl.fromJson(Map<String, dynamic> json) =>
-      _$$MatchInjuryImplFromJson(json);
-
-  @override
-  final String teamId;
-  @override
-  final String playerId;
-  @override
-  final Injury injury;
-  @override
-  final bool playerInStartingXi;
-  @override
-  @JsonKey()
-  final bool potentialLoss;
-
-  @override
-  String toString() {
-    return 'MatchInjury(teamId: $teamId, playerId: $playerId, injury: $injury, playerInStartingXi: $playerInStartingXi, potentialLoss: $potentialLoss)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$MatchInjuryImpl &&
-            (identical(other.teamId, teamId) || other.teamId == teamId) &&
-            (identical(other.playerId, playerId) ||
-                other.playerId == playerId) &&
-            (identical(other.injury, injury) || other.injury == injury) &&
-            (identical(other.playerInStartingXi, playerInStartingXi) ||
-                other.playerInStartingXi == playerInStartingXi) &&
-            (identical(other.potentialLoss, potentialLoss) ||
-                other.potentialLoss == potentialLoss));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    teamId,
-    playerId,
-    injury,
-    playerInStartingXi,
-    potentialLoss,
-  );
-
-  /// Create a copy of MatchInjury
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$MatchInjuryImplCopyWith<_$MatchInjuryImpl> get copyWith =>
-      __$$MatchInjuryImplCopyWithImpl<_$MatchInjuryImpl>(this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$MatchInjuryImplToJson(this);
-  }
+}
 }
 
-abstract class _MatchInjury implements MatchInjury {
-  const factory _MatchInjury({
-    required final String teamId,
-    required final String playerId,
-    required final Injury injury,
-    required final bool playerInStartingXi,
-    final bool potentialLoss,
-  }) = _$MatchInjuryImpl;
-
-  factory _MatchInjury.fromJson(Map<String, dynamic> json) =
-      _$MatchInjuryImpl.fromJson;
-
-  @override
-  String get teamId;
-  @override
-  String get playerId;
-  @override
-  Injury get injury;
-  @override
-  bool get playerInStartingXi;
-  @override
-  bool get potentialLoss;
-
-  /// Create a copy of MatchInjury
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$MatchInjuryImplCopyWith<_$MatchInjuryImpl> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-MatchDiscipline _$MatchDisciplineFromJson(Map<String, dynamic> json) {
-  return _MatchDiscipline.fromJson(json);
-}
 
 /// @nodoc
 mixin _$MatchDiscipline {
-  String get teamId => throw _privateConstructorUsedError;
-  String get playerId => throw _privateConstructorUsedError;
-  int get yellowCardsInMatch => throw _privateConstructorUsedError;
-  RedCardKind get redCardKind => throw _privateConstructorUsedError;
-  int get directRedSeverity => throw _privateConstructorUsedError;
-  bool get playerInStartingXi => throw _privateConstructorUsedError;
+
+ String get teamId; String get playerId; int get yellowCardsInMatch; RedCardKind get redCardKind; int get directRedSeverity; bool get playerInStartingXi;
+/// Create a copy of MatchDiscipline
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$MatchDisciplineCopyWith<MatchDiscipline> get copyWith => _$MatchDisciplineCopyWithImpl<MatchDiscipline>(this as MatchDiscipline, _$identity);
 
   /// Serializes this MatchDiscipline to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  Map<String, dynamic> toJson();
 
-  /// Create a copy of MatchDiscipline
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $MatchDisciplineCopyWith<MatchDiscipline> get copyWith =>
-      throw _privateConstructorUsedError;
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MatchDiscipline&&(identical(other.teamId, teamId) || other.teamId == teamId)&&(identical(other.playerId, playerId) || other.playerId == playerId)&&(identical(other.yellowCardsInMatch, yellowCardsInMatch) || other.yellowCardsInMatch == yellowCardsInMatch)&&(identical(other.redCardKind, redCardKind) || other.redCardKind == redCardKind)&&(identical(other.directRedSeverity, directRedSeverity) || other.directRedSeverity == directRedSeverity)&&(identical(other.playerInStartingXi, playerInStartingXi) || other.playerInStartingXi == playerInStartingXi));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,teamId,playerId,yellowCardsInMatch,redCardKind,directRedSeverity,playerInStartingXi);
+
+@override
+String toString() {
+  return 'MatchDiscipline(teamId: $teamId, playerId: $playerId, yellowCardsInMatch: $yellowCardsInMatch, redCardKind: $redCardKind, directRedSeverity: $directRedSeverity, playerInStartingXi: $playerInStartingXi)';
+}
+
+
 }
 
 /// @nodoc
-abstract class $MatchDisciplineCopyWith<$Res> {
-  factory $MatchDisciplineCopyWith(
-    MatchDiscipline value,
-    $Res Function(MatchDiscipline) then,
-  ) = _$MatchDisciplineCopyWithImpl<$Res, MatchDiscipline>;
-  @useResult
-  $Res call({
-    String teamId,
-    String playerId,
-    int yellowCardsInMatch,
-    RedCardKind redCardKind,
-    int directRedSeverity,
-    bool playerInStartingXi,
-  });
-}
+abstract mixin class $MatchDisciplineCopyWith<$Res>  {
+  factory $MatchDisciplineCopyWith(MatchDiscipline value, $Res Function(MatchDiscipline) _then) = _$MatchDisciplineCopyWithImpl;
+@useResult
+$Res call({
+ String teamId, String playerId, int yellowCardsInMatch, RedCardKind redCardKind, int directRedSeverity, bool playerInStartingXi
+});
 
+
+
+
+}
 /// @nodoc
-class _$MatchDisciplineCopyWithImpl<$Res, $Val extends MatchDiscipline>
+class _$MatchDisciplineCopyWithImpl<$Res>
     implements $MatchDisciplineCopyWith<$Res> {
-  _$MatchDisciplineCopyWithImpl(this._value, this._then);
+  _$MatchDisciplineCopyWithImpl(this._self, this._then);
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final MatchDiscipline _self;
+  final $Res Function(MatchDiscipline) _then;
 
-  /// Create a copy of MatchDiscipline
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? teamId = null,
-    Object? playerId = null,
-    Object? yellowCardsInMatch = null,
-    Object? redCardKind = null,
-    Object? directRedSeverity = null,
-    Object? playerInStartingXi = null,
-  }) {
-    return _then(
-      _value.copyWith(
-            teamId: null == teamId
-                ? _value.teamId
-                : teamId // ignore: cast_nullable_to_non_nullable
-                      as String,
-            playerId: null == playerId
-                ? _value.playerId
-                : playerId // ignore: cast_nullable_to_non_nullable
-                      as String,
-            yellowCardsInMatch: null == yellowCardsInMatch
-                ? _value.yellowCardsInMatch
-                : yellowCardsInMatch // ignore: cast_nullable_to_non_nullable
-                      as int,
-            redCardKind: null == redCardKind
-                ? _value.redCardKind
-                : redCardKind // ignore: cast_nullable_to_non_nullable
-                      as RedCardKind,
-            directRedSeverity: null == directRedSeverity
-                ? _value.directRedSeverity
-                : directRedSeverity // ignore: cast_nullable_to_non_nullable
-                      as int,
-            playerInStartingXi: null == playerInStartingXi
-                ? _value.playerInStartingXi
-                : playerInStartingXi // ignore: cast_nullable_to_non_nullable
-                      as bool,
-          )
-          as $Val,
-    );
-  }
+/// Create a copy of MatchDiscipline
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? teamId = null,Object? playerId = null,Object? yellowCardsInMatch = null,Object? redCardKind = null,Object? directRedSeverity = null,Object? playerInStartingXi = null,}) {
+  return _then(_self.copyWith(
+teamId: null == teamId ? _self.teamId : teamId // ignore: cast_nullable_to_non_nullable
+as String,playerId: null == playerId ? _self.playerId : playerId // ignore: cast_nullable_to_non_nullable
+as String,yellowCardsInMatch: null == yellowCardsInMatch ? _self.yellowCardsInMatch : yellowCardsInMatch // ignore: cast_nullable_to_non_nullable
+as int,redCardKind: null == redCardKind ? _self.redCardKind : redCardKind // ignore: cast_nullable_to_non_nullable
+as RedCardKind,directRedSeverity: null == directRedSeverity ? _self.directRedSeverity : directRedSeverity // ignore: cast_nullable_to_non_nullable
+as int,playerInStartingXi: null == playerInStartingXi ? _self.playerInStartingXi : playerInStartingXi // ignore: cast_nullable_to_non_nullable
+as bool,
+  ));
 }
 
-/// @nodoc
-abstract class _$$MatchDisciplineImplCopyWith<$Res>
-    implements $MatchDisciplineCopyWith<$Res> {
-  factory _$$MatchDisciplineImplCopyWith(
-    _$MatchDisciplineImpl value,
-    $Res Function(_$MatchDisciplineImpl) then,
-  ) = __$$MatchDisciplineImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({
-    String teamId,
-    String playerId,
-    int yellowCardsInMatch,
-    RedCardKind redCardKind,
-    int directRedSeverity,
-    bool playerInStartingXi,
-  });
 }
 
-/// @nodoc
-class __$$MatchDisciplineImplCopyWithImpl<$Res>
-    extends _$MatchDisciplineCopyWithImpl<$Res, _$MatchDisciplineImpl>
-    implements _$$MatchDisciplineImplCopyWith<$Res> {
-  __$$MatchDisciplineImplCopyWithImpl(
-    _$MatchDisciplineImpl _value,
-    $Res Function(_$MatchDisciplineImpl) _then,
-  ) : super(_value, _then);
 
-  /// Create a copy of MatchDiscipline
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? teamId = null,
-    Object? playerId = null,
-    Object? yellowCardsInMatch = null,
-    Object? redCardKind = null,
-    Object? directRedSeverity = null,
-    Object? playerInStartingXi = null,
-  }) {
-    return _then(
-      _$MatchDisciplineImpl(
-        teamId: null == teamId
-            ? _value.teamId
-            : teamId // ignore: cast_nullable_to_non_nullable
-                  as String,
-        playerId: null == playerId
-            ? _value.playerId
-            : playerId // ignore: cast_nullable_to_non_nullable
-                  as String,
-        yellowCardsInMatch: null == yellowCardsInMatch
-            ? _value.yellowCardsInMatch
-            : yellowCardsInMatch // ignore: cast_nullable_to_non_nullable
-                  as int,
-        redCardKind: null == redCardKind
-            ? _value.redCardKind
-            : redCardKind // ignore: cast_nullable_to_non_nullable
-                  as RedCardKind,
-        directRedSeverity: null == directRedSeverity
-            ? _value.directRedSeverity
-            : directRedSeverity // ignore: cast_nullable_to_non_nullable
-                  as int,
-        playerInStartingXi: null == playerInStartingXi
-            ? _value.playerInStartingXi
-            : playerInStartingXi // ignore: cast_nullable_to_non_nullable
-                  as bool,
-      ),
-    );
-  }
+/// Adds pattern-matching-related methods to [MatchDiscipline].
+extension MatchDisciplinePatterns on MatchDiscipline {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _MatchDiscipline value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _MatchDiscipline() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _MatchDiscipline value)  $default,){
+final _that = this;
+switch (_that) {
+case _MatchDiscipline():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _MatchDiscipline value)?  $default,){
+final _that = this;
+switch (_that) {
+case _MatchDiscipline() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String teamId,  String playerId,  int yellowCardsInMatch,  RedCardKind redCardKind,  int directRedSeverity,  bool playerInStartingXi)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _MatchDiscipline() when $default != null:
+return $default(_that.teamId,_that.playerId,_that.yellowCardsInMatch,_that.redCardKind,_that.directRedSeverity,_that.playerInStartingXi);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String teamId,  String playerId,  int yellowCardsInMatch,  RedCardKind redCardKind,  int directRedSeverity,  bool playerInStartingXi)  $default,) {final _that = this;
+switch (_that) {
+case _MatchDiscipline():
+return $default(_that.teamId,_that.playerId,_that.yellowCardsInMatch,_that.redCardKind,_that.directRedSeverity,_that.playerInStartingXi);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String teamId,  String playerId,  int yellowCardsInMatch,  RedCardKind redCardKind,  int directRedSeverity,  bool playerInStartingXi)?  $default,) {final _that = this;
+switch (_that) {
+case _MatchDiscipline() when $default != null:
+return $default(_that.teamId,_that.playerId,_that.yellowCardsInMatch,_that.redCardKind,_that.directRedSeverity,_that.playerInStartingXi);case _:
+  return null;
+
+}
+}
+
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$MatchDisciplineImpl implements _MatchDiscipline {
-  const _$MatchDisciplineImpl({
-    required this.teamId,
-    required this.playerId,
-    this.yellowCardsInMatch = 0,
-    this.redCardKind = RedCardKind.none,
-    this.directRedSeverity = 0,
-    this.playerInStartingXi = false,
-  });
 
-  factory _$MatchDisciplineImpl.fromJson(Map<String, dynamic> json) =>
-      _$$MatchDisciplineImplFromJson(json);
+class _MatchDiscipline implements MatchDiscipline {
+  const _MatchDiscipline({required this.teamId, required this.playerId, this.yellowCardsInMatch = 0, this.redCardKind = RedCardKind.none, this.directRedSeverity = 0, this.playerInStartingXi = false});
+  factory _MatchDiscipline.fromJson(Map<String, dynamic> json) => _$MatchDisciplineFromJson(json);
 
-  @override
-  final String teamId;
-  @override
-  final String playerId;
-  @override
-  @JsonKey()
-  final int yellowCardsInMatch;
-  @override
-  @JsonKey()
-  final RedCardKind redCardKind;
-  @override
-  @JsonKey()
-  final int directRedSeverity;
-  @override
-  @JsonKey()
-  final bool playerInStartingXi;
+@override final  String teamId;
+@override final  String playerId;
+@override@JsonKey() final  int yellowCardsInMatch;
+@override@JsonKey() final  RedCardKind redCardKind;
+@override@JsonKey() final  int directRedSeverity;
+@override@JsonKey() final  bool playerInStartingXi;
 
-  @override
-  String toString() {
-    return 'MatchDiscipline(teamId: $teamId, playerId: $playerId, yellowCardsInMatch: $yellowCardsInMatch, redCardKind: $redCardKind, directRedSeverity: $directRedSeverity, playerInStartingXi: $playerInStartingXi)';
-  }
+/// Create a copy of MatchDiscipline
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$MatchDisciplineCopyWith<_MatchDiscipline> get copyWith => __$MatchDisciplineCopyWithImpl<_MatchDiscipline>(this, _$identity);
 
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$MatchDisciplineImpl &&
-            (identical(other.teamId, teamId) || other.teamId == teamId) &&
-            (identical(other.playerId, playerId) ||
-                other.playerId == playerId) &&
-            (identical(other.yellowCardsInMatch, yellowCardsInMatch) ||
-                other.yellowCardsInMatch == yellowCardsInMatch) &&
-            (identical(other.redCardKind, redCardKind) ||
-                other.redCardKind == redCardKind) &&
-            (identical(other.directRedSeverity, directRedSeverity) ||
-                other.directRedSeverity == directRedSeverity) &&
-            (identical(other.playerInStartingXi, playerInStartingXi) ||
-                other.playerInStartingXi == playerInStartingXi));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    teamId,
-    playerId,
-    yellowCardsInMatch,
-    redCardKind,
-    directRedSeverity,
-    playerInStartingXi,
-  );
-
-  /// Create a copy of MatchDiscipline
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$MatchDisciplineImplCopyWith<_$MatchDisciplineImpl> get copyWith =>
-      __$$MatchDisciplineImplCopyWithImpl<_$MatchDisciplineImpl>(
-        this,
-        _$identity,
-      );
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$MatchDisciplineImplToJson(this);
-  }
+@override
+Map<String, dynamic> toJson() {
+  return _$MatchDisciplineToJson(this, );
 }
 
-abstract class _MatchDiscipline implements MatchDiscipline {
-  const factory _MatchDiscipline({
-    required final String teamId,
-    required final String playerId,
-    final int yellowCardsInMatch,
-    final RedCardKind redCardKind,
-    final int directRedSeverity,
-    final bool playerInStartingXi,
-  }) = _$MatchDisciplineImpl;
-
-  factory _MatchDiscipline.fromJson(Map<String, dynamic> json) =
-      _$MatchDisciplineImpl.fromJson;
-
-  @override
-  String get teamId;
-  @override
-  String get playerId;
-  @override
-  int get yellowCardsInMatch;
-  @override
-  RedCardKind get redCardKind;
-  @override
-  int get directRedSeverity;
-  @override
-  bool get playerInStartingXi;
-
-  /// Create a copy of MatchDiscipline
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$MatchDisciplineImplCopyWith<_$MatchDisciplineImpl> get copyWith =>
-      throw _privateConstructorUsedError;
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MatchDiscipline&&(identical(other.teamId, teamId) || other.teamId == teamId)&&(identical(other.playerId, playerId) || other.playerId == playerId)&&(identical(other.yellowCardsInMatch, yellowCardsInMatch) || other.yellowCardsInMatch == yellowCardsInMatch)&&(identical(other.redCardKind, redCardKind) || other.redCardKind == redCardKind)&&(identical(other.directRedSeverity, directRedSeverity) || other.directRedSeverity == directRedSeverity)&&(identical(other.playerInStartingXi, playerInStartingXi) || other.playerInStartingXi == playerInStartingXi));
 }
 
-TeamMatchStats _$TeamMatchStatsFromJson(Map<String, dynamic> json) {
-  return _TeamMatchStats.fromJson(json);
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,teamId,playerId,yellowCardsInMatch,redCardKind,directRedSeverity,playerInStartingXi);
+
+@override
+String toString() {
+  return 'MatchDiscipline(teamId: $teamId, playerId: $playerId, yellowCardsInMatch: $yellowCardsInMatch, redCardKind: $redCardKind, directRedSeverity: $directRedSeverity, playerInStartingXi: $playerInStartingXi)';
 }
+
+
+}
+
+/// @nodoc
+abstract mixin class _$MatchDisciplineCopyWith<$Res> implements $MatchDisciplineCopyWith<$Res> {
+  factory _$MatchDisciplineCopyWith(_MatchDiscipline value, $Res Function(_MatchDiscipline) _then) = __$MatchDisciplineCopyWithImpl;
+@override @useResult
+$Res call({
+ String teamId, String playerId, int yellowCardsInMatch, RedCardKind redCardKind, int directRedSeverity, bool playerInStartingXi
+});
+
+
+
+
+}
+/// @nodoc
+class __$MatchDisciplineCopyWithImpl<$Res>
+    implements _$MatchDisciplineCopyWith<$Res> {
+  __$MatchDisciplineCopyWithImpl(this._self, this._then);
+
+  final _MatchDiscipline _self;
+  final $Res Function(_MatchDiscipline) _then;
+
+/// Create a copy of MatchDiscipline
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? teamId = null,Object? playerId = null,Object? yellowCardsInMatch = null,Object? redCardKind = null,Object? directRedSeverity = null,Object? playerInStartingXi = null,}) {
+  return _then(_MatchDiscipline(
+teamId: null == teamId ? _self.teamId : teamId // ignore: cast_nullable_to_non_nullable
+as String,playerId: null == playerId ? _self.playerId : playerId // ignore: cast_nullable_to_non_nullable
+as String,yellowCardsInMatch: null == yellowCardsInMatch ? _self.yellowCardsInMatch : yellowCardsInMatch // ignore: cast_nullable_to_non_nullable
+as int,redCardKind: null == redCardKind ? _self.redCardKind : redCardKind // ignore: cast_nullable_to_non_nullable
+as RedCardKind,directRedSeverity: null == directRedSeverity ? _self.directRedSeverity : directRedSeverity // ignore: cast_nullable_to_non_nullable
+as int,playerInStartingXi: null == playerInStartingXi ? _self.playerInStartingXi : playerInStartingXi // ignore: cast_nullable_to_non_nullable
+as bool,
+  ));
+}
+
+
+}
+
 
 /// @nodoc
 mixin _$TeamMatchStats {
-  String get teamId => throw _privateConstructorUsedError;
-  int get goals => throw _privateConstructorUsedError;
-  int get shots => throw _privateConstructorUsedError;
-  int get shotsOnTarget => throw _privateConstructorUsedError;
-  int get possession => throw _privateConstructorUsedError;
-  double get xg => throw _privateConstructorUsedError;
-  int get passes => throw _privateConstructorUsedError;
-  double get passAccuracy => throw _privateConstructorUsedError;
-  int get duelsWon => throw _privateConstructorUsedError;
-  int get offsides => throw _privateConstructorUsedError;
-  int get corners => throw _privateConstructorUsedError;
-  int get fouls => throw _privateConstructorUsedError;
-  int get yellowCards => throw _privateConstructorUsedError;
-  int get redCards => throw _privateConstructorUsedError;
-  int get saves => throw _privateConstructorUsedError;
+
+ String get teamId; int get goals; int get shots; int get shotsOnTarget; int get possession; double get xg; int get passes; double get passAccuracy; int get duelsWon; int get offsides; int get corners; int get fouls; int get yellowCards; int get redCards; int get saves;
+/// Create a copy of TeamMatchStats
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$TeamMatchStatsCopyWith<TeamMatchStats> get copyWith => _$TeamMatchStatsCopyWithImpl<TeamMatchStats>(this as TeamMatchStats, _$identity);
 
   /// Serializes this TeamMatchStats to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  Map<String, dynamic> toJson();
 
-  /// Create a copy of TeamMatchStats
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $TeamMatchStatsCopyWith<TeamMatchStats> get copyWith =>
-      throw _privateConstructorUsedError;
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TeamMatchStats&&(identical(other.teamId, teamId) || other.teamId == teamId)&&(identical(other.goals, goals) || other.goals == goals)&&(identical(other.shots, shots) || other.shots == shots)&&(identical(other.shotsOnTarget, shotsOnTarget) || other.shotsOnTarget == shotsOnTarget)&&(identical(other.possession, possession) || other.possession == possession)&&(identical(other.xg, xg) || other.xg == xg)&&(identical(other.passes, passes) || other.passes == passes)&&(identical(other.passAccuracy, passAccuracy) || other.passAccuracy == passAccuracy)&&(identical(other.duelsWon, duelsWon) || other.duelsWon == duelsWon)&&(identical(other.offsides, offsides) || other.offsides == offsides)&&(identical(other.corners, corners) || other.corners == corners)&&(identical(other.fouls, fouls) || other.fouls == fouls)&&(identical(other.yellowCards, yellowCards) || other.yellowCards == yellowCards)&&(identical(other.redCards, redCards) || other.redCards == redCards)&&(identical(other.saves, saves) || other.saves == saves));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,teamId,goals,shots,shotsOnTarget,possession,xg,passes,passAccuracy,duelsWon,offsides,corners,fouls,yellowCards,redCards,saves);
+
+@override
+String toString() {
+  return 'TeamMatchStats(teamId: $teamId, goals: $goals, shots: $shots, shotsOnTarget: $shotsOnTarget, possession: $possession, xg: $xg, passes: $passes, passAccuracy: $passAccuracy, duelsWon: $duelsWon, offsides: $offsides, corners: $corners, fouls: $fouls, yellowCards: $yellowCards, redCards: $redCards, saves: $saves)';
+}
+
+
 }
 
 /// @nodoc
-abstract class $TeamMatchStatsCopyWith<$Res> {
-  factory $TeamMatchStatsCopyWith(
-    TeamMatchStats value,
-    $Res Function(TeamMatchStats) then,
-  ) = _$TeamMatchStatsCopyWithImpl<$Res, TeamMatchStats>;
-  @useResult
-  $Res call({
-    String teamId,
-    int goals,
-    int shots,
-    int shotsOnTarget,
-    int possession,
-    double xg,
-    int passes,
-    double passAccuracy,
-    int duelsWon,
-    int offsides,
-    int corners,
-    int fouls,
-    int yellowCards,
-    int redCards,
-    int saves,
-  });
-}
+abstract mixin class $TeamMatchStatsCopyWith<$Res>  {
+  factory $TeamMatchStatsCopyWith(TeamMatchStats value, $Res Function(TeamMatchStats) _then) = _$TeamMatchStatsCopyWithImpl;
+@useResult
+$Res call({
+ String teamId, int goals, int shots, int shotsOnTarget, int possession, double xg, int passes, double passAccuracy, int duelsWon, int offsides, int corners, int fouls, int yellowCards, int redCards, int saves
+});
 
+
+
+
+}
 /// @nodoc
-class _$TeamMatchStatsCopyWithImpl<$Res, $Val extends TeamMatchStats>
+class _$TeamMatchStatsCopyWithImpl<$Res>
     implements $TeamMatchStatsCopyWith<$Res> {
-  _$TeamMatchStatsCopyWithImpl(this._value, this._then);
+  _$TeamMatchStatsCopyWithImpl(this._self, this._then);
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final TeamMatchStats _self;
+  final $Res Function(TeamMatchStats) _then;
 
-  /// Create a copy of TeamMatchStats
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? teamId = null,
-    Object? goals = null,
-    Object? shots = null,
-    Object? shotsOnTarget = null,
-    Object? possession = null,
-    Object? xg = null,
-    Object? passes = null,
-    Object? passAccuracy = null,
-    Object? duelsWon = null,
-    Object? offsides = null,
-    Object? corners = null,
-    Object? fouls = null,
-    Object? yellowCards = null,
-    Object? redCards = null,
-    Object? saves = null,
-  }) {
-    return _then(
-      _value.copyWith(
-            teamId: null == teamId
-                ? _value.teamId
-                : teamId // ignore: cast_nullable_to_non_nullable
-                      as String,
-            goals: null == goals
-                ? _value.goals
-                : goals // ignore: cast_nullable_to_non_nullable
-                      as int,
-            shots: null == shots
-                ? _value.shots
-                : shots // ignore: cast_nullable_to_non_nullable
-                      as int,
-            shotsOnTarget: null == shotsOnTarget
-                ? _value.shotsOnTarget
-                : shotsOnTarget // ignore: cast_nullable_to_non_nullable
-                      as int,
-            possession: null == possession
-                ? _value.possession
-                : possession // ignore: cast_nullable_to_non_nullable
-                      as int,
-            xg: null == xg
-                ? _value.xg
-                : xg // ignore: cast_nullable_to_non_nullable
-                      as double,
-            passes: null == passes
-                ? _value.passes
-                : passes // ignore: cast_nullable_to_non_nullable
-                      as int,
-            passAccuracy: null == passAccuracy
-                ? _value.passAccuracy
-                : passAccuracy // ignore: cast_nullable_to_non_nullable
-                      as double,
-            duelsWon: null == duelsWon
-                ? _value.duelsWon
-                : duelsWon // ignore: cast_nullable_to_non_nullable
-                      as int,
-            offsides: null == offsides
-                ? _value.offsides
-                : offsides // ignore: cast_nullable_to_non_nullable
-                      as int,
-            corners: null == corners
-                ? _value.corners
-                : corners // ignore: cast_nullable_to_non_nullable
-                      as int,
-            fouls: null == fouls
-                ? _value.fouls
-                : fouls // ignore: cast_nullable_to_non_nullable
-                      as int,
-            yellowCards: null == yellowCards
-                ? _value.yellowCards
-                : yellowCards // ignore: cast_nullable_to_non_nullable
-                      as int,
-            redCards: null == redCards
-                ? _value.redCards
-                : redCards // ignore: cast_nullable_to_non_nullable
-                      as int,
-            saves: null == saves
-                ? _value.saves
-                : saves // ignore: cast_nullable_to_non_nullable
-                      as int,
-          )
-          as $Val,
-    );
-  }
+/// Create a copy of TeamMatchStats
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? teamId = null,Object? goals = null,Object? shots = null,Object? shotsOnTarget = null,Object? possession = null,Object? xg = null,Object? passes = null,Object? passAccuracy = null,Object? duelsWon = null,Object? offsides = null,Object? corners = null,Object? fouls = null,Object? yellowCards = null,Object? redCards = null,Object? saves = null,}) {
+  return _then(_self.copyWith(
+teamId: null == teamId ? _self.teamId : teamId // ignore: cast_nullable_to_non_nullable
+as String,goals: null == goals ? _self.goals : goals // ignore: cast_nullable_to_non_nullable
+as int,shots: null == shots ? _self.shots : shots // ignore: cast_nullable_to_non_nullable
+as int,shotsOnTarget: null == shotsOnTarget ? _self.shotsOnTarget : shotsOnTarget // ignore: cast_nullable_to_non_nullable
+as int,possession: null == possession ? _self.possession : possession // ignore: cast_nullable_to_non_nullable
+as int,xg: null == xg ? _self.xg : xg // ignore: cast_nullable_to_non_nullable
+as double,passes: null == passes ? _self.passes : passes // ignore: cast_nullable_to_non_nullable
+as int,passAccuracy: null == passAccuracy ? _self.passAccuracy : passAccuracy // ignore: cast_nullable_to_non_nullable
+as double,duelsWon: null == duelsWon ? _self.duelsWon : duelsWon // ignore: cast_nullable_to_non_nullable
+as int,offsides: null == offsides ? _self.offsides : offsides // ignore: cast_nullable_to_non_nullable
+as int,corners: null == corners ? _self.corners : corners // ignore: cast_nullable_to_non_nullable
+as int,fouls: null == fouls ? _self.fouls : fouls // ignore: cast_nullable_to_non_nullable
+as int,yellowCards: null == yellowCards ? _self.yellowCards : yellowCards // ignore: cast_nullable_to_non_nullable
+as int,redCards: null == redCards ? _self.redCards : redCards // ignore: cast_nullable_to_non_nullable
+as int,saves: null == saves ? _self.saves : saves // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
 }
 
-/// @nodoc
-abstract class _$$TeamMatchStatsImplCopyWith<$Res>
-    implements $TeamMatchStatsCopyWith<$Res> {
-  factory _$$TeamMatchStatsImplCopyWith(
-    _$TeamMatchStatsImpl value,
-    $Res Function(_$TeamMatchStatsImpl) then,
-  ) = __$$TeamMatchStatsImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({
-    String teamId,
-    int goals,
-    int shots,
-    int shotsOnTarget,
-    int possession,
-    double xg,
-    int passes,
-    double passAccuracy,
-    int duelsWon,
-    int offsides,
-    int corners,
-    int fouls,
-    int yellowCards,
-    int redCards,
-    int saves,
-  });
 }
 
-/// @nodoc
-class __$$TeamMatchStatsImplCopyWithImpl<$Res>
-    extends _$TeamMatchStatsCopyWithImpl<$Res, _$TeamMatchStatsImpl>
-    implements _$$TeamMatchStatsImplCopyWith<$Res> {
-  __$$TeamMatchStatsImplCopyWithImpl(
-    _$TeamMatchStatsImpl _value,
-    $Res Function(_$TeamMatchStatsImpl) _then,
-  ) : super(_value, _then);
 
-  /// Create a copy of TeamMatchStats
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? teamId = null,
-    Object? goals = null,
-    Object? shots = null,
-    Object? shotsOnTarget = null,
-    Object? possession = null,
-    Object? xg = null,
-    Object? passes = null,
-    Object? passAccuracy = null,
-    Object? duelsWon = null,
-    Object? offsides = null,
-    Object? corners = null,
-    Object? fouls = null,
-    Object? yellowCards = null,
-    Object? redCards = null,
-    Object? saves = null,
-  }) {
-    return _then(
-      _$TeamMatchStatsImpl(
-        teamId: null == teamId
-            ? _value.teamId
-            : teamId // ignore: cast_nullable_to_non_nullable
-                  as String,
-        goals: null == goals
-            ? _value.goals
-            : goals // ignore: cast_nullable_to_non_nullable
-                  as int,
-        shots: null == shots
-            ? _value.shots
-            : shots // ignore: cast_nullable_to_non_nullable
-                  as int,
-        shotsOnTarget: null == shotsOnTarget
-            ? _value.shotsOnTarget
-            : shotsOnTarget // ignore: cast_nullable_to_non_nullable
-                  as int,
-        possession: null == possession
-            ? _value.possession
-            : possession // ignore: cast_nullable_to_non_nullable
-                  as int,
-        xg: null == xg
-            ? _value.xg
-            : xg // ignore: cast_nullable_to_non_nullable
-                  as double,
-        passes: null == passes
-            ? _value.passes
-            : passes // ignore: cast_nullable_to_non_nullable
-                  as int,
-        passAccuracy: null == passAccuracy
-            ? _value.passAccuracy
-            : passAccuracy // ignore: cast_nullable_to_non_nullable
-                  as double,
-        duelsWon: null == duelsWon
-            ? _value.duelsWon
-            : duelsWon // ignore: cast_nullable_to_non_nullable
-                  as int,
-        offsides: null == offsides
-            ? _value.offsides
-            : offsides // ignore: cast_nullable_to_non_nullable
-                  as int,
-        corners: null == corners
-            ? _value.corners
-            : corners // ignore: cast_nullable_to_non_nullable
-                  as int,
-        fouls: null == fouls
-            ? _value.fouls
-            : fouls // ignore: cast_nullable_to_non_nullable
-                  as int,
-        yellowCards: null == yellowCards
-            ? _value.yellowCards
-            : yellowCards // ignore: cast_nullable_to_non_nullable
-                  as int,
-        redCards: null == redCards
-            ? _value.redCards
-            : redCards // ignore: cast_nullable_to_non_nullable
-                  as int,
-        saves: null == saves
-            ? _value.saves
-            : saves // ignore: cast_nullable_to_non_nullable
-                  as int,
-      ),
-    );
-  }
+/// Adds pattern-matching-related methods to [TeamMatchStats].
+extension TeamMatchStatsPatterns on TeamMatchStats {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _TeamMatchStats value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _TeamMatchStats() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _TeamMatchStats value)  $default,){
+final _that = this;
+switch (_that) {
+case _TeamMatchStats():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _TeamMatchStats value)?  $default,){
+final _that = this;
+switch (_that) {
+case _TeamMatchStats() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String teamId,  int goals,  int shots,  int shotsOnTarget,  int possession,  double xg,  int passes,  double passAccuracy,  int duelsWon,  int offsides,  int corners,  int fouls,  int yellowCards,  int redCards,  int saves)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _TeamMatchStats() when $default != null:
+return $default(_that.teamId,_that.goals,_that.shots,_that.shotsOnTarget,_that.possession,_that.xg,_that.passes,_that.passAccuracy,_that.duelsWon,_that.offsides,_that.corners,_that.fouls,_that.yellowCards,_that.redCards,_that.saves);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String teamId,  int goals,  int shots,  int shotsOnTarget,  int possession,  double xg,  int passes,  double passAccuracy,  int duelsWon,  int offsides,  int corners,  int fouls,  int yellowCards,  int redCards,  int saves)  $default,) {final _that = this;
+switch (_that) {
+case _TeamMatchStats():
+return $default(_that.teamId,_that.goals,_that.shots,_that.shotsOnTarget,_that.possession,_that.xg,_that.passes,_that.passAccuracy,_that.duelsWon,_that.offsides,_that.corners,_that.fouls,_that.yellowCards,_that.redCards,_that.saves);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String teamId,  int goals,  int shots,  int shotsOnTarget,  int possession,  double xg,  int passes,  double passAccuracy,  int duelsWon,  int offsides,  int corners,  int fouls,  int yellowCards,  int redCards,  int saves)?  $default,) {final _that = this;
+switch (_that) {
+case _TeamMatchStats() when $default != null:
+return $default(_that.teamId,_that.goals,_that.shots,_that.shotsOnTarget,_that.possession,_that.xg,_that.passes,_that.passAccuracy,_that.duelsWon,_that.offsides,_that.corners,_that.fouls,_that.yellowCards,_that.redCards,_that.saves);case _:
+  return null;
+
+}
+}
+
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$TeamMatchStatsImpl implements _TeamMatchStats {
-  const _$TeamMatchStatsImpl({
-    required this.teamId,
-    this.goals = 0,
-    this.shots = 0,
-    this.shotsOnTarget = 0,
-    this.possession = 0,
-    this.xg = 0.0,
-    this.passes = 0,
-    this.passAccuracy = 0.0,
-    this.duelsWon = 0,
-    this.offsides = 0,
-    this.corners = 0,
-    this.fouls = 0,
-    this.yellowCards = 0,
-    this.redCards = 0,
-    this.saves = 0,
-  });
 
-  factory _$TeamMatchStatsImpl.fromJson(Map<String, dynamic> json) =>
-      _$$TeamMatchStatsImplFromJson(json);
+class _TeamMatchStats implements TeamMatchStats {
+  const _TeamMatchStats({required this.teamId, this.goals = 0, this.shots = 0, this.shotsOnTarget = 0, this.possession = 0, this.xg = 0.0, this.passes = 0, this.passAccuracy = 0.0, this.duelsWon = 0, this.offsides = 0, this.corners = 0, this.fouls = 0, this.yellowCards = 0, this.redCards = 0, this.saves = 0});
+  factory _TeamMatchStats.fromJson(Map<String, dynamic> json) => _$TeamMatchStatsFromJson(json);
 
-  @override
-  final String teamId;
-  @override
-  @JsonKey()
-  final int goals;
-  @override
-  @JsonKey()
-  final int shots;
-  @override
-  @JsonKey()
-  final int shotsOnTarget;
-  @override
-  @JsonKey()
-  final int possession;
-  @override
-  @JsonKey()
-  final double xg;
-  @override
-  @JsonKey()
-  final int passes;
-  @override
-  @JsonKey()
-  final double passAccuracy;
-  @override
-  @JsonKey()
-  final int duelsWon;
-  @override
-  @JsonKey()
-  final int offsides;
-  @override
-  @JsonKey()
-  final int corners;
-  @override
-  @JsonKey()
-  final int fouls;
-  @override
-  @JsonKey()
-  final int yellowCards;
-  @override
-  @JsonKey()
-  final int redCards;
-  @override
-  @JsonKey()
-  final int saves;
+@override final  String teamId;
+@override@JsonKey() final  int goals;
+@override@JsonKey() final  int shots;
+@override@JsonKey() final  int shotsOnTarget;
+@override@JsonKey() final  int possession;
+@override@JsonKey() final  double xg;
+@override@JsonKey() final  int passes;
+@override@JsonKey() final  double passAccuracy;
+@override@JsonKey() final  int duelsWon;
+@override@JsonKey() final  int offsides;
+@override@JsonKey() final  int corners;
+@override@JsonKey() final  int fouls;
+@override@JsonKey() final  int yellowCards;
+@override@JsonKey() final  int redCards;
+@override@JsonKey() final  int saves;
 
-  @override
-  String toString() {
-    return 'TeamMatchStats(teamId: $teamId, goals: $goals, shots: $shots, shotsOnTarget: $shotsOnTarget, possession: $possession, xg: $xg, passes: $passes, passAccuracy: $passAccuracy, duelsWon: $duelsWon, offsides: $offsides, corners: $corners, fouls: $fouls, yellowCards: $yellowCards, redCards: $redCards, saves: $saves)';
-  }
+/// Create a copy of TeamMatchStats
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$TeamMatchStatsCopyWith<_TeamMatchStats> get copyWith => __$TeamMatchStatsCopyWithImpl<_TeamMatchStats>(this, _$identity);
 
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$TeamMatchStatsImpl &&
-            (identical(other.teamId, teamId) || other.teamId == teamId) &&
-            (identical(other.goals, goals) || other.goals == goals) &&
-            (identical(other.shots, shots) || other.shots == shots) &&
-            (identical(other.shotsOnTarget, shotsOnTarget) ||
-                other.shotsOnTarget == shotsOnTarget) &&
-            (identical(other.possession, possession) ||
-                other.possession == possession) &&
-            (identical(other.xg, xg) || other.xg == xg) &&
-            (identical(other.passes, passes) || other.passes == passes) &&
-            (identical(other.passAccuracy, passAccuracy) ||
-                other.passAccuracy == passAccuracy) &&
-            (identical(other.duelsWon, duelsWon) ||
-                other.duelsWon == duelsWon) &&
-            (identical(other.offsides, offsides) ||
-                other.offsides == offsides) &&
-            (identical(other.corners, corners) || other.corners == corners) &&
-            (identical(other.fouls, fouls) || other.fouls == fouls) &&
-            (identical(other.yellowCards, yellowCards) ||
-                other.yellowCards == yellowCards) &&
-            (identical(other.redCards, redCards) ||
-                other.redCards == redCards) &&
-            (identical(other.saves, saves) || other.saves == saves));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    teamId,
-    goals,
-    shots,
-    shotsOnTarget,
-    possession,
-    xg,
-    passes,
-    passAccuracy,
-    duelsWon,
-    offsides,
-    corners,
-    fouls,
-    yellowCards,
-    redCards,
-    saves,
-  );
-
-  /// Create a copy of TeamMatchStats
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$TeamMatchStatsImplCopyWith<_$TeamMatchStatsImpl> get copyWith =>
-      __$$TeamMatchStatsImplCopyWithImpl<_$TeamMatchStatsImpl>(
-        this,
-        _$identity,
-      );
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$TeamMatchStatsImplToJson(this);
-  }
+@override
+Map<String, dynamic> toJson() {
+  return _$TeamMatchStatsToJson(this, );
 }
 
-abstract class _TeamMatchStats implements TeamMatchStats {
-  const factory _TeamMatchStats({
-    required final String teamId,
-    final int goals,
-    final int shots,
-    final int shotsOnTarget,
-    final int possession,
-    final double xg,
-    final int passes,
-    final double passAccuracy,
-    final int duelsWon,
-    final int offsides,
-    final int corners,
-    final int fouls,
-    final int yellowCards,
-    final int redCards,
-    final int saves,
-  }) = _$TeamMatchStatsImpl;
-
-  factory _TeamMatchStats.fromJson(Map<String, dynamic> json) =
-      _$TeamMatchStatsImpl.fromJson;
-
-  @override
-  String get teamId;
-  @override
-  int get goals;
-  @override
-  int get shots;
-  @override
-  int get shotsOnTarget;
-  @override
-  int get possession;
-  @override
-  double get xg;
-  @override
-  int get passes;
-  @override
-  double get passAccuracy;
-  @override
-  int get duelsWon;
-  @override
-  int get offsides;
-  @override
-  int get corners;
-  @override
-  int get fouls;
-  @override
-  int get yellowCards;
-  @override
-  int get redCards;
-  @override
-  int get saves;
-
-  /// Create a copy of TeamMatchStats
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$TeamMatchStatsImplCopyWith<_$TeamMatchStatsImpl> get copyWith =>
-      throw _privateConstructorUsedError;
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TeamMatchStats&&(identical(other.teamId, teamId) || other.teamId == teamId)&&(identical(other.goals, goals) || other.goals == goals)&&(identical(other.shots, shots) || other.shots == shots)&&(identical(other.shotsOnTarget, shotsOnTarget) || other.shotsOnTarget == shotsOnTarget)&&(identical(other.possession, possession) || other.possession == possession)&&(identical(other.xg, xg) || other.xg == xg)&&(identical(other.passes, passes) || other.passes == passes)&&(identical(other.passAccuracy, passAccuracy) || other.passAccuracy == passAccuracy)&&(identical(other.duelsWon, duelsWon) || other.duelsWon == duelsWon)&&(identical(other.offsides, offsides) || other.offsides == offsides)&&(identical(other.corners, corners) || other.corners == corners)&&(identical(other.fouls, fouls) || other.fouls == fouls)&&(identical(other.yellowCards, yellowCards) || other.yellowCards == yellowCards)&&(identical(other.redCards, redCards) || other.redCards == redCards)&&(identical(other.saves, saves) || other.saves == saves));
 }
 
-MatchTeamSnapshot _$MatchTeamSnapshotFromJson(Map<String, dynamic> json) {
-  return _MatchTeamSnapshot.fromJson(json);
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,teamId,goals,shots,shotsOnTarget,possession,xg,passes,passAccuracy,duelsWon,offsides,corners,fouls,yellowCards,redCards,saves);
+
+@override
+String toString() {
+  return 'TeamMatchStats(teamId: $teamId, goals: $goals, shots: $shots, shotsOnTarget: $shotsOnTarget, possession: $possession, xg: $xg, passes: $passes, passAccuracy: $passAccuracy, duelsWon: $duelsWon, offsides: $offsides, corners: $corners, fouls: $fouls, yellowCards: $yellowCards, redCards: $redCards, saves: $saves)';
 }
+
+
+}
+
+/// @nodoc
+abstract mixin class _$TeamMatchStatsCopyWith<$Res> implements $TeamMatchStatsCopyWith<$Res> {
+  factory _$TeamMatchStatsCopyWith(_TeamMatchStats value, $Res Function(_TeamMatchStats) _then) = __$TeamMatchStatsCopyWithImpl;
+@override @useResult
+$Res call({
+ String teamId, int goals, int shots, int shotsOnTarget, int possession, double xg, int passes, double passAccuracy, int duelsWon, int offsides, int corners, int fouls, int yellowCards, int redCards, int saves
+});
+
+
+
+
+}
+/// @nodoc
+class __$TeamMatchStatsCopyWithImpl<$Res>
+    implements _$TeamMatchStatsCopyWith<$Res> {
+  __$TeamMatchStatsCopyWithImpl(this._self, this._then);
+
+  final _TeamMatchStats _self;
+  final $Res Function(_TeamMatchStats) _then;
+
+/// Create a copy of TeamMatchStats
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? teamId = null,Object? goals = null,Object? shots = null,Object? shotsOnTarget = null,Object? possession = null,Object? xg = null,Object? passes = null,Object? passAccuracy = null,Object? duelsWon = null,Object? offsides = null,Object? corners = null,Object? fouls = null,Object? yellowCards = null,Object? redCards = null,Object? saves = null,}) {
+  return _then(_TeamMatchStats(
+teamId: null == teamId ? _self.teamId : teamId // ignore: cast_nullable_to_non_nullable
+as String,goals: null == goals ? _self.goals : goals // ignore: cast_nullable_to_non_nullable
+as int,shots: null == shots ? _self.shots : shots // ignore: cast_nullable_to_non_nullable
+as int,shotsOnTarget: null == shotsOnTarget ? _self.shotsOnTarget : shotsOnTarget // ignore: cast_nullable_to_non_nullable
+as int,possession: null == possession ? _self.possession : possession // ignore: cast_nullable_to_non_nullable
+as int,xg: null == xg ? _self.xg : xg // ignore: cast_nullable_to_non_nullable
+as double,passes: null == passes ? _self.passes : passes // ignore: cast_nullable_to_non_nullable
+as int,passAccuracy: null == passAccuracy ? _self.passAccuracy : passAccuracy // ignore: cast_nullable_to_non_nullable
+as double,duelsWon: null == duelsWon ? _self.duelsWon : duelsWon // ignore: cast_nullable_to_non_nullable
+as int,offsides: null == offsides ? _self.offsides : offsides // ignore: cast_nullable_to_non_nullable
+as int,corners: null == corners ? _self.corners : corners // ignore: cast_nullable_to_non_nullable
+as int,fouls: null == fouls ? _self.fouls : fouls // ignore: cast_nullable_to_non_nullable
+as int,yellowCards: null == yellowCards ? _self.yellowCards : yellowCards // ignore: cast_nullable_to_non_nullable
+as int,redCards: null == redCards ? _self.redCards : redCards // ignore: cast_nullable_to_non_nullable
+as int,saves: null == saves ? _self.saves : saves // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
+
 
 /// @nodoc
 mixin _$MatchTeamSnapshot {
-  String get teamId => throw _privateConstructorUsedError;
-  List<Player> get startingXi => throw _privateConstructorUsedError;
-  List<Player> get bench => throw _privateConstructorUsedError;
-  List<Position> get assignedPositions => throw _privateConstructorUsedError;
-  List<AssignedRole> get assignedRoles => throw _privateConstructorUsedError;
-  TacticsSetup get tactics => throw _privateConstructorUsedError;
-  double get chemistry => throw _privateConstructorUsedError;
-  int get atmosphere => throw _privateConstructorUsedError;
-  double get cohesionMultiplier => throw _privateConstructorUsedError;
-  TeamStaff get staff => throw _privateConstructorUsedError;
+
+ String get teamId; List<Player> get startingXi; List<Player> get bench; List<Position> get assignedPositions; List<AssignedRole> get assignedRoles; TacticsSetup get tactics; double get chemistry; int get atmosphere; double get cohesionMultiplier; TeamStaff get staff;
+/// Create a copy of MatchTeamSnapshot
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$MatchTeamSnapshotCopyWith<MatchTeamSnapshot> get copyWith => _$MatchTeamSnapshotCopyWithImpl<MatchTeamSnapshot>(this as MatchTeamSnapshot, _$identity);
 
   /// Serializes this MatchTeamSnapshot to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  Map<String, dynamic> toJson();
 
-  /// Create a copy of MatchTeamSnapshot
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $MatchTeamSnapshotCopyWith<MatchTeamSnapshot> get copyWith =>
-      throw _privateConstructorUsedError;
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MatchTeamSnapshot&&(identical(other.teamId, teamId) || other.teamId == teamId)&&const DeepCollectionEquality().equals(other.startingXi, startingXi)&&const DeepCollectionEquality().equals(other.bench, bench)&&const DeepCollectionEquality().equals(other.assignedPositions, assignedPositions)&&const DeepCollectionEquality().equals(other.assignedRoles, assignedRoles)&&(identical(other.tactics, tactics) || other.tactics == tactics)&&(identical(other.chemistry, chemistry) || other.chemistry == chemistry)&&(identical(other.atmosphere, atmosphere) || other.atmosphere == atmosphere)&&(identical(other.cohesionMultiplier, cohesionMultiplier) || other.cohesionMultiplier == cohesionMultiplier)&&(identical(other.staff, staff) || other.staff == staff));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,teamId,const DeepCollectionEquality().hash(startingXi),const DeepCollectionEquality().hash(bench),const DeepCollectionEquality().hash(assignedPositions),const DeepCollectionEquality().hash(assignedRoles),tactics,chemistry,atmosphere,cohesionMultiplier,staff);
+
+@override
+String toString() {
+  return 'MatchTeamSnapshot(teamId: $teamId, startingXi: $startingXi, bench: $bench, assignedPositions: $assignedPositions, assignedRoles: $assignedRoles, tactics: $tactics, chemistry: $chemistry, atmosphere: $atmosphere, cohesionMultiplier: $cohesionMultiplier, staff: $staff)';
+}
+
+
 }
 
 /// @nodoc
-abstract class $MatchTeamSnapshotCopyWith<$Res> {
-  factory $MatchTeamSnapshotCopyWith(
-    MatchTeamSnapshot value,
-    $Res Function(MatchTeamSnapshot) then,
-  ) = _$MatchTeamSnapshotCopyWithImpl<$Res, MatchTeamSnapshot>;
-  @useResult
-  $Res call({
-    String teamId,
-    List<Player> startingXi,
-    List<Player> bench,
-    List<Position> assignedPositions,
-    List<AssignedRole> assignedRoles,
-    TacticsSetup tactics,
-    double chemistry,
-    int atmosphere,
-    double cohesionMultiplier,
-    TeamStaff staff,
-  });
+abstract mixin class $MatchTeamSnapshotCopyWith<$Res>  {
+  factory $MatchTeamSnapshotCopyWith(MatchTeamSnapshot value, $Res Function(MatchTeamSnapshot) _then) = _$MatchTeamSnapshotCopyWithImpl;
+@useResult
+$Res call({
+ String teamId, List<Player> startingXi, List<Player> bench, List<Position> assignedPositions, List<AssignedRole> assignedRoles, TacticsSetup tactics, double chemistry, int atmosphere, double cohesionMultiplier, TeamStaff staff
+});
 
-  $TacticsSetupCopyWith<$Res> get tactics;
-  $TeamStaffCopyWith<$Res> get staff;
+
+$TacticsSetupCopyWith<$Res> get tactics;$TeamStaffCopyWith<$Res> get staff;
+
 }
-
 /// @nodoc
-class _$MatchTeamSnapshotCopyWithImpl<$Res, $Val extends MatchTeamSnapshot>
+class _$MatchTeamSnapshotCopyWithImpl<$Res>
     implements $MatchTeamSnapshotCopyWith<$Res> {
-  _$MatchTeamSnapshotCopyWithImpl(this._value, this._then);
+  _$MatchTeamSnapshotCopyWithImpl(this._self, this._then);
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final MatchTeamSnapshot _self;
+  final $Res Function(MatchTeamSnapshot) _then;
 
-  /// Create a copy of MatchTeamSnapshot
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? teamId = null,
-    Object? startingXi = null,
-    Object? bench = null,
-    Object? assignedPositions = null,
-    Object? assignedRoles = null,
-    Object? tactics = null,
-    Object? chemistry = null,
-    Object? atmosphere = null,
-    Object? cohesionMultiplier = null,
-    Object? staff = null,
-  }) {
-    return _then(
-      _value.copyWith(
-            teamId: null == teamId
-                ? _value.teamId
-                : teamId // ignore: cast_nullable_to_non_nullable
-                      as String,
-            startingXi: null == startingXi
-                ? _value.startingXi
-                : startingXi // ignore: cast_nullable_to_non_nullable
-                      as List<Player>,
-            bench: null == bench
-                ? _value.bench
-                : bench // ignore: cast_nullable_to_non_nullable
-                      as List<Player>,
-            assignedPositions: null == assignedPositions
-                ? _value.assignedPositions
-                : assignedPositions // ignore: cast_nullable_to_non_nullable
-                      as List<Position>,
-            assignedRoles: null == assignedRoles
-                ? _value.assignedRoles
-                : assignedRoles // ignore: cast_nullable_to_non_nullable
-                      as List<AssignedRole>,
-            tactics: null == tactics
-                ? _value.tactics
-                : tactics // ignore: cast_nullable_to_non_nullable
-                      as TacticsSetup,
-            chemistry: null == chemistry
-                ? _value.chemistry
-                : chemistry // ignore: cast_nullable_to_non_nullable
-                      as double,
-            atmosphere: null == atmosphere
-                ? _value.atmosphere
-                : atmosphere // ignore: cast_nullable_to_non_nullable
-                      as int,
-            cohesionMultiplier: null == cohesionMultiplier
-                ? _value.cohesionMultiplier
-                : cohesionMultiplier // ignore: cast_nullable_to_non_nullable
-                      as double,
-            staff: null == staff
-                ? _value.staff
-                : staff // ignore: cast_nullable_to_non_nullable
-                      as TeamStaff,
-          )
-          as $Val,
-    );
-  }
-
-  /// Create a copy of MatchTeamSnapshot
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $TacticsSetupCopyWith<$Res> get tactics {
-    return $TacticsSetupCopyWith<$Res>(_value.tactics, (value) {
-      return _then(_value.copyWith(tactics: value) as $Val);
-    });
-  }
-
-  /// Create a copy of MatchTeamSnapshot
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $TeamStaffCopyWith<$Res> get staff {
-    return $TeamStaffCopyWith<$Res>(_value.staff, (value) {
-      return _then(_value.copyWith(staff: value) as $Val);
-    });
-  }
+/// Create a copy of MatchTeamSnapshot
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? teamId = null,Object? startingXi = null,Object? bench = null,Object? assignedPositions = null,Object? assignedRoles = null,Object? tactics = null,Object? chemistry = null,Object? atmosphere = null,Object? cohesionMultiplier = null,Object? staff = null,}) {
+  return _then(_self.copyWith(
+teamId: null == teamId ? _self.teamId : teamId // ignore: cast_nullable_to_non_nullable
+as String,startingXi: null == startingXi ? _self.startingXi : startingXi // ignore: cast_nullable_to_non_nullable
+as List<Player>,bench: null == bench ? _self.bench : bench // ignore: cast_nullable_to_non_nullable
+as List<Player>,assignedPositions: null == assignedPositions ? _self.assignedPositions : assignedPositions // ignore: cast_nullable_to_non_nullable
+as List<Position>,assignedRoles: null == assignedRoles ? _self.assignedRoles : assignedRoles // ignore: cast_nullable_to_non_nullable
+as List<AssignedRole>,tactics: null == tactics ? _self.tactics : tactics // ignore: cast_nullable_to_non_nullable
+as TacticsSetup,chemistry: null == chemistry ? _self.chemistry : chemistry // ignore: cast_nullable_to_non_nullable
+as double,atmosphere: null == atmosphere ? _self.atmosphere : atmosphere // ignore: cast_nullable_to_non_nullable
+as int,cohesionMultiplier: null == cohesionMultiplier ? _self.cohesionMultiplier : cohesionMultiplier // ignore: cast_nullable_to_non_nullable
+as double,staff: null == staff ? _self.staff : staff // ignore: cast_nullable_to_non_nullable
+as TeamStaff,
+  ));
 }
-
-/// @nodoc
-abstract class _$$MatchTeamSnapshotImplCopyWith<$Res>
-    implements $MatchTeamSnapshotCopyWith<$Res> {
-  factory _$$MatchTeamSnapshotImplCopyWith(
-    _$MatchTeamSnapshotImpl value,
-    $Res Function(_$MatchTeamSnapshotImpl) then,
-  ) = __$$MatchTeamSnapshotImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({
-    String teamId,
-    List<Player> startingXi,
-    List<Player> bench,
-    List<Position> assignedPositions,
-    List<AssignedRole> assignedRoles,
-    TacticsSetup tactics,
-    double chemistry,
-    int atmosphere,
-    double cohesionMultiplier,
-    TeamStaff staff,
+/// Create a copy of MatchTeamSnapshot
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$TacticsSetupCopyWith<$Res> get tactics {
+  
+  return $TacticsSetupCopyWith<$Res>(_self.tactics, (value) {
+    return _then(_self.copyWith(tactics: value));
   });
-
-  @override
-  $TacticsSetupCopyWith<$Res> get tactics;
-  @override
-  $TeamStaffCopyWith<$Res> get staff;
+}/// Create a copy of MatchTeamSnapshot
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$TeamStaffCopyWith<$Res> get staff {
+  
+  return $TeamStaffCopyWith<$Res>(_self.staff, (value) {
+    return _then(_self.copyWith(staff: value));
+  });
+}
 }
 
-/// @nodoc
-class __$$MatchTeamSnapshotImplCopyWithImpl<$Res>
-    extends _$MatchTeamSnapshotCopyWithImpl<$Res, _$MatchTeamSnapshotImpl>
-    implements _$$MatchTeamSnapshotImplCopyWith<$Res> {
-  __$$MatchTeamSnapshotImplCopyWithImpl(
-    _$MatchTeamSnapshotImpl _value,
-    $Res Function(_$MatchTeamSnapshotImpl) _then,
-  ) : super(_value, _then);
 
-  /// Create a copy of MatchTeamSnapshot
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? teamId = null,
-    Object? startingXi = null,
-    Object? bench = null,
-    Object? assignedPositions = null,
-    Object? assignedRoles = null,
-    Object? tactics = null,
-    Object? chemistry = null,
-    Object? atmosphere = null,
-    Object? cohesionMultiplier = null,
-    Object? staff = null,
-  }) {
-    return _then(
-      _$MatchTeamSnapshotImpl(
-        teamId: null == teamId
-            ? _value.teamId
-            : teamId // ignore: cast_nullable_to_non_nullable
-                  as String,
-        startingXi: null == startingXi
-            ? _value._startingXi
-            : startingXi // ignore: cast_nullable_to_non_nullable
-                  as List<Player>,
-        bench: null == bench
-            ? _value._bench
-            : bench // ignore: cast_nullable_to_non_nullable
-                  as List<Player>,
-        assignedPositions: null == assignedPositions
-            ? _value._assignedPositions
-            : assignedPositions // ignore: cast_nullable_to_non_nullable
-                  as List<Position>,
-        assignedRoles: null == assignedRoles
-            ? _value._assignedRoles
-            : assignedRoles // ignore: cast_nullable_to_non_nullable
-                  as List<AssignedRole>,
-        tactics: null == tactics
-            ? _value.tactics
-            : tactics // ignore: cast_nullable_to_non_nullable
-                  as TacticsSetup,
-        chemistry: null == chemistry
-            ? _value.chemistry
-            : chemistry // ignore: cast_nullable_to_non_nullable
-                  as double,
-        atmosphere: null == atmosphere
-            ? _value.atmosphere
-            : atmosphere // ignore: cast_nullable_to_non_nullable
-                  as int,
-        cohesionMultiplier: null == cohesionMultiplier
-            ? _value.cohesionMultiplier
-            : cohesionMultiplier // ignore: cast_nullable_to_non_nullable
-                  as double,
-        staff: null == staff
-            ? _value.staff
-            : staff // ignore: cast_nullable_to_non_nullable
-                  as TeamStaff,
-      ),
-    );
-  }
+/// Adds pattern-matching-related methods to [MatchTeamSnapshot].
+extension MatchTeamSnapshotPatterns on MatchTeamSnapshot {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _MatchTeamSnapshot value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _MatchTeamSnapshot() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _MatchTeamSnapshot value)  $default,){
+final _that = this;
+switch (_that) {
+case _MatchTeamSnapshot():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _MatchTeamSnapshot value)?  $default,){
+final _that = this;
+switch (_that) {
+case _MatchTeamSnapshot() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String teamId,  List<Player> startingXi,  List<Player> bench,  List<Position> assignedPositions,  List<AssignedRole> assignedRoles,  TacticsSetup tactics,  double chemistry,  int atmosphere,  double cohesionMultiplier,  TeamStaff staff)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _MatchTeamSnapshot() when $default != null:
+return $default(_that.teamId,_that.startingXi,_that.bench,_that.assignedPositions,_that.assignedRoles,_that.tactics,_that.chemistry,_that.atmosphere,_that.cohesionMultiplier,_that.staff);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String teamId,  List<Player> startingXi,  List<Player> bench,  List<Position> assignedPositions,  List<AssignedRole> assignedRoles,  TacticsSetup tactics,  double chemistry,  int atmosphere,  double cohesionMultiplier,  TeamStaff staff)  $default,) {final _that = this;
+switch (_that) {
+case _MatchTeamSnapshot():
+return $default(_that.teamId,_that.startingXi,_that.bench,_that.assignedPositions,_that.assignedRoles,_that.tactics,_that.chemistry,_that.atmosphere,_that.cohesionMultiplier,_that.staff);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String teamId,  List<Player> startingXi,  List<Player> bench,  List<Position> assignedPositions,  List<AssignedRole> assignedRoles,  TacticsSetup tactics,  double chemistry,  int atmosphere,  double cohesionMultiplier,  TeamStaff staff)?  $default,) {final _that = this;
+switch (_that) {
+case _MatchTeamSnapshot() when $default != null:
+return $default(_that.teamId,_that.startingXi,_that.bench,_that.assignedPositions,_that.assignedRoles,_that.tactics,_that.chemistry,_that.atmosphere,_that.cohesionMultiplier,_that.staff);case _:
+  return null;
+
+}
+}
+
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$MatchTeamSnapshotImpl implements _MatchTeamSnapshot {
-  const _$MatchTeamSnapshotImpl({
-    this.teamId = '',
-    final List<Player> startingXi = const [],
-    final List<Player> bench = const [],
-    final List<Position> assignedPositions = const [],
-    final List<AssignedRole> assignedRoles = const [],
-    this.tactics = const TacticsSetup(),
-    this.chemistry = 50.0,
-    this.atmosphere = 50,
-    this.cohesionMultiplier = 1.0,
-    this.staff = const TeamStaff(),
-  }) : _startingXi = startingXi,
-       _bench = bench,
-       _assignedPositions = assignedPositions,
-       _assignedRoles = assignedRoles;
 
-  factory _$MatchTeamSnapshotImpl.fromJson(Map<String, dynamic> json) =>
-      _$$MatchTeamSnapshotImplFromJson(json);
+class _MatchTeamSnapshot implements MatchTeamSnapshot {
+  const _MatchTeamSnapshot({this.teamId = '', final  List<Player> startingXi = const [], final  List<Player> bench = const [], final  List<Position> assignedPositions = const [], final  List<AssignedRole> assignedRoles = const [], this.tactics = const TacticsSetup(), this.chemistry = 50.0, this.atmosphere = 50, this.cohesionMultiplier = 1.0, this.staff = const TeamStaff()}): _startingXi = startingXi,_bench = bench,_assignedPositions = assignedPositions,_assignedRoles = assignedRoles;
+  factory _MatchTeamSnapshot.fromJson(Map<String, dynamic> json) => _$MatchTeamSnapshotFromJson(json);
 
-  @override
-  @JsonKey()
-  final String teamId;
-  final List<Player> _startingXi;
-  @override
-  @JsonKey()
-  List<Player> get startingXi {
-    if (_startingXi is EqualUnmodifiableListView) return _startingXi;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_startingXi);
-  }
-
-  final List<Player> _bench;
-  @override
-  @JsonKey()
-  List<Player> get bench {
-    if (_bench is EqualUnmodifiableListView) return _bench;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_bench);
-  }
-
-  final List<Position> _assignedPositions;
-  @override
-  @JsonKey()
-  List<Position> get assignedPositions {
-    if (_assignedPositions is EqualUnmodifiableListView)
-      return _assignedPositions;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_assignedPositions);
-  }
-
-  final List<AssignedRole> _assignedRoles;
-  @override
-  @JsonKey()
-  List<AssignedRole> get assignedRoles {
-    if (_assignedRoles is EqualUnmodifiableListView) return _assignedRoles;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_assignedRoles);
-  }
-
-  @override
-  @JsonKey()
-  final TacticsSetup tactics;
-  @override
-  @JsonKey()
-  final double chemistry;
-  @override
-  @JsonKey()
-  final int atmosphere;
-  @override
-  @JsonKey()
-  final double cohesionMultiplier;
-  @override
-  @JsonKey()
-  final TeamStaff staff;
-
-  @override
-  String toString() {
-    return 'MatchTeamSnapshot(teamId: $teamId, startingXi: $startingXi, bench: $bench, assignedPositions: $assignedPositions, assignedRoles: $assignedRoles, tactics: $tactics, chemistry: $chemistry, atmosphere: $atmosphere, cohesionMultiplier: $cohesionMultiplier, staff: $staff)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$MatchTeamSnapshotImpl &&
-            (identical(other.teamId, teamId) || other.teamId == teamId) &&
-            const DeepCollectionEquality().equals(
-              other._startingXi,
-              _startingXi,
-            ) &&
-            const DeepCollectionEquality().equals(other._bench, _bench) &&
-            const DeepCollectionEquality().equals(
-              other._assignedPositions,
-              _assignedPositions,
-            ) &&
-            const DeepCollectionEquality().equals(
-              other._assignedRoles,
-              _assignedRoles,
-            ) &&
-            (identical(other.tactics, tactics) || other.tactics == tactics) &&
-            (identical(other.chemistry, chemistry) ||
-                other.chemistry == chemistry) &&
-            (identical(other.atmosphere, atmosphere) ||
-                other.atmosphere == atmosphere) &&
-            (identical(other.cohesionMultiplier, cohesionMultiplier) ||
-                other.cohesionMultiplier == cohesionMultiplier) &&
-            (identical(other.staff, staff) || other.staff == staff));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    teamId,
-    const DeepCollectionEquality().hash(_startingXi),
-    const DeepCollectionEquality().hash(_bench),
-    const DeepCollectionEquality().hash(_assignedPositions),
-    const DeepCollectionEquality().hash(_assignedRoles),
-    tactics,
-    chemistry,
-    atmosphere,
-    cohesionMultiplier,
-    staff,
-  );
-
-  /// Create a copy of MatchTeamSnapshot
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$MatchTeamSnapshotImplCopyWith<_$MatchTeamSnapshotImpl> get copyWith =>
-      __$$MatchTeamSnapshotImplCopyWithImpl<_$MatchTeamSnapshotImpl>(
-        this,
-        _$identity,
-      );
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$MatchTeamSnapshotImplToJson(this);
-  }
+@override@JsonKey() final  String teamId;
+ final  List<Player> _startingXi;
+@override@JsonKey() List<Player> get startingXi {
+  if (_startingXi is EqualUnmodifiableListView) return _startingXi;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_startingXi);
 }
 
-abstract class _MatchTeamSnapshot implements MatchTeamSnapshot {
-  const factory _MatchTeamSnapshot({
-    final String teamId,
-    final List<Player> startingXi,
-    final List<Player> bench,
-    final List<Position> assignedPositions,
-    final List<AssignedRole> assignedRoles,
-    final TacticsSetup tactics,
-    final double chemistry,
-    final int atmosphere,
-    final double cohesionMultiplier,
-    final TeamStaff staff,
-  }) = _$MatchTeamSnapshotImpl;
-
-  factory _MatchTeamSnapshot.fromJson(Map<String, dynamic> json) =
-      _$MatchTeamSnapshotImpl.fromJson;
-
-  @override
-  String get teamId;
-  @override
-  List<Player> get startingXi;
-  @override
-  List<Player> get bench;
-  @override
-  List<Position> get assignedPositions;
-  @override
-  List<AssignedRole> get assignedRoles;
-  @override
-  TacticsSetup get tactics;
-  @override
-  double get chemistry;
-  @override
-  int get atmosphere;
-  @override
-  double get cohesionMultiplier;
-  @override
-  TeamStaff get staff;
-
-  /// Create a copy of MatchTeamSnapshot
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$MatchTeamSnapshotImplCopyWith<_$MatchTeamSnapshotImpl> get copyWith =>
-      throw _privateConstructorUsedError;
+ final  List<Player> _bench;
+@override@JsonKey() List<Player> get bench {
+  if (_bench is EqualUnmodifiableListView) return _bench;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_bench);
 }
 
-MatchResult _$MatchResultFromJson(Map<String, dynamic> json) {
-  return _MatchResult.fromJson(json);
+ final  List<Position> _assignedPositions;
+@override@JsonKey() List<Position> get assignedPositions {
+  if (_assignedPositions is EqualUnmodifiableListView) return _assignedPositions;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_assignedPositions);
 }
+
+ final  List<AssignedRole> _assignedRoles;
+@override@JsonKey() List<AssignedRole> get assignedRoles {
+  if (_assignedRoles is EqualUnmodifiableListView) return _assignedRoles;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_assignedRoles);
+}
+
+@override@JsonKey() final  TacticsSetup tactics;
+@override@JsonKey() final  double chemistry;
+@override@JsonKey() final  int atmosphere;
+@override@JsonKey() final  double cohesionMultiplier;
+@override@JsonKey() final  TeamStaff staff;
+
+/// Create a copy of MatchTeamSnapshot
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$MatchTeamSnapshotCopyWith<_MatchTeamSnapshot> get copyWith => __$MatchTeamSnapshotCopyWithImpl<_MatchTeamSnapshot>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$MatchTeamSnapshotToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MatchTeamSnapshot&&(identical(other.teamId, teamId) || other.teamId == teamId)&&const DeepCollectionEquality().equals(other._startingXi, _startingXi)&&const DeepCollectionEquality().equals(other._bench, _bench)&&const DeepCollectionEquality().equals(other._assignedPositions, _assignedPositions)&&const DeepCollectionEquality().equals(other._assignedRoles, _assignedRoles)&&(identical(other.tactics, tactics) || other.tactics == tactics)&&(identical(other.chemistry, chemistry) || other.chemistry == chemistry)&&(identical(other.atmosphere, atmosphere) || other.atmosphere == atmosphere)&&(identical(other.cohesionMultiplier, cohesionMultiplier) || other.cohesionMultiplier == cohesionMultiplier)&&(identical(other.staff, staff) || other.staff == staff));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,teamId,const DeepCollectionEquality().hash(_startingXi),const DeepCollectionEquality().hash(_bench),const DeepCollectionEquality().hash(_assignedPositions),const DeepCollectionEquality().hash(_assignedRoles),tactics,chemistry,atmosphere,cohesionMultiplier,staff);
+
+@override
+String toString() {
+  return 'MatchTeamSnapshot(teamId: $teamId, startingXi: $startingXi, bench: $bench, assignedPositions: $assignedPositions, assignedRoles: $assignedRoles, tactics: $tactics, chemistry: $chemistry, atmosphere: $atmosphere, cohesionMultiplier: $cohesionMultiplier, staff: $staff)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$MatchTeamSnapshotCopyWith<$Res> implements $MatchTeamSnapshotCopyWith<$Res> {
+  factory _$MatchTeamSnapshotCopyWith(_MatchTeamSnapshot value, $Res Function(_MatchTeamSnapshot) _then) = __$MatchTeamSnapshotCopyWithImpl;
+@override @useResult
+$Res call({
+ String teamId, List<Player> startingXi, List<Player> bench, List<Position> assignedPositions, List<AssignedRole> assignedRoles, TacticsSetup tactics, double chemistry, int atmosphere, double cohesionMultiplier, TeamStaff staff
+});
+
+
+@override $TacticsSetupCopyWith<$Res> get tactics;@override $TeamStaffCopyWith<$Res> get staff;
+
+}
+/// @nodoc
+class __$MatchTeamSnapshotCopyWithImpl<$Res>
+    implements _$MatchTeamSnapshotCopyWith<$Res> {
+  __$MatchTeamSnapshotCopyWithImpl(this._self, this._then);
+
+  final _MatchTeamSnapshot _self;
+  final $Res Function(_MatchTeamSnapshot) _then;
+
+/// Create a copy of MatchTeamSnapshot
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? teamId = null,Object? startingXi = null,Object? bench = null,Object? assignedPositions = null,Object? assignedRoles = null,Object? tactics = null,Object? chemistry = null,Object? atmosphere = null,Object? cohesionMultiplier = null,Object? staff = null,}) {
+  return _then(_MatchTeamSnapshot(
+teamId: null == teamId ? _self.teamId : teamId // ignore: cast_nullable_to_non_nullable
+as String,startingXi: null == startingXi ? _self._startingXi : startingXi // ignore: cast_nullable_to_non_nullable
+as List<Player>,bench: null == bench ? _self._bench : bench // ignore: cast_nullable_to_non_nullable
+as List<Player>,assignedPositions: null == assignedPositions ? _self._assignedPositions : assignedPositions // ignore: cast_nullable_to_non_nullable
+as List<Position>,assignedRoles: null == assignedRoles ? _self._assignedRoles : assignedRoles // ignore: cast_nullable_to_non_nullable
+as List<AssignedRole>,tactics: null == tactics ? _self.tactics : tactics // ignore: cast_nullable_to_non_nullable
+as TacticsSetup,chemistry: null == chemistry ? _self.chemistry : chemistry // ignore: cast_nullable_to_non_nullable
+as double,atmosphere: null == atmosphere ? _self.atmosphere : atmosphere // ignore: cast_nullable_to_non_nullable
+as int,cohesionMultiplier: null == cohesionMultiplier ? _self.cohesionMultiplier : cohesionMultiplier // ignore: cast_nullable_to_non_nullable
+as double,staff: null == staff ? _self.staff : staff // ignore: cast_nullable_to_non_nullable
+as TeamStaff,
+  ));
+}
+
+/// Create a copy of MatchTeamSnapshot
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$TacticsSetupCopyWith<$Res> get tactics {
+  
+  return $TacticsSetupCopyWith<$Res>(_self.tactics, (value) {
+    return _then(_self.copyWith(tactics: value));
+  });
+}/// Create a copy of MatchTeamSnapshot
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$TeamStaffCopyWith<$Res> get staff {
+  
+  return $TeamStaffCopyWith<$Res>(_self.staff, (value) {
+    return _then(_self.copyWith(staff: value));
+  });
+}
+}
+
 
 /// @nodoc
 mixin _$MatchResult {
-  String get homeTeamId => throw _privateConstructorUsedError;
-  String get awayTeamId => throw _privateConstructorUsedError;
-  int get homeGoals => throw _privateConstructorUsedError;
-  int get awayGoals => throw _privateConstructorUsedError;
-  TeamMatchStats get homeStats => throw _privateConstructorUsedError;
-  TeamMatchStats get awayStats => throw _privateConstructorUsedError;
-  MatchStatus get status => throw _privateConstructorUsedError;
-  String? get reasonCode => throw _privateConstructorUsedError;
-  List<String> get violatingTeamIds => throw _privateConstructorUsedError;
-  bool get isWalkover => throw _privateConstructorUsedError;
-  bool get noGkPenalty => throw _privateConstructorUsedError;
-  List<String> get noGkPenaltyTeamIds => throw _privateConstructorUsedError;
-  MatchContext get context => throw _privateConstructorUsedError;
-  TacticsSetup get homeTactics => throw _privateConstructorUsedError;
-  TacticsSetup get awayTactics => throw _privateConstructorUsedError;
-  List<Player> get homeLineup => throw _privateConstructorUsedError;
-  List<Player> get awayLineup => throw _privateConstructorUsedError;
-  List<Position> get homeLineupPositions => throw _privateConstructorUsedError;
-  List<Position> get awayLineupPositions => throw _privateConstructorUsedError;
-  MatchTeamSnapshot get homeSnapshot => throw _privateConstructorUsedError;
-  MatchTeamSnapshot get awaySnapshot => throw _privateConstructorUsedError;
-  List<PlayerMatchStats> get playerStats => throw _privateConstructorUsedError;
-  List<MatchEvent> get events => throw _privateConstructorUsedError;
-  List<MatchInjury> get injuries => throw _privateConstructorUsedError;
-  List<MatchDiscipline> get disciplines => throw _privateConstructorUsedError;
-  String? get manOfTheMatchPlayerId => throw _privateConstructorUsedError;
-  String? get inspiredPerformancePlayerId => throw _privateConstructorUsedError;
-  int get matchEndMinute => throw _privateConstructorUsedError;
-  int get stoppageTime => throw _privateConstructorUsedError;
+
+ String get homeTeamId; String get awayTeamId; int get homeGoals; int get awayGoals; TeamMatchStats get homeStats; TeamMatchStats get awayStats; MatchStatus get status; String? get reasonCode; List<String> get violatingTeamIds; bool get isWalkover; bool get noGkPenalty; List<String> get noGkPenaltyTeamIds; MatchContext get context; TacticsSetup get homeTactics; TacticsSetup get awayTactics; List<Player> get homeLineup; List<Player> get awayLineup; List<Position> get homeLineupPositions; List<Position> get awayLineupPositions; MatchTeamSnapshot get homeSnapshot; MatchTeamSnapshot get awaySnapshot; List<PlayerMatchStats> get playerStats; List<MatchEvent> get events; List<MatchInjury> get injuries; List<MatchDiscipline> get disciplines; String? get manOfTheMatchPlayerId; String? get inspiredPerformancePlayerId; int get matchEndMinute; int get stoppageTime;
+/// Create a copy of MatchResult
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$MatchResultCopyWith<MatchResult> get copyWith => _$MatchResultCopyWithImpl<MatchResult>(this as MatchResult, _$identity);
 
   /// Serializes this MatchResult to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  Map<String, dynamic> toJson();
 
-  /// Create a copy of MatchResult
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $MatchResultCopyWith<MatchResult> get copyWith =>
-      throw _privateConstructorUsedError;
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MatchResult&&(identical(other.homeTeamId, homeTeamId) || other.homeTeamId == homeTeamId)&&(identical(other.awayTeamId, awayTeamId) || other.awayTeamId == awayTeamId)&&(identical(other.homeGoals, homeGoals) || other.homeGoals == homeGoals)&&(identical(other.awayGoals, awayGoals) || other.awayGoals == awayGoals)&&(identical(other.homeStats, homeStats) || other.homeStats == homeStats)&&(identical(other.awayStats, awayStats) || other.awayStats == awayStats)&&(identical(other.status, status) || other.status == status)&&(identical(other.reasonCode, reasonCode) || other.reasonCode == reasonCode)&&const DeepCollectionEquality().equals(other.violatingTeamIds, violatingTeamIds)&&(identical(other.isWalkover, isWalkover) || other.isWalkover == isWalkover)&&(identical(other.noGkPenalty, noGkPenalty) || other.noGkPenalty == noGkPenalty)&&const DeepCollectionEquality().equals(other.noGkPenaltyTeamIds, noGkPenaltyTeamIds)&&(identical(other.context, context) || other.context == context)&&(identical(other.homeTactics, homeTactics) || other.homeTactics == homeTactics)&&(identical(other.awayTactics, awayTactics) || other.awayTactics == awayTactics)&&const DeepCollectionEquality().equals(other.homeLineup, homeLineup)&&const DeepCollectionEquality().equals(other.awayLineup, awayLineup)&&const DeepCollectionEquality().equals(other.homeLineupPositions, homeLineupPositions)&&const DeepCollectionEquality().equals(other.awayLineupPositions, awayLineupPositions)&&(identical(other.homeSnapshot, homeSnapshot) || other.homeSnapshot == homeSnapshot)&&(identical(other.awaySnapshot, awaySnapshot) || other.awaySnapshot == awaySnapshot)&&const DeepCollectionEquality().equals(other.playerStats, playerStats)&&const DeepCollectionEquality().equals(other.events, events)&&const DeepCollectionEquality().equals(other.injuries, injuries)&&const DeepCollectionEquality().equals(other.disciplines, disciplines)&&(identical(other.manOfTheMatchPlayerId, manOfTheMatchPlayerId) || other.manOfTheMatchPlayerId == manOfTheMatchPlayerId)&&(identical(other.inspiredPerformancePlayerId, inspiredPerformancePlayerId) || other.inspiredPerformancePlayerId == inspiredPerformancePlayerId)&&(identical(other.matchEndMinute, matchEndMinute) || other.matchEndMinute == matchEndMinute)&&(identical(other.stoppageTime, stoppageTime) || other.stoppageTime == stoppageTime));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hashAll([runtimeType,homeTeamId,awayTeamId,homeGoals,awayGoals,homeStats,awayStats,status,reasonCode,const DeepCollectionEquality().hash(violatingTeamIds),isWalkover,noGkPenalty,const DeepCollectionEquality().hash(noGkPenaltyTeamIds),context,homeTactics,awayTactics,const DeepCollectionEquality().hash(homeLineup),const DeepCollectionEquality().hash(awayLineup),const DeepCollectionEquality().hash(homeLineupPositions),const DeepCollectionEquality().hash(awayLineupPositions),homeSnapshot,awaySnapshot,const DeepCollectionEquality().hash(playerStats),const DeepCollectionEquality().hash(events),const DeepCollectionEquality().hash(injuries),const DeepCollectionEquality().hash(disciplines),manOfTheMatchPlayerId,inspiredPerformancePlayerId,matchEndMinute,stoppageTime]);
+
+@override
+String toString() {
+  return 'MatchResult(homeTeamId: $homeTeamId, awayTeamId: $awayTeamId, homeGoals: $homeGoals, awayGoals: $awayGoals, homeStats: $homeStats, awayStats: $awayStats, status: $status, reasonCode: $reasonCode, violatingTeamIds: $violatingTeamIds, isWalkover: $isWalkover, noGkPenalty: $noGkPenalty, noGkPenaltyTeamIds: $noGkPenaltyTeamIds, context: $context, homeTactics: $homeTactics, awayTactics: $awayTactics, homeLineup: $homeLineup, awayLineup: $awayLineup, homeLineupPositions: $homeLineupPositions, awayLineupPositions: $awayLineupPositions, homeSnapshot: $homeSnapshot, awaySnapshot: $awaySnapshot, playerStats: $playerStats, events: $events, injuries: $injuries, disciplines: $disciplines, manOfTheMatchPlayerId: $manOfTheMatchPlayerId, inspiredPerformancePlayerId: $inspiredPerformancePlayerId, matchEndMinute: $matchEndMinute, stoppageTime: $stoppageTime)';
+}
+
+
 }
 
 /// @nodoc
-abstract class $MatchResultCopyWith<$Res> {
-  factory $MatchResultCopyWith(
-    MatchResult value,
-    $Res Function(MatchResult) then,
-  ) = _$MatchResultCopyWithImpl<$Res, MatchResult>;
-  @useResult
-  $Res call({
-    String homeTeamId,
-    String awayTeamId,
-    int homeGoals,
-    int awayGoals,
-    TeamMatchStats homeStats,
-    TeamMatchStats awayStats,
-    MatchStatus status,
-    String? reasonCode,
-    List<String> violatingTeamIds,
-    bool isWalkover,
-    bool noGkPenalty,
-    List<String> noGkPenaltyTeamIds,
-    MatchContext context,
-    TacticsSetup homeTactics,
-    TacticsSetup awayTactics,
-    List<Player> homeLineup,
-    List<Player> awayLineup,
-    List<Position> homeLineupPositions,
-    List<Position> awayLineupPositions,
-    MatchTeamSnapshot homeSnapshot,
-    MatchTeamSnapshot awaySnapshot,
-    List<PlayerMatchStats> playerStats,
-    List<MatchEvent> events,
-    List<MatchInjury> injuries,
-    List<MatchDiscipline> disciplines,
-    String? manOfTheMatchPlayerId,
-    String? inspiredPerformancePlayerId,
-    int matchEndMinute,
-    int stoppageTime,
-  });
+abstract mixin class $MatchResultCopyWith<$Res>  {
+  factory $MatchResultCopyWith(MatchResult value, $Res Function(MatchResult) _then) = _$MatchResultCopyWithImpl;
+@useResult
+$Res call({
+ String homeTeamId, String awayTeamId, int homeGoals, int awayGoals, TeamMatchStats homeStats, TeamMatchStats awayStats, MatchStatus status, String? reasonCode, List<String> violatingTeamIds, bool isWalkover, bool noGkPenalty, List<String> noGkPenaltyTeamIds, MatchContext context, TacticsSetup homeTactics, TacticsSetup awayTactics, List<Player> homeLineup, List<Player> awayLineup, List<Position> homeLineupPositions, List<Position> awayLineupPositions, MatchTeamSnapshot homeSnapshot, MatchTeamSnapshot awaySnapshot, List<PlayerMatchStats> playerStats, List<MatchEvent> events, List<MatchInjury> injuries, List<MatchDiscipline> disciplines, String? manOfTheMatchPlayerId, String? inspiredPerformancePlayerId, int matchEndMinute, int stoppageTime
+});
 
-  $TeamMatchStatsCopyWith<$Res> get homeStats;
-  $TeamMatchStatsCopyWith<$Res> get awayStats;
-  $MatchContextCopyWith<$Res> get context;
-  $TacticsSetupCopyWith<$Res> get homeTactics;
-  $TacticsSetupCopyWith<$Res> get awayTactics;
-  $MatchTeamSnapshotCopyWith<$Res> get homeSnapshot;
-  $MatchTeamSnapshotCopyWith<$Res> get awaySnapshot;
+
+$TeamMatchStatsCopyWith<$Res> get homeStats;$TeamMatchStatsCopyWith<$Res> get awayStats;$MatchContextCopyWith<$Res> get context;$TacticsSetupCopyWith<$Res> get homeTactics;$TacticsSetupCopyWith<$Res> get awayTactics;$MatchTeamSnapshotCopyWith<$Res> get homeSnapshot;$MatchTeamSnapshotCopyWith<$Res> get awaySnapshot;
+
 }
-
 /// @nodoc
-class _$MatchResultCopyWithImpl<$Res, $Val extends MatchResult>
+class _$MatchResultCopyWithImpl<$Res>
     implements $MatchResultCopyWith<$Res> {
-  _$MatchResultCopyWithImpl(this._value, this._then);
+  _$MatchResultCopyWithImpl(this._self, this._then);
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final MatchResult _self;
+  final $Res Function(MatchResult) _then;
 
-  /// Create a copy of MatchResult
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? homeTeamId = null,
-    Object? awayTeamId = null,
-    Object? homeGoals = null,
-    Object? awayGoals = null,
-    Object? homeStats = null,
-    Object? awayStats = null,
-    Object? status = null,
-    Object? reasonCode = freezed,
-    Object? violatingTeamIds = null,
-    Object? isWalkover = null,
-    Object? noGkPenalty = null,
-    Object? noGkPenaltyTeamIds = null,
-    Object? context = null,
-    Object? homeTactics = null,
-    Object? awayTactics = null,
-    Object? homeLineup = null,
-    Object? awayLineup = null,
-    Object? homeLineupPositions = null,
-    Object? awayLineupPositions = null,
-    Object? homeSnapshot = null,
-    Object? awaySnapshot = null,
-    Object? playerStats = null,
-    Object? events = null,
-    Object? injuries = null,
-    Object? disciplines = null,
-    Object? manOfTheMatchPlayerId = freezed,
-    Object? inspiredPerformancePlayerId = freezed,
-    Object? matchEndMinute = null,
-    Object? stoppageTime = null,
-  }) {
-    return _then(
-      _value.copyWith(
-            homeTeamId: null == homeTeamId
-                ? _value.homeTeamId
-                : homeTeamId // ignore: cast_nullable_to_non_nullable
-                      as String,
-            awayTeamId: null == awayTeamId
-                ? _value.awayTeamId
-                : awayTeamId // ignore: cast_nullable_to_non_nullable
-                      as String,
-            homeGoals: null == homeGoals
-                ? _value.homeGoals
-                : homeGoals // ignore: cast_nullable_to_non_nullable
-                      as int,
-            awayGoals: null == awayGoals
-                ? _value.awayGoals
-                : awayGoals // ignore: cast_nullable_to_non_nullable
-                      as int,
-            homeStats: null == homeStats
-                ? _value.homeStats
-                : homeStats // ignore: cast_nullable_to_non_nullable
-                      as TeamMatchStats,
-            awayStats: null == awayStats
-                ? _value.awayStats
-                : awayStats // ignore: cast_nullable_to_non_nullable
-                      as TeamMatchStats,
-            status: null == status
-                ? _value.status
-                : status // ignore: cast_nullable_to_non_nullable
-                      as MatchStatus,
-            reasonCode: freezed == reasonCode
-                ? _value.reasonCode
-                : reasonCode // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            violatingTeamIds: null == violatingTeamIds
-                ? _value.violatingTeamIds
-                : violatingTeamIds // ignore: cast_nullable_to_non_nullable
-                      as List<String>,
-            isWalkover: null == isWalkover
-                ? _value.isWalkover
-                : isWalkover // ignore: cast_nullable_to_non_nullable
-                      as bool,
-            noGkPenalty: null == noGkPenalty
-                ? _value.noGkPenalty
-                : noGkPenalty // ignore: cast_nullable_to_non_nullable
-                      as bool,
-            noGkPenaltyTeamIds: null == noGkPenaltyTeamIds
-                ? _value.noGkPenaltyTeamIds
-                : noGkPenaltyTeamIds // ignore: cast_nullable_to_non_nullable
-                      as List<String>,
-            context: null == context
-                ? _value.context
-                : context // ignore: cast_nullable_to_non_nullable
-                      as MatchContext,
-            homeTactics: null == homeTactics
-                ? _value.homeTactics
-                : homeTactics // ignore: cast_nullable_to_non_nullable
-                      as TacticsSetup,
-            awayTactics: null == awayTactics
-                ? _value.awayTactics
-                : awayTactics // ignore: cast_nullable_to_non_nullable
-                      as TacticsSetup,
-            homeLineup: null == homeLineup
-                ? _value.homeLineup
-                : homeLineup // ignore: cast_nullable_to_non_nullable
-                      as List<Player>,
-            awayLineup: null == awayLineup
-                ? _value.awayLineup
-                : awayLineup // ignore: cast_nullable_to_non_nullable
-                      as List<Player>,
-            homeLineupPositions: null == homeLineupPositions
-                ? _value.homeLineupPositions
-                : homeLineupPositions // ignore: cast_nullable_to_non_nullable
-                      as List<Position>,
-            awayLineupPositions: null == awayLineupPositions
-                ? _value.awayLineupPositions
-                : awayLineupPositions // ignore: cast_nullable_to_non_nullable
-                      as List<Position>,
-            homeSnapshot: null == homeSnapshot
-                ? _value.homeSnapshot
-                : homeSnapshot // ignore: cast_nullable_to_non_nullable
-                      as MatchTeamSnapshot,
-            awaySnapshot: null == awaySnapshot
-                ? _value.awaySnapshot
-                : awaySnapshot // ignore: cast_nullable_to_non_nullable
-                      as MatchTeamSnapshot,
-            playerStats: null == playerStats
-                ? _value.playerStats
-                : playerStats // ignore: cast_nullable_to_non_nullable
-                      as List<PlayerMatchStats>,
-            events: null == events
-                ? _value.events
-                : events // ignore: cast_nullable_to_non_nullable
-                      as List<MatchEvent>,
-            injuries: null == injuries
-                ? _value.injuries
-                : injuries // ignore: cast_nullable_to_non_nullable
-                      as List<MatchInjury>,
-            disciplines: null == disciplines
-                ? _value.disciplines
-                : disciplines // ignore: cast_nullable_to_non_nullable
-                      as List<MatchDiscipline>,
-            manOfTheMatchPlayerId: freezed == manOfTheMatchPlayerId
-                ? _value.manOfTheMatchPlayerId
-                : manOfTheMatchPlayerId // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            inspiredPerformancePlayerId: freezed == inspiredPerformancePlayerId
-                ? _value.inspiredPerformancePlayerId
-                : inspiredPerformancePlayerId // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            matchEndMinute: null == matchEndMinute
-                ? _value.matchEndMinute
-                : matchEndMinute // ignore: cast_nullable_to_non_nullable
-                      as int,
-            stoppageTime: null == stoppageTime
-                ? _value.stoppageTime
-                : stoppageTime // ignore: cast_nullable_to_non_nullable
-                      as int,
-          )
-          as $Val,
-    );
-  }
-
-  /// Create a copy of MatchResult
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $TeamMatchStatsCopyWith<$Res> get homeStats {
-    return $TeamMatchStatsCopyWith<$Res>(_value.homeStats, (value) {
-      return _then(_value.copyWith(homeStats: value) as $Val);
-    });
-  }
-
-  /// Create a copy of MatchResult
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $TeamMatchStatsCopyWith<$Res> get awayStats {
-    return $TeamMatchStatsCopyWith<$Res>(_value.awayStats, (value) {
-      return _then(_value.copyWith(awayStats: value) as $Val);
-    });
-  }
-
-  /// Create a copy of MatchResult
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $MatchContextCopyWith<$Res> get context {
-    return $MatchContextCopyWith<$Res>(_value.context, (value) {
-      return _then(_value.copyWith(context: value) as $Val);
-    });
-  }
-
-  /// Create a copy of MatchResult
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $TacticsSetupCopyWith<$Res> get homeTactics {
-    return $TacticsSetupCopyWith<$Res>(_value.homeTactics, (value) {
-      return _then(_value.copyWith(homeTactics: value) as $Val);
-    });
-  }
-
-  /// Create a copy of MatchResult
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $TacticsSetupCopyWith<$Res> get awayTactics {
-    return $TacticsSetupCopyWith<$Res>(_value.awayTactics, (value) {
-      return _then(_value.copyWith(awayTactics: value) as $Val);
-    });
-  }
-
-  /// Create a copy of MatchResult
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $MatchTeamSnapshotCopyWith<$Res> get homeSnapshot {
-    return $MatchTeamSnapshotCopyWith<$Res>(_value.homeSnapshot, (value) {
-      return _then(_value.copyWith(homeSnapshot: value) as $Val);
-    });
-  }
-
-  /// Create a copy of MatchResult
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $MatchTeamSnapshotCopyWith<$Res> get awaySnapshot {
-    return $MatchTeamSnapshotCopyWith<$Res>(_value.awaySnapshot, (value) {
-      return _then(_value.copyWith(awaySnapshot: value) as $Val);
-    });
-  }
+/// Create a copy of MatchResult
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? homeTeamId = null,Object? awayTeamId = null,Object? homeGoals = null,Object? awayGoals = null,Object? homeStats = null,Object? awayStats = null,Object? status = null,Object? reasonCode = freezed,Object? violatingTeamIds = null,Object? isWalkover = null,Object? noGkPenalty = null,Object? noGkPenaltyTeamIds = null,Object? context = null,Object? homeTactics = null,Object? awayTactics = null,Object? homeLineup = null,Object? awayLineup = null,Object? homeLineupPositions = null,Object? awayLineupPositions = null,Object? homeSnapshot = null,Object? awaySnapshot = null,Object? playerStats = null,Object? events = null,Object? injuries = null,Object? disciplines = null,Object? manOfTheMatchPlayerId = freezed,Object? inspiredPerformancePlayerId = freezed,Object? matchEndMinute = null,Object? stoppageTime = null,}) {
+  return _then(_self.copyWith(
+homeTeamId: null == homeTeamId ? _self.homeTeamId : homeTeamId // ignore: cast_nullable_to_non_nullable
+as String,awayTeamId: null == awayTeamId ? _self.awayTeamId : awayTeamId // ignore: cast_nullable_to_non_nullable
+as String,homeGoals: null == homeGoals ? _self.homeGoals : homeGoals // ignore: cast_nullable_to_non_nullable
+as int,awayGoals: null == awayGoals ? _self.awayGoals : awayGoals // ignore: cast_nullable_to_non_nullable
+as int,homeStats: null == homeStats ? _self.homeStats : homeStats // ignore: cast_nullable_to_non_nullable
+as TeamMatchStats,awayStats: null == awayStats ? _self.awayStats : awayStats // ignore: cast_nullable_to_non_nullable
+as TeamMatchStats,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as MatchStatus,reasonCode: freezed == reasonCode ? _self.reasonCode : reasonCode // ignore: cast_nullable_to_non_nullable
+as String?,violatingTeamIds: null == violatingTeamIds ? _self.violatingTeamIds : violatingTeamIds // ignore: cast_nullable_to_non_nullable
+as List<String>,isWalkover: null == isWalkover ? _self.isWalkover : isWalkover // ignore: cast_nullable_to_non_nullable
+as bool,noGkPenalty: null == noGkPenalty ? _self.noGkPenalty : noGkPenalty // ignore: cast_nullable_to_non_nullable
+as bool,noGkPenaltyTeamIds: null == noGkPenaltyTeamIds ? _self.noGkPenaltyTeamIds : noGkPenaltyTeamIds // ignore: cast_nullable_to_non_nullable
+as List<String>,context: null == context ? _self.context : context // ignore: cast_nullable_to_non_nullable
+as MatchContext,homeTactics: null == homeTactics ? _self.homeTactics : homeTactics // ignore: cast_nullable_to_non_nullable
+as TacticsSetup,awayTactics: null == awayTactics ? _self.awayTactics : awayTactics // ignore: cast_nullable_to_non_nullable
+as TacticsSetup,homeLineup: null == homeLineup ? _self.homeLineup : homeLineup // ignore: cast_nullable_to_non_nullable
+as List<Player>,awayLineup: null == awayLineup ? _self.awayLineup : awayLineup // ignore: cast_nullable_to_non_nullable
+as List<Player>,homeLineupPositions: null == homeLineupPositions ? _self.homeLineupPositions : homeLineupPositions // ignore: cast_nullable_to_non_nullable
+as List<Position>,awayLineupPositions: null == awayLineupPositions ? _self.awayLineupPositions : awayLineupPositions // ignore: cast_nullable_to_non_nullable
+as List<Position>,homeSnapshot: null == homeSnapshot ? _self.homeSnapshot : homeSnapshot // ignore: cast_nullable_to_non_nullable
+as MatchTeamSnapshot,awaySnapshot: null == awaySnapshot ? _self.awaySnapshot : awaySnapshot // ignore: cast_nullable_to_non_nullable
+as MatchTeamSnapshot,playerStats: null == playerStats ? _self.playerStats : playerStats // ignore: cast_nullable_to_non_nullable
+as List<PlayerMatchStats>,events: null == events ? _self.events : events // ignore: cast_nullable_to_non_nullable
+as List<MatchEvent>,injuries: null == injuries ? _self.injuries : injuries // ignore: cast_nullable_to_non_nullable
+as List<MatchInjury>,disciplines: null == disciplines ? _self.disciplines : disciplines // ignore: cast_nullable_to_non_nullable
+as List<MatchDiscipline>,manOfTheMatchPlayerId: freezed == manOfTheMatchPlayerId ? _self.manOfTheMatchPlayerId : manOfTheMatchPlayerId // ignore: cast_nullable_to_non_nullable
+as String?,inspiredPerformancePlayerId: freezed == inspiredPerformancePlayerId ? _self.inspiredPerformancePlayerId : inspiredPerformancePlayerId // ignore: cast_nullable_to_non_nullable
+as String?,matchEndMinute: null == matchEndMinute ? _self.matchEndMinute : matchEndMinute // ignore: cast_nullable_to_non_nullable
+as int,stoppageTime: null == stoppageTime ? _self.stoppageTime : stoppageTime // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
 }
-
-/// @nodoc
-abstract class _$$MatchResultImplCopyWith<$Res>
-    implements $MatchResultCopyWith<$Res> {
-  factory _$$MatchResultImplCopyWith(
-    _$MatchResultImpl value,
-    $Res Function(_$MatchResultImpl) then,
-  ) = __$$MatchResultImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({
-    String homeTeamId,
-    String awayTeamId,
-    int homeGoals,
-    int awayGoals,
-    TeamMatchStats homeStats,
-    TeamMatchStats awayStats,
-    MatchStatus status,
-    String? reasonCode,
-    List<String> violatingTeamIds,
-    bool isWalkover,
-    bool noGkPenalty,
-    List<String> noGkPenaltyTeamIds,
-    MatchContext context,
-    TacticsSetup homeTactics,
-    TacticsSetup awayTactics,
-    List<Player> homeLineup,
-    List<Player> awayLineup,
-    List<Position> homeLineupPositions,
-    List<Position> awayLineupPositions,
-    MatchTeamSnapshot homeSnapshot,
-    MatchTeamSnapshot awaySnapshot,
-    List<PlayerMatchStats> playerStats,
-    List<MatchEvent> events,
-    List<MatchInjury> injuries,
-    List<MatchDiscipline> disciplines,
-    String? manOfTheMatchPlayerId,
-    String? inspiredPerformancePlayerId,
-    int matchEndMinute,
-    int stoppageTime,
+/// Create a copy of MatchResult
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$TeamMatchStatsCopyWith<$Res> get homeStats {
+  
+  return $TeamMatchStatsCopyWith<$Res>(_self.homeStats, (value) {
+    return _then(_self.copyWith(homeStats: value));
   });
-
-  @override
-  $TeamMatchStatsCopyWith<$Res> get homeStats;
-  @override
-  $TeamMatchStatsCopyWith<$Res> get awayStats;
-  @override
-  $MatchContextCopyWith<$Res> get context;
-  @override
-  $TacticsSetupCopyWith<$Res> get homeTactics;
-  @override
-  $TacticsSetupCopyWith<$Res> get awayTactics;
-  @override
-  $MatchTeamSnapshotCopyWith<$Res> get homeSnapshot;
-  @override
-  $MatchTeamSnapshotCopyWith<$Res> get awaySnapshot;
+}/// Create a copy of MatchResult
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$TeamMatchStatsCopyWith<$Res> get awayStats {
+  
+  return $TeamMatchStatsCopyWith<$Res>(_self.awayStats, (value) {
+    return _then(_self.copyWith(awayStats: value));
+  });
+}/// Create a copy of MatchResult
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$MatchContextCopyWith<$Res> get context {
+  
+  return $MatchContextCopyWith<$Res>(_self.context, (value) {
+    return _then(_self.copyWith(context: value));
+  });
+}/// Create a copy of MatchResult
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$TacticsSetupCopyWith<$Res> get homeTactics {
+  
+  return $TacticsSetupCopyWith<$Res>(_self.homeTactics, (value) {
+    return _then(_self.copyWith(homeTactics: value));
+  });
+}/// Create a copy of MatchResult
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$TacticsSetupCopyWith<$Res> get awayTactics {
+  
+  return $TacticsSetupCopyWith<$Res>(_self.awayTactics, (value) {
+    return _then(_self.copyWith(awayTactics: value));
+  });
+}/// Create a copy of MatchResult
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$MatchTeamSnapshotCopyWith<$Res> get homeSnapshot {
+  
+  return $MatchTeamSnapshotCopyWith<$Res>(_self.homeSnapshot, (value) {
+    return _then(_self.copyWith(homeSnapshot: value));
+  });
+}/// Create a copy of MatchResult
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$MatchTeamSnapshotCopyWith<$Res> get awaySnapshot {
+  
+  return $MatchTeamSnapshotCopyWith<$Res>(_self.awaySnapshot, (value) {
+    return _then(_self.copyWith(awaySnapshot: value));
+  });
+}
 }
 
-/// @nodoc
-class __$$MatchResultImplCopyWithImpl<$Res>
-    extends _$MatchResultCopyWithImpl<$Res, _$MatchResultImpl>
-    implements _$$MatchResultImplCopyWith<$Res> {
-  __$$MatchResultImplCopyWithImpl(
-    _$MatchResultImpl _value,
-    $Res Function(_$MatchResultImpl) _then,
-  ) : super(_value, _then);
 
-  /// Create a copy of MatchResult
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? homeTeamId = null,
-    Object? awayTeamId = null,
-    Object? homeGoals = null,
-    Object? awayGoals = null,
-    Object? homeStats = null,
-    Object? awayStats = null,
-    Object? status = null,
-    Object? reasonCode = freezed,
-    Object? violatingTeamIds = null,
-    Object? isWalkover = null,
-    Object? noGkPenalty = null,
-    Object? noGkPenaltyTeamIds = null,
-    Object? context = null,
-    Object? homeTactics = null,
-    Object? awayTactics = null,
-    Object? homeLineup = null,
-    Object? awayLineup = null,
-    Object? homeLineupPositions = null,
-    Object? awayLineupPositions = null,
-    Object? homeSnapshot = null,
-    Object? awaySnapshot = null,
-    Object? playerStats = null,
-    Object? events = null,
-    Object? injuries = null,
-    Object? disciplines = null,
-    Object? manOfTheMatchPlayerId = freezed,
-    Object? inspiredPerformancePlayerId = freezed,
-    Object? matchEndMinute = null,
-    Object? stoppageTime = null,
-  }) {
-    return _then(
-      _$MatchResultImpl(
-        homeTeamId: null == homeTeamId
-            ? _value.homeTeamId
-            : homeTeamId // ignore: cast_nullable_to_non_nullable
-                  as String,
-        awayTeamId: null == awayTeamId
-            ? _value.awayTeamId
-            : awayTeamId // ignore: cast_nullable_to_non_nullable
-                  as String,
-        homeGoals: null == homeGoals
-            ? _value.homeGoals
-            : homeGoals // ignore: cast_nullable_to_non_nullable
-                  as int,
-        awayGoals: null == awayGoals
-            ? _value.awayGoals
-            : awayGoals // ignore: cast_nullable_to_non_nullable
-                  as int,
-        homeStats: null == homeStats
-            ? _value.homeStats
-            : homeStats // ignore: cast_nullable_to_non_nullable
-                  as TeamMatchStats,
-        awayStats: null == awayStats
-            ? _value.awayStats
-            : awayStats // ignore: cast_nullable_to_non_nullable
-                  as TeamMatchStats,
-        status: null == status
-            ? _value.status
-            : status // ignore: cast_nullable_to_non_nullable
-                  as MatchStatus,
-        reasonCode: freezed == reasonCode
-            ? _value.reasonCode
-            : reasonCode // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        violatingTeamIds: null == violatingTeamIds
-            ? _value._violatingTeamIds
-            : violatingTeamIds // ignore: cast_nullable_to_non_nullable
-                  as List<String>,
-        isWalkover: null == isWalkover
-            ? _value.isWalkover
-            : isWalkover // ignore: cast_nullable_to_non_nullable
-                  as bool,
-        noGkPenalty: null == noGkPenalty
-            ? _value.noGkPenalty
-            : noGkPenalty // ignore: cast_nullable_to_non_nullable
-                  as bool,
-        noGkPenaltyTeamIds: null == noGkPenaltyTeamIds
-            ? _value._noGkPenaltyTeamIds
-            : noGkPenaltyTeamIds // ignore: cast_nullable_to_non_nullable
-                  as List<String>,
-        context: null == context
-            ? _value.context
-            : context // ignore: cast_nullable_to_non_nullable
-                  as MatchContext,
-        homeTactics: null == homeTactics
-            ? _value.homeTactics
-            : homeTactics // ignore: cast_nullable_to_non_nullable
-                  as TacticsSetup,
-        awayTactics: null == awayTactics
-            ? _value.awayTactics
-            : awayTactics // ignore: cast_nullable_to_non_nullable
-                  as TacticsSetup,
-        homeLineup: null == homeLineup
-            ? _value._homeLineup
-            : homeLineup // ignore: cast_nullable_to_non_nullable
-                  as List<Player>,
-        awayLineup: null == awayLineup
-            ? _value._awayLineup
-            : awayLineup // ignore: cast_nullable_to_non_nullable
-                  as List<Player>,
-        homeLineupPositions: null == homeLineupPositions
-            ? _value._homeLineupPositions
-            : homeLineupPositions // ignore: cast_nullable_to_non_nullable
-                  as List<Position>,
-        awayLineupPositions: null == awayLineupPositions
-            ? _value._awayLineupPositions
-            : awayLineupPositions // ignore: cast_nullable_to_non_nullable
-                  as List<Position>,
-        homeSnapshot: null == homeSnapshot
-            ? _value.homeSnapshot
-            : homeSnapshot // ignore: cast_nullable_to_non_nullable
-                  as MatchTeamSnapshot,
-        awaySnapshot: null == awaySnapshot
-            ? _value.awaySnapshot
-            : awaySnapshot // ignore: cast_nullable_to_non_nullable
-                  as MatchTeamSnapshot,
-        playerStats: null == playerStats
-            ? _value._playerStats
-            : playerStats // ignore: cast_nullable_to_non_nullable
-                  as List<PlayerMatchStats>,
-        events: null == events
-            ? _value._events
-            : events // ignore: cast_nullable_to_non_nullable
-                  as List<MatchEvent>,
-        injuries: null == injuries
-            ? _value._injuries
-            : injuries // ignore: cast_nullable_to_non_nullable
-                  as List<MatchInjury>,
-        disciplines: null == disciplines
-            ? _value._disciplines
-            : disciplines // ignore: cast_nullable_to_non_nullable
-                  as List<MatchDiscipline>,
-        manOfTheMatchPlayerId: freezed == manOfTheMatchPlayerId
-            ? _value.manOfTheMatchPlayerId
-            : manOfTheMatchPlayerId // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        inspiredPerformancePlayerId: freezed == inspiredPerformancePlayerId
-            ? _value.inspiredPerformancePlayerId
-            : inspiredPerformancePlayerId // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        matchEndMinute: null == matchEndMinute
-            ? _value.matchEndMinute
-            : matchEndMinute // ignore: cast_nullable_to_non_nullable
-                  as int,
-        stoppageTime: null == stoppageTime
-            ? _value.stoppageTime
-            : stoppageTime // ignore: cast_nullable_to_non_nullable
-                  as int,
-      ),
-    );
-  }
+/// Adds pattern-matching-related methods to [MatchResult].
+extension MatchResultPatterns on MatchResult {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _MatchResult value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _MatchResult() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _MatchResult value)  $default,){
+final _that = this;
+switch (_that) {
+case _MatchResult():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _MatchResult value)?  $default,){
+final _that = this;
+switch (_that) {
+case _MatchResult() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String homeTeamId,  String awayTeamId,  int homeGoals,  int awayGoals,  TeamMatchStats homeStats,  TeamMatchStats awayStats,  MatchStatus status,  String? reasonCode,  List<String> violatingTeamIds,  bool isWalkover,  bool noGkPenalty,  List<String> noGkPenaltyTeamIds,  MatchContext context,  TacticsSetup homeTactics,  TacticsSetup awayTactics,  List<Player> homeLineup,  List<Player> awayLineup,  List<Position> homeLineupPositions,  List<Position> awayLineupPositions,  MatchTeamSnapshot homeSnapshot,  MatchTeamSnapshot awaySnapshot,  List<PlayerMatchStats> playerStats,  List<MatchEvent> events,  List<MatchInjury> injuries,  List<MatchDiscipline> disciplines,  String? manOfTheMatchPlayerId,  String? inspiredPerformancePlayerId,  int matchEndMinute,  int stoppageTime)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _MatchResult() when $default != null:
+return $default(_that.homeTeamId,_that.awayTeamId,_that.homeGoals,_that.awayGoals,_that.homeStats,_that.awayStats,_that.status,_that.reasonCode,_that.violatingTeamIds,_that.isWalkover,_that.noGkPenalty,_that.noGkPenaltyTeamIds,_that.context,_that.homeTactics,_that.awayTactics,_that.homeLineup,_that.awayLineup,_that.homeLineupPositions,_that.awayLineupPositions,_that.homeSnapshot,_that.awaySnapshot,_that.playerStats,_that.events,_that.injuries,_that.disciplines,_that.manOfTheMatchPlayerId,_that.inspiredPerformancePlayerId,_that.matchEndMinute,_that.stoppageTime);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String homeTeamId,  String awayTeamId,  int homeGoals,  int awayGoals,  TeamMatchStats homeStats,  TeamMatchStats awayStats,  MatchStatus status,  String? reasonCode,  List<String> violatingTeamIds,  bool isWalkover,  bool noGkPenalty,  List<String> noGkPenaltyTeamIds,  MatchContext context,  TacticsSetup homeTactics,  TacticsSetup awayTactics,  List<Player> homeLineup,  List<Player> awayLineup,  List<Position> homeLineupPositions,  List<Position> awayLineupPositions,  MatchTeamSnapshot homeSnapshot,  MatchTeamSnapshot awaySnapshot,  List<PlayerMatchStats> playerStats,  List<MatchEvent> events,  List<MatchInjury> injuries,  List<MatchDiscipline> disciplines,  String? manOfTheMatchPlayerId,  String? inspiredPerformancePlayerId,  int matchEndMinute,  int stoppageTime)  $default,) {final _that = this;
+switch (_that) {
+case _MatchResult():
+return $default(_that.homeTeamId,_that.awayTeamId,_that.homeGoals,_that.awayGoals,_that.homeStats,_that.awayStats,_that.status,_that.reasonCode,_that.violatingTeamIds,_that.isWalkover,_that.noGkPenalty,_that.noGkPenaltyTeamIds,_that.context,_that.homeTactics,_that.awayTactics,_that.homeLineup,_that.awayLineup,_that.homeLineupPositions,_that.awayLineupPositions,_that.homeSnapshot,_that.awaySnapshot,_that.playerStats,_that.events,_that.injuries,_that.disciplines,_that.manOfTheMatchPlayerId,_that.inspiredPerformancePlayerId,_that.matchEndMinute,_that.stoppageTime);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String homeTeamId,  String awayTeamId,  int homeGoals,  int awayGoals,  TeamMatchStats homeStats,  TeamMatchStats awayStats,  MatchStatus status,  String? reasonCode,  List<String> violatingTeamIds,  bool isWalkover,  bool noGkPenalty,  List<String> noGkPenaltyTeamIds,  MatchContext context,  TacticsSetup homeTactics,  TacticsSetup awayTactics,  List<Player> homeLineup,  List<Player> awayLineup,  List<Position> homeLineupPositions,  List<Position> awayLineupPositions,  MatchTeamSnapshot homeSnapshot,  MatchTeamSnapshot awaySnapshot,  List<PlayerMatchStats> playerStats,  List<MatchEvent> events,  List<MatchInjury> injuries,  List<MatchDiscipline> disciplines,  String? manOfTheMatchPlayerId,  String? inspiredPerformancePlayerId,  int matchEndMinute,  int stoppageTime)?  $default,) {final _that = this;
+switch (_that) {
+case _MatchResult() when $default != null:
+return $default(_that.homeTeamId,_that.awayTeamId,_that.homeGoals,_that.awayGoals,_that.homeStats,_that.awayStats,_that.status,_that.reasonCode,_that.violatingTeamIds,_that.isWalkover,_that.noGkPenalty,_that.noGkPenaltyTeamIds,_that.context,_that.homeTactics,_that.awayTactics,_that.homeLineup,_that.awayLineup,_that.homeLineupPositions,_that.awayLineupPositions,_that.homeSnapshot,_that.awaySnapshot,_that.playerStats,_that.events,_that.injuries,_that.disciplines,_that.manOfTheMatchPlayerId,_that.inspiredPerformancePlayerId,_that.matchEndMinute,_that.stoppageTime);case _:
+  return null;
+
+}
+}
+
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$MatchResultImpl implements _MatchResult {
-  const _$MatchResultImpl({
-    required this.homeTeamId,
-    required this.awayTeamId,
-    required this.homeGoals,
-    required this.awayGoals,
-    required this.homeStats,
-    required this.awayStats,
-    this.status = MatchStatus.played,
-    this.reasonCode,
-    final List<String> violatingTeamIds = const [],
-    this.isWalkover = false,
-    this.noGkPenalty = false,
-    final List<String> noGkPenaltyTeamIds = const [],
-    this.context = const MatchContext(),
-    this.homeTactics = const TacticsSetup(),
-    this.awayTactics = const TacticsSetup(),
-    final List<Player> homeLineup = const [],
-    final List<Player> awayLineup = const [],
-    final List<Position> homeLineupPositions = const [],
-    final List<Position> awayLineupPositions = const [],
-    this.homeSnapshot = const MatchTeamSnapshot(),
-    this.awaySnapshot = const MatchTeamSnapshot(),
-    final List<PlayerMatchStats> playerStats = const [],
-    final List<MatchEvent> events = const [],
-    final List<MatchInjury> injuries = const [],
-    final List<MatchDiscipline> disciplines = const [],
-    this.manOfTheMatchPlayerId,
-    this.inspiredPerformancePlayerId,
-    this.matchEndMinute = 90,
-    this.stoppageTime = 0,
-  }) : _violatingTeamIds = violatingTeamIds,
-       _noGkPenaltyTeamIds = noGkPenaltyTeamIds,
-       _homeLineup = homeLineup,
-       _awayLineup = awayLineup,
-       _homeLineupPositions = homeLineupPositions,
-       _awayLineupPositions = awayLineupPositions,
-       _playerStats = playerStats,
-       _events = events,
-       _injuries = injuries,
-       _disciplines = disciplines;
 
-  factory _$MatchResultImpl.fromJson(Map<String, dynamic> json) =>
-      _$$MatchResultImplFromJson(json);
+class _MatchResult implements MatchResult {
+  const _MatchResult({required this.homeTeamId, required this.awayTeamId, required this.homeGoals, required this.awayGoals, required this.homeStats, required this.awayStats, this.status = MatchStatus.played, this.reasonCode, final  List<String> violatingTeamIds = const [], this.isWalkover = false, this.noGkPenalty = false, final  List<String> noGkPenaltyTeamIds = const [], this.context = const MatchContext(), this.homeTactics = const TacticsSetup(), this.awayTactics = const TacticsSetup(), final  List<Player> homeLineup = const [], final  List<Player> awayLineup = const [], final  List<Position> homeLineupPositions = const [], final  List<Position> awayLineupPositions = const [], this.homeSnapshot = const MatchTeamSnapshot(), this.awaySnapshot = const MatchTeamSnapshot(), final  List<PlayerMatchStats> playerStats = const [], final  List<MatchEvent> events = const [], final  List<MatchInjury> injuries = const [], final  List<MatchDiscipline> disciplines = const [], this.manOfTheMatchPlayerId, this.inspiredPerformancePlayerId, this.matchEndMinute = 90, this.stoppageTime = 0}): _violatingTeamIds = violatingTeamIds,_noGkPenaltyTeamIds = noGkPenaltyTeamIds,_homeLineup = homeLineup,_awayLineup = awayLineup,_homeLineupPositions = homeLineupPositions,_awayLineupPositions = awayLineupPositions,_playerStats = playerStats,_events = events,_injuries = injuries,_disciplines = disciplines;
+  factory _MatchResult.fromJson(Map<String, dynamic> json) => _$MatchResultFromJson(json);
 
-  @override
-  final String homeTeamId;
-  @override
-  final String awayTeamId;
-  @override
-  final int homeGoals;
-  @override
-  final int awayGoals;
-  @override
-  final TeamMatchStats homeStats;
-  @override
-  final TeamMatchStats awayStats;
-  @override
-  @JsonKey()
-  final MatchStatus status;
-  @override
-  final String? reasonCode;
-  final List<String> _violatingTeamIds;
-  @override
-  @JsonKey()
-  List<String> get violatingTeamIds {
-    if (_violatingTeamIds is EqualUnmodifiableListView)
-      return _violatingTeamIds;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_violatingTeamIds);
-  }
-
-  @override
-  @JsonKey()
-  final bool isWalkover;
-  @override
-  @JsonKey()
-  final bool noGkPenalty;
-  final List<String> _noGkPenaltyTeamIds;
-  @override
-  @JsonKey()
-  List<String> get noGkPenaltyTeamIds {
-    if (_noGkPenaltyTeamIds is EqualUnmodifiableListView)
-      return _noGkPenaltyTeamIds;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_noGkPenaltyTeamIds);
-  }
-
-  @override
-  @JsonKey()
-  final MatchContext context;
-  @override
-  @JsonKey()
-  final TacticsSetup homeTactics;
-  @override
-  @JsonKey()
-  final TacticsSetup awayTactics;
-  final List<Player> _homeLineup;
-  @override
-  @JsonKey()
-  List<Player> get homeLineup {
-    if (_homeLineup is EqualUnmodifiableListView) return _homeLineup;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_homeLineup);
-  }
-
-  final List<Player> _awayLineup;
-  @override
-  @JsonKey()
-  List<Player> get awayLineup {
-    if (_awayLineup is EqualUnmodifiableListView) return _awayLineup;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_awayLineup);
-  }
-
-  final List<Position> _homeLineupPositions;
-  @override
-  @JsonKey()
-  List<Position> get homeLineupPositions {
-    if (_homeLineupPositions is EqualUnmodifiableListView)
-      return _homeLineupPositions;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_homeLineupPositions);
-  }
-
-  final List<Position> _awayLineupPositions;
-  @override
-  @JsonKey()
-  List<Position> get awayLineupPositions {
-    if (_awayLineupPositions is EqualUnmodifiableListView)
-      return _awayLineupPositions;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_awayLineupPositions);
-  }
-
-  @override
-  @JsonKey()
-  final MatchTeamSnapshot homeSnapshot;
-  @override
-  @JsonKey()
-  final MatchTeamSnapshot awaySnapshot;
-  final List<PlayerMatchStats> _playerStats;
-  @override
-  @JsonKey()
-  List<PlayerMatchStats> get playerStats {
-    if (_playerStats is EqualUnmodifiableListView) return _playerStats;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_playerStats);
-  }
-
-  final List<MatchEvent> _events;
-  @override
-  @JsonKey()
-  List<MatchEvent> get events {
-    if (_events is EqualUnmodifiableListView) return _events;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_events);
-  }
-
-  final List<MatchInjury> _injuries;
-  @override
-  @JsonKey()
-  List<MatchInjury> get injuries {
-    if (_injuries is EqualUnmodifiableListView) return _injuries;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_injuries);
-  }
-
-  final List<MatchDiscipline> _disciplines;
-  @override
-  @JsonKey()
-  List<MatchDiscipline> get disciplines {
-    if (_disciplines is EqualUnmodifiableListView) return _disciplines;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_disciplines);
-  }
-
-  @override
-  final String? manOfTheMatchPlayerId;
-  @override
-  final String? inspiredPerformancePlayerId;
-  @override
-  @JsonKey()
-  final int matchEndMinute;
-  @override
-  @JsonKey()
-  final int stoppageTime;
-
-  @override
-  String toString() {
-    return 'MatchResult(homeTeamId: $homeTeamId, awayTeamId: $awayTeamId, homeGoals: $homeGoals, awayGoals: $awayGoals, homeStats: $homeStats, awayStats: $awayStats, status: $status, reasonCode: $reasonCode, violatingTeamIds: $violatingTeamIds, isWalkover: $isWalkover, noGkPenalty: $noGkPenalty, noGkPenaltyTeamIds: $noGkPenaltyTeamIds, context: $context, homeTactics: $homeTactics, awayTactics: $awayTactics, homeLineup: $homeLineup, awayLineup: $awayLineup, homeLineupPositions: $homeLineupPositions, awayLineupPositions: $awayLineupPositions, homeSnapshot: $homeSnapshot, awaySnapshot: $awaySnapshot, playerStats: $playerStats, events: $events, injuries: $injuries, disciplines: $disciplines, manOfTheMatchPlayerId: $manOfTheMatchPlayerId, inspiredPerformancePlayerId: $inspiredPerformancePlayerId, matchEndMinute: $matchEndMinute, stoppageTime: $stoppageTime)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$MatchResultImpl &&
-            (identical(other.homeTeamId, homeTeamId) ||
-                other.homeTeamId == homeTeamId) &&
-            (identical(other.awayTeamId, awayTeamId) ||
-                other.awayTeamId == awayTeamId) &&
-            (identical(other.homeGoals, homeGoals) ||
-                other.homeGoals == homeGoals) &&
-            (identical(other.awayGoals, awayGoals) ||
-                other.awayGoals == awayGoals) &&
-            (identical(other.homeStats, homeStats) ||
-                other.homeStats == homeStats) &&
-            (identical(other.awayStats, awayStats) ||
-                other.awayStats == awayStats) &&
-            (identical(other.status, status) || other.status == status) &&
-            (identical(other.reasonCode, reasonCode) ||
-                other.reasonCode == reasonCode) &&
-            const DeepCollectionEquality().equals(
-              other._violatingTeamIds,
-              _violatingTeamIds,
-            ) &&
-            (identical(other.isWalkover, isWalkover) ||
-                other.isWalkover == isWalkover) &&
-            (identical(other.noGkPenalty, noGkPenalty) ||
-                other.noGkPenalty == noGkPenalty) &&
-            const DeepCollectionEquality().equals(
-              other._noGkPenaltyTeamIds,
-              _noGkPenaltyTeamIds,
-            ) &&
-            (identical(other.context, context) || other.context == context) &&
-            (identical(other.homeTactics, homeTactics) ||
-                other.homeTactics == homeTactics) &&
-            (identical(other.awayTactics, awayTactics) ||
-                other.awayTactics == awayTactics) &&
-            const DeepCollectionEquality().equals(
-              other._homeLineup,
-              _homeLineup,
-            ) &&
-            const DeepCollectionEquality().equals(
-              other._awayLineup,
-              _awayLineup,
-            ) &&
-            const DeepCollectionEquality().equals(
-              other._homeLineupPositions,
-              _homeLineupPositions,
-            ) &&
-            const DeepCollectionEquality().equals(
-              other._awayLineupPositions,
-              _awayLineupPositions,
-            ) &&
-            (identical(other.homeSnapshot, homeSnapshot) ||
-                other.homeSnapshot == homeSnapshot) &&
-            (identical(other.awaySnapshot, awaySnapshot) ||
-                other.awaySnapshot == awaySnapshot) &&
-            const DeepCollectionEquality().equals(
-              other._playerStats,
-              _playerStats,
-            ) &&
-            const DeepCollectionEquality().equals(other._events, _events) &&
-            const DeepCollectionEquality().equals(other._injuries, _injuries) &&
-            const DeepCollectionEquality().equals(
-              other._disciplines,
-              _disciplines,
-            ) &&
-            (identical(other.manOfTheMatchPlayerId, manOfTheMatchPlayerId) ||
-                other.manOfTheMatchPlayerId == manOfTheMatchPlayerId) &&
-            (identical(
-                  other.inspiredPerformancePlayerId,
-                  inspiredPerformancePlayerId,
-                ) ||
-                other.inspiredPerformancePlayerId ==
-                    inspiredPerformancePlayerId) &&
-            (identical(other.matchEndMinute, matchEndMinute) ||
-                other.matchEndMinute == matchEndMinute) &&
-            (identical(other.stoppageTime, stoppageTime) ||
-                other.stoppageTime == stoppageTime));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hashAll([
-    runtimeType,
-    homeTeamId,
-    awayTeamId,
-    homeGoals,
-    awayGoals,
-    homeStats,
-    awayStats,
-    status,
-    reasonCode,
-    const DeepCollectionEquality().hash(_violatingTeamIds),
-    isWalkover,
-    noGkPenalty,
-    const DeepCollectionEquality().hash(_noGkPenaltyTeamIds),
-    context,
-    homeTactics,
-    awayTactics,
-    const DeepCollectionEquality().hash(_homeLineup),
-    const DeepCollectionEquality().hash(_awayLineup),
-    const DeepCollectionEquality().hash(_homeLineupPositions),
-    const DeepCollectionEquality().hash(_awayLineupPositions),
-    homeSnapshot,
-    awaySnapshot,
-    const DeepCollectionEquality().hash(_playerStats),
-    const DeepCollectionEquality().hash(_events),
-    const DeepCollectionEquality().hash(_injuries),
-    const DeepCollectionEquality().hash(_disciplines),
-    manOfTheMatchPlayerId,
-    inspiredPerformancePlayerId,
-    matchEndMinute,
-    stoppageTime,
-  ]);
-
-  /// Create a copy of MatchResult
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$MatchResultImplCopyWith<_$MatchResultImpl> get copyWith =>
-      __$$MatchResultImplCopyWithImpl<_$MatchResultImpl>(this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$MatchResultImplToJson(this);
-  }
+@override final  String homeTeamId;
+@override final  String awayTeamId;
+@override final  int homeGoals;
+@override final  int awayGoals;
+@override final  TeamMatchStats homeStats;
+@override final  TeamMatchStats awayStats;
+@override@JsonKey() final  MatchStatus status;
+@override final  String? reasonCode;
+ final  List<String> _violatingTeamIds;
+@override@JsonKey() List<String> get violatingTeamIds {
+  if (_violatingTeamIds is EqualUnmodifiableListView) return _violatingTeamIds;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_violatingTeamIds);
 }
 
-abstract class _MatchResult implements MatchResult {
-  const factory _MatchResult({
-    required final String homeTeamId,
-    required final String awayTeamId,
-    required final int homeGoals,
-    required final int awayGoals,
-    required final TeamMatchStats homeStats,
-    required final TeamMatchStats awayStats,
-    final MatchStatus status,
-    final String? reasonCode,
-    final List<String> violatingTeamIds,
-    final bool isWalkover,
-    final bool noGkPenalty,
-    final List<String> noGkPenaltyTeamIds,
-    final MatchContext context,
-    final TacticsSetup homeTactics,
-    final TacticsSetup awayTactics,
-    final List<Player> homeLineup,
-    final List<Player> awayLineup,
-    final List<Position> homeLineupPositions,
-    final List<Position> awayLineupPositions,
-    final MatchTeamSnapshot homeSnapshot,
-    final MatchTeamSnapshot awaySnapshot,
-    final List<PlayerMatchStats> playerStats,
-    final List<MatchEvent> events,
-    final List<MatchInjury> injuries,
-    final List<MatchDiscipline> disciplines,
-    final String? manOfTheMatchPlayerId,
-    final String? inspiredPerformancePlayerId,
-    final int matchEndMinute,
-    final int stoppageTime,
-  }) = _$MatchResultImpl;
-
-  factory _MatchResult.fromJson(Map<String, dynamic> json) =
-      _$MatchResultImpl.fromJson;
-
-  @override
-  String get homeTeamId;
-  @override
-  String get awayTeamId;
-  @override
-  int get homeGoals;
-  @override
-  int get awayGoals;
-  @override
-  TeamMatchStats get homeStats;
-  @override
-  TeamMatchStats get awayStats;
-  @override
-  MatchStatus get status;
-  @override
-  String? get reasonCode;
-  @override
-  List<String> get violatingTeamIds;
-  @override
-  bool get isWalkover;
-  @override
-  bool get noGkPenalty;
-  @override
-  List<String> get noGkPenaltyTeamIds;
-  @override
-  MatchContext get context;
-  @override
-  TacticsSetup get homeTactics;
-  @override
-  TacticsSetup get awayTactics;
-  @override
-  List<Player> get homeLineup;
-  @override
-  List<Player> get awayLineup;
-  @override
-  List<Position> get homeLineupPositions;
-  @override
-  List<Position> get awayLineupPositions;
-  @override
-  MatchTeamSnapshot get homeSnapshot;
-  @override
-  MatchTeamSnapshot get awaySnapshot;
-  @override
-  List<PlayerMatchStats> get playerStats;
-  @override
-  List<MatchEvent> get events;
-  @override
-  List<MatchInjury> get injuries;
-  @override
-  List<MatchDiscipline> get disciplines;
-  @override
-  String? get manOfTheMatchPlayerId;
-  @override
-  String? get inspiredPerformancePlayerId;
-  @override
-  int get matchEndMinute;
-  @override
-  int get stoppageTime;
-
-  /// Create a copy of MatchResult
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$MatchResultImplCopyWith<_$MatchResultImpl> get copyWith =>
-      throw _privateConstructorUsedError;
+@override@JsonKey() final  bool isWalkover;
+@override@JsonKey() final  bool noGkPenalty;
+ final  List<String> _noGkPenaltyTeamIds;
+@override@JsonKey() List<String> get noGkPenaltyTeamIds {
+  if (_noGkPenaltyTeamIds is EqualUnmodifiableListView) return _noGkPenaltyTeamIds;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_noGkPenaltyTeamIds);
 }
 
-MatchSetup _$MatchSetupFromJson(Map<String, dynamic> json) {
-  return _MatchSetup.fromJson(json);
+@override@JsonKey() final  MatchContext context;
+@override@JsonKey() final  TacticsSetup homeTactics;
+@override@JsonKey() final  TacticsSetup awayTactics;
+ final  List<Player> _homeLineup;
+@override@JsonKey() List<Player> get homeLineup {
+  if (_homeLineup is EqualUnmodifiableListView) return _homeLineup;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_homeLineup);
 }
+
+ final  List<Player> _awayLineup;
+@override@JsonKey() List<Player> get awayLineup {
+  if (_awayLineup is EqualUnmodifiableListView) return _awayLineup;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_awayLineup);
+}
+
+ final  List<Position> _homeLineupPositions;
+@override@JsonKey() List<Position> get homeLineupPositions {
+  if (_homeLineupPositions is EqualUnmodifiableListView) return _homeLineupPositions;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_homeLineupPositions);
+}
+
+ final  List<Position> _awayLineupPositions;
+@override@JsonKey() List<Position> get awayLineupPositions {
+  if (_awayLineupPositions is EqualUnmodifiableListView) return _awayLineupPositions;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_awayLineupPositions);
+}
+
+@override@JsonKey() final  MatchTeamSnapshot homeSnapshot;
+@override@JsonKey() final  MatchTeamSnapshot awaySnapshot;
+ final  List<PlayerMatchStats> _playerStats;
+@override@JsonKey() List<PlayerMatchStats> get playerStats {
+  if (_playerStats is EqualUnmodifiableListView) return _playerStats;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_playerStats);
+}
+
+ final  List<MatchEvent> _events;
+@override@JsonKey() List<MatchEvent> get events {
+  if (_events is EqualUnmodifiableListView) return _events;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_events);
+}
+
+ final  List<MatchInjury> _injuries;
+@override@JsonKey() List<MatchInjury> get injuries {
+  if (_injuries is EqualUnmodifiableListView) return _injuries;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_injuries);
+}
+
+ final  List<MatchDiscipline> _disciplines;
+@override@JsonKey() List<MatchDiscipline> get disciplines {
+  if (_disciplines is EqualUnmodifiableListView) return _disciplines;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_disciplines);
+}
+
+@override final  String? manOfTheMatchPlayerId;
+@override final  String? inspiredPerformancePlayerId;
+@override@JsonKey() final  int matchEndMinute;
+@override@JsonKey() final  int stoppageTime;
+
+/// Create a copy of MatchResult
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$MatchResultCopyWith<_MatchResult> get copyWith => __$MatchResultCopyWithImpl<_MatchResult>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$MatchResultToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MatchResult&&(identical(other.homeTeamId, homeTeamId) || other.homeTeamId == homeTeamId)&&(identical(other.awayTeamId, awayTeamId) || other.awayTeamId == awayTeamId)&&(identical(other.homeGoals, homeGoals) || other.homeGoals == homeGoals)&&(identical(other.awayGoals, awayGoals) || other.awayGoals == awayGoals)&&(identical(other.homeStats, homeStats) || other.homeStats == homeStats)&&(identical(other.awayStats, awayStats) || other.awayStats == awayStats)&&(identical(other.status, status) || other.status == status)&&(identical(other.reasonCode, reasonCode) || other.reasonCode == reasonCode)&&const DeepCollectionEquality().equals(other._violatingTeamIds, _violatingTeamIds)&&(identical(other.isWalkover, isWalkover) || other.isWalkover == isWalkover)&&(identical(other.noGkPenalty, noGkPenalty) || other.noGkPenalty == noGkPenalty)&&const DeepCollectionEquality().equals(other._noGkPenaltyTeamIds, _noGkPenaltyTeamIds)&&(identical(other.context, context) || other.context == context)&&(identical(other.homeTactics, homeTactics) || other.homeTactics == homeTactics)&&(identical(other.awayTactics, awayTactics) || other.awayTactics == awayTactics)&&const DeepCollectionEquality().equals(other._homeLineup, _homeLineup)&&const DeepCollectionEquality().equals(other._awayLineup, _awayLineup)&&const DeepCollectionEquality().equals(other._homeLineupPositions, _homeLineupPositions)&&const DeepCollectionEquality().equals(other._awayLineupPositions, _awayLineupPositions)&&(identical(other.homeSnapshot, homeSnapshot) || other.homeSnapshot == homeSnapshot)&&(identical(other.awaySnapshot, awaySnapshot) || other.awaySnapshot == awaySnapshot)&&const DeepCollectionEquality().equals(other._playerStats, _playerStats)&&const DeepCollectionEquality().equals(other._events, _events)&&const DeepCollectionEquality().equals(other._injuries, _injuries)&&const DeepCollectionEquality().equals(other._disciplines, _disciplines)&&(identical(other.manOfTheMatchPlayerId, manOfTheMatchPlayerId) || other.manOfTheMatchPlayerId == manOfTheMatchPlayerId)&&(identical(other.inspiredPerformancePlayerId, inspiredPerformancePlayerId) || other.inspiredPerformancePlayerId == inspiredPerformancePlayerId)&&(identical(other.matchEndMinute, matchEndMinute) || other.matchEndMinute == matchEndMinute)&&(identical(other.stoppageTime, stoppageTime) || other.stoppageTime == stoppageTime));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hashAll([runtimeType,homeTeamId,awayTeamId,homeGoals,awayGoals,homeStats,awayStats,status,reasonCode,const DeepCollectionEquality().hash(_violatingTeamIds),isWalkover,noGkPenalty,const DeepCollectionEquality().hash(_noGkPenaltyTeamIds),context,homeTactics,awayTactics,const DeepCollectionEquality().hash(_homeLineup),const DeepCollectionEquality().hash(_awayLineup),const DeepCollectionEquality().hash(_homeLineupPositions),const DeepCollectionEquality().hash(_awayLineupPositions),homeSnapshot,awaySnapshot,const DeepCollectionEquality().hash(_playerStats),const DeepCollectionEquality().hash(_events),const DeepCollectionEquality().hash(_injuries),const DeepCollectionEquality().hash(_disciplines),manOfTheMatchPlayerId,inspiredPerformancePlayerId,matchEndMinute,stoppageTime]);
+
+@override
+String toString() {
+  return 'MatchResult(homeTeamId: $homeTeamId, awayTeamId: $awayTeamId, homeGoals: $homeGoals, awayGoals: $awayGoals, homeStats: $homeStats, awayStats: $awayStats, status: $status, reasonCode: $reasonCode, violatingTeamIds: $violatingTeamIds, isWalkover: $isWalkover, noGkPenalty: $noGkPenalty, noGkPenaltyTeamIds: $noGkPenaltyTeamIds, context: $context, homeTactics: $homeTactics, awayTactics: $awayTactics, homeLineup: $homeLineup, awayLineup: $awayLineup, homeLineupPositions: $homeLineupPositions, awayLineupPositions: $awayLineupPositions, homeSnapshot: $homeSnapshot, awaySnapshot: $awaySnapshot, playerStats: $playerStats, events: $events, injuries: $injuries, disciplines: $disciplines, manOfTheMatchPlayerId: $manOfTheMatchPlayerId, inspiredPerformancePlayerId: $inspiredPerformancePlayerId, matchEndMinute: $matchEndMinute, stoppageTime: $stoppageTime)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$MatchResultCopyWith<$Res> implements $MatchResultCopyWith<$Res> {
+  factory _$MatchResultCopyWith(_MatchResult value, $Res Function(_MatchResult) _then) = __$MatchResultCopyWithImpl;
+@override @useResult
+$Res call({
+ String homeTeamId, String awayTeamId, int homeGoals, int awayGoals, TeamMatchStats homeStats, TeamMatchStats awayStats, MatchStatus status, String? reasonCode, List<String> violatingTeamIds, bool isWalkover, bool noGkPenalty, List<String> noGkPenaltyTeamIds, MatchContext context, TacticsSetup homeTactics, TacticsSetup awayTactics, List<Player> homeLineup, List<Player> awayLineup, List<Position> homeLineupPositions, List<Position> awayLineupPositions, MatchTeamSnapshot homeSnapshot, MatchTeamSnapshot awaySnapshot, List<PlayerMatchStats> playerStats, List<MatchEvent> events, List<MatchInjury> injuries, List<MatchDiscipline> disciplines, String? manOfTheMatchPlayerId, String? inspiredPerformancePlayerId, int matchEndMinute, int stoppageTime
+});
+
+
+@override $TeamMatchStatsCopyWith<$Res> get homeStats;@override $TeamMatchStatsCopyWith<$Res> get awayStats;@override $MatchContextCopyWith<$Res> get context;@override $TacticsSetupCopyWith<$Res> get homeTactics;@override $TacticsSetupCopyWith<$Res> get awayTactics;@override $MatchTeamSnapshotCopyWith<$Res> get homeSnapshot;@override $MatchTeamSnapshotCopyWith<$Res> get awaySnapshot;
+
+}
+/// @nodoc
+class __$MatchResultCopyWithImpl<$Res>
+    implements _$MatchResultCopyWith<$Res> {
+  __$MatchResultCopyWithImpl(this._self, this._then);
+
+  final _MatchResult _self;
+  final $Res Function(_MatchResult) _then;
+
+/// Create a copy of MatchResult
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? homeTeamId = null,Object? awayTeamId = null,Object? homeGoals = null,Object? awayGoals = null,Object? homeStats = null,Object? awayStats = null,Object? status = null,Object? reasonCode = freezed,Object? violatingTeamIds = null,Object? isWalkover = null,Object? noGkPenalty = null,Object? noGkPenaltyTeamIds = null,Object? context = null,Object? homeTactics = null,Object? awayTactics = null,Object? homeLineup = null,Object? awayLineup = null,Object? homeLineupPositions = null,Object? awayLineupPositions = null,Object? homeSnapshot = null,Object? awaySnapshot = null,Object? playerStats = null,Object? events = null,Object? injuries = null,Object? disciplines = null,Object? manOfTheMatchPlayerId = freezed,Object? inspiredPerformancePlayerId = freezed,Object? matchEndMinute = null,Object? stoppageTime = null,}) {
+  return _then(_MatchResult(
+homeTeamId: null == homeTeamId ? _self.homeTeamId : homeTeamId // ignore: cast_nullable_to_non_nullable
+as String,awayTeamId: null == awayTeamId ? _self.awayTeamId : awayTeamId // ignore: cast_nullable_to_non_nullable
+as String,homeGoals: null == homeGoals ? _self.homeGoals : homeGoals // ignore: cast_nullable_to_non_nullable
+as int,awayGoals: null == awayGoals ? _self.awayGoals : awayGoals // ignore: cast_nullable_to_non_nullable
+as int,homeStats: null == homeStats ? _self.homeStats : homeStats // ignore: cast_nullable_to_non_nullable
+as TeamMatchStats,awayStats: null == awayStats ? _self.awayStats : awayStats // ignore: cast_nullable_to_non_nullable
+as TeamMatchStats,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as MatchStatus,reasonCode: freezed == reasonCode ? _self.reasonCode : reasonCode // ignore: cast_nullable_to_non_nullable
+as String?,violatingTeamIds: null == violatingTeamIds ? _self._violatingTeamIds : violatingTeamIds // ignore: cast_nullable_to_non_nullable
+as List<String>,isWalkover: null == isWalkover ? _self.isWalkover : isWalkover // ignore: cast_nullable_to_non_nullable
+as bool,noGkPenalty: null == noGkPenalty ? _self.noGkPenalty : noGkPenalty // ignore: cast_nullable_to_non_nullable
+as bool,noGkPenaltyTeamIds: null == noGkPenaltyTeamIds ? _self._noGkPenaltyTeamIds : noGkPenaltyTeamIds // ignore: cast_nullable_to_non_nullable
+as List<String>,context: null == context ? _self.context : context // ignore: cast_nullable_to_non_nullable
+as MatchContext,homeTactics: null == homeTactics ? _self.homeTactics : homeTactics // ignore: cast_nullable_to_non_nullable
+as TacticsSetup,awayTactics: null == awayTactics ? _self.awayTactics : awayTactics // ignore: cast_nullable_to_non_nullable
+as TacticsSetup,homeLineup: null == homeLineup ? _self._homeLineup : homeLineup // ignore: cast_nullable_to_non_nullable
+as List<Player>,awayLineup: null == awayLineup ? _self._awayLineup : awayLineup // ignore: cast_nullable_to_non_nullable
+as List<Player>,homeLineupPositions: null == homeLineupPositions ? _self._homeLineupPositions : homeLineupPositions // ignore: cast_nullable_to_non_nullable
+as List<Position>,awayLineupPositions: null == awayLineupPositions ? _self._awayLineupPositions : awayLineupPositions // ignore: cast_nullable_to_non_nullable
+as List<Position>,homeSnapshot: null == homeSnapshot ? _self.homeSnapshot : homeSnapshot // ignore: cast_nullable_to_non_nullable
+as MatchTeamSnapshot,awaySnapshot: null == awaySnapshot ? _self.awaySnapshot : awaySnapshot // ignore: cast_nullable_to_non_nullable
+as MatchTeamSnapshot,playerStats: null == playerStats ? _self._playerStats : playerStats // ignore: cast_nullable_to_non_nullable
+as List<PlayerMatchStats>,events: null == events ? _self._events : events // ignore: cast_nullable_to_non_nullable
+as List<MatchEvent>,injuries: null == injuries ? _self._injuries : injuries // ignore: cast_nullable_to_non_nullable
+as List<MatchInjury>,disciplines: null == disciplines ? _self._disciplines : disciplines // ignore: cast_nullable_to_non_nullable
+as List<MatchDiscipline>,manOfTheMatchPlayerId: freezed == manOfTheMatchPlayerId ? _self.manOfTheMatchPlayerId : manOfTheMatchPlayerId // ignore: cast_nullable_to_non_nullable
+as String?,inspiredPerformancePlayerId: freezed == inspiredPerformancePlayerId ? _self.inspiredPerformancePlayerId : inspiredPerformancePlayerId // ignore: cast_nullable_to_non_nullable
+as String?,matchEndMinute: null == matchEndMinute ? _self.matchEndMinute : matchEndMinute // ignore: cast_nullable_to_non_nullable
+as int,stoppageTime: null == stoppageTime ? _self.stoppageTime : stoppageTime // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+/// Create a copy of MatchResult
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$TeamMatchStatsCopyWith<$Res> get homeStats {
+  
+  return $TeamMatchStatsCopyWith<$Res>(_self.homeStats, (value) {
+    return _then(_self.copyWith(homeStats: value));
+  });
+}/// Create a copy of MatchResult
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$TeamMatchStatsCopyWith<$Res> get awayStats {
+  
+  return $TeamMatchStatsCopyWith<$Res>(_self.awayStats, (value) {
+    return _then(_self.copyWith(awayStats: value));
+  });
+}/// Create a copy of MatchResult
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$MatchContextCopyWith<$Res> get context {
+  
+  return $MatchContextCopyWith<$Res>(_self.context, (value) {
+    return _then(_self.copyWith(context: value));
+  });
+}/// Create a copy of MatchResult
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$TacticsSetupCopyWith<$Res> get homeTactics {
+  
+  return $TacticsSetupCopyWith<$Res>(_self.homeTactics, (value) {
+    return _then(_self.copyWith(homeTactics: value));
+  });
+}/// Create a copy of MatchResult
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$TacticsSetupCopyWith<$Res> get awayTactics {
+  
+  return $TacticsSetupCopyWith<$Res>(_self.awayTactics, (value) {
+    return _then(_self.copyWith(awayTactics: value));
+  });
+}/// Create a copy of MatchResult
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$MatchTeamSnapshotCopyWith<$Res> get homeSnapshot {
+  
+  return $MatchTeamSnapshotCopyWith<$Res>(_self.homeSnapshot, (value) {
+    return _then(_self.copyWith(homeSnapshot: value));
+  });
+}/// Create a copy of MatchResult
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$MatchTeamSnapshotCopyWith<$Res> get awaySnapshot {
+  
+  return $MatchTeamSnapshotCopyWith<$Res>(_self.awaySnapshot, (value) {
+    return _then(_self.copyWith(awaySnapshot: value));
+  });
+}
+}
+
 
 /// @nodoc
 mixin _$MatchSetup {
-  String get homeTeamId => throw _privateConstructorUsedError;
-  String get awayTeamId => throw _privateConstructorUsedError;
-  List<Player> get homeLineup => throw _privateConstructorUsedError;
-  List<Player> get awayLineup => throw _privateConstructorUsedError;
-  TacticsSetup get homeTactics => throw _privateConstructorUsedError;
-  TacticsSetup get awayTactics => throw _privateConstructorUsedError;
-  bool get isHomeAdvantage => throw _privateConstructorUsedError;
-  int get roundNumber => throw _privateConstructorUsedError;
+
+ String get homeTeamId; String get awayTeamId; List<Player> get homeLineup; List<Player> get awayLineup; TacticsSetup get homeTactics; TacticsSetup get awayTactics; bool get isHomeAdvantage; int get roundNumber;
+/// Create a copy of MatchSetup
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$MatchSetupCopyWith<MatchSetup> get copyWith => _$MatchSetupCopyWithImpl<MatchSetup>(this as MatchSetup, _$identity);
 
   /// Serializes this MatchSetup to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  Map<String, dynamic> toJson();
 
-  /// Create a copy of MatchSetup
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $MatchSetupCopyWith<MatchSetup> get copyWith =>
-      throw _privateConstructorUsedError;
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MatchSetup&&(identical(other.homeTeamId, homeTeamId) || other.homeTeamId == homeTeamId)&&(identical(other.awayTeamId, awayTeamId) || other.awayTeamId == awayTeamId)&&const DeepCollectionEquality().equals(other.homeLineup, homeLineup)&&const DeepCollectionEquality().equals(other.awayLineup, awayLineup)&&(identical(other.homeTactics, homeTactics) || other.homeTactics == homeTactics)&&(identical(other.awayTactics, awayTactics) || other.awayTactics == awayTactics)&&(identical(other.isHomeAdvantage, isHomeAdvantage) || other.isHomeAdvantage == isHomeAdvantage)&&(identical(other.roundNumber, roundNumber) || other.roundNumber == roundNumber));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,homeTeamId,awayTeamId,const DeepCollectionEquality().hash(homeLineup),const DeepCollectionEquality().hash(awayLineup),homeTactics,awayTactics,isHomeAdvantage,roundNumber);
+
+@override
+String toString() {
+  return 'MatchSetup(homeTeamId: $homeTeamId, awayTeamId: $awayTeamId, homeLineup: $homeLineup, awayLineup: $awayLineup, homeTactics: $homeTactics, awayTactics: $awayTactics, isHomeAdvantage: $isHomeAdvantage, roundNumber: $roundNumber)';
+}
+
+
 }
 
 /// @nodoc
-abstract class $MatchSetupCopyWith<$Res> {
-  factory $MatchSetupCopyWith(
-    MatchSetup value,
-    $Res Function(MatchSetup) then,
-  ) = _$MatchSetupCopyWithImpl<$Res, MatchSetup>;
-  @useResult
-  $Res call({
-    String homeTeamId,
-    String awayTeamId,
-    List<Player> homeLineup,
-    List<Player> awayLineup,
-    TacticsSetup homeTactics,
-    TacticsSetup awayTactics,
-    bool isHomeAdvantage,
-    int roundNumber,
-  });
+abstract mixin class $MatchSetupCopyWith<$Res>  {
+  factory $MatchSetupCopyWith(MatchSetup value, $Res Function(MatchSetup) _then) = _$MatchSetupCopyWithImpl;
+@useResult
+$Res call({
+ String homeTeamId, String awayTeamId, List<Player> homeLineup, List<Player> awayLineup, TacticsSetup homeTactics, TacticsSetup awayTactics, bool isHomeAdvantage, int roundNumber
+});
 
-  $TacticsSetupCopyWith<$Res> get homeTactics;
-  $TacticsSetupCopyWith<$Res> get awayTactics;
+
+$TacticsSetupCopyWith<$Res> get homeTactics;$TacticsSetupCopyWith<$Res> get awayTactics;
+
 }
-
 /// @nodoc
-class _$MatchSetupCopyWithImpl<$Res, $Val extends MatchSetup>
+class _$MatchSetupCopyWithImpl<$Res>
     implements $MatchSetupCopyWith<$Res> {
-  _$MatchSetupCopyWithImpl(this._value, this._then);
+  _$MatchSetupCopyWithImpl(this._self, this._then);
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final MatchSetup _self;
+  final $Res Function(MatchSetup) _then;
 
-  /// Create a copy of MatchSetup
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? homeTeamId = null,
-    Object? awayTeamId = null,
-    Object? homeLineup = null,
-    Object? awayLineup = null,
-    Object? homeTactics = null,
-    Object? awayTactics = null,
-    Object? isHomeAdvantage = null,
-    Object? roundNumber = null,
-  }) {
-    return _then(
-      _value.copyWith(
-            homeTeamId: null == homeTeamId
-                ? _value.homeTeamId
-                : homeTeamId // ignore: cast_nullable_to_non_nullable
-                      as String,
-            awayTeamId: null == awayTeamId
-                ? _value.awayTeamId
-                : awayTeamId // ignore: cast_nullable_to_non_nullable
-                      as String,
-            homeLineup: null == homeLineup
-                ? _value.homeLineup
-                : homeLineup // ignore: cast_nullable_to_non_nullable
-                      as List<Player>,
-            awayLineup: null == awayLineup
-                ? _value.awayLineup
-                : awayLineup // ignore: cast_nullable_to_non_nullable
-                      as List<Player>,
-            homeTactics: null == homeTactics
-                ? _value.homeTactics
-                : homeTactics // ignore: cast_nullable_to_non_nullable
-                      as TacticsSetup,
-            awayTactics: null == awayTactics
-                ? _value.awayTactics
-                : awayTactics // ignore: cast_nullable_to_non_nullable
-                      as TacticsSetup,
-            isHomeAdvantage: null == isHomeAdvantage
-                ? _value.isHomeAdvantage
-                : isHomeAdvantage // ignore: cast_nullable_to_non_nullable
-                      as bool,
-            roundNumber: null == roundNumber
-                ? _value.roundNumber
-                : roundNumber // ignore: cast_nullable_to_non_nullable
-                      as int,
-          )
-          as $Val,
-    );
-  }
-
-  /// Create a copy of MatchSetup
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $TacticsSetupCopyWith<$Res> get homeTactics {
-    return $TacticsSetupCopyWith<$Res>(_value.homeTactics, (value) {
-      return _then(_value.copyWith(homeTactics: value) as $Val);
-    });
-  }
-
-  /// Create a copy of MatchSetup
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $TacticsSetupCopyWith<$Res> get awayTactics {
-    return $TacticsSetupCopyWith<$Res>(_value.awayTactics, (value) {
-      return _then(_value.copyWith(awayTactics: value) as $Val);
-    });
-  }
+/// Create a copy of MatchSetup
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? homeTeamId = null,Object? awayTeamId = null,Object? homeLineup = null,Object? awayLineup = null,Object? homeTactics = null,Object? awayTactics = null,Object? isHomeAdvantage = null,Object? roundNumber = null,}) {
+  return _then(_self.copyWith(
+homeTeamId: null == homeTeamId ? _self.homeTeamId : homeTeamId // ignore: cast_nullable_to_non_nullable
+as String,awayTeamId: null == awayTeamId ? _self.awayTeamId : awayTeamId // ignore: cast_nullable_to_non_nullable
+as String,homeLineup: null == homeLineup ? _self.homeLineup : homeLineup // ignore: cast_nullable_to_non_nullable
+as List<Player>,awayLineup: null == awayLineup ? _self.awayLineup : awayLineup // ignore: cast_nullable_to_non_nullable
+as List<Player>,homeTactics: null == homeTactics ? _self.homeTactics : homeTactics // ignore: cast_nullable_to_non_nullable
+as TacticsSetup,awayTactics: null == awayTactics ? _self.awayTactics : awayTactics // ignore: cast_nullable_to_non_nullable
+as TacticsSetup,isHomeAdvantage: null == isHomeAdvantage ? _self.isHomeAdvantage : isHomeAdvantage // ignore: cast_nullable_to_non_nullable
+as bool,roundNumber: null == roundNumber ? _self.roundNumber : roundNumber // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
 }
-
-/// @nodoc
-abstract class _$$MatchSetupImplCopyWith<$Res>
-    implements $MatchSetupCopyWith<$Res> {
-  factory _$$MatchSetupImplCopyWith(
-    _$MatchSetupImpl value,
-    $Res Function(_$MatchSetupImpl) then,
-  ) = __$$MatchSetupImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({
-    String homeTeamId,
-    String awayTeamId,
-    List<Player> homeLineup,
-    List<Player> awayLineup,
-    TacticsSetup homeTactics,
-    TacticsSetup awayTactics,
-    bool isHomeAdvantage,
-    int roundNumber,
+/// Create a copy of MatchSetup
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$TacticsSetupCopyWith<$Res> get homeTactics {
+  
+  return $TacticsSetupCopyWith<$Res>(_self.homeTactics, (value) {
+    return _then(_self.copyWith(homeTactics: value));
   });
-
-  @override
-  $TacticsSetupCopyWith<$Res> get homeTactics;
-  @override
-  $TacticsSetupCopyWith<$Res> get awayTactics;
+}/// Create a copy of MatchSetup
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$TacticsSetupCopyWith<$Res> get awayTactics {
+  
+  return $TacticsSetupCopyWith<$Res>(_self.awayTactics, (value) {
+    return _then(_self.copyWith(awayTactics: value));
+  });
+}
 }
 
-/// @nodoc
-class __$$MatchSetupImplCopyWithImpl<$Res>
-    extends _$MatchSetupCopyWithImpl<$Res, _$MatchSetupImpl>
-    implements _$$MatchSetupImplCopyWith<$Res> {
-  __$$MatchSetupImplCopyWithImpl(
-    _$MatchSetupImpl _value,
-    $Res Function(_$MatchSetupImpl) _then,
-  ) : super(_value, _then);
 
-  /// Create a copy of MatchSetup
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? homeTeamId = null,
-    Object? awayTeamId = null,
-    Object? homeLineup = null,
-    Object? awayLineup = null,
-    Object? homeTactics = null,
-    Object? awayTactics = null,
-    Object? isHomeAdvantage = null,
-    Object? roundNumber = null,
-  }) {
-    return _then(
-      _$MatchSetupImpl(
-        homeTeamId: null == homeTeamId
-            ? _value.homeTeamId
-            : homeTeamId // ignore: cast_nullable_to_non_nullable
-                  as String,
-        awayTeamId: null == awayTeamId
-            ? _value.awayTeamId
-            : awayTeamId // ignore: cast_nullable_to_non_nullable
-                  as String,
-        homeLineup: null == homeLineup
-            ? _value._homeLineup
-            : homeLineup // ignore: cast_nullable_to_non_nullable
-                  as List<Player>,
-        awayLineup: null == awayLineup
-            ? _value._awayLineup
-            : awayLineup // ignore: cast_nullable_to_non_nullable
-                  as List<Player>,
-        homeTactics: null == homeTactics
-            ? _value.homeTactics
-            : homeTactics // ignore: cast_nullable_to_non_nullable
-                  as TacticsSetup,
-        awayTactics: null == awayTactics
-            ? _value.awayTactics
-            : awayTactics // ignore: cast_nullable_to_non_nullable
-                  as TacticsSetup,
-        isHomeAdvantage: null == isHomeAdvantage
-            ? _value.isHomeAdvantage
-            : isHomeAdvantage // ignore: cast_nullable_to_non_nullable
-                  as bool,
-        roundNumber: null == roundNumber
-            ? _value.roundNumber
-            : roundNumber // ignore: cast_nullable_to_non_nullable
-                  as int,
-      ),
-    );
-  }
+/// Adds pattern-matching-related methods to [MatchSetup].
+extension MatchSetupPatterns on MatchSetup {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _MatchSetup value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _MatchSetup() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _MatchSetup value)  $default,){
+final _that = this;
+switch (_that) {
+case _MatchSetup():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _MatchSetup value)?  $default,){
+final _that = this;
+switch (_that) {
+case _MatchSetup() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String homeTeamId,  String awayTeamId,  List<Player> homeLineup,  List<Player> awayLineup,  TacticsSetup homeTactics,  TacticsSetup awayTactics,  bool isHomeAdvantage,  int roundNumber)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _MatchSetup() when $default != null:
+return $default(_that.homeTeamId,_that.awayTeamId,_that.homeLineup,_that.awayLineup,_that.homeTactics,_that.awayTactics,_that.isHomeAdvantage,_that.roundNumber);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String homeTeamId,  String awayTeamId,  List<Player> homeLineup,  List<Player> awayLineup,  TacticsSetup homeTactics,  TacticsSetup awayTactics,  bool isHomeAdvantage,  int roundNumber)  $default,) {final _that = this;
+switch (_that) {
+case _MatchSetup():
+return $default(_that.homeTeamId,_that.awayTeamId,_that.homeLineup,_that.awayLineup,_that.homeTactics,_that.awayTactics,_that.isHomeAdvantage,_that.roundNumber);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String homeTeamId,  String awayTeamId,  List<Player> homeLineup,  List<Player> awayLineup,  TacticsSetup homeTactics,  TacticsSetup awayTactics,  bool isHomeAdvantage,  int roundNumber)?  $default,) {final _that = this;
+switch (_that) {
+case _MatchSetup() when $default != null:
+return $default(_that.homeTeamId,_that.awayTeamId,_that.homeLineup,_that.awayLineup,_that.homeTactics,_that.awayTactics,_that.isHomeAdvantage,_that.roundNumber);case _:
+  return null;
+
+}
+}
+
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$MatchSetupImpl implements _MatchSetup {
-  const _$MatchSetupImpl({
-    required this.homeTeamId,
-    required this.awayTeamId,
-    required final List<Player> homeLineup,
-    required final List<Player> awayLineup,
-    required this.homeTactics,
-    required this.awayTactics,
-    this.isHomeAdvantage = false,
-    this.roundNumber = 0,
-  }) : _homeLineup = homeLineup,
-       _awayLineup = awayLineup;
 
-  factory _$MatchSetupImpl.fromJson(Map<String, dynamic> json) =>
-      _$$MatchSetupImplFromJson(json);
+class _MatchSetup implements MatchSetup {
+  const _MatchSetup({required this.homeTeamId, required this.awayTeamId, required final  List<Player> homeLineup, required final  List<Player> awayLineup, required this.homeTactics, required this.awayTactics, this.isHomeAdvantage = false, this.roundNumber = 0}): _homeLineup = homeLineup,_awayLineup = awayLineup;
+  factory _MatchSetup.fromJson(Map<String, dynamic> json) => _$MatchSetupFromJson(json);
 
-  @override
-  final String homeTeamId;
-  @override
-  final String awayTeamId;
-  final List<Player> _homeLineup;
-  @override
-  List<Player> get homeLineup {
-    if (_homeLineup is EqualUnmodifiableListView) return _homeLineup;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_homeLineup);
-  }
-
-  final List<Player> _awayLineup;
-  @override
-  List<Player> get awayLineup {
-    if (_awayLineup is EqualUnmodifiableListView) return _awayLineup;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_awayLineup);
-  }
-
-  @override
-  final TacticsSetup homeTactics;
-  @override
-  final TacticsSetup awayTactics;
-  @override
-  @JsonKey()
-  final bool isHomeAdvantage;
-  @override
-  @JsonKey()
-  final int roundNumber;
-
-  @override
-  String toString() {
-    return 'MatchSetup(homeTeamId: $homeTeamId, awayTeamId: $awayTeamId, homeLineup: $homeLineup, awayLineup: $awayLineup, homeTactics: $homeTactics, awayTactics: $awayTactics, isHomeAdvantage: $isHomeAdvantage, roundNumber: $roundNumber)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$MatchSetupImpl &&
-            (identical(other.homeTeamId, homeTeamId) ||
-                other.homeTeamId == homeTeamId) &&
-            (identical(other.awayTeamId, awayTeamId) ||
-                other.awayTeamId == awayTeamId) &&
-            const DeepCollectionEquality().equals(
-              other._homeLineup,
-              _homeLineup,
-            ) &&
-            const DeepCollectionEquality().equals(
-              other._awayLineup,
-              _awayLineup,
-            ) &&
-            (identical(other.homeTactics, homeTactics) ||
-                other.homeTactics == homeTactics) &&
-            (identical(other.awayTactics, awayTactics) ||
-                other.awayTactics == awayTactics) &&
-            (identical(other.isHomeAdvantage, isHomeAdvantage) ||
-                other.isHomeAdvantage == isHomeAdvantage) &&
-            (identical(other.roundNumber, roundNumber) ||
-                other.roundNumber == roundNumber));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    homeTeamId,
-    awayTeamId,
-    const DeepCollectionEquality().hash(_homeLineup),
-    const DeepCollectionEquality().hash(_awayLineup),
-    homeTactics,
-    awayTactics,
-    isHomeAdvantage,
-    roundNumber,
-  );
-
-  /// Create a copy of MatchSetup
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$MatchSetupImplCopyWith<_$MatchSetupImpl> get copyWith =>
-      __$$MatchSetupImplCopyWithImpl<_$MatchSetupImpl>(this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$MatchSetupImplToJson(this);
-  }
+@override final  String homeTeamId;
+@override final  String awayTeamId;
+ final  List<Player> _homeLineup;
+@override List<Player> get homeLineup {
+  if (_homeLineup is EqualUnmodifiableListView) return _homeLineup;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_homeLineup);
 }
 
-abstract class _MatchSetup implements MatchSetup {
-  const factory _MatchSetup({
-    required final String homeTeamId,
-    required final String awayTeamId,
-    required final List<Player> homeLineup,
-    required final List<Player> awayLineup,
-    required final TacticsSetup homeTactics,
-    required final TacticsSetup awayTactics,
-    final bool isHomeAdvantage,
-    final int roundNumber,
-  }) = _$MatchSetupImpl;
-
-  factory _MatchSetup.fromJson(Map<String, dynamic> json) =
-      _$MatchSetupImpl.fromJson;
-
-  @override
-  String get homeTeamId;
-  @override
-  String get awayTeamId;
-  @override
-  List<Player> get homeLineup;
-  @override
-  List<Player> get awayLineup;
-  @override
-  TacticsSetup get homeTactics;
-  @override
-  TacticsSetup get awayTactics;
-  @override
-  bool get isHomeAdvantage;
-  @override
-  int get roundNumber;
-
-  /// Create a copy of MatchSetup
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$MatchSetupImplCopyWith<_$MatchSetupImpl> get copyWith =>
-      throw _privateConstructorUsedError;
+ final  List<Player> _awayLineup;
+@override List<Player> get awayLineup {
+  if (_awayLineup is EqualUnmodifiableListView) return _awayLineup;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_awayLineup);
 }
 
-ScheduledMatch _$ScheduledMatchFromJson(Map<String, dynamic> json) {
-  return _ScheduledMatch.fromJson(json);
+@override final  TacticsSetup homeTactics;
+@override final  TacticsSetup awayTactics;
+@override@JsonKey() final  bool isHomeAdvantage;
+@override@JsonKey() final  int roundNumber;
+
+/// Create a copy of MatchSetup
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$MatchSetupCopyWith<_MatchSetup> get copyWith => __$MatchSetupCopyWithImpl<_MatchSetup>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$MatchSetupToJson(this, );
 }
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _MatchSetup&&(identical(other.homeTeamId, homeTeamId) || other.homeTeamId == homeTeamId)&&(identical(other.awayTeamId, awayTeamId) || other.awayTeamId == awayTeamId)&&const DeepCollectionEquality().equals(other._homeLineup, _homeLineup)&&const DeepCollectionEquality().equals(other._awayLineup, _awayLineup)&&(identical(other.homeTactics, homeTactics) || other.homeTactics == homeTactics)&&(identical(other.awayTactics, awayTactics) || other.awayTactics == awayTactics)&&(identical(other.isHomeAdvantage, isHomeAdvantage) || other.isHomeAdvantage == isHomeAdvantage)&&(identical(other.roundNumber, roundNumber) || other.roundNumber == roundNumber));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,homeTeamId,awayTeamId,const DeepCollectionEquality().hash(_homeLineup),const DeepCollectionEquality().hash(_awayLineup),homeTactics,awayTactics,isHomeAdvantage,roundNumber);
+
+@override
+String toString() {
+  return 'MatchSetup(homeTeamId: $homeTeamId, awayTeamId: $awayTeamId, homeLineup: $homeLineup, awayLineup: $awayLineup, homeTactics: $homeTactics, awayTactics: $awayTactics, isHomeAdvantage: $isHomeAdvantage, roundNumber: $roundNumber)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$MatchSetupCopyWith<$Res> implements $MatchSetupCopyWith<$Res> {
+  factory _$MatchSetupCopyWith(_MatchSetup value, $Res Function(_MatchSetup) _then) = __$MatchSetupCopyWithImpl;
+@override @useResult
+$Res call({
+ String homeTeamId, String awayTeamId, List<Player> homeLineup, List<Player> awayLineup, TacticsSetup homeTactics, TacticsSetup awayTactics, bool isHomeAdvantage, int roundNumber
+});
+
+
+@override $TacticsSetupCopyWith<$Res> get homeTactics;@override $TacticsSetupCopyWith<$Res> get awayTactics;
+
+}
+/// @nodoc
+class __$MatchSetupCopyWithImpl<$Res>
+    implements _$MatchSetupCopyWith<$Res> {
+  __$MatchSetupCopyWithImpl(this._self, this._then);
+
+  final _MatchSetup _self;
+  final $Res Function(_MatchSetup) _then;
+
+/// Create a copy of MatchSetup
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? homeTeamId = null,Object? awayTeamId = null,Object? homeLineup = null,Object? awayLineup = null,Object? homeTactics = null,Object? awayTactics = null,Object? isHomeAdvantage = null,Object? roundNumber = null,}) {
+  return _then(_MatchSetup(
+homeTeamId: null == homeTeamId ? _self.homeTeamId : homeTeamId // ignore: cast_nullable_to_non_nullable
+as String,awayTeamId: null == awayTeamId ? _self.awayTeamId : awayTeamId // ignore: cast_nullable_to_non_nullable
+as String,homeLineup: null == homeLineup ? _self._homeLineup : homeLineup // ignore: cast_nullable_to_non_nullable
+as List<Player>,awayLineup: null == awayLineup ? _self._awayLineup : awayLineup // ignore: cast_nullable_to_non_nullable
+as List<Player>,homeTactics: null == homeTactics ? _self.homeTactics : homeTactics // ignore: cast_nullable_to_non_nullable
+as TacticsSetup,awayTactics: null == awayTactics ? _self.awayTactics : awayTactics // ignore: cast_nullable_to_non_nullable
+as TacticsSetup,isHomeAdvantage: null == isHomeAdvantage ? _self.isHomeAdvantage : isHomeAdvantage // ignore: cast_nullable_to_non_nullable
+as bool,roundNumber: null == roundNumber ? _self.roundNumber : roundNumber // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+/// Create a copy of MatchSetup
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$TacticsSetupCopyWith<$Res> get homeTactics {
+  
+  return $TacticsSetupCopyWith<$Res>(_self.homeTactics, (value) {
+    return _then(_self.copyWith(homeTactics: value));
+  });
+}/// Create a copy of MatchSetup
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$TacticsSetupCopyWith<$Res> get awayTactics {
+  
+  return $TacticsSetupCopyWith<$Res>(_self.awayTactics, (value) {
+    return _then(_self.copyWith(awayTactics: value));
+  });
+}
+}
+
 
 /// @nodoc
 mixin _$ScheduledMatch {
-  String get id => throw _privateConstructorUsedError;
-  String get homeTeamId => throw _privateConstructorUsedError;
-  String get awayTeamId => throw _privateConstructorUsedError;
-  int get round => throw _privateConstructorUsedError;
-  MatchResult? get result => throw _privateConstructorUsedError;
+
+ String get id; String get homeTeamId; String get awayTeamId; int get round; MatchResult? get result;
+/// Create a copy of ScheduledMatch
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ScheduledMatchCopyWith<ScheduledMatch> get copyWith => _$ScheduledMatchCopyWithImpl<ScheduledMatch>(this as ScheduledMatch, _$identity);
 
   /// Serializes this ScheduledMatch to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  Map<String, dynamic> toJson();
 
-  /// Create a copy of ScheduledMatch
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $ScheduledMatchCopyWith<ScheduledMatch> get copyWith =>
-      throw _privateConstructorUsedError;
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ScheduledMatch&&(identical(other.id, id) || other.id == id)&&(identical(other.homeTeamId, homeTeamId) || other.homeTeamId == homeTeamId)&&(identical(other.awayTeamId, awayTeamId) || other.awayTeamId == awayTeamId)&&(identical(other.round, round) || other.round == round)&&(identical(other.result, result) || other.result == result));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,homeTeamId,awayTeamId,round,result);
+
+@override
+String toString() {
+  return 'ScheduledMatch(id: $id, homeTeamId: $homeTeamId, awayTeamId: $awayTeamId, round: $round, result: $result)';
+}
+
+
 }
 
 /// @nodoc
-abstract class $ScheduledMatchCopyWith<$Res> {
-  factory $ScheduledMatchCopyWith(
-    ScheduledMatch value,
-    $Res Function(ScheduledMatch) then,
-  ) = _$ScheduledMatchCopyWithImpl<$Res, ScheduledMatch>;
-  @useResult
-  $Res call({
-    String id,
-    String homeTeamId,
-    String awayTeamId,
-    int round,
-    MatchResult? result,
-  });
+abstract mixin class $ScheduledMatchCopyWith<$Res>  {
+  factory $ScheduledMatchCopyWith(ScheduledMatch value, $Res Function(ScheduledMatch) _then) = _$ScheduledMatchCopyWithImpl;
+@useResult
+$Res call({
+ String id, String homeTeamId, String awayTeamId, int round, MatchResult? result
+});
 
-  $MatchResultCopyWith<$Res>? get result;
+
+$MatchResultCopyWith<$Res>? get result;
+
 }
-
 /// @nodoc
-class _$ScheduledMatchCopyWithImpl<$Res, $Val extends ScheduledMatch>
+class _$ScheduledMatchCopyWithImpl<$Res>
     implements $ScheduledMatchCopyWith<$Res> {
-  _$ScheduledMatchCopyWithImpl(this._value, this._then);
+  _$ScheduledMatchCopyWithImpl(this._self, this._then);
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final ScheduledMatch _self;
+  final $Res Function(ScheduledMatch) _then;
 
-  /// Create a copy of ScheduledMatch
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? homeTeamId = null,
-    Object? awayTeamId = null,
-    Object? round = null,
-    Object? result = freezed,
-  }) {
-    return _then(
-      _value.copyWith(
-            id: null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                      as String,
-            homeTeamId: null == homeTeamId
-                ? _value.homeTeamId
-                : homeTeamId // ignore: cast_nullable_to_non_nullable
-                      as String,
-            awayTeamId: null == awayTeamId
-                ? _value.awayTeamId
-                : awayTeamId // ignore: cast_nullable_to_non_nullable
-                      as String,
-            round: null == round
-                ? _value.round
-                : round // ignore: cast_nullable_to_non_nullable
-                      as int,
-            result: freezed == result
-                ? _value.result
-                : result // ignore: cast_nullable_to_non_nullable
-                      as MatchResult?,
-          )
-          as $Val,
-    );
-  }
-
-  /// Create a copy of ScheduledMatch
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $MatchResultCopyWith<$Res>? get result {
-    if (_value.result == null) {
-      return null;
-    }
-
-    return $MatchResultCopyWith<$Res>(_value.result!, (value) {
-      return _then(_value.copyWith(result: value) as $Val);
-    });
-  }
+/// Create a copy of ScheduledMatch
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? homeTeamId = null,Object? awayTeamId = null,Object? round = null,Object? result = freezed,}) {
+  return _then(_self.copyWith(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,homeTeamId: null == homeTeamId ? _self.homeTeamId : homeTeamId // ignore: cast_nullable_to_non_nullable
+as String,awayTeamId: null == awayTeamId ? _self.awayTeamId : awayTeamId // ignore: cast_nullable_to_non_nullable
+as String,round: null == round ? _self.round : round // ignore: cast_nullable_to_non_nullable
+as int,result: freezed == result ? _self.result : result // ignore: cast_nullable_to_non_nullable
+as MatchResult?,
+  ));
 }
+/// Create a copy of ScheduledMatch
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$MatchResultCopyWith<$Res>? get result {
+    if (_self.result == null) {
+    return null;
+  }
 
-/// @nodoc
-abstract class _$$ScheduledMatchImplCopyWith<$Res>
-    implements $ScheduledMatchCopyWith<$Res> {
-  factory _$$ScheduledMatchImplCopyWith(
-    _$ScheduledMatchImpl value,
-    $Res Function(_$ScheduledMatchImpl) then,
-  ) = __$$ScheduledMatchImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({
-    String id,
-    String homeTeamId,
-    String awayTeamId,
-    int round,
-    MatchResult? result,
+  return $MatchResultCopyWith<$Res>(_self.result!, (value) {
+    return _then(_self.copyWith(result: value));
   });
-
-  @override
-  $MatchResultCopyWith<$Res>? get result;
+}
 }
 
-/// @nodoc
-class __$$ScheduledMatchImplCopyWithImpl<$Res>
-    extends _$ScheduledMatchCopyWithImpl<$Res, _$ScheduledMatchImpl>
-    implements _$$ScheduledMatchImplCopyWith<$Res> {
-  __$$ScheduledMatchImplCopyWithImpl(
-    _$ScheduledMatchImpl _value,
-    $Res Function(_$ScheduledMatchImpl) _then,
-  ) : super(_value, _then);
 
-  /// Create a copy of ScheduledMatch
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? homeTeamId = null,
-    Object? awayTeamId = null,
-    Object? round = null,
-    Object? result = freezed,
-  }) {
-    return _then(
-      _$ScheduledMatchImpl(
-        id: null == id
-            ? _value.id
-            : id // ignore: cast_nullable_to_non_nullable
-                  as String,
-        homeTeamId: null == homeTeamId
-            ? _value.homeTeamId
-            : homeTeamId // ignore: cast_nullable_to_non_nullable
-                  as String,
-        awayTeamId: null == awayTeamId
-            ? _value.awayTeamId
-            : awayTeamId // ignore: cast_nullable_to_non_nullable
-                  as String,
-        round: null == round
-            ? _value.round
-            : round // ignore: cast_nullable_to_non_nullable
-                  as int,
-        result: freezed == result
-            ? _value.result
-            : result // ignore: cast_nullable_to_non_nullable
-                  as MatchResult?,
-      ),
-    );
-  }
+/// Adds pattern-matching-related methods to [ScheduledMatch].
+extension ScheduledMatchPatterns on ScheduledMatch {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ScheduledMatch value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _ScheduledMatch() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ScheduledMatch value)  $default,){
+final _that = this;
+switch (_that) {
+case _ScheduledMatch():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ScheduledMatch value)?  $default,){
+final _that = this;
+switch (_that) {
+case _ScheduledMatch() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String homeTeamId,  String awayTeamId,  int round,  MatchResult? result)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _ScheduledMatch() when $default != null:
+return $default(_that.id,_that.homeTeamId,_that.awayTeamId,_that.round,_that.result);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String homeTeamId,  String awayTeamId,  int round,  MatchResult? result)  $default,) {final _that = this;
+switch (_that) {
+case _ScheduledMatch():
+return $default(_that.id,_that.homeTeamId,_that.awayTeamId,_that.round,_that.result);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String homeTeamId,  String awayTeamId,  int round,  MatchResult? result)?  $default,) {final _that = this;
+switch (_that) {
+case _ScheduledMatch() when $default != null:
+return $default(_that.id,_that.homeTeamId,_that.awayTeamId,_that.round,_that.result);case _:
+  return null;
+
+}
+}
+
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$ScheduledMatchImpl implements _ScheduledMatch {
-  const _$ScheduledMatchImpl({
-    required this.id,
-    required this.homeTeamId,
-    required this.awayTeamId,
-    required this.round,
-    this.result,
+
+class _ScheduledMatch implements ScheduledMatch {
+  const _ScheduledMatch({required this.id, required this.homeTeamId, required this.awayTeamId, required this.round, this.result});
+  factory _ScheduledMatch.fromJson(Map<String, dynamic> json) => _$ScheduledMatchFromJson(json);
+
+@override final  String id;
+@override final  String homeTeamId;
+@override final  String awayTeamId;
+@override final  int round;
+@override final  MatchResult? result;
+
+/// Create a copy of ScheduledMatch
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ScheduledMatchCopyWith<_ScheduledMatch> get copyWith => __$ScheduledMatchCopyWithImpl<_ScheduledMatch>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$ScheduledMatchToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ScheduledMatch&&(identical(other.id, id) || other.id == id)&&(identical(other.homeTeamId, homeTeamId) || other.homeTeamId == homeTeamId)&&(identical(other.awayTeamId, awayTeamId) || other.awayTeamId == awayTeamId)&&(identical(other.round, round) || other.round == round)&&(identical(other.result, result) || other.result == result));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,homeTeamId,awayTeamId,round,result);
+
+@override
+String toString() {
+  return 'ScheduledMatch(id: $id, homeTeamId: $homeTeamId, awayTeamId: $awayTeamId, round: $round, result: $result)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$ScheduledMatchCopyWith<$Res> implements $ScheduledMatchCopyWith<$Res> {
+  factory _$ScheduledMatchCopyWith(_ScheduledMatch value, $Res Function(_ScheduledMatch) _then) = __$ScheduledMatchCopyWithImpl;
+@override @useResult
+$Res call({
+ String id, String homeTeamId, String awayTeamId, int round, MatchResult? result
+});
+
+
+@override $MatchResultCopyWith<$Res>? get result;
+
+}
+/// @nodoc
+class __$ScheduledMatchCopyWithImpl<$Res>
+    implements _$ScheduledMatchCopyWith<$Res> {
+  __$ScheduledMatchCopyWithImpl(this._self, this._then);
+
+  final _ScheduledMatch _self;
+  final $Res Function(_ScheduledMatch) _then;
+
+/// Create a copy of ScheduledMatch
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? homeTeamId = null,Object? awayTeamId = null,Object? round = null,Object? result = freezed,}) {
+  return _then(_ScheduledMatch(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,homeTeamId: null == homeTeamId ? _self.homeTeamId : homeTeamId // ignore: cast_nullable_to_non_nullable
+as String,awayTeamId: null == awayTeamId ? _self.awayTeamId : awayTeamId // ignore: cast_nullable_to_non_nullable
+as String,round: null == round ? _self.round : round // ignore: cast_nullable_to_non_nullable
+as int,result: freezed == result ? _self.result : result // ignore: cast_nullable_to_non_nullable
+as MatchResult?,
+  ));
+}
+
+/// Create a copy of ScheduledMatch
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$MatchResultCopyWith<$Res>? get result {
+    if (_self.result == null) {
+    return null;
+  }
+
+  return $MatchResultCopyWith<$Res>(_self.result!, (value) {
+    return _then(_self.copyWith(result: value));
   });
-
-  factory _$ScheduledMatchImpl.fromJson(Map<String, dynamic> json) =>
-      _$$ScheduledMatchImplFromJson(json);
-
-  @override
-  final String id;
-  @override
-  final String homeTeamId;
-  @override
-  final String awayTeamId;
-  @override
-  final int round;
-  @override
-  final MatchResult? result;
-
-  @override
-  String toString() {
-    return 'ScheduledMatch(id: $id, homeTeamId: $homeTeamId, awayTeamId: $awayTeamId, round: $round, result: $result)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$ScheduledMatchImpl &&
-            (identical(other.id, id) || other.id == id) &&
-            (identical(other.homeTeamId, homeTeamId) ||
-                other.homeTeamId == homeTeamId) &&
-            (identical(other.awayTeamId, awayTeamId) ||
-                other.awayTeamId == awayTeamId) &&
-            (identical(other.round, round) || other.round == round) &&
-            (identical(other.result, result) || other.result == result));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode =>
-      Object.hash(runtimeType, id, homeTeamId, awayTeamId, round, result);
-
-  /// Create a copy of ScheduledMatch
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$ScheduledMatchImplCopyWith<_$ScheduledMatchImpl> get copyWith =>
-      __$$ScheduledMatchImplCopyWithImpl<_$ScheduledMatchImpl>(
-        this,
-        _$identity,
-      );
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$ScheduledMatchImplToJson(this);
-  }
+}
 }
 
-abstract class _ScheduledMatch implements ScheduledMatch {
-  const factory _ScheduledMatch({
-    required final String id,
-    required final String homeTeamId,
-    required final String awayTeamId,
-    required final int round,
-    final MatchResult? result,
-  }) = _$ScheduledMatchImpl;
-
-  factory _ScheduledMatch.fromJson(Map<String, dynamic> json) =
-      _$ScheduledMatchImpl.fromJson;
-
-  @override
-  String get id;
-  @override
-  String get homeTeamId;
-  @override
-  String get awayTeamId;
-  @override
-  int get round;
-  @override
-  MatchResult? get result;
-
-  /// Create a copy of ScheduledMatch
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$ScheduledMatchImplCopyWith<_$ScheduledMatchImpl> get copyWith =>
-      throw _privateConstructorUsedError;
-}
-
-PlayoffSeries _$PlayoffSeriesFromJson(Map<String, dynamic> json) {
-  return _PlayoffSeries.fromJson(json);
-}
 
 /// @nodoc
 mixin _$PlayoffSeries {
-  String get id => throw _privateConstructorUsedError;
-  String get higherSeedTeamId => throw _privateConstructorUsedError;
-  String get lowerSeedTeamId => throw _privateConstructorUsedError;
-  int get winsNeeded => throw _privateConstructorUsedError;
-  int get higherSeedWins => throw _privateConstructorUsedError;
-  int get lowerSeedWins => throw _privateConstructorUsedError;
-  List<MatchResult> get games => throw _privateConstructorUsedError;
-  String? get winnerTeamId => throw _privateConstructorUsedError;
+
+ String get id; String get higherSeedTeamId; String get lowerSeedTeamId; int get winsNeeded; int get higherSeedWins; int get lowerSeedWins; List<MatchResult> get games; String? get winnerTeamId;
+/// Create a copy of PlayoffSeries
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$PlayoffSeriesCopyWith<PlayoffSeries> get copyWith => _$PlayoffSeriesCopyWithImpl<PlayoffSeries>(this as PlayoffSeries, _$identity);
 
   /// Serializes this PlayoffSeries to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  Map<String, dynamic> toJson();
 
-  /// Create a copy of PlayoffSeries
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $PlayoffSeriesCopyWith<PlayoffSeries> get copyWith =>
-      throw _privateConstructorUsedError;
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PlayoffSeries&&(identical(other.id, id) || other.id == id)&&(identical(other.higherSeedTeamId, higherSeedTeamId) || other.higherSeedTeamId == higherSeedTeamId)&&(identical(other.lowerSeedTeamId, lowerSeedTeamId) || other.lowerSeedTeamId == lowerSeedTeamId)&&(identical(other.winsNeeded, winsNeeded) || other.winsNeeded == winsNeeded)&&(identical(other.higherSeedWins, higherSeedWins) || other.higherSeedWins == higherSeedWins)&&(identical(other.lowerSeedWins, lowerSeedWins) || other.lowerSeedWins == lowerSeedWins)&&const DeepCollectionEquality().equals(other.games, games)&&(identical(other.winnerTeamId, winnerTeamId) || other.winnerTeamId == winnerTeamId));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,higherSeedTeamId,lowerSeedTeamId,winsNeeded,higherSeedWins,lowerSeedWins,const DeepCollectionEquality().hash(games),winnerTeamId);
+
+@override
+String toString() {
+  return 'PlayoffSeries(id: $id, higherSeedTeamId: $higherSeedTeamId, lowerSeedTeamId: $lowerSeedTeamId, winsNeeded: $winsNeeded, higherSeedWins: $higherSeedWins, lowerSeedWins: $lowerSeedWins, games: $games, winnerTeamId: $winnerTeamId)';
+}
+
+
 }
 
 /// @nodoc
-abstract class $PlayoffSeriesCopyWith<$Res> {
-  factory $PlayoffSeriesCopyWith(
-    PlayoffSeries value,
-    $Res Function(PlayoffSeries) then,
-  ) = _$PlayoffSeriesCopyWithImpl<$Res, PlayoffSeries>;
-  @useResult
-  $Res call({
-    String id,
-    String higherSeedTeamId,
-    String lowerSeedTeamId,
-    int winsNeeded,
-    int higherSeedWins,
-    int lowerSeedWins,
-    List<MatchResult> games,
-    String? winnerTeamId,
-  });
-}
+abstract mixin class $PlayoffSeriesCopyWith<$Res>  {
+  factory $PlayoffSeriesCopyWith(PlayoffSeries value, $Res Function(PlayoffSeries) _then) = _$PlayoffSeriesCopyWithImpl;
+@useResult
+$Res call({
+ String id, String higherSeedTeamId, String lowerSeedTeamId, int winsNeeded, int higherSeedWins, int lowerSeedWins, List<MatchResult> games, String? winnerTeamId
+});
 
+
+
+
+}
 /// @nodoc
-class _$PlayoffSeriesCopyWithImpl<$Res, $Val extends PlayoffSeries>
+class _$PlayoffSeriesCopyWithImpl<$Res>
     implements $PlayoffSeriesCopyWith<$Res> {
-  _$PlayoffSeriesCopyWithImpl(this._value, this._then);
+  _$PlayoffSeriesCopyWithImpl(this._self, this._then);
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final PlayoffSeries _self;
+  final $Res Function(PlayoffSeries) _then;
 
-  /// Create a copy of PlayoffSeries
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? higherSeedTeamId = null,
-    Object? lowerSeedTeamId = null,
-    Object? winsNeeded = null,
-    Object? higherSeedWins = null,
-    Object? lowerSeedWins = null,
-    Object? games = null,
-    Object? winnerTeamId = freezed,
-  }) {
-    return _then(
-      _value.copyWith(
-            id: null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                      as String,
-            higherSeedTeamId: null == higherSeedTeamId
-                ? _value.higherSeedTeamId
-                : higherSeedTeamId // ignore: cast_nullable_to_non_nullable
-                      as String,
-            lowerSeedTeamId: null == lowerSeedTeamId
-                ? _value.lowerSeedTeamId
-                : lowerSeedTeamId // ignore: cast_nullable_to_non_nullable
-                      as String,
-            winsNeeded: null == winsNeeded
-                ? _value.winsNeeded
-                : winsNeeded // ignore: cast_nullable_to_non_nullable
-                      as int,
-            higherSeedWins: null == higherSeedWins
-                ? _value.higherSeedWins
-                : higherSeedWins // ignore: cast_nullable_to_non_nullable
-                      as int,
-            lowerSeedWins: null == lowerSeedWins
-                ? _value.lowerSeedWins
-                : lowerSeedWins // ignore: cast_nullable_to_non_nullable
-                      as int,
-            games: null == games
-                ? _value.games
-                : games // ignore: cast_nullable_to_non_nullable
-                      as List<MatchResult>,
-            winnerTeamId: freezed == winnerTeamId
-                ? _value.winnerTeamId
-                : winnerTeamId // ignore: cast_nullable_to_non_nullable
-                      as String?,
-          )
-          as $Val,
-    );
-  }
+/// Create a copy of PlayoffSeries
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? higherSeedTeamId = null,Object? lowerSeedTeamId = null,Object? winsNeeded = null,Object? higherSeedWins = null,Object? lowerSeedWins = null,Object? games = null,Object? winnerTeamId = freezed,}) {
+  return _then(_self.copyWith(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,higherSeedTeamId: null == higherSeedTeamId ? _self.higherSeedTeamId : higherSeedTeamId // ignore: cast_nullable_to_non_nullable
+as String,lowerSeedTeamId: null == lowerSeedTeamId ? _self.lowerSeedTeamId : lowerSeedTeamId // ignore: cast_nullable_to_non_nullable
+as String,winsNeeded: null == winsNeeded ? _self.winsNeeded : winsNeeded // ignore: cast_nullable_to_non_nullable
+as int,higherSeedWins: null == higherSeedWins ? _self.higherSeedWins : higherSeedWins // ignore: cast_nullable_to_non_nullable
+as int,lowerSeedWins: null == lowerSeedWins ? _self.lowerSeedWins : lowerSeedWins // ignore: cast_nullable_to_non_nullable
+as int,games: null == games ? _self.games : games // ignore: cast_nullable_to_non_nullable
+as List<MatchResult>,winnerTeamId: freezed == winnerTeamId ? _self.winnerTeamId : winnerTeamId // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
 }
 
-/// @nodoc
-abstract class _$$PlayoffSeriesImplCopyWith<$Res>
-    implements $PlayoffSeriesCopyWith<$Res> {
-  factory _$$PlayoffSeriesImplCopyWith(
-    _$PlayoffSeriesImpl value,
-    $Res Function(_$PlayoffSeriesImpl) then,
-  ) = __$$PlayoffSeriesImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({
-    String id,
-    String higherSeedTeamId,
-    String lowerSeedTeamId,
-    int winsNeeded,
-    int higherSeedWins,
-    int lowerSeedWins,
-    List<MatchResult> games,
-    String? winnerTeamId,
-  });
 }
 
-/// @nodoc
-class __$$PlayoffSeriesImplCopyWithImpl<$Res>
-    extends _$PlayoffSeriesCopyWithImpl<$Res, _$PlayoffSeriesImpl>
-    implements _$$PlayoffSeriesImplCopyWith<$Res> {
-  __$$PlayoffSeriesImplCopyWithImpl(
-    _$PlayoffSeriesImpl _value,
-    $Res Function(_$PlayoffSeriesImpl) _then,
-  ) : super(_value, _then);
 
-  /// Create a copy of PlayoffSeries
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? higherSeedTeamId = null,
-    Object? lowerSeedTeamId = null,
-    Object? winsNeeded = null,
-    Object? higherSeedWins = null,
-    Object? lowerSeedWins = null,
-    Object? games = null,
-    Object? winnerTeamId = freezed,
-  }) {
-    return _then(
-      _$PlayoffSeriesImpl(
-        id: null == id
-            ? _value.id
-            : id // ignore: cast_nullable_to_non_nullable
-                  as String,
-        higherSeedTeamId: null == higherSeedTeamId
-            ? _value.higherSeedTeamId
-            : higherSeedTeamId // ignore: cast_nullable_to_non_nullable
-                  as String,
-        lowerSeedTeamId: null == lowerSeedTeamId
-            ? _value.lowerSeedTeamId
-            : lowerSeedTeamId // ignore: cast_nullable_to_non_nullable
-                  as String,
-        winsNeeded: null == winsNeeded
-            ? _value.winsNeeded
-            : winsNeeded // ignore: cast_nullable_to_non_nullable
-                  as int,
-        higherSeedWins: null == higherSeedWins
-            ? _value.higherSeedWins
-            : higherSeedWins // ignore: cast_nullable_to_non_nullable
-                  as int,
-        lowerSeedWins: null == lowerSeedWins
-            ? _value.lowerSeedWins
-            : lowerSeedWins // ignore: cast_nullable_to_non_nullable
-                  as int,
-        games: null == games
-            ? _value._games
-            : games // ignore: cast_nullable_to_non_nullable
-                  as List<MatchResult>,
-        winnerTeamId: freezed == winnerTeamId
-            ? _value.winnerTeamId
-            : winnerTeamId // ignore: cast_nullable_to_non_nullable
-                  as String?,
-      ),
-    );
-  }
+/// Adds pattern-matching-related methods to [PlayoffSeries].
+extension PlayoffSeriesPatterns on PlayoffSeries {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _PlayoffSeries value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _PlayoffSeries() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _PlayoffSeries value)  $default,){
+final _that = this;
+switch (_that) {
+case _PlayoffSeries():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _PlayoffSeries value)?  $default,){
+final _that = this;
+switch (_that) {
+case _PlayoffSeries() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String higherSeedTeamId,  String lowerSeedTeamId,  int winsNeeded,  int higherSeedWins,  int lowerSeedWins,  List<MatchResult> games,  String? winnerTeamId)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _PlayoffSeries() when $default != null:
+return $default(_that.id,_that.higherSeedTeamId,_that.lowerSeedTeamId,_that.winsNeeded,_that.higherSeedWins,_that.lowerSeedWins,_that.games,_that.winnerTeamId);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String higherSeedTeamId,  String lowerSeedTeamId,  int winsNeeded,  int higherSeedWins,  int lowerSeedWins,  List<MatchResult> games,  String? winnerTeamId)  $default,) {final _that = this;
+switch (_that) {
+case _PlayoffSeries():
+return $default(_that.id,_that.higherSeedTeamId,_that.lowerSeedTeamId,_that.winsNeeded,_that.higherSeedWins,_that.lowerSeedWins,_that.games,_that.winnerTeamId);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String higherSeedTeamId,  String lowerSeedTeamId,  int winsNeeded,  int higherSeedWins,  int lowerSeedWins,  List<MatchResult> games,  String? winnerTeamId)?  $default,) {final _that = this;
+switch (_that) {
+case _PlayoffSeries() when $default != null:
+return $default(_that.id,_that.higherSeedTeamId,_that.lowerSeedTeamId,_that.winsNeeded,_that.higherSeedWins,_that.lowerSeedWins,_that.games,_that.winnerTeamId);case _:
+  return null;
+
+}
+}
+
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$PlayoffSeriesImpl implements _PlayoffSeries {
-  const _$PlayoffSeriesImpl({
-    required this.id,
-    required this.higherSeedTeamId,
-    required this.lowerSeedTeamId,
-    required this.winsNeeded,
-    this.higherSeedWins = 0,
-    this.lowerSeedWins = 0,
-    final List<MatchResult> games = const [],
-    this.winnerTeamId,
-  }) : _games = games;
 
-  factory _$PlayoffSeriesImpl.fromJson(Map<String, dynamic> json) =>
-      _$$PlayoffSeriesImplFromJson(json);
+class _PlayoffSeries implements PlayoffSeries {
+  const _PlayoffSeries({required this.id, required this.higherSeedTeamId, required this.lowerSeedTeamId, required this.winsNeeded, this.higherSeedWins = 0, this.lowerSeedWins = 0, final  List<MatchResult> games = const [], this.winnerTeamId}): _games = games;
+  factory _PlayoffSeries.fromJson(Map<String, dynamic> json) => _$PlayoffSeriesFromJson(json);
 
-  @override
-  final String id;
-  @override
-  final String higherSeedTeamId;
-  @override
-  final String lowerSeedTeamId;
-  @override
-  final int winsNeeded;
-  @override
-  @JsonKey()
-  final int higherSeedWins;
-  @override
-  @JsonKey()
-  final int lowerSeedWins;
-  final List<MatchResult> _games;
-  @override
-  @JsonKey()
-  List<MatchResult> get games {
-    if (_games is EqualUnmodifiableListView) return _games;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_games);
-  }
-
-  @override
-  final String? winnerTeamId;
-
-  @override
-  String toString() {
-    return 'PlayoffSeries(id: $id, higherSeedTeamId: $higherSeedTeamId, lowerSeedTeamId: $lowerSeedTeamId, winsNeeded: $winsNeeded, higherSeedWins: $higherSeedWins, lowerSeedWins: $lowerSeedWins, games: $games, winnerTeamId: $winnerTeamId)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$PlayoffSeriesImpl &&
-            (identical(other.id, id) || other.id == id) &&
-            (identical(other.higherSeedTeamId, higherSeedTeamId) ||
-                other.higherSeedTeamId == higherSeedTeamId) &&
-            (identical(other.lowerSeedTeamId, lowerSeedTeamId) ||
-                other.lowerSeedTeamId == lowerSeedTeamId) &&
-            (identical(other.winsNeeded, winsNeeded) ||
-                other.winsNeeded == winsNeeded) &&
-            (identical(other.higherSeedWins, higherSeedWins) ||
-                other.higherSeedWins == higherSeedWins) &&
-            (identical(other.lowerSeedWins, lowerSeedWins) ||
-                other.lowerSeedWins == lowerSeedWins) &&
-            const DeepCollectionEquality().equals(other._games, _games) &&
-            (identical(other.winnerTeamId, winnerTeamId) ||
-                other.winnerTeamId == winnerTeamId));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    higherSeedTeamId,
-    lowerSeedTeamId,
-    winsNeeded,
-    higherSeedWins,
-    lowerSeedWins,
-    const DeepCollectionEquality().hash(_games),
-    winnerTeamId,
-  );
-
-  /// Create a copy of PlayoffSeries
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$PlayoffSeriesImplCopyWith<_$PlayoffSeriesImpl> get copyWith =>
-      __$$PlayoffSeriesImplCopyWithImpl<_$PlayoffSeriesImpl>(this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$PlayoffSeriesImplToJson(this);
-  }
+@override final  String id;
+@override final  String higherSeedTeamId;
+@override final  String lowerSeedTeamId;
+@override final  int winsNeeded;
+@override@JsonKey() final  int higherSeedWins;
+@override@JsonKey() final  int lowerSeedWins;
+ final  List<MatchResult> _games;
+@override@JsonKey() List<MatchResult> get games {
+  if (_games is EqualUnmodifiableListView) return _games;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_games);
 }
 
-abstract class _PlayoffSeries implements PlayoffSeries {
-  const factory _PlayoffSeries({
-    required final String id,
-    required final String higherSeedTeamId,
-    required final String lowerSeedTeamId,
-    required final int winsNeeded,
-    final int higherSeedWins,
-    final int lowerSeedWins,
-    final List<MatchResult> games,
-    final String? winnerTeamId,
-  }) = _$PlayoffSeriesImpl;
+@override final  String? winnerTeamId;
 
-  factory _PlayoffSeries.fromJson(Map<String, dynamic> json) =
-      _$PlayoffSeriesImpl.fromJson;
+/// Create a copy of PlayoffSeries
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$PlayoffSeriesCopyWith<_PlayoffSeries> get copyWith => __$PlayoffSeriesCopyWithImpl<_PlayoffSeries>(this, _$identity);
 
-  @override
-  String get id;
-  @override
-  String get higherSeedTeamId;
-  @override
-  String get lowerSeedTeamId;
-  @override
-  int get winsNeeded;
-  @override
-  int get higherSeedWins;
-  @override
-  int get lowerSeedWins;
-  @override
-  List<MatchResult> get games;
-  @override
-  String? get winnerTeamId;
-
-  /// Create a copy of PlayoffSeries
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$PlayoffSeriesImplCopyWith<_$PlayoffSeriesImpl> get copyWith =>
-      throw _privateConstructorUsedError;
+@override
+Map<String, dynamic> toJson() {
+  return _$PlayoffSeriesToJson(this, );
 }
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PlayoffSeries&&(identical(other.id, id) || other.id == id)&&(identical(other.higherSeedTeamId, higherSeedTeamId) || other.higherSeedTeamId == higherSeedTeamId)&&(identical(other.lowerSeedTeamId, lowerSeedTeamId) || other.lowerSeedTeamId == lowerSeedTeamId)&&(identical(other.winsNeeded, winsNeeded) || other.winsNeeded == winsNeeded)&&(identical(other.higherSeedWins, higherSeedWins) || other.higherSeedWins == higherSeedWins)&&(identical(other.lowerSeedWins, lowerSeedWins) || other.lowerSeedWins == lowerSeedWins)&&const DeepCollectionEquality().equals(other._games, _games)&&(identical(other.winnerTeamId, winnerTeamId) || other.winnerTeamId == winnerTeamId));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,higherSeedTeamId,lowerSeedTeamId,winsNeeded,higherSeedWins,lowerSeedWins,const DeepCollectionEquality().hash(_games),winnerTeamId);
+
+@override
+String toString() {
+  return 'PlayoffSeries(id: $id, higherSeedTeamId: $higherSeedTeamId, lowerSeedTeamId: $lowerSeedTeamId, winsNeeded: $winsNeeded, higherSeedWins: $higherSeedWins, lowerSeedWins: $lowerSeedWins, games: $games, winnerTeamId: $winnerTeamId)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$PlayoffSeriesCopyWith<$Res> implements $PlayoffSeriesCopyWith<$Res> {
+  factory _$PlayoffSeriesCopyWith(_PlayoffSeries value, $Res Function(_PlayoffSeries) _then) = __$PlayoffSeriesCopyWithImpl;
+@override @useResult
+$Res call({
+ String id, String higherSeedTeamId, String lowerSeedTeamId, int winsNeeded, int higherSeedWins, int lowerSeedWins, List<MatchResult> games, String? winnerTeamId
+});
+
+
+
+
+}
+/// @nodoc
+class __$PlayoffSeriesCopyWithImpl<$Res>
+    implements _$PlayoffSeriesCopyWith<$Res> {
+  __$PlayoffSeriesCopyWithImpl(this._self, this._then);
+
+  final _PlayoffSeries _self;
+  final $Res Function(_PlayoffSeries) _then;
+
+/// Create a copy of PlayoffSeries
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? higherSeedTeamId = null,Object? lowerSeedTeamId = null,Object? winsNeeded = null,Object? higherSeedWins = null,Object? lowerSeedWins = null,Object? games = null,Object? winnerTeamId = freezed,}) {
+  return _then(_PlayoffSeries(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,higherSeedTeamId: null == higherSeedTeamId ? _self.higherSeedTeamId : higherSeedTeamId // ignore: cast_nullable_to_non_nullable
+as String,lowerSeedTeamId: null == lowerSeedTeamId ? _self.lowerSeedTeamId : lowerSeedTeamId // ignore: cast_nullable_to_non_nullable
+as String,winsNeeded: null == winsNeeded ? _self.winsNeeded : winsNeeded // ignore: cast_nullable_to_non_nullable
+as int,higherSeedWins: null == higherSeedWins ? _self.higherSeedWins : higherSeedWins // ignore: cast_nullable_to_non_nullable
+as int,lowerSeedWins: null == lowerSeedWins ? _self.lowerSeedWins : lowerSeedWins // ignore: cast_nullable_to_non_nullable
+as int,games: null == games ? _self._games : games // ignore: cast_nullable_to_non_nullable
+as List<MatchResult>,winnerTeamId: freezed == winnerTeamId ? _self.winnerTeamId : winnerTeamId // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+
+}
+
+// dart format on

@@ -6,9 +6,9 @@ part of 'field_player_attributes.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$FieldPlayerAttributesImpl _$$FieldPlayerAttributesImplFromJson(
+_FieldPlayerAttributes _$FieldPlayerAttributesFromJson(
   Map<String, dynamic> json,
-) => _$FieldPlayerAttributesImpl(
+) => _FieldPlayerAttributes(
   pace: (json['pace'] as num).toInt(),
   shooting: (json['shooting'] as num).toInt(),
   passing: (json['passing'] as num).toInt(),
@@ -17,8 +17,8 @@ _$FieldPlayerAttributesImpl _$$FieldPlayerAttributesImplFromJson(
   physicality: (json['physicality'] as num).toInt(),
 );
 
-Map<String, dynamic> _$$FieldPlayerAttributesImplToJson(
-  _$FieldPlayerAttributesImpl instance,
+Map<String, dynamic> _$FieldPlayerAttributesToJson(
+  _FieldPlayerAttributes instance,
 ) => <String, dynamic>{
   'pace': instance.pace,
   'shooting': instance.shooting,

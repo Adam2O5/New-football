@@ -1491,6 +1491,249 @@ class AppLocalizationsPl extends AppLocalizations {
   String get matchday_toEnd => 'Do końca';
 
   @override
+  String get matchday_weather => 'Pogoda';
+
+  @override
+  String get matchday_weather_clear => 'Bezchmurnie';
+
+  @override
+  String get matchday_weather_overcast => 'Pochmurno';
+
+  @override
+  String get matchday_weather_rain => 'Deszcz';
+
+  @override
+  String get matchday_weather_heavyRain => 'Ulewa';
+
+  @override
+  String get matchday_weather_wind => 'Wiatr';
+
+  @override
+  String get matchday_weather_snow => 'Śnieg';
+
+  @override
+  String get matchday_weather_heat => 'Upał';
+
+  @override
+  String get matchday_weather_cold => 'Zimno';
+
+  @override
+  String matchday_temperature(int value) {
+    return '$value°C';
+  }
+
+  @override
+  String get matchday_liveStats => 'Statystyki na żywo';
+
+  @override
+  String get matchday_eventFeed => 'Przebieg meczu';
+
+  @override
+  String get matchday_noEvents => 'Brak zdarzeń';
+
+  @override
+  String get matchday_derby => 'Derby';
+
+  @override
+  String get matchday_possession => 'Posiadanie';
+
+  @override
+  String get matchday_shots => 'Strzały';
+
+  @override
+  String get matchday_xg => 'xG';
+
+  @override
+  String matchday_onTarget(int value) {
+    return '$value cel.';
+  }
+
+  @override
+  String get matchday_lineup => 'Wyjściowa jedenastka';
+
+  @override
+  String get matchday_bench => 'Ławka';
+
+  @override
+  String get matchday_noPlayers => 'Brak zawodników';
+
+  @override
+  String get matchday_substitutions => 'Zmiany';
+
+  @override
+  String get matchday_tactics => 'Taktyka meczowa';
+
+  @override
+  String get matchday_autoPause => 'Auto-pauza';
+
+  @override
+  String get matchday_autoPauseTitle => 'Ustawienia auto-pauzy';
+
+  @override
+  String get matchday_autoPauseInjury => 'Kontuzja mojego zawodnika';
+
+  @override
+  String get matchday_autoPauseRed => 'Czerwona kartka mojego zawodnika';
+
+  @override
+  String get matchday_autoPauseHalfTime => 'Przerwa';
+
+  @override
+  String get matchday_autoPausePenalty => 'Rzut karny dla mojej drużyny';
+
+  @override
+  String get matchday_penaltyPauseUnavailable =>
+      'W tym silniku nie ma jeszcze zdarzenia przyznania rzutu karnego.';
+
+  @override
+  String get matchday_speed => 'Prędkość';
+
+  @override
+  String get matchday_speed1 => '×1';
+
+  @override
+  String get matchday_speed2 => '×2';
+
+  @override
+  String get matchday_speed4 => '×4';
+
+  @override
+  String matchday_subsUsed(int used) {
+    return 'Zmiany: $used';
+  }
+
+  @override
+  String matchday_playerMeta(String position, int ovr, int condition) {
+    return '$position · OVR $ovr · Cond $condition';
+  }
+
+  @override
+  String get matchday_injured => 'Kontuzja';
+
+  @override
+  String get matchday_sentOff => 'Wyrzucony';
+
+  @override
+  String get matchday_suspended => 'Zawieszony';
+
+  @override
+  String get matchday_yellowCard => 'Żółta kartka';
+
+  @override
+  String get matchday_attention => 'Wymaga uwagi';
+
+  @override
+  String get matchday_available => 'Dostępny';
+
+  @override
+  String get matchday_formationLocked =>
+      'Formację można zmienić tylko w przerwie';
+
+  @override
+  String get matchday_changesHint =>
+      'Wybierz zawodnika schodzącego i rezerwowego';
+
+  @override
+  String get matchday_tacticsHint =>
+      'Zmiana taktyki poza formacją jest dostępna w trakcie gry';
+
+  @override
+  String get matchday_selectOutgoing => 'Zawodnik schodzący';
+
+  @override
+  String get matchday_selectIncoming => 'Zawodnik wchodzący';
+
+  @override
+  String get matchday_confirmSubstitution => 'Wykonaj zmianę';
+
+  @override
+  String get matchday_substitutionSuccess => 'Zmiana wykonana';
+
+  @override
+  String get matchday_tacticsSuccess => 'Taktyka zaktualizowana';
+
+  @override
+  String get matchday_actionRejected => 'Nie można wykonać tej akcji';
+
+  @override
+  String get matchday_failureMatchFinished => 'Mecz został zakończony';
+
+  @override
+  String get matchday_failurePlayerNotOnPitch => 'Zawodnik nie jest na boisku';
+
+  @override
+  String get matchday_failurePlayerNotOnBench => 'Zawodnik nie jest na ławce';
+
+  @override
+  String get matchday_failurePlayerUnavailable => 'Zawodnik jest niedostępny';
+
+  @override
+  String get matchday_failurePlayerCannotReenter =>
+      'Ten zawodnik nie może wrócić na boisko';
+
+  @override
+  String get matchday_failureSubstitutionsLimit => 'Wykorzystano limit zmian';
+
+  @override
+  String get matchday_failureSubstitutionWindowsLimit =>
+      'Wykorzystano limit okien zmian';
+
+  @override
+  String get matchday_failureFormationOutsideHalfTime =>
+      'Formację można zmienić tylko w przerwie';
+
+  @override
+  String get matchday_failureInvalidHalfTime =>
+      'Akcja jest dostępna tylko w przerwie';
+
+  @override
+  String get matchday_failureNoAvailableSubstitute =>
+      'Brak dostępnego rezerwowego';
+
+  @override
+  String matchday_autoPaused(String reason) {
+    return 'Auto-pauza: $reason';
+  }
+
+  @override
+  String matchday_matchProgress(int minute) {
+    return 'Symulacja: $minute\'';
+  }
+
+  @override
+  String get matchday_summaryTitle => 'Podsumowanie meczu';
+
+  @override
+  String get matchday_summaryTeamStats => 'Statystyki drużyn';
+
+  @override
+  String get matchday_summaryPlayerStats => 'Statystyki zawodników';
+
+  @override
+  String get matchday_summaryMOTM => 'Zawodnik meczu';
+
+  @override
+  String get matchday_summaryInspired => 'Inspirujący występ';
+
+  @override
+  String get matchday_summaryNone => 'Brak';
+
+  @override
+  String get matchday_summaryClose => 'Zamknij podsumowanie';
+
+  @override
+  String get matchday_summaryNoPlayerStats => 'Brak statystyk zawodników';
+
+  @override
+  String get matchday_summaryRating => 'Ocena';
+
+  @override
+  String get matchday_summaryStamina => 'Kondycja';
+
+  @override
+  String get matchday_summaryStatus => 'Status';
+
+  @override
   String get router_noMatchData => 'Brak danych meczu';
 
   @override

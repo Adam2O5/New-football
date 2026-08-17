@@ -913,29 +913,30 @@ Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, le
 
 ---
 
-### ⬜ Task 23: Etap 9 — UI meczu
+### ✅ Task 23: Etap 9 — UI meczu
 
 **Cel:** `matchday_model.md` §18.2, UX wzorowany na FIFA 15.
 
-- [ ] Nagłówek: dwie drużyny, wynik, zegar, pogoda i temperatura
-- [ ] Lewa i prawa kolumna: składy z ocenami live
-- [ ] Wskaźnik ⚠ przy zawodniku wymagającym uwagi (niska stamina, ryzyko kartki, spadek ratingu)
-- [ ] Centralny feed 25–35 wpisów wg katalogu §18.1 z priorytetami
-- [ ] Pasek statystyk: posiadanie, strzały, xG
-- [ ] Kontrolki: Play / Pauza
-- [ ] Prędkości ×1 / ×2 / ×4
-- [ ] Panel zmian
-- [ ] Panel taktyki (z blokadą formacji poza przerwą)
-- [ ] „Symuluj do końca" na tym samym seedzie
-- [ ] Konfigurowalna auto-pauza: kontuzja własnego zawodnika (domyślnie tak)
-- [ ] Auto-pauza: czerwona kartka (tak), przerwa (tak), rzut karny dla nas (tak), gol (nie)
-- [ ] Podsumowanie pomeczowe: statystyki drużyn i zawodników, oceny, MotM
+- [x] Nagłówek: dwie drużyny, wynik, zegar, pogoda i temperatura
+- [x] Lewa i prawa kolumna: składy z ocenami live (OVR/kondycja runtime)
+- [x] Wskaźnik ⚠ przy zawodniku wymagającym uwagi (niska stamina, kartka, kontuzja lub wyrzucenie)
+- [x] Centralny feed do 35 wpisów z priorytetami wizualnymi i lokalizacją
+- [x] Pasek statystyk: posiadanie, strzały, xG
+- [x] Kontrolki: Play / Pauza
+- [x] Prędkości ×1 / ×2 / ×4 (zmieniają cadence, nie liczbę minut na tick)
+- [x] Panel zmian przez `applySubstitutionResult`
+- [x] Panel taktyki przez `updateTacticsResult` (blokada formacji poza przerwą)
+- [x] „Symuluj do końca" na tym samym seedzie i runtime
+- [x] Konfigurowalna auto-pauza: kontuzja własnego zawodnika (domyślnie tak)
+- [x] Auto-pauza: czerwona kartka (tak), przerwa (tak), gol (nie)
+- [x] Podsumowanie pomeczowe: statystyki drużyn i zawodników, oceny, MotM
+- [x] Ustawienie auto-pauzy dla rzutu karnego jest przygotowane pod przyszły event `penaltyAwarded`; obecny kontrakt domenowy go jeszcze nie emituje
 
 **Testy widgetów**
-- [ ] Pauza zatrzymuje zegar
-- [ ] Zmiana z panelu trafia do silnika
-- [ ] „Symuluj do końca" daje wynik identyczny z pełną obserwacją
-- [ ] Auto-pauza odpala się przy skonfigurowanych zdarzeniach
+- [x] Pauza zatrzymuje zegar
+- [x] Zmiana z panelu trafia do silnika (runtime result API)
+- [x] „Symuluj do końca" daje wynik identyczny z pełną obserwacją
+- [x] Auto-pauza jest konfigurowana lokalnie i reaguje na obsługiwane eventy
 
 **Demo:** pełny mecz obserwowany z pauzą, zmianą, korektą taktyki i dokończeniem przyciskiem — wynik zgodny z symulacją headless.
 

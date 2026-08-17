@@ -6,38 +6,36 @@ part of 'assigned_role.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$AssignedGkRoleImpl _$$AssignedGkRoleImplFromJson(Map<String, dynamic> json) =>
-    _$AssignedGkRoleImpl(
+AssignedGkRole _$AssignedGkRoleFromJson(Map<String, dynamic> json) =>
+    AssignedGkRole(
       role:
           $enumDecodeNullable(_$GkRoleEnumMap, json['role']) ?? GkRole.standard,
       $type: json['type'] as String?,
     );
 
-Map<String, dynamic> _$$AssignedGkRoleImplToJson(
-  _$AssignedGkRoleImpl instance,
-) => <String, dynamic>{
-  'role': _$GkRoleEnumMap[instance.role]!,
-  'type': instance.$type,
-};
+Map<String, dynamic> _$AssignedGkRoleToJson(AssignedGkRole instance) =>
+    <String, dynamic>{
+      'role': _$GkRoleEnumMap[instance.role]!,
+      'type': instance.$type,
+    };
 
 const _$GkRoleEnumMap = {
   GkRole.standard: 'standard',
   GkRole.sweeperKeeper: 'sweeperKeeper',
 };
 
-_$AssignedCbRoleImpl _$$AssignedCbRoleImplFromJson(Map<String, dynamic> json) =>
-    _$AssignedCbRoleImpl(
+AssignedCbRole _$AssignedCbRoleFromJson(Map<String, dynamic> json) =>
+    AssignedCbRole(
       role:
           $enumDecodeNullable(_$CbRoleEnumMap, json['role']) ?? CbRole.standard,
       $type: json['type'] as String?,
     );
 
-Map<String, dynamic> _$$AssignedCbRoleImplToJson(
-  _$AssignedCbRoleImpl instance,
-) => <String, dynamic>{
-  'role': _$CbRoleEnumMap[instance.role]!,
-  'type': instance.$type,
-};
+Map<String, dynamic> _$AssignedCbRoleToJson(AssignedCbRole instance) =>
+    <String, dynamic>{
+      'role': _$CbRoleEnumMap[instance.role]!,
+      'type': instance.$type,
+    };
 
 const _$CbRoleEnumMap = {
   CbRole.standard: 'standard',
@@ -45,17 +43,17 @@ const _$CbRoleEnumMap = {
   CbRole.noNonsenseCentreBack: 'noNonsenseCentreBack',
 };
 
-_$AssignedFullBackRoleImpl _$$AssignedFullBackRoleImplFromJson(
+AssignedFullBackRole _$AssignedFullBackRoleFromJson(
   Map<String, dynamic> json,
-) => _$AssignedFullBackRoleImpl(
+) => AssignedFullBackRole(
   role:
       $enumDecodeNullable(_$FullBackRoleEnumMap, json['role']) ??
       FullBackRole.standard,
   $type: json['type'] as String?,
 );
 
-Map<String, dynamic> _$$AssignedFullBackRoleImplToJson(
-  _$AssignedFullBackRoleImpl instance,
+Map<String, dynamic> _$AssignedFullBackRoleToJson(
+  AssignedFullBackRole instance,
 ) => <String, dynamic>{
   'role': _$FullBackRoleEnumMap[instance.role]!,
   'type': instance.$type,
@@ -67,17 +65,17 @@ const _$FullBackRoleEnumMap = {
   FullBackRole.attackingFullBack: 'attackingFullBack',
 };
 
-_$AssignedWingBackRoleImpl _$$AssignedWingBackRoleImplFromJson(
+AssignedWingBackRole _$AssignedWingBackRoleFromJson(
   Map<String, dynamic> json,
-) => _$AssignedWingBackRoleImpl(
+) => AssignedWingBackRole(
   role:
       $enumDecodeNullable(_$WingBackRoleEnumMap, json['role']) ??
       WingBackRole.standard,
   $type: json['type'] as String?,
 );
 
-Map<String, dynamic> _$$AssignedWingBackRoleImplToJson(
-  _$AssignedWingBackRoleImpl instance,
+Map<String, dynamic> _$AssignedWingBackRoleToJson(
+  AssignedWingBackRole instance,
 ) => <String, dynamic>{
   'role': _$WingBackRoleEnumMap[instance.role]!,
   'type': instance.$type,
@@ -89,19 +87,18 @@ const _$WingBackRoleEnumMap = {
   WingBackRole.invertedWingBack: 'invertedWingBack',
 };
 
-_$AssignedCdmRoleImpl _$$AssignedCdmRoleImplFromJson(
+AssignedCdmRole _$AssignedCdmRoleFromJson(
   Map<String, dynamic> json,
-) => _$AssignedCdmRoleImpl(
+) => AssignedCdmRole(
   role: $enumDecodeNullable(_$CdmRoleEnumMap, json['role']) ?? CdmRole.standard,
   $type: json['type'] as String?,
 );
 
-Map<String, dynamic> _$$AssignedCdmRoleImplToJson(
-  _$AssignedCdmRoleImpl instance,
-) => <String, dynamic>{
-  'role': _$CdmRoleEnumMap[instance.role]!,
-  'type': instance.$type,
-};
+Map<String, dynamic> _$AssignedCdmRoleToJson(AssignedCdmRole instance) =>
+    <String, dynamic>{
+      'role': _$CdmRoleEnumMap[instance.role]!,
+      'type': instance.$type,
+    };
 
 const _$CdmRoleEnumMap = {
   CdmRole.standard: 'standard',
@@ -110,19 +107,18 @@ const _$CdmRoleEnumMap = {
   CdmRole.anchorMan: 'anchorMan',
 };
 
-_$AssignedCmRoleImpl _$$AssignedCmRoleImplFromJson(Map<String, dynamic> json) =>
-    _$AssignedCmRoleImpl(
+AssignedCmRole _$AssignedCmRoleFromJson(Map<String, dynamic> json) =>
+    AssignedCmRole(
       role:
           $enumDecodeNullable(_$CmRoleEnumMap, json['role']) ?? CmRole.standard,
       $type: json['type'] as String?,
     );
 
-Map<String, dynamic> _$$AssignedCmRoleImplToJson(
-  _$AssignedCmRoleImpl instance,
-) => <String, dynamic>{
-  'role': _$CmRoleEnumMap[instance.role]!,
-  'type': instance.$type,
-};
+Map<String, dynamic> _$AssignedCmRoleToJson(AssignedCmRole instance) =>
+    <String, dynamic>{
+      'role': _$CmRoleEnumMap[instance.role]!,
+      'type': instance.$type,
+    };
 
 const _$CmRoleEnumMap = {
   CmRole.standard: 'standard',
@@ -132,19 +128,18 @@ const _$CmRoleEnumMap = {
   CmRole.mezzala: 'mezzala',
 };
 
-_$AssignedCamRoleImpl _$$AssignedCamRoleImplFromJson(
+AssignedCamRole _$AssignedCamRoleFromJson(
   Map<String, dynamic> json,
-) => _$AssignedCamRoleImpl(
+) => AssignedCamRole(
   role: $enumDecodeNullable(_$CamRoleEnumMap, json['role']) ?? CamRole.standard,
   $type: json['type'] as String?,
 );
 
-Map<String, dynamic> _$$AssignedCamRoleImplToJson(
-  _$AssignedCamRoleImpl instance,
-) => <String, dynamic>{
-  'role': _$CamRoleEnumMap[instance.role]!,
-  'type': instance.$type,
-};
+Map<String, dynamic> _$AssignedCamRoleToJson(AssignedCamRole instance) =>
+    <String, dynamic>{
+      'role': _$CamRoleEnumMap[instance.role]!,
+      'type': instance.$type,
+    };
 
 const _$CamRoleEnumMap = {
   CamRole.standard: 'standard',
@@ -152,21 +147,19 @@ const _$CamRoleEnumMap = {
   CamRole.shadowStriker: 'shadowStriker',
 };
 
-_$AssignedWingerRoleImpl _$$AssignedWingerRoleImplFromJson(
-  Map<String, dynamic> json,
-) => _$AssignedWingerRoleImpl(
-  role:
-      $enumDecodeNullable(_$WingerRoleEnumMap, json['role']) ??
-      WingerRole.standard,
-  $type: json['type'] as String?,
-);
+AssignedWingerRole _$AssignedWingerRoleFromJson(Map<String, dynamic> json) =>
+    AssignedWingerRole(
+      role:
+          $enumDecodeNullable(_$WingerRoleEnumMap, json['role']) ??
+          WingerRole.standard,
+      $type: json['type'] as String?,
+    );
 
-Map<String, dynamic> _$$AssignedWingerRoleImplToJson(
-  _$AssignedWingerRoleImpl instance,
-) => <String, dynamic>{
-  'role': _$WingerRoleEnumMap[instance.role]!,
-  'type': instance.$type,
-};
+Map<String, dynamic> _$AssignedWingerRoleToJson(AssignedWingerRole instance) =>
+    <String, dynamic>{
+      'role': _$WingerRoleEnumMap[instance.role]!,
+      'type': instance.$type,
+    };
 
 const _$WingerRoleEnumMap = {
   WingerRole.standard: 'standard',
@@ -174,17 +167,16 @@ const _$WingerRoleEnumMap = {
   WingerRole.winger: 'winger',
 };
 
-_$AssignedStrikerRoleImpl _$$AssignedStrikerRoleImplFromJson(
-  Map<String, dynamic> json,
-) => _$AssignedStrikerRoleImpl(
-  role:
-      $enumDecodeNullable(_$StrikerRoleEnumMap, json['role']) ??
-      StrikerRole.standard,
-  $type: json['type'] as String?,
-);
+AssignedStrikerRole _$AssignedStrikerRoleFromJson(Map<String, dynamic> json) =>
+    AssignedStrikerRole(
+      role:
+          $enumDecodeNullable(_$StrikerRoleEnumMap, json['role']) ??
+          StrikerRole.standard,
+      $type: json['type'] as String?,
+    );
 
-Map<String, dynamic> _$$AssignedStrikerRoleImplToJson(
-  _$AssignedStrikerRoleImpl instance,
+Map<String, dynamic> _$AssignedStrikerRoleToJson(
+  AssignedStrikerRole instance,
 ) => <String, dynamic>{
   'role': _$StrikerRoleEnumMap[instance.role]!,
   'type': instance.$type,

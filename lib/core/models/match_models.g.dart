@@ -6,16 +6,15 @@ part of 'match_models.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$MatchEventImpl _$$MatchEventImplFromJson(Map<String, dynamic> json) =>
-    _$MatchEventImpl(
-      type: $enumDecode(_$MatchEventTypeEnumMap, json['type']),
-      minute: (json['minute'] as num).toInt(),
-      teamId: json['teamId'] as String,
-      playerId: json['playerId'] as String?,
-      description: json['description'] as String?,
-    );
+_MatchEvent _$MatchEventFromJson(Map<String, dynamic> json) => _MatchEvent(
+  type: $enumDecode(_$MatchEventTypeEnumMap, json['type']),
+  minute: (json['minute'] as num).toInt(),
+  teamId: json['teamId'] as String,
+  playerId: json['playerId'] as String?,
+  description: json['description'] as String?,
+);
 
-Map<String, dynamic> _$$MatchEventImplToJson(_$MatchEventImpl instance) =>
+Map<String, dynamic> _$MatchEventToJson(_MatchEvent instance) =>
     <String, dynamic>{
       'type': _$MatchEventTypeEnumMap[instance.type]!,
       'minute': instance.minute,
@@ -38,16 +37,15 @@ const _$MatchEventTypeEnumMap = {
   MatchEventType.foul: 'foul',
 };
 
-_$MatchInjuryImpl _$$MatchInjuryImplFromJson(Map<String, dynamic> json) =>
-    _$MatchInjuryImpl(
-      teamId: json['teamId'] as String,
-      playerId: json['playerId'] as String,
-      injury: Injury.fromJson(json['injury'] as Map<String, dynamic>),
-      playerInStartingXi: json['playerInStartingXi'] as bool,
-      potentialLoss: json['potentialLoss'] as bool? ?? false,
-    );
+_MatchInjury _$MatchInjuryFromJson(Map<String, dynamic> json) => _MatchInjury(
+  teamId: json['teamId'] as String,
+  playerId: json['playerId'] as String,
+  injury: Injury.fromJson(json['injury'] as Map<String, dynamic>),
+  playerInStartingXi: json['playerInStartingXi'] as bool,
+  potentialLoss: json['potentialLoss'] as bool? ?? false,
+);
 
-Map<String, dynamic> _$$MatchInjuryImplToJson(_$MatchInjuryImpl instance) =>
+Map<String, dynamic> _$MatchInjuryToJson(_MatchInjury instance) =>
     <String, dynamic>{
       'teamId': instance.teamId,
       'playerId': instance.playerId,
@@ -56,29 +54,27 @@ Map<String, dynamic> _$$MatchInjuryImplToJson(_$MatchInjuryImpl instance) =>
       'potentialLoss': instance.potentialLoss,
     };
 
-_$MatchDisciplineImpl _$$MatchDisciplineImplFromJson(
-  Map<String, dynamic> json,
-) => _$MatchDisciplineImpl(
-  teamId: json['teamId'] as String,
-  playerId: json['playerId'] as String,
-  yellowCardsInMatch: (json['yellowCardsInMatch'] as num?)?.toInt() ?? 0,
-  redCardKind:
-      $enumDecodeNullable(_$RedCardKindEnumMap, json['redCardKind']) ??
-      RedCardKind.none,
-  directRedSeverity: (json['directRedSeverity'] as num?)?.toInt() ?? 0,
-  playerInStartingXi: json['playerInStartingXi'] as bool? ?? false,
-);
+_MatchDiscipline _$MatchDisciplineFromJson(Map<String, dynamic> json) =>
+    _MatchDiscipline(
+      teamId: json['teamId'] as String,
+      playerId: json['playerId'] as String,
+      yellowCardsInMatch: (json['yellowCardsInMatch'] as num?)?.toInt() ?? 0,
+      redCardKind:
+          $enumDecodeNullable(_$RedCardKindEnumMap, json['redCardKind']) ??
+          RedCardKind.none,
+      directRedSeverity: (json['directRedSeverity'] as num?)?.toInt() ?? 0,
+      playerInStartingXi: json['playerInStartingXi'] as bool? ?? false,
+    );
 
-Map<String, dynamic> _$$MatchDisciplineImplToJson(
-  _$MatchDisciplineImpl instance,
-) => <String, dynamic>{
-  'teamId': instance.teamId,
-  'playerId': instance.playerId,
-  'yellowCardsInMatch': instance.yellowCardsInMatch,
-  'redCardKind': _$RedCardKindEnumMap[instance.redCardKind]!,
-  'directRedSeverity': instance.directRedSeverity,
-  'playerInStartingXi': instance.playerInStartingXi,
-};
+Map<String, dynamic> _$MatchDisciplineToJson(_MatchDiscipline instance) =>
+    <String, dynamic>{
+      'teamId': instance.teamId,
+      'playerId': instance.playerId,
+      'yellowCardsInMatch': instance.yellowCardsInMatch,
+      'redCardKind': _$RedCardKindEnumMap[instance.redCardKind]!,
+      'directRedSeverity': instance.directRedSeverity,
+      'playerInStartingXi': instance.playerInStartingXi,
+    };
 
 const _$RedCardKindEnumMap = {
   RedCardKind.none: 'none',
@@ -86,8 +82,8 @@ const _$RedCardKindEnumMap = {
   RedCardKind.direct: 'direct',
 };
 
-_$TeamMatchStatsImpl _$$TeamMatchStatsImplFromJson(Map<String, dynamic> json) =>
-    _$TeamMatchStatsImpl(
+_TeamMatchStats _$TeamMatchStatsFromJson(Map<String, dynamic> json) =>
+    _TeamMatchStats(
       teamId: json['teamId'] as String,
       goals: (json['goals'] as num?)?.toInt() ?? 0,
       shots: (json['shots'] as num?)?.toInt() ?? 0,
@@ -105,77 +101,75 @@ _$TeamMatchStatsImpl _$$TeamMatchStatsImplFromJson(Map<String, dynamic> json) =>
       saves: (json['saves'] as num?)?.toInt() ?? 0,
     );
 
-Map<String, dynamic> _$$TeamMatchStatsImplToJson(
-  _$TeamMatchStatsImpl instance,
-) => <String, dynamic>{
-  'teamId': instance.teamId,
-  'goals': instance.goals,
-  'shots': instance.shots,
-  'shotsOnTarget': instance.shotsOnTarget,
-  'possession': instance.possession,
-  'xg': instance.xg,
-  'passes': instance.passes,
-  'passAccuracy': instance.passAccuracy,
-  'duelsWon': instance.duelsWon,
-  'offsides': instance.offsides,
-  'corners': instance.corners,
-  'fouls': instance.fouls,
-  'yellowCards': instance.yellowCards,
-  'redCards': instance.redCards,
-  'saves': instance.saves,
-};
+Map<String, dynamic> _$TeamMatchStatsToJson(_TeamMatchStats instance) =>
+    <String, dynamic>{
+      'teamId': instance.teamId,
+      'goals': instance.goals,
+      'shots': instance.shots,
+      'shotsOnTarget': instance.shotsOnTarget,
+      'possession': instance.possession,
+      'xg': instance.xg,
+      'passes': instance.passes,
+      'passAccuracy': instance.passAccuracy,
+      'duelsWon': instance.duelsWon,
+      'offsides': instance.offsides,
+      'corners': instance.corners,
+      'fouls': instance.fouls,
+      'yellowCards': instance.yellowCards,
+      'redCards': instance.redCards,
+      'saves': instance.saves,
+    };
 
-_$MatchTeamSnapshotImpl _$$MatchTeamSnapshotImplFromJson(
-  Map<String, dynamic> json,
-) => _$MatchTeamSnapshotImpl(
-  teamId: json['teamId'] as String? ?? '',
-  startingXi:
-      (json['startingXi'] as List<dynamic>?)
-          ?.map((e) => Player.fromJson(e as Map<String, dynamic>))
-          .toList() ??
-      const [],
-  bench:
-      (json['bench'] as List<dynamic>?)
-          ?.map((e) => Player.fromJson(e as Map<String, dynamic>))
-          .toList() ??
-      const [],
-  assignedPositions:
-      (json['assignedPositions'] as List<dynamic>?)
-          ?.map((e) => $enumDecode(_$PositionEnumMap, e))
-          .toList() ??
-      const [],
-  assignedRoles:
-      (json['assignedRoles'] as List<dynamic>?)
-          ?.map((e) => AssignedRole.fromJson(e as Map<String, dynamic>))
-          .toList() ??
-      const [],
-  tactics: json['tactics'] == null
-      ? const TacticsSetup()
-      : TacticsSetup.fromJson(json['tactics'] as Map<String, dynamic>),
-  chemistry: (json['chemistry'] as num?)?.toDouble() ?? 50.0,
-  atmosphere: (json['atmosphere'] as num?)?.toInt() ?? 50,
-  cohesionMultiplier: (json['cohesionMultiplier'] as num?)?.toDouble() ?? 1.0,
-  staff: json['staff'] == null
-      ? const TeamStaff()
-      : TeamStaff.fromJson(json['staff'] as Map<String, dynamic>),
-);
+_MatchTeamSnapshot _$MatchTeamSnapshotFromJson(Map<String, dynamic> json) =>
+    _MatchTeamSnapshot(
+      teamId: json['teamId'] as String? ?? '',
+      startingXi:
+          (json['startingXi'] as List<dynamic>?)
+              ?.map((e) => Player.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      bench:
+          (json['bench'] as List<dynamic>?)
+              ?.map((e) => Player.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      assignedPositions:
+          (json['assignedPositions'] as List<dynamic>?)
+              ?.map((e) => $enumDecode(_$PositionEnumMap, e))
+              .toList() ??
+          const [],
+      assignedRoles:
+          (json['assignedRoles'] as List<dynamic>?)
+              ?.map((e) => AssignedRole.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+      tactics: json['tactics'] == null
+          ? const TacticsSetup()
+          : TacticsSetup.fromJson(json['tactics'] as Map<String, dynamic>),
+      chemistry: (json['chemistry'] as num?)?.toDouble() ?? 50.0,
+      atmosphere: (json['atmosphere'] as num?)?.toInt() ?? 50,
+      cohesionMultiplier:
+          (json['cohesionMultiplier'] as num?)?.toDouble() ?? 1.0,
+      staff: json['staff'] == null
+          ? const TeamStaff()
+          : TeamStaff.fromJson(json['staff'] as Map<String, dynamic>),
+    );
 
-Map<String, dynamic> _$$MatchTeamSnapshotImplToJson(
-  _$MatchTeamSnapshotImpl instance,
-) => <String, dynamic>{
-  'teamId': instance.teamId,
-  'startingXi': instance.startingXi,
-  'bench': instance.bench,
-  'assignedPositions': instance.assignedPositions
-      .map((e) => _$PositionEnumMap[e]!)
-      .toList(),
-  'assignedRoles': instance.assignedRoles,
-  'tactics': instance.tactics,
-  'chemistry': instance.chemistry,
-  'atmosphere': instance.atmosphere,
-  'cohesionMultiplier': instance.cohesionMultiplier,
-  'staff': instance.staff,
-};
+Map<String, dynamic> _$MatchTeamSnapshotToJson(_MatchTeamSnapshot instance) =>
+    <String, dynamic>{
+      'teamId': instance.teamId,
+      'startingXi': instance.startingXi,
+      'bench': instance.bench,
+      'assignedPositions': instance.assignedPositions
+          .map((e) => _$PositionEnumMap[e]!)
+          .toList(),
+      'assignedRoles': instance.assignedRoles,
+      'tactics': instance.tactics,
+      'chemistry': instance.chemistry,
+      'atmosphere': instance.atmosphere,
+      'cohesionMultiplier': instance.cohesionMultiplier,
+      'staff': instance.staff,
+    };
 
 const _$PositionEnumMap = {
   Position.gk: 'gk',
@@ -192,9 +186,7 @@ const _$PositionEnumMap = {
   Position.st: 'st',
 };
 
-_$MatchResultImpl _$$MatchResultImplFromJson(
-  Map<String, dynamic> json,
-) => _$MatchResultImpl(
+_MatchResult _$MatchResultFromJson(Map<String, dynamic> json) => _MatchResult(
   homeTeamId: json['homeTeamId'] as String,
   awayTeamId: json['awayTeamId'] as String,
   homeGoals: (json['homeGoals'] as num).toInt(),
@@ -282,7 +274,7 @@ _$MatchResultImpl _$$MatchResultImplFromJson(
   stoppageTime: (json['stoppageTime'] as num?)?.toInt() ?? 0,
 );
 
-Map<String, dynamic> _$$MatchResultImplToJson(_$MatchResultImpl instance) =>
+Map<String, dynamic> _$MatchResultToJson(_MatchResult instance) =>
     <String, dynamic>{
       'homeTeamId': instance.homeTeamId,
       'awayTeamId': instance.awayTeamId,
@@ -325,27 +317,26 @@ const _$MatchStatusEnumMap = {
   MatchStatus.dsq: 'dsq',
 };
 
-_$MatchSetupImpl _$$MatchSetupImplFromJson(Map<String, dynamic> json) =>
-    _$MatchSetupImpl(
-      homeTeamId: json['homeTeamId'] as String,
-      awayTeamId: json['awayTeamId'] as String,
-      homeLineup: (json['homeLineup'] as List<dynamic>)
-          .map((e) => Player.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      awayLineup: (json['awayLineup'] as List<dynamic>)
-          .map((e) => Player.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      homeTactics: TacticsSetup.fromJson(
-        json['homeTactics'] as Map<String, dynamic>,
-      ),
-      awayTactics: TacticsSetup.fromJson(
-        json['awayTactics'] as Map<String, dynamic>,
-      ),
-      isHomeAdvantage: json['isHomeAdvantage'] as bool? ?? false,
-      roundNumber: (json['roundNumber'] as num?)?.toInt() ?? 0,
-    );
+_MatchSetup _$MatchSetupFromJson(Map<String, dynamic> json) => _MatchSetup(
+  homeTeamId: json['homeTeamId'] as String,
+  awayTeamId: json['awayTeamId'] as String,
+  homeLineup: (json['homeLineup'] as List<dynamic>)
+      .map((e) => Player.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  awayLineup: (json['awayLineup'] as List<dynamic>)
+      .map((e) => Player.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  homeTactics: TacticsSetup.fromJson(
+    json['homeTactics'] as Map<String, dynamic>,
+  ),
+  awayTactics: TacticsSetup.fromJson(
+    json['awayTactics'] as Map<String, dynamic>,
+  ),
+  isHomeAdvantage: json['isHomeAdvantage'] as bool? ?? false,
+  roundNumber: (json['roundNumber'] as num?)?.toInt() ?? 0,
+);
 
-Map<String, dynamic> _$$MatchSetupImplToJson(_$MatchSetupImpl instance) =>
+Map<String, dynamic> _$MatchSetupToJson(_MatchSetup instance) =>
     <String, dynamic>{
       'homeTeamId': instance.homeTeamId,
       'awayTeamId': instance.awayTeamId,
@@ -357,8 +348,8 @@ Map<String, dynamic> _$$MatchSetupImplToJson(_$MatchSetupImpl instance) =>
       'roundNumber': instance.roundNumber,
     };
 
-_$ScheduledMatchImpl _$$ScheduledMatchImplFromJson(Map<String, dynamic> json) =>
-    _$ScheduledMatchImpl(
+_ScheduledMatch _$ScheduledMatchFromJson(Map<String, dynamic> json) =>
+    _ScheduledMatch(
       id: json['id'] as String,
       homeTeamId: json['homeTeamId'] as String,
       awayTeamId: json['awayTeamId'] as String,
@@ -368,18 +359,17 @@ _$ScheduledMatchImpl _$$ScheduledMatchImplFromJson(Map<String, dynamic> json) =>
           : MatchResult.fromJson(json['result'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$$ScheduledMatchImplToJson(
-  _$ScheduledMatchImpl instance,
-) => <String, dynamic>{
-  'id': instance.id,
-  'homeTeamId': instance.homeTeamId,
-  'awayTeamId': instance.awayTeamId,
-  'round': instance.round,
-  'result': instance.result,
-};
+Map<String, dynamic> _$ScheduledMatchToJson(_ScheduledMatch instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'homeTeamId': instance.homeTeamId,
+      'awayTeamId': instance.awayTeamId,
+      'round': instance.round,
+      'result': instance.result,
+    };
 
-_$PlayoffSeriesImpl _$$PlayoffSeriesImplFromJson(Map<String, dynamic> json) =>
-    _$PlayoffSeriesImpl(
+_PlayoffSeries _$PlayoffSeriesFromJson(Map<String, dynamic> json) =>
+    _PlayoffSeries(
       id: json['id'] as String,
       higherSeedTeamId: json['higherSeedTeamId'] as String,
       lowerSeedTeamId: json['lowerSeedTeamId'] as String,
@@ -394,7 +384,7 @@ _$PlayoffSeriesImpl _$$PlayoffSeriesImplFromJson(Map<String, dynamic> json) =>
       winnerTeamId: json['winnerTeamId'] as String?,
     );
 
-Map<String, dynamic> _$$PlayoffSeriesImplToJson(_$PlayoffSeriesImpl instance) =>
+Map<String, dynamic> _$PlayoffSeriesToJson(_PlayoffSeries instance) =>
     <String, dynamic>{
       'id': instance.id,
       'higherSeedTeamId': instance.higherSeedTeamId,

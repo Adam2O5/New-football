@@ -6,24 +6,24 @@ part of 'player_attributes.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$OutfieldPlayerAttributesImpl _$$OutfieldPlayerAttributesImplFromJson(
+OutfieldPlayerAttributes _$OutfieldPlayerAttributesFromJson(
   Map<String, dynamic> json,
-) => _$OutfieldPlayerAttributesImpl(
+) => OutfieldPlayerAttributes(
   stats: FieldPlayerAttributes.fromJson(json['stats'] as Map<String, dynamic>),
   $type: json['type'] as String?,
 );
 
-Map<String, dynamic> _$$OutfieldPlayerAttributesImplToJson(
-  _$OutfieldPlayerAttributesImpl instance,
+Map<String, dynamic> _$OutfieldPlayerAttributesToJson(
+  OutfieldPlayerAttributes instance,
 ) => <String, dynamic>{'stats': instance.stats, 'type': instance.$type};
 
-_$GoalkeeperPlayerAttributesImpl _$$GoalkeeperPlayerAttributesImplFromJson(
+GoalkeeperPlayerAttributes _$GoalkeeperPlayerAttributesFromJson(
   Map<String, dynamic> json,
-) => _$GoalkeeperPlayerAttributesImpl(
+) => GoalkeeperPlayerAttributes(
   stats: GoalkeeperAttributes.fromJson(json['stats'] as Map<String, dynamic>),
   $type: json['type'] as String?,
 );
 
-Map<String, dynamic> _$$GoalkeeperPlayerAttributesImplToJson(
-  _$GoalkeeperPlayerAttributesImpl instance,
+Map<String, dynamic> _$GoalkeeperPlayerAttributesToJson(
+  GoalkeeperPlayerAttributes instance,
 ) => <String, dynamic>{'stats': instance.stats, 'type': instance.$type};

@@ -6,8 +6,8 @@ part of 'game_save.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$GameSaveMetaImpl _$$GameSaveMetaImplFromJson(Map<String, dynamic> json) =>
-    _$GameSaveMetaImpl(
+_GameSaveMeta _$GameSaveMetaFromJson(Map<String, dynamic> json) =>
+    _GameSaveMeta(
       id: json['id'] as String,
       name: json['name'] as String,
       createdAt: DateTime.parse(json['createdAt'] as String),
@@ -19,7 +19,7 @@ _$GameSaveMetaImpl _$$GameSaveMetaImplFromJson(Map<String, dynamic> json) =>
           (json['schemaVersion'] as num?)?.toInt() ?? SaveSchema.unknownVersion,
     );
 
-Map<String, dynamic> _$$GameSaveMetaImplToJson(_$GameSaveMetaImpl instance) =>
+Map<String, dynamic> _$GameSaveMetaToJson(_GameSaveMeta instance) =>
     <String, dynamic>{
       'id': instance.id,
       'name': instance.name,
@@ -39,21 +39,19 @@ const _$SeasonPhaseEnumMap = {
   SeasonPhase.offseason: 'offseason',
 };
 
-_$GameSaveImpl _$$GameSaveImplFromJson(Map<String, dynamic> json) =>
-    _$GameSaveImpl(
-      meta: GameSaveMeta.fromJson(json['meta'] as Map<String, dynamic>),
-      leagueState: LeagueState.fromJson(
-        json['leagueState'] as Map<String, dynamic>,
-      ),
-      saveSeed: (json['saveSeed'] as num).toInt(),
-      schemaVersion:
-          (json['schemaVersion'] as num?)?.toInt() ?? SaveSchema.unknownVersion,
-    );
+_GameSave _$GameSaveFromJson(Map<String, dynamic> json) => _GameSave(
+  meta: GameSaveMeta.fromJson(json['meta'] as Map<String, dynamic>),
+  leagueState: LeagueState.fromJson(
+    json['leagueState'] as Map<String, dynamic>,
+  ),
+  saveSeed: (json['saveSeed'] as num).toInt(),
+  schemaVersion:
+      (json['schemaVersion'] as num?)?.toInt() ?? SaveSchema.unknownVersion,
+);
 
-Map<String, dynamic> _$$GameSaveImplToJson(_$GameSaveImpl instance) =>
-    <String, dynamic>{
-      'meta': instance.meta,
-      'leagueState': instance.leagueState,
-      'saveSeed': instance.saveSeed,
-      'schemaVersion': instance.schemaVersion,
-    };
+Map<String, dynamic> _$GameSaveToJson(_GameSave instance) => <String, dynamic>{
+  'meta': instance.meta,
+  'leagueState': instance.leagueState,
+  'saveSeed': instance.saveSeed,
+  'schemaVersion': instance.schemaVersion,
+};

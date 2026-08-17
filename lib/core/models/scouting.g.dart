@@ -6,30 +6,28 @@ part of 'scouting.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$ScoutingKnowledgeImpl _$$ScoutingKnowledgeImplFromJson(
-  Map<String, dynamic> json,
-) => _$ScoutingKnowledgeImpl(
-  prospectId: json['prospectId'] as String,
-  tier:
-      $enumDecodeNullable(_$ScoutingTierEnumMap, json['tier']) ??
-      ScoutingTier.tier1,
-  estimatedSlot: $enumDecodeNullable(
-    _$EstimatedDraftSlotEnumMap,
-    json['estimatedSlot'],
-  ),
-  injuryProneKnown: json['injuryProneKnown'] as bool? ?? false,
-  determinationKnown: json['determinationKnown'] as bool? ?? false,
-);
+_ScoutingKnowledge _$ScoutingKnowledgeFromJson(Map<String, dynamic> json) =>
+    _ScoutingKnowledge(
+      prospectId: json['prospectId'] as String,
+      tier:
+          $enumDecodeNullable(_$ScoutingTierEnumMap, json['tier']) ??
+          ScoutingTier.tier1,
+      estimatedSlot: $enumDecodeNullable(
+        _$EstimatedDraftSlotEnumMap,
+        json['estimatedSlot'],
+      ),
+      injuryProneKnown: json['injuryProneKnown'] as bool? ?? false,
+      determinationKnown: json['determinationKnown'] as bool? ?? false,
+    );
 
-Map<String, dynamic> _$$ScoutingKnowledgeImplToJson(
-  _$ScoutingKnowledgeImpl instance,
-) => <String, dynamic>{
-  'prospectId': instance.prospectId,
-  'tier': _$ScoutingTierEnumMap[instance.tier]!,
-  'estimatedSlot': _$EstimatedDraftSlotEnumMap[instance.estimatedSlot],
-  'injuryProneKnown': instance.injuryProneKnown,
-  'determinationKnown': instance.determinationKnown,
-};
+Map<String, dynamic> _$ScoutingKnowledgeToJson(_ScoutingKnowledge instance) =>
+    <String, dynamic>{
+      'prospectId': instance.prospectId,
+      'tier': _$ScoutingTierEnumMap[instance.tier]!,
+      'estimatedSlot': _$EstimatedDraftSlotEnumMap[instance.estimatedSlot],
+      'injuryProneKnown': instance.injuryProneKnown,
+      'determinationKnown': instance.determinationKnown,
+    };
 
 const _$ScoutingTierEnumMap = {
   ScoutingTier.tier1: 'tier1',
@@ -50,8 +48,8 @@ const _$EstimatedDraftSlotEnumMap = {
   EstimatedDraftSlot.x: 'x',
 };
 
-_$TeamScoutingImpl _$$TeamScoutingImplFromJson(Map<String, dynamic> json) =>
-    _$TeamScoutingImpl(
+_TeamScouting _$TeamScoutingFromJson(Map<String, dynamic> json) =>
+    _TeamScouting(
       watchlistProspectIds:
           (json['watchlistProspectIds'] as List<dynamic>?)
               ?.map((e) => e as String)
@@ -71,7 +69,7 @@ _$TeamScoutingImpl _$$TeamScoutingImplFromJson(Map<String, dynamic> json) =>
           const [],
     );
 
-Map<String, dynamic> _$$TeamScoutingImplToJson(_$TeamScoutingImpl instance) =>
+Map<String, dynamic> _$TeamScoutingToJson(_TeamScouting instance) =>
     <String, dynamic>{
       'watchlistProspectIds': instance.watchlistProspectIds,
       'knowledge': instance.knowledge,

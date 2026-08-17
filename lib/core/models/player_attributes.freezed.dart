@@ -1,5 +1,5 @@
-// coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// coverage:ignore-file
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
@@ -9,445 +9,362 @@ part of 'player_attributes.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// dart format off
 T _$identity<T>(T value) => value;
-
-final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
+PlayerAttributes _$PlayerAttributesFromJson(
+  Map<String, dynamic> json
+) {
+        switch (json['type']) {
+                  case 'outfield':
+          return OutfieldPlayerAttributes.fromJson(
+            json
+          );
+                case 'goalkeeper':
+          return GoalkeeperPlayerAttributes.fromJson(
+            json
+          );
+        
+          default:
+            throw CheckedFromJsonException(
+  json,
+  'type',
+  'PlayerAttributes',
+  'Invalid union type "${json['type']}"!'
 );
-
-PlayerAttributes _$PlayerAttributesFromJson(Map<String, dynamic> json) {
-  switch (json['type']) {
-    case 'outfield':
-      return OutfieldPlayerAttributes.fromJson(json);
-    case 'goalkeeper':
-      return GoalkeeperPlayerAttributes.fromJson(json);
-
-    default:
-      throw CheckedFromJsonException(
-        json,
-        'type',
-        'PlayerAttributes',
-        'Invalid union type "${json['type']}"!',
-      );
-  }
+        }
+      
 }
 
 /// @nodoc
 mixin _$PlayerAttributes {
-  Object get stats => throw _privateConstructorUsedError;
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function(FieldPlayerAttributes stats) outfield,
-    required TResult Function(GoalkeeperAttributes stats) goalkeeper,
-  }) => throw _privateConstructorUsedError;
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(FieldPlayerAttributes stats)? outfield,
-    TResult? Function(GoalkeeperAttributes stats)? goalkeeper,
-  }) => throw _privateConstructorUsedError;
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function(FieldPlayerAttributes stats)? outfield,
-    TResult Function(GoalkeeperAttributes stats)? goalkeeper,
-    required TResult orElse(),
-  }) => throw _privateConstructorUsedError;
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(OutfieldPlayerAttributes value) outfield,
-    required TResult Function(GoalkeeperPlayerAttributes value) goalkeeper,
-  }) => throw _privateConstructorUsedError;
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(OutfieldPlayerAttributes value)? outfield,
-    TResult? Function(GoalkeeperPlayerAttributes value)? goalkeeper,
-  }) => throw _privateConstructorUsedError;
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(OutfieldPlayerAttributes value)? outfield,
-    TResult Function(GoalkeeperPlayerAttributes value)? goalkeeper,
-    required TResult orElse(),
-  }) => throw _privateConstructorUsedError;
+
+ Object get stats;
 
   /// Serializes this PlayerAttributes to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PlayerAttributes&&const DeepCollectionEquality().equals(other.stats, stats));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(stats));
+
+@override
+String toString() {
+  return 'PlayerAttributes(stats: $stats)';
+}
+
+
 }
 
 /// @nodoc
-abstract class $PlayerAttributesCopyWith<$Res> {
-  factory $PlayerAttributesCopyWith(
-    PlayerAttributes value,
-    $Res Function(PlayerAttributes) then,
-  ) = _$PlayerAttributesCopyWithImpl<$Res, PlayerAttributes>;
+class $PlayerAttributesCopyWith<$Res>  {
+$PlayerAttributesCopyWith(PlayerAttributes _, $Res Function(PlayerAttributes) __);
 }
 
-/// @nodoc
-class _$PlayerAttributesCopyWithImpl<$Res, $Val extends PlayerAttributes>
-    implements $PlayerAttributesCopyWith<$Res> {
-  _$PlayerAttributesCopyWithImpl(this._value, this._then);
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+/// Adds pattern-matching-related methods to [PlayerAttributes].
+extension PlayerAttributesPatterns on PlayerAttributes {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
 
-  /// Create a copy of PlayerAttributes
-  /// with the given fields replaced by the non-null parameter values.
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( OutfieldPlayerAttributes value)?  outfield,TResult Function( GoalkeeperPlayerAttributes value)?  goalkeeper,required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case OutfieldPlayerAttributes() when outfield != null:
+return outfield(_that);case GoalkeeperPlayerAttributes() when goalkeeper != null:
+return goalkeeper(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( OutfieldPlayerAttributes value)  outfield,required TResult Function( GoalkeeperPlayerAttributes value)  goalkeeper,}){
+final _that = this;
+switch (_that) {
+case OutfieldPlayerAttributes():
+return outfield(_that);case GoalkeeperPlayerAttributes():
+return goalkeeper(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( OutfieldPlayerAttributes value)?  outfield,TResult? Function( GoalkeeperPlayerAttributes value)?  goalkeeper,}){
+final _that = this;
+switch (_that) {
+case OutfieldPlayerAttributes() when outfield != null:
+return outfield(_that);case GoalkeeperPlayerAttributes() when goalkeeper != null:
+return goalkeeper(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( FieldPlayerAttributes stats)?  outfield,TResult Function( GoalkeeperAttributes stats)?  goalkeeper,required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case OutfieldPlayerAttributes() when outfield != null:
+return outfield(_that.stats);case GoalkeeperPlayerAttributes() when goalkeeper != null:
+return goalkeeper(_that.stats);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( FieldPlayerAttributes stats)  outfield,required TResult Function( GoalkeeperAttributes stats)  goalkeeper,}) {final _that = this;
+switch (_that) {
+case OutfieldPlayerAttributes():
+return outfield(_that.stats);case GoalkeeperPlayerAttributes():
+return goalkeeper(_that.stats);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( FieldPlayerAttributes stats)?  outfield,TResult? Function( GoalkeeperAttributes stats)?  goalkeeper,}) {final _that = this;
+switch (_that) {
+case OutfieldPlayerAttributes() when outfield != null:
+return outfield(_that.stats);case GoalkeeperPlayerAttributes() when goalkeeper != null:
+return goalkeeper(_that.stats);case _:
+  return null;
+
+}
 }
 
-/// @nodoc
-abstract class _$$OutfieldPlayerAttributesImplCopyWith<$Res> {
-  factory _$$OutfieldPlayerAttributesImplCopyWith(
-    _$OutfieldPlayerAttributesImpl value,
-    $Res Function(_$OutfieldPlayerAttributesImpl) then,
-  ) = __$$OutfieldPlayerAttributesImplCopyWithImpl<$Res>;
-  @useResult
-  $Res call({FieldPlayerAttributes stats});
-
-  $FieldPlayerAttributesCopyWith<$Res> get stats;
-}
-
-/// @nodoc
-class __$$OutfieldPlayerAttributesImplCopyWithImpl<$Res>
-    extends _$PlayerAttributesCopyWithImpl<$Res, _$OutfieldPlayerAttributesImpl>
-    implements _$$OutfieldPlayerAttributesImplCopyWith<$Res> {
-  __$$OutfieldPlayerAttributesImplCopyWithImpl(
-    _$OutfieldPlayerAttributesImpl _value,
-    $Res Function(_$OutfieldPlayerAttributesImpl) _then,
-  ) : super(_value, _then);
-
-  /// Create a copy of PlayerAttributes
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({Object? stats = null}) {
-    return _then(
-      _$OutfieldPlayerAttributesImpl(
-        stats: null == stats
-            ? _value.stats
-            : stats // ignore: cast_nullable_to_non_nullable
-                  as FieldPlayerAttributes,
-      ),
-    );
-  }
-
-  /// Create a copy of PlayerAttributes
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $FieldPlayerAttributesCopyWith<$Res> get stats {
-    return $FieldPlayerAttributesCopyWith<$Res>(_value.stats, (value) {
-      return _then(_value.copyWith(stats: value));
-    });
-  }
-}
-
-/// @nodoc
-@JsonSerializable()
-class _$OutfieldPlayerAttributesImpl implements OutfieldPlayerAttributes {
-  const _$OutfieldPlayerAttributesImpl({
-    required this.stats,
-    final String? $type,
-  }) : $type = $type ?? 'outfield';
-
-  factory _$OutfieldPlayerAttributesImpl.fromJson(Map<String, dynamic> json) =>
-      _$$OutfieldPlayerAttributesImplFromJson(json);
-
-  @override
-  final FieldPlayerAttributes stats;
-
-  @JsonKey(name: 'type')
-  final String $type;
-
-  @override
-  String toString() {
-    return 'PlayerAttributes.outfield(stats: $stats)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$OutfieldPlayerAttributesImpl &&
-            (identical(other.stats, stats) || other.stats == stats));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(runtimeType, stats);
-
-  /// Create a copy of PlayerAttributes
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$OutfieldPlayerAttributesImplCopyWith<_$OutfieldPlayerAttributesImpl>
-  get copyWith =>
-      __$$OutfieldPlayerAttributesImplCopyWithImpl<
-        _$OutfieldPlayerAttributesImpl
-      >(this, _$identity);
-
-  @override
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function(FieldPlayerAttributes stats) outfield,
-    required TResult Function(GoalkeeperAttributes stats) goalkeeper,
-  }) {
-    return outfield(stats);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(FieldPlayerAttributes stats)? outfield,
-    TResult? Function(GoalkeeperAttributes stats)? goalkeeper,
-  }) {
-    return outfield?.call(stats);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function(FieldPlayerAttributes stats)? outfield,
-    TResult Function(GoalkeeperAttributes stats)? goalkeeper,
-    required TResult orElse(),
-  }) {
-    if (outfield != null) {
-      return outfield(stats);
-    }
-    return orElse();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(OutfieldPlayerAttributes value) outfield,
-    required TResult Function(GoalkeeperPlayerAttributes value) goalkeeper,
-  }) {
-    return outfield(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(OutfieldPlayerAttributes value)? outfield,
-    TResult? Function(GoalkeeperPlayerAttributes value)? goalkeeper,
-  }) {
-    return outfield?.call(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(OutfieldPlayerAttributes value)? outfield,
-    TResult Function(GoalkeeperPlayerAttributes value)? goalkeeper,
-    required TResult orElse(),
-  }) {
-    if (outfield != null) {
-      return outfield(this);
-    }
-    return orElse();
-  }
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$OutfieldPlayerAttributesImplToJson(this);
-  }
-}
-
-abstract class OutfieldPlayerAttributes implements PlayerAttributes {
-  const factory OutfieldPlayerAttributes({
-    required final FieldPlayerAttributes stats,
-  }) = _$OutfieldPlayerAttributesImpl;
-
-  factory OutfieldPlayerAttributes.fromJson(Map<String, dynamic> json) =
-      _$OutfieldPlayerAttributesImpl.fromJson;
-
-  @override
-  FieldPlayerAttributes get stats;
-
-  /// Create a copy of PlayerAttributes
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$OutfieldPlayerAttributesImplCopyWith<_$OutfieldPlayerAttributesImpl>
-  get copyWith => throw _privateConstructorUsedError;
-}
-
-/// @nodoc
-abstract class _$$GoalkeeperPlayerAttributesImplCopyWith<$Res> {
-  factory _$$GoalkeeperPlayerAttributesImplCopyWith(
-    _$GoalkeeperPlayerAttributesImpl value,
-    $Res Function(_$GoalkeeperPlayerAttributesImpl) then,
-  ) = __$$GoalkeeperPlayerAttributesImplCopyWithImpl<$Res>;
-  @useResult
-  $Res call({GoalkeeperAttributes stats});
-
-  $GoalkeeperAttributesCopyWith<$Res> get stats;
-}
-
-/// @nodoc
-class __$$GoalkeeperPlayerAttributesImplCopyWithImpl<$Res>
-    extends
-        _$PlayerAttributesCopyWithImpl<$Res, _$GoalkeeperPlayerAttributesImpl>
-    implements _$$GoalkeeperPlayerAttributesImplCopyWith<$Res> {
-  __$$GoalkeeperPlayerAttributesImplCopyWithImpl(
-    _$GoalkeeperPlayerAttributesImpl _value,
-    $Res Function(_$GoalkeeperPlayerAttributesImpl) _then,
-  ) : super(_value, _then);
-
-  /// Create a copy of PlayerAttributes
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({Object? stats = null}) {
-    return _then(
-      _$GoalkeeperPlayerAttributesImpl(
-        stats: null == stats
-            ? _value.stats
-            : stats // ignore: cast_nullable_to_non_nullable
-                  as GoalkeeperAttributes,
-      ),
-    );
-  }
-
-  /// Create a copy of PlayerAttributes
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @pragma('vm:prefer-inline')
-  $GoalkeeperAttributesCopyWith<$Res> get stats {
-    return $GoalkeeperAttributesCopyWith<$Res>(_value.stats, (value) {
-      return _then(_value.copyWith(stats: value));
-    });
-  }
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$GoalkeeperPlayerAttributesImpl implements GoalkeeperPlayerAttributes {
-  const _$GoalkeeperPlayerAttributesImpl({
-    required this.stats,
-    final String? $type,
-  }) : $type = $type ?? 'goalkeeper';
 
-  factory _$GoalkeeperPlayerAttributesImpl.fromJson(
-    Map<String, dynamic> json,
-  ) => _$$GoalkeeperPlayerAttributesImplFromJson(json);
+class OutfieldPlayerAttributes implements PlayerAttributes {
+  const OutfieldPlayerAttributes({required this.stats, final  String? $type}): $type = $type ?? 'outfield';
+  factory OutfieldPlayerAttributes.fromJson(Map<String, dynamic> json) => _$OutfieldPlayerAttributesFromJson(json);
 
-  @override
-  final GoalkeeperAttributes stats;
+@override final  FieldPlayerAttributes stats;
 
-  @JsonKey(name: 'type')
-  final String $type;
+@JsonKey(name: 'type')
+final String $type;
 
-  @override
-  String toString() {
-    return 'PlayerAttributes.goalkeeper(stats: $stats)';
-  }
 
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$GoalkeeperPlayerAttributesImpl &&
-            (identical(other.stats, stats) || other.stats == stats));
-  }
+/// Create a copy of PlayerAttributes
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$OutfieldPlayerAttributesCopyWith<OutfieldPlayerAttributes> get copyWith => _$OutfieldPlayerAttributesCopyWithImpl<OutfieldPlayerAttributes>(this, _$identity);
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(runtimeType, stats);
-
-  /// Create a copy of PlayerAttributes
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$GoalkeeperPlayerAttributesImplCopyWith<_$GoalkeeperPlayerAttributesImpl>
-  get copyWith =>
-      __$$GoalkeeperPlayerAttributesImplCopyWithImpl<
-        _$GoalkeeperPlayerAttributesImpl
-      >(this, _$identity);
-
-  @override
-  @optionalTypeArgs
-  TResult when<TResult extends Object?>({
-    required TResult Function(FieldPlayerAttributes stats) outfield,
-    required TResult Function(GoalkeeperAttributes stats) goalkeeper,
-  }) {
-    return goalkeeper(stats);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function(FieldPlayerAttributes stats)? outfield,
-    TResult? Function(GoalkeeperAttributes stats)? goalkeeper,
-  }) {
-    return goalkeeper?.call(stats);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeWhen<TResult extends Object?>({
-    TResult Function(FieldPlayerAttributes stats)? outfield,
-    TResult Function(GoalkeeperAttributes stats)? goalkeeper,
-    required TResult orElse(),
-  }) {
-    if (goalkeeper != null) {
-      return goalkeeper(stats);
-    }
-    return orElse();
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult map<TResult extends Object?>({
-    required TResult Function(OutfieldPlayerAttributes value) outfield,
-    required TResult Function(GoalkeeperPlayerAttributes value) goalkeeper,
-  }) {
-    return goalkeeper(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult? mapOrNull<TResult extends Object?>({
-    TResult? Function(OutfieldPlayerAttributes value)? outfield,
-    TResult? Function(GoalkeeperPlayerAttributes value)? goalkeeper,
-  }) {
-    return goalkeeper?.call(this);
-  }
-
-  @override
-  @optionalTypeArgs
-  TResult maybeMap<TResult extends Object?>({
-    TResult Function(OutfieldPlayerAttributes value)? outfield,
-    TResult Function(GoalkeeperPlayerAttributes value)? goalkeeper,
-    required TResult orElse(),
-  }) {
-    if (goalkeeper != null) {
-      return goalkeeper(this);
-    }
-    return orElse();
-  }
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$GoalkeeperPlayerAttributesImplToJson(this);
-  }
+@override
+Map<String, dynamic> toJson() {
+  return _$OutfieldPlayerAttributesToJson(this, );
 }
 
-abstract class GoalkeeperPlayerAttributes implements PlayerAttributes {
-  const factory GoalkeeperPlayerAttributes({
-    required final GoalkeeperAttributes stats,
-  }) = _$GoalkeeperPlayerAttributesImpl;
-
-  factory GoalkeeperPlayerAttributes.fromJson(Map<String, dynamic> json) =
-      _$GoalkeeperPlayerAttributesImpl.fromJson;
-
-  @override
-  GoalkeeperAttributes get stats;
-
-  /// Create a copy of PlayerAttributes
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$GoalkeeperPlayerAttributesImplCopyWith<_$GoalkeeperPlayerAttributesImpl>
-  get copyWith => throw _privateConstructorUsedError;
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is OutfieldPlayerAttributes&&(identical(other.stats, stats) || other.stats == stats));
 }
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,stats);
+
+@override
+String toString() {
+  return 'PlayerAttributes.outfield(stats: $stats)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $OutfieldPlayerAttributesCopyWith<$Res> implements $PlayerAttributesCopyWith<$Res> {
+  factory $OutfieldPlayerAttributesCopyWith(OutfieldPlayerAttributes value, $Res Function(OutfieldPlayerAttributes) _then) = _$OutfieldPlayerAttributesCopyWithImpl;
+@useResult
+$Res call({
+ FieldPlayerAttributes stats
+});
+
+
+$FieldPlayerAttributesCopyWith<$Res> get stats;
+
+}
+/// @nodoc
+class _$OutfieldPlayerAttributesCopyWithImpl<$Res>
+    implements $OutfieldPlayerAttributesCopyWith<$Res> {
+  _$OutfieldPlayerAttributesCopyWithImpl(this._self, this._then);
+
+  final OutfieldPlayerAttributes _self;
+  final $Res Function(OutfieldPlayerAttributes) _then;
+
+/// Create a copy of PlayerAttributes
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? stats = null,}) {
+  return _then(OutfieldPlayerAttributes(
+stats: null == stats ? _self.stats : stats // ignore: cast_nullable_to_non_nullable
+as FieldPlayerAttributes,
+  ));
+}
+
+/// Create a copy of PlayerAttributes
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$FieldPlayerAttributesCopyWith<$Res> get stats {
+  
+  return $FieldPlayerAttributesCopyWith<$Res>(_self.stats, (value) {
+    return _then(_self.copyWith(stats: value));
+  });
+}
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class GoalkeeperPlayerAttributes implements PlayerAttributes {
+  const GoalkeeperPlayerAttributes({required this.stats, final  String? $type}): $type = $type ?? 'goalkeeper';
+  factory GoalkeeperPlayerAttributes.fromJson(Map<String, dynamic> json) => _$GoalkeeperPlayerAttributesFromJson(json);
+
+@override final  GoalkeeperAttributes stats;
+
+@JsonKey(name: 'type')
+final String $type;
+
+
+/// Create a copy of PlayerAttributes
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$GoalkeeperPlayerAttributesCopyWith<GoalkeeperPlayerAttributes> get copyWith => _$GoalkeeperPlayerAttributesCopyWithImpl<GoalkeeperPlayerAttributes>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$GoalkeeperPlayerAttributesToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is GoalkeeperPlayerAttributes&&(identical(other.stats, stats) || other.stats == stats));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,stats);
+
+@override
+String toString() {
+  return 'PlayerAttributes.goalkeeper(stats: $stats)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $GoalkeeperPlayerAttributesCopyWith<$Res> implements $PlayerAttributesCopyWith<$Res> {
+  factory $GoalkeeperPlayerAttributesCopyWith(GoalkeeperPlayerAttributes value, $Res Function(GoalkeeperPlayerAttributes) _then) = _$GoalkeeperPlayerAttributesCopyWithImpl;
+@useResult
+$Res call({
+ GoalkeeperAttributes stats
+});
+
+
+$GoalkeeperAttributesCopyWith<$Res> get stats;
+
+}
+/// @nodoc
+class _$GoalkeeperPlayerAttributesCopyWithImpl<$Res>
+    implements $GoalkeeperPlayerAttributesCopyWith<$Res> {
+  _$GoalkeeperPlayerAttributesCopyWithImpl(this._self, this._then);
+
+  final GoalkeeperPlayerAttributes _self;
+  final $Res Function(GoalkeeperPlayerAttributes) _then;
+
+/// Create a copy of PlayerAttributes
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? stats = null,}) {
+  return _then(GoalkeeperPlayerAttributes(
+stats: null == stats ? _self.stats : stats // ignore: cast_nullable_to_non_nullable
+as GoalkeeperAttributes,
+  ));
+}
+
+/// Create a copy of PlayerAttributes
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$GoalkeeperAttributesCopyWith<$Res> get stats {
+  
+  return $GoalkeeperAttributesCopyWith<$Res>(_self.stats, (value) {
+    return _then(_self.copyWith(stats: value));
+  });
+}
+}
+
+// dart format on

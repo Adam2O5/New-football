@@ -6,7 +6,7 @@ part of 'injury.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$InjuryImpl _$$InjuryImplFromJson(Map<String, dynamic> json) => _$InjuryImpl(
+_Injury _$InjuryFromJson(Map<String, dynamic> json) => _Injury(
   id: json['id'] as String,
   group: $enumDecode(_$InjuryGroupEnumMap, json['group']),
   type: $enumDecode(_$InjuryTypeEnumMap, json['type']),
@@ -14,14 +14,13 @@ _$InjuryImpl _$$InjuryImplFromJson(Map<String, dynamic> json) => _$InjuryImpl(
   daysRemaining: (json['daysRemaining'] as num).toInt(),
 );
 
-Map<String, dynamic> _$$InjuryImplToJson(_$InjuryImpl instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'group': _$InjuryGroupEnumMap[instance.group]!,
-      'type': _$InjuryTypeEnumMap[instance.type]!,
-      'daysTotal': instance.daysTotal,
-      'daysRemaining': instance.daysRemaining,
-    };
+Map<String, dynamic> _$InjuryToJson(_Injury instance) => <String, dynamic>{
+  'id': instance.id,
+  'group': _$InjuryGroupEnumMap[instance.group]!,
+  'type': _$InjuryTypeEnumMap[instance.type]!,
+  'daysTotal': instance.daysTotal,
+  'daysRemaining': instance.daysRemaining,
+};
 
 const _$InjuryGroupEnumMap = {
   InjuryGroup.headFace: 'headFace',

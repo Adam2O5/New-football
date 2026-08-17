@@ -6,8 +6,8 @@ part of 'tactics_setup.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$TacticsSetupImpl _$$TacticsSetupImplFromJson(Map<String, dynamic> json) =>
-    _$TacticsSetupImpl(
+_TacticsSetup _$TacticsSetupFromJson(Map<String, dynamic> json) =>
+    _TacticsSetup(
       formation:
           $enumDecodeNullable(_$FormationEnumMap, json['formation']) ??
           Formation.f433,
@@ -28,7 +28,7 @@ _$TacticsSetupImpl _$$TacticsSetupImplFromJson(Map<String, dynamic> json) =>
       penalties: (json['penalties'] as num?)?.toInt() ?? 80,
     );
 
-Map<String, dynamic> _$$TacticsSetupImplToJson(_$TacticsSetupImpl instance) =>
+Map<String, dynamic> _$TacticsSetupToJson(_TacticsSetup instance) =>
     <String, dynamic>{
       'formation': _$FormationEnumMap[instance.formation]!,
       'tempo': _$TempoEnumMap[instance.tempo]!,

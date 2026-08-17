@@ -2814,6 +2814,450 @@ abstract class AppLocalizations {
   /// **'Do końca'**
   String get matchday_toEnd;
 
+  /// No description provided for @matchday_weather.
+  ///
+  /// In pl, this message translates to:
+  /// **'Pogoda'**
+  String get matchday_weather;
+
+  /// No description provided for @matchday_weather_clear.
+  ///
+  /// In pl, this message translates to:
+  /// **'Bezchmurnie'**
+  String get matchday_weather_clear;
+
+  /// No description provided for @matchday_weather_overcast.
+  ///
+  /// In pl, this message translates to:
+  /// **'Pochmurno'**
+  String get matchday_weather_overcast;
+
+  /// No description provided for @matchday_weather_rain.
+  ///
+  /// In pl, this message translates to:
+  /// **'Deszcz'**
+  String get matchday_weather_rain;
+
+  /// No description provided for @matchday_weather_heavyRain.
+  ///
+  /// In pl, this message translates to:
+  /// **'Ulewa'**
+  String get matchday_weather_heavyRain;
+
+  /// No description provided for @matchday_weather_wind.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wiatr'**
+  String get matchday_weather_wind;
+
+  /// No description provided for @matchday_weather_snow.
+  ///
+  /// In pl, this message translates to:
+  /// **'Śnieg'**
+  String get matchday_weather_snow;
+
+  /// No description provided for @matchday_weather_heat.
+  ///
+  /// In pl, this message translates to:
+  /// **'Upał'**
+  String get matchday_weather_heat;
+
+  /// No description provided for @matchday_weather_cold.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zimno'**
+  String get matchday_weather_cold;
+
+  /// No description provided for @matchday_temperature.
+  ///
+  /// In pl, this message translates to:
+  /// **'{value}°C'**
+  String matchday_temperature(int value);
+
+  /// No description provided for @matchday_liveStats.
+  ///
+  /// In pl, this message translates to:
+  /// **'Statystyki na żywo'**
+  String get matchday_liveStats;
+
+  /// No description provided for @matchday_eventFeed.
+  ///
+  /// In pl, this message translates to:
+  /// **'Przebieg meczu'**
+  String get matchday_eventFeed;
+
+  /// No description provided for @matchday_noEvents.
+  ///
+  /// In pl, this message translates to:
+  /// **'Brak zdarzeń'**
+  String get matchday_noEvents;
+
+  /// No description provided for @matchday_derby.
+  ///
+  /// In pl, this message translates to:
+  /// **'Derby'**
+  String get matchday_derby;
+
+  /// No description provided for @matchday_possession.
+  ///
+  /// In pl, this message translates to:
+  /// **'Posiadanie'**
+  String get matchday_possession;
+
+  /// No description provided for @matchday_shots.
+  ///
+  /// In pl, this message translates to:
+  /// **'Strzały'**
+  String get matchday_shots;
+
+  /// No description provided for @matchday_xg.
+  ///
+  /// In pl, this message translates to:
+  /// **'xG'**
+  String get matchday_xg;
+
+  /// No description provided for @matchday_onTarget.
+  ///
+  /// In pl, this message translates to:
+  /// **'{value} cel.'**
+  String matchday_onTarget(int value);
+
+  /// No description provided for @matchday_lineup.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wyjściowa jedenastka'**
+  String get matchday_lineup;
+
+  /// No description provided for @matchday_bench.
+  ///
+  /// In pl, this message translates to:
+  /// **'Ławka'**
+  String get matchday_bench;
+
+  /// No description provided for @matchday_noPlayers.
+  ///
+  /// In pl, this message translates to:
+  /// **'Brak zawodników'**
+  String get matchday_noPlayers;
+
+  /// No description provided for @matchday_substitutions.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zmiany'**
+  String get matchday_substitutions;
+
+  /// No description provided for @matchday_tactics.
+  ///
+  /// In pl, this message translates to:
+  /// **'Taktyka meczowa'**
+  String get matchday_tactics;
+
+  /// No description provided for @matchday_autoPause.
+  ///
+  /// In pl, this message translates to:
+  /// **'Auto-pauza'**
+  String get matchday_autoPause;
+
+  /// No description provided for @matchday_autoPauseTitle.
+  ///
+  /// In pl, this message translates to:
+  /// **'Ustawienia auto-pauzy'**
+  String get matchday_autoPauseTitle;
+
+  /// No description provided for @matchday_autoPauseInjury.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kontuzja mojego zawodnika'**
+  String get matchday_autoPauseInjury;
+
+  /// No description provided for @matchday_autoPauseRed.
+  ///
+  /// In pl, this message translates to:
+  /// **'Czerwona kartka mojego zawodnika'**
+  String get matchday_autoPauseRed;
+
+  /// No description provided for @matchday_autoPauseHalfTime.
+  ///
+  /// In pl, this message translates to:
+  /// **'Przerwa'**
+  String get matchday_autoPauseHalfTime;
+
+  /// No description provided for @matchday_autoPausePenalty.
+  ///
+  /// In pl, this message translates to:
+  /// **'Rzut karny dla mojej drużyny'**
+  String get matchday_autoPausePenalty;
+
+  /// No description provided for @matchday_penaltyPauseUnavailable.
+  ///
+  /// In pl, this message translates to:
+  /// **'W tym silniku nie ma jeszcze zdarzenia przyznania rzutu karnego.'**
+  String get matchday_penaltyPauseUnavailable;
+
+  /// No description provided for @matchday_speed.
+  ///
+  /// In pl, this message translates to:
+  /// **'Prędkość'**
+  String get matchday_speed;
+
+  /// No description provided for @matchday_speed1.
+  ///
+  /// In pl, this message translates to:
+  /// **'×1'**
+  String get matchday_speed1;
+
+  /// No description provided for @matchday_speed2.
+  ///
+  /// In pl, this message translates to:
+  /// **'×2'**
+  String get matchday_speed2;
+
+  /// No description provided for @matchday_speed4.
+  ///
+  /// In pl, this message translates to:
+  /// **'×4'**
+  String get matchday_speed4;
+
+  /// No description provided for @matchday_subsUsed.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zmiany: {used}'**
+  String matchday_subsUsed(int used);
+
+  /// No description provided for @matchday_playerMeta.
+  ///
+  /// In pl, this message translates to:
+  /// **'{position} · OVR {ovr} · Cond {condition}'**
+  String matchday_playerMeta(String position, int ovr, int condition);
+
+  /// No description provided for @matchday_injured.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kontuzja'**
+  String get matchday_injured;
+
+  /// No description provided for @matchday_sentOff.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wyrzucony'**
+  String get matchday_sentOff;
+
+  /// No description provided for @matchday_suspended.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zawieszony'**
+  String get matchday_suspended;
+
+  /// No description provided for @matchday_yellowCard.
+  ///
+  /// In pl, this message translates to:
+  /// **'Żółta kartka'**
+  String get matchday_yellowCard;
+
+  /// No description provided for @matchday_attention.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wymaga uwagi'**
+  String get matchday_attention;
+
+  /// No description provided for @matchday_available.
+  ///
+  /// In pl, this message translates to:
+  /// **'Dostępny'**
+  String get matchday_available;
+
+  /// No description provided for @matchday_formationLocked.
+  ///
+  /// In pl, this message translates to:
+  /// **'Formację można zmienić tylko w przerwie'**
+  String get matchday_formationLocked;
+
+  /// No description provided for @matchday_changesHint.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wybierz zawodnika schodzącego i rezerwowego'**
+  String get matchday_changesHint;
+
+  /// No description provided for @matchday_tacticsHint.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zmiana taktyki poza formacją jest dostępna w trakcie gry'**
+  String get matchday_tacticsHint;
+
+  /// No description provided for @matchday_selectOutgoing.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zawodnik schodzący'**
+  String get matchday_selectOutgoing;
+
+  /// No description provided for @matchday_selectIncoming.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zawodnik wchodzący'**
+  String get matchday_selectIncoming;
+
+  /// No description provided for @matchday_confirmSubstitution.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wykonaj zmianę'**
+  String get matchday_confirmSubstitution;
+
+  /// No description provided for @matchday_substitutionSuccess.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zmiana wykonana'**
+  String get matchday_substitutionSuccess;
+
+  /// No description provided for @matchday_tacticsSuccess.
+  ///
+  /// In pl, this message translates to:
+  /// **'Taktyka zaktualizowana'**
+  String get matchday_tacticsSuccess;
+
+  /// No description provided for @matchday_actionRejected.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nie można wykonać tej akcji'**
+  String get matchday_actionRejected;
+
+  /// No description provided for @matchday_failureMatchFinished.
+  ///
+  /// In pl, this message translates to:
+  /// **'Mecz został zakończony'**
+  String get matchday_failureMatchFinished;
+
+  /// No description provided for @matchday_failurePlayerNotOnPitch.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zawodnik nie jest na boisku'**
+  String get matchday_failurePlayerNotOnPitch;
+
+  /// No description provided for @matchday_failurePlayerNotOnBench.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zawodnik nie jest na ławce'**
+  String get matchday_failurePlayerNotOnBench;
+
+  /// No description provided for @matchday_failurePlayerUnavailable.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zawodnik jest niedostępny'**
+  String get matchday_failurePlayerUnavailable;
+
+  /// No description provided for @matchday_failurePlayerCannotReenter.
+  ///
+  /// In pl, this message translates to:
+  /// **'Ten zawodnik nie może wrócić na boisko'**
+  String get matchday_failurePlayerCannotReenter;
+
+  /// No description provided for @matchday_failureSubstitutionsLimit.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wykorzystano limit zmian'**
+  String get matchday_failureSubstitutionsLimit;
+
+  /// No description provided for @matchday_failureSubstitutionWindowsLimit.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wykorzystano limit okien zmian'**
+  String get matchday_failureSubstitutionWindowsLimit;
+
+  /// No description provided for @matchday_failureFormationOutsideHalfTime.
+  ///
+  /// In pl, this message translates to:
+  /// **'Formację można zmienić tylko w przerwie'**
+  String get matchday_failureFormationOutsideHalfTime;
+
+  /// No description provided for @matchday_failureInvalidHalfTime.
+  ///
+  /// In pl, this message translates to:
+  /// **'Akcja jest dostępna tylko w przerwie'**
+  String get matchday_failureInvalidHalfTime;
+
+  /// No description provided for @matchday_failureNoAvailableSubstitute.
+  ///
+  /// In pl, this message translates to:
+  /// **'Brak dostępnego rezerwowego'**
+  String get matchday_failureNoAvailableSubstitute;
+
+  /// No description provided for @matchday_autoPaused.
+  ///
+  /// In pl, this message translates to:
+  /// **'Auto-pauza: {reason}'**
+  String matchday_autoPaused(String reason);
+
+  /// No description provided for @matchday_matchProgress.
+  ///
+  /// In pl, this message translates to:
+  /// **'Symulacja: {minute}\''**
+  String matchday_matchProgress(int minute);
+
+  /// No description provided for @matchday_summaryTitle.
+  ///
+  /// In pl, this message translates to:
+  /// **'Podsumowanie meczu'**
+  String get matchday_summaryTitle;
+
+  /// No description provided for @matchday_summaryTeamStats.
+  ///
+  /// In pl, this message translates to:
+  /// **'Statystyki drużyn'**
+  String get matchday_summaryTeamStats;
+
+  /// No description provided for @matchday_summaryPlayerStats.
+  ///
+  /// In pl, this message translates to:
+  /// **'Statystyki zawodników'**
+  String get matchday_summaryPlayerStats;
+
+  /// No description provided for @matchday_summaryMOTM.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zawodnik meczu'**
+  String get matchday_summaryMOTM;
+
+  /// No description provided for @matchday_summaryInspired.
+  ///
+  /// In pl, this message translates to:
+  /// **'Inspirujący występ'**
+  String get matchday_summaryInspired;
+
+  /// No description provided for @matchday_summaryNone.
+  ///
+  /// In pl, this message translates to:
+  /// **'Brak'**
+  String get matchday_summaryNone;
+
+  /// No description provided for @matchday_summaryClose.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zamknij podsumowanie'**
+  String get matchday_summaryClose;
+
+  /// No description provided for @matchday_summaryNoPlayerStats.
+  ///
+  /// In pl, this message translates to:
+  /// **'Brak statystyk zawodników'**
+  String get matchday_summaryNoPlayerStats;
+
+  /// No description provided for @matchday_summaryRating.
+  ///
+  /// In pl, this message translates to:
+  /// **'Ocena'**
+  String get matchday_summaryRating;
+
+  /// No description provided for @matchday_summaryStamina.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kondycja'**
+  String get matchday_summaryStamina;
+
+  /// No description provided for @matchday_summaryStatus.
+  ///
+  /// In pl, this message translates to:
+  /// **'Status'**
+  String get matchday_summaryStatus;
+
   /// No description provided for @router_noMatchData.
   ///
   /// In pl, this message translates to:

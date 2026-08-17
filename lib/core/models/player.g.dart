@@ -6,60 +6,58 @@ part of 'player.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$PlayerSeasonStatsImpl _$$PlayerSeasonStatsImplFromJson(
-  Map<String, dynamic> json,
-) => _$PlayerSeasonStatsImpl(
-  year: (json['year'] as num).toInt(),
-  minutes: (json['minutes'] as num?)?.toInt() ?? 0,
-  goals: (json['goals'] as num?)?.toInt() ?? 0,
-  assists: (json['assists'] as num?)?.toInt() ?? 0,
-  appearances: (json['appearances'] as num?)?.toInt() ?? 0,
-  yellowCards: (json['yellowCards'] as num?)?.toInt() ?? 0,
-  redCards: (json['redCards'] as num?)?.toInt() ?? 0,
-  shots: (json['shots'] as num?)?.toInt() ?? 0,
-  shotsOnTarget: (json['shotsOnTarget'] as num?)?.toInt() ?? 0,
-  xg: (json['xg'] as num?)?.toDouble() ?? 0.0,
-  passes: (json['passes'] as num?)?.toInt() ?? 0,
-  passAccuracy: (json['passAccuracy'] as num?)?.toDouble() ?? 0.0,
-  duelsWon: (json['duelsWon'] as num?)?.toInt() ?? 0,
-  offsides: (json['offsides'] as num?)?.toInt() ?? 0,
-  corners: (json['corners'] as num?)?.toInt() ?? 0,
-  tackles: (json['tackles'] as num?)?.toInt() ?? 0,
-  interceptions: (json['interceptions'] as num?)?.toInt() ?? 0,
-  cleanSheets: (json['cleanSheets'] as num?)?.toInt() ?? 0,
-  saves: (json['saves'] as num?)?.toInt() ?? 0,
-  shotsFaced: (json['shotsFaced'] as num?)?.toInt() ?? 0,
-  ratingAvg: (json['ratingAvg'] as num?)?.toDouble() ?? 6.0,
-);
+_PlayerSeasonStats _$PlayerSeasonStatsFromJson(Map<String, dynamic> json) =>
+    _PlayerSeasonStats(
+      year: (json['year'] as num).toInt(),
+      minutes: (json['minutes'] as num?)?.toInt() ?? 0,
+      goals: (json['goals'] as num?)?.toInt() ?? 0,
+      assists: (json['assists'] as num?)?.toInt() ?? 0,
+      appearances: (json['appearances'] as num?)?.toInt() ?? 0,
+      yellowCards: (json['yellowCards'] as num?)?.toInt() ?? 0,
+      redCards: (json['redCards'] as num?)?.toInt() ?? 0,
+      shots: (json['shots'] as num?)?.toInt() ?? 0,
+      shotsOnTarget: (json['shotsOnTarget'] as num?)?.toInt() ?? 0,
+      xg: (json['xg'] as num?)?.toDouble() ?? 0.0,
+      passes: (json['passes'] as num?)?.toInt() ?? 0,
+      passAccuracy: (json['passAccuracy'] as num?)?.toDouble() ?? 0.0,
+      duelsWon: (json['duelsWon'] as num?)?.toInt() ?? 0,
+      offsides: (json['offsides'] as num?)?.toInt() ?? 0,
+      corners: (json['corners'] as num?)?.toInt() ?? 0,
+      tackles: (json['tackles'] as num?)?.toInt() ?? 0,
+      interceptions: (json['interceptions'] as num?)?.toInt() ?? 0,
+      cleanSheets: (json['cleanSheets'] as num?)?.toInt() ?? 0,
+      saves: (json['saves'] as num?)?.toInt() ?? 0,
+      shotsFaced: (json['shotsFaced'] as num?)?.toInt() ?? 0,
+      ratingAvg: (json['ratingAvg'] as num?)?.toDouble() ?? 6.0,
+    );
 
-Map<String, dynamic> _$$PlayerSeasonStatsImplToJson(
-  _$PlayerSeasonStatsImpl instance,
-) => <String, dynamic>{
-  'year': instance.year,
-  'minutes': instance.minutes,
-  'goals': instance.goals,
-  'assists': instance.assists,
-  'appearances': instance.appearances,
-  'yellowCards': instance.yellowCards,
-  'redCards': instance.redCards,
-  'shots': instance.shots,
-  'shotsOnTarget': instance.shotsOnTarget,
-  'xg': instance.xg,
-  'passes': instance.passes,
-  'passAccuracy': instance.passAccuracy,
-  'duelsWon': instance.duelsWon,
-  'offsides': instance.offsides,
-  'corners': instance.corners,
-  'tackles': instance.tackles,
-  'interceptions': instance.interceptions,
-  'cleanSheets': instance.cleanSheets,
-  'saves': instance.saves,
-  'shotsFaced': instance.shotsFaced,
-  'ratingAvg': instance.ratingAvg,
-};
+Map<String, dynamic> _$PlayerSeasonStatsToJson(_PlayerSeasonStats instance) =>
+    <String, dynamic>{
+      'year': instance.year,
+      'minutes': instance.minutes,
+      'goals': instance.goals,
+      'assists': instance.assists,
+      'appearances': instance.appearances,
+      'yellowCards': instance.yellowCards,
+      'redCards': instance.redCards,
+      'shots': instance.shots,
+      'shotsOnTarget': instance.shotsOnTarget,
+      'xg': instance.xg,
+      'passes': instance.passes,
+      'passAccuracy': instance.passAccuracy,
+      'duelsWon': instance.duelsWon,
+      'offsides': instance.offsides,
+      'corners': instance.corners,
+      'tackles': instance.tackles,
+      'interceptions': instance.interceptions,
+      'cleanSheets': instance.cleanSheets,
+      'saves': instance.saves,
+      'shotsFaced': instance.shotsFaced,
+      'ratingAvg': instance.ratingAvg,
+    };
 
-_$PlayerHiddenImpl _$$PlayerHiddenImplFromJson(Map<String, dynamic> json) =>
-    _$PlayerHiddenImpl(
+_PlayerHidden _$PlayerHiddenFromJson(Map<String, dynamic> json) =>
+    _PlayerHidden(
       injuryProne: (json['injuryProne'] as num).toInt(),
       determination: (json['determination'] as num).toInt(),
       overallProgress: (json['overallProgress'] as num?)?.toDouble() ?? 0.0,
@@ -72,7 +70,7 @@ _$PlayerHiddenImpl _$$PlayerHiddenImplFromJson(Map<String, dynamic> json) =>
           (json['developmentCeilingStars'] as num?)?.toDouble() ?? 0.0,
     );
 
-Map<String, dynamic> _$$PlayerHiddenImplToJson(_$PlayerHiddenImpl instance) =>
+Map<String, dynamic> _$PlayerHiddenToJson(_PlayerHidden instance) =>
     <String, dynamic>{
       'injuryProne': instance.injuryProne,
       'determination': instance.determination,
@@ -89,30 +87,29 @@ const _$DevelopmentOutcomeEnumMap = {
   DevelopmentOutcome.under: 'under',
 };
 
-_$PlayerStateImpl _$$PlayerStateImplFromJson(Map<String, dynamic> json) =>
-    _$PlayerStateImpl(
-      stamina: (json['stamina'] as num?)?.toInt() ?? 100,
-      form: (json['form'] as num?)?.toDouble() ?? 5.0,
-      injury: json['injury'] == null
-          ? null
-          : Injury.fromJson(json['injury'] as Map<String, dynamic>),
-      regularSeasonYellowCards:
-          (json['regularSeasonYellowCards'] as num?)?.toInt() ?? 0,
-      playoffYellowCards: (json['playoffYellowCards'] as num?)?.toInt() ?? 0,
-      suspensionGamesRemaining:
-          (json['suspensionGamesRemaining'] as num?)?.toInt() ?? 0,
-      role: json['role'] == null
-          ? const AssignedRole.cm()
-          : AssignedRole.fromJson(json['role'] as Map<String, dynamic>),
-      seasonsWithTeam: (json['seasonsWithTeam'] as num?)?.toInt() ?? 0,
-      minutesThisWeek: (json['minutesThisWeek'] as num?)?.toInt() ?? 0,
-      lastDevelopmentOvrDelta:
-          (json['lastDevelopmentOvrDelta'] as num?)?.toInt() ?? 0,
-      lastDevelopmentProgressDelta:
-          (json['lastDevelopmentProgressDelta'] as num?)?.toDouble() ?? 0.0,
-    );
+_PlayerState _$PlayerStateFromJson(Map<String, dynamic> json) => _PlayerState(
+  stamina: (json['stamina'] as num?)?.toInt() ?? 100,
+  form: (json['form'] as num?)?.toDouble() ?? 5.0,
+  injury: json['injury'] == null
+      ? null
+      : Injury.fromJson(json['injury'] as Map<String, dynamic>),
+  regularSeasonYellowCards:
+      (json['regularSeasonYellowCards'] as num?)?.toInt() ?? 0,
+  playoffYellowCards: (json['playoffYellowCards'] as num?)?.toInt() ?? 0,
+  suspensionGamesRemaining:
+      (json['suspensionGamesRemaining'] as num?)?.toInt() ?? 0,
+  role: json['role'] == null
+      ? const AssignedRole.cm()
+      : AssignedRole.fromJson(json['role'] as Map<String, dynamic>),
+  seasonsWithTeam: (json['seasonsWithTeam'] as num?)?.toInt() ?? 0,
+  minutesThisWeek: (json['minutesThisWeek'] as num?)?.toInt() ?? 0,
+  lastDevelopmentOvrDelta:
+      (json['lastDevelopmentOvrDelta'] as num?)?.toInt() ?? 0,
+  lastDevelopmentProgressDelta:
+      (json['lastDevelopmentProgressDelta'] as num?)?.toDouble() ?? 0.0,
+);
 
-Map<String, dynamic> _$$PlayerStateImplToJson(_$PlayerStateImpl instance) =>
+Map<String, dynamic> _$PlayerStateToJson(_PlayerState instance) =>
     <String, dynamic>{
       'stamina': instance.stamina,
       'form': instance.form,
@@ -127,7 +124,7 @@ Map<String, dynamic> _$$PlayerStateImplToJson(_$PlayerStateImpl instance) =>
       'lastDevelopmentProgressDelta': instance.lastDevelopmentProgressDelta,
     };
 
-_$PlayerImpl _$$PlayerImplFromJson(Map<String, dynamic> json) => _$PlayerImpl(
+_Player _$PlayerFromJson(Map<String, dynamic> json) => _Player(
   id: json['id'] as String,
   name: json['name'] as String,
   position: $enumDecode(_$PositionEnumMap, json['position']),
@@ -155,26 +152,25 @@ _$PlayerImpl _$$PlayerImplFromJson(Map<String, dynamic> json) => _$PlayerImpl(
   previousPotential: (json['previousPotential'] as num?)?.toDouble(),
 );
 
-Map<String, dynamic> _$$PlayerImplToJson(_$PlayerImpl instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'name': instance.name,
-      'position': _$PositionEnumMap[instance.position]!,
-      'nationality': _$NationalityEnumMap[instance.nationality]!,
-      'age': instance.age,
-      'attributes': instance.attributes,
-      'contract': instance.contract,
-      'personality': _$PlayerPersonalityEnumMap[instance.personality]!,
-      'potentialStars': instance.potentialStars,
-      'heightCm': instance.heightCm,
-      'state': instance.state,
-      'hidden': instance.hidden,
-      'seasonStats': instance.seasonStats,
-      'pointValue': instance.pointValue,
-      'optimalRole': instance.optimalRole,
-      'previousOvr': instance.previousOvr,
-      'previousPotential': instance.previousPotential,
-    };
+Map<String, dynamic> _$PlayerToJson(_Player instance) => <String, dynamic>{
+  'id': instance.id,
+  'name': instance.name,
+  'position': _$PositionEnumMap[instance.position]!,
+  'nationality': _$NationalityEnumMap[instance.nationality]!,
+  'age': instance.age,
+  'attributes': instance.attributes,
+  'contract': instance.contract,
+  'personality': _$PlayerPersonalityEnumMap[instance.personality]!,
+  'potentialStars': instance.potentialStars,
+  'heightCm': instance.heightCm,
+  'state': instance.state,
+  'hidden': instance.hidden,
+  'seasonStats': instance.seasonStats,
+  'pointValue': instance.pointValue,
+  'optimalRole': instance.optimalRole,
+  'previousOvr': instance.previousOvr,
+  'previousPotential': instance.previousPotential,
+};
 
 const _$PositionEnumMap = {
   Position.gk: 'gk',
@@ -226,56 +222,54 @@ const _$PlayerPersonalityEnumMap = {
   PlayerPersonality.balanced: 'balanced',
 };
 
-_$PlayerMatchStatsImpl _$$PlayerMatchStatsImplFromJson(
-  Map<String, dynamic> json,
-) => _$PlayerMatchStatsImpl(
-  playerId: json['playerId'] as String,
-  minutes: (json['minutes'] as num?)?.toInt() ?? 0,
-  goals: (json['goals'] as num?)?.toInt() ?? 0,
-  assists: (json['assists'] as num?)?.toInt() ?? 0,
-  shots: (json['shots'] as num?)?.toInt() ?? 0,
-  shotsOnTarget: (json['shotsOnTarget'] as num?)?.toInt() ?? 0,
-  xg: (json['xg'] as num?)?.toDouble() ?? 0.0,
-  passes: (json['passes'] as num?)?.toInt() ?? 0,
-  passAccuracy: (json['passAccuracy'] as num?)?.toDouble() ?? 0.0,
-  duelsWon: (json['duelsWon'] as num?)?.toInt() ?? 0,
-  offsides: (json['offsides'] as num?)?.toInt() ?? 0,
-  corners: (json['corners'] as num?)?.toInt() ?? 0,
-  yellowCards: (json['yellowCards'] as num?)?.toInt() ?? 0,
-  redCards: (json['redCards'] as num?)?.toInt() ?? 0,
-  tackles: (json['tackles'] as num?)?.toInt() ?? 0,
-  interceptions: (json['interceptions'] as num?)?.toInt() ?? 0,
-  saves: (json['saves'] as num?)?.toInt() ?? 0,
-  shotsFaced: (json['shotsFaced'] as num?)?.toInt() ?? 0,
-  ownGoals: (json['ownGoals'] as num?)?.toInt() ?? 0,
-  cleanSheet: json['cleanSheet'] as bool? ?? false,
-  staminaAfterMatch: (json['staminaAfterMatch'] as num?)?.toInt() ?? -1,
-  rating: (json['rating'] as num?)?.toDouble() ?? 6.0,
-);
+_PlayerMatchStats _$PlayerMatchStatsFromJson(Map<String, dynamic> json) =>
+    _PlayerMatchStats(
+      playerId: json['playerId'] as String,
+      minutes: (json['minutes'] as num?)?.toInt() ?? 0,
+      goals: (json['goals'] as num?)?.toInt() ?? 0,
+      assists: (json['assists'] as num?)?.toInt() ?? 0,
+      shots: (json['shots'] as num?)?.toInt() ?? 0,
+      shotsOnTarget: (json['shotsOnTarget'] as num?)?.toInt() ?? 0,
+      xg: (json['xg'] as num?)?.toDouble() ?? 0.0,
+      passes: (json['passes'] as num?)?.toInt() ?? 0,
+      passAccuracy: (json['passAccuracy'] as num?)?.toDouble() ?? 0.0,
+      duelsWon: (json['duelsWon'] as num?)?.toInt() ?? 0,
+      offsides: (json['offsides'] as num?)?.toInt() ?? 0,
+      corners: (json['corners'] as num?)?.toInt() ?? 0,
+      yellowCards: (json['yellowCards'] as num?)?.toInt() ?? 0,
+      redCards: (json['redCards'] as num?)?.toInt() ?? 0,
+      tackles: (json['tackles'] as num?)?.toInt() ?? 0,
+      interceptions: (json['interceptions'] as num?)?.toInt() ?? 0,
+      saves: (json['saves'] as num?)?.toInt() ?? 0,
+      shotsFaced: (json['shotsFaced'] as num?)?.toInt() ?? 0,
+      ownGoals: (json['ownGoals'] as num?)?.toInt() ?? 0,
+      cleanSheet: json['cleanSheet'] as bool? ?? false,
+      staminaAfterMatch: (json['staminaAfterMatch'] as num?)?.toInt() ?? -1,
+      rating: (json['rating'] as num?)?.toDouble() ?? 6.0,
+    );
 
-Map<String, dynamic> _$$PlayerMatchStatsImplToJson(
-  _$PlayerMatchStatsImpl instance,
-) => <String, dynamic>{
-  'playerId': instance.playerId,
-  'minutes': instance.minutes,
-  'goals': instance.goals,
-  'assists': instance.assists,
-  'shots': instance.shots,
-  'shotsOnTarget': instance.shotsOnTarget,
-  'xg': instance.xg,
-  'passes': instance.passes,
-  'passAccuracy': instance.passAccuracy,
-  'duelsWon': instance.duelsWon,
-  'offsides': instance.offsides,
-  'corners': instance.corners,
-  'yellowCards': instance.yellowCards,
-  'redCards': instance.redCards,
-  'tackles': instance.tackles,
-  'interceptions': instance.interceptions,
-  'saves': instance.saves,
-  'shotsFaced': instance.shotsFaced,
-  'ownGoals': instance.ownGoals,
-  'cleanSheet': instance.cleanSheet,
-  'staminaAfterMatch': instance.staminaAfterMatch,
-  'rating': instance.rating,
-};
+Map<String, dynamic> _$PlayerMatchStatsToJson(_PlayerMatchStats instance) =>
+    <String, dynamic>{
+      'playerId': instance.playerId,
+      'minutes': instance.minutes,
+      'goals': instance.goals,
+      'assists': instance.assists,
+      'shots': instance.shots,
+      'shotsOnTarget': instance.shotsOnTarget,
+      'xg': instance.xg,
+      'passes': instance.passes,
+      'passAccuracy': instance.passAccuracy,
+      'duelsWon': instance.duelsWon,
+      'offsides': instance.offsides,
+      'corners': instance.corners,
+      'yellowCards': instance.yellowCards,
+      'redCards': instance.redCards,
+      'tackles': instance.tackles,
+      'interceptions': instance.interceptions,
+      'saves': instance.saves,
+      'shotsFaced': instance.shotsFaced,
+      'ownGoals': instance.ownGoals,
+      'cleanSheet': instance.cleanSheet,
+      'staminaAfterMatch': instance.staminaAfterMatch,
+      'rating': instance.rating,
+    };

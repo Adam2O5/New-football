@@ -6,64 +6,63 @@ part of 'message.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$MessageActionImpl _$$MessageActionImplFromJson(Map<String, dynamic> json) =>
-    _$MessageActionImpl(
+_MessageAction _$MessageActionFromJson(Map<String, dynamic> json) =>
+    _MessageAction(
       id: json['id'] as String,
       labelKey: json['labelKey'] as String,
     );
 
-Map<String, dynamic> _$$MessageActionImplToJson(_$MessageActionImpl instance) =>
+Map<String, dynamic> _$MessageActionToJson(_MessageAction instance) =>
     <String, dynamic>{'id': instance.id, 'labelKey': instance.labelKey};
 
-_$DecisionSpecImpl _$$DecisionSpecImplFromJson(Map<String, dynamic> json) =>
-    _$DecisionSpecImpl(
+_DecisionSpec _$DecisionSpecFromJson(Map<String, dynamic> json) =>
+    _DecisionSpec(
       options: (json['options'] as List<dynamic>)
           .map((e) => MessageAction.fromJson(e as Map<String, dynamic>))
           .toList(),
       defaultOnExpiry: json['defaultOnExpiry'] as String,
     );
 
-Map<String, dynamic> _$$DecisionSpecImplToJson(_$DecisionSpecImpl instance) =>
+Map<String, dynamic> _$DecisionSpecToJson(_DecisionSpec instance) =>
     <String, dynamic>{
       'options': instance.options,
       'defaultOnExpiry': instance.defaultOnExpiry,
     };
 
-_$GameMessageImpl _$$GameMessageImplFromJson(Map<String, dynamic> json) =>
-    _$GameMessageImpl(
-      id: json['id'] as String,
-      type: $enumDecode(_$MessageTypeEnumMap, json['type']),
-      kind: json['kind'] as String?,
-      domain:
-          $enumDecodeNullable(_$MessageDomainEnumMap, json['domain']) ??
-          MessageDomain.system,
-      priority:
-          $enumDecodeNullable(_$MessagePriorityEnumMap, json['priority']) ??
-          MessagePriority.normal,
-      seasonYear: (json['seasonYear'] as num).toInt(),
-      week: (json['week'] as num).toInt(),
-      day: (json['day'] as num?)?.toInt() ?? 1,
-      hour: (json['hour'] as num?)?.toInt(),
-      titleKey: json['titleKey'] as String,
-      bodyKey: json['bodyKey'] as String,
-      args: json['args'] as Map<String, dynamic>? ?? const {},
-      payload: json['payload'] as Map<String, dynamic>? ?? const {},
-      actions:
-          (json['actions'] as List<dynamic>?)
-              ?.map((e) => MessageAction.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          const [],
-      decision: json['decision'] == null
-          ? null
-          : DecisionSpec.fromJson(json['decision'] as Map<String, dynamic>),
-      expiresAt: json['expiresAt'] as String?,
-      groupKey: json['groupKey'] as String?,
-      dedupKey: json['dedupKey'] as String?,
-      read: json['read'] as bool? ?? false,
-      acknowledged: json['acknowledged'] as bool? ?? false,
-    );
+_GameMessage _$GameMessageFromJson(Map<String, dynamic> json) => _GameMessage(
+  id: json['id'] as String,
+  type: $enumDecode(_$MessageTypeEnumMap, json['type']),
+  kind: json['kind'] as String?,
+  domain:
+      $enumDecodeNullable(_$MessageDomainEnumMap, json['domain']) ??
+      MessageDomain.system,
+  priority:
+      $enumDecodeNullable(_$MessagePriorityEnumMap, json['priority']) ??
+      MessagePriority.normal,
+  seasonYear: (json['seasonYear'] as num).toInt(),
+  week: (json['week'] as num).toInt(),
+  day: (json['day'] as num?)?.toInt() ?? 1,
+  hour: (json['hour'] as num?)?.toInt(),
+  titleKey: json['titleKey'] as String,
+  bodyKey: json['bodyKey'] as String,
+  args: json['args'] as Map<String, dynamic>? ?? const {},
+  payload: json['payload'] as Map<String, dynamic>? ?? const {},
+  actions:
+      (json['actions'] as List<dynamic>?)
+          ?.map((e) => MessageAction.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+  decision: json['decision'] == null
+      ? null
+      : DecisionSpec.fromJson(json['decision'] as Map<String, dynamic>),
+  expiresAt: json['expiresAt'] as String?,
+  groupKey: json['groupKey'] as String?,
+  dedupKey: json['dedupKey'] as String?,
+  read: json['read'] as bool? ?? false,
+  acknowledged: json['acknowledged'] as bool? ?? false,
+);
 
-Map<String, dynamic> _$$GameMessageImplToJson(_$GameMessageImpl instance) =>
+Map<String, dynamic> _$GameMessageToJson(_GameMessage instance) =>
     <String, dynamic>{
       'id': instance.id,
       'type': _$MessageTypeEnumMap[instance.type]!,
@@ -157,29 +156,28 @@ const _$MessagePriorityEnumMap = {
   MessagePriority.urgent: 'urgent',
 };
 
-_$MessageSettingsImpl _$$MessageSettingsImplFromJson(
-  Map<String, dynamic> json,
-) => _$MessageSettingsImpl(
-  overrides:
-      (json['overrides'] as Map<String, dynamic>?)?.map(
-        (k, e) => MapEntry(
-          $enumDecode(_$MessageTypeEnumMap, k),
-          $enumDecode(_$NotificationLevelEnumMap, e),
-        ),
-      ) ??
-      const {},
-  domainOverrides:
-      (json['domainOverrides'] as Map<String, dynamic>?)?.map(
-        (k, e) => MapEntry(
-          $enumDecode(_$MessageDomainEnumMap, k),
-          $enumDecode(_$NotificationLevelEnumMap, e),
-        ),
-      ) ??
-      const {},
-);
+_MessageSettings _$MessageSettingsFromJson(Map<String, dynamic> json) =>
+    _MessageSettings(
+      overrides:
+          (json['overrides'] as Map<String, dynamic>?)?.map(
+            (k, e) => MapEntry(
+              $enumDecode(_$MessageTypeEnumMap, k),
+              $enumDecode(_$NotificationLevelEnumMap, e),
+            ),
+          ) ??
+          const {},
+      domainOverrides:
+          (json['domainOverrides'] as Map<String, dynamic>?)?.map(
+            (k, e) => MapEntry(
+              $enumDecode(_$MessageDomainEnumMap, k),
+              $enumDecode(_$NotificationLevelEnumMap, e),
+            ),
+          ) ??
+          const {},
+    );
 
-Map<String, dynamic> _$$MessageSettingsImplToJson(
-  _$MessageSettingsImpl instance,
+Map<String, dynamic> _$MessageSettingsToJson(
+  _MessageSettings instance,
 ) => <String, dynamic>{
   'overrides': instance.overrides.map(
     (k, e) =>
@@ -198,7 +196,7 @@ const _$NotificationLevelEnumMap = {
   NotificationLevel.muted: 'muted',
 };
 
-_$InboxImpl _$$InboxImplFromJson(Map<String, dynamic> json) => _$InboxImpl(
+_Inbox _$InboxFromJson(Map<String, dynamic> json) => _Inbox(
   messages:
       (json['messages'] as List<dynamic>?)
           ?.map((e) => GameMessage.fromJson(e as Map<String, dynamic>))
@@ -216,9 +214,8 @@ _$InboxImpl _$$InboxImplFromJson(Map<String, dynamic> json) => _$InboxImpl(
       const [],
 );
 
-Map<String, dynamic> _$$InboxImplToJson(_$InboxImpl instance) =>
-    <String, dynamic>{
-      'messages': instance.messages,
-      'scheduled': instance.scheduled,
-      'archive': instance.archive,
-    };
+Map<String, dynamic> _$InboxToJson(_Inbox instance) => <String, dynamic>{
+  'messages': instance.messages,
+  'scheduled': instance.scheduled,
+  'archive': instance.archive,
+};

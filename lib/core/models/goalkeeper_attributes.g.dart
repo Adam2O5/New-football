@@ -6,9 +6,9 @@ part of 'goalkeeper_attributes.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$GoalkeeperAttributesImpl _$$GoalkeeperAttributesImplFromJson(
+_GoalkeeperAttributes _$GoalkeeperAttributesFromJson(
   Map<String, dynamic> json,
-) => _$GoalkeeperAttributesImpl(
+) => _GoalkeeperAttributes(
   diving: (json['diving'] as num).toInt(),
   handling: (json['handling'] as num).toInt(),
   kicking: (json['kicking'] as num).toInt(),
@@ -17,8 +17,8 @@ _$GoalkeeperAttributesImpl _$$GoalkeeperAttributesImplFromJson(
   positioning: (json['positioning'] as num).toInt(),
 );
 
-Map<String, dynamic> _$$GoalkeeperAttributesImplToJson(
-  _$GoalkeeperAttributesImpl instance,
+Map<String, dynamic> _$GoalkeeperAttributesToJson(
+  _GoalkeeperAttributes instance,
 ) => <String, dynamic>{
   'diving': instance.diving,
   'handling': instance.handling,

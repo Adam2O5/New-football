@@ -6,8 +6,8 @@ part of 'season_awards.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$SeasonAwardsImpl _$$SeasonAwardsImplFromJson(Map<String, dynamic> json) =>
-    _$SeasonAwardsImpl(
+_SeasonAwards _$SeasonAwardsFromJson(Map<String, dynamic> json) =>
+    _SeasonAwards(
       year: (json['year'] as num).toInt(),
       mvpPlayerId: json['mvpPlayerId'] as String?,
       rotyPlayerId: json['rotyPlayerId'] as String?,
@@ -27,7 +27,7 @@ _$SeasonAwardsImpl _$$SeasonAwardsImplFromJson(Map<String, dynamic> json) =>
       championTeamId: json['championTeamId'] as String?,
     );
 
-Map<String, dynamic> _$$SeasonAwardsImplToJson(_$SeasonAwardsImpl instance) =>
+Map<String, dynamic> _$SeasonAwardsToJson(_SeasonAwards instance) =>
     <String, dynamic>{
       'year': instance.year,
       'mvpPlayerId': instance.mvpPlayerId,
