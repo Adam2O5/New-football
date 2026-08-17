@@ -41,11 +41,13 @@ class DuelResolver {
     required double defenderRating,
     required MatchRandom random,
     bool resolveWinner = true,
+    double? sigmaOverride,
+    double? dispersionOverride,
   }) {
-    final sigma = balance.matchday.duelSigma;
+    final sigma = sigmaOverride ?? balance.matchday.duelSigma;
     final noisyAttacker = attackerRating + random.nextGaussian() * sigma;
     final noisyDefender = defenderRating + random.nextGaussian() * sigma;
-    final dispersion = balance.matchday.duelDispersion;
+    final dispersion = dispersionOverride ?? balance.matchday.duelDispersion;
     final probability =
         1.0 /
         (1.0 + math.pow(10.0, (noisyDefender - noisyAttacker) / dispersion));

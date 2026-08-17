@@ -12,10 +12,11 @@ class MatchRandomRoll {
 }
 
 class MatchRandom {
-  MatchRandom(this.seed) : _random = Random(seed);
+  MatchRandom(this.seed, {this.recordRolls = true}) : _random = Random(seed);
 
   final Random _random;
   final int seed;
+  final bool recordRolls;
   final List<MatchRandomRoll> _rolls = [];
   double? _gaussianCache;
   int _cursor = 0;
@@ -29,7 +30,9 @@ class MatchRandom {
   double nextDouble() {
     final value = _random.nextDouble();
     _cursor++;
-    _rolls.add(MatchRandomRoll(kind: 'double', value: value));
+    if (recordRolls) {
+      _rolls.add(MatchRandomRoll(kind: 'double', value: value));
+    }
     return value;
   }
 
@@ -39,7 +42,9 @@ class MatchRandom {
     }
     final value = _random.nextInt(max);
     _cursor++;
-    _rolls.add(MatchRandomRoll(kind: 'int', value: value.toDouble()));
+    if (recordRolls) {
+      _rolls.add(MatchRandomRoll(kind: 'int', value: value.toDouble()));
+    }
     return value;
   }
 
@@ -82,10 +87,15 @@ class MatchRandom {
   }
 
   T pickWeighted<T>(Map<T, double> weights) {
-    final positive = weights.entries
-        .where((entry) => entry.value > 0)
-        .toList(growable: false);
-    if (positive.isEmpty) {
+    var total = 0.0;
+    var hasPositive = false;
+    for (final entry in weights.entries) {
+      if (entry.value > 0) {
+        hasPositive = true;
+        total += entry.value;
+      }
+    }
+    if (!hasPositive) {
       throw ArgumentError.value(
         weights,
         'weights',
@@ -93,12 +103,14 @@ class MatchRandom {
       );
     }
 
-    final total = positive.fold<double>(0, (sum, entry) => sum + entry.value);
     var roll = nextDouble() * total;
-    for (final entry in positive) {
+    late T lastPositive;
+    for (final entry in weights.entries) {
+      if (entry.value <= 0) continue;
+      lastPositive = entry.key;
       roll -= entry.value;
       if (roll < 0) return entry.key;
     }
-    return positive.last.key;
+    return lastPositive;
   }
 }

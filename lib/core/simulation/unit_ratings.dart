@@ -31,11 +31,34 @@ class UnitRatings {
   double get average => (defRating + midRating + atkRating) / 3.0;
 }
 
+/// Reusable cache for the position-based D/M/A membership of one lineup.
+///
+/// Effective attributes and tactical multipliers still refresh every minute;
+/// only the stable lineup membership and weights are cached. The owner clears
+/// this cache when a formation or lineup changes.
+class UnitRatingMembershipCache {
+  final Map<List<Player>, _UnitMemberships> _byLineup = {};
+
+  _UnitMemberships? _get(List<Player> lineup) => _byLineup[lineup];
+
+  void _put(List<Player> lineup, _UnitMemberships memberships) {
+    _byLineup[lineup] = memberships;
+  }
+
+  void clear() => _byLineup.clear();
+}
+
 /// Converts effective player attributes into weighted D/M/A unit ratings.
 class UnitRatingCalculator {
-  const UnitRatingCalculator({this.balance = BalanceConfig.defaults});
+  const UnitRatingCalculator({
+    this.balance = BalanceConfig.defaults,
+    this.membershipCache,
+  });
 
   final BalanceConfig balance;
+  final UnitRatingMembershipCache? membershipCache;
+
+  void clearMembershipCache() => membershipCache?.clear();
 
   UnitRatings calculate({
     required List<Player> lineup,
@@ -44,41 +67,14 @@ class UnitRatingCalculator {
     Map<String, Position> assignedPositions = const {},
     bool applyShortHanded = false,
   }) {
-    final defensive = _unitMembers(
+    final memberships = _memberships(
       lineup,
       assignedPositions: assignedPositions,
-      positions: const {
-        Position.cb,
-        Position.lb,
-        Position.rb,
-        Position.lwb,
-        Position.rwb,
-        Position.cdm,
-      },
-      supportingPositions: const {Position.cdm},
-    );
-    final midfield = _unitMembers(
-      lineup,
-      assignedPositions: assignedPositions,
-      positions: const {
-        Position.cdm,
-        Position.cm,
-        Position.cam,
-        Position.lw,
-        Position.rw,
-      },
-      supportingPositions: const {Position.lw, Position.rw},
-    );
-    final attacking = _unitMembers(
-      lineup,
-      assignedPositions: assignedPositions,
-      positions: const {Position.st, Position.lw, Position.rw, Position.cam},
-      supportingPositions: const {Position.lw, Position.rw, Position.cam},
     );
 
     return UnitRatings(
       defRating: _rating(
-        defensive,
+        memberships.defensive,
         effectiveAttributes,
         shape.tacticalMult(ShapeAxis.def, balance),
         UnitKind.def,
@@ -86,7 +82,7 @@ class UnitRatingCalculator {
         applyShortHanded: applyShortHanded,
       ),
       midRating: _rating(
-        midfield,
+        memberships.midfield,
         effectiveAttributes,
         shape.tacticalMult(ShapeAxis.mid, balance),
         UnitKind.mid,
@@ -94,26 +90,64 @@ class UnitRatingCalculator {
         applyShortHanded: applyShortHanded,
       ),
       atkRating: _rating(
-        attacking,
+        memberships.attacking,
         effectiveAttributes,
         shape.tacticalMult(ShapeAxis.atk, balance),
         UnitKind.atk,
         playersOnPitch: lineup.length,
         applyShortHanded: applyShortHanded,
       ),
-      defensivePlayerIds: [for (final member in defensive) member.player.id],
-      midfieldPlayerIds: [for (final member in midfield) member.player.id],
-      attackingPlayerIds: [for (final member in attacking) member.player.id],
-      defensiveWeights: {
-        for (final member in defensive) member.player.id: member.weight,
-      },
-      midfieldWeights: {
-        for (final member in midfield) member.player.id: member.weight,
-      },
-      attackingWeights: {
-        for (final member in attacking) member.player.id: member.weight,
-      },
+      defensivePlayerIds: memberships.defensivePlayerIds,
+      midfieldPlayerIds: memberships.midfieldPlayerIds,
+      attackingPlayerIds: memberships.attackingPlayerIds,
+      defensiveWeights: memberships.defensiveWeights,
+      midfieldWeights: memberships.midfieldWeights,
+      attackingWeights: memberships.attackingWeights,
     );
+  }
+
+  _UnitMemberships _memberships(
+    List<Player> lineup, {
+    required Map<String, Position> assignedPositions,
+  }) {
+    final cached = membershipCache?._get(lineup);
+    if (cached != null) return cached;
+
+    final memberships = _UnitMemberships(
+      defensive: _unitMembers(
+        lineup,
+        assignedPositions: assignedPositions,
+        positions: const {
+          Position.cb,
+          Position.lb,
+          Position.rb,
+          Position.lwb,
+          Position.rwb,
+          Position.cdm,
+        },
+        supportingPositions: const {Position.cdm},
+      ),
+      midfield: _unitMembers(
+        lineup,
+        assignedPositions: assignedPositions,
+        positions: const {
+          Position.cdm,
+          Position.cm,
+          Position.cam,
+          Position.lw,
+          Position.rw,
+        },
+        supportingPositions: const {Position.lw, Position.rw},
+      ),
+      attacking: _unitMembers(
+        lineup,
+        assignedPositions: assignedPositions,
+        positions: const {Position.st, Position.lw, Position.rw, Position.cam},
+        supportingPositions: const {Position.lw, Position.rw, Position.cam},
+      ),
+    );
+    membershipCache?._put(lineup, memberships);
+    return memberships;
   }
 
   double _rating(
@@ -185,6 +219,41 @@ class UnitRatingCalculator {
               : 1.0,
         ),
   ];
+}
+
+class _UnitMemberships {
+  _UnitMemberships({
+    required this.defensive,
+    required this.midfield,
+    required this.attacking,
+  }) : defensivePlayerIds = List.unmodifiable([
+         for (final member in defensive) member.player.id,
+       ]),
+       midfieldPlayerIds = List.unmodifiable([
+         for (final member in midfield) member.player.id,
+       ]),
+       attackingPlayerIds = List.unmodifiable([
+         for (final member in attacking) member.player.id,
+       ]),
+       defensiveWeights = Map.unmodifiable({
+         for (final member in defensive) member.player.id: member.weight,
+       }),
+       midfieldWeights = Map.unmodifiable({
+         for (final member in midfield) member.player.id: member.weight,
+       }),
+       attackingWeights = Map.unmodifiable({
+         for (final member in attacking) member.player.id: member.weight,
+       });
+
+  final List<_UnitMember> defensive;
+  final List<_UnitMember> midfield;
+  final List<_UnitMember> attacking;
+  final List<String> defensivePlayerIds;
+  final List<String> midfieldPlayerIds;
+  final List<String> attackingPlayerIds;
+  final Map<String, double> defensiveWeights;
+  final Map<String, double> midfieldWeights;
+  final Map<String, double> attackingWeights;
 }
 
 enum UnitKind { def, mid, atk }

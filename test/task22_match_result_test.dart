@@ -15,7 +15,7 @@ void main() {
   ).generateLeague(year: 2026, seed: 2201);
   final home = league.teams[0];
   final away = league.teams[1];
-  const engine = SimulationMatchEngine();
+  final engine = SimulationMatchEngine();
 
   test('agreguje statystyki z trace, a nie z wyniku końcowego', () {
     var foundNonHeuristicSample = false;

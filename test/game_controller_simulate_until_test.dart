@@ -33,6 +33,11 @@ void main() {
         seed: 7,
       ),
     );
+    expect(
+      controller.save,
+      isNotNull,
+      reason: 'createNewGame failed: ${controller.state.error}',
+    );
   });
 
   tearDown(() async {
@@ -53,8 +58,15 @@ void main() {
   test('simulateUntilPhaseEnd(regular) reaches the start of play-in when there '
       'is no player team to pause on', () async {
     // Remove the player team so DaySimulator never pauses for a match.
+    // Start on the deadline day to keep this calendar-stop test fast while
+    // still exercising the urgent-message/resume path.
     await controller.updateLeague(
-      (l) => l.copyWith(playerTeamId: null),
+      (l) => l.copyWith(
+        playerTeamId: null,
+        currentWeek: 23,
+        currentDay: 1,
+        currentSeason: l.currentSeason.copyWith(phase: SeasonPhase.regular),
+      ),
       autosave: false,
     );
     // The trade deadline (week 23) still raises an urgent calendar

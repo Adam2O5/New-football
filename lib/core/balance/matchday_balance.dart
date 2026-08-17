@@ -21,13 +21,18 @@ class MatchdayBalance {
     this.shapeBaseline = 55,
     this.shapeWeight = 0.0025,
     this.duelDispersion = 35,
-    this.duelSigma = 6.0,
+    this.duelSigma = 10.5,
+    this.possessionDuelDispersion = 65,
+    this.possessionDuelSigma = 11.0,
+    this.homeAdvantageAttackScale = 8.0,
+    this.homeAdvantageAwayAttackPenaltyScale = 2.0,
     this.sequenceBase = 1.15,
     this.sequenceToShot = 0.22,
     this.shotToGoal = 0.115,
-    this.foulBase = 0.085,
-    this.yellowFromFoul = 0.13,
-    this.redDirect = 0.007,
+    this.foulBase = 0.2359,
+    this.foulCardedPlayerMultiplier = 0.10,
+    this.yellowFromFoul = 0.17,
+    this.redDirect = 0.0045,
     this.foulPressingLowMultiplier = 0.85,
     this.foulPressingMediumMultiplier = 1.0,
     this.foulPressingHighMultiplier = 1.15,
@@ -66,7 +71,7 @@ class MatchdayBalance {
       'heat': 1.10,
       'cold': 1.12,
     },
-    this.injuryBase = 0.00018,
+    this.injuryBase = 0.00010,
     this.clutchWeight = 1.2,
     this.momentumDecay = 0.96,
     this.momentumGoal = 25,
@@ -152,14 +157,14 @@ class MatchdayBalance {
     this.stakePlayoffEliminationSequenceMultiplier = 1.08,
     this.stakeLeagueFinalSequenceMultiplier = 1.10,
     this.sequenceBaseXg = const <String, double>{
-      'centralBuildUp': 0.118,
-      'wingPlay': 0.112,
-      'crossFromWide': 0.145,
-      'throughBall': 0.138,
-      'individualDribble': 0.115,
-      'counterAttack': 0.155,
-      'longBall': 0.125,
-      'setPiece': 0.035,
+      'centralBuildUp': 0.127,
+      'wingPlay': 0.121,
+      'crossFromWide': 0.157,
+      'throughBall': 0.149,
+      'individualDribble': 0.124,
+      'counterAttack': 0.167,
+      'longBall': 0.135,
+      'setPiece': 0.038,
     },
     this.shootingBaseline = 70.0,
     this.gkRatingBaseline = 70.0,
@@ -293,6 +298,10 @@ class MatchdayBalance {
   /// `DUEL_DISPERSION` and `DUEL_SIGMA`.
   final int duelDispersion;
   final double duelSigma;
+  final int possessionDuelDispersion;
+  final double possessionDuelSigma;
+  final double homeAdvantageAttackScale;
+  final double homeAdvantageAwayAttackPenaltyScale;
 
   /// Sequence, shot and goal conversion constants.
   final double sequenceBase;
@@ -301,6 +310,7 @@ class MatchdayBalance {
 
   /// Foul and card probabilities.
   final double foulBase;
+  final double foulCardedPlayerMultiplier;
   final double yellowFromFoul;
   final double redDirect;
   final double foulPressingLowMultiplier;

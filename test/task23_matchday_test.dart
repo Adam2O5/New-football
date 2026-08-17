@@ -23,7 +23,7 @@ void main() {
       awayTeamId: 'task23-away',
       seed: 2301,
     );
-    const engine = SimulationMatchEngine();
+    final engine = SimulationMatchEngine();
 
     final observedLive = engine.start(
       home: home,
@@ -53,7 +53,7 @@ void main() {
     final league = SeedDataGenerator().generateLeague(year: 2026, seed: 2302);
     final home = league.teams[0];
     final away = league.teams[1];
-    const engine = SimulationMatchEngine();
+    final engine = SimulationMatchEngine();
     final live = engine.start(home: home, away: away, rngSeed: 2302);
     final outgoing = live.state.homeLineup.first;
     final incoming = live.state.homeBench.first;

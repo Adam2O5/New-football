@@ -140,7 +140,10 @@ void main() {
       );
       expect(direct.yellow, isFalse);
       expect(direct.directRed, isTrue);
-      expect(direct.directRedProbability, closeTo(0.014, 1e-12));
+      expect(
+        direct.directRedProbability,
+        closeTo(BalanceConfig.defaults.matchday.redDirect * 2.0, 1e-12),
+      );
       expect(direct.directRedSeverity, 3);
       expect(MatchIncidentResolver.directRedSeverityFromRoll(0.59), 1);
       expect(MatchIncidentResolver.directRedSeverityFromRoll(0.60), 2);
@@ -250,7 +253,7 @@ void main() {
 
   group('Task 20 — osłabienie', () {
     test('ratingi jednostek i stamina stosują mnożniki dla 10 i 9 graczy', () {
-      const engine = SimulationMatchEngine();
+      final engine = SimulationMatchEngine();
       final live = engine.start(
         home: home,
         away: away,
@@ -464,7 +467,7 @@ void main() {
     test(
       'wymuszona zmiana i brak ławki usuwają kontuzjowanego oraz synchronizują GK',
       () {
-        const engine = SimulationMatchEngine();
+        final engine = SimulationMatchEngine();
         final live = engine.start(
           home: home,
           away: away,

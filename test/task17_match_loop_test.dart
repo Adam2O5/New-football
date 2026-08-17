@@ -18,7 +18,11 @@ void main() {
     test('contest gives the documented upset curve at +10 and +25', () {
       double winRate(double advantage) {
         final random = MatchRandom(1700 + advantage.round());
-        const resolver = DuelResolver();
+        const resolver = DuelResolver(
+          balance: BalanceConfig(
+            matchday: MatchdayBalance(duelDispersion: 35, duelSigma: 6.0),
+          ),
+        );
         var wins = 0;
         const samples = 20000;
         for (var i = 0; i < samples; i++) {
@@ -52,7 +56,7 @@ void main() {
 
   group('Task 17 — minute loop', () {
     test('same seed reproduces the complete sequence trace', () {
-      const engine = SimulationMatchEngine();
+      final engine = SimulationMatchEngine();
       const context = MatchContext(
         homeTeamId: 'home',
         awayTeamId: 'away',
@@ -86,7 +90,7 @@ void main() {
     });
 
     test('minute-by-minute and full simulation share the same trace', () {
-      const engine = SimulationMatchEngine();
+      final engine = SimulationMatchEngine();
       const context = MatchContext(seed: 1722);
       final observed = engine.start(
         home: home,
@@ -108,7 +112,7 @@ void main() {
     });
 
     test('sequence volume is close to 100–110 per 90-minute match', () {
-      const engine = SimulationMatchEngine();
+      final engine = SimulationMatchEngine();
       var totalSequences = 0;
       var homeSequences = 0;
       var awaySequences = 0;
@@ -140,7 +144,7 @@ void main() {
     });
 
     test('stamina tick precedes the Task 16 effAttr refresh', () {
-      const engine = SimulationMatchEngine();
+      final engine = SimulationMatchEngine();
       final target = home.startingEleven.firstWhere(
         (player) => player.position != Position.gk,
       );

@@ -35,7 +35,7 @@ final matchContextFactoryProvider = Provider(
   (ref) => MatchContextFactory(calendar: ref.watch(calendarServiceProvider)),
 );
 
-final matchEngineProvider = Provider((ref) => const SimulationMatchEngine());
+final matchEngineProvider = Provider((ref) => SimulationMatchEngine());
 
 final daySimulatorProvider = Provider((ref) {
   return DaySimulator(matchEngine: ref.watch(matchEngineProvider));

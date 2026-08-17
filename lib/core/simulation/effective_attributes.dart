@@ -86,11 +86,25 @@ class EffectivePlayerAttributes {
   Map<EffectiveAttribute, double> get attributes => values;
 }
 
+class EffectiveAttributeBaseCache {
+  final Map<Player, Map<EffectiveAttribute, double>> _byPlayer = Map.identity();
+
+  Map<EffectiveAttribute, double>? _get(Player player) => _byPlayer[player];
+
+  void _put(Player player, Map<EffectiveAttribute, double> attributes) {
+    _byPlayer[player] = attributes;
+  }
+}
+
 /// Calculates the nine multipliers in the documented effAttr pipeline.
 class EffectiveAttributeCalculator {
-  const EffectiveAttributeCalculator({this.balance = BalanceConfig.defaults});
+  const EffectiveAttributeCalculator({
+    this.balance = BalanceConfig.defaults,
+    this.baseAttributeCache,
+  });
 
   final BalanceConfig balance;
+  final EffectiveAttributeBaseCache? baseAttributeCache;
 
   EffectivePlayerAttributes calculate({
     required Player player,
@@ -179,21 +193,94 @@ class EffectiveAttributeCalculator {
     Map<String, double> staminaRemaining = const {},
     Map<String, Position> assignedPositions = const {},
   }) {
-    return {
-      for (final player in lineup)
-        player.id: calculate(
-          player: player,
+    final lineupList = lineup.toList(growable: false);
+    final chemistryMult = TeamManagementService.chemistryMultiplier(chemistry);
+    final atmosphereMult = TeamManagementService.atmosphereMultiplier(
+      atmosphere,
+    );
+    final Map<EffectiveAttribute, double> contextMult = Map.unmodifiable({
+      for (final attribute in EffectiveAttribute.values)
+        attribute: contextMultiplier(
+          attribute: attribute,
           context: context,
-          chemistry: chemistry,
-          atmosphere: atmosphere,
-          cohesionMultiplier: cohesionMultiplier,
           isHome: isHome,
-          headCoach: headCoach,
-          lineup: lineup,
+        ),
+    });
+    final leaderMult =
+        lineupList.any(
+          (candidate) => candidate.personality == PlayerPersonality.leader,
+        )
+        ? balance.matchday.leaderBonus
+        : 1.0;
+
+    return {
+      for (final player in lineupList)
+        player.id: _calculateWithSharedFactors(
+          player: player,
+          chemistryMult: chemistryMult,
+          atmosphereMult: atmosphereMult,
+          cohesionMultiplier: cohesionMultiplier,
+          contextMult: contextMult,
+          leaderMult: leaderMult,
           currentStamina: staminaRemaining[player.id],
           assignedPosition: assignedPositions[player.id],
         ),
     };
+  }
+
+  EffectivePlayerAttributes _calculateWithSharedFactors({
+    required Player player,
+    required double chemistryMult,
+    required double atmosphereMult,
+    required double cohesionMultiplier,
+    required Map<EffectiveAttribute, double> contextMult,
+    required double leaderMult,
+    required double? currentStamina,
+    required Position? assignedPosition,
+  }) {
+    final positionMult = positionMultiplier(
+      player,
+      assignedPosition: assignedPosition,
+    );
+    final roleFitMult = roleFitMultiplier(player);
+    final formMult = balance.player.formMult(player.state.form);
+    final staminaMult = balance.player.performanceMult(
+      (currentStamina ?? player.state.stamina.toDouble()).round(),
+    );
+    final multipliers = EffectiveAttributeMultipliers(
+      positionMult: positionMult,
+      roleFitMult: roleFitMult,
+      chemistryMult: chemistryMult,
+      cohesionMult: cohesionMultiplier,
+      atmosphereMult: atmosphereMult,
+      formMult: formMult,
+      staminaMult: staminaMult,
+      contextMult: contextMult,
+      leaderMult: leaderMult,
+    );
+
+    final base = _baseAttributes(player);
+    final values = <EffectiveAttribute, double>{};
+    for (final attribute in EffectiveAttribute.values) {
+      final effective =
+          base[attribute]! *
+          positionMult *
+          roleFitMult *
+          chemistryMult *
+          cohesionMultiplier *
+          atmosphereMult *
+          formMult *
+          staminaMult *
+          contextMult[attribute]! *
+          leaderMult;
+      values[attribute] = effective.clamp(1.0, 120.0).toDouble();
+    }
+
+    return EffectivePlayerAttributes(
+      player: player,
+      values: Map.unmodifiable(values),
+      multipliers: multipliers,
+    );
   }
 
   EffectivePlayerAttributes calculateForTeam({
@@ -285,27 +372,32 @@ class EffectiveAttributeCalculator {
     return weather * crowd * matchLoad;
   }
 
-  Map<EffectiveAttribute, double> _baseAttributes(
-    Player player,
-  ) => player.attributes.map(
-    outfield: (attributes) => {
-      EffectiveAttribute.pace: attributes.stats.pace.toDouble(),
-      EffectiveAttribute.shooting: attributes.stats.shooting.toDouble(),
-      EffectiveAttribute.passing: attributes.stats.passing.toDouble(),
-      EffectiveAttribute.dribbling: attributes.stats.dribbling.toDouble(),
-      EffectiveAttribute.defending: attributes.stats.defending.toDouble(),
-      EffectiveAttribute.physicality: attributes.stats.physicality.toDouble(),
-    },
-    // GK is not included in D/M/A unit membership yet. Keeping a stable
-    // fallback here makes the diagnostic pipeline total and avoids making
-    // Task 16 depend on the Task 18 goalkeeper model.
-    goalkeeper: (attributes) {
-      final overall = attributes.stats.overall;
-      return {
-        for (final attribute in EffectiveAttribute.values) attribute: overall,
-      };
-    },
-  );
+  Map<EffectiveAttribute, double> _baseAttributes(Player player) {
+    final cached = baseAttributeCache?._get(player);
+    if (cached != null) return cached;
+
+    final attributes = player.attributes.map(
+      outfield: (attributes) => {
+        EffectiveAttribute.pace: attributes.stats.pace.toDouble(),
+        EffectiveAttribute.shooting: attributes.stats.shooting.toDouble(),
+        EffectiveAttribute.passing: attributes.stats.passing.toDouble(),
+        EffectiveAttribute.dribbling: attributes.stats.dribbling.toDouble(),
+        EffectiveAttribute.defending: attributes.stats.defending.toDouble(),
+        EffectiveAttribute.physicality: attributes.stats.physicality.toDouble(),
+      },
+      // GK is not included in D/M/A unit membership yet. Keeping a stable
+      // fallback here makes the diagnostic pipeline total and avoids making
+      // Task 16 depend on the Task 18 goalkeeper model.
+      goalkeeper: (attributes) {
+        final overall = attributes.stats.overall;
+        return {
+          for (final attribute in EffectiveAttribute.values) attribute: overall,
+        };
+      },
+    );
+    baseAttributeCache?._put(player, attributes);
+    return attributes;
+  }
 
   static bool _positionFitsRole(Position position, AssignedRole role) =>
       role.map(

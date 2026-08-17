@@ -398,6 +398,7 @@ class MatchEngine {
     required Team away,
     MatchContext context = const MatchContext(),
     required int rngSeed,
+    bool refreshDerivedRatings = true,
   }) {
     final report = PreMatchValidator(
       balance: balance,
@@ -531,7 +532,9 @@ class MatchEngine {
         away.staff.doctor,
       ),
     );
-    _refreshRuntimeRatings(live);
+    if (refreshDerivedRatings) {
+      _refreshRuntimeRatings(live);
+    }
     return live;
   }
 

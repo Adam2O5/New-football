@@ -11,11 +11,8 @@ void main() {
   final home = league.teams[0];
   final away = league.teams[1];
 
-  SimulationLiveMatch startMatch() => const SimulationMatchEngine().start(
-    home: home,
-    away: away,
-    rngSeed: 1919,
-  );
+  SimulationLiveMatch startMatch() =>
+      SimulationMatchEngine().start(home: home, away: away, rngSeed: 1919);
 
   void setMinute(SimulationLiveMatch live, int minute) {
     live.legacyMatch.state = live.state.copyWith(minute: minute);
@@ -46,7 +43,7 @@ void main() {
   test(
     'substitute keeps current stamina, slot position and does not roll RNG',
     () {
-      final engine = const SimulationMatchEngine();
+      final engine = SimulationMatchEngine();
       final live = startMatch();
       final outgoing = live.state.homeLineup.firstWhere(
         (player) => player.position != Position.gk,
@@ -90,7 +87,7 @@ void main() {
   test(
     'five substitutions and three windows are enforced, with one window per stoppage',
     () {
-      final engine = const SimulationMatchEngine();
+      final engine = SimulationMatchEngine();
       final live = startMatch();
       final outgoingIds = live.state.homeLineup
           .take(5)
@@ -192,7 +189,7 @@ void main() {
   );
 
   test('half-time changes do not consume ordinary windows', () {
-    final engine = const SimulationMatchEngine();
+    final engine = SimulationMatchEngine();
     final live = startMatch();
     setMinute(live, 45);
     final outgoing = live.state.homeLineup.take(2).toList(growable: false);
@@ -225,7 +222,7 @@ void main() {
   test(
     'tactical correction is temporary and formation changes require half-time',
     () {
-      final engine = const SimulationMatchEngine();
+      final engine = SimulationMatchEngine();
       final live = startMatch();
       final baseline = live.homeCohesionMultiplier;
       final corrected = live.state.homeTactics.copyWith(tempo: Tempo.fast);
@@ -296,7 +293,7 @@ void main() {
         incoming.id: 0,
       };
       final adaptedHome = home.copyWith(chemistryAppearances: appearances);
-      final live = const SimulationMatchEngine().start(
+      final live = SimulationMatchEngine().start(
         home: adaptedHome,
         away: away,
         rngSeed: 1920,
@@ -329,7 +326,7 @@ void main() {
   test(
     'major injury path forces a bench substitution and records no replacement',
     () {
-      final engine = const SimulationMatchEngine();
+      final engine = SimulationMatchEngine();
       final live = startMatch();
       final outgoing = live.state.homeLineup.first;
       live.legacyMatch.state = live.state.copyWith(
@@ -377,7 +374,7 @@ void main() {
   );
 
   test('same seed and same Task 19 commands preserve deterministic trace', () {
-    final engine = const SimulationMatchEngine();
+    final engine = SimulationMatchEngine();
     final first = startMatch();
     final second = startMatch();
     final firstOut = first.state.homeLineup.first.id;

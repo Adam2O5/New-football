@@ -61,7 +61,7 @@ void main() {
     );
 
     test('throughBall high line adds the documented pace weight', () {
-      const engine = SimulationMatchEngine();
+      final engine = SimulationMatchEngine();
       final live = engine.start(home: home, away: away, rngSeed: 1820);
       final attacker = live.state.homeLineup.firstWhere(
         (player) => player.position != Position.gk,
@@ -215,7 +215,7 @@ void main() {
           freeKicks: 50,
           penalties: 50,
         );
-        final live = const SimulationMatchEngine().start(
+        final live = SimulationMatchEngine().start(
           home: home,
           away: away,
           context: const MatchContext(stake: MatchStake.leagueFinal),
@@ -250,7 +250,7 @@ void main() {
     test(
       'full Task 18 simulation is deterministic and exposes shots/goals/xG',
       () {
-        const engine = SimulationMatchEngine();
+        final engine = SimulationMatchEngine();
         const context = MatchContext(seed: 1828);
         final first = engine.simulateFull(
           home: home,

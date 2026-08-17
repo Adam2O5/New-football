@@ -63,9 +63,13 @@ class ShotResolution {
 
 /// Resolves the documented sequence-to-shot and shot-to-goal funnel.
 class ShotResolver {
-  const ShotResolver({this.balance = BalanceConfig.defaults});
+  const ShotResolver({
+    this.balance = BalanceConfig.defaults,
+    GoalkeeperResolver? goalkeeperResolver,
+  }) : _goalkeeperResolver = goalkeeperResolver;
 
   final BalanceConfig balance;
+  final GoalkeeperResolver? _goalkeeperResolver;
 
   ShotResolution resolve({
     required SequenceType sequenceType,
@@ -83,6 +87,7 @@ class ShotResolver {
     bool allowRebound = true,
     int minute = 0,
     bool applyClutch = true,
+    double xgMultiplier = 1.0,
   }) {
     if (useSequenceGate &&
         random.nextDouble() >= balance.matchday.sequenceToShot) {
@@ -113,15 +118,20 @@ class ShotResolver {
       context.weather,
     );
     final xg =
-        (baseXg * chanceQualityMultiplier * shooterFactor * weatherXgMultiplier)
+        (baseXg *
+                chanceQualityMultiplier *
+                shooterFactor *
+                weatherXgMultiplier *
+                xgMultiplier)
             .clamp(0.01, 0.95)
             .toDouble();
-    final goalkeeper = GoalkeeperResolver(balance: balance).resolve(
-      shotKind: shotKind,
-      defendingLineup: defendingLineup,
-      effectiveAttributes: defendingAttributes,
-      weather: context.weather,
-    );
+    final goalkeeper =
+        (_goalkeeperResolver ?? GoalkeeperResolver(balance: balance)).resolve(
+          shotKind: shotKind,
+          defendingLineup: defendingLineup,
+          effectiveAttributes: defendingAttributes,
+          weather: context.weather,
+        );
     final gkFactor =
         1.0 -
         (goalkeeper.gkRating - balance.matchday.gkRatingBaseline) /

@@ -36,9 +36,19 @@ class SetPieceResolution {
 }
 
 class SetPieceResolver {
-  const SetPieceResolver({this.balance = BalanceConfig.defaults});
+  const SetPieceResolver({
+    this.balance = BalanceConfig.defaults,
+    GoalkeeperResolver? goalkeeperResolver,
+    DuelResolver? duelResolver,
+    ShotResolver? shotResolver,
+  }) : _goalkeeperResolver = goalkeeperResolver,
+       _duelResolver = duelResolver,
+       _shotResolver = shotResolver;
 
   final BalanceConfig balance;
+  final GoalkeeperResolver? _goalkeeperResolver;
+  final DuelResolver? _duelResolver;
+  final ShotResolver? _shotResolver;
 
   SetPieceResolution resolve({
     required SetPieceType type,
@@ -73,13 +83,14 @@ class SetPieceResolver {
             stake: context.stake,
             ambitious: shooter.personality == PlayerPersonality.ambitious,
           );
-      final goalkeeper = GoalkeeperResolver(balance: balance).resolve(
-        shotKind: SequenceShotKind.penalty,
-        defendingLineup: defendingLineup,
-        effectiveAttributes: defendingAttributes,
-        weather: context.weather,
-      );
-      penaltyDuel = DuelResolver(balance: balance).contest(
+      final goalkeeper =
+          (_goalkeeperResolver ?? GoalkeeperResolver(balance: balance)).resolve(
+            shotKind: SequenceShotKind.penalty,
+            defendingLineup: defendingLineup,
+            effectiveAttributes: defendingAttributes,
+            weather: context.weather,
+          );
+      penaltyDuel = (_duelResolver ?? DuelResolver(balance: balance)).contest(
         attackerRating: shooterRating,
         defenderRating: _goalkeeperRating(goalkeeper),
         random: random,
@@ -92,7 +103,7 @@ class SetPieceResolver {
 
     final shot = shooter == null
         ? const ShotResolution.noShot()
-        : ShotResolver(balance: balance).resolve(
+        : (_shotResolver ?? ShotResolver(balance: balance)).resolve(
             sequenceType: SequenceType.setPiece,
             shotKind: switch (type) {
               SetPieceType.corner => SequenceShotKind.header,

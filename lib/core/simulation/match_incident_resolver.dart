@@ -71,6 +71,7 @@ class MatchIncidentResolver {
     required TacticsSetup defendingTactics,
     required MatchContext context,
     bool defendingHome = true,
+    int existingYellowCards = 0,
   }) {
     final matchday = balance.matchday;
     final probability =
@@ -81,6 +82,7 @@ class MatchIncidentResolver {
           attackerPace: attackerPace,
         ) *
         _cardProneMultiplier(defender) *
+        (existingYellowCards > 0 ? matchday.foulCardedPlayerMultiplier : 1.0) *
         (context.isDerby ? matchday.derbyFoulMultiplier : 1.0) *
         context.refereeStrictness *
         matchday.refereeCrowdMultiplier(
@@ -97,6 +99,7 @@ class MatchIncidentResolver {
     required TacticsSetup defendingTactics,
     required MatchContext context,
     bool defendingHome = true,
+    int existingYellowCards = 0,
     required double Function() nextDouble,
   }) {
     final probability = foulProbability(
@@ -106,6 +109,7 @@ class MatchIncidentResolver {
       defendingTactics: defendingTactics,
       context: context,
       defendingHome: defendingHome,
+      existingYellowCards: existingYellowCards,
     );
     return FoulDecision(
       probability: probability,

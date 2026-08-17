@@ -6,6 +6,7 @@ import 'package:new_football/core/models/match_state.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/goalkeeper_attributes.dart';
 import 'package:new_football/core/models/player_attributes.dart';
+import 'package:new_football/core/simulation/goalkeeper_resolver.dart';
 import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/random/match_random.dart';
 import 'package:new_football/core/services/cohesion_service.dart';
@@ -302,6 +303,8 @@ class SimulationLiveMatch {
   final Set<String> _awayUnreplacedMajorInjuryIds = <String>{};
   int? _homeTacticalPenaltyExpiresAtMinute;
   int? _awayTacticalPenaltyExpiresAtMinute;
+  double? _cachedHomeCohesionBaseMultiplier;
+  double? _cachedAwayCohesionBaseMultiplier;
   bool _homeManualTacticsAfter65 = false;
   bool _awayManualTacticsAfter65 = false;
   bool _stoppageEnabled = false;
@@ -392,8 +395,8 @@ class SimulationLiveMatch {
   int get awaySubsUsed => legacyMatch.awaySubsUsed;
   int get homeSubWindows => legacyMatch.homeSubWindows;
   int get awaySubWindows => legacyMatch.awaySubWindows;
-  double get homeCohesionMultiplier => _runtimeCohesionMultiplier(true);
-  double get awayCohesionMultiplier => _runtimeCohesionMultiplier(false);
+  double get homeCohesionMultiplier => _cohesionMultiplier(homeSide: true);
+  double get awayCohesionMultiplier => _cohesionMultiplier(homeSide: false);
   double get homeCohesionMult => homeCohesionMultiplier;
   double get awayCohesionMult => awayCohesionMultiplier;
   double get homeCohesionScore => _runtimeCohesionScore(true);
@@ -483,23 +486,39 @@ class SimulationLiveMatch {
     atHalfTime: atHalfTime,
   );
 
-  double _runtimeCohesionMultiplier(bool homeSide) {
+  double _cohesionMultiplier({required bool homeSide}) {
+    final baseMultiplier = homeSide
+        ? (_cachedHomeCohesionBaseMultiplier ??= _runtimeCohesionBaseMultiplier(
+            homeSide,
+          ))
+        : (_cachedAwayCohesionBaseMultiplier ??= _runtimeCohesionBaseMultiplier(
+            homeSide,
+          ));
+    final expiresAtMinute = homeSide
+        ? _homeTacticalPenaltyExpiresAtMinute
+        : _awayTacticalPenaltyExpiresAtMinute;
+    final penalty = _remainingPenaltyMinutes(expiresAtMinute) > 0
+        ? balance.matchday.cohesionTacticsPenalty / 100.0
+        : 0.0;
+    return (baseMultiplier - penalty).clamp(0.0, 2.0).toDouble();
+  }
+
+  double _runtimeCohesionBaseMultiplier(bool homeSide) {
     final score = _runtimeCohesionScore(homeSide);
-    var multiplier = const CohesionService().cohesionMult(
-      score.clamp(0.0, 100.0),
-      headCoach: homeSide
-          ? legacyMatch.homeHeadCoach
-          : legacyMatch.awayHeadCoach,
-    );
-    if (_remainingPenaltyMinutes(
-          homeSide
-              ? _homeTacticalPenaltyExpiresAtMinute
-              : _awayTacticalPenaltyExpiresAtMinute,
-        ) >
-        0) {
-      multiplier -= balance.matchday.cohesionTacticsPenalty / 100.0;
-    }
-    return multiplier.clamp(0.0, 2.0).toDouble();
+    return const CohesionService()
+        .cohesionMult(
+          score.clamp(0.0, 100.0),
+          headCoach: homeSide
+              ? legacyMatch.homeHeadCoach
+              : legacyMatch.awayHeadCoach,
+        )
+        .clamp(0.0, 2.0)
+        .toDouble();
+  }
+
+  void _invalidateRuntimeCaches() {
+    _cachedHomeCohesionBaseMultiplier = null;
+    _cachedAwayCohesionBaseMultiplier = null;
   }
 
   double _runtimeCohesionScore(bool homeSide) {
@@ -615,9 +634,50 @@ class SimulationLiveMatch {
 /// [simulateFullMatch] is the persisted MatchResult facade used by the
 /// provider, day simulator and postseason services.
 class SimulationMatchEngine {
-  const SimulationMatchEngine({this.balance = BalanceConfig.defaults});
+  SimulationMatchEngine({
+    this.balance = BalanceConfig.defaults,
+    this.recordRandomRolls = true,
+  }) : _shapeCalculator = TeamShapeCalculator(balance: balance),
+       _effectiveCalculator = EffectiveAttributeCalculator(
+         balance: balance,
+         baseAttributeCache: EffectiveAttributeBaseCache(),
+       ),
+       _unitCalculator = UnitRatingCalculator(
+         balance: balance,
+         membershipCache: UnitRatingMembershipCache(),
+       ),
+       _duelResolver = DuelResolver(balance: balance),
+       _incidentResolver = MatchIncidentResolver(balance: balance),
+       _sequenceSelector = SequenceSelector(balance: balance),
+       _chainResolver = SequenceChainResolver(
+         balance: balance,
+         duelResolver: DuelResolver(balance: balance),
+       ),
+       _shotResolver = ShotResolver(
+         balance: balance,
+         goalkeeperResolver: GoalkeeperResolver(balance: balance),
+       ),
+       _setPieceResolver = SetPieceResolver(
+         balance: balance,
+         goalkeeperResolver: GoalkeeperResolver(balance: balance),
+         duelResolver: DuelResolver(balance: balance),
+         shotResolver: ShotResolver(
+           balance: balance,
+           goalkeeperResolver: GoalkeeperResolver(balance: balance),
+         ),
+       );
 
   final BalanceConfig balance;
+  final bool recordRandomRolls;
+  final TeamShapeCalculator _shapeCalculator;
+  final EffectiveAttributeCalculator _effectiveCalculator;
+  final UnitRatingCalculator _unitCalculator;
+  final DuelResolver _duelResolver;
+  final MatchIncidentResolver _incidentResolver;
+  final SequenceSelector _sequenceSelector;
+  final SequenceChainResolver _chainResolver;
+  final ShotResolver _shotResolver;
+  final SetPieceResolver _setPieceResolver;
 
   SimulationLiveMatch start({
     required Team home,
@@ -627,12 +687,16 @@ class SimulationMatchEngine {
   }) {
     final seed = context.seed == 0 ? rngSeed : context.seed;
     final seededContext = context.copyWith(seed: seed);
-    final live = legacy.MatchEngine(
-      balance: balance,
-    ).start(home: home, away: away, context: seededContext, rngSeed: seed);
+    final live = legacy.MatchEngine(balance: balance).start(
+      home: home,
+      away: away,
+      context: seededContext,
+      rngSeed: seed,
+      refreshDerivedRatings: false,
+    );
     final simulation = SimulationLiveMatch(
       legacyMatch: live,
-      random: MatchRandom(seed),
+      random: MatchRandom(seed, recordRolls: recordRandomRolls),
       seed: seed,
       balance: balance,
       homeChemistryAppearances: home.chemistryAppearances,
@@ -764,6 +828,7 @@ class SimulationMatchEngine {
         description: 'Zmiana: ${outgoing.name} → ${incoming.name}',
       ),
     );
+    _invalidateRuntimeShapes(live);
     _refreshRuntimeRatings(live);
     return _accept(live);
   }
@@ -979,6 +1044,7 @@ class SimulationMatchEngine {
           ? null
           : live.state.minute + balance.matchday.cohesionPenaltyDurationMinutes;
     }
+    _invalidateRuntimeShapes(live, invalidateCohesion: formationChanged);
     _refreshRuntimeRatings(live);
     return _accept(live);
   }
@@ -1026,6 +1092,17 @@ class SimulationMatchEngine {
         ? live.state.homeTactics.formation
         : live.state.awayTactics.formation;
     _remapFormation(live, homeSide: homeSide, formation: formation);
+    _invalidateRuntimeShapes(live);
+  }
+
+  void _invalidateRuntimeShapes(
+    SimulationLiveMatch live, {
+    bool invalidateCohesion = true,
+  }) {
+    live.legacyMatch.homeTeamShape = null;
+    live.legacyMatch.awayTeamShape = null;
+    _unitCalculator.clearMembershipCache();
+    if (invalidateCohesion) live._invalidateRuntimeCaches();
   }
 
   MatchState recordSetPieceResolution({
@@ -1105,7 +1182,10 @@ class SimulationMatchEngine {
     return state;
   }
 
-  SimulationMinuteTrace simulateMinute(SimulationLiveMatch live) {
+  SimulationMinuteTrace simulateMinute(
+    SimulationLiveMatch live, {
+    bool collectTrace = true,
+  }) {
     if (live.isFinished) {
       return SimulationMinuteTrace.empty(
         minute: live.state.minute,
@@ -1151,11 +1231,13 @@ class SimulationMatchEngine {
 
     // Task 17 order 3: one noisy contest produces the possession probability;
     // the adjusted probability receives one Bernoulli roll for the minute.
-    final possessionDuel = DuelResolver(balance: balance).contest(
+    final possessionDuel = _duelResolver.contest(
       attackerRating: homeRatings.midRating,
       defenderRating: awayRatings.midRating,
       random: live.random,
       resolveWinner: false,
+      sigmaOverride: balance.matchday.possessionDuelSigma,
+      dispersionOverride: balance.matchday.possessionDuelDispersion.toDouble(),
     );
     final possessionProbability = _possessionProbability(
       baseProbability: possessionDuel.attackerProbability,
@@ -1183,7 +1265,9 @@ class SimulationMatchEngine {
         .nextPoisson(sequenceLambda)
         .clamp(0, balance.matchday.sequenceMaxPerMinute)
         .toInt();
-    final sequenceTraces = <SimulationSequenceTrace>[];
+    final List<SimulationSequenceTrace>? sequenceTraces = collectTrace
+        ? <SimulationSequenceTrace>[]
+        : null;
     final homeDuelParticipants = <String>{};
     final awayDuelParticipants = <String>{};
     var homeSequenceCount = 0;
@@ -1191,10 +1275,10 @@ class SimulationMatchEngine {
 
     // Task 20 keeps the same MatchRandom stream and resolves secondary
     // incidents directly from the duels produced by this minute.
-    final incidentResolver = MatchIncidentResolver(balance: balance);
-    final chainResolver = SequenceChainResolver(balance: balance);
-    final shotResolver = ShotResolver(balance: balance);
-    final setPieceResolver = SetPieceResolver(balance: balance);
+    final incidentResolver = _incidentResolver;
+    final chainResolver = _chainResolver;
+    final shotResolver = _shotResolver;
+    final setPieceResolver = _setPieceResolver;
     for (var index = 0; index < sequenceCount; index++) {
       final attackingHome = live.random.nextDouble() < possessionProbability;
       final sequenceContext = _sequenceContext(
@@ -1204,9 +1288,10 @@ class SimulationMatchEngine {
             ? live._homeCounterAttackEligible
             : live._awayCounterAttackEligible,
       );
-      final selection = SequenceSelector(
-        balance: balance,
-      ).select(context: sequenceContext, random: live.random);
+      final selection = _sequenceSelector.select(
+        context: sequenceContext,
+        random: live.random,
+      );
       final chain = chainResolver.resolve(
         selection: selection,
         context: sequenceContext,
@@ -1257,6 +1342,13 @@ class SimulationMatchEngine {
         final defendingAttributes = attackingHome
             ? live.awayEffectiveAttributes
             : live.homeEffectiveAttributes;
+        final homeXgMultiplier = attackingHome
+            ? 1.0 +
+                  state.context.homeAdvantage *
+                      balance.matchday.homeAdvantageAttackScale
+            : 1.0 -
+                  state.context.homeAdvantage *
+                      balance.matchday.homeAdvantageAwayAttackPenaltyScale;
         shot = shotResolver.resolve(
           sequenceType: selection.type,
           shotKind: chain.shotKind,
@@ -1269,6 +1361,7 @@ class SimulationMatchEngine {
           wonDuels: chain.wonDuels,
           chanceQualityMultiplier: chain.chanceQualityMultiplier,
           minute: nextMinute,
+          xgMultiplier: homeXgMultiplier,
         );
       }
 
@@ -1383,23 +1476,25 @@ class SimulationMatchEngine {
       live.legacyMatch.state = state;
 
       final primaryDuel = chain.primaryDuel ?? setPiece?.penaltyDuel;
-      sequenceTraces.add(
-        SimulationSequenceTrace(
-          type: selection.type,
-          attackingHome: attackingHome,
-          attackerId: chain.duels.isNotEmpty
-              ? chain.duels.first.attackerId
-              : selection.attacker.id,
-          defenderId: chain.duels.isNotEmpty
-              ? chain.duels.first.defenderId
-              : selection.defender.id,
-          duel: primaryDuel,
-          duels: chain.duels,
-          chain: chain,
-          shot: shot,
-          setPiece: setPiece,
-        ),
-      );
+      if (collectTrace) {
+        sequenceTraces!.add(
+          SimulationSequenceTrace(
+            type: selection.type,
+            attackingHome: attackingHome,
+            attackerId: chain.duels.isNotEmpty
+                ? chain.duels.first.attackerId
+                : selection.attacker.id,
+            defenderId: chain.duels.isNotEmpty
+                ? chain.duels.first.defenderId
+                : selection.defender.id,
+            duel: primaryDuel,
+            duels: chain.duels,
+            chain: chain,
+            shot: shot,
+            setPiece: setPiece,
+          ),
+        );
+      }
       if (attackingHome) {
         homeSequenceCount++;
       } else {
@@ -1419,6 +1514,12 @@ class SimulationMatchEngine {
 
     live._homeSequences += homeSequenceCount;
     live._awaySequences += awaySequenceCount;
+    if (!collectTrace) {
+      return SimulationMinuteTrace.empty(
+        minute: nextMinute,
+        randomCursor: live.random.cursor,
+      );
+    }
     final trace = SimulationMinuteTrace(
       minute: nextMinute,
       homePossessionProbability: possessionProbability,
@@ -1426,7 +1527,7 @@ class SimulationMatchEngine {
       sequenceCount: sequenceCount,
       homeSequenceCount: homeSequenceCount,
       awaySequenceCount: awaySequenceCount,
-      sequences: List.unmodifiable(sequenceTraces),
+      sequences: List.unmodifiable(sequenceTraces!),
       randomCursorStart: cursorStart,
       randomCursorEnd: live.random.cursor,
       momentum: state.momentum,
@@ -1541,6 +1642,7 @@ class SimulationMatchEngine {
       final defendingHome = !attackingHome;
       if (duel.attackerWon) continue;
 
+      final existingYellow = next.yellowCardCounts[defender.id] ?? 0;
       final foul = resolver.rollFoul(
         attackerPace: _pace(
           attacker,
@@ -1554,6 +1656,7 @@ class SimulationMatchEngine {
         defendingTactics: sequenceContext.defendingTactics,
         context: next.context,
         defendingHome: defendingHome,
+        existingYellowCards: existingYellow,
         nextDouble: live.random.nextDouble,
       );
       if (!foul.occurred) continue;
@@ -1574,7 +1677,6 @@ class SimulationMatchEngine {
         ),
       );
 
-      final existingYellow = next.yellowCardCounts[defender.id] ?? 0;
       final card = resolver.rollCard(
         defender: defender,
         context: next.context,
@@ -1894,13 +1996,15 @@ class SimulationMatchEngine {
     SimulationLiveMatch live,
     int untilMinute, {
     bool includeStoppageTime = false,
+    bool collectTraces = true,
   }) {
     live._stoppageEnabled = includeStoppageTime;
     final traces = <SimulationMinuteTrace>[];
 
     void simulateTo(int targetMinute) {
       while (live.state.minute < targetMinute) {
-        traces.add(simulateMinute(live));
+        final trace = simulateMinute(live, collectTrace: collectTraces);
+        if (collectTraces) traces.add(trace);
       }
     }
 
@@ -1924,6 +2028,7 @@ class SimulationMatchEngine {
     MatchContext context = const MatchContext(),
     int rngSeed = 0,
     bool includeStoppageTime = false,
+    bool collectTraces = true,
   }) {
     final live = start(
       home: home,
@@ -1931,7 +2036,12 @@ class SimulationMatchEngine {
       context: context,
       rngSeed: rngSeed,
     );
-    runUntil(live, 90, includeStoppageTime: includeStoppageTime);
+    runUntil(
+      live,
+      90,
+      includeStoppageTime: includeStoppageTime,
+      collectTraces: collectTraces,
+    );
     return live.toResult();
   }
 
@@ -2023,24 +2133,25 @@ class SimulationMatchEngine {
     final state = live.state;
     final homeLineup = state.homeLineup;
     final awayLineup = state.awayLineup;
-    final shapeCalculator = TeamShapeCalculator(balance: balance);
-    final effectiveCalculator = EffectiveAttributeCalculator(balance: balance);
-    final unitCalculator = UnitRatingCalculator(balance: balance);
-    final homeShape = shapeCalculator.calculate(
-      tactics: state.homeTactics,
-      opponentTactics: state.awayTactics,
-      lineup: homeLineup,
-      opponentLineup: awayLineup,
-      headCoach: live.legacyMatch.homeHeadCoach,
-    );
-    final awayShape = shapeCalculator.calculate(
-      tactics: state.awayTactics,
-      opponentTactics: state.homeTactics,
-      lineup: awayLineup,
-      opponentLineup: homeLineup,
-      headCoach: live.legacyMatch.awayHeadCoach,
-    );
-    final homeEffective = effectiveCalculator.calculateLineup(
+    final homeShape =
+        live.legacyMatch.homeTeamShape ??
+        _shapeCalculator.calculate(
+          tactics: state.homeTactics,
+          opponentTactics: state.awayTactics,
+          lineup: homeLineup,
+          opponentLineup: awayLineup,
+          headCoach: live.legacyMatch.homeHeadCoach,
+        );
+    final awayShape =
+        live.legacyMatch.awayTeamShape ??
+        _shapeCalculator.calculate(
+          tactics: state.awayTactics,
+          opponentTactics: state.homeTactics,
+          lineup: awayLineup,
+          opponentLineup: homeLineup,
+          headCoach: live.legacyMatch.awayHeadCoach,
+        );
+    final homeEffective = _effectiveCalculator.calculateLineup(
       lineup: homeLineup,
       context: state.context,
       chemistry: live.legacyMatch.homeChemistry,
@@ -2049,9 +2160,9 @@ class SimulationMatchEngine {
       isHome: true,
       headCoach: live.legacyMatch.homeHeadCoach,
       staminaRemaining: live.legacyMatch.staminaRemaining,
-      assignedPositions: live.homeAssignedPositions,
+      assignedPositions: live._homeAssignedPositions,
     );
-    final awayEffective = effectiveCalculator.calculateLineup(
+    final awayEffective = _effectiveCalculator.calculateLineup(
       lineup: awayLineup,
       context: state.context,
       chemistry: live.legacyMatch.awayChemistry,
@@ -2060,25 +2171,25 @@ class SimulationMatchEngine {
       isHome: false,
       headCoach: live.legacyMatch.awayHeadCoach,
       staminaRemaining: live.legacyMatch.staminaRemaining,
-      assignedPositions: live.awayAssignedPositions,
+      assignedPositions: live._awayAssignedPositions,
     );
 
     live.legacyMatch.homeTeamShape = homeShape;
     live.legacyMatch.awayTeamShape = awayShape;
     live.legacyMatch.homeEffectiveAttributes = Map.unmodifiable(homeEffective);
     live.legacyMatch.awayEffectiveAttributes = Map.unmodifiable(awayEffective);
-    final homeRatings = unitCalculator.calculate(
+    final homeRatings = _unitCalculator.calculate(
       lineup: homeLineup,
       effectiveAttributes: homeEffective,
       shape: homeShape,
-      assignedPositions: live.homeAssignedPositions,
+      assignedPositions: live._homeAssignedPositions,
       applyShortHanded: true,
     );
-    final awayRatings = unitCalculator.calculate(
+    final awayRatings = _unitCalculator.calculate(
       lineup: awayLineup,
       effectiveAttributes: awayEffective,
       shape: awayShape,
-      assignedPositions: live.awayAssignedPositions,
+      assignedPositions: live._awayAssignedPositions,
       applyShortHanded: true,
     );
     live.legacyMatch.homeUnitRatings = _applyRuntimeUnitModifiers(
@@ -2157,11 +2268,11 @@ class SimulationMatchEngine {
       weather: state.context.weather,
       counterAttackEligible: counterAttackEligible,
       attackingAssignedPositions: attackingHome
-          ? live.homeAssignedPositions
-          : live.awayAssignedPositions,
+          ? live._homeAssignedPositions
+          : live._awayAssignedPositions,
       defendingAssignedPositions: attackingHome
-          ? live.awayAssignedPositions
-          : live.homeAssignedPositions,
+          ? live._awayAssignedPositions
+          : live._homeAssignedPositions,
       longBallWeightMultiplier: attackingHome
           ? live.homeScoreState.longBallWeightMultiplier
           : live.awayScoreState.longBallWeightMultiplier,
