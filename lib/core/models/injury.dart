@@ -6,7 +6,7 @@ part 'injury.g.dart';
 
 /// Canonical active injury state persisted with a player.
 @freezed
-class Injury with _$Injury {
+abstract class Injury with _$Injury {
   const factory Injury({
     required String id,
     required InjuryGroup group,

@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 
 import 'package:new_football/core/simulation/match_engine.dart';
 import 'package:new_football/core/models/enums.dart';
@@ -131,7 +132,7 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   SeasonService get _season => _ref.read(seasonServiceProvider);
   CalendarService get _calendar => _ref.read(calendarServiceProvider);
 
-  GameSave? get save => state.valueOrNull;
+  GameSave? get save => state.value;
 
   Future<void> createNewGame(NewGameRequest request) async {
     state = const AsyncValue.loading();
@@ -889,7 +890,7 @@ final gameControllerProvider =
     });
 
 final activeLeagueProvider = Provider((ref) {
-  return ref.watch(gameControllerProvider).valueOrNull?.leagueState;
+  return ref.watch(gameControllerProvider).value?.leagueState;
 });
 
 /// Next fixture/event the player can act on, driving the contextual button

@@ -38,8 +38,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       final isGameRoute =
           state.matchedLocation == '/game' ||
           state.matchedLocation.startsWith('/game/');
-      final hasActiveGame =
-          ref.read(gameControllerProvider).valueOrNull != null;
+      final hasActiveGame = ref.read(gameControllerProvider).value != null;
       if (isGameRoute && !hasActiveGame) return '/';
       return null;
     },

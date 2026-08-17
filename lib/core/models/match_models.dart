@@ -11,7 +11,7 @@ part 'match_models.freezed.dart';
 part 'match_models.g.dart';
 
 @freezed
-class MatchEvent with _$MatchEvent {
+abstract class MatchEvent with _$MatchEvent {
   const factory MatchEvent({
     required MatchEventType type,
     required int minute,
@@ -25,7 +25,7 @@ class MatchEvent with _$MatchEvent {
 }
 
 @freezed
-class MatchInjury with _$MatchInjury {
+abstract class MatchInjury with _$MatchInjury {
   const factory MatchInjury({
     required String teamId,
     required String playerId,
@@ -39,7 +39,7 @@ class MatchInjury with _$MatchInjury {
 }
 
 @freezed
-class MatchDiscipline with _$MatchDiscipline {
+abstract class MatchDiscipline with _$MatchDiscipline {
   const factory MatchDiscipline({
     required String teamId,
     required String playerId,
@@ -54,7 +54,7 @@ class MatchDiscipline with _$MatchDiscipline {
 }
 
 @freezed
-class TeamMatchStats with _$TeamMatchStats {
+abstract class TeamMatchStats with _$TeamMatchStats {
   const factory TeamMatchStats({
     required String teamId,
     @Default(0) int goals,
@@ -78,7 +78,7 @@ class TeamMatchStats with _$TeamMatchStats {
 }
 
 @freezed
-class MatchTeamSnapshot with _$MatchTeamSnapshot {
+abstract class MatchTeamSnapshot with _$MatchTeamSnapshot {
   const factory MatchTeamSnapshot({
     @Default('') String teamId,
     @Default([]) List<Player> startingXi,
@@ -97,7 +97,7 @@ class MatchTeamSnapshot with _$MatchTeamSnapshot {
 }
 
 @freezed
-class MatchResult with _$MatchResult {
+abstract class MatchResult with _$MatchResult {
   const factory MatchResult({
     required String homeTeamId,
     required String awayTeamId,
@@ -135,7 +135,7 @@ class MatchResult with _$MatchResult {
 }
 
 @freezed
-class MatchSetup with _$MatchSetup {
+abstract class MatchSetup with _$MatchSetup {
   const factory MatchSetup({
     required String homeTeamId,
     required String awayTeamId,
@@ -152,7 +152,7 @@ class MatchSetup with _$MatchSetup {
 }
 
 @freezed
-class ScheduledMatch with _$ScheduledMatch {
+abstract class ScheduledMatch with _$ScheduledMatch {
   const factory ScheduledMatch({
     required String id,
     required String homeTeamId,
@@ -166,7 +166,7 @@ class ScheduledMatch with _$ScheduledMatch {
 }
 
 @freezed
-class PlayoffSeries with _$PlayoffSeries {
+abstract class PlayoffSeries with _$PlayoffSeries {
   const factory PlayoffSeries({
     required String id,
     required String higherSeedTeamId,

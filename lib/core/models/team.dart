@@ -12,7 +12,7 @@ part 'team.freezed.dart';
 part 'team.g.dart';
 
 @freezed
-class TeamAiConfig with _$TeamAiConfig {
+abstract class TeamAiConfig with _$TeamAiConfig {
   const factory TeamAiConfig({
     @Default(0.5) double aggressionLevel,
     @Default(0.5) double riskTolerance,
@@ -24,7 +24,7 @@ class TeamAiConfig with _$TeamAiConfig {
 }
 
 @freezed
-class TeamWeeklyHistory with _$TeamWeeklyHistory {
+abstract class TeamWeeklyHistory with _$TeamWeeklyHistory {
   const factory TeamWeeklyHistory({
     required int seasonYear,
     required int week,
@@ -42,7 +42,7 @@ class TeamWeeklyHistory with _$TeamWeeklyHistory {
 }
 
 @freezed
-class Team with _$Team {
+abstract class Team with _$Team {
   const factory Team({
     required String id,
     required String name,

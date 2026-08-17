@@ -17,7 +17,7 @@ abstract final class SaveSchema {
 enum SaveCompatibility { compatible, older, newer }
 
 @freezed
-class GameSaveMeta with _$GameSaveMeta {
+abstract class GameSaveMeta with _$GameSaveMeta {
   const factory GameSaveMeta({
     required String id,
     required String name,
@@ -45,7 +45,7 @@ extension GameSaveMetaCompatibility on GameSaveMeta {
 }
 
 @freezed
-class GameSave with _$GameSave {
+abstract class GameSave with _$GameSave {
   const factory GameSave({
     required GameSaveMeta meta,
     required LeagueState leagueState,

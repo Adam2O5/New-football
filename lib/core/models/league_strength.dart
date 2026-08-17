@@ -6,7 +6,7 @@ part 'league_strength.g.dart';
 
 /// Single team's entry in the league strength table (`team_management.md`).
 @freezed
-class TeamStrengthEntry with _$TeamStrengthEntry {
+abstract class TeamStrengthEntry with _$TeamStrengthEntry {
   const factory TeamStrengthEntry({
     required String teamId,
 
@@ -27,7 +27,7 @@ class TeamStrengthEntry with _$TeamStrengthEntry {
 /// The full league strength table — one source of truth for teamStatus
 /// and expectedRank across all 30 teams (`team_management.md`).
 @freezed
-class LeagueStrengthTable with _$LeagueStrengthTable {
+abstract class LeagueStrengthTable with _$LeagueStrengthTable {
   const factory LeagueStrengthTable({
     /// Sorted descending by teamPower (index 0 = rank 1).
     required List<TeamStrengthEntry> entries,

@@ -16,7 +16,7 @@ part 'draft_pick.g.dart';
 /// [originalTeamId] pozostaje niezmienne od momentu utworzenia i jest
 /// używane do wyceny (`computeTradeValue`) oraz reguły Stepiena.
 @freezed
-class DraftPick with _$DraftPick {
+abstract class DraftPick with _$DraftPick {
   const factory DraftPick({
     required String id,
     required int year,

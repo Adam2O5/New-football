@@ -11,7 +11,7 @@ part 'league_state.freezed.dart';
 part 'league_state.g.dart';
 
 @freezed
-class LeagueState with _$LeagueState {
+abstract class LeagueState with _$LeagueState {
   const factory LeagueState({
     required List<Team> teams,
     required Season currentSeason,

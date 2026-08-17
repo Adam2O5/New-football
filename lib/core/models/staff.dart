@@ -5,7 +5,7 @@ part 'staff.freezed.dart';
 part 'staff.g.dart';
 
 @freezed
-class StaffAttributes with _$StaffAttributes {
+abstract class StaffAttributes with _$StaffAttributes {
   const factory StaffAttributes({
     @Default(0.0) double tactics,
     @Default(0.0) double motivation,
@@ -45,7 +45,7 @@ extension StaffAttributesX on StaffAttributes {
 }
 
 @freezed
-class StaffContract with _$StaffContract {
+abstract class StaffContract with _$StaffContract {
   const factory StaffContract({
     required int salary,
     required int yearsRemaining,
@@ -56,7 +56,7 @@ class StaffContract with _$StaffContract {
 }
 
 @freezed
-class StaffMember with _$StaffMember {
+abstract class StaffMember with _$StaffMember {
   const factory StaffMember({
     required String id,
     required String name,
@@ -80,7 +80,7 @@ extension StaffMemberX on StaffMember {
 }
 
 @freezed
-class TeamStaff with _$TeamStaff {
+abstract class TeamStaff with _$TeamStaff {
   const factory TeamStaff({
     StaffMember? headCoach,
     StaffMember? youthCoach,

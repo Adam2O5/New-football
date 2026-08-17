@@ -6,7 +6,7 @@ part 'field_player_attributes.freezed.dart';
 part 'field_player_attributes.g.dart';
 
 @freezed
-class FieldPlayerAttributes with _$FieldPlayerAttributes {
+abstract class FieldPlayerAttributes with _$FieldPlayerAttributes {
   const factory FieldPlayerAttributes({
     required int pace,
     required int shooting,

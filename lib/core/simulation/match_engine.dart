@@ -1,10 +1,11 @@
 import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/simulation/match_bootstrap.dart' as legacy;
 import 'package:new_football/core/models/enums.dart';
-import 'package:new_football/core/models/goalkeeper_attributes.dart';
 import 'package:new_football/core/models/match_models.dart';
 import 'package:new_football/core/models/match_state.dart';
 import 'package:new_football/core/models/player.dart';
+import 'package:new_football/core/models/goalkeeper_attributes.dart';
+import 'package:new_football/core/models/player_attributes.dart';
 import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/random/match_random.dart';
 import 'package:new_football/core/services/cohesion_service.dart';

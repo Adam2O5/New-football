@@ -17,7 +17,7 @@ part 'draft_models.freezed.dart';
 part 'draft_models.g.dart';
 
 @freezed
-class Prospect with _$Prospect {
+abstract class Prospect with _$Prospect {
   const factory Prospect({
     required String id,
     required String name,
@@ -87,7 +87,7 @@ extension ProspectX on Prospect {
 }
 
 @freezed
-class LotteryResult with _$LotteryResult {
+abstract class LotteryResult with _$LotteryResult {
   const factory LotteryResult({
     required String teamId,
     required int originalRank,
@@ -100,7 +100,7 @@ class LotteryResult with _$LotteryResult {
 }
 
 @freezed
-class DraftClass with _$DraftClass {
+abstract class DraftClass with _$DraftClass {
   const factory DraftClass({
     required int year,
     @Default([]) List<Prospect> prospects,
@@ -111,7 +111,7 @@ class DraftClass with _$DraftClass {
 }
 
 @freezed
-class DraftState with _$DraftState {
+abstract class DraftState with _$DraftState {
   const factory DraftState({
     required int year,
     @Default([]) List<DraftPick> order,
@@ -126,7 +126,7 @@ class DraftState with _$DraftState {
 }
 
 @freezed
-class PlayInResult with _$PlayInResult {
+abstract class PlayInResult with _$PlayInResult {
   const factory PlayInResult({
     required Conference conference,
     required String seed7TeamId,
@@ -146,7 +146,7 @@ class PlayInResult with _$PlayInResult {
 /// It keeps the existing atomic [PlayInResult] API intact while allowing the
 /// Wednesday games and Saturday decider to be resolved on their own dates.
 @freezed
-class PlayInProgress with _$PlayInProgress {
+abstract class PlayInProgress with _$PlayInProgress {
   const factory PlayInProgress({
     required Conference conference,
     required String seed7TeamId,
@@ -163,7 +163,7 @@ class PlayInProgress with _$PlayInProgress {
 }
 
 @freezed
-class PlayoffBracket with _$PlayoffBracket {
+abstract class PlayoffBracket with _$PlayoffBracket {
   const factory PlayoffBracket({
     required Conference conference,
     @Default([]) List<PlayoffSeries> quarterFinals,
@@ -177,7 +177,7 @@ class PlayoffBracket with _$PlayoffBracket {
 }
 
 @freezed
-class Season with _$Season {
+abstract class Season with _$Season {
   const factory Season({
     required int year,
     @Default(SeasonPhase.preseason) SeasonPhase phase,
@@ -205,7 +205,7 @@ class Season with _$Season {
 }
 
 @freezed
-class SeasonHistory with _$SeasonHistory {
+abstract class SeasonHistory with _$SeasonHistory {
   const factory SeasonHistory({
     required int year,
     required List<ConferenceStandings> finalStandings,

@@ -5,7 +5,7 @@ part 'scouting.freezed.dart';
 part 'scouting.g.dart';
 
 @freezed
-class ScoutingKnowledge with _$ScoutingKnowledge {
+abstract class ScoutingKnowledge with _$ScoutingKnowledge {
   const factory ScoutingKnowledge({
     required String prospectId,
     @Default(ScoutingTier.tier1) ScoutingTier tier,
@@ -19,7 +19,7 @@ class ScoutingKnowledge with _$ScoutingKnowledge {
 }
 
 @freezed
-class TeamScouting with _$TeamScouting {
+abstract class TeamScouting with _$TeamScouting {
   const factory TeamScouting({
     @Default([]) List<String> watchlistProspectIds,
     @Default([]) List<ScoutingKnowledge> knowledge,

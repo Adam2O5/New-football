@@ -9,7 +9,7 @@ part 'player_attributes.g.dart';
 
 /// union of `FieldPlayerAttributes` and `GoalkeeperAttributes`
 @Freezed(unionKey: 'type', unionValueCase: FreezedUnionCase.snake)
-class PlayerAttributes with _$PlayerAttributes {
+abstract class PlayerAttributes with _$PlayerAttributes {
   const factory PlayerAttributes.outfield({
     required FieldPlayerAttributes stats,
   }) = OutfieldPlayerAttributes;

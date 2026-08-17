@@ -1,8 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/enums.dart';
-import 'package:new_football/core/models/goalkeeper_attributes.dart';
 import 'package:new_football/core/models/match_state.dart';
+import 'package:new_football/core/models/goalkeeper_attributes.dart';
+import 'package:new_football/core/models/player_attributes.dart';
 import 'package:new_football/core/models/seed_data_generator.dart';
 import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/random/match_random.dart';

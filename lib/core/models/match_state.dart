@@ -7,7 +7,7 @@ part 'match_state.freezed.dart';
 part 'match_state.g.dart';
 
 @freezed
-class MatchContext with _$MatchContext {
+abstract class MatchContext with _$MatchContext {
   const factory MatchContext({
     @Default('') String homeTeamId,
     @Default('') String awayTeamId,
@@ -28,7 +28,7 @@ class MatchContext with _$MatchContext {
 }
 
 @freezed
-class MatchState with _$MatchState {
+abstract class MatchState with _$MatchState {
   const factory MatchState({
     @Default(0) int minute,
     @Default(0) int homeGoals,

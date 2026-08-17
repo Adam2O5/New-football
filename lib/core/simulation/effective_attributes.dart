@@ -2,6 +2,7 @@ import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/assigned_role.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/goalkeeper_attributes.dart';
+import 'package:new_football/core/models/player_attributes.dart';
 import 'package:new_football/core/models/match_state.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/staff.dart';

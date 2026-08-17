@@ -5,7 +5,7 @@ part 'goalkeeper_attributes.g.dart';
 
 /// FUT goalkeeper face stats (DIV / HAN / KIC / REF / SPD / POS).
 @freezed
-class GoalkeeperAttributes with _$GoalkeeperAttributes {
+abstract class GoalkeeperAttributes with _$GoalkeeperAttributes {
   const factory GoalkeeperAttributes({
     required int diving,
     required int handling,

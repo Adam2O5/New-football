@@ -5,7 +5,7 @@ part 'standing.freezed.dart';
 part 'standing.g.dart';
 
 @freezed
-class Standing with _$Standing {
+abstract class Standing with _$Standing {
   const factory Standing({
     required String teamId,
     @Default(0) int wins,
@@ -25,10 +25,7 @@ extension StandingX on Standing {
   int get goalDifference => goalsFor - goalsAgainst;
   int get gamesPlayed => wins + losses + draws;
 
-  Standing applyResult({
-    required int goalsFor,
-    required int goalsAgainst,
-  }) {
+  Standing applyResult({required int goalsFor, required int goalsAgainst}) {
     if (goalsFor > goalsAgainst) {
       return copyWith(
         wins: wins + 1,
@@ -52,7 +49,7 @@ extension StandingX on Standing {
 }
 
 @freezed
-class ConferenceStandings with _$ConferenceStandings {
+abstract class ConferenceStandings with _$ConferenceStandings {
   const factory ConferenceStandings({
     required Conference conference,
     @Default([]) List<Standing> standings,

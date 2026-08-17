@@ -47,7 +47,7 @@ class _MatchdayScreenState extends ConsumerState<MatchdayScreen> {
 
   void _start() {
     if (!mounted) return;
-    final save = ref.read(gameControllerProvider).valueOrNull;
+    final save = ref.read(gameControllerProvider).value;
     if (save == null) return;
     final league = save.leagueState;
     final home = league.teamById(widget.match.homeTeamId);
@@ -158,7 +158,7 @@ class _MatchdayScreenState extends ConsumerState<MatchdayScreen> {
   }
 
   String? get _playerTeamId =>
-      ref.read(gameControllerProvider).valueOrNull?.leagueState.playerTeamId;
+      ref.read(gameControllerProvider).value?.leagueState.playerTeamId;
 
   bool get _homeIsPlayerTeam => _home?.id == _playerTeamId;
 

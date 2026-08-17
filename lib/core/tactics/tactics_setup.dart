@@ -5,7 +5,7 @@ part 'tactics_setup.freezed.dart';
 part 'tactics_setup.g.dart';
 
 @freezed
-class TacticsSetup with _$TacticsSetup {
+abstract class TacticsSetup with _$TacticsSetup {
   const factory TacticsSetup({
     @Default(Formation.f433) Formation formation,
     @Default(Tempo.balanced) Tempo tempo,

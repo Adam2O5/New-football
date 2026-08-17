@@ -8,6 +8,7 @@ import 'package:new_football/app/widgets/screen_background.dart';
 import 'package:new_football/core/models/assigned_role.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/player.dart';
+import 'package:new_football/core/models/player_attributes.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
 class PlayerDetailScreen extends ConsumerWidget {

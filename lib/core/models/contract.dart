@@ -5,7 +5,7 @@ part 'contract.freezed.dart';
 part 'contract.g.dart';
 
 @freezed
-class Contract with _$Contract {
+abstract class Contract with _$Contract {
   const factory Contract({
     required int salary,
     required int yearsRemaining,
@@ -21,7 +21,7 @@ class Contract with _$Contract {
 }
 
 @freezed
-class CapException with _$CapException {
+abstract class CapException with _$CapException {
   const factory CapException({
     required CapExceptionType type,
     required int amountRemaining,
@@ -34,7 +34,7 @@ class CapException with _$CapException {
 }
 
 @freezed
-class TeamFinance with _$TeamFinance {
+abstract class TeamFinance with _$TeamFinance {
   const factory TeamFinance({
     @Default(300000000) int salaryCap,
     @Default(0) int totalPayroll,

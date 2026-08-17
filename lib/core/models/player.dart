@@ -10,7 +10,7 @@ part 'player.freezed.dart';
 part 'player.g.dart';
 
 @freezed
-class PlayerSeasonStats with _$PlayerSeasonStats {
+abstract class PlayerSeasonStats with _$PlayerSeasonStats {
   const factory PlayerSeasonStats({
     required int year,
     @Default(0) int minutes,
@@ -126,7 +126,7 @@ PlayerSeasonStats aggregatePlayerSeasonStats(
 
 /// Hidden development / durability traits (`player_management.md` §3).
 @freezed
-class PlayerHidden with _$PlayerHidden {
+abstract class PlayerHidden with _$PlayerHidden {
   const factory PlayerHidden({
     required int injuryProne,
     required int determination,
@@ -142,7 +142,7 @@ class PlayerHidden with _$PlayerHidden {
 
 /// Mutable matchday / roster state of a player.
 @freezed
-class PlayerState with _$PlayerState {
+abstract class PlayerState with _$PlayerState {
   const factory PlayerState({
     @Default(100) int stamina,
     @Default(5.0) double form,
@@ -171,7 +171,7 @@ extension PlayerStateX on PlayerState {
 }
 
 @freezed
-class Player with _$Player {
+abstract class Player with _$Player {
   const factory Player({
     required String id,
     required String name,
@@ -375,7 +375,7 @@ extension PlayerX on Player {
 }
 
 @freezed
-class PlayerMatchStats with _$PlayerMatchStats {
+abstract class PlayerMatchStats with _$PlayerMatchStats {
   const factory PlayerMatchStats({
     required String playerId,
     @Default(0) int minutes,

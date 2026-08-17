@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:new_football/core/balance/balance_config.dart';
+import 'package:new_football/core/models/assigned_role.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/match_models.dart';
 import 'package:new_football/core/models/match_state.dart';

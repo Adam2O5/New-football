@@ -5,7 +5,7 @@ part 'season_awards.freezed.dart';
 part 'season_awards.g.dart';
 
 @freezed
-class SeasonAwards with _$SeasonAwards {
+abstract class SeasonAwards with _$SeasonAwards {
   const factory SeasonAwards({
     required int year,
     String? mvpPlayerId,

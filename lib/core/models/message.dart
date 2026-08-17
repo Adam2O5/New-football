@@ -6,7 +6,7 @@ part 'message.g.dart';
 
 /// A single option in a decision message (`messages.md` §12).
 @freezed
-class MessageAction with _$MessageAction {
+abstract class MessageAction with _$MessageAction {
   const factory MessageAction({required String id, required String labelKey}) =
       _MessageAction;
 
@@ -16,7 +16,7 @@ class MessageAction with _$MessageAction {
 
 /// Decision spec for messages requiring player choice (`messages.md` §12).
 @freezed
-class DecisionSpec with _$DecisionSpec {
+abstract class DecisionSpec with _$DecisionSpec {
   const factory DecisionSpec({
     required List<MessageAction> options,
     required String defaultOnExpiry,
@@ -28,7 +28,7 @@ class DecisionSpec with _$DecisionSpec {
 
 /// Full message model (`messages.md` §4).
 @freezed
-class GameMessage with _$GameMessage {
+abstract class GameMessage with _$GameMessage {
   const factory GameMessage({
     required String id,
     required MessageType type,
@@ -57,7 +57,7 @@ class GameMessage with _$GameMessage {
 }
 
 @freezed
-class MessageSettings with _$MessageSettings {
+abstract class MessageSettings with _$MessageSettings {
   const factory MessageSettings({
     /// Type-level settings take precedence over domain-level settings.
     @Default({}) Map<MessageType, NotificationLevel> overrides,
@@ -104,7 +104,7 @@ extension MessageSettingsX on MessageSettings {
 }
 
 @freezed
-class Inbox with _$Inbox {
+abstract class Inbox with _$Inbox {
   const factory Inbox({
     @Default([]) List<GameMessage> messages,
     @Default([]) List<GameMessage> scheduled,

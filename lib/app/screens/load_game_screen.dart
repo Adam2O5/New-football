@@ -165,7 +165,7 @@ class LoadGameScreen extends ConsumerWidget {
 
     try {
       await ref.read(saveRepositoryProvider).delete(meta.id);
-      final current = ref.read(gameControllerProvider).valueOrNull;
+      final current = ref.read(gameControllerProvider).value;
       if (current?.meta.id == meta.id) {
         ref.read(gameControllerProvider.notifier).clear();
       }

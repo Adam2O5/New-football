@@ -5,7 +5,7 @@ part 'assigned_role.freezed.dart';
 part 'assigned_role.g.dart';
 
 @Freezed(unionKey: 'type')
-class AssignedRole with _$AssignedRole {
+abstract class AssignedRole with _$AssignedRole {
   const factory AssignedRole.gk({@Default(GkRole.standard) GkRole role}) =
       AssignedGkRole;
 
