@@ -70,6 +70,46 @@ class MatchdayBalance {
     this.clutchWeight = 1.2,
     this.momentumDecay = 0.96,
     this.momentumGoal = 25,
+    this.momentumMissedBigChance = 8,
+    this.momentumSavedPenalty = 18,
+    this.momentumRedCard = 20,
+    this.momentumKeyPlayerInjury = 8,
+    this.derbyMomentumMultiplier = 1.25,
+    this.derbyStaminaMultiplier = 1.05,
+    this.derbySequenceMultiplier = 1.05,
+    this.crowdHomeDivisor = 2500.0,
+    this.crowdAwayDivisor = 4000.0,
+    this.crowdRefereeDivisor = 1500.0,
+    this.temperatureHotThreshold = 24,
+    this.temperatureHotStep = 0.012,
+    this.temperatureColdThreshold = 4,
+    this.temperatureColdStep = 0.008,
+    this.windLongBallWeightMultiplier = 1.40,
+    this.scoreTrailingOneAttackDelta = 6,
+    this.scoreTrailingOneDefenseDelta = -5,
+    this.scoreTrailingOneLambdaMultiplier = 1.10,
+    this.scoreTrailingTwoAttackDelta = 10,
+    this.scoreTrailingTwoDefenseDelta = -9,
+    this.scoreTrailingTwoLambdaMultiplier = 1.18,
+    this.scoreTrailingTwoLongBallMultiplier = 1.60,
+    this.scoreLeadingOneAttackDelta = -4,
+    this.scoreLeadingOneDefenseDelta = 5,
+    this.scoreLeadingOneLambdaMultiplier = 0.94,
+    this.scoreLeadingTwoAttackDelta = -6,
+    this.scoreLeadingTwoDefenseDelta = 7,
+    this.scoreLeadingTwoLambdaMultiplier = 0.88,
+    this.stakeRegularLambdaMultiplier = 1.0,
+    this.stakePlayInLambdaMultiplier = 1.0,
+    this.stakePlayoffLambdaMultiplier = 1.0,
+    this.stakePlayoffEliminationLambdaMultiplier = 0.95,
+    this.stakeLeagueFinalLambdaMultiplier = 1.0,
+    this.stoppageBase = 1,
+    this.stoppageEventWeight = 0.5,
+    this.stoppageRandomMin = 0.7,
+    this.stoppageRandomMax = 1.3,
+    this.stoppageMin = 1,
+    this.stoppageMax = 8,
+    this.firstHalfStoppageDivisor = 3,
     this.roleFitBonus = 1.03,
     this.leaderBonus = 1.02,
     this.cardProneTemperamental = 1.35,
@@ -156,6 +196,46 @@ class MatchdayBalance {
       'snow': 1.45,
       'heat': 1.05,
       'cold': 1.08,
+    },
+    this.weatherPassingMultipliers = const <String, double>{
+      'clear': 1.00,
+      'overcast': 1.00,
+      'rain': 0.96,
+      'heavyRain': 0.90,
+      'wind': 0.93,
+      'snow': 0.88,
+      'heat': 0.98,
+      'cold': 0.98,
+    },
+    this.weatherPaceMultipliers = const <String, double>{
+      'clear': 1.00,
+      'overcast': 1.00,
+      'rain': 0.98,
+      'heavyRain': 0.94,
+      'wind': 1.00,
+      'snow': 0.90,
+      'heat': 0.96,
+      'cold': 0.97,
+    },
+    this.weatherStaminaMultipliers = const <String, double>{
+      'clear': 1.00,
+      'overcast': 0.98,
+      'rain': 1.03,
+      'heavyRain': 1.08,
+      'wind': 1.02,
+      'snow': 1.10,
+      'heat': 1.15,
+      'cold': 1.04,
+    },
+    this.weatherXgMultipliers = const <String, double>{
+      'clear': 1.00,
+      'overcast': 1.00,
+      'rain': 1.02,
+      'heavyRain': 1.05,
+      'wind': 0.97,
+      'snow': 0.95,
+      'heat': 0.98,
+      'cold': 1.00,
     },
     this.goalkeeperProfileWeights = const <String, Map<String, double>>{
       'distance': <String, double>{
@@ -250,6 +330,46 @@ class MatchdayBalance {
   final double clutchWeight;
   final double momentumDecay;
   final int momentumGoal;
+  final int momentumMissedBigChance;
+  final int momentumSavedPenalty;
+  final int momentumRedCard;
+  final int momentumKeyPlayerInjury;
+  final double derbyMomentumMultiplier;
+  final double derbyStaminaMultiplier;
+  final double derbySequenceMultiplier;
+  final double crowdHomeDivisor;
+  final double crowdAwayDivisor;
+  final double crowdRefereeDivisor;
+  final int temperatureHotThreshold;
+  final double temperatureHotStep;
+  final int temperatureColdThreshold;
+  final double temperatureColdStep;
+  final double windLongBallWeightMultiplier;
+  final int scoreTrailingOneAttackDelta;
+  final int scoreTrailingOneDefenseDelta;
+  final double scoreTrailingOneLambdaMultiplier;
+  final int scoreTrailingTwoAttackDelta;
+  final int scoreTrailingTwoDefenseDelta;
+  final double scoreTrailingTwoLambdaMultiplier;
+  final double scoreTrailingTwoLongBallMultiplier;
+  final int scoreLeadingOneAttackDelta;
+  final int scoreLeadingOneDefenseDelta;
+  final double scoreLeadingOneLambdaMultiplier;
+  final int scoreLeadingTwoAttackDelta;
+  final int scoreLeadingTwoDefenseDelta;
+  final double scoreLeadingTwoLambdaMultiplier;
+  final double stakeRegularLambdaMultiplier;
+  final double stakePlayInLambdaMultiplier;
+  final double stakePlayoffLambdaMultiplier;
+  final double stakePlayoffEliminationLambdaMultiplier;
+  final double stakeLeagueFinalLambdaMultiplier;
+  final int stoppageBase;
+  final double stoppageEventWeight;
+  final double stoppageRandomMin;
+  final double stoppageRandomMax;
+  final int stoppageMin;
+  final int stoppageMax;
+  final int firstHalfStoppageDivisor;
 
   final double roleFitBonus;
   final double leaderBonus;
@@ -318,6 +438,10 @@ class MatchdayBalance {
   final double stakePlayoffEliminationPressure;
   final double stakeLeagueFinalPressure;
   final Map<String, double> weatherHandlingMultipliers;
+  final Map<String, double> weatherPassingMultipliers;
+  final Map<String, double> weatherPaceMultipliers;
+  final Map<String, double> weatherStaminaMultipliers;
+  final Map<String, double> weatherXgMultipliers;
   final Map<String, Map<String, double>> goalkeeperProfileWeights;
 
   double tempoMultiplier(Tempo tempo) => switch (tempo) {
@@ -425,6 +549,47 @@ class MatchdayBalance {
   double weatherHandlingMultiplier(Weather weather) =>
       weatherHandlingMultipliers[weather.name] ?? 1.0;
 
+  double weatherPassingMultiplier(Weather weather) =>
+      weatherPassingMultipliers[weather.name] ?? 1.0;
+
+  double weatherPaceMultiplier(Weather weather) =>
+      weatherPaceMultipliers[weather.name] ?? 1.0;
+
+  double weatherStaminaMultiplier(Weather weather) =>
+      weatherStaminaMultipliers[weather.name] ?? 1.0;
+
+  double weatherXgMultiplier(Weather weather) =>
+      weatherXgMultipliers[weather.name] ?? 1.0;
+
+  double temperatureStaminaMultiplier(int temperatureC) {
+    final hot = (temperatureC - temperatureHotThreshold)
+        .clamp(0, 100)
+        .toDouble();
+    final cold = (temperatureColdThreshold - temperatureC)
+        .clamp(0, 100)
+        .toDouble();
+    return 1.0 + hot * temperatureHotStep + cold * temperatureColdStep;
+  }
+
+  double stakeLambdaMultiplier(MatchStake stake) => switch (stake) {
+    MatchStake.regular => stakeRegularLambdaMultiplier,
+    MatchStake.playIn => stakePlayInLambdaMultiplier,
+    MatchStake.playoff => stakePlayoffLambdaMultiplier,
+    MatchStake.playoffElimination => stakePlayoffEliminationLambdaMultiplier,
+    MatchStake.leagueFinal => stakeLeagueFinalLambdaMultiplier,
+  };
+
+  double crowdHomeMultiplier(int crowdIntensity) =>
+      1.0 + crowdIntensity / crowdHomeDivisor;
+
+  double crowdAwayMultiplier(int crowdIntensity) =>
+      1.0 - crowdIntensity / crowdAwayDivisor;
+
+  double refereeCrowdMultiplier({
+    required int crowdIntensity,
+    required bool defendingHome,
+  }) => defendingHome ? 1.0 : 1.0 + crowdIntensity / crowdRefereeDivisor;
+
   Map<String, double> goalkeeperProfileFor(String shotKind) =>
       goalkeeperProfileWeights[shotKind] ?? goalkeeperProfileWeights['box']!;
 
@@ -452,6 +617,24 @@ class MatchdayBalance {
   }) {
     final base = (determination - 5.5) * clutchWeight * stakePressure(stake);
     return base * (ambitious ? 1.03 : 1.0);
+  }
+
+  int stoppageMinutes({
+    required int goals,
+    required int cards,
+    required int injuries,
+    required int substitutions,
+    required double randomUnit,
+  }) {
+    final boundedRandom = randomUnit.clamp(0.0, 1.0).toDouble();
+    final eventCount = goals + cards + injuries + substitutions;
+    final randomMultiplier =
+        stoppageRandomMin +
+        (stoppageRandomMax - stoppageRandomMin) * boundedRandom;
+    final raw =
+        stoppageBase +
+        (stoppageEventWeight * eventCount * randomMultiplier).round();
+    return raw.clamp(stoppageMin, stoppageMax).toInt();
   }
 
   /// Documentation names for the substitution limits.

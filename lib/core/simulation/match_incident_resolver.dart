@@ -70,6 +70,7 @@ class MatchIncidentResolver {
     required Player defender,
     required TacticsSetup defendingTactics,
     required MatchContext context,
+    bool defendingHome = true,
   }) {
     final matchday = balance.matchday;
     final probability =
@@ -81,7 +82,11 @@ class MatchIncidentResolver {
         ) *
         _cardProneMultiplier(defender) *
         (context.isDerby ? matchday.derbyFoulMultiplier : 1.0) *
-        context.refereeStrictness;
+        context.refereeStrictness *
+        matchday.refereeCrowdMultiplier(
+          crowdIntensity: context.crowdIntensity,
+          defendingHome: defendingHome,
+        );
     return probability.clamp(0.0, 1.0).toDouble();
   }
 
@@ -91,6 +96,7 @@ class MatchIncidentResolver {
     required Player defender,
     required TacticsSetup defendingTactics,
     required MatchContext context,
+    bool defendingHome = true,
     required double Function() nextDouble,
   }) {
     final probability = foulProbability(
@@ -99,6 +105,7 @@ class MatchIncidentResolver {
       defender: defender,
       defendingTactics: defendingTactics,
       context: context,
+      defendingHome: defendingHome,
     );
     return FoulDecision(
       probability: probability,
@@ -112,6 +119,7 @@ class MatchIncidentResolver {
   }) =>
       (balance.matchday.yellowFromFoul *
               context.refereeStrictness *
+              (context.isDerby ? balance.matchday.derbyFoulMultiplier : 1.0) *
               _cardProneMultiplier(defender))
           .clamp(0.0, 1.0)
           .toDouble();

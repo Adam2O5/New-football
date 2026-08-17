@@ -264,27 +264,17 @@ class EffectiveAttributeCalculator {
     required bool isHome,
   }) {
     final weather = switch (attribute) {
-      EffectiveAttribute.passing => switch (context.weather) {
-        Weather.rain => 0.96,
-        Weather.heavyRain => 0.90,
-        Weather.wind => 0.93,
-        Weather.snow => 0.88,
-        Weather.heat || Weather.cold => 0.98,
-        _ => 1.0,
-      },
-      EffectiveAttribute.pace => switch (context.weather) {
-        Weather.rain => 0.98,
-        Weather.heavyRain => 0.94,
-        Weather.snow => 0.90,
-        Weather.heat => 0.96,
-        Weather.cold => 0.97,
-        _ => 1.0,
-      },
+      EffectiveAttribute.passing => balance.matchday.weatherPassingMultiplier(
+        context.weather,
+      ),
+      EffectiveAttribute.pace => balance.matchday.weatherPaceMultiplier(
+        context.weather,
+      ),
       _ => 1.0,
     };
     final crowd = isHome
-        ? 1 + context.crowdIntensity / 2500.0
-        : 1 - context.crowdIntensity / 4000.0;
+        ? balance.matchday.crowdHomeMultiplier(context.crowdIntensity)
+        : balance.matchday.crowdAwayMultiplier(context.crowdIntensity);
     final matchLoad =
         (isHome ? context.homeMatchInWeek : context.awayMatchInWeek) >= 3
         ? 0.96

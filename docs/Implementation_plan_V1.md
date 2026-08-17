@@ -821,43 +821,49 @@ Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, le
 
 ---
 
-### ⬜ Task 21: Etap 7 — momentum, stan meczu, kontekst pozaboiskowy
+### ✅ Task 21: Etap 7 — momentum, stan meczu, kontekst pozaboiskowy
 
 **Cel:** `matchday_model.md` §12–13, §6.6.
 
-- [ ] `momentum ∈ [−100, +100]`, dodatnie na korzyść gospodarza
-- [ ] Gol +25 dla strzelca
-- [ ] Zmarnowana duża sytuacja (xG > 0,4) +8 dla atakującego
-- [ ] Obroniony rzut karny +18 dla broniącego
-- [ ] Czerwona kartka −20 dla ukaranego
-- [ ] Kontuzja kluczowego zawodnika −8
-- [ ] Zanik ×0,96 / minuta w stronę 0
-- [ ] `momentumMult = 1 + momentum / 1500` na `atkRating` i na `λ`
-- [ ] Od 65': przegrywa 1 golem → `atk'` +6, `def'` −5, `λ` ×1,10
-- [ ] Od 65': przegrywa 2+ → `atk'` +10, `def'` −9, `λ` ×1,18, `longBall` waga ×1,6
-- [ ] Od 65': wygrywa 1 golem → `def'` +5, `atk'` −4, `λ` ×0,94
-- [ ] Od 65': wygrywa 2+ → `def'` +7, `atk'` −6, `λ` ×0,88
-- [ ] Automatyczne przesunięcia nieaktywne, gdy gracz ręcznie ustawił taktykę po 65'
-- [ ] Pogoda: 8 stanów × 6 efektów (passing, pace, błąd GK, stamina, kontuzje, xG)
-- [ ] `wind` → `longBall` waga ×1,4
-- [ ] `tempStaminaMult = 1 + max(0, t − 24) × 0,012 + max(0, 4 − t) × 0,008`
-- [ ] Derby: faule ×1,15, stamina ×1,05, momentum ×1,25, crowd +20, `λ` ×1,05
-- [ ] `crowdIntensity = clamp(45 + forma × 0,3 + stakeBonus + derbyBonus, 0, 100)`
-- [ ] `contextMult` gospodarza `1 + crowd / 2500`, gościa `1 − crowd / 4000`
-- [ ] Bias sędziego `×(1 + crowd / 1500)` na faule przeciw gościom
-- [ ] Startowe momentum `+crowd / 8`
-- [ ] Stawka: 5 poziomów z `stakePressure` i efektami na crowd, `refereeStrictness`, `λ`
-- [ ] Drugi mecz w tygodniu: `contextMult` ×0,98; trzy w 8 dni: ×0,96
-- [ ] `stoppage = 1 + round(0,5 × (gole + kartki + kontuzje + zmiany) × RNG(0,7…1,3))`, clamp 1–8
-- [ ] Pierwsza połowa: `floor(stoppage / 3)`
+- [x] `momentum ∈ [−100, +100]`, dodatnie na korzyść gospodarza
+- [x] Gol +25 dla strzelca
+- [x] Zmarnowana duża sytuacja (xG > 0,4) +8 dla atakującego
+- [x] Obroniony rzut karny +18 dla broniącego
+- [x] Czerwona kartka −20 dla ukaranego
+- [x] Kontuzja kluczowego zawodnika −8
+- [x] Zanik ×0,96 / minuta w stronę 0
+- [x] `momentumMult = 1 + momentum / 1500` na `atkRating` i na `λ`
+- [x] Od 65': przegrywa 1 golem → `atk'` +6, `def'` −5, `λ` ×1,10
+- [x] Od 65': przegrywa 2+ → `atk'` +10, `def'` −9, `λ` ×1,18, `longBall` waga ×1,6
+- [x] Od 65': wygrywa 1 golem → `def'` +5, `atk'` −4, `λ` ×0,94
+- [x] Od 65': wygrywa 2+ → `def'` +7, `atk'` −6, `λ` ×0,88
+- [x] Automatyczne przesunięcia nieaktywne, gdy gracz ręcznie ustawił taktykę po 65'
+- [x] Pogoda: 8 stanów × 6 efektów (passing, pace, błąd GK, stamina, kontuzje, xG)
+- [x] `wind` → `longBall` waga ×1,4
+- [x] `tempStaminaMult = 1 + max(0, t − 24) × 0,012 + max(0, 4 − t) × 0,008`
+- [x] Derby: faule ×1,15, stamina ×1,05, momentum ×1,25, crowd +20, `λ` ×1,05
+- [x] `crowdIntensity = clamp(45 + forma × 0,3 + stakeBonus + derbyBonus, 0, 100)`
+- [x] `contextMult` gospodarza `1 + crowd / 2500`, gościa `1 − crowd / 4000`
+- [x] Bias sędziego `×(1 + crowd / 1500)` na faule przeciw gościom
+- [x] Startowe momentum `+crowd / 8`
+- [x] Stawka: 5 poziomów z `stakePressure` i efektami na crowd, `refereeStrictness`, `λ`
+- [x] Drugi mecz w tygodniu: `contextMult` ×0,98; trzy w 8 dni: ×0,96
+- [x] `stoppage = 1 + round(0,5 × (gole + kartki + kontuzje + zmiany) × RNG(0,7…1,3))`, clamp 1–8
+- [x] Pierwsza połowa: `floor(stoppage / 3)`
+
+**Implementacja:** Task 21 działa runtime-only w `SimulationMatchEngine`. Kanoniczna skala momentum jest przechowywana w istniejącym `MatchState` wyłącznie dla tego runtime'u; pipeline legacy, provider, modele serializowane i replaye pozostają bez migracji do Task 22. `ScoreStateModifiers` modyfikuje bieżące ratingi, lambdę i wagę `longBall`, ale nie nadpisuje zapisanych taktyk. Ręczna zmiana taktyki po 65. minucie ustawia blokadę automatycznych przesunięć dla danej strony. Doliczony czas jest opt-in przez `includeStoppageTime`, dzięki czemu domyślne API zachowuje 90 minut i kompatybilność z Task 17–20. `SetPieceResolution` ma runtime-only most dla zdarzeń `scoredPenalty` i `missedPenalty`.
 
 **Testy**
-- [ ] Momentum zanika do zera bez zdarzeń
-- [ ] Drużyna przegrywająca 2+ golami od 65' ma podwyższone `λ` i wagę `longBall`
-- [ ] `heavyRain` wyraźnie podnosi błędy GK
-- [ ] Doliczony czas mieści się w 1–8 minut
 
-**Demo:** mecz derbowy w ulewie ma widocznie inny przebieg (więcej kartek, błędów GK, gorsze podania) niż ten sam mecz w pogodzie `clear`.
+- [x] Momentum zanika do zera bez zdarzeń i jest propagowane do `legacyMatch.state` oraz śladu minuty
+- [x] Gol, zmarnowana duża sytuacja, obroniony karny, czerwona kartka i kontuzja key playera stosują właściwy znak oraz wartość delty
+- [x] Drużyna przegrywająca 1/2+ golami od 65' otrzymuje właściwe `atk'`, `def'`, `λ` i `longBall`; wariant ręczny pozostaje neutralny
+- [x] `heavyRain`, `wind` i temperatura wpływają na efekty pogody, błąd GK, xG, wagę `longBall` i stamina
+- [x] Derby, crowd i stake zmieniają kontekst oraz lambdę
+- [x] Doliczony czas jest deterministyczny, mieści się w 1–8 minutach, a pierwsza połowa używa `floor(stoppage / 3)`
+- [x] Pokrycie mechaniki znajduje się w `test/task21_momentum_context_test.dart`
+
+**Demo:** ten sam runtime potrafi deterministycznie odtworzyć mecz derbowy w ulewie z innymi błędami GK, jakością podań, wagą `longBall`, zmęczeniem i lambdą niż mecz w pogodzie `clear`, bez zmiany save schema.
 
 ---
 

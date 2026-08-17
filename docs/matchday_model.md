@@ -255,6 +255,8 @@ stoppage = 1 + round(0,5 × (gole + kartki + kontuzje + zmiany) × RNG(0,7…1,3
 
 Clamp 1–8 minut. Pierwsza połowa: `floor(stoppage / 3)`.
 
+W runtime formuła korzysta z tego samego `MatchRandom` co reszta meczu i uwzględnia zdarzenia zapisane w `MatchEvent` oraz `MatchInjury`. Doliczony czas jest opt-in przez `SimulationMatchEngine.runUntil(..., includeStoppageTime: true)` lub `simulateFull(..., includeStoppageTime: true)`. Domyślnie silnik kończy się na 90. minucie, aby zachować kompatybilność istniejących replayów i testów; przy włączeniu opcji `SimulationResult` udostępnia `firstHalfStoppageTime`, `secondHalfStoppageTime` i `matchEndMinute`.
+
 ---
 
 ## 7. Rozstrzyganie sytuacji
@@ -646,6 +648,8 @@ Od 65. minuty rozkład typów sekwencji i `TeamShape` przesuwają się automatyc
 
 Drużyna gracza podlega temu tylko jeśli gracz nie ustawił ręcznie taktyki po 65. minucie.
 
+W runtime `ScoreStateModifiers` wylicza stan osobno dla gospodarzy i gości, a następnie stosuje delty do `UnitRatings`, mnożnik do lambdy oraz — przy stracie co najmniej dwóch goli — mnożnik wagi `longBall`. Zapisane `TacticsSetup` nie jest mutowane. `SimulationLiveMatch.updateTactics` ustawia blokadę automatycznego score-state dla konkretnej strony, gdy zmiana nastąpiła po 65. minucie. Diagnostyka jest dostępna w każdym `SimulationMinuteTrace` (`momentum`, oba score-state i obie lambdy).
+
 ---
 
 ## 13. Warunki pozaboiskowe
@@ -665,7 +669,7 @@ Losowana per mecz, rozkład zależny od tygodnia sezonu (sierpień → upały, z
 | `heat` | ×0,98 | ×0,96 | ×1,05 | **×1,15** | ×1,10 | ×0,98 | zgodne z `player_management.md` |
 | `cold` | ×0,98 | ×0,97 | ×1,08 | ×1,04 | ×1,12 | ×1,00 | sztywność mięśni |
 
-Pogoda działa przez `contextMult` na odpowiednie atrybuty, nie na cały profil zawodnika.
+Pogoda działa przez `contextMult` na odpowiednie atrybuty, nie na cały profil zawodnika. W kodzie wspólny kontrakt reprezentuje `MatchWeatherEffects`: `EffectiveAttributeCalculator` konsumuje passing/pace, `GoalkeeperResolver` podnosi prawdopodobieństwo błędu handling, `MatchIncidentResolver` konsumuje injury, `ShotResolver` konsumuje xG, a tick staminy runtime uwzględnia stamina. Wiatr dodatkowo zmienia wagę `longBall` w `SequenceSelector`.
 
 ### 13.2 Temperatura
 
@@ -674,6 +678,8 @@ tempStaminaMult = 1 + max(0, temperatureC − 24) × 0,012 + max(0, 4 − temper
 ```
 
 Przy 34 °C → ×1,12. Przy −4 °C → ×1,06.
+
+`MatchdayBalance.temperatureStaminaMultiplier` stosuje ten wzór per minuta. Mnożnik pogody i temperatury trafia do `recordMinute`, a istniejący mnożnik derby jest przekazywany przez kontekst legacy; dzięki temu nie jest nakładany podwójnie.
 
 ### 13.3 Derby
 
@@ -684,6 +690,8 @@ Przy 34 °C → ×1,12. Przy −4 °C → ×1,06.
 | Skala zmian momentum | ×1,25 |
 | `crowdIntensity` | +20 |
 | `λ` sekwencji | ×1,05 |
+
+`MatchContextEffects` stosuje mnożnik derby ×1,25 tylko do delty zdarzeniowej momentum, natomiast `MatchdayBalance` udostępnia osobne mnożniki dla staminy, lambdy i fauli/kartek.
 
 ### 13.4 Gospodarz i publiczność
 
@@ -697,6 +705,8 @@ crowdIntensity = clamp(45 + formaGospodarza × 0,3 + stakeBonus + derbyBonus, 0,
 | `contextMult` gościa | 1 − `crowdIntensity` / 4000 (do ×0,975) |
 | Bias sędziego (faule przeciw gościom) | ×(1 + `crowdIntensity` / 1500) |
 | Startowe momentum | +`crowdIntensity` / 8 |
+
+`MatchContextFactory` wylicza crowd deterministycznie z formy gospodarza, stawki i derby, a `EffectiveAttributeCalculator` stosuje osobne mnożniki gospodarza i gościa. Faul przeciw gościom dostaje dodatkowo bias sędziego, bez zmiany bazowej wartości dla faulu gospodarza.
 
 ### 13.5 Stawka meczu
 

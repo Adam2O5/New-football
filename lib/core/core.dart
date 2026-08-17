@@ -13,6 +13,7 @@ export 'simulation/sequence_resolver.dart';
 export 'simulation/set_piece_resolver.dart';
 export 'simulation/shot_models.dart';
 export 'simulation/shot_resolver.dart';
+export 'simulation/match_context_effects.dart';
 export 'simulation/match_context_factory.dart';
 export 'simulation/match_message_emitter.dart';
 export 'simulation/pre_match_validator.dart';

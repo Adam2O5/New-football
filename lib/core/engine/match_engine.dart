@@ -149,6 +149,7 @@ class LiveMatch {
     required List<Player> lineup,
     required bool homeSide,
     bool applyShortHanded = false,
+    double additionalStaminaMultiplier = 1.0,
   }) {
     final tactics = homeSide ? state.homeTactics : state.awayTactics;
     for (final player in lineup) {
@@ -161,6 +162,7 @@ class LiveMatch {
         pressing: tactics.pressing,
         weather: state.context.weather,
         isDerby: state.context.isDerby,
+        additionalMultiplier: additionalStaminaMultiplier,
       );
       final shortHandedMultiplier = applyShortHanded
           ? balance.matchday.shortHandedStaminaMultiplier(lineup.length)

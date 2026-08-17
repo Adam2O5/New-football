@@ -163,7 +163,7 @@ class MatchContextFactory {
     }
   }
 
-  int _matchInWeek(int? value) => (value ?? 1).clamp(1, 2);
+  int _matchInWeek(int? value) => (value ?? 1).clamp(1, 3);
 
   bool _defaultSeededRivalry(String homeId, String awayId) {
     final home = _seededTeamParts(homeId);

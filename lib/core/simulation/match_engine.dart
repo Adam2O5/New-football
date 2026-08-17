@@ -10,6 +10,7 @@ import 'package:new_football/core/random/match_random.dart';
 import 'package:new_football/core/services/cohesion_service.dart';
 import 'package:new_football/core/simulation/duel_resolver.dart';
 import 'package:new_football/core/simulation/effective_attributes.dart';
+import 'package:new_football/core/simulation/match_context_effects.dart';
 import 'package:new_football/core/simulation/matchday_runtime.dart';
 import 'package:new_football/core/simulation/match_incident_resolver.dart';
 import 'package:new_football/core/simulation/sequence_chain_resolver.dart';
@@ -62,6 +63,11 @@ class SimulationMinuteTrace {
     required this.sequences,
     required this.randomCursorStart,
     required this.randomCursorEnd,
+    this.momentum = 0.0,
+    this.homeScoreState = const ScoreStateModifiers.neutral(),
+    this.awayScoreState = const ScoreStateModifiers.neutral(),
+    this.homeSequenceLambda = 0.0,
+    this.awaySequenceLambda = 0.0,
   });
 
   factory SimulationMinuteTrace.empty({
@@ -88,6 +94,11 @@ class SimulationMinuteTrace {
   final List<SimulationSequenceTrace> sequences;
   final int randomCursorStart;
   final int randomCursorEnd;
+  final double momentum;
+  final ScoreStateModifiers homeScoreState;
+  final ScoreStateModifiers awayScoreState;
+  final double homeSequenceLambda;
+  final double awaySequenceLambda;
 }
 
 /// Runtime-only result for Task 18. It intentionally does not replace
@@ -118,6 +129,10 @@ class SimulationResult {
     List<MatchInjury> injuries = const [],
     List<MatchDiscipline> disciplines = const [],
     List<String> unreplacedInjuryIds = const [],
+    this.stoppageTime = 0,
+    this.firstHalfStoppageTime = 0,
+    this.secondHalfStoppageTime = 0,
+    this.matchEndMinute = 90,
   }) : minuteTraces = List.unmodifiable(minuteTraces),
        events = List.unmodifiable(events),
        injuries = List.unmodifiable(injuries),
@@ -148,6 +163,10 @@ class SimulationResult {
   final List<MatchInjury> injuries;
   final List<MatchDiscipline> disciplines;
   final List<String> unreplacedInjuryIds;
+  final int stoppageTime;
+  final int firstHalfStoppageTime;
+  final int secondHalfStoppageTime;
+  final int matchEndMinute;
 
   double get awayPossessionPercent => 100.0 - homePossessionPercent;
   int get minutesSimulated => minuteTraces.length;
@@ -281,6 +300,13 @@ class SimulationLiveMatch {
   final Set<String> _awayUnreplacedMajorInjuryIds = <String>{};
   int? _homeTacticalPenaltyExpiresAtMinute;
   int? _awayTacticalPenaltyExpiresAtMinute;
+  bool _homeManualTacticsAfter65 = false;
+  bool _awayManualTacticsAfter65 = false;
+  bool _stoppageEnabled = false;
+  int? _firstHalfStoppageTime;
+  int? _secondHalfStoppageTime;
+  int? _firstHalfEndMinute;
+  int? _matchEndMinute;
   SimulationActionResult? lastAction;
   final List<SimulationMinuteTrace> minuteTraces = [];
 
@@ -301,7 +327,12 @@ class SimulationLiveMatch {
   bool _awayCounterAttackEligible = false;
 
   MatchState get state => legacyMatch.state;
-  bool get isFinished => legacyMatch.isFinished;
+  bool get isFinished {
+    if (!_stoppageEnabled) return state.minute >= 90;
+    final endMinute = _matchEndMinute;
+    return endMinute != null && state.minute >= endMinute;
+  }
+
   String get homeTeamId => legacyMatch.homeTeamId;
   String get awayTeamId => legacyMatch.awayTeamId;
   TeamShape? get homeTeamShape => legacyMatch.homeTeamShape;
@@ -329,7 +360,32 @@ class SimulationLiveMatch {
   Map<String, Position> get awayAssignedPositions =>
       Map.unmodifiable(_awayAssignedPositions);
 
-  bool get isHalfTime => state.minute == 45;
+  bool get isHalfTime =>
+      state.minute == 45 ||
+      (_firstHalfEndMinute != null && state.minute == _firstHalfEndMinute);
+  bool get homeManualTacticsAfter65 => _homeManualTacticsAfter65;
+  bool get awayManualTacticsAfter65 => _awayManualTacticsAfter65;
+  ScoreStateModifiers get homeScoreState => ScoreStateModifiers.forTeam(
+    minute: state.minute,
+    homeGoals: state.homeGoals,
+    awayGoals: state.awayGoals,
+    homeSide: true,
+    balance: balance.matchday,
+    manualTacticsAfter65: _homeManualTacticsAfter65,
+  );
+  ScoreStateModifiers get awayScoreState => ScoreStateModifiers.forTeam(
+    minute: state.minute,
+    homeGoals: state.homeGoals,
+    awayGoals: state.awayGoals,
+    homeSide: false,
+    balance: balance.matchday,
+    manualTacticsAfter65: _awayManualTacticsAfter65,
+  );
+  int get firstHalfStoppageTime => _firstHalfStoppageTime ?? 0;
+  int get secondHalfStoppageTime => _secondHalfStoppageTime ?? 0;
+  int get stoppageTime => secondHalfStoppageTime;
+  int get matchEndMinute => _matchEndMinute ?? 90;
+  bool get stoppageTimeEnabled => _stoppageEnabled;
   int get homeSubsUsed => legacyMatch.homeSubsUsed;
   int get awaySubsUsed => legacyMatch.awaySubsUsed;
   int get homeSubWindows => legacyMatch.homeSubWindows;
@@ -401,6 +457,17 @@ class SimulationLiveMatch {
     playerInId: playerInId,
     atHalfTime: atHalfTime,
     injuryType: InjuryType.major,
+  );
+
+  MatchState recordSetPieceResolution({
+    required SetPieceResolution resolution,
+    required bool attackingHome,
+    int? minute,
+  }) => SimulationMatchEngine(balance: balance).recordSetPieceResolution(
+    live: this,
+    resolution: resolution,
+    attackingHome: attackingHome,
+    minute: minute,
   );
 
   bool updateTactics({
@@ -511,6 +578,10 @@ class SimulationLiveMatch {
       ..._homeUnreplacedInjuryIds,
       ..._awayUnreplacedInjuryIds,
     ],
+    stoppageTime: stoppageTime,
+    firstHalfStoppageTime: firstHalfStoppageTime,
+    secondHalfStoppageTime: secondHalfStoppageTime,
+    matchEndMinute: matchEndMinute,
   );
 
   static Map<String, Position> _initialAssignedPositions(
@@ -879,6 +950,13 @@ class SimulationMatchEngine {
     }
 
     final changed = current != tactics;
+    if (changed && !halftime && live.state.minute >= 65) {
+      if (homeSide) {
+        live._homeManualTacticsAfter65 = true;
+      } else {
+        live._awayManualTacticsAfter65 = true;
+      }
+    }
     if (homeSide) {
       live.legacyMatch.state = live.state.copyWith(homeTactics: tactics);
       if (halftime && formationChanged) {
@@ -945,6 +1023,83 @@ class SimulationMatchEngine {
     _remapFormation(live, homeSide: homeSide, formation: formation);
   }
 
+  MatchState recordSetPieceResolution({
+    required SimulationLiveMatch live,
+    required SetPieceResolution resolution,
+    required bool attackingHome,
+    int? minute,
+  }) {
+    final shot = resolution.shot;
+    var state = live.state;
+    if (!shot.isShot) return state;
+
+    final xg = shot.xg + shot.reboundXg;
+    if (attackingHome) {
+      live._homeShots++;
+      live._homeXg += xg;
+      if (shot.isOnTarget) live._homeShotsOnTarget++;
+      if (shot.reboundAttempted) live._homeShots++;
+      if (shot.reboundGoal) live._homeShotsOnTarget++;
+      if (shot.cornerAwarded || resolution.type == SetPieceType.corner) {
+        live._homeCorners++;
+      }
+    } else {
+      live._awayShots++;
+      live._awayXg += xg;
+      if (shot.isOnTarget) live._awayShotsOnTarget++;
+      if (shot.reboundAttempted) live._awayShots++;
+      if (shot.reboundGoal) live._awayShotsOnTarget++;
+      if (shot.cornerAwarded || resolution.type == SetPieceType.corner) {
+        live._awayCorners++;
+      }
+    }
+
+    final eventMinute = minute ?? state.minute;
+    if (shot.isGoal) {
+      state = attackingHome
+          ? state.copyWith(homeGoals: state.homeGoals + 1)
+          : state.copyWith(awayGoals: state.awayGoals + 1);
+      state = _applyMomentumDelta(
+        live,
+        state,
+        homeSide: attackingHome,
+        amount: balance.matchday.momentumGoal,
+      );
+      _recordShotEvent(
+        live,
+        shot: shot,
+        setPiece: resolution,
+        homeSide: attackingHome,
+        minute: eventMinute,
+      );
+    } else if (resolution.type == SetPieceType.penalty &&
+        shot.outcome == ShotOutcome.saved) {
+      state = _applyMomentumDelta(
+        live,
+        state,
+        homeSide: !attackingHome,
+        amount: balance.matchday.momentumSavedPenalty,
+      );
+      _recordMissedPenaltyEvent(
+        live,
+        shot: shot,
+        attackingHome: attackingHome,
+        minute: eventMinute,
+      );
+    } else if (shot.xg > 0.4) {
+      state = _applyMomentumDelta(
+        live,
+        state,
+        homeSide: attackingHome,
+        amount: balance.matchday.momentumMissedBigChance,
+      );
+    }
+
+    live.legacyMatch.state = state;
+    _refreshRuntimeRatings(live);
+    return state;
+  }
+
   SimulationMinuteTrace simulateMinute(SimulationLiveMatch live) {
     if (live.isFinished) {
       return SimulationMinuteTrace.empty(
@@ -957,8 +1112,15 @@ class SimulationMatchEngine {
     final cursorStart = live.random.cursor;
     final previousHomeLineup = live.state.homeLineup;
     final previousAwayLineup = live.state.awayLineup;
+    final staminaContextMultiplier = _staminaContextMultiplier(
+      live.state.context,
+    );
     var state = live.state.copyWith(minute: nextMinute);
+    state = state.copyWith(momentum: _decayMomentum(state.momentum));
 
+    // Task 21 keeps the documented momentum scale in the simulation runtime.
+    // The decay happens before this minute's events are resolved.
+    live.legacyMatch.state = state;
     // Task 17 order 1: stamina tick for the players on the pitch at minute
     // start. Task 16 is refreshed only after both sides have been ticked.
     state = state.copyWith(
@@ -966,11 +1128,13 @@ class SimulationMatchEngine {
         lineup: previousHomeLineup,
         homeSide: true,
         applyShortHanded: true,
+        additionalStaminaMultiplier: staminaContextMultiplier,
       ),
       awayLineup: live.legacyMatch.recordMinute(
         lineup: previousAwayLineup,
         homeSide: false,
         applyShortHanded: true,
+        additionalStaminaMultiplier: staminaContextMultiplier,
       ),
     );
     live.legacyMatch.state = state;
@@ -997,8 +1161,21 @@ class SimulationMatchEngine {
     live._homePossessionSum += possessionProbability;
 
     // Task 17 order 4: Poisson sequence count, bounded to 0–3.
+    final homeSequenceLambda = _sequenceLambdaForSide(
+      live,
+      state,
+      homeSide: true,
+    );
+    final awaySequenceLambda = _sequenceLambdaForSide(
+      live,
+      state,
+      homeSide: false,
+    );
+    final sequenceLambda =
+        homeSequenceLambda * possessionProbability +
+        awaySequenceLambda * (1.0 - possessionProbability);
     final sequenceCount = live.random
-        .nextPoisson(_sequenceLambda(state))
+        .nextPoisson(sequenceLambda)
         .clamp(0, balance.matchday.sequenceMaxPerMinute)
         .toInt();
     final sequenceTraces = <SimulationSequenceTrace>[];
@@ -1100,6 +1277,40 @@ class SimulationMatchEngine {
           if (shot.reboundGoal) live._homeShotsOnTarget++;
           if (shot.isGoal) {
             state = state.copyWith(homeGoals: state.homeGoals + 1);
+            state = _applyMomentumDelta(
+              live,
+              state,
+              homeSide: true,
+              amount: balance.matchday.momentumGoal,
+            );
+            _recordShotEvent(
+              live,
+              shot: shot,
+              setPiece: setPiece,
+              homeSide: true,
+              minute: nextMinute,
+            );
+          } else if (setPiece?.type == SetPieceType.penalty &&
+              shot.outcome == ShotOutcome.saved) {
+            state = _applyMomentumDelta(
+              live,
+              state,
+              homeSide: false,
+              amount: balance.matchday.momentumSavedPenalty,
+            );
+            _recordMissedPenaltyEvent(
+              live,
+              shot: shot,
+              attackingHome: true,
+              minute: nextMinute,
+            );
+          } else if (shot.xg > 0.4) {
+            state = _applyMomentumDelta(
+              live,
+              state,
+              homeSide: true,
+              amount: balance.matchday.momentumMissedBigChance,
+            );
           }
           if (shot.cornerAwarded || setPiece?.type == SetPieceType.corner) {
             live._homeCorners++;
@@ -1112,6 +1323,40 @@ class SimulationMatchEngine {
           if (shot.reboundGoal) live._awayShotsOnTarget++;
           if (shot.isGoal) {
             state = state.copyWith(awayGoals: state.awayGoals + 1);
+            state = _applyMomentumDelta(
+              live,
+              state,
+              homeSide: false,
+              amount: balance.matchday.momentumGoal,
+            );
+            _recordShotEvent(
+              live,
+              shot: shot,
+              setPiece: setPiece,
+              homeSide: false,
+              minute: nextMinute,
+            );
+          } else if (setPiece?.type == SetPieceType.penalty &&
+              shot.outcome == ShotOutcome.saved) {
+            state = _applyMomentumDelta(
+              live,
+              state,
+              homeSide: true,
+              amount: balance.matchday.momentumSavedPenalty,
+            );
+            _recordMissedPenaltyEvent(
+              live,
+              shot: shot,
+              attackingHome: false,
+              minute: nextMinute,
+            );
+          } else if (shot.xg > 0.4) {
+            state = _applyMomentumDelta(
+              live,
+              state,
+              homeSide: false,
+              amount: balance.matchday.momentumMissedBigChance,
+            );
           }
           if (shot.cornerAwarded || setPiece?.type == SetPieceType.corner) {
             live._awayCorners++;
@@ -1179,9 +1424,87 @@ class SimulationMatchEngine {
       sequences: List.unmodifiable(sequenceTraces),
       randomCursorStart: cursorStart,
       randomCursorEnd: live.random.cursor,
+      momentum: state.momentum,
+      homeScoreState: ScoreStateModifiers.forTeam(
+        minute: nextMinute,
+        homeGoals: state.homeGoals,
+        awayGoals: state.awayGoals,
+        homeSide: true,
+        balance: balance.matchday,
+        manualTacticsAfter65: live._homeManualTacticsAfter65,
+      ),
+      awayScoreState: ScoreStateModifiers.forTeam(
+        minute: nextMinute,
+        homeGoals: state.homeGoals,
+        awayGoals: state.awayGoals,
+        homeSide: false,
+        balance: balance.matchday,
+        manualTacticsAfter65: live._awayManualTacticsAfter65,
+      ),
+      homeSequenceLambda: homeSequenceLambda,
+      awaySequenceLambda: awaySequenceLambda,
     );
     live.minuteTraces.add(trace);
     return trace;
+  }
+
+  void _recordShotEvent(
+    SimulationLiveMatch live, {
+    required ShotResolution shot,
+    required SetPieceResolution? setPiece,
+    required bool homeSide,
+    required int minute,
+  }) {
+    if (!shot.isGoal) return;
+    final penalty = setPiece?.type == SetPieceType.penalty;
+    live.legacyMatch.events.add(
+      MatchEvent(
+        type: penalty ? MatchEventType.scoredPenalty : MatchEventType.goal,
+        minute: minute,
+        teamId: homeSide ? live.homeTeamId : live.awayTeamId,
+        playerId: shot.shooterId,
+        description: penalty ? 'Wykorzystany rzut karny' : 'GOL',
+      ),
+    );
+  }
+
+  void _recordMissedPenaltyEvent(
+    SimulationLiveMatch live, {
+    required ShotResolution shot,
+    required bool attackingHome,
+    required int minute,
+  }) {
+    live.legacyMatch.events.add(
+      MatchEvent(
+        type: MatchEventType.missedPenalty,
+        minute: minute,
+        teamId: attackingHome ? live.homeTeamId : live.awayTeamId,
+        playerId: shot.shooterId,
+        description: 'Obroniony rzut karny',
+      ),
+    );
+  }
+
+  bool _isKeyPlayer(
+    SimulationLiveMatch live,
+    Player player, {
+    required bool homeSide,
+  }) {
+    final starting = homeSide
+        ? live.legacyMatch.homeStartingLineup
+        : live.legacyMatch.awayStartingLineup;
+    if (starting.isEmpty) return false;
+    final key = starting.reduce((best, candidate) {
+      final bestOverall = best.overall(balance);
+      final candidateOverall = candidate.overall(balance);
+      if (candidateOverall > bestOverall) return candidate;
+      if (candidateOverall == bestOverall &&
+          candidate.id.compareTo(best.id) < 0) {
+        return candidate;
+      }
+      return best;
+    });
+    return key.id == player.id;
   }
 
   MatchState _resolveSequenceIncidents({
@@ -1210,6 +1533,7 @@ class SimulationMatchEngine {
         awayDuelParticipants.add(attacker.id);
         homeDuelParticipants.add(defender.id);
       }
+      final defendingHome = !attackingHome;
       if (duel.attackerWon) continue;
 
       final foul = resolver.rollFoul(
@@ -1224,11 +1548,11 @@ class SimulationMatchEngine {
         defender: defender,
         defendingTactics: sequenceContext.defendingTactics,
         context: next.context,
+        defendingHome: defendingHome,
         nextDouble: live.random.nextDouble,
       );
       if (!foul.occurred) continue;
 
-      final defendingHome = !attackingHome;
       if (defendingHome) {
         live._homeFouls++;
       } else {
@@ -1337,14 +1661,13 @@ class SimulationMatchEngine {
     )..removeWhere((player) => player.id == playerId);
     final sentOff = [...state.sentOffPlayerIds];
     if (!sentOff.contains(playerId)) sentOff.add(playerId);
-    final next = homeSide
+    var next = homeSide
         ? state.copyWith(
             homeLineup: lineup,
             sentOffPlayerIds: sentOff,
             yellowCardCounts: secondYellow
                 ? {...state.yellowCardCounts, playerId: 2}
                 : state.yellowCardCounts,
-            momentum: (state.momentum - 0.2).clamp(-1.0, 1.0),
           )
         : state.copyWith(
             awayLineup: lineup,
@@ -1352,8 +1675,13 @@ class SimulationMatchEngine {
             yellowCardCounts: secondYellow
                 ? {...state.yellowCardCounts, playerId: 2}
                 : state.yellowCardCounts,
-            momentum: (state.momentum + 0.2).clamp(-1.0, 1.0),
           );
+    next = _applyMomentumDelta(
+      live,
+      next,
+      homeSide: !homeSide,
+      amount: balance.matchday.momentumRedCard,
+    );
     live.legacyMatch.state = next;
     live.legacyMatch.syncNoGkPenalty();
     _reconfigureAfterLineupChange(live, homeSide: homeSide);
@@ -1437,6 +1765,14 @@ class SimulationMatchEngine {
       next = homeSide
           ? next.copyWith(homeLineup: updatedLineup)
           : next.copyWith(awayLineup: updatedLineup);
+      if (_isKeyPlayer(live, player, homeSide: homeSide)) {
+        next = _applyMomentumDelta(
+          live,
+          next,
+          homeSide: !homeSide,
+          amount: balance.matchday.momentumKeyPlayerInjury,
+        );
+      }
       live.legacyMatch.state = next;
 
       final teamId = homeSide ? live.homeTeamId : live.awayTeamId;
@@ -1551,11 +1887,28 @@ class SimulationMatchEngine {
 
   List<SimulationMinuteTrace> runUntil(
     SimulationLiveMatch live,
-    int untilMinute,
-  ) {
+    int untilMinute, {
+    bool includeStoppageTime = false,
+  }) {
+    live._stoppageEnabled = includeStoppageTime;
     final traces = <SimulationMinuteTrace>[];
-    while (!live.isFinished && live.state.minute < untilMinute) {
-      traces.add(simulateMinute(live));
+
+    void simulateTo(int targetMinute) {
+      while (live.state.minute < targetMinute) {
+        traces.add(simulateMinute(live));
+      }
+    }
+
+    if (includeStoppageTime && untilMinute >= 45) {
+      simulateTo(45);
+      _prepareFirstHalfStoppage(live);
+      simulateTo(live._firstHalfEndMinute!);
+    }
+    simulateTo(untilMinute);
+
+    if (includeStoppageTime && untilMinute >= 90) {
+      _prepareSecondHalfStoppage(live);
+      simulateTo(live._matchEndMinute!);
     }
     return traces;
   }
@@ -1565,6 +1918,7 @@ class SimulationMatchEngine {
     required Team away,
     MatchContext context = const MatchContext(),
     int rngSeed = 0,
+    bool includeStoppageTime = false,
   }) {
     final live = start(
       home: home,
@@ -1572,8 +1926,60 @@ class SimulationMatchEngine {
       context: context,
       rngSeed: rngSeed,
     );
-    runUntil(live, 90);
+    runUntil(live, 90, includeStoppageTime: includeStoppageTime);
     return live.toResult();
+  }
+
+  void _prepareFirstHalfStoppage(SimulationLiveMatch live) {
+    if (live._firstHalfStoppageTime != null) return;
+    final value = _stoppageForEvents(
+      live,
+      maxMinute: 45,
+      goals: live.state.homeGoals + live.state.awayGoals,
+    );
+    live._firstHalfStoppageTime =
+        (value ~/ balance.matchday.firstHalfStoppageDivisor).clamp(0, 8);
+    live._firstHalfEndMinute = 45 + live._firstHalfStoppageTime!;
+  }
+
+  void _prepareSecondHalfStoppage(SimulationLiveMatch live) {
+    if (live._secondHalfStoppageTime != null) return;
+    live._secondHalfStoppageTime = _stoppageForEvents(
+      live,
+      maxMinute: 90,
+      goals: live.state.homeGoals + live.state.awayGoals,
+    );
+    live._matchEndMinute = 90 + live._secondHalfStoppageTime!;
+  }
+
+  int _stoppageForEvents(
+    SimulationLiveMatch live, {
+    required int maxMinute,
+    required int goals,
+  }) {
+    final events = live.legacyMatch.events.where(
+      (event) => event.minute <= maxMinute,
+    );
+    final cards = events
+        .where(
+          (event) =>
+              event.type == MatchEventType.yellowCard ||
+              event.type == MatchEventType.redCard,
+        )
+        .length;
+    final substitutions = events
+        .where((event) => event.type == MatchEventType.substitution)
+        .length;
+    final injuries = live.legacyMatch.injuries
+        .where((injury) => injury.injury.daysTotal >= 0)
+        .length;
+    return balance.matchday.stoppageMinutes(
+      goals: goals,
+      cards: cards,
+      injuries: injuries,
+      substitutions: substitutions,
+      randomUnit: live.random.nextDouble(),
+    );
   }
 
   void _refreshRuntimeRatings(SimulationLiveMatch live) {
@@ -1624,19 +2030,54 @@ class SimulationMatchEngine {
     live.legacyMatch.awayTeamShape = awayShape;
     live.legacyMatch.homeEffectiveAttributes = Map.unmodifiable(homeEffective);
     live.legacyMatch.awayEffectiveAttributes = Map.unmodifiable(awayEffective);
-    live.legacyMatch.homeUnitRatings = unitCalculator.calculate(
+    final homeRatings = unitCalculator.calculate(
       lineup: homeLineup,
       effectiveAttributes: homeEffective,
       shape: homeShape,
       assignedPositions: live.homeAssignedPositions,
       applyShortHanded: true,
     );
-    live.legacyMatch.awayUnitRatings = unitCalculator.calculate(
+    final awayRatings = unitCalculator.calculate(
       lineup: awayLineup,
       effectiveAttributes: awayEffective,
       shape: awayShape,
       assignedPositions: live.awayAssignedPositions,
       applyShortHanded: true,
+    );
+    live.legacyMatch.homeUnitRatings = _applyRuntimeUnitModifiers(
+      live,
+      homeRatings,
+      homeSide: true,
+    );
+    live.legacyMatch.awayUnitRatings = _applyRuntimeUnitModifiers(
+      live,
+      awayRatings,
+      homeSide: false,
+    );
+  }
+
+  UnitRatings _applyRuntimeUnitModifiers(
+    SimulationLiveMatch live,
+    UnitRatings ratings, {
+    required bool homeSide,
+  }) {
+    final score = homeSide ? live.homeScoreState : live.awayScoreState;
+    final sideMomentum = homeSide ? live.state.momentum : -live.state.momentum;
+    final momentumMultiplier = MatchContextEffects.momentumMultiplier(
+      sideMomentum,
+      balance.matchday,
+    );
+    return UnitRatings(
+      defRating: (ratings.defRating + score.defenseDelta).clamp(0.0, 200.0),
+      midRating: ratings.midRating,
+      atkRating: ((ratings.atkRating + score.attackDelta) * momentumMultiplier)
+          .clamp(0.0, 200.0),
+      defensivePlayerIds: ratings.defensivePlayerIds,
+      midfieldPlayerIds: ratings.midfieldPlayerIds,
+      attackingPlayerIds: ratings.attackingPlayerIds,
+      defensiveWeights: ratings.defensiveWeights,
+      midfieldWeights: ratings.midfieldWeights,
+      attackingWeights: ratings.attackingWeights,
     );
   }
 
@@ -1684,6 +2125,9 @@ class SimulationMatchEngine {
       defendingAssignedPositions: attackingHome
           ? live.awayAssignedPositions
           : live.homeAssignedPositions,
+      longBallWeightMultiplier: attackingHome
+          ? live.homeScoreState.longBallWeightMultiplier
+          : live.awayScoreState.longBallWeightMultiplier,
     );
   }
 
@@ -1712,7 +2156,11 @@ class SimulationMatchEngine {
         .toDouble();
   }
 
-  double _sequenceLambda(MatchState state) {
+  double _sequenceLambdaForSide(
+    SimulationLiveMatch live,
+    MatchState state, {
+    required bool homeSide,
+  }) {
     final homeTempo = balance.matchday.tempoMultiplier(state.homeTactics.tempo);
     final awayTempo = balance.matchday.tempoMultiplier(state.awayTactics.tempo);
     final homePress = balance.matchday.pressingMultiplier(
@@ -1723,24 +2171,57 @@ class SimulationMatchEngine {
     );
     final tempoMultiplier = (homeTempo + awayTempo) / 2.0;
     final pressingMultiplier = (homePress + awayPress) / 2.0;
-    final documentedMomentum = _documentedMomentum(state.momentum);
-    final momentumMultiplier =
-        1.0 + documentedMomentum / balance.matchday.momentumSequenceDivisor;
+    final score = homeSide ? live.homeScoreState : live.awayScoreState;
+    final sideMomentum = homeSide ? state.momentum : -state.momentum;
+    final momentumMultiplier = MatchContextEffects.momentumMultiplier(
+      sideMomentum,
+      balance.matchday,
+    );
+    final derbyMultiplier = state.context.isDerby
+        ? balance.matchday.derbySequenceMultiplier
+        : 1.0;
     return balance.matchday.sequenceBase *
         tempoMultiplier *
         pressingMultiplier *
         momentumMultiplier *
-        balance.matchday.stakeMultiplier(state.context.stake);
+        score.lambdaMultiplier *
+        balance.matchday.stakeLambdaMultiplier(state.context.stake) *
+        derbyMultiplier;
   }
 
-  double _documentedMomentum(double runtimeMomentum) {
-    // Task 16 uses a small [-1, 1] drift, while matchday_model.md documents
-    // [-100, 100]. Values outside [-1, 1] are already in the documented scale
-    // (the legacy kickoff crowd value is one such value).
-    final documented = runtimeMomentum.abs() <= 1
-        ? runtimeMomentum * 100
-        : runtimeMomentum;
-    return documented.clamp(-100.0, 100.0).toDouble();
+  double _decayMomentum(double momentum) {
+    final decayed = momentum * balance.matchday.momentumDecay;
+    if (decayed.abs() < 0.01) return 0.0;
+    return decayed.clamp(-100.0, 100.0).toDouble();
+  }
+
+  double _staminaContextMultiplier(MatchContext context) {
+    // PlayerBalance already contains the historical heat ×1.15 multiplier;
+    // divide it out before applying the complete Task 21 weather table.
+    final historicalHeatMultiplier = context.weather == Weather.heat
+        ? 1.15
+        : 1.0;
+    final weatherMultiplier =
+        balance.matchday.weatherStaminaMultiplier(context.weather) /
+        historicalHeatMultiplier;
+    return weatherMultiplier *
+        balance.matchday.temperatureStaminaMultiplier(context.temperatureC);
+  }
+
+  MatchState _applyMomentumDelta(
+    SimulationLiveMatch live,
+    MatchState state, {
+    required bool homeSide,
+    required num amount,
+  }) {
+    final derbyMultiplier = state.context.isDerby
+        ? balance.matchday.derbyMomentumMultiplier
+        : 1.0;
+    final signed =
+        (homeSide ? amount.toDouble() : -amount.toDouble()) * derbyMultiplier;
+    return state.copyWith(
+      momentum: (state.momentum + signed).clamp(-100.0, 100.0).toDouble(),
+    );
   }
 
   static const _emptyRatings = UnitRatings(

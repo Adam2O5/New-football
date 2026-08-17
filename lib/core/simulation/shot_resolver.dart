@@ -108,9 +108,13 @@ class ShotResolver {
         baseXgOverride ??
         balance.matchday.sequenceBaseXg[sequenceType.name] ??
         balance.matchday.shotToGoal;
-    final xg = (baseXg * chanceQualityMultiplier * shooterFactor)
-        .clamp(0.01, 0.95)
-        .toDouble();
+    final weatherXgMultiplier = balance.matchday.weatherXgMultiplier(
+      context.weather,
+    );
+    final xg =
+        (baseXg * chanceQualityMultiplier * shooterFactor * weatherXgMultiplier)
+            .clamp(0.01, 0.95)
+            .toDouble();
     final goalkeeper = GoalkeeperResolver(balance: balance).resolve(
       shotKind: shotKind,
       defendingLineup: defendingLineup,

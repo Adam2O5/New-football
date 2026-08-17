@@ -33,6 +33,7 @@ class SequenceContext {
     this.attackingAssignedPositions = const {},
     this.defendingAssignedPositions = const {},
     this.counterAttackEligible = true,
+    this.longBallWeightMultiplier = 1.0,
   });
 
   final TacticsSetup attackingTactics;
@@ -47,6 +48,7 @@ class SequenceContext {
   final Map<String, Position> attackingAssignedPositions;
   final Map<String, Position> defendingAssignedPositions;
   final bool counterAttackEligible;
+  final double longBallWeightMultiplier;
 }
 
 class SequenceSelection {
@@ -170,6 +172,13 @@ class SequenceSelector {
       weights[SequenceType.longBall] =
           weights[SequenceType.longBall]! + normalBonus;
     }
+    final weatherLongBallMultiplier = context.weather == Weather.wind
+        ? balance.matchday.windLongBallWeightMultiplier
+        : 1.0;
+    weights[SequenceType.longBall] =
+        weights[SequenceType.longBall]! *
+        weatherLongBallMultiplier *
+        context.longBallWeightMultiplier;
     if (context.defendingTactics.defensiveLine == DefensiveLine.high &&
         (highPace || highAttack)) {
       weights[SequenceType.throughBall] =

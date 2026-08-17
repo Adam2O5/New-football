@@ -290,6 +290,7 @@ class PlayerBalance {
     required PressingIntensity pressing,
     required Weather weather,
     required bool isDerby,
+    double additionalMultiplier = 1.0,
   }) {
     var multiplier = switch (tempo) {
       Tempo.fast => 1.15,
@@ -304,7 +305,7 @@ class PlayerBalance {
     };
     if (weather == Weather.heat) multiplier *= 1.15;
     if (isDerby) multiplier *= 1.05;
-    return multiplier;
+    return multiplier * additionalMultiplier;
   }
 
   double staminaLossForMinutes(
@@ -314,6 +315,7 @@ class PlayerBalance {
     PressingIntensity pressing = PressingIntensity.medium,
     Weather weather = Weather.clear,
     bool isDerby = false,
+    double additionalMultiplier = 1.0,
   }) {
     final minutes = minutesPlayed.clamp(0, minutesPerMatch);
     return staminaLossPer90(position) *
@@ -324,6 +326,7 @@ class PlayerBalance {
           pressing: pressing,
           weather: weather,
           isDerby: isDerby,
+          additionalMultiplier: additionalMultiplier,
         );
   }
 
