@@ -3,10 +3,13 @@ import 'package:new_football/core/engine/match_engine.dart' as legacy;
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/match_models.dart';
 import 'package:new_football/core/models/match_state.dart';
+import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/random/match_random.dart';
+import 'package:new_football/core/services/cohesion_service.dart';
 import 'package:new_football/core/simulation/duel_resolver.dart';
 import 'package:new_football/core/simulation/effective_attributes.dart';
+import 'package:new_football/core/simulation/matchday_runtime.dart';
 import 'package:new_football/core/simulation/sequence_chain_resolver.dart';
 import 'package:new_football/core/simulation/sequence_resolver.dart';
 import 'package:new_football/core/simulation/set_piece_resolver.dart';
@@ -14,6 +17,7 @@ import 'package:new_football/core/simulation/shot_models.dart';
 import 'package:new_football/core/simulation/shot_resolver.dart';
 import 'package:new_football/core/simulation/team_shape.dart';
 import 'package:new_football/core/simulation/unit_ratings.dart';
+import 'package:new_football/core/tactics/formation_layout.dart';
 import 'package:new_football/core/tactics/tactics_setup.dart';
 
 class SimulationSequenceTrace {
@@ -165,11 +169,41 @@ class SimulationLiveMatch {
     required this.legacyMatch,
     required this.random,
     required this.seed,
-  });
+    required this.balance,
+    Map<String, int>? homeChemistryAppearances,
+    Map<String, int>? awayChemistryAppearances,
+  }) : homeChemistryAppearances = Map.unmodifiable(
+         homeChemistryAppearances ?? const {},
+       ),
+       awayChemistryAppearances = Map.unmodifiable(
+         awayChemistryAppearances ?? const {},
+       ),
+       _homeAssignedPositions = _initialAssignedPositions(
+         legacyMatch.homeSnapshot,
+         legacyMatch.state.homeLineup,
+       ),
+       _awayAssignedPositions = _initialAssignedPositions(
+         legacyMatch.awaySnapshot,
+         legacyMatch.state.awayLineup,
+       );
 
   final legacy.LiveMatch legacyMatch;
   final MatchRandom random;
   final int seed;
+  final BalanceConfig balance;
+  final Map<String, int> homeChemistryAppearances;
+  final Map<String, int> awayChemistryAppearances;
+  final Map<String, Position> _homeAssignedPositions;
+  final Map<String, Position> _awayAssignedPositions;
+  final Set<String> _homeSubstitutionWindowKeys = <String>{};
+  final Set<String> _awaySubstitutionWindowKeys = <String>{};
+  final Set<String> _homeSubstitutedOutIds = <String>{};
+  final Set<String> _awaySubstitutedOutIds = <String>{};
+  final Set<String> _homeUnreplacedMajorInjuryIds = <String>{};
+  final Set<String> _awayUnreplacedMajorInjuryIds = <String>{};
+  int? _homeTacticalPenaltyExpiresAtMinute;
+  int? _awayTacticalPenaltyExpiresAtMinute;
+  SimulationActionResult? lastAction;
   final List<SimulationMinuteTrace> minuteTraces = [];
 
   double _homePossessionSum = 0;
@@ -198,6 +232,131 @@ class SimulationLiveMatch {
       legacyMatch.homeEffectiveAttributes;
   Map<String, EffectivePlayerAttributes> get awayEffectiveAttributes =>
       legacyMatch.awayEffectiveAttributes;
+
+  Map<String, Position> get homeAssignedPositions =>
+      Map.unmodifiable(_homeAssignedPositions);
+  Map<String, Position> get awayAssignedPositions =>
+      Map.unmodifiable(_awayAssignedPositions);
+
+  bool get isHalfTime => state.minute == 45;
+  int get homeSubsUsed => legacyMatch.homeSubsUsed;
+  int get awaySubsUsed => legacyMatch.awaySubsUsed;
+  int get homeSubWindows => legacyMatch.homeSubWindows;
+  int get awaySubWindows => legacyMatch.awaySubWindows;
+  double get homeCohesionMultiplier => _runtimeCohesionMultiplier(true);
+  double get awayCohesionMultiplier => _runtimeCohesionMultiplier(false);
+  double get homeCohesionMult => homeCohesionMultiplier;
+  double get awayCohesionMult => awayCohesionMultiplier;
+  double get homeCohesionScore => _runtimeCohesionScore(true);
+  double get awayCohesionScore => _runtimeCohesionScore(false);
+  double get homeAdaptationPenalty => _adaptationPenalty(true);
+  double get awayAdaptationPenalty => _adaptationPenalty(false);
+  int get homeTacticalPenaltyRemaining =>
+      _remainingPenaltyMinutes(_homeTacticalPenaltyExpiresAtMinute);
+  int get awayTacticalPenaltyRemaining =>
+      _remainingPenaltyMinutes(_awayTacticalPenaltyExpiresAtMinute);
+  bool get homeTacticalPenaltyActive => homeTacticalPenaltyRemaining > 0;
+  bool get awayTacticalPenaltyActive => awayTacticalPenaltyRemaining > 0;
+  Set<String> get homeUnreplacedMajorInjuryIds =>
+      Set.unmodifiable(_homeUnreplacedMajorInjuryIds);
+  Set<String> get awayUnreplacedMajorInjuryIds =>
+      Set.unmodifiable(_awayUnreplacedMajorInjuryIds);
+
+  bool applySubstitution({
+    required bool homeSide,
+    required String playerOutId,
+    required String playerInId,
+    bool? atHalfTime,
+    bool forced = false,
+    String? windowId,
+  }) => SimulationMatchEngine(balance: balance).applySubstitution(
+    live: this,
+    homeSide: homeSide,
+    playerOutId: playerOutId,
+    playerInId: playerInId,
+    atHalfTime: atHalfTime,
+    forced: forced,
+    windowId: windowId,
+  );
+
+  bool applyMajorInjurySubstitution({
+    required bool homeSide,
+    required String playerOutId,
+    String? playerInId,
+    bool? atHalfTime,
+  }) => SimulationMatchEngine(balance: balance).applyMajorInjurySubstitution(
+    live: this,
+    homeSide: homeSide,
+    playerOutId: playerOutId,
+    playerInId: playerInId,
+    atHalfTime: atHalfTime,
+  );
+
+  bool updateTactics({
+    required bool homeSide,
+    required TacticsSetup tactics,
+    bool? atHalfTime,
+  }) => SimulationMatchEngine(balance: balance).updateTactics(
+    live: this,
+    homeSide: homeSide,
+    tactics: tactics,
+    atHalfTime: atHalfTime,
+  );
+
+  double _runtimeCohesionMultiplier(bool homeSide) {
+    final score = _runtimeCohesionScore(homeSide);
+    var multiplier = const CohesionService().cohesionMult(
+      score.clamp(0.0, 100.0),
+      headCoach: homeSide
+          ? legacyMatch.homeHeadCoach
+          : legacyMatch.awayHeadCoach,
+    );
+    if (_remainingPenaltyMinutes(
+          homeSide
+              ? _homeTacticalPenaltyExpiresAtMinute
+              : _awayTacticalPenaltyExpiresAtMinute,
+        ) >
+        0) {
+      multiplier -= balance.matchday.cohesionTacticsPenalty / 100.0;
+    }
+    return multiplier.clamp(0.0, 2.0).toDouble();
+  }
+
+  double _runtimeCohesionScore(bool homeSide) {
+    final lineup = homeSide ? state.homeLineup : state.awayLineup;
+    final assignments = homeSide
+        ? _homeAssignedPositions
+        : _awayAssignedPositions;
+    var score = 50.0;
+    for (final player in lineup) {
+      final assigned = assignments[player.id] ?? player.position;
+      score += player.position == assigned ? 2.0 : -5.0;
+      if (player.state.role == player.optimalRole) score += 2.0;
+    }
+    score -= _adaptationPenalty(homeSide);
+    return score.clamp(0.0, 100.0).toDouble();
+  }
+
+  double _adaptationPenalty(bool homeSide) {
+    final lineup = homeSide ? state.homeLineup : state.awayLineup;
+    final appearances = homeSide
+        ? homeChemistryAppearances
+        : awayChemistryAppearances;
+    return lineup.fold<double>(
+      0.0,
+      (sum, player) =>
+          sum +
+          balance.matchday.adaptationPenaltyForAppearances(
+            appearances[player.id] ?? 0,
+          ),
+    );
+  }
+
+  int _remainingPenaltyMinutes(int? expiresAtMinute) {
+    if (expiresAtMinute == null) return 0;
+    final remaining = expiresAtMinute - state.minute;
+    return remaining > 0 ? remaining : 0;
+  }
 
   int get totalSequences => _homeSequences + _awaySequences;
   int get homeSequences => _homeSequences;
@@ -231,6 +390,28 @@ class SimulationLiveMatch {
     homeCorners: _homeCorners,
     awayCorners: _awayCorners,
   );
+
+  static Map<String, Position> _initialAssignedPositions(
+    MatchTeamSnapshot? snapshot,
+    List<Player> lineup,
+  ) {
+    final assignments = <String, Position>{};
+    if (snapshot != null) {
+      for (
+        var index = 0;
+        index < snapshot.startingXi.length &&
+            index < snapshot.assignedPositions.length;
+        index++
+      ) {
+        assignments[snapshot.startingXi[index].id] =
+            snapshot.assignedPositions[index];
+      }
+    }
+    for (final player in lineup) {
+      assignments.putIfAbsent(player.id, () => player.position);
+    }
+    return assignments;
+  }
 }
 
 /// Task 17 engine. It is deliberately not wired to the production provider;
@@ -255,9 +436,288 @@ class SimulationMatchEngine {
       legacyMatch: live,
       random: MatchRandom(seed),
       seed: seed,
+      balance: balance,
+      homeChemistryAppearances: home.chemistryAppearances,
+      awayChemistryAppearances: away.chemistryAppearances,
     );
     _refreshRuntimeRatings(simulation);
     return simulation;
+  }
+
+  bool applySubstitution({
+    required SimulationLiveMatch live,
+    required bool homeSide,
+    required String playerOutId,
+    required String playerInId,
+    bool? atHalfTime,
+    bool forced = false,
+    String? windowId,
+  }) => applySubstitutionResult(
+    live: live,
+    homeSide: homeSide,
+    playerOutId: playerOutId,
+    playerInId: playerInId,
+    atHalfTime: atHalfTime,
+    forced: forced,
+    windowId: windowId,
+  ).accepted;
+
+  SimulationActionResult applySubstitutionResult({
+    required SimulationLiveMatch live,
+    required bool homeSide,
+    required String playerOutId,
+    required String playerInId,
+    bool? atHalfTime,
+    bool forced = false,
+    String? windowId,
+  }) {
+    if (live.isFinished) {
+      return _reject(live, SimulationActionFailure.matchFinished);
+    }
+
+    final halftime = atHalfTime ?? live.isHalfTime;
+    final state = live.state;
+    final lineup = List<Player>.from(
+      homeSide ? state.homeLineup : state.awayLineup,
+    );
+    final bench = List<Player>.from(
+      homeSide ? state.homeBench : state.awayBench,
+    );
+    final outIndex = lineup.indexWhere((player) => player.id == playerOutId);
+    if (outIndex < 0) {
+      return _reject(live, SimulationActionFailure.playerNotOnPitch);
+    }
+    final inIndex = bench.indexWhere((player) => player.id == playerInId);
+    if (inIndex < 0) {
+      return _reject(live, SimulationActionFailure.playerNotOnBench);
+    }
+
+    final substitutedOutIds = homeSide
+        ? live._homeSubstitutedOutIds
+        : live._awaySubstitutedOutIds;
+    if (substitutedOutIds.contains(playerInId)) {
+      return _reject(live, SimulationActionFailure.playerCannotReenter);
+    }
+
+    final outgoing = lineup[outIndex];
+    final incoming = bench[inIndex];
+    if (!forced && !outgoing.isAvailable) {
+      return _reject(live, SimulationActionFailure.playerUnavailable);
+    }
+    if (!incoming.isAvailable) {
+      return _reject(live, SimulationActionFailure.playerUnavailable);
+    }
+
+    final windowKeys = homeSide
+        ? live._homeSubstitutionWindowKeys
+        : live._awaySubstitutionWindowKeys;
+    final currentWindows = homeSide ? live.homeSubWindows : live.awaySubWindows;
+    final key = windowId ?? 'minute:${state.minute}';
+    final isNewOrdinaryWindow = !halftime && !windowKeys.contains(key);
+    if (!halftime && !forced && isNewOrdinaryWindow) {
+      if (currentWindows >= balance.matchday.maxSubstitutionWindows) {
+        return _reject(live, SimulationActionFailure.substitutionWindowsLimit);
+      }
+    }
+    final used = homeSide ? live.homeSubsUsed : live.awaySubsUsed;
+    if (used >= balance.matchday.maxSubstitutions) {
+      return _reject(live, SimulationActionFailure.substitutionsLimit);
+    }
+
+    final assignments = homeSide
+        ? live._homeAssignedPositions
+        : live._awayAssignedPositions;
+    final assignedPosition = assignments[outgoing.id] ?? outgoing.position;
+    lineup[outIndex] = incoming;
+    bench.removeAt(inIndex);
+    bench.add(outgoing);
+    assignments.remove(outgoing.id);
+    assignments[incoming.id] = assignedPosition;
+    live.legacyMatch.staminaRemaining.putIfAbsent(
+      incoming.id,
+      () => incoming.state.stamina.toDouble(),
+    );
+
+    live.legacyMatch.state = homeSide
+        ? state.copyWith(homeLineup: lineup, homeBench: bench)
+        : state.copyWith(awayLineup: lineup, awayBench: bench);
+    substitutedOutIds.add(outgoing.id);
+    if (homeSide) {
+      live.legacyMatch.homeSubsUsed++;
+    } else {
+      live.legacyMatch.awaySubsUsed++;
+    }
+    if (isNewOrdinaryWindow && !forced) {
+      windowKeys.add(key);
+      if (homeSide) {
+        live.legacyMatch.homeSubWindows++;
+      } else {
+        live.legacyMatch.awaySubWindows++;
+      }
+    }
+
+    live.legacyMatch.events.add(
+      MatchEvent(
+        type: MatchEventType.substitution,
+        minute: state.minute,
+        teamId: homeSide ? live.homeTeamId : live.awayTeamId,
+        playerId: incoming.id,
+        description: 'Zmiana: ${outgoing.name} → ${incoming.name}',
+      ),
+    );
+    _refreshRuntimeRatings(live);
+    return _accept(live);
+  }
+
+  bool applyMajorInjurySubstitution({
+    required SimulationLiveMatch live,
+    required bool homeSide,
+    required String playerOutId,
+    String? playerInId,
+    bool? atHalfTime,
+  }) => applyMajorInjurySubstitutionResult(
+    live: live,
+    homeSide: homeSide,
+    playerOutId: playerOutId,
+    playerInId: playerInId,
+    atHalfTime: atHalfTime,
+  ).accepted;
+
+  SimulationActionResult applyMajorInjurySubstitutionResult({
+    required SimulationLiveMatch live,
+    required bool homeSide,
+    required String playerOutId,
+    String? playerInId,
+    bool? atHalfTime,
+  }) {
+    final bench = homeSide ? live.state.homeBench : live.state.awayBench;
+    final substitutedOutIds = homeSide
+        ? live._homeSubstitutedOutIds
+        : live._awaySubstitutedOutIds;
+    final eligible = bench.where(
+      (player) => player.isAvailable && !substitutedOutIds.contains(player.id),
+    );
+    Player? selected;
+    if (playerInId == null) {
+      if (eligible.isNotEmpty) selected = eligible.first;
+    } else {
+      for (final player in bench) {
+        if (player.id == playerInId) {
+          selected = player;
+          break;
+        }
+      }
+    }
+    if (selected == null || !selected.isAvailable) {
+      final unreplaced = homeSide
+          ? live._homeUnreplacedMajorInjuryIds
+          : live._awayUnreplacedMajorInjuryIds;
+      unreplaced.add(playerOutId);
+      return _reject(live, SimulationActionFailure.noAvailableSubstitute);
+    }
+    final result = applySubstitutionResult(
+      live: live,
+      homeSide: homeSide,
+      playerOutId: playerOutId,
+      playerInId: selected.id,
+      atHalfTime: atHalfTime,
+      forced: true,
+    );
+    if (result.accepted) {
+      (homeSide
+              ? live._homeUnreplacedMajorInjuryIds
+              : live._awayUnreplacedMajorInjuryIds)
+          .remove(playerOutId);
+    }
+    return result;
+  }
+
+  bool updateTactics({
+    required SimulationLiveMatch live,
+    required bool homeSide,
+    required TacticsSetup tactics,
+    bool? atHalfTime,
+  }) => updateTacticsResult(
+    live: live,
+    homeSide: homeSide,
+    tactics: tactics,
+    atHalfTime: atHalfTime,
+  ).accepted;
+
+  SimulationActionResult updateTacticsResult({
+    required SimulationLiveMatch live,
+    required bool homeSide,
+    required TacticsSetup tactics,
+    bool? atHalfTime,
+  }) {
+    if (live.isFinished) {
+      return _reject(live, SimulationActionFailure.matchFinished);
+    }
+    final halftime = atHalfTime ?? live.isHalfTime;
+    final current = homeSide ? live.state.homeTactics : live.state.awayTactics;
+    final formationChanged = current.formation != tactics.formation;
+    if (!halftime && formationChanged) {
+      return _reject(
+        live,
+        SimulationActionFailure.formationChangeOutsideHalfTime,
+      );
+    }
+
+    final changed = current != tactics;
+    if (homeSide) {
+      live.legacyMatch.state = live.state.copyWith(homeTactics: tactics);
+      if (halftime && formationChanged) {
+        _remapFormation(live, homeSide: true, formation: tactics.formation);
+      }
+      live._homeTacticalPenaltyExpiresAtMinute = halftime || !changed
+          ? null
+          : live.state.minute + balance.matchday.cohesionPenaltyDurationMinutes;
+    } else {
+      live.legacyMatch.state = live.state.copyWith(awayTactics: tactics);
+      if (halftime && formationChanged) {
+        _remapFormation(live, homeSide: false, formation: tactics.formation);
+      }
+      live._awayTacticalPenaltyExpiresAtMinute = halftime || !changed
+          ? null
+          : live.state.minute + balance.matchday.cohesionPenaltyDurationMinutes;
+    }
+    _refreshRuntimeRatings(live);
+    return _accept(live);
+  }
+
+  SimulationActionResult _accept(SimulationLiveMatch live) {
+    const result = SimulationActionResult.accepted();
+    live.lastAction = result;
+    return result;
+  }
+
+  SimulationActionResult _reject(
+    SimulationLiveMatch live,
+    SimulationActionFailure failure,
+  ) {
+    final result = SimulationActionResult.rejected(failure);
+    live.lastAction = result;
+    return result;
+  }
+
+  void _remapFormation(
+    SimulationLiveMatch live, {
+    required bool homeSide,
+    required Formation formation,
+  }) {
+    final lineup = homeSide ? live.state.homeLineup : live.state.awayLineup;
+    final assignments = homeSide
+        ? live._homeAssignedPositions
+        : live._awayAssignedPositions;
+    final slots = FormationLayout.of(formation).slots;
+    assignments.clear();
+    for (
+      var index = 0;
+      index < lineup.length && index < slots.length;
+      index++
+    ) {
+      assignments[lineup[index].id] = slots[index].position;
+    }
   }
 
   SimulationMinuteTrace simulateMinute(SimulationLiveMatch live) {
@@ -527,22 +987,22 @@ class SimulationMatchEngine {
       context: state.context,
       chemistry: live.legacyMatch.homeChemistry,
       atmosphere: live.legacyMatch.homeAtmosphere,
-      cohesionMultiplier: live.legacyMatch.homeCohesionMult,
+      cohesionMultiplier: live.homeCohesionMultiplier,
       isHome: true,
       headCoach: live.legacyMatch.homeHeadCoach,
       staminaRemaining: live.legacyMatch.staminaRemaining,
-      assignedPositions: _assignedPositions(live.legacyMatch.homeSnapshot),
+      assignedPositions: live.homeAssignedPositions,
     );
     final awayEffective = effectiveCalculator.calculateLineup(
       lineup: awayLineup,
       context: state.context,
       chemistry: live.legacyMatch.awayChemistry,
       atmosphere: live.legacyMatch.awayAtmosphere,
-      cohesionMultiplier: live.legacyMatch.awayCohesionMult,
+      cohesionMultiplier: live.awayCohesionMultiplier,
       isHome: false,
       headCoach: live.legacyMatch.awayHeadCoach,
       staminaRemaining: live.legacyMatch.staminaRemaining,
-      assignedPositions: _assignedPositions(live.legacyMatch.awaySnapshot),
+      assignedPositions: live.awayAssignedPositions,
     );
 
     live.legacyMatch.homeTeamShape = homeShape;
@@ -553,11 +1013,13 @@ class SimulationMatchEngine {
       lineup: homeLineup,
       effectiveAttributes: homeEffective,
       shape: homeShape,
+      assignedPositions: live.homeAssignedPositions,
     );
     live.legacyMatch.awayUnitRatings = unitCalculator.calculate(
       lineup: awayLineup,
       effectiveAttributes: awayEffective,
       shape: awayShape,
+      assignedPositions: live.awayAssignedPositions,
     );
   }
 
@@ -587,12 +1049,6 @@ class SimulationMatchEngine {
     final defendingRatings = attackingHome
         ? live.awayUnitRatings ?? _emptyRatings
         : live.homeUnitRatings ?? _emptyRatings;
-    final attackingSnapshot = attackingHome
-        ? live.legacyMatch.homeSnapshot
-        : live.legacyMatch.awaySnapshot;
-    final defendingSnapshot = attackingHome
-        ? live.legacyMatch.awaySnapshot
-        : live.legacyMatch.homeSnapshot;
 
     return SequenceContext(
       attackingTactics: attackingTactics,
@@ -605,8 +1061,12 @@ class SimulationMatchEngine {
       defendingRatings: defendingRatings,
       weather: state.context.weather,
       counterAttackEligible: counterAttackEligible,
-      attackingAssignedPositions: _assignedPositions(attackingSnapshot),
-      defendingAssignedPositions: _assignedPositions(defendingSnapshot),
+      attackingAssignedPositions: attackingHome
+          ? live.homeAssignedPositions
+          : live.awayAssignedPositions,
+      defendingAssignedPositions: attackingHome
+          ? live.awayAssignedPositions
+          : live.homeAssignedPositions,
     );
   }
 
@@ -664,19 +1124,6 @@ class SimulationMatchEngine {
         ? runtimeMomentum * 100
         : runtimeMomentum;
     return documented.clamp(-100.0, 100.0).toDouble();
-  }
-
-  Map<String, Position> _assignedPositions(MatchTeamSnapshot? snapshot) {
-    if (snapshot == null || snapshot.startingXi.isEmpty) return const {};
-    return {
-      for (
-        var index = 0;
-        index < snapshot.startingXi.length &&
-            index < snapshot.assignedPositions.length;
-        index++
-      )
-        snapshot.startingXi[index].id: snapshot.assignedPositions[index],
-    };
   }
 
   static const _emptyRatings = UnitRatings(

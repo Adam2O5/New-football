@@ -566,19 +566,28 @@ Automatyczna pauza (konfigurowalna, spójna z `messages.md`):
 | ------ | ------: |
 | Limit zmian | 5 |
 | Okna zmian | 3 (+ przerwa poza limitem) |
-| Źródło | wyłącznie 7-osobowa ławka (`squad_management.md`) |
+| Źródło | wyłącznie bieżąca 7-osobowa ławka (`squad_management.md`) |
+| Wymuszona zmiana Major | zużywa limit 5, omija limit zwykłych okien |
 
-Wejście zmiennika przelicza `cohesionMult` (możliwa obca pozycja), a przy zawodniku z < 5 meczami w klubie nakłada karę adaptacji do zgrania (`team_management.md`). Zmiennik z pełną staminą realnie zwiększa `unitRating` w końcówce — nagroda za rotację.
+Runtime udostępnia `SimulationLiveMatch.applySubstitution` oraz wariant `applySubstitutionResult`. Zmiennik jest pobierany wyłącznie z bieżącej ławki, zachowuje pozycję slotu zawodnika schodzącego i wchodzi z istniejącą wartością `staminaRemaining`. Zawodnik, który opuścił boisko, nie może ponownie wejść w tym samym meczu.
+
+Kilka zmian w tym samym zatrzymaniu zużywa jedno okno. Służy do tego opcjonalny `windowId`; gdy go nie podano, kluczem okna jest bieżąca minuta (`minute:<minute>`). Przerwa nie rejestruje zwykłego okna, ale nadal obowiązuje limit pięciu zawodników. `cohesionMult` i ratingi jednostek są po każdej zaakceptowanej zmianie przeliczane z runtime'owej mapy slotów, więc możliwa jest także obca pozycja naturalna.
+
+Adaptacja do zgrania korzysta z snapshotu `Team.chemistryAppearances`: dla 0 występów kara wynosi `1,0`, maleje liniowo do `0,0` przy 5 występach i jest konfigurowana przez `MatchdayBalance` (`adaptationAppearances`, `adaptationPenaltyAtZero`).
+
+Przy kontuzji Major `applyMajorInjurySubstitution` wymusza zmianę i omija limit zwykłych okien, lecz nie limit pięciu zmian. Gdy bieżąca ławka nie zawiera dostępnego zmiennika, mecz pozostaje bez uzupełnienia, a ID jest przechowywane w runtime jako `homeUnreplacedMajorInjuryIds` lub `awayUnreplacedMajorInjuryIds`.
 
 ### 11.3 Przerwa
 
-W przerwie gracz może wykonać zmiany i zmienić ustawienia taktyczne (w tym formację) **bez kary cohesion**. Poza przerwą zmiana formacji jest niedostępna.
+W runtime przerwa jest reprezentowana przez minutę 45. W przerwie gracz może wykonać zmiany i zmienić ustawienia taktyczne (w tym formację) **bez kary cohesion** i bez zużywania zwykłego okna zmian. Limit pięciu zmian nadal obowiązuje. Zmiana formacji mapuje bieżące XI na sloty `FormationLayout`.
 
-HC **Motivation ★** (`staff.md`) nadal wpływa na mecz przez `cohesionMult` (§5.1) — nie wymaga osobnej mechaniki przemowy.
+Poza przerwą zmiana formacji jest niedostępna: komenda jest odrzucana i nie zmienia stanu. HC **Motivation ★** (`staff.md`) nadal wpływa na mecz przez `cohesionMult` (§5.1) — nie wymaga osobnej mechaniki przemowy.
 
 ### 11.4 Korekta taktyki w trakcie meczu
 
-Zmiana ustawień dozwolona w każdej pauzie, ale poza przerwą kosztuje **−2 do `cohesionMult` na 10 minut**. Zmiana formacji możliwa tylko w przerwie.
+`SimulationLiveMatch.updateTactics` pozwala zmienić ustawienia; poza przerwą korekta kosztuje bezpośrednio **−2 / 100 (`−0,02`) w `cohesionMultiplier` przez 10 minut**. Timer wygasa, gdy `expiresAtMinute <= state.minute`; kolejna korekta odświeża go i nie kumuluje kilku kar.
+
+Zmiana formacji możliwa jest tylko w przerwie. Stałe `cohesionTacticsPenalty` i `cohesionPenaltyDurationMinutes` znajdują się w `MatchdayBalance`, a stan timera pozostaje runtime-only i nie trafia do modeli zapisu.
 
 ### 11.5 AI przeciwnika
 

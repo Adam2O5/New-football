@@ -740,30 +740,51 @@ Legenda: `⬜` do zrobienia · `🔄` w trakcie · `✅` gotowe
 
 ---
 
-### ⬜ Task 19: Etap 5 — stamina live, zmiany, okno przerwy
+### ✅ Task 19: Etap 5 — stamina live, zmiany, okno przerwy
 
 **Cel:** `matchday_model.md` §6.1, §11.2–11.4.
 
-- [ ] Tick staminy co minutę wg Task 12
-- [ ] `staminaMult` przeliczany bieżąco w pipeline `effAttr`
-- [ ] Zmiennik startuje ze swoją bieżącą staminą
-- [ ] Limit zmian 5
-- [ ] Okna zmian 3, przerwa poza limitem okien
-- [ ] Zmiany wyłącznie z 7-osobowej ławki
-- [ ] Wejście zmiennika przelicza `cohesionMult` (możliwa obca pozycja)
-- [ ] Kara adaptacji do zgrania przy zawodniku z <5 meczami w klubie
-- [ ] W przerwie: zmiany i taktyka (w tym formacja) bez kary cohesion
-- [ ] Poza przerwą: korekta taktyki kosztuje −2 `cohesionMult` na 10 minut
-- [ ] Poza przerwą: zmiana formacji niedostępna
-- [ ] Wymuszona zmiana przy kontuzji Major
+Task 19 jest zaimplementowany jako warstwa runtime-only w `lib/core/simulation`. Pętla używa istniejącego `staminaRemaining` i wywołuje `legacyMatch.recordMinute()` dokładnie raz dla każdej drużyny na minutę, a następnie odświeża `effAttr`, ratingi jednostek i pipeline Task 17–18.
+
+- [x] Tick staminy co minutę wg Task 12
+- [x] `staminaMult` przeliczany bieżąco w pipeline `effAttr`
+- [x] Zmiennik startuje ze swoją bieżącą staminą, bez drugiego ticka i bez dodatkowego losowania
+- [x] Limit zmian 5 na drużynę
+- [x] Okna zmian 3; przerwa nie zużywa zwykłego okna
+- [x] Zmiany wyłącznie z bieżącej ławki (`homeBench` / `awayBench`)
+- [x] Wejście zmiennika przelicza `cohesionMult` i zachowuje pozycję slotu zawodnika schodzącego, także przy obcej pozycji naturalnej
+- [x] Kara adaptacji do zgrania przy zawodniku z <5 występami w snapshotcie `Team.chemistryAppearances`
+- [x] W przerwie: zmiany i taktyka (w tym formacja) bez kary cohesion
+- [x] Poza przerwą: korekta taktyki kosztuje bezpośrednio `−2 / 100` (`−0,02`) `cohesionMultiplier` przez 10 minut
+- [x] Poza przerwą: zmiana formacji jest odrzucana bez zmiany stanu
+- [x] Wymuszona zmiana przy kontuzji Major, z rejestrowaniem nieuzupełnionego ID przy pustej ławce
+
+**API runtime**
+
+`SimulationLiveMatch` udostępnia `applySubstitution`, `applyMajorInjurySubstitution` i `updateTactics`. `SimulationMatchEngine` udostępnia również warianty `...Result`, zwracające `SimulationActionResult` z przyczyną odrzucenia. Dla zwykłej zmiany opcjonalny `windowId` grupuje kilka zmian w jedno okno; bez niego używana jest bieżąca minuta (`minute:<minute>`). Zmieniony zawodnik trafia na ławkę, ale jego ID jest blokowane przed ponownym wejściem.
+
+Wymuszona ścieżka Major zużywa limit pięciu zmian, lecz omija limit trzech zwykłych okien. Nadal korzysta wyłącznie z dostępnej bieżącej ławki; gdy nie ma zmiennika, ID trafia do `homeUnreplacedMajorInjuryIds` lub `awayUnreplacedMajorInjuryIds`.
+
+**Cohesion, adaptacja i taktyka**
+
+Runtime utrzymuje mapę przypisania zawodnik → slot. `cohesionMult` jest liczony na jej podstawie i uwzględnia karę adaptacji liniowo od `1,0` przy zerowych występach do `0,0` przy pięciu występach. Korekta taktyczna poza przerwą odświeża, a nie kumuluje, timer; kara wygasa, gdy `expiresAtMinute <= state.minute`. Zmiana formacji w przerwie remapuje bieżące XI przez `FormationLayout` i czyści karę.
+
+**Zachowanie kompatybilności**
+
+Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, legacy `LiveMatch` ani istniejącego formatu replayów. Stan komend, liczniki okien, mapy slotów, adaptacja i kara taktyczna pozostają wyłącznie w `SimulationLiveMatch`.
 
 **Testy**
-- [ ] Limity zmian i okien są respektowane
-- [ ] Zmiana taktyki poza przerwą nakłada i po 10 minutach zdejmuje karę
-- [ ] Zmiana formacji poza przerwą jest odrzucana
-- [ ] Zmiennik z pełną staminą podnosi `unitRating` w końcówce
 
-**Demo:** zmiennik z pełną staminą realnie podnosi `unitRating` w końcówce, co czyni rotację opłacalną.
+- [x] Aktualna stamina zmiennika, mapa slotów i rating po wejściu na obcą pozycję
+- [x] Limity pięciu zmian i trzech zwykłych okien, w tym wiele zmian w jednym `windowId`
+- [x] Zmiany w przerwie bez zużycia zwykłego okna
+- [x] Zmiana taktyki poza przerwą nakłada i po 10 minutach zdejmuje karę
+- [x] Zmiana formacji poza przerwą jest odrzucana
+- [x] Adaptacja zgrania wygasa liniowo przez pięć występów
+- [x] Wymuszona zmiana Major omija limit okien, a brak ławki rejestruje nieuzupełnioną kontuzję
+- [x] Ten sam seed i te same komendy Task 19 zachowują deterministyczny trace
+
+**Demo:** zmiennik z pełną bieżącą staminą realnie podnosi `unitRating` w końcówce, co czyni rotację opłacalną, bez naruszania kolejności losowań Task 17–18.
 
 ---
 

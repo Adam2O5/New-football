@@ -53,13 +53,13 @@ class CohesionService {
   /// | 81–100   | 1.05 |
   ///
   /// Then multiplied by HC Motivation factor (`staff.md`).
-  double cohesionMult(int cohesion, {StaffMember? headCoach}) {
-    final baseMult = _baseCohesionMult(cohesion);
+  double cohesionMult(num cohesion, {StaffMember? headCoach}) {
+    final baseMult = _baseCohesionMult(cohesion.toDouble());
     final motivationFactor = _hcMotivationFactor(headCoach);
     return baseMult * motivationFactor;
   }
 
-  static double _baseCohesionMult(int cohesion) {
+  static double _baseCohesionMult(double cohesion) {
     if (cohesion <= 20) return 1.01;
     if (cohesion <= 40) return 1.02;
     if (cohesion <= 60) return 1.03;

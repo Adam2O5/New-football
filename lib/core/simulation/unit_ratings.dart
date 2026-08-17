@@ -41,9 +41,11 @@ class UnitRatingCalculator {
     required List<Player> lineup,
     required Map<String, EffectivePlayerAttributes> effectiveAttributes,
     required TeamShape shape,
+    Map<String, Position> assignedPositions = const {},
   }) {
     final defensive = _unitMembers(
       lineup,
+      assignedPositions: assignedPositions,
       positions: const {
         Position.cb,
         Position.lb,
@@ -56,6 +58,7 @@ class UnitRatingCalculator {
     );
     final midfield = _unitMembers(
       lineup,
+      assignedPositions: assignedPositions,
       positions: const {
         Position.cdm,
         Position.cm,
@@ -67,6 +70,7 @@ class UnitRatingCalculator {
     );
     final attacking = _unitMembers(
       lineup,
+      assignedPositions: assignedPositions,
       positions: const {Position.st, Position.lw, Position.rw, Position.cam},
       supportingPositions: const {Position.lw, Position.rw, Position.cam},
     );
@@ -143,14 +147,20 @@ class UnitRatingCalculator {
 
   List<_UnitMember> _unitMembers(
     List<Player> lineup, {
+    required Map<String, Position> assignedPositions,
     required Set<Position> positions,
     required Set<Position> supportingPositions,
   }) => [
     for (final player in lineup)
-      if (positions.contains(player.position))
+      if (positions.contains(assignedPositions[player.id] ?? player.position))
         _UnitMember(
           player: player,
-          weight: supportingPositions.contains(player.position) ? 0.5 : 1.0,
+          weight:
+              supportingPositions.contains(
+                assignedPositions[player.id] ?? player.position,
+              )
+              ? 0.5
+              : 1.0,
         ),
   ];
 }

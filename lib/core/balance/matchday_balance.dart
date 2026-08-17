@@ -14,6 +14,10 @@ class MatchdayBalance {
     this.noGkGoalsAgainst = 5,
     this.maxSubstitutions = 5,
     this.maxSubstitutionWindows = 3,
+    this.cohesionTacticsPenalty = 2.0,
+    this.cohesionPenaltyDurationMinutes = 10,
+    this.adaptationAppearances = 5,
+    this.adaptationPenaltyAtZero = 1.0,
     this.shapeBaseline = 55,
     this.shapeWeight = 0.0025,
     this.duelDispersion = 35,
@@ -152,9 +156,17 @@ class MatchdayBalance {
   final int noGkGoalsFor;
   final int noGkGoalsAgainst;
 
-  /// Current engine names retained for backwards compatibility.
+  /// Maximum number of players replaced and ordinary substitution windows.
   final int maxSubstitutions;
   final int maxSubstitutionWindows;
+
+  /// Task 19 live-match cohesion controls. The documented `-2` tactical
+  /// correction is represented as two raw cohesion points before the existing
+  /// 1.01–1.05 multiplier mapping is applied.
+  final double cohesionTacticsPenalty;
+  final int cohesionPenaltyDurationMinutes;
+  final int adaptationAppearances;
+  final double adaptationPenaltyAtZero;
 
   /// `SHAPE_BASELINE` and `SHAPE_WEIGHT`.
   final int shapeBaseline;
@@ -260,6 +272,17 @@ class MatchdayBalance {
     PressingIntensity.high => pressingHighMultiplier,
     PressingIntensity.gegenpressing => pressingGegenpressingMultiplier,
   };
+
+  double adaptationPenaltyForAppearances(int appearances) {
+    if (adaptationAppearances <= 0 || appearances >= adaptationAppearances) {
+      return 0.0;
+    }
+    final remaining = (adaptationAppearances - appearances).clamp(
+      0,
+      adaptationAppearances,
+    );
+    return adaptationPenaltyAtZero * remaining / adaptationAppearances;
+  }
 
   double stakeMultiplier(MatchStake stake) => switch (stake) {
     MatchStake.regular => stakeRegularSequenceMultiplier,
