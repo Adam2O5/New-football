@@ -458,8 +458,11 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   /// `playerAction` events like `draft` — those are driven entirely by the
   /// dedicated UI + `makeDraftPick`.
   Future<void> runEventAtCurrentDay(CalendarEventId eventId) async {
+    final saveSeed = save?.saveSeed ?? 0;
     await updateLeague((league) {
       switch (eventId) {
+        case CalendarEventId.capUpdateTv:
+          return _season.runCapUpdateTv(league, saveSeed: saveSeed);
         case CalendarEventId.staffGrowth:
           return _season.runStaffGrowthAndRetire(league);
         case CalendarEventId.retirements:
@@ -892,6 +895,30 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     if (hourly && league.hourlyStaffOfferUsed) return false;
     final team = league.playerTeam;
     if (team == null) return false;
+
+    final hireViolation = _staff.hireValidationReason(team, offer.salary);
+    if (hireViolation != null) {
+      await updateLeague(
+        (l) => MessageService().send(
+          l,
+          type: MessageType.staffCapViolation,
+          domain: MessageDomain.finance,
+          priority: MessagePriority.urgent,
+          args: {
+            'reason': hireViolation,
+            'staffPayroll': team.staff.totalSalary,
+            'staffCap': _staff.balance.staff.salaryCap,
+          },
+          payload: {
+            'teamId': team.id,
+            'attemptedSalary': offer.salary,
+            'staffPayroll': team.staff.totalSalary,
+            'staffCap': _staff.balance.staff.salaryCap,
+          },
+        ),
+      );
+      return false;
+    }
 
     if (hourly) {
       await updateLeague((l) => l.copyWith(hourlyStaffOfferUsed: true));

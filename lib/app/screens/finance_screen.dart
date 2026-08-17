@@ -80,11 +80,6 @@ class FinanceScreen extends ConsumerWidget {
               l10n.finance_secondApron,
               formatMoney(context, snap.secondApron),
             ),
-            _tile(
-              context,
-              l10n.finance_tax,
-              formatMoney(context, snap.taxOwed),
-            ),
             _tile(context, l10n.finance_cash, formatMoney(context, cash)),
             _tile(
               context,

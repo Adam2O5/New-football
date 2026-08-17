@@ -7,6 +7,7 @@ enum CalendarEventKind { match, playerAction, automatic, informational }
 /// Typed calendar event identifiers — single source of truth.
 /// Replaces stringly-typed IDs across the codebase.
 enum CalendarEventId {
+  capUpdateTv,
   staffGrowth,
   awards,
   retirements,
@@ -83,6 +84,13 @@ class CalendarEventRegistry {
     final awardsWeek = calendar.awardsWeek;
     final scoutWeek = awardsWeek + 1;
     return [
+      CalendarEventSlot(
+        id: CalendarEventId.capUpdateTv,
+        week: awardsWeek,
+        day: 1,
+        order: -2,
+        kind: CalendarEventKind.automatic,
+      ),
       CalendarEventSlot(
         id: CalendarEventId.awards,
         week: awardsWeek,
@@ -204,6 +212,8 @@ class CalendarEventRegistry {
   /// Czy akcja przypisana do [id] została już wykonana w bieżącym sezonie.
   static bool isDone(Season season, CalendarEventId id) {
     switch (id) {
+      case CalendarEventId.capUpdateTv:
+        return season.capUpdateTvDone;
       case CalendarEventId.staffGrowth:
         return season.staffGrowthDone;
       case CalendarEventId.awards:

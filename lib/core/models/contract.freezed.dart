@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Contract {
 
- int get salary; int get yearsRemaining; bool get hasBirdRights; bool get isRookieScale; int get rookiePickSlot; bool get noTradeClause; List<String> get blockedTeamIds;
+ int get salary; int get yearsRemaining; bool get hasBirdRights; bool get isRookieScale; int get rookiePickSlot; CapExceptionType? get exceptionType; bool get noTradeClause; List<String> get blockedTeamIds;
 /// Create a copy of Contract
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $ContractCopyWith<Contract> get copyWith => _$ContractCopyWithImpl<Contract>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Contract&&(identical(other.salary, salary) || other.salary == salary)&&(identical(other.yearsRemaining, yearsRemaining) || other.yearsRemaining == yearsRemaining)&&(identical(other.hasBirdRights, hasBirdRights) || other.hasBirdRights == hasBirdRights)&&(identical(other.isRookieScale, isRookieScale) || other.isRookieScale == isRookieScale)&&(identical(other.rookiePickSlot, rookiePickSlot) || other.rookiePickSlot == rookiePickSlot)&&(identical(other.noTradeClause, noTradeClause) || other.noTradeClause == noTradeClause)&&const DeepCollectionEquality().equals(other.blockedTeamIds, blockedTeamIds));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Contract&&(identical(other.salary, salary) || other.salary == salary)&&(identical(other.yearsRemaining, yearsRemaining) || other.yearsRemaining == yearsRemaining)&&(identical(other.hasBirdRights, hasBirdRights) || other.hasBirdRights == hasBirdRights)&&(identical(other.isRookieScale, isRookieScale) || other.isRookieScale == isRookieScale)&&(identical(other.rookiePickSlot, rookiePickSlot) || other.rookiePickSlot == rookiePickSlot)&&(identical(other.exceptionType, exceptionType) || other.exceptionType == exceptionType)&&(identical(other.noTradeClause, noTradeClause) || other.noTradeClause == noTradeClause)&&const DeepCollectionEquality().equals(other.blockedTeamIds, blockedTeamIds));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,salary,yearsRemaining,hasBirdRights,isRookieScale,rookiePickSlot,noTradeClause,const DeepCollectionEquality().hash(blockedTeamIds));
+int get hashCode => Object.hash(runtimeType,salary,yearsRemaining,hasBirdRights,isRookieScale,rookiePickSlot,exceptionType,noTradeClause,const DeepCollectionEquality().hash(blockedTeamIds));
 
 @override
 String toString() {
-  return 'Contract(salary: $salary, yearsRemaining: $yearsRemaining, hasBirdRights: $hasBirdRights, isRookieScale: $isRookieScale, rookiePickSlot: $rookiePickSlot, noTradeClause: $noTradeClause, blockedTeamIds: $blockedTeamIds)';
+  return 'Contract(salary: $salary, yearsRemaining: $yearsRemaining, hasBirdRights: $hasBirdRights, isRookieScale: $isRookieScale, rookiePickSlot: $rookiePickSlot, exceptionType: $exceptionType, noTradeClause: $noTradeClause, blockedTeamIds: $blockedTeamIds)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $ContractCopyWith<$Res>  {
   factory $ContractCopyWith(Contract value, $Res Function(Contract) _then) = _$ContractCopyWithImpl;
 @useResult
 $Res call({
- int salary, int yearsRemaining, bool hasBirdRights, bool isRookieScale, int rookiePickSlot, bool noTradeClause, List<String> blockedTeamIds
+ int salary, int yearsRemaining, bool hasBirdRights, bool isRookieScale, int rookiePickSlot, CapExceptionType? exceptionType, bool noTradeClause, List<String> blockedTeamIds
 });
 
 
@@ -65,14 +65,15 @@ class _$ContractCopyWithImpl<$Res>
 
 /// Create a copy of Contract
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? salary = null,Object? yearsRemaining = null,Object? hasBirdRights = null,Object? isRookieScale = null,Object? rookiePickSlot = null,Object? noTradeClause = null,Object? blockedTeamIds = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? salary = null,Object? yearsRemaining = null,Object? hasBirdRights = null,Object? isRookieScale = null,Object? rookiePickSlot = null,Object? exceptionType = freezed,Object? noTradeClause = null,Object? blockedTeamIds = null,}) {
   return _then(_self.copyWith(
 salary: null == salary ? _self.salary : salary // ignore: cast_nullable_to_non_nullable
 as int,yearsRemaining: null == yearsRemaining ? _self.yearsRemaining : yearsRemaining // ignore: cast_nullable_to_non_nullable
 as int,hasBirdRights: null == hasBirdRights ? _self.hasBirdRights : hasBirdRights // ignore: cast_nullable_to_non_nullable
 as bool,isRookieScale: null == isRookieScale ? _self.isRookieScale : isRookieScale // ignore: cast_nullable_to_non_nullable
 as bool,rookiePickSlot: null == rookiePickSlot ? _self.rookiePickSlot : rookiePickSlot // ignore: cast_nullable_to_non_nullable
-as int,noTradeClause: null == noTradeClause ? _self.noTradeClause : noTradeClause // ignore: cast_nullable_to_non_nullable
+as int,exceptionType: freezed == exceptionType ? _self.exceptionType : exceptionType // ignore: cast_nullable_to_non_nullable
+as CapExceptionType?,noTradeClause: null == noTradeClause ? _self.noTradeClause : noTradeClause // ignore: cast_nullable_to_non_nullable
 as bool,blockedTeamIds: null == blockedTeamIds ? _self.blockedTeamIds : blockedTeamIds // ignore: cast_nullable_to_non_nullable
 as List<String>,
   ));
@@ -159,10 +160,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int salary,  int yearsRemaining,  bool hasBirdRights,  bool isRookieScale,  int rookiePickSlot,  bool noTradeClause,  List<String> blockedTeamIds)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int salary,  int yearsRemaining,  bool hasBirdRights,  bool isRookieScale,  int rookiePickSlot,  CapExceptionType? exceptionType,  bool noTradeClause,  List<String> blockedTeamIds)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Contract() when $default != null:
-return $default(_that.salary,_that.yearsRemaining,_that.hasBirdRights,_that.isRookieScale,_that.rookiePickSlot,_that.noTradeClause,_that.blockedTeamIds);case _:
+return $default(_that.salary,_that.yearsRemaining,_that.hasBirdRights,_that.isRookieScale,_that.rookiePickSlot,_that.exceptionType,_that.noTradeClause,_that.blockedTeamIds);case _:
   return orElse();
 
 }
@@ -180,10 +181,10 @@ return $default(_that.salary,_that.yearsRemaining,_that.hasBirdRights,_that.isRo
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int salary,  int yearsRemaining,  bool hasBirdRights,  bool isRookieScale,  int rookiePickSlot,  bool noTradeClause,  List<String> blockedTeamIds)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int salary,  int yearsRemaining,  bool hasBirdRights,  bool isRookieScale,  int rookiePickSlot,  CapExceptionType? exceptionType,  bool noTradeClause,  List<String> blockedTeamIds)  $default,) {final _that = this;
 switch (_that) {
 case _Contract():
-return $default(_that.salary,_that.yearsRemaining,_that.hasBirdRights,_that.isRookieScale,_that.rookiePickSlot,_that.noTradeClause,_that.blockedTeamIds);case _:
+return $default(_that.salary,_that.yearsRemaining,_that.hasBirdRights,_that.isRookieScale,_that.rookiePickSlot,_that.exceptionType,_that.noTradeClause,_that.blockedTeamIds);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -200,10 +201,10 @@ return $default(_that.salary,_that.yearsRemaining,_that.hasBirdRights,_that.isRo
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int salary,  int yearsRemaining,  bool hasBirdRights,  bool isRookieScale,  int rookiePickSlot,  bool noTradeClause,  List<String> blockedTeamIds)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int salary,  int yearsRemaining,  bool hasBirdRights,  bool isRookieScale,  int rookiePickSlot,  CapExceptionType? exceptionType,  bool noTradeClause,  List<String> blockedTeamIds)?  $default,) {final _that = this;
 switch (_that) {
 case _Contract() when $default != null:
-return $default(_that.salary,_that.yearsRemaining,_that.hasBirdRights,_that.isRookieScale,_that.rookiePickSlot,_that.noTradeClause,_that.blockedTeamIds);case _:
+return $default(_that.salary,_that.yearsRemaining,_that.hasBirdRights,_that.isRookieScale,_that.rookiePickSlot,_that.exceptionType,_that.noTradeClause,_that.blockedTeamIds);case _:
   return null;
 
 }
@@ -215,7 +216,7 @@ return $default(_that.salary,_that.yearsRemaining,_that.hasBirdRights,_that.isRo
 @JsonSerializable()
 
 class _Contract implements Contract {
-  const _Contract({required this.salary, required this.yearsRemaining, this.hasBirdRights = false, this.isRookieScale = false, this.rookiePickSlot = 0, this.noTradeClause = false, final  List<String> blockedTeamIds = const []}): _blockedTeamIds = blockedTeamIds;
+  const _Contract({required this.salary, required this.yearsRemaining, this.hasBirdRights = false, this.isRookieScale = false, this.rookiePickSlot = 0, this.exceptionType, this.noTradeClause = false, final  List<String> blockedTeamIds = const []}): _blockedTeamIds = blockedTeamIds;
   factory _Contract.fromJson(Map<String, dynamic> json) => _$ContractFromJson(json);
 
 @override final  int salary;
@@ -223,6 +224,7 @@ class _Contract implements Contract {
 @override@JsonKey() final  bool hasBirdRights;
 @override@JsonKey() final  bool isRookieScale;
 @override@JsonKey() final  int rookiePickSlot;
+@override final  CapExceptionType? exceptionType;
 @override@JsonKey() final  bool noTradeClause;
  final  List<String> _blockedTeamIds;
 @override@JsonKey() List<String> get blockedTeamIds {
@@ -245,16 +247,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Contract&&(identical(other.salary, salary) || other.salary == salary)&&(identical(other.yearsRemaining, yearsRemaining) || other.yearsRemaining == yearsRemaining)&&(identical(other.hasBirdRights, hasBirdRights) || other.hasBirdRights == hasBirdRights)&&(identical(other.isRookieScale, isRookieScale) || other.isRookieScale == isRookieScale)&&(identical(other.rookiePickSlot, rookiePickSlot) || other.rookiePickSlot == rookiePickSlot)&&(identical(other.noTradeClause, noTradeClause) || other.noTradeClause == noTradeClause)&&const DeepCollectionEquality().equals(other._blockedTeamIds, _blockedTeamIds));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Contract&&(identical(other.salary, salary) || other.salary == salary)&&(identical(other.yearsRemaining, yearsRemaining) || other.yearsRemaining == yearsRemaining)&&(identical(other.hasBirdRights, hasBirdRights) || other.hasBirdRights == hasBirdRights)&&(identical(other.isRookieScale, isRookieScale) || other.isRookieScale == isRookieScale)&&(identical(other.rookiePickSlot, rookiePickSlot) || other.rookiePickSlot == rookiePickSlot)&&(identical(other.exceptionType, exceptionType) || other.exceptionType == exceptionType)&&(identical(other.noTradeClause, noTradeClause) || other.noTradeClause == noTradeClause)&&const DeepCollectionEquality().equals(other._blockedTeamIds, _blockedTeamIds));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,salary,yearsRemaining,hasBirdRights,isRookieScale,rookiePickSlot,noTradeClause,const DeepCollectionEquality().hash(_blockedTeamIds));
+int get hashCode => Object.hash(runtimeType,salary,yearsRemaining,hasBirdRights,isRookieScale,rookiePickSlot,exceptionType,noTradeClause,const DeepCollectionEquality().hash(_blockedTeamIds));
 
 @override
 String toString() {
-  return 'Contract(salary: $salary, yearsRemaining: $yearsRemaining, hasBirdRights: $hasBirdRights, isRookieScale: $isRookieScale, rookiePickSlot: $rookiePickSlot, noTradeClause: $noTradeClause, blockedTeamIds: $blockedTeamIds)';
+  return 'Contract(salary: $salary, yearsRemaining: $yearsRemaining, hasBirdRights: $hasBirdRights, isRookieScale: $isRookieScale, rookiePickSlot: $rookiePickSlot, exceptionType: $exceptionType, noTradeClause: $noTradeClause, blockedTeamIds: $blockedTeamIds)';
 }
 
 
@@ -265,7 +267,7 @@ abstract mixin class _$ContractCopyWith<$Res> implements $ContractCopyWith<$Res>
   factory _$ContractCopyWith(_Contract value, $Res Function(_Contract) _then) = __$ContractCopyWithImpl;
 @override @useResult
 $Res call({
- int salary, int yearsRemaining, bool hasBirdRights, bool isRookieScale, int rookiePickSlot, bool noTradeClause, List<String> blockedTeamIds
+ int salary, int yearsRemaining, bool hasBirdRights, bool isRookieScale, int rookiePickSlot, CapExceptionType? exceptionType, bool noTradeClause, List<String> blockedTeamIds
 });
 
 
@@ -282,14 +284,15 @@ class __$ContractCopyWithImpl<$Res>
 
 /// Create a copy of Contract
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? salary = null,Object? yearsRemaining = null,Object? hasBirdRights = null,Object? isRookieScale = null,Object? rookiePickSlot = null,Object? noTradeClause = null,Object? blockedTeamIds = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? salary = null,Object? yearsRemaining = null,Object? hasBirdRights = null,Object? isRookieScale = null,Object? rookiePickSlot = null,Object? exceptionType = freezed,Object? noTradeClause = null,Object? blockedTeamIds = null,}) {
   return _then(_Contract(
 salary: null == salary ? _self.salary : salary // ignore: cast_nullable_to_non_nullable
 as int,yearsRemaining: null == yearsRemaining ? _self.yearsRemaining : yearsRemaining // ignore: cast_nullable_to_non_nullable
 as int,hasBirdRights: null == hasBirdRights ? _self.hasBirdRights : hasBirdRights // ignore: cast_nullable_to_non_nullable
 as bool,isRookieScale: null == isRookieScale ? _self.isRookieScale : isRookieScale // ignore: cast_nullable_to_non_nullable
 as bool,rookiePickSlot: null == rookiePickSlot ? _self.rookiePickSlot : rookiePickSlot // ignore: cast_nullable_to_non_nullable
-as int,noTradeClause: null == noTradeClause ? _self.noTradeClause : noTradeClause // ignore: cast_nullable_to_non_nullable
+as int,exceptionType: freezed == exceptionType ? _self.exceptionType : exceptionType // ignore: cast_nullable_to_non_nullable
+as CapExceptionType?,noTradeClause: null == noTradeClause ? _self.noTradeClause : noTradeClause // ignore: cast_nullable_to_non_nullable
 as bool,blockedTeamIds: null == blockedTeamIds ? _self._blockedTeamIds : blockedTeamIds // ignore: cast_nullable_to_non_nullable
 as List<String>,
   ));
@@ -574,7 +577,7 @@ as int?,
 /// @nodoc
 mixin _$TeamFinance {
 
- int get salaryCap; int get totalPayroll; List<CapException> get activeExceptions; int get midLevelExceptionAmount; bool get midLevelExceptionAvailable; int get cashBalance;
+ int get salaryCap; int get firstApron; int get secondApron; int get totalPayroll; List<CapException> get activeExceptions; int get midLevelExceptionAmount; bool get midLevelExceptionAvailable; int get cashBalance;
 /// Create a copy of TeamFinance
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -587,16 +590,16 @@ $TeamFinanceCopyWith<TeamFinance> get copyWith => _$TeamFinanceCopyWithImpl<Team
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TeamFinance&&(identical(other.salaryCap, salaryCap) || other.salaryCap == salaryCap)&&(identical(other.totalPayroll, totalPayroll) || other.totalPayroll == totalPayroll)&&const DeepCollectionEquality().equals(other.activeExceptions, activeExceptions)&&(identical(other.midLevelExceptionAmount, midLevelExceptionAmount) || other.midLevelExceptionAmount == midLevelExceptionAmount)&&(identical(other.midLevelExceptionAvailable, midLevelExceptionAvailable) || other.midLevelExceptionAvailable == midLevelExceptionAvailable)&&(identical(other.cashBalance, cashBalance) || other.cashBalance == cashBalance));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TeamFinance&&(identical(other.salaryCap, salaryCap) || other.salaryCap == salaryCap)&&(identical(other.firstApron, firstApron) || other.firstApron == firstApron)&&(identical(other.secondApron, secondApron) || other.secondApron == secondApron)&&(identical(other.totalPayroll, totalPayroll) || other.totalPayroll == totalPayroll)&&const DeepCollectionEquality().equals(other.activeExceptions, activeExceptions)&&(identical(other.midLevelExceptionAmount, midLevelExceptionAmount) || other.midLevelExceptionAmount == midLevelExceptionAmount)&&(identical(other.midLevelExceptionAvailable, midLevelExceptionAvailable) || other.midLevelExceptionAvailable == midLevelExceptionAvailable)&&(identical(other.cashBalance, cashBalance) || other.cashBalance == cashBalance));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,salaryCap,totalPayroll,const DeepCollectionEquality().hash(activeExceptions),midLevelExceptionAmount,midLevelExceptionAvailable,cashBalance);
+int get hashCode => Object.hash(runtimeType,salaryCap,firstApron,secondApron,totalPayroll,const DeepCollectionEquality().hash(activeExceptions),midLevelExceptionAmount,midLevelExceptionAvailable,cashBalance);
 
 @override
 String toString() {
-  return 'TeamFinance(salaryCap: $salaryCap, totalPayroll: $totalPayroll, activeExceptions: $activeExceptions, midLevelExceptionAmount: $midLevelExceptionAmount, midLevelExceptionAvailable: $midLevelExceptionAvailable, cashBalance: $cashBalance)';
+  return 'TeamFinance(salaryCap: $salaryCap, firstApron: $firstApron, secondApron: $secondApron, totalPayroll: $totalPayroll, activeExceptions: $activeExceptions, midLevelExceptionAmount: $midLevelExceptionAmount, midLevelExceptionAvailable: $midLevelExceptionAvailable, cashBalance: $cashBalance)';
 }
 
 
@@ -607,7 +610,7 @@ abstract mixin class $TeamFinanceCopyWith<$Res>  {
   factory $TeamFinanceCopyWith(TeamFinance value, $Res Function(TeamFinance) _then) = _$TeamFinanceCopyWithImpl;
 @useResult
 $Res call({
- int salaryCap, int totalPayroll, List<CapException> activeExceptions, int midLevelExceptionAmount, bool midLevelExceptionAvailable, int cashBalance
+ int salaryCap, int firstApron, int secondApron, int totalPayroll, List<CapException> activeExceptions, int midLevelExceptionAmount, bool midLevelExceptionAvailable, int cashBalance
 });
 
 
@@ -624,9 +627,11 @@ class _$TeamFinanceCopyWithImpl<$Res>
 
 /// Create a copy of TeamFinance
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? salaryCap = null,Object? totalPayroll = null,Object? activeExceptions = null,Object? midLevelExceptionAmount = null,Object? midLevelExceptionAvailable = null,Object? cashBalance = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? salaryCap = null,Object? firstApron = null,Object? secondApron = null,Object? totalPayroll = null,Object? activeExceptions = null,Object? midLevelExceptionAmount = null,Object? midLevelExceptionAvailable = null,Object? cashBalance = null,}) {
   return _then(_self.copyWith(
 salaryCap: null == salaryCap ? _self.salaryCap : salaryCap // ignore: cast_nullable_to_non_nullable
+as int,firstApron: null == firstApron ? _self.firstApron : firstApron // ignore: cast_nullable_to_non_nullable
+as int,secondApron: null == secondApron ? _self.secondApron : secondApron // ignore: cast_nullable_to_non_nullable
 as int,totalPayroll: null == totalPayroll ? _self.totalPayroll : totalPayroll // ignore: cast_nullable_to_non_nullable
 as int,activeExceptions: null == activeExceptions ? _self.activeExceptions : activeExceptions // ignore: cast_nullable_to_non_nullable
 as List<CapException>,midLevelExceptionAmount: null == midLevelExceptionAmount ? _self.midLevelExceptionAmount : midLevelExceptionAmount // ignore: cast_nullable_to_non_nullable
@@ -717,10 +722,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int salaryCap,  int totalPayroll,  List<CapException> activeExceptions,  int midLevelExceptionAmount,  bool midLevelExceptionAvailable,  int cashBalance)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int salaryCap,  int firstApron,  int secondApron,  int totalPayroll,  List<CapException> activeExceptions,  int midLevelExceptionAmount,  bool midLevelExceptionAvailable,  int cashBalance)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TeamFinance() when $default != null:
-return $default(_that.salaryCap,_that.totalPayroll,_that.activeExceptions,_that.midLevelExceptionAmount,_that.midLevelExceptionAvailable,_that.cashBalance);case _:
+return $default(_that.salaryCap,_that.firstApron,_that.secondApron,_that.totalPayroll,_that.activeExceptions,_that.midLevelExceptionAmount,_that.midLevelExceptionAvailable,_that.cashBalance);case _:
   return orElse();
 
 }
@@ -738,10 +743,10 @@ return $default(_that.salaryCap,_that.totalPayroll,_that.activeExceptions,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int salaryCap,  int totalPayroll,  List<CapException> activeExceptions,  int midLevelExceptionAmount,  bool midLevelExceptionAvailable,  int cashBalance)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int salaryCap,  int firstApron,  int secondApron,  int totalPayroll,  List<CapException> activeExceptions,  int midLevelExceptionAmount,  bool midLevelExceptionAvailable,  int cashBalance)  $default,) {final _that = this;
 switch (_that) {
 case _TeamFinance():
-return $default(_that.salaryCap,_that.totalPayroll,_that.activeExceptions,_that.midLevelExceptionAmount,_that.midLevelExceptionAvailable,_that.cashBalance);case _:
+return $default(_that.salaryCap,_that.firstApron,_that.secondApron,_that.totalPayroll,_that.activeExceptions,_that.midLevelExceptionAmount,_that.midLevelExceptionAvailable,_that.cashBalance);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -758,10 +763,10 @@ return $default(_that.salaryCap,_that.totalPayroll,_that.activeExceptions,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int salaryCap,  int totalPayroll,  List<CapException> activeExceptions,  int midLevelExceptionAmount,  bool midLevelExceptionAvailable,  int cashBalance)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int salaryCap,  int firstApron,  int secondApron,  int totalPayroll,  List<CapException> activeExceptions,  int midLevelExceptionAmount,  bool midLevelExceptionAvailable,  int cashBalance)?  $default,) {final _that = this;
 switch (_that) {
 case _TeamFinance() when $default != null:
-return $default(_that.salaryCap,_that.totalPayroll,_that.activeExceptions,_that.midLevelExceptionAmount,_that.midLevelExceptionAvailable,_that.cashBalance);case _:
+return $default(_that.salaryCap,_that.firstApron,_that.secondApron,_that.totalPayroll,_that.activeExceptions,_that.midLevelExceptionAmount,_that.midLevelExceptionAvailable,_that.cashBalance);case _:
   return null;
 
 }
@@ -773,10 +778,12 @@ return $default(_that.salaryCap,_that.totalPayroll,_that.activeExceptions,_that.
 @JsonSerializable()
 
 class _TeamFinance implements TeamFinance {
-  const _TeamFinance({this.salaryCap = 300000000, this.totalPayroll = 0, final  List<CapException> activeExceptions = const [], this.midLevelExceptionAmount = 20400000, this.midLevelExceptionAvailable = true, this.cashBalance = 75000000}): _activeExceptions = activeExceptions;
+  const _TeamFinance({this.salaryCap = 350000000, this.firstApron = 396700000, this.secondApron = 431700000, this.totalPayroll = 0, final  List<CapException> activeExceptions = const [], this.midLevelExceptionAmount = 20400000, this.midLevelExceptionAvailable = true, this.cashBalance = 75000000}): _activeExceptions = activeExceptions;
   factory _TeamFinance.fromJson(Map<String, dynamic> json) => _$TeamFinanceFromJson(json);
 
 @override@JsonKey() final  int salaryCap;
+@override@JsonKey() final  int firstApron;
+@override@JsonKey() final  int secondApron;
 @override@JsonKey() final  int totalPayroll;
  final  List<CapException> _activeExceptions;
 @override@JsonKey() List<CapException> get activeExceptions {
@@ -802,16 +809,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TeamFinance&&(identical(other.salaryCap, salaryCap) || other.salaryCap == salaryCap)&&(identical(other.totalPayroll, totalPayroll) || other.totalPayroll == totalPayroll)&&const DeepCollectionEquality().equals(other._activeExceptions, _activeExceptions)&&(identical(other.midLevelExceptionAmount, midLevelExceptionAmount) || other.midLevelExceptionAmount == midLevelExceptionAmount)&&(identical(other.midLevelExceptionAvailable, midLevelExceptionAvailable) || other.midLevelExceptionAvailable == midLevelExceptionAvailable)&&(identical(other.cashBalance, cashBalance) || other.cashBalance == cashBalance));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TeamFinance&&(identical(other.salaryCap, salaryCap) || other.salaryCap == salaryCap)&&(identical(other.firstApron, firstApron) || other.firstApron == firstApron)&&(identical(other.secondApron, secondApron) || other.secondApron == secondApron)&&(identical(other.totalPayroll, totalPayroll) || other.totalPayroll == totalPayroll)&&const DeepCollectionEquality().equals(other._activeExceptions, _activeExceptions)&&(identical(other.midLevelExceptionAmount, midLevelExceptionAmount) || other.midLevelExceptionAmount == midLevelExceptionAmount)&&(identical(other.midLevelExceptionAvailable, midLevelExceptionAvailable) || other.midLevelExceptionAvailable == midLevelExceptionAvailable)&&(identical(other.cashBalance, cashBalance) || other.cashBalance == cashBalance));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,salaryCap,totalPayroll,const DeepCollectionEquality().hash(_activeExceptions),midLevelExceptionAmount,midLevelExceptionAvailable,cashBalance);
+int get hashCode => Object.hash(runtimeType,salaryCap,firstApron,secondApron,totalPayroll,const DeepCollectionEquality().hash(_activeExceptions),midLevelExceptionAmount,midLevelExceptionAvailable,cashBalance);
 
 @override
 String toString() {
-  return 'TeamFinance(salaryCap: $salaryCap, totalPayroll: $totalPayroll, activeExceptions: $activeExceptions, midLevelExceptionAmount: $midLevelExceptionAmount, midLevelExceptionAvailable: $midLevelExceptionAvailable, cashBalance: $cashBalance)';
+  return 'TeamFinance(salaryCap: $salaryCap, firstApron: $firstApron, secondApron: $secondApron, totalPayroll: $totalPayroll, activeExceptions: $activeExceptions, midLevelExceptionAmount: $midLevelExceptionAmount, midLevelExceptionAvailable: $midLevelExceptionAvailable, cashBalance: $cashBalance)';
 }
 
 
@@ -822,7 +829,7 @@ abstract mixin class _$TeamFinanceCopyWith<$Res> implements $TeamFinanceCopyWith
   factory _$TeamFinanceCopyWith(_TeamFinance value, $Res Function(_TeamFinance) _then) = __$TeamFinanceCopyWithImpl;
 @override @useResult
 $Res call({
- int salaryCap, int totalPayroll, List<CapException> activeExceptions, int midLevelExceptionAmount, bool midLevelExceptionAvailable, int cashBalance
+ int salaryCap, int firstApron, int secondApron, int totalPayroll, List<CapException> activeExceptions, int midLevelExceptionAmount, bool midLevelExceptionAvailable, int cashBalance
 });
 
 
@@ -839,9 +846,11 @@ class __$TeamFinanceCopyWithImpl<$Res>
 
 /// Create a copy of TeamFinance
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? salaryCap = null,Object? totalPayroll = null,Object? activeExceptions = null,Object? midLevelExceptionAmount = null,Object? midLevelExceptionAvailable = null,Object? cashBalance = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? salaryCap = null,Object? firstApron = null,Object? secondApron = null,Object? totalPayroll = null,Object? activeExceptions = null,Object? midLevelExceptionAmount = null,Object? midLevelExceptionAvailable = null,Object? cashBalance = null,}) {
   return _then(_TeamFinance(
 salaryCap: null == salaryCap ? _self.salaryCap : salaryCap // ignore: cast_nullable_to_non_nullable
+as int,firstApron: null == firstApron ? _self.firstApron : firstApron // ignore: cast_nullable_to_non_nullable
+as int,secondApron: null == secondApron ? _self.secondApron : secondApron // ignore: cast_nullable_to_non_nullable
 as int,totalPayroll: null == totalPayroll ? _self.totalPayroll : totalPayroll // ignore: cast_nullable_to_non_nullable
 as int,activeExceptions: null == activeExceptions ? _self._activeExceptions : activeExceptions // ignore: cast_nullable_to_non_nullable
 as List<CapException>,midLevelExceptionAmount: null == midLevelExceptionAmount ? _self.midLevelExceptionAmount : midLevelExceptionAmount // ignore: cast_nullable_to_non_nullable

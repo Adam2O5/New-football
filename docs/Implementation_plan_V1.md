@@ -158,11 +158,11 @@ Tryb **1a**: każda pozycja dostaje osobne pytanie w momencie, gdy zablokuje zad
 | 1 | Tyg. 44: tabela „Exact schedule" mówi Awards pon / StaffGrowth wt; checklist „Kluczowe eventy" mówi StaffGrowth pon / Awards wt | Task 5 | **Rozstrzygnięto: Awards pon, StaffGrowth/retire wt, Retirements śr, Lottery pt.** Tabela „Exact schedule" jest kanoniczna; okno wymian otwiera się w pon tyg. 44 niezależnie od Awards. | ✅ |
 | 2 | Przeliczanie tabeli siły ligi: `team_management.md` „co miesiąc 1. dnia miesiąca + pon tyg. 23 + start kariery"; `AI_behaviour.md` §2.1 „wtorek tyg. 44 i poniedziałek tyg. 23" | Task 14 | Kanonem `team_management.md`. Gra liczy tygodnie, nie miesiące → **co 4 tygodnie (tyg. 1, 5, 9, 13, 17, 21) + pon tyg. 23 + wt tyg. 44 + start kariery**. Wtorek tyg. 44 dochodzi, bo AI potrzebuje świeżej wyceny przed loterią. | ✅ |
 | 3 | Progi `playerOfferScore`: pasmo 40–59 „Counter" nachodzi na 55–69 „Waiting/Counter/Accept" | Task 28 | **40–54 Counter, 55–69 pasmo mieszane** z losowaniem z docs (50/50 w punkcie 62, ±6 pkt rozkładu na punkt odchylenia). | ⏳ |
-| 4 | Rookie scale: `contracts.md` §8 `baseScale / (1 + pickSlot × 0,06)`; kod `rookiePickDecay = 0,08` | Task 27 | **0,06** za docs; kod zsynchronizować. | ⏳ |
+| 4 | Rookie scale: `contracts.md` §8 `baseScale / (1 + pickSlot × 0,06)`; kod `rookiePickDecay = 0,08` | Task 27 | **Rozstrzygnięto: 0,06**; kod i testy zsynchronizowane. | ✅ |
 | 5 | `publicCriticism` → „Kara dyscyplinarna: −2 atmosfera, −2 atmosfera" (duplikat) | Task 26 | **−2 atmosfera, −2 zgranie** — przez analogię do pozostałych opcji eventu. | ⏳ |
 | 6 | `messages.md` §13 wymienia `ovrDigest`, §9 definiuje `groupKey = ovr:own:{week}` bez odpowiadającego `type` | Task 7 | Dodać wzorzec **`ovrDigest`** do katalogu (domain `playerEvent`, `silenced`). | ✅ |
 | 7 | Literówki formatowania: „zaokrąglane do 2 miejsc po przecinku.0" oraz zdublowana kolumna w tabeli skutków atmosfery (`team_management.md`) | Task 14 | Poprawka kosmetyczna w docs. | ✅ |
-| 8 | `game_rules.md`: cap „uzgadniany co 5–7 lat przy nowej umowie TV" — mechanizm nieopisany w szczegółach | Task 27 | Doczytać `salary_cap.md`; jeśli brak reguły, zaproponować: zmiana +4…+12% w losowym roku z przedziału 5–7 lat, termin znany przy podpisaniu. | ⏳ |
+| 8 | `game_rules.md`: cap „uzgadniany co 5–7 lat przy nowej umowie TV" — mechanizm nieopisany w szczegółach | Task 27 | **Rozstrzygnięto:** deterministyczny reset za 5–7 sezonów i wzrost 4–12%, oba parametry znane i zapisane przy rozpoczęciu save'a. | ✅ |
 
 ---
 
@@ -1052,43 +1052,43 @@ Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, le
 
 > Reguły, na których stoi AI. Muszą być kompletne, zanim AI zacznie je konsumować.
 
-### ⬜ Task 27: Pełny model salary cap
+### ✅ Task 27: Pełny model salary cap
 
 **Cel:** `salary_cap.md`, `game_rules.md`, `trades.md` — sekcja o apronach.
 
-- [ ] **Rozstrzygnąć sprzeczność #4** (rookie decay 0,06 vs 0,08)
-- [ ] **Rozstrzygnąć sprzeczność #8** (mechanizm aktualizacji capu TV)
-- [ ] Zsynchronizować `salaryCap` na 350 000 000
-- [ ] Zsynchronizować `firstApron` na 396 700 000, `secondApron` na 431 700 000
-- [ ] Zsynchronizować `minSalary` na 1 000 000, `maxSalary` na 60 000 000
-- [ ] Zsynchronizować `StaffBalance.salaryCap` na 15 000 000, pensje 0,5–5M
-- [ ] Usunąć `taxToFirstApron`, `taxToSecondApron`, `taxAboveSecondApron` (V1 bez podatku)
-- [ ] Zaktualizować `TeamFinance` defaulty i istniejące `seed_data`
-- [ ] Poziom „poniżej capu": pełna elastyczność w ramach cap space
-- [ ] Poziom „powyżej capu, poniżej 1. aprogu": matching 125% + 500 000 bufor, agregacja dozwolona
-- [ ] Poziom „między apronami": matching jak wyżej, **bez agregacji**
-- [ ] Poziom „powyżej 2. aprogu": brak netto wzrostu pensji, brak picków R1 w pakiecie dokupionym
-- [ ] Model wyjątków: Rookie Scale (`baseScale / (1 + pickSlot × 0,06)`, 2 lata)
-- [ ] Wyjątek: Rookie Extension (5 lat, wyłączność)
-- [ ] Wyjątek: Qualifying Offer / RFA (QO ≥ 1,25 × ostatnia pensja rookie, 5 lat)
-- [ ] Wyjątek: Full Bird Rights (staż ≥3, do `maxSalary`, 5 lat)
-- [ ] Wyjątek: Early Bird Rights (staż =2, max 175% ostatniej pensji lub 60% `maxSalary`, 4 lata)
-- [ ] Wyjątek: Non-Bird Rights (staż <2, max 120% ostatniej pensji, 4 lata)
-- [ ] Wyjątek: Veteran Extension Raise Cap (max +8% r/r na starcie oferty)
-- [ ] Aktualizacja capu co 5–7 lat przy umowie TV, termin znany przy podpisaniu
-- [ ] Brak możliwości zwolnienia zawodnika i sztabu — utrzymać w walidacjach
-- [ ] Wiadomości `capUpdateTv`, `apronWarning` (eskalacja >2. apron), `staffCapViolation`
-- [ ] Przebudować `FinanceScreen`: poziom capu, payroll, dostępne wyjątki, konkretne ograniczenia
-- [ ] Podnieść `currentSchemaVersion`
+- [x] **Rozstrzygnąć sprzeczność #4:** przyjęto rookie decay `0,06` zamiast `0,08`; kod i testy używają tej wartości
+- [x] **Rozstrzygnąć sprzeczność #8:** przyjęto deterministyczny harmonogram TV: reset za 5–7 sezonów i wzrost 4–12%, znane z góry oraz zapisane w `Season`
+- [x] Zsynchronizować `salaryCap` na 350 000 000
+- [x] Zsynchronizować `firstApron` na 396 700 000, `secondApron` na 431 700 000
+- [x] Zsynchronizować `minSalary` na 1 000 000, `maxSalary` na 60 000 000
+- [x] Zsynchronizować `StaffBalance.salaryCap` na 15 000 000, pensje 0,5–5M
+- [x] Usunąć `taxToFirstApron`, `taxToSecondApron`, `taxAboveSecondApron` — V1 nie nalicza podatku
+- [x] Zaktualizować defaulty `TeamFinance` i istniejące dane seed
+- [x] Poziom „poniżej capu": pełna elastyczność w ramach cap space
+- [x] Poziom „powyżej capu, poniżej 1. aprogu": matching 125% + 500 000 bufor, agregacja dozwolona
+- [x] Poziom „między apronami": matching 125% + 500 000 na pojedynczej podstawie, **bez agregacji**
+- [x] Poziom „powyżej 2. aprogu”: brak netto wzrostu pensji i zakaz przyjęcia picków R1
+- [x] Model wyjątków: Rookie Scale (`baseScale / (1 + pickSlot × 0,06)`, dokładnie 2 lata)
+- [x] Wyjątek: Rookie Extension (do 5 lat, wyłączność, tylko w ostatnim roku skali)
+- [x] Wyjątek: Qualifying Offer / RFA (QO ≥ `max(1M, ceil(1,25 × ostatnia pensja rookie))`, do 5 lat)
+- [x] Wyjątek: Full Bird Rights (staż ≥3, do `maxSalary`, do 5 lat)
+- [x] Wyjątek: Early Bird Rights (staż =2, max `min(175% ostatniej pensji, 60% maxSalary)`, do 4 lat)
+- [x] Wyjątek: Non-Bird Rights (staż <2, max 120% ostatniej pensji, do 4 lat)
+- [x] Wyjątek: Veteran Extension Raise Cap (max +8% względem poprzedniej pensji na starcie, do 5 lat)
+- [x] Aktualizacja capu co 5–7 lat przy umowie TV: event w tygodniu 44, dzień 1; termin i wzrost są persisted
+- [x] Brak możliwości zwolnienia zawodnika i sztabu — utrzymane są wyłącznie ścieżki wygaśnięcia, wymiany i emerytury
+- [x] Wiadomości `capUpdateTv`, `apronWarning` i `staffCapViolation`
+- [x] Zaktualizować `FinanceScreen`: poziom capu, payroll, cap space i progi apronów; usunąć nieużywany tile podatku
+- [x] Podnieść `currentSchemaVersion` do 14
 
 **Testy**
-- [ ] Drużyna między apronami nie może agregować kontraktów
-- [ ] Powyżej 2. aprogu nie może podnieść payrollu
-- [ ] Matching liczony dokładnie jak w docs (125% + 500k)
-- [ ] Każdy wyjątek respektuje swój limit kwoty i lat
-- [ ] Rookie scale dla picku #1 i #30 daje wartości zgodne z formułą
+- [x] Drużyna między apronami nie może agregować kontraktów
+- [x] Powyżej 2. aprogu nie może podnieść payrollu ani przyjąć picka R1
+- [x] Matching liczony dokładnie jak w docs (125% + 500k)
+- [x] Każdy wyjątek respektuje swój limit kwoty, kwalifikację i lat
+- [x] Rookie scale dla picku #1 i #30 daje wartości zgodne z formułą
 
-**Demo:** przebudowany `FinanceScreen` pokazuje poziom capu, dostępne wyjątki i konkretne ograniczenia transakcyjne.
+**Demo:** `FinanceScreen` pokazuje payroll, cap space, status capu i oba aprony; `SalaryCapService` centralizuje matching, wyjątki oraz hard restrictions, a TV update nie modyfikuje istniejących kontraktów.
 
 ---
 

@@ -12,6 +12,7 @@ abstract class Contract with _$Contract {
     @Default(false) bool hasBirdRights,
     @Default(false) bool isRookieScale,
     @Default(0) int rookiePickSlot,
+    CapExceptionType? exceptionType,
     @Default(false) bool noTradeClause,
     @Default([]) List<String> blockedTeamIds,
   }) = _Contract;
@@ -36,7 +37,9 @@ abstract class CapException with _$CapException {
 @freezed
 abstract class TeamFinance with _$TeamFinance {
   const factory TeamFinance({
-    @Default(300000000) int salaryCap,
+    @Default(350000000) int salaryCap,
+    @Default(396700000) int firstApron,
+    @Default(431700000) int secondApron,
     @Default(0) int totalPayroll,
     @Default([]) List<CapException> activeExceptions,
     @Default(20400000) int midLevelExceptionAmount,
@@ -54,8 +57,25 @@ extension TeamFinanceX on TeamFinance {
   bool canSignPlayer(int salary, {CapExceptionType? exception}) {
     if (totalPayroll + salary <= salaryCap) return true;
     if (exception == null) return false;
-    return activeExceptions.any(
-      (e) => e.type == exception && e.amountRemaining >= salary,
-    );
+    switch (exception) {
+      case CapExceptionType.midLevelException:
+        return midLevelExceptionAvailable && salary <= midLevelExceptionAmount;
+      case CapExceptionType.tradedPlayerException:
+        return activeExceptions.any(
+          (e) => e.type == exception && e.amountRemaining >= salary,
+        );
+      case CapExceptionType.birdRights:
+      case CapExceptionType.rookieScale:
+      case CapExceptionType.rookieExtension:
+      case CapExceptionType.qualifyingOffer:
+      case CapExceptionType.fullBirdRights:
+      case CapExceptionType.earlyBirdRights:
+      case CapExceptionType.nonBirdRights:
+      case CapExceptionType.veteranExtensionRaiseCap:
+        // Player-specific eligibility and limits are enforced by
+        // SalaryCapService/ContractService; TeamFinance only answers whether
+        // a named exception path is available in principle.
+        return true;
+    }
   }
 }

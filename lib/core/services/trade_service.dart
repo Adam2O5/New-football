@@ -21,10 +21,6 @@ class TradeAsset {
   final String? playerId;
   final int? pickYear;
   final int? pickRound;
-
-  /// Drużyna, do której pierwotnie należał ten pick (`DraftPick.originalTeamId`)
-  /// — wraz z `pickYear`/`pickRound` jednoznacznie identyfikuje konkretny
-  /// `DraftPick` w `Team.ownedPicks`.
   final String? originalTeamId;
 
   bool get isPlayer => playerId != null;
@@ -64,8 +60,6 @@ class TradeService {
   final SalaryCapService capService;
   final CalendarService calendarService;
 
-  /// Znajduje konkretny `DraftPick` w `team.ownedPicks` odpowiadający
-  /// [asset] (dopasowanie po `pickYear`/`pickRound`/`originalTeamId`).
   DraftPick? _findOwnedPick(Team team, TradeAsset asset) {
     for (final p in team.ownedPicks) {
       if (p.year == asset.pickYear &&
@@ -77,8 +71,6 @@ class TradeService {
     return null;
   }
 
-  /// Wycena handlowa aktywa. [currentYear] jest wymagany dla picków —
-  /// wpływa na dyskonto czasowe (`DraftPick.computeTradeValue`).
   int assetValue(Team team, TradeAsset asset, {required int currentYear}) {
     if (asset.isPlayer) {
       final matches = team.roster.where((p) => p.id == asset.playerId);
@@ -95,9 +87,6 @@ class TradeService {
         balance: balance,
       );
     }
-    // Pick nie znaleziony w ownedPicks (np. rozbieżność stanu UI/silnika) —
-    // policz wartość "z powietrza" dla podanych parametrów zamiast zwracać 0,
-    // żeby okno wymian nie pokazywało fałszywie zerowej wyceny.
     return DraftPick(
       id: 'preview_${asset.originalTeamId}_${asset.pickYear}_r${asset.pickRound}',
       year: asset.pickYear!,
@@ -107,9 +96,6 @@ class TradeService {
     ).computeTradeValue(currentYear: currentYear, balance: balance);
   }
 
-  /// Validates a proposed trade. Pass [currentWeek] to also enforce the
-  /// trade window (`docs/trade_rules.md`); omit it (e.g. in tests) to skip
-  /// that check.
   TradeValidation validate(
     Team a,
     Team b,
@@ -140,33 +126,34 @@ class TradeService {
 
     final salaryOutA = _salaryOf(a, proposal.assetsFromA);
     final salaryOutB = _salaryOf(b, proposal.assetsFromB);
-    final match = balance.salaryCap.salaryMatchPct;
-
-    // Matching: incoming <= outgoing * 125% + buffer (when over cap).
-    final snapA = capService.snapshot(a);
-    final snapB = capService.snapshot(b);
-    if (snapA.payroll > snapA.cap) {
-      final maxIn = (salaryOutA * match + balance.salaryCap.salaryMatchBuffer)
-          .round();
-      if (salaryOutB > maxIn) {
-        return const TradeValidation(
-          ok: false,
-          reason: 'Drużyna A: matching pensji (125%)',
-        );
-      }
-    }
-    if (snapB.payroll > snapB.cap) {
-      final maxIn = (salaryOutB * match + balance.salaryCap.salaryMatchBuffer)
-          .round();
-      if (salaryOutA > maxIn) {
-        return const TradeValidation(
-          ok: false,
-          reason: 'Drużyna B: matching pensji (125%)',
-        );
-      }
+    final matchA = capService.tradeMatching(
+      team: a,
+      outgoingSalary: salaryOutA,
+      outgoingSalaries: _playerSalaries(a, proposal.assetsFromA),
+      incomingSalary: salaryOutB,
+      incomingFirstRoundPicks: _firstRoundPicks(proposal.assetsFromB),
+    );
+    if (!matchA.allowed) {
+      return TradeValidation(
+        ok: false,
+        reason: 'Drużyna A: ${matchA.reason ?? 'salary matching'}',
+      );
     }
 
-    // NTC check
+    final matchB = capService.tradeMatching(
+      team: b,
+      outgoingSalary: salaryOutB,
+      outgoingSalaries: _playerSalaries(b, proposal.assetsFromB),
+      incomingSalary: salaryOutA,
+      incomingFirstRoundPicks: _firstRoundPicks(proposal.assetsFromA),
+    );
+    if (!matchB.allowed) {
+      return TradeValidation(
+        ok: false,
+        reason: 'Drużyna B: ${matchB.reason ?? 'salary matching'}',
+      );
+    }
+
     for (final asset in proposal.assetsFromA) {
       if (!asset.isPlayer) continue;
       final p = a.roster.firstWhere((p) => p.id == asset.playerId);
@@ -213,7 +200,6 @@ class TradeService {
         .toSet();
 
     final movingToB = a.roster.where((p) => leaveA.contains(p.id)).map((p) {
-      // Bird rights do not travel.
       return p.copyWith(
         contract: p.contract.copyWith(hasBirdRights: false),
         state: p.state.copyWith(seasonsWithTeam: 0),
@@ -226,8 +212,6 @@ class TradeService {
       );
     }).toList();
 
-    // Picki: przenosimy konkretny DraftPick z ownedPicks nadawcy do
-    // odbiorcy (zmiana teamId, originalTeamId bez zmian — `trade_rules.md`).
     final remainingA = List<DraftPick>.from(a.ownedPicks);
     final movingPicksToB = <DraftPick>[];
     for (final asset in proposal.assetsFromA.where((x) => x.isPick)) {
@@ -237,8 +221,7 @@ class TradeService {
             p.round == asset.pickRound &&
             p.originalTeamId == asset.originalTeamId,
       );
-      if (idx == -1)
-        return null; // asset niedostępny — walidacja powinna to wyłapać wcześniej
+      if (idx == -1) return null;
       movingPicksToB.add(remainingA.removeAt(idx).copyWith(teamId: b.id));
     }
 
@@ -270,15 +253,21 @@ class TradeService {
     return (newA, newB);
   }
 
-  int _salaryOf(Team team, List<TradeAsset> assets) {
-    var sum = 0;
-    for (final a in assets) {
-      if (!a.isPlayer) continue;
-      final p = team.roster.where((p) => p.id == a.playerId);
-      if (p.isNotEmpty) sum += p.first.contract.salary;
+  int _salaryOf(Team team, List<TradeAsset> assets) =>
+      _playerSalaries(team, assets).fold(0, (sum, salary) => sum + salary);
+
+  List<int> _playerSalaries(Team team, List<TradeAsset> assets) {
+    final salaries = <int>[];
+    for (final asset in assets) {
+      if (!asset.isPlayer) continue;
+      final player = team.roster.where((p) => p.id == asset.playerId);
+      if (player.isNotEmpty) salaries.add(player.first.contract.salary);
     }
-    return sum;
+    return salaries;
   }
+
+  int _firstRoundPicks(List<TradeAsset> assets) =>
+      assets.where((asset) => asset.isPick && asset.pickRound == 1).length;
 
   bool _legalRoster(Team team) {
     final n = team.roster.length;

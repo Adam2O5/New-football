@@ -406,25 +406,22 @@ class OutfieldAttrWeights {
 
 class SalaryCapBalance {
   const SalaryCapBalance({
-    this.salaryCap = 300000000,
-    this.firstApron = 340000000,
-    this.secondApron = 370000000,
+    this.salaryCap = 350000000,
+    this.firstApron = 396700000,
+    this.secondApron = 431700000,
     this.midLevelException = 20400000,
-    this.minSalary = 500000,
-    this.maxSalary = 80000000,
+    this.minSalary = 1000000,
+    this.maxSalary = 60000000,
     this.rookieBaseScale = 8000000,
-    this.rookieMinSalary = 500000,
+    this.rookieMinSalary = 1000000,
     this.rookieMaxSalary = 8000000,
     this.rookieScaleYears = 2,
-    this.rookiePickDecay = 0.08,
+    this.rookiePickDecay = 0.06,
     this.birdRightsSeasons = 3,
     this.qualifyingOfferMultiplier = 1.25,
     this.qualifyingOfferMin = 1000000,
     this.salaryMatchPct = 1.25,
     this.salaryMatchBuffer = 500000,
-    this.taxToFirstApron = 1.75,
-    this.taxToSecondApron = 2.25,
-    this.taxAboveSecondApron = 3.0,
     this.maxPicksPerTrade = 3,
     this.maxPickYearsAhead = 7,
   });
@@ -449,10 +446,6 @@ class SalaryCapBalance {
   /// Incoming / outgoing salary matching above the cap (e.g. 125%).
   final double salaryMatchPct;
   final int salaryMatchBuffer;
-
-  final double taxToFirstApron;
-  final double taxToSecondApron;
-  final double taxAboveSecondApron;
 
   final int maxPicksPerTrade;
   final int maxPickYearsAhead;
@@ -497,7 +490,9 @@ class ClubCashBalance {
 
 class StaffBalance {
   const StaffBalance({
-    this.salaryCap = 12000000,
+    this.salaryCap = 15000000,
+    this.minSalary = 500000,
+    this.maxSalary = 5000000,
     this.roleSlots = 6,
     this.starMin = 0.0,
     this.starMax = 5.0,
@@ -532,6 +527,8 @@ class StaffBalance {
   });
 
   final int salaryCap;
+  final int minSalary;
+  final int maxSalary;
   final int roleSlots;
   final double starMin;
   final double starMax;
@@ -574,7 +571,8 @@ class StaffBalance {
   double salaryFor(StaffRole role, double avgStars) {
     final weight = roleSalaryWeight[role] ?? 0.5;
     final norm = (avgStars / starMax).clamp(0.0, 1.0);
-    return weight * (0.4 + 0.6 * norm) * salaryMarketBand;
+    final salary = weight * (0.4 + 0.6 * norm) * salaryMarketBand;
+    return salary.clamp(minSalary, maxSalary).toDouble();
   }
 
   double growthChanceForAge(int age) {

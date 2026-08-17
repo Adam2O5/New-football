@@ -12,6 +12,10 @@ _Contract _$ContractFromJson(Map<String, dynamic> json) => _Contract(
   hasBirdRights: json['hasBirdRights'] as bool? ?? false,
   isRookieScale: json['isRookieScale'] as bool? ?? false,
   rookiePickSlot: (json['rookiePickSlot'] as num?)?.toInt() ?? 0,
+  exceptionType: $enumDecodeNullable(
+    _$CapExceptionTypeEnumMap,
+    json['exceptionType'],
+  ),
   noTradeClause: json['noTradeClause'] as bool? ?? false,
   blockedTeamIds:
       (json['blockedTeamIds'] as List<dynamic>?)
@@ -26,8 +30,22 @@ Map<String, dynamic> _$ContractToJson(_Contract instance) => <String, dynamic>{
   'hasBirdRights': instance.hasBirdRights,
   'isRookieScale': instance.isRookieScale,
   'rookiePickSlot': instance.rookiePickSlot,
+  'exceptionType': _$CapExceptionTypeEnumMap[instance.exceptionType],
   'noTradeClause': instance.noTradeClause,
   'blockedTeamIds': instance.blockedTeamIds,
+};
+
+const _$CapExceptionTypeEnumMap = {
+  CapExceptionType.birdRights: 'birdRights',
+  CapExceptionType.midLevelException: 'midLevelException',
+  CapExceptionType.rookieScale: 'rookieScale',
+  CapExceptionType.rookieExtension: 'rookieExtension',
+  CapExceptionType.qualifyingOffer: 'qualifyingOffer',
+  CapExceptionType.fullBirdRights: 'fullBirdRights',
+  CapExceptionType.earlyBirdRights: 'earlyBirdRights',
+  CapExceptionType.nonBirdRights: 'nonBirdRights',
+  CapExceptionType.veteranExtensionRaiseCap: 'veteranExtensionRaiseCap',
+  CapExceptionType.tradedPlayerException: 'tradedPlayerException',
 };
 
 _CapException _$CapExceptionFromJson(Map<String, dynamic> json) =>
@@ -46,15 +64,10 @@ Map<String, dynamic> _$CapExceptionToJson(_CapException instance) =>
       'expiryYear': instance.expiryYear,
     };
 
-const _$CapExceptionTypeEnumMap = {
-  CapExceptionType.birdRights: 'birdRights',
-  CapExceptionType.midLevelException: 'midLevelException',
-  CapExceptionType.rookieScale: 'rookieScale',
-  CapExceptionType.tradedPlayerException: 'tradedPlayerException',
-};
-
 _TeamFinance _$TeamFinanceFromJson(Map<String, dynamic> json) => _TeamFinance(
-  salaryCap: (json['salaryCap'] as num?)?.toInt() ?? 300000000,
+  salaryCap: (json['salaryCap'] as num?)?.toInt() ?? 350000000,
+  firstApron: (json['firstApron'] as num?)?.toInt() ?? 396700000,
+  secondApron: (json['secondApron'] as num?)?.toInt() ?? 431700000,
   totalPayroll: (json['totalPayroll'] as num?)?.toInt() ?? 0,
   activeExceptions:
       (json['activeExceptions'] as List<dynamic>?)
@@ -71,6 +84,8 @@ _TeamFinance _$TeamFinanceFromJson(Map<String, dynamic> json) => _TeamFinance(
 Map<String, dynamic> _$TeamFinanceToJson(_TeamFinance instance) =>
     <String, dynamic>{
       'salaryCap': instance.salaryCap,
+      'firstApron': instance.firstApron,
+      'secondApron': instance.secondApron,
       'totalPayroll': instance.totalPayroll,
       'activeExceptions': instance.activeExceptions,
       'midLevelExceptionAmount': instance.midLevelExceptionAmount,

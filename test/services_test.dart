@@ -17,7 +17,7 @@ void main() {
     const svc = SalaryCapService();
     final snap = svc.snapshot(league.teams.first);
     expect(snap.payroll, greaterThan(0));
-    expect(snap.cap, 300000000);
+    expect(snap.cap, 350000000);
   });
 
   test('TradeService rejects illegal roster after trade dump', () {

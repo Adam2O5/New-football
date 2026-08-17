@@ -56,6 +56,9 @@ void main() {
     CalendarEventSlot slot(CalendarEventId id) =>
         slots.firstWhere((event) => event.id == id);
 
+    expect(slot(CalendarEventId.capUpdateTv).week, 44);
+    expect(slot(CalendarEventId.capUpdateTv).day, 1);
+    expect(slot(CalendarEventId.capUpdateTv).order, -2);
     expect(slot(CalendarEventId.awards).week, 44);
     expect(slot(CalendarEventId.awards).day, 1);
     expect(slot(CalendarEventId.staffGrowth).week, 44);
@@ -199,6 +202,7 @@ void main() {
       faOpenDone: true,
       scoutReportDone: true,
       tradeDeadlineAcked: true,
+      capUpdateTvDone: true,
       draftState: draft,
       nextDraftState: draft,
     );

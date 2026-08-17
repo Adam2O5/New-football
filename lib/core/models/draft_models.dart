@@ -193,6 +193,13 @@ abstract class Season with _$Season {
     SeasonAwards? awards,
     @Default(false) bool staffGrowthDone,
     @Default(false) bool playerRetirementsDone,
+
+    /// Persisted TV agreement: the exact reset year and increase are known
+    /// before the event fires, so loading a save cannot reroll the cap.
+    @Default(0) int nextTvCapResetSeason,
+    @Default(0) int nextTvCapIncreasePct,
+    @Default(false) bool capUpdateTvDone,
+
     @Default(false) bool combineDone,
     @Default(false) bool finalMockDone,
     @Default(false) bool faOpenDone,

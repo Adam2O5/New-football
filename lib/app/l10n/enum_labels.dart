@@ -19,6 +19,7 @@ String seasonPhaseLabel(BuildContext context, SeasonPhase phase) {
 String? calendarEventLabel(BuildContext context, CalendarEventId eventId) {
   final l10n = AppLocalizations.of(context)!;
   return switch (eventId) {
+    CalendarEventId.capUpdateTv => 'Aktualizacja salary cap',
     CalendarEventId.staffGrowth => 'Rozwój i emerytury sztabu',
     CalendarEventId.awards => l10n.calendar_event_awards,
     CalendarEventId.retirements => l10n.calendar_event_retirements,

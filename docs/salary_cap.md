@@ -23,24 +23,23 @@
 
 ## Aktualizacja limitu (prawa telewizyjne)
 
-- Limit pensji jest uzgadniany co **5–7 lat** przy podpisaniu nowej umowy na prawa telewizyjne ligi.
-- Dokładny rok zmiany jest znany z góry w momencie podpisania umowy TV i powinien być widoczny w ekranie finansów jako „następny reset capu: sezon X”.
-- Wzrost capu zależy od wartości kontraktu medialnego.
-- Po aktualizacji capu przeliczane są wszystkie progi apronów; istniejące kontrakty pozostają bez zmian do wygaśnięcia.
-- Staff salary cap nie jest aktualizowany - pozostaje cały czas ten sam.
+- Harmonogram nowej umowy TV jest wyznaczany deterministycznie przy tworzeniu save'a z `saveSeed` i bieżącego sezonu.
+- Następny reset przypada za **5–7 sezonów** (`currentYear + 5..7`), a wzrost wynosi **4–12%**; oba parametry są znane z góry i zapisane w `Season.nextTvCapResetSeason` oraz `Season.nextTvCapIncreasePct`.
+- Aktualizacja jest wykonywana przez event `capUpdateTv` na początku offseasonu — tydzień 44, dzień 1 — i może wykonać się tylko raz w danym sezonie (`capUpdateTvDone`).
+- Po aktualizacji wszystkie drużyny dostają nowy `salaryCap`, a oba aprony są skalowane tym samym współczynnikiem. Istniejące kontrakty i payroll pozostają bez zmian.
+- Po wykonaniu aktualizacji zapisywany jest kolejny deterministyczny termin i wzrost. Staff salary cap nie jest aktualizowany — pozostaje stały.
+- Gracz otrzymuje urgent message o zmianie capu; drużyny dotknięte ograniczeniami dostają także `apronWarning`.
 
-Limit pensji jest zmieniany na początku offseason - informacja poprzez urgent message i ma natychmiastowy wpływ. Salary cap może się zmienić w zakresie -10% - +10%.
-
-## Trzy pułapy finansowe
+## Cztery poziomy finansowe
 
 Liga operuje poziomami payrollu. Im wyżej znajduje się drużyna, tym mniejsza jej elastyczność w podpisach i wymianach.
 
-| Pułap | Próg | Znaczenie |
+| Poziom | Próg | Znaczenie |
 | --- | --- | --- |
 | **Poniżej cap** | payroll `<= 350 000 000 €` | Pełna elastyczność — podpisy w ramach cap space |
-| **1st apron** | `350 000 000 € < payroll <= 396 700 000 €` | Soft cap — ograniczone wymiany |
-| **Między apronami** | `396 700 000 € < payroll <= 431 700 000 €` | Brak agregacji w wymianach; wyższy podatek |
-| **2nd apron** | payroll `> 431 700 000 €` | Twardy reżim — brak netto wzrostu w trade, najwyższy podatek |
+| **Powyżej capu** | `350 000 000 € < payroll < 396 700 000 €` | Matching przy wymianach; agregacja dozwolona |
+| **1st apron** | `396 700 000 € <= payroll < 431 700 000 €` | Matching bez agregacji |
+| **2nd apron** | payroll `>= 431 700 000 €` | Brak netto wzrostu payrollu i zakaz przyjęcia picka R1 |
 
 Progi przy zachowaniu tych samych proporcji co w poprzednim modelu:
 
@@ -50,7 +49,7 @@ Progi przy zachowaniu tych samych proporcji co w poprzednim modelu:
 | 1st apron | **396 700 000 €** | ≈ +13,3% |
 | 2nd apron | **431 700 000 €** | ≈ +23,3% |
 
-> Przy każdej aktualizacji TV aprony skalują się tymi samymi procentami względem nowego limitu.
+> Przy każdej aktualizacji TV aprony skalują się tymi samymi procentami względem nowego limitu. Granice są oceniane zgodnie z `SalaryCapService.snapshot`: payroll równy apronowi należy już do danego poziomu.
 
 ## Walidacja składu (player cap)
 
@@ -68,7 +67,17 @@ W ekranie finance_screen wyświetla się informacja o obecnym stanie staffCap.
 
 ## Wyjątki cap (players)
 
-Wyjątki szczegółowo opisane w contracts.md
+Walidacja wyjątków jest scentralizowana w `SalaryCapService.validateExceptionOffer` i sprawdza kwalifikację zawodnika, zakres pensji oraz długość umowy:
+
+- **Rookie Scale:** dokładnie `rookieBaseScale / (1 + pickSlot × 0,06)`, zaokrąglone do pełnych euro i ograniczone do zakresu rookie; maksymalnie 2 lata. Dla skali używana jest baza **8 000 000 €**.
+- **Rookie Extension:** tylko dla zawodnika na skali rookie w jej ostatnim roku, wyłączna dla obecnego klubu, **1–60M €**, maksymalnie 5 lat.
+- **Qualifying Offer / RFA:** tylko po zakończeniu skali rookie; pensja co najmniej `max(1 000 000 €, ceil(1,25 × ostatnia pensja rookie))`, maksymalnie 5 lat.
+- **Full Bird Rights:** staż co najmniej 3 sezonów (albo zachowane prawa Bird), **1–60M €**, maksymalnie 5 lat.
+- **Early Bird Rights:** dokładnie 2 sezony w klubie; maksimum `min(175% poprzedniej pensji, 60% maxSalary)`, maksymalnie 4 lata.
+- **Non-Bird Rights:** staż krótszy niż 2 sezony; maksimum `120% poprzedniej pensji`, maksymalnie 4 lata.
+- **Veteran Extension Raise Cap:** nie dotyczy rookie scale; maksimum `min(60M €, 108% poprzedniej pensji)`, maksymalnie 5 lat.
+
+Wyjątek nie znosi kwalifikacji ani limitu kwotowego: podpis musi przejść również przez `canSign`, a istniejący zawodnik jest rozliczany jako zastępowana pensja, bez podwójnego obciążenia payrollu.
 
 ## Pensje
 
@@ -107,16 +116,18 @@ Kolejność preferencji przy budowaniu składu:
 
 ## Cash flow
 
-W wersji V1 nie będzie zaimplementowana funkcjonalność osobnego budżetu operacyjnego i związanych z nim kosztów i przychodów. Dodatkowy podatek od luksusu po przekroczeniu salary cap nie ma więc wiekszych konsekwencji poza ograniczeniami w wymianach i podpisywaniu zawodników.
+W wersji V1 nie jest zaimplementowany osobny budżet operacyjny. Ograniczenia finansowe wynikają wyłącznie z salary capu, apronów, wyjątków i reguł wymian.
 
 ## Ograniczenia przy pułapach
 
 | Poziom | Podpisy | Wymiany |
 | --- | --- | --- |
-| Poniżej cap | Pełna elastyczność w cap space | Bez dopasowania pensji |
-| Powyżej cap, poniżej 1st apron | Wyjątki (`Bird`, `Rookie`) | Matching 125% + TPE; agregacja dozwolona |
-| 1st apron – 2nd apron | Tylko obniżanie lub utrzymanie payrollu | Brak agregacji |
-| Powyżej 2nd apron | Tylko obniżanie payrollu  | Brak netto wzrostu pensji |
+| Poniżej cap | Pełna elastyczność w cap space | Maksimum incoming = outgoing + dostępny cap space |
+| Powyżej capu, poniżej 1st apron | Wyjątki (`Bird`, `Rookie`) | Matching `125% outgoing + 500 000 €`; agregacja dozwolona |
+| Od 1st apronu do poniżej 2nd apronu | Tylko zgodnie z dostępnymi wyjątkami i bez zwiększania ograniczeń apronów | Matching `125% jednej pensji outgoing + 500 000 €`; agregacja zabroniona |
+| Od 2nd apronu | Tylko zgodnie z regułami hard capu | Incoming `<= outgoing`; brak netto wzrostu payrollu i zakaz przyjęcia picków R1 |
+
+W przedziale między apronami `SalaryCapService` wybiera jedną pensję outgoing jako podstawę matchingu; pozostałe kontrakty nie mogą być agregowane. Powyżej 2nd apronu zakaz picków R1 dotyczy picków przyjmowanych przez tę drużynę.
 
 ## Brak zwolnień (kanon V1)
 

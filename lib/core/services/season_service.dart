@@ -475,6 +475,99 @@ class SeasonService {
     return state;
   }
 
+  LeagueState runCapUpdateTv(LeagueState league, {int saveSeed = 0}) {
+    final season = league.currentSeason;
+    if (season.capUpdateTvDone) return league;
+
+    var resetSeason = season.nextTvCapResetSeason;
+    var increasePct = season.nextTvCapIncreasePct;
+    if (resetSeason <= 0 || increasePct <= 0) {
+      final initial = capService.tvScheduleFor(
+        currentYear: season.year,
+        saveSeed: saveSeed,
+      );
+      resetSeason = initial.nextTvCapResetSeason;
+      increasePct = initial.nextTvCapIncreasePct;
+    }
+
+    if (season.year != resetSeason) {
+      return league.copyWith(
+        currentSeason: season.copyWith(
+          nextTvCapResetSeason: resetSeason,
+          nextTvCapIncreasePct: increasePct,
+          capUpdateTvDone: true,
+        ),
+      );
+    }
+
+    final updatedTeams = capService.applyTvUpdate(
+      league.teams,
+      increasePct: increasePct,
+    );
+    final nextAgreement = capService.tvScheduleFor(
+      currentYear: season.year,
+      saveSeed: saveSeed,
+    );
+    var state = league.copyWith(
+      teams: updatedTeams,
+      currentSeason: season.copyWith(
+        nextTvCapResetSeason: nextAgreement.nextTvCapResetSeason,
+        nextTvCapIncreasePct: nextAgreement.nextTvCapIncreasePct,
+        capUpdateTvDone: true,
+      ),
+    );
+
+    state = _messages.send(
+      state,
+      type: MessageType.capUpdateTv,
+      domain: MessageDomain.finance,
+      priority: MessagePriority.urgent,
+      args: {
+        'increasePct': increasePct,
+        'salaryCap': state.teams.first.finance.salaryCap,
+        'firstApron': state.teams.first.finance.firstApron,
+        'secondApron': state.teams.first.finance.secondApron,
+        'nextResetSeason': nextAgreement.nextTvCapResetSeason,
+      },
+      payload: {
+        'increasePct': increasePct,
+        'salaryCap': state.teams.first.finance.salaryCap,
+        'firstApron': state.teams.first.finance.firstApron,
+        'secondApron': state.teams.first.finance.secondApron,
+        'nextTvCapResetSeason': nextAgreement.nextTvCapResetSeason,
+      },
+      dedupKey: 'capUpdateTv:${season.year}',
+    );
+
+    final playerTeam = state.playerTeam;
+    if (playerTeam != null) {
+      final snapshot = capService.snapshot(playerTeam);
+      if (snapshot.status == CapStatus.firstApron ||
+          snapshot.status == CapStatus.secondApron) {
+        state = _messages.send(
+          state,
+          type: MessageType.apronWarning,
+          domain: MessageDomain.finance,
+          args: {
+            'payroll': snapshot.payroll,
+            'firstApron': snapshot.firstApron,
+            'secondApron': snapshot.secondApron,
+            'payrollAboveSecondApron': snapshot.isAboveSecondApron,
+          },
+          payload: {
+            'teamId': playerTeam.id,
+            'payroll': snapshot.payroll,
+            'firstApron': snapshot.firstApron,
+            'secondApron': snapshot.secondApron,
+            'payrollAboveSecondApron': snapshot.isAboveSecondApron,
+          },
+          dedupKey: 'apronWarning:${season.year}:${playerTeam.id}',
+        );
+      }
+    }
+    return state;
+  }
+
   LeagueState runStaffGrowthAndRetire(LeagueState league) {
     final state = staffService.growthAndRetireTick(league);
     return state.copyWith(
@@ -1047,6 +1140,9 @@ class SeasonService {
         scoutReportDone: false,
         tradeDeadlineAcked: false,
         nextDraftState: null,
+        nextTvCapResetSeason: league.currentSeason.nextTvCapResetSeason,
+        nextTvCapIncreasePct: league.currentSeason.nextTvCapIncreasePct,
+        capUpdateTvDone: false,
       ),
     );
   }

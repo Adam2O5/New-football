@@ -75,11 +75,25 @@ class StaffService {
     return StaffOffer(salary: salary, years: years);
   }
 
-  bool canHire(Team team, int salary) =>
-      team.staff.totalSalary + salary <= balance.staff.salaryCap;
+  bool isSalaryInRange(int salary) =>
+      salary >= balance.staff.minSalary && salary <= balance.staff.maxSalary;
 
-  /// Returns `null` if hiring would exceed the staff salary cap or the slot
-  /// is already filled.
+  String? hireValidationReason(Team team, int salary) {
+    if (!isSalaryInRange(salary)) {
+      return 'Pensja sztabu musi mieścić się w zakresie '
+          '${balance.staff.minSalary}–${balance.staff.maxSalary}';
+    }
+    if (team.staff.totalSalary + salary > balance.staff.salaryCap) {
+      return 'Przekroczony staff salary cap';
+    }
+    return null;
+  }
+
+  bool canHire(Team team, int salary) =>
+      hireValidationReason(team, salary) == null;
+
+  /// Returns `null` if hiring would exceed the staff salary cap, the salary
+  /// range, or the role slot is already filled.
   Team? hire({
     required Team team,
     required StaffMember member,
@@ -96,7 +110,13 @@ class StaffService {
     return team.copyWith(staff: team.staff.withMember(member.role, hired));
   }
 
+  /// V1 does not allow terminating an active staff contract. Retirement or
+  /// expiry paths remove staff elsewhere in the season pipeline.
   Team fire(Team team, StaffRole role) {
+    final member = team.staff.member(role);
+    if (member?.contract != null && member!.contract!.yearsRemaining > 0) {
+      return team;
+    }
     return team.copyWith(staff: team.staff.withMember(role, null));
   }
 

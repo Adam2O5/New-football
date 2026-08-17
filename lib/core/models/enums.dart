@@ -227,9 +227,16 @@ enum AttackWidth { narrow, balanced, wide }
 enum Tempo { slow, balanced, fast }
 
 enum CapExceptionType {
+  /// Legacy generic Bird-rights flag kept for save compatibility.
   birdRights,
   midLevelException,
   rookieScale,
+  rookieExtension,
+  qualifyingOffer,
+  fullBirdRights,
+  earlyBirdRights,
+  nonBirdRights,
+  veteranExtensionRaiseCap,
   tradedPlayerException,
 }
 

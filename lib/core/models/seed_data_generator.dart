@@ -16,6 +16,7 @@ import 'package:new_football/core/models/seed_data.dart';
 import 'package:new_football/core/models/staff.dart';
 import 'package:new_football/core/models/standing.dart';
 import 'package:new_football/core/models/team.dart';
+import 'package:new_football/core/services/salary_cap_service.dart';
 import 'package:new_football/core/tactics/formation_layout.dart';
 
 class SeedDataGenerator {
@@ -93,6 +94,7 @@ class SeedDataGenerator {
       year: year + 1,
       draftClass: generateDraftClass(year: year + 1),
     );
+    final tvSchedule = tvCapScheduleFor(currentYear: year, saveSeed: seed ?? 0);
 
     return LeagueState(
       teams: teams,
@@ -100,6 +102,8 @@ class SeedDataGenerator {
         year: year,
         standings: standings,
         nextDraftState: nextDraftState,
+        nextTvCapResetSeason: tvSchedule.nextTvCapResetSeason,
+        nextTvCapIncreasePct: tvSchedule.nextTvCapIncreasePct,
       ),
       playerTeamId: actualPlayerTeamId,
     );
@@ -241,11 +245,11 @@ class SeedDataGenerator {
       );
     }
 
-    // Keep a ~25-player roster comfortably under the 300M salary cap on
-    // average (elite ~90+ OVR ≈ 20-27M, replacement-level ≈ 1-1.5M).
+    // Keep the seeded 25-player rosters within the new 1M–60M player salary
+    // range while preserving the existing strength-based salary distribution.
     final salary = (1000000 + (base - 40) * 350000 + rng.nextInt(300000)).clamp(
-      500000,
-      80000000,
+      1000000,
+      60000000,
     );
 
     final potentialStars = ((base - 50) / 10).clamp(0.5, 5.0);
