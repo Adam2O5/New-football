@@ -6,6 +6,7 @@ import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/player_event_state.dart';
 import 'package:new_football/core/models/scouting.dart';
+import 'package:new_football/core/models/team_event_state.dart';
 import 'package:new_football/core/models/staff.dart';
 import 'package:new_football/core/tactics/tactics_setup.dart';
 
@@ -59,6 +60,7 @@ abstract class Team with _$Team {
     @Default([]) List<TeamWeeklyHistory> weeklyHistory,
     @Default([]) List<int> recentMatchResults,
     @Default({}) Map<String, int> chemistryAppearances,
+    @Default(TeamEventState()) TeamEventState eventState,
     @Default(TeamStaff()) TeamStaff staff,
     @Default(TeamScouting()) TeamScouting scouting,
 

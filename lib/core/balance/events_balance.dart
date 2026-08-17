@@ -18,6 +18,17 @@ class EventsBalance {
     this.leaderSupportCooldownMonths = 1,
     this.publicCriticismAtmosphereThreshold = 30,
     this.publicCriticismChance = 0.08,
+    this.moreMinutesLowShareThreshold = 0.25,
+    this.moreMinutesPromiseShare = 0.40,
+    this.moreMinutesPromiseWeeks = 4,
+    this.transferSituationWeeks = 4,
+    this.transferRequestIChance = 0.01,
+    this.transferRequestIIChanceAfterBrokenPromise = 0.20,
+    this.dressingRoomConflictPenaltyWeeks = 2,
+    this.leaderSupportCooldownWeeks = 4,
+    this.publicCriticismPunishRollMultiplier = 0.5,
+    this.publicCriticismIgnoreRollMultiplier = 1.5,
+    this.teamEventDecisionExpiryDays = 1,
     this.breakthroughAgeMax = 26,
     this.breakthroughProgressMin = 70,
     this.breakthroughFormMin = 8,
@@ -91,6 +102,17 @@ class EventsBalance {
   final int leaderSupportCooldownMonths;
   final int publicCriticismAtmosphereThreshold;
   final double publicCriticismChance;
+  final double moreMinutesLowShareThreshold;
+  final double moreMinutesPromiseShare;
+  final int moreMinutesPromiseWeeks;
+  final int transferSituationWeeks;
+  final double transferRequestIChance;
+  final double transferRequestIIChanceAfterBrokenPromise;
+  final int dressingRoomConflictPenaltyWeeks;
+  final int leaderSupportCooldownWeeks;
+  final double publicCriticismPunishRollMultiplier;
+  final double publicCriticismIgnoreRollMultiplier;
+  final int teamEventDecisionExpiryDays;
 
   final int breakthroughAgeMax;
   final int breakthroughProgressMin;

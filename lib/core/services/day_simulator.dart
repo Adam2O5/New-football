@@ -24,6 +24,7 @@ import 'package:new_football/core/services/message_service.dart';
 import 'package:new_football/core/services/player_event_service.dart';
 import 'package:new_football/core/services/salary_cap_service.dart';
 import 'package:new_football/core/services/team_management_service.dart';
+import 'package:new_football/core/services/team_event_service.dart';
 import 'package:new_football/core/services/schedule_generator.dart';
 import 'package:new_football/core/services/scouting_service.dart';
 
@@ -64,6 +65,7 @@ class DaySimulator {
     MessageService? messages,
     TeamManagementService? teamManagement,
     PlayerEventService? playerEvents,
+    TeamEventService? teamEvents,
   }) : matchEngine = matchEngine ?? SimulationMatchEngine(balance: balance),
        calendar = calendar ?? CalendarService(balance: balance),
        contextFactory =
@@ -82,7 +84,9 @@ class DaySimulator {
        teamManagement = teamManagement ?? const TeamManagementService(),
        playerEvents =
            playerEvents ??
-           PlayerEventService(balance: balance, messages: messages);
+           PlayerEventService(balance: balance, messages: messages),
+       teamEvents =
+           teamEvents ?? TeamEventService(balance: balance, messages: messages);
 
   final BalanceConfig balance;
   final SimulationMatchEngine matchEngine;
@@ -96,6 +100,7 @@ class DaySimulator {
   final MessageService messages;
   final TeamManagementService teamManagement;
   final PlayerEventService playerEvents;
+  final TeamEventService teamEvents;
 
   DaySimulationResult simulateDay(LeagueState league, {int saveSeed = 0}) {
     final week = league.currentWeek;
@@ -220,6 +225,9 @@ class DaySimulator {
       if (playerWeeklyUpdate != null &&
           (playerWeeklyUpdate.atmosphereDelta != 0 ||
               playerWeeklyUpdate.chemistryDelta != 0)) {
+        final oldAtmosphere =
+            playerWeeklyUpdate.team.atmosphere -
+            playerWeeklyUpdate.atmosphereDelta;
         state = messages.send(
           state,
           type: MessageType.teamEvent,
@@ -228,6 +236,10 @@ class DaySimulator {
           args: {
             'delta': playerWeeklyUpdate.atmosphereDelta,
             'chemistryDelta': playerWeeklyUpdate.chemistryDelta,
+            'oldLevel': oldAtmosphere,
+            'newLevel': playerWeeklyUpdate.team.atmosphere,
+            'atmosphereBefore': oldAtmosphere,
+            'atmosphereAfter': playerWeeklyUpdate.team.atmosphere,
             'atmosphere': playerWeeklyUpdate.team.atmosphere,
             'chemistry': playerWeeklyUpdate.team.chemistry,
           },
@@ -235,12 +247,24 @@ class DaySimulator {
             'teamId': state.playerTeamId,
             'atmosphereDelta': playerWeeklyUpdate.atmosphereDelta,
             'chemistryDelta': playerWeeklyUpdate.chemistryDelta,
+            'oldLevel': oldAtmosphere,
+            'newLevel': playerWeeklyUpdate.team.atmosphere,
+            'atmosphereBefore': oldAtmosphere,
+            'atmosphereAfter': playerWeeklyUpdate.team.atmosphere,
             'atmosphere': playerWeeklyUpdate.team.atmosphere,
             'chemistry': playerWeeklyUpdate.team.chemistry,
           },
           groupKey: 'atmosphere:$week',
         );
       }
+
+      state = teamEvents.weeklyTick(
+        state,
+        saveSeed: saveSeed,
+        offseason:
+            phase == SeasonPhase.offseason ||
+            nextPhase == SeasonPhase.offseason,
+      );
 
       final developmentChanges = <DevelopmentChange>[];
       final developedTeams = state.teams.map((team) {
@@ -316,9 +340,10 @@ class DaySimulator {
   LeagueState applyPlayerMatchResult(
     LeagueState league,
     ScheduledMatch match,
-    MatchResult result,
-  ) {
-    var state = _applyResult(league, match, result);
+    MatchResult result, {
+    int saveSeed = 0,
+  }) {
+    var state = _applyResult(league, match, result, saveSeed: saveSeed);
     final (nextWeek, nextDay) = calendar.advanceDay(
       state.currentWeek,
       state.currentDay,
@@ -383,7 +408,7 @@ class DaySimulator {
         context: context,
         rngSeed: context.seed,
       );
-      state = _applyResult(state, f, result);
+      state = _applyResult(state, f, result, saveSeed: saveSeed);
       results.add(result);
     }
 
@@ -421,8 +446,9 @@ class DaySimulator {
   LeagueState _applyResult(
     LeagueState league,
     ScheduledMatch match,
-    MatchResult result,
-  ) {
+    MatchResult result, {
+    int saveSeed = 0,
+  }) {
     final newSchedule = league.currentSeason.schedule.map((m) {
       if (m.id != match.id) return m;
       return m.copyWith(result: result);
@@ -547,6 +573,8 @@ class DaySimulator {
         : immediateAtmosphereDeltas[state.playerTeamId];
     if (playerAtmosphereDelta != null) {
       final playerTeam = state.teamById(state.playerTeamId!);
+      final atmosphereAfter = playerTeam?.atmosphere ?? 0;
+      final atmosphereBefore = atmosphereAfter - playerAtmosphereDelta;
       state = messages.send(
         state,
         type: MessageType.teamEvent,
@@ -555,12 +583,20 @@ class DaySimulator {
         priority: MessagePriority.urgent,
         args: {
           'delta': playerAtmosphereDelta,
-          'atmosphere': playerTeam?.atmosphere ?? 0,
+          'oldLevel': atmosphereBefore,
+          'newLevel': atmosphereAfter,
+          'atmosphereBefore': atmosphereBefore,
+          'atmosphereAfter': atmosphereAfter,
+          'atmosphere': atmosphereAfter,
         },
         payload: {
           'teamId': state.playerTeamId,
           'atmosphereDelta': playerAtmosphereDelta,
-          'atmosphere': playerTeam?.atmosphere ?? 0,
+          'oldLevel': atmosphereBefore,
+          'newLevel': atmosphereAfter,
+          'atmosphereBefore': atmosphereBefore,
+          'atmosphereAfter': atmosphereAfter,
+          'atmosphere': atmosphereAfter,
           'reason': 'walkover',
         },
         dedupKey: 'atmosphere:walkover:${match.id}',
@@ -691,7 +727,7 @@ class DaySimulator {
         );
       }
     }
-    return state;
+    return teamEvents.afterMatch(state, result, saveSeed: saveSeed);
   }
 
   Team _applyFatigue(Team team, MatchResult result, {required int seasonYear}) {

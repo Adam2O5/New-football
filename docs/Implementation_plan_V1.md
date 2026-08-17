@@ -1012,37 +1012,37 @@ Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, le
 
 ---
 
-### ⬜ Task 26: 9 eventów zespołowych z trackingiem obietnic
+### ✅ Task 26: 9 eventów zespołowych z trackingiem obietnic
 
 **Cel:** `team_management.md` — sekcja „Eventy związane z zespołem".
 
-- [ ] **Rozstrzygnąć sprzeczność #5** (`publicCriticism` — kara dyscyplinarna)
-- [ ] `moreMinutesRequest` — warunki aktywacji z docs, 3%/tyg. (5% dla `ambitious`), roll po meczu
-- [ ] `moreMinutesRequest` Accept: −3 atmosfery natychmiast + obietnica ≥40% minut na 4 tyg.
-- [ ] Tracker obietnicy: spełniona → +5 atmosfery; złamana → −12 (dodatkowo −3 dla `temperamental`/`ambitious`) + 20% szans na `transferRequestII`
-- [ ] `moreMinutesRequest` Decline: −7 atmosfery, dodatkowo −3 dla `temperamental`/`ambitious`
-- [ ] Ignoruj = Decline
-- [ ] `transferRequestI` — atmosfera <40 przez 4+ tyg. LUB top 20% `pointValue` w słabym klubie, 1%/tyg. (×2 `ambitious`), nie dla `loyal`
-- [ ] `transferRequestI` Accept: +3 atmosfery; brak transferu w miesiąc / do deadline → −15 atmosfery, −4 zgrania
-- [ ] `transferRequestI` Decline: −6 atmosfery, −2 zgrania
-- [ ] Skutek uboczny: `pointValue` −10% tymczasowo do rozwiązania sytuacji
-- [ ] `transferRequestII` — warunki z `teamStatus` vs osiągnięcie playoff, roll po playoff, 100% dla jednego z top 11 OVR
-- [ ] `transferRequestII`: wykluczenie `loyal`; przy <1 roku kontraktu degradacja do `declineToExtend`
-- [ ] `declineToExtend` — `yearsRemaining ≤ 1`, tylko przyszli UFA, raz per zawodnik, automatyczny
-- [ ] `dressingRoomConflict` — ≥2 `temperamental` w XI i atmosfera <40, 5%/tyg.
-- [ ] `dressingRoomConflict` Interwencja: 50% na +2 atm./−2 zgr., 50% na −3 atm./−2 zgr. + 20% eventów negatywnych na 2 tyg.; jeden `temperamental` składa prośbę o transfer
-- [ ] `dressingRoomConflict` Ignoruj: −3 atmosfery, −2 zgrania, +20% eventów negatywnych na 2 tyg.
-- [ ] `leaderSupport` — po serii 3+ zwycięstw z `leader` w XI, 15%, cooldown 1 mies.; +4 atmosfery, +1 zgrania
-- [ ] `publicCriticism` — atmosfera <30, top 15 OVR, wiek >25, 8%/tyg.; trzy opcje z konsekwencjami
-- [ ] `atmosphereShift` — automatyczna wiadomość przy zmianie poziomu atmosfery
-- [ ] `promiseBroken` — `urgent`, emitowana przy złamaniu obietnicy
-- [ ] Podnieść `currentSchemaVersion`
+- [x] **Rozstrzygnąć sprzeczność #5** (`publicCriticism` — kara dyscyplinarna)
+- [x] `moreMinutesRequest` — warunki aktywacji z docs, 3%/tyg. (5% dla `ambitious`), roll po meczu
+- [x] `moreMinutesRequest` Accept: −3 atmosfery natychmiast + obietnica ≥40% minut na 4 tyg.
+- [x] Tracker obietnicy: spełniona → +5 atmosfery; złamana → −12 (dodatkowo −3 dla `temperamental`/`ambitious`) + 20% szans na `transferRequestII`
+- [x] `moreMinutesRequest` Decline: −7 atmosfery, dodatkowo −3 dla `temperamental`/`ambitious`
+- [x] Ignoruj = Decline
+- [x] `transferRequestI` — atmosfera <40 przez 4+ tyg. LUB top 20% `pointValue` w słabym klubie, 1%/tyg. (×2 `ambitious`), nie dla `loyal`
+- [x] `transferRequestI` Accept: +3 atmosfery; brak transferu w miesiąc / do deadline → −15 atmosfery, −4 zgrania
+- [x] `transferRequestI` Decline: −6 atmosfery, −2 zgrania
+- [x] Skutek uboczny: `pointValue` −10% tymczasowo do rozwiązania sytuacji
+- [x] `transferRequestII` — warunki z `teamStatus` vs osiągnięcie playoff, roll po playoff, deterministyczny wybór z top 11 OVR
+- [x] `transferRequestII`: wykluczenie `loyal`; przy <1 roku kontraktu degradacja do `declineToExtend` dla reprezentowanych UFA
+- [x] `declineToExtend` — `yearsRemaining ≤ 1`, tylko przyszli UFA, raz per zawodnik, automatyczny
+- [x] `dressingRoomConflict` — ≥2 `temperamental` w XI i atmosfera <40, 5%/tyg.
+- [x] `dressingRoomConflict` Interwencja: 50% na +2 atm./−2 zgr., 50% na −3 atm./−2 zgr. + 20% eventów negatywnych na 2 tyg.; jeden `temperamental` składa prośbę o transfer
+- [x] `dressingRoomConflict` Ignoruj: −3 atmosfery, −2 zgrania, +20% eventów negatywnych na 2 tyg.
+- [x] `leaderSupport` — po serii 3+ zwycięstw z `leader` w XI, 15%, cooldown 1 mies.; +4 atmosfery, +1 zgrania
+- [x] `publicCriticism` — atmosfera <30, top 15 OVR, wiek >25, 8%/tyg.; trzy opcje z konsekwencjami
+- [x] `atmosphereShift` — automatyczna wiadomość przy zmianie poziomu atmosfery z poziomem przed/po
+- [x] `promiseBroken` — `urgent`, emitowana przy złamaniu obietnicy
+- [x] Podnieść `currentSchemaVersion`
 
 **Testy**
-- [ ] Złamana obietnica po 4 tygodniach nakłada karę i emituje `promiseBroken` jako `urgent`
-- [ ] `loyal` nigdy nie składa prośby o transfer
-- [ ] Niedowieziony transfer po Accept daje −15 atmosfery i −4 zgrania
-- [ ] `pointValue` wraca do normy po rozwiązaniu sytuacji
+- [x] Złamana obietnica po 4 tygodniach nakłada karę i emituje `promiseBroken` jako `urgent`
+- [x] `loyal` nigdy nie składa prośby o transfer
+- [x] Niedowieziony transfer po Accept daje −15 atmosfery i −4 zgrania
+- [x] `pointValue` wraca do normy po rozwiązaniu sytuacji
 
 **Demo:** akceptacja prośby o minuty, niewystawianie zawodnika i po 4 tygodniach kara atmosfery z wiadomością oraz ryzykiem żądania transferu.
 

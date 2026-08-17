@@ -430,24 +430,62 @@ final _playerEventTemplates = <MessageTemplate>[
 ];
 
 final _teamEventTemplates = <MessageTemplate>[
-  for (final kind in [
-    'moreMinutesRequest',
-    'transferRequestI',
-    'transferRequestII',
-    'dressingRoomConflict',
-    'publicCriticism',
-  ])
-    _template(
-      MessageType.teamEvent,
-      MessageDomain.teamEvent,
-      MessagePriority.urgent,
-      kind: kind,
-      decision: _decision(MessageType.teamEvent, const [
-        'accept',
-        'decline',
-      ], 'decline'),
-      expiresAt: 'endOfDay',
-    ),
+  _template(
+    MessageType.teamEvent,
+    MessageDomain.teamEvent,
+    MessagePriority.urgent,
+    kind: 'moreMinutesRequest',
+    decision: _decision(MessageType.teamEvent, const [
+      'accept',
+      'decline',
+    ], 'decline'),
+    expiresAt: 'teamEventExpiry',
+  ),
+  _template(
+    MessageType.teamEvent,
+    MessageDomain.teamEvent,
+    MessagePriority.urgent,
+    kind: 'transferRequestI',
+    decision: _decision(MessageType.teamEvent, const [
+      'accept',
+      'decline',
+    ], 'decline'),
+    expiresAt: 'teamEventExpiry',
+  ),
+  _template(
+    MessageType.teamEvent,
+    MessageDomain.teamEvent,
+    MessagePriority.urgent,
+    kind: 'transferRequestII',
+    decision: _decision(MessageType.teamEvent, const [
+      'accept',
+      'decline',
+    ], 'decline'),
+    expiresAt: 'teamEventExpiry',
+  ),
+  _template(
+    MessageType.teamEvent,
+    MessageDomain.teamEvent,
+    MessagePriority.urgent,
+    kind: 'dressingRoomConflict',
+    decision: _decision(MessageType.teamEvent, const [
+      'intervene',
+      'ignore',
+    ], 'ignore'),
+    expiresAt: 'teamEventExpiry',
+  ),
+  _template(
+    MessageType.teamEvent,
+    MessageDomain.teamEvent,
+    MessagePriority.urgent,
+    kind: 'publicCriticism',
+    decision: _decision(MessageType.teamEvent, const [
+      'response',
+      'punish',
+      'ignore',
+    ], 'ignore'),
+    expiresAt: 'teamEventExpiry',
+  ),
   for (final kind in [
     'declineToExtend',
     'leaderSupport',

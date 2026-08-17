@@ -20,6 +20,7 @@ import 'package:new_football/core/models/season_awards.dart';
 import 'package:new_football/core/models/seed_data_generator.dart';
 import 'package:new_football/core/models/standing.dart';
 import 'package:new_football/core/models/team.dart';
+import 'package:new_football/core/models/team_event_state.dart';
 import 'package:new_football/core/services/calendar_service.dart';
 import 'package:new_football/core/services/development_service.dart';
 import 'package:new_football/core/services/discipline_service.dart';
@@ -31,6 +32,7 @@ import 'package:new_football/core/services/schedule_generator.dart';
 import 'package:new_football/core/services/scouting_service.dart';
 import 'package:new_football/core/services/staff_service.dart';
 import 'package:new_football/core/services/team_management_service.dart';
+import 'package:new_football/core/services/team_event_service.dart';
 
 /// Offseason / playoff pipeline (`docs/offseason.md`, play-in, draft).
 class SeasonService {
@@ -45,6 +47,7 @@ class SeasonService {
     StaffService? staffService,
     ScoutingService? scoutingService,
     MessageService? messages,
+    TeamEventService? teamEvents,
     Random? random,
   }) : matchEngine = matchEngine ?? SimulationMatchEngine(balance: balance),
        calendar = calendar ?? CalendarService(balance: balance),
@@ -61,6 +64,8 @@ class SeasonService {
        staffService = staffService ?? StaffService(balance: balance),
        scoutingService = scoutingService ?? ScoutingService(balance: balance),
        _messages = messages ?? MessageService(),
+       teamEvents =
+           teamEvents ?? TeamEventService(balance: balance, messages: messages),
        _random = random ?? Random();
 
   final BalanceConfig balance;
@@ -73,6 +78,7 @@ class SeasonService {
   final StaffService staffService;
   final ScoutingService scoutingService;
   final MessageService _messages;
+  final TeamEventService teamEvents;
   final Random _random;
   final _uuid = const Uuid();
 
@@ -431,10 +437,18 @@ class SeasonService {
               type: MessageType.teamEvent,
               kind: 'atmosphereShift',
               domain: MessageDomain.teamEvent,
-              args: {'delta': updated.atmosphere - before},
+              args: {
+                'delta': updated.atmosphere - before,
+                'oldLevel': before,
+                'newLevel': updated.atmosphere,
+              },
               payload: {
                 'teamId': champion,
                 'atmosphereDelta': updated.atmosphere - before,
+                'oldLevel': before,
+                'newLevel': updated.atmosphere,
+                'atmosphereBefore': before,
+                'atmosphereAfter': updated.atmosphere,
                 'reason': 'championship',
               },
               dedupKey: 'atmosphere:championship:${state.currentSeason.year}',
@@ -456,6 +470,7 @@ class SeasonService {
         'Sezon zakończony. Offseason rozpoczyna się w tygodniu 44.',
         urgent: true,
       );
+      state = teamEvents.afterPlayoffs(state, saveSeed: saveSeed);
     }
     return state;
   }
@@ -487,15 +502,23 @@ class SeasonService {
     final retired = <String>[];
     final teams = league.teams.map((t) {
       final keep = <Player>[];
+      final retiredIds = <String>{};
       for (final p in t.roster) {
         final chance = balance.retirement.baseChanceForAge(p.age);
         if (chance > 0 && _random.nextDouble() < chance) {
           retired.add(p.name);
+          retiredIds.add(p.id);
         } else {
           keep.add(p);
         }
       }
-      return capService.applyPayroll(t.copyWith(roster: keep));
+      var updated = t.copyWith(roster: keep);
+      if (retiredIds.isNotEmpty) {
+        updated = updated.copyWith(
+          eventState: t.eventState.clearPlayers(retiredIds),
+        );
+      }
+      return capService.applyPayroll(updated);
     }).toList();
 
     var state = league.copyWith(
@@ -851,15 +874,22 @@ class SeasonService {
     final freeAgents = List<Player>.from(league.freeAgents);
     final teams = league.teams.map((t) {
       final keep = <Player>[];
+      final expiredIds = <String>{};
       for (final p in t.roster) {
         if (p.contract.yearsRemaining <= 0) {
           freeAgents.add(p);
+          expiredIds.add(p.id);
         } else {
           keep.add(p);
         }
       }
-      if (keep.length == t.roster.length) return t;
-      return capService.applyPayroll(t.copyWith(roster: keep));
+      if (expiredIds.isEmpty) return t;
+      return capService.applyPayroll(
+        t.copyWith(
+          roster: keep,
+          eventState: t.eventState.clearPlayers(expiredIds),
+        ),
+      );
     }).toList();
     return league.copyWith(teams: teams, freeAgents: freeAgents);
   }
@@ -904,11 +934,17 @@ class SeasonService {
           priority: MessagePriority.urgent,
           args: {
             'atmosphereDelta': playerDelta,
+            'oldLevel': (playerTeam?.atmosphere ?? 0) - playerDelta,
+            'newLevel': playerTeam?.atmosphere ?? 0,
             'atmosphere': playerTeam?.atmosphere ?? 0,
           },
           payload: {
             'teamId': playerId,
             'atmosphereDelta': playerDelta,
+            'oldLevel': (playerTeam?.atmosphere ?? 0) - playerDelta,
+            'newLevel': playerTeam?.atmosphere ?? 0,
+            'atmosphereBefore': (playerTeam?.atmosphere ?? 0) - playerDelta,
+            'atmosphereAfter': playerTeam?.atmosphere ?? 0,
             'atmosphere': playerTeam?.atmosphere ?? 0,
           },
           dedupKey: 'playoffMissed:${league.currentSeason.year}:$playerId',
@@ -964,6 +1000,7 @@ class SeasonService {
               ),
             )
             .toList(),
+        eventState: t.eventState.resetForSeason(),
         finance: t.finance.copyWith(midLevelExceptionAvailable: true),
         // Prognoza miejsca w tabeli (`projectedFinish`) i dyskonto czasowe
         // zmieniają się co sezon — przeliczyć wartość wszystkich
@@ -1113,15 +1150,18 @@ class SeasonService {
       phase: phase,
       stake: effectiveStake,
     );
-    return (
-      league: _applyPostseasonDiscipline(
-        state,
-        result,
-        phase,
-        matchId: matchId,
-      ),
-      result: result,
+    var postseasonState = _applyPostseasonDiscipline(
+      state,
+      result,
+      phase,
+      matchId: matchId,
     );
+    postseasonState = teamEvents.afterMatch(
+      postseasonState,
+      result,
+      saveSeed: saveSeed,
+    );
+    return (league: postseasonState, result: result);
   }
 
   String _winnerId(MatchResult r, String homeId, String awayId) {

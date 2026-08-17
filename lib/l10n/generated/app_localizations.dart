@@ -5548,6 +5548,30 @@ abstract class AppLocalizations {
   /// **'Odrzuć'**
   String get msg_teamEvent_action_decline;
 
+  /// No description provided for @msg_teamEvent_action_intervene.
+  ///
+  /// In pl, this message translates to:
+  /// **'Interweniuj'**
+  String get msg_teamEvent_action_intervene;
+
+  /// No description provided for @msg_teamEvent_action_ignore.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zignoruj'**
+  String get msg_teamEvent_action_ignore;
+
+  /// No description provided for @msg_teamEvent_action_response.
+  ///
+  /// In pl, this message translates to:
+  /// **'Odpowiedz publicznie'**
+  String get msg_teamEvent_action_response;
+
+  /// No description provided for @msg_teamEvent_action_punish.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kara dyscyplinarna'**
+  String get msg_teamEvent_action_punish;
+
   /// No description provided for @msg_contractOffer_action_finalize.
   ///
   /// In pl, this message translates to:

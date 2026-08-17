@@ -3004,6 +3004,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get msg_teamEvent_action_decline => 'Decline';
 
   @override
+  String get msg_teamEvent_action_intervene => 'Intervene';
+
+  @override
+  String get msg_teamEvent_action_ignore => 'Ignore';
+
+  @override
+  String get msg_teamEvent_action_response => 'Respond publicly';
+
+  @override
+  String get msg_teamEvent_action_punish => 'Disciplinary action';
+
+  @override
   String get msg_contractOffer_action_finalize => 'Finalize';
 
   @override

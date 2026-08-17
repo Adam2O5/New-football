@@ -62,6 +62,27 @@ int playerEventSeed(
   ]);
 }
 
+int teamEventSeed(
+  int saveSeed,
+  int seasonYear,
+  int week,
+  String teamId,
+  String eventKind, {
+  String? playerId,
+  int salt = 0,
+}) {
+  return _stableHash([
+    'team-event',
+    saveSeed,
+    seasonYear,
+    week,
+    teamId,
+    eventKind,
+    playerId ?? '',
+    salt,
+  ]);
+}
+
 /// A stable 31-bit FNV-1a hash.
 ///
 /// [Object.hash] is deliberately avoided here: seeds are persisted game

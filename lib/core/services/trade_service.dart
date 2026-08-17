@@ -2,6 +2,7 @@ import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/draft_pick.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/team.dart';
+import 'package:new_football/core/models/team_event_state.dart';
 import 'package:new_football/core/services/calendar_service.dart';
 import 'package:new_football/core/services/salary_cap_service.dart';
 
@@ -82,7 +83,10 @@ class TradeService {
     if (asset.isPlayer) {
       final matches = team.roster.where((p) => p.id == asset.playerId);
       if (matches.isEmpty) return 0;
-      return matches.first.computePointValue(balance);
+      final player = matches.first;
+      final baseValue = player.computePointValue(balance);
+      return (baseValue * team.eventState.pointValueMultiplierFor(player.id))
+          .round();
     }
     final owned = _findOwnedPick(team, asset);
     if (owned != null) {
@@ -254,10 +258,12 @@ class TradeService {
     var newA = a.copyWith(
       roster: [...a.roster.where((p) => !leaveA.contains(p.id)), ...movingToA],
       ownedPicks: [...remainingA, ...movingPicksToA],
+      eventState: a.eventState.clearPlayers(leaveA),
     );
     var newB = b.copyWith(
       roster: [...b.roster.where((p) => !leaveB.contains(p.id)), ...movingToB],
       ownedPicks: [...remainingB, ...movingPicksToB],
+      eventState: b.eventState.clearPlayers(leaveB),
     );
     newA = capService.applyPayroll(newA);
     newB = capService.applyPayroll(newB);

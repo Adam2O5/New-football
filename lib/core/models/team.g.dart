@@ -86,6 +86,9 @@ _Team _$TeamFromJson(Map<String, dynamic> json) => _Team(
         (k, e) => MapEntry(k, (e as num).toInt()),
       ) ??
       const {},
+  eventState: json['eventState'] == null
+      ? const TeamEventState()
+      : TeamEventState.fromJson(json['eventState'] as Map<String, dynamic>),
   staff: json['staff'] == null
       ? const TeamStaff()
       : TeamStaff.fromJson(json['staff'] as Map<String, dynamic>),
@@ -117,6 +120,7 @@ Map<String, dynamic> _$TeamToJson(_Team instance) => <String, dynamic>{
   'weeklyHistory': instance.weeklyHistory,
   'recentMatchResults': instance.recentMatchResults,
   'chemistryAppearances': instance.chemistryAppearances,
+  'eventState': instance.eventState,
   'staff': instance.staff,
   'scouting': instance.scouting,
   'ownedPicks': instance.ownedPicks,

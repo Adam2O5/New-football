@@ -2999,6 +2999,18 @@ class AppLocalizationsPl extends AppLocalizations {
   String get msg_teamEvent_action_decline => 'Odrzuć';
 
   @override
+  String get msg_teamEvent_action_intervene => 'Interweniuj';
+
+  @override
+  String get msg_teamEvent_action_ignore => 'Zignoruj';
+
+  @override
+  String get msg_teamEvent_action_response => 'Odpowiedz publicznie';
+
+  @override
+  String get msg_teamEvent_action_punish => 'Kara dyscyplinarna';
+
+  @override
   String get msg_contractOffer_action_finalize => 'Finalizuj';
 
   @override
