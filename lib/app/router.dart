@@ -24,6 +24,7 @@ import 'package:new_football/app/screens/team_overview_screen.dart';
 import 'package:new_football/app/screens/lottery_screen.dart';
 import 'package:new_football/app/screens/prospects_screen.dart';
 import 'package:new_football/app/screens/staff_screen.dart';
+import 'package:new_football/app/screens/trade_history_screen.dart';
 import 'package:new_football/app/screens/trade_screen.dart';
 import 'package:new_football/core/models/match_models.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
@@ -103,6 +104,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           initialTheirPlayerId: state.uri.queryParameters['theirPlayerId'],
           initialTradeOfferId: state.uri.queryParameters['tradeOfferId'],
         ),
+      ),
+      GoRoute(
+        path: '/game/trade-history',
+        builder: (context, state) => const TradeHistoryScreen(),
       ),
       GoRoute(
         path: '/game/contracts',

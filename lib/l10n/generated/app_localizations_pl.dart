@@ -380,6 +380,86 @@ class AppLocalizationsPl extends AppLocalizations {
   String get other_tradeHistory => 'Historia wymian';
 
   @override
+  String get tradeHistory_title => 'Historia wymian';
+
+  @override
+  String get tradeHistory_noLeague => 'Brak aktywnej ligi';
+
+  @override
+  String get tradeHistory_empty => 'Brak zapisanej historii wymian.';
+
+  @override
+  String get tradeHistory_noMatches => 'Brak wymian dla wybranego filtra.';
+
+  @override
+  String get tradeHistory_filter => 'Filtr wyniku';
+
+  @override
+  String get tradeHistory_allOutcomes => 'Wszystkie wyniki';
+
+  @override
+  String get tradeHistory_outcomeAccepted => 'Zaakceptowana';
+
+  @override
+  String get tradeHistory_outcomeRejected => 'Odrzucona';
+
+  @override
+  String get tradeHistory_outcomeHardRejected => 'Zablokowana';
+
+  @override
+  String get tradeHistory_outcomeExpired => 'Wygasła';
+
+  @override
+  String get tradeHistory_outcomeNtcRefused => 'Odrzucona przez NTC';
+
+  @override
+  String get tradeHistory_outcomeCancelled => 'Anulowana';
+
+  @override
+  String tradeHistory_date(int season, int week, int day) {
+    return 'Sezon $season, tydzień $week, dzień $day';
+  }
+
+  @override
+  String tradeHistory_round(int round) {
+    return 'Runda $round';
+  }
+
+  @override
+  String get tradeHistory_reason => 'Powód';
+
+  @override
+  String get tradeHistory_ntcProbability => 'Prawdopodobieństwo zgody NTC';
+
+  @override
+  String tradeHistory_sentBy(String team) {
+    return 'Aktywa od $team';
+  }
+
+  @override
+  String get tradeHistory_noAssets => 'Brak aktywów';
+
+  @override
+  String tradeHistory_player(String name) {
+    return 'Zawodnik: $name';
+  }
+
+  @override
+  String tradeHistory_pick(int year, int round) {
+    return 'Pick: $year, runda $round';
+  }
+
+  @override
+  String tradeHistory_rights(String name) {
+    return 'Prawa draftowe: $name';
+  }
+
+  @override
+  String tradeHistory_unknownAsset(String type) {
+    return 'Aktyw: $type';
+  }
+
+  @override
   String get other_teamOverview => 'Przegląd drużyny';
 
   @override
@@ -860,6 +940,42 @@ class AppLocalizationsPl extends AppLocalizations {
   String get market_status => 'Rynek kontraktów';
 
   @override
+  String get market_negotiations => 'Negocjacje';
+
+  @override
+  String get market_noNegotiations => 'Brak zapisanych negocjacji.';
+
+  @override
+  String get market_offerPreview => 'Podgląd oferty';
+
+  @override
+  String get market_currentOffer => 'Bieżąca oferta';
+
+  @override
+  String get market_advanceHour => 'Przejdź o godzinę';
+
+  @override
+  String get market_hourAdvanced => 'Przesunięto rynek o godzinę.';
+
+  @override
+  String get market_statusActive => 'Aktywna';
+
+  @override
+  String get market_statusCounter => 'Oczekuje na odpowiedź na kontrofertę';
+
+  @override
+  String get market_statusHardRejected => 'Odrzucona i zablokowana';
+
+  @override
+  String get market_statusCompleted => 'Zakończona';
+
+  @override
+  String get market_statusCancelled => 'Anulowana';
+
+  @override
+  String get market_statusExpired => 'Termin negocjacji minął';
+
+  @override
   String get market_closed => 'Zamknięty';
 
   @override
@@ -914,6 +1030,22 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get market_qo => 'Qualifying Offers';
+
+  @override
+  String get market_qoEligible => 'Kandydaci do QO';
+
+  @override
+  String get market_qoSubmitted => 'Aktywne QO';
+
+  @override
+  String market_qoMinimum(Object salary) {
+    return 'Minimalna QO: $salary';
+  }
+
+  @override
+  String market_offerSheetFrom(Object team) {
+    return 'Oferta od: $team';
+  }
 
   @override
   String get market_submitQO => 'Złóż QO';
@@ -1408,6 +1540,12 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
+  String get contract_counterEdit => 'Edytuj';
+
+  @override
+  String get contract_editCounterTitle => 'Edytuj kontrofertę';
+
+  @override
   String get staff_title => 'Sztab';
 
   @override
@@ -1472,6 +1610,78 @@ class AppLocalizationsPl extends AppLocalizations {
   String staff_capUsage(String used, String cap) {
     return '$used / $cap';
   }
+
+  @override
+  String get staff_fireDisabled =>
+      'Aktywnego kontraktu nie można jeszcze zwolnić';
+
+  @override
+  String get staff_offerPreview => 'Podgląd oferty';
+
+  @override
+  String staff_profileLine(String role, int age, String nationality) {
+    return '$role · $age lat · $nationality';
+  }
+
+  @override
+  String get staff_attributes => 'Atrybuty';
+
+  @override
+  String staff_expectedSalary(String salary) {
+    return 'Oczekiwana pensja: $salary';
+  }
+
+  @override
+  String staff_expectedLength(int years) {
+    return 'Oczekiwana długość: $years lat';
+  }
+
+  @override
+  String staff_offerScore(String score) {
+    return 'Wynik oferty: $score';
+  }
+
+  @override
+  String get staff_negotiations => 'Negocjacje sztabu';
+
+  @override
+  String get staff_noNegotiations => 'Brak zapisanych negocjacji sztabu.';
+
+  @override
+  String get staff_editCounterTitle => 'Edytuj kontrofertę sztabu';
+
+  @override
+  String get staff_attrTactics => 'Taktyka';
+
+  @override
+  String get staff_attrMotivation => 'Motywacja';
+
+  @override
+  String get staff_attrDevelopment => 'Rozwój';
+
+  @override
+  String get staff_attrMentoring => 'Mentoring';
+
+  @override
+  String get staff_attrCoverage => 'Zasięg';
+
+  @override
+  String get staff_attrEvaluation => 'Ocena';
+
+  @override
+  String get staff_attrRehabilitation => 'Rehabilitacja';
+
+  @override
+  String get staff_attrRegeneration => 'Regeneracja';
+
+  @override
+  String get staff_attrPrevention => 'Prewencja';
+
+  @override
+  String get staff_attrCare => 'Opieka';
+
+  @override
+  String get staff_attrNegotiation => 'Negocjacje';
 
   @override
   String get scouting_watchlistTitle => 'Watchlista skauta';

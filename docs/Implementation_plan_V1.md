@@ -1238,24 +1238,27 @@ Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, le
 
 ---
 
-### ⬜ Task 31: UI rynku
+### ✅ Task 31: UI rynku
 
 **Cel:** domknięcie ekranów pod nowe silniki z Task 28–30.
 
-- [ ] Ekran historii wymian (obecnie pozycja „work in progress" w `OtherScreen`)
-- [ ] `ContractScreen`: tryb godzinowy z licznikiem h/10
-- [ ] `ContractScreen`: rundy negocjacji, kontroferty, terminy finalizacji
-- [ ] `ContractScreen`: widoczne `expectedSalary`, `expectedLength`, `offerScore` przewidywany
-- [ ] `FreeAgencyScreen`: rozróżnienie faz I i II
-- [ ] `FreeAgencyScreen`: RFA, QO i offer sheety z przyciskiem Match
-- [ ] `FreeAgencyScreen`: lista sztabu FA obok zawodników
-- [ ] Przebudowa `StaffScreen` wg `TODO.md`
-- [ ] Usunąć `_showWorkInProgress` z `OtherScreen`
+- [x] Ekran historii wymian (obecnie pozycja „work in progress" w `OtherScreen`)
+- [x] `ContractScreen`: tryb godzinowy z licznikiem h/10
+- [x] `ContractScreen`: rundy negocjacji, kontroferty, terminy finalizacji
+- [x] `ContractScreen`: widoczne `expectedSalary`, `expectedLength`, `offerScore` przewidywany
+- [x] `FreeAgencyScreen`: rozróżnienie faz I i II
+- [x] `FreeAgencyScreen`: RFA, QO i offer sheety z przyciskiem Match
+- [x] `FreeAgencyScreen`: lista sztabu FA obok zawodników
+- [x] Przebudowa `StaffScreen` wg `TODO.md`
+- [x] Usunąć `_showWorkInProgress` z `OtherScreen`
 
-**Testy widgetów**
-- [ ] Walidacja wymiany renderuje powód odrzucenia
-- [ ] Licznik godzin i rund negocjacji odpowiada stanowi silnika
-- [ ] Przycisk Match pojawia się tylko w oknie i tylko dla RFA
+**Testy widgetów** (`test/task31_market_ui_test.dart`, 6 przypadków)
+- [x] Historia wymian: sortowanie, filtr wyniku, `ExpansionTile`, powód odrzucenia i aktywa
+- [x] `ContractScreen`: licznik godzin, preview oczekiwań, status rundy i deadline negocjacji
+- [x] `FreeAgencyScreen`: rozróżnienie FA I/FA II i obecność zegara tylko w FA I
+- [x] `FreeAgencyScreen`: aktywny przycisk Match wyłącznie dla aktywnego offer sheetu RFA w oknie
+- [x] `FreeAgencyScreen`: ukrycie Match po przekroczeniu deadline’u offer sheetu
+- [x] `StaffScreen`: preview kandydata oraz blokada zatrudnienia po wykorzystaniu godziny
 
 **Demo:** gracz przechodzi cały offseason rynkowy (przedłużenia → FA I → FA II) bez wychodzenia poza dedykowane ekrany.
 

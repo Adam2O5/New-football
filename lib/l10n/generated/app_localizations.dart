@@ -812,6 +812,138 @@ abstract class AppLocalizations {
   /// **'Historia wymian'**
   String get other_tradeHistory;
 
+  /// No description provided for @tradeHistory_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Historia wymian'**
+  String get tradeHistory_title;
+
+  /// No description provided for @tradeHistory_noLeague.
+  ///
+  /// In pl, this message translates to:
+  /// **'Brak aktywnej ligi'**
+  String get tradeHistory_noLeague;
+
+  /// No description provided for @tradeHistory_empty.
+  ///
+  /// In pl, this message translates to:
+  /// **'Brak zapisanej historii wymian.'**
+  String get tradeHistory_empty;
+
+  /// No description provided for @tradeHistory_noMatches.
+  ///
+  /// In pl, this message translates to:
+  /// **'Brak wymian dla wybranego filtra.'**
+  String get tradeHistory_noMatches;
+
+  /// No description provided for @tradeHistory_filter.
+  ///
+  /// In pl, this message translates to:
+  /// **'Filtr wyniku'**
+  String get tradeHistory_filter;
+
+  /// No description provided for @tradeHistory_allOutcomes.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wszystkie wyniki'**
+  String get tradeHistory_allOutcomes;
+
+  /// No description provided for @tradeHistory_outcomeAccepted.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zaakceptowana'**
+  String get tradeHistory_outcomeAccepted;
+
+  /// No description provided for @tradeHistory_outcomeRejected.
+  ///
+  /// In pl, this message translates to:
+  /// **'Odrzucona'**
+  String get tradeHistory_outcomeRejected;
+
+  /// No description provided for @tradeHistory_outcomeHardRejected.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zablokowana'**
+  String get tradeHistory_outcomeHardRejected;
+
+  /// No description provided for @tradeHistory_outcomeExpired.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wygasła'**
+  String get tradeHistory_outcomeExpired;
+
+  /// No description provided for @tradeHistory_outcomeNtcRefused.
+  ///
+  /// In pl, this message translates to:
+  /// **'Odrzucona przez NTC'**
+  String get tradeHistory_outcomeNtcRefused;
+
+  /// No description provided for @tradeHistory_outcomeCancelled.
+  ///
+  /// In pl, this message translates to:
+  /// **'Anulowana'**
+  String get tradeHistory_outcomeCancelled;
+
+  /// No description provided for @tradeHistory_date.
+  ///
+  /// In pl, this message translates to:
+  /// **'Sezon {season}, tydzień {week}, dzień {day}'**
+  String tradeHistory_date(int season, int week, int day);
+
+  /// No description provided for @tradeHistory_round.
+  ///
+  /// In pl, this message translates to:
+  /// **'Runda {round}'**
+  String tradeHistory_round(int round);
+
+  /// No description provided for @tradeHistory_reason.
+  ///
+  /// In pl, this message translates to:
+  /// **'Powód'**
+  String get tradeHistory_reason;
+
+  /// No description provided for @tradeHistory_ntcProbability.
+  ///
+  /// In pl, this message translates to:
+  /// **'Prawdopodobieństwo zgody NTC'**
+  String get tradeHistory_ntcProbability;
+
+  /// No description provided for @tradeHistory_sentBy.
+  ///
+  /// In pl, this message translates to:
+  /// **'Aktywa od {team}'**
+  String tradeHistory_sentBy(String team);
+
+  /// No description provided for @tradeHistory_noAssets.
+  ///
+  /// In pl, this message translates to:
+  /// **'Brak aktywów'**
+  String get tradeHistory_noAssets;
+
+  /// No description provided for @tradeHistory_player.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zawodnik: {name}'**
+  String tradeHistory_player(String name);
+
+  /// No description provided for @tradeHistory_pick.
+  ///
+  /// In pl, this message translates to:
+  /// **'Pick: {year}, runda {round}'**
+  String tradeHistory_pick(int year, int round);
+
+  /// No description provided for @tradeHistory_rights.
+  ///
+  /// In pl, this message translates to:
+  /// **'Prawa draftowe: {name}'**
+  String tradeHistory_rights(String name);
+
+  /// No description provided for @tradeHistory_unknownAsset.
+  ///
+  /// In pl, this message translates to:
+  /// **'Aktyw: {type}'**
+  String tradeHistory_unknownAsset(String type);
+
   /// No description provided for @other_teamOverview.
   ///
   /// In pl, this message translates to:
@@ -1712,6 +1844,78 @@ abstract class AppLocalizations {
   /// **'Rynek kontraktów'**
   String get market_status;
 
+  /// No description provided for @market_negotiations.
+  ///
+  /// In pl, this message translates to:
+  /// **'Negocjacje'**
+  String get market_negotiations;
+
+  /// No description provided for @market_noNegotiations.
+  ///
+  /// In pl, this message translates to:
+  /// **'Brak zapisanych negocjacji.'**
+  String get market_noNegotiations;
+
+  /// No description provided for @market_offerPreview.
+  ///
+  /// In pl, this message translates to:
+  /// **'Podgląd oferty'**
+  String get market_offerPreview;
+
+  /// No description provided for @market_currentOffer.
+  ///
+  /// In pl, this message translates to:
+  /// **'Bieżąca oferta'**
+  String get market_currentOffer;
+
+  /// No description provided for @market_advanceHour.
+  ///
+  /// In pl, this message translates to:
+  /// **'Przejdź o godzinę'**
+  String get market_advanceHour;
+
+  /// No description provided for @market_hourAdvanced.
+  ///
+  /// In pl, this message translates to:
+  /// **'Przesunięto rynek o godzinę.'**
+  String get market_hourAdvanced;
+
+  /// No description provided for @market_statusActive.
+  ///
+  /// In pl, this message translates to:
+  /// **'Aktywna'**
+  String get market_statusActive;
+
+  /// No description provided for @market_statusCounter.
+  ///
+  /// In pl, this message translates to:
+  /// **'Oczekuje na odpowiedź na kontrofertę'**
+  String get market_statusCounter;
+
+  /// No description provided for @market_statusHardRejected.
+  ///
+  /// In pl, this message translates to:
+  /// **'Odrzucona i zablokowana'**
+  String get market_statusHardRejected;
+
+  /// No description provided for @market_statusCompleted.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zakończona'**
+  String get market_statusCompleted;
+
+  /// No description provided for @market_statusCancelled.
+  ///
+  /// In pl, this message translates to:
+  /// **'Anulowana'**
+  String get market_statusCancelled;
+
+  /// No description provided for @market_statusExpired.
+  ///
+  /// In pl, this message translates to:
+  /// **'Termin negocjacji minął'**
+  String get market_statusExpired;
+
   /// No description provided for @market_closed.
   ///
   /// In pl, this message translates to:
@@ -1795,6 +1999,30 @@ abstract class AppLocalizations {
   /// In pl, this message translates to:
   /// **'Qualifying Offers'**
   String get market_qo;
+
+  /// No description provided for @market_qoEligible.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kandydaci do QO'**
+  String get market_qoEligible;
+
+  /// No description provided for @market_qoSubmitted.
+  ///
+  /// In pl, this message translates to:
+  /// **'Aktywne QO'**
+  String get market_qoSubmitted;
+
+  /// No description provided for @market_qoMinimum.
+  ///
+  /// In pl, this message translates to:
+  /// **'Minimalna QO: {salary}'**
+  String market_qoMinimum(Object salary);
+
+  /// No description provided for @market_offerSheetFrom.
+  ///
+  /// In pl, this message translates to:
+  /// **'Oferta od: {team}'**
+  String market_offerSheetFrom(Object team);
 
   /// No description provided for @market_submitQO.
   ///
@@ -2676,6 +2904,18 @@ abstract class AppLocalizations {
   /// **'Kontroferta: {salary} × {years} lat'**
   String contract_counter(String salary, int years);
 
+  /// No description provided for @contract_counterEdit.
+  ///
+  /// In pl, this message translates to:
+  /// **'Edytuj'**
+  String get contract_counterEdit;
+
+  /// No description provided for @contract_editCounterTitle.
+  ///
+  /// In pl, this message translates to:
+  /// **'Edytuj kontrofertę'**
+  String get contract_editCounterTitle;
+
   /// No description provided for @staff_title.
   ///
   /// In pl, this message translates to:
@@ -2789,6 +3029,132 @@ abstract class AppLocalizations {
   /// In pl, this message translates to:
   /// **'{used} / {cap}'**
   String staff_capUsage(String used, String cap);
+
+  /// No description provided for @staff_fireDisabled.
+  ///
+  /// In pl, this message translates to:
+  /// **'Aktywnego kontraktu nie można jeszcze zwolnić'**
+  String get staff_fireDisabled;
+
+  /// No description provided for @staff_offerPreview.
+  ///
+  /// In pl, this message translates to:
+  /// **'Podgląd oferty'**
+  String get staff_offerPreview;
+
+  /// No description provided for @staff_profileLine.
+  ///
+  /// In pl, this message translates to:
+  /// **'{role} · {age} lat · {nationality}'**
+  String staff_profileLine(String role, int age, String nationality);
+
+  /// No description provided for @staff_attributes.
+  ///
+  /// In pl, this message translates to:
+  /// **'Atrybuty'**
+  String get staff_attributes;
+
+  /// No description provided for @staff_expectedSalary.
+  ///
+  /// In pl, this message translates to:
+  /// **'Oczekiwana pensja: {salary}'**
+  String staff_expectedSalary(String salary);
+
+  /// No description provided for @staff_expectedLength.
+  ///
+  /// In pl, this message translates to:
+  /// **'Oczekiwana długość: {years} lat'**
+  String staff_expectedLength(int years);
+
+  /// No description provided for @staff_offerScore.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wynik oferty: {score}'**
+  String staff_offerScore(String score);
+
+  /// No description provided for @staff_negotiations.
+  ///
+  /// In pl, this message translates to:
+  /// **'Negocjacje sztabu'**
+  String get staff_negotiations;
+
+  /// No description provided for @staff_noNegotiations.
+  ///
+  /// In pl, this message translates to:
+  /// **'Brak zapisanych negocjacji sztabu.'**
+  String get staff_noNegotiations;
+
+  /// No description provided for @staff_editCounterTitle.
+  ///
+  /// In pl, this message translates to:
+  /// **'Edytuj kontrofertę sztabu'**
+  String get staff_editCounterTitle;
+
+  /// No description provided for @staff_attrTactics.
+  ///
+  /// In pl, this message translates to:
+  /// **'Taktyka'**
+  String get staff_attrTactics;
+
+  /// No description provided for @staff_attrMotivation.
+  ///
+  /// In pl, this message translates to:
+  /// **'Motywacja'**
+  String get staff_attrMotivation;
+
+  /// No description provided for @staff_attrDevelopment.
+  ///
+  /// In pl, this message translates to:
+  /// **'Rozwój'**
+  String get staff_attrDevelopment;
+
+  /// No description provided for @staff_attrMentoring.
+  ///
+  /// In pl, this message translates to:
+  /// **'Mentoring'**
+  String get staff_attrMentoring;
+
+  /// No description provided for @staff_attrCoverage.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zasięg'**
+  String get staff_attrCoverage;
+
+  /// No description provided for @staff_attrEvaluation.
+  ///
+  /// In pl, this message translates to:
+  /// **'Ocena'**
+  String get staff_attrEvaluation;
+
+  /// No description provided for @staff_attrRehabilitation.
+  ///
+  /// In pl, this message translates to:
+  /// **'Rehabilitacja'**
+  String get staff_attrRehabilitation;
+
+  /// No description provided for @staff_attrRegeneration.
+  ///
+  /// In pl, this message translates to:
+  /// **'Regeneracja'**
+  String get staff_attrRegeneration;
+
+  /// No description provided for @staff_attrPrevention.
+  ///
+  /// In pl, this message translates to:
+  /// **'Prewencja'**
+  String get staff_attrPrevention;
+
+  /// No description provided for @staff_attrCare.
+  ///
+  /// In pl, this message translates to:
+  /// **'Opieka'**
+  String get staff_attrCare;
+
+  /// No description provided for @staff_attrNegotiation.
+  ///
+  /// In pl, this message translates to:
+  /// **'Negocjacje'**
+  String get staff_attrNegotiation;
 
   /// No description provided for @scouting_watchlistTitle.
   ///

@@ -7,18 +7,11 @@ import 'package:new_football/l10n/generated/app_localizations.dart';
 class OtherScreen extends StatelessWidget {
   const OtherScreen({super.key});
 
-  void _showWorkInProgress(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(l10n.other_workInProgress)));
-  }
-
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final items = <(IconData, String, String?)>[
-      (Icons.swap_horiz, l10n.other_tradeHistory, null),
+    final items = <(IconData, String, String)>[
+      (Icons.swap_horiz, l10n.other_tradeHistory, '/game/trade-history'),
       (Icons.groups_outlined, l10n.other_teamOverview, '/game/team-overview'),
       (
         Icons.account_balance_wallet_outlined,
@@ -62,13 +55,7 @@ class OtherScreen extends StatelessWidget {
               leading: Icon(icon),
               title: Text(label),
               trailing: const Icon(Icons.chevron_right),
-              onTap: () {
-                if (route != null) {
-                  context.push(route);
-                } else {
-                  _showWorkInProgress(context);
-                }
-              },
+              onTap: () => context.push(route),
             ),
           );
         },
