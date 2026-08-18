@@ -56,6 +56,21 @@ _LeagueState _$LeagueStateFromJson(Map<String, dynamic> json) => _LeagueState(
           ?.map((e) => NegotiationBlock.fromJson(e as Map<String, dynamic>))
           .toList() ??
       const [],
+  tradeHistory:
+      (json['tradeHistory'] as List<dynamic>?)
+          ?.map((e) => TradeHistoryEntry.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+  tradeOffers:
+      (json['tradeOffers'] as List<dynamic>?)
+          ?.map((e) => TradeOffer.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+  ntcTradeBlocks:
+      (json['ntcTradeBlocks'] as List<dynamic>?)
+          ?.map((e) => NtcTradeBlock.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
   draftedRights:
       (json['draftedRights'] as List<dynamic>?)
           ?.map((e) => DraftedPlayerRights.fromJson(e as Map<String, dynamic>))
@@ -92,6 +107,9 @@ Map<String, dynamic> _$LeagueStateToJson(_LeagueState instance) =>
       'strengthTable': instance.strengthTable,
       'negotiations': instance.negotiations,
       'negotiationBlocks': instance.negotiationBlocks,
+      'tradeHistory': instance.tradeHistory,
+      'tradeOffers': instance.tradeOffers,
+      'ntcTradeBlocks': instance.ntcTradeBlocks,
       'draftedRights': instance.draftedRights,
       'rfaQualifyingOffers': instance.rfaQualifyingOffers,
       'rfaOfferSheets': instance.rfaOfferSheets,

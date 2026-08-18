@@ -1293,6 +1293,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get trade_yourPick => 'Your draft pick';
 
   @override
+  String get trade_yourRights => 'Your drafted rights';
+
+  @override
   String get trade_targetTeam => 'Target team';
 
   @override
@@ -1300,6 +1303,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get trade_theirPick => 'Their draft pick';
+
+  @override
+  String get trade_theirRights => 'Their drafted rights';
 
   @override
   String get trade_confirm => 'Confirm trade';

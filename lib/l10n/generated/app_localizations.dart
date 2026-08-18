@@ -2479,6 +2479,12 @@ abstract class AppLocalizations {
   /// **'Twój pick draftowy'**
   String get trade_yourPick;
 
+  /// No description provided for @trade_yourRights.
+  ///
+  /// In pl, this message translates to:
+  /// **'Twoje prawa draftowe'**
+  String get trade_yourRights;
+
   /// No description provided for @trade_targetTeam.
   ///
   /// In pl, this message translates to:
@@ -2496,6 +2502,12 @@ abstract class AppLocalizations {
   /// In pl, this message translates to:
   /// **'Ich pick draftowy'**
   String get trade_theirPick;
+
+  /// No description provided for @trade_theirRights.
+  ///
+  /// In pl, this message translates to:
+  /// **'Ich prawa draftowe'**
+  String get trade_theirRights;
 
   /// No description provided for @trade_confirm.
   ///

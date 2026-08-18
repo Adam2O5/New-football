@@ -8,6 +8,7 @@ import 'package:new_football/core/models/message.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/staff.dart';
 import 'package:new_football/core/models/team.dart';
+import 'package:new_football/core/models/trade_models.dart';
 
 part 'league_state.freezed.dart';
 part 'league_state.g.dart';
@@ -53,6 +54,16 @@ abstract class LeagueState with _$LeagueState {
     /// Temporary subject × club blocks created by hard rejects or expired
     /// finalization windows.
     @Default([]) List<NegotiationBlock> negotiationBlocks,
+
+    /// Completed and rejected trade attempts. Only accepted entries affect
+    /// draft-pick Stepien validation; other outcomes remain for the history UI.
+    @Default([]) List<TradeHistoryEntry> tradeHistory,
+
+    /// Active and terminal offer records for trade/counter threads.
+    @Default([]) List<TradeOffer> tradeOffers,
+
+    /// Temporary player × destination blocks created by NTC refusals.
+    @Default([]) List<NtcTradeBlock> ntcTradeBlocks,
 
     /// Drafted players under team control but not yet signed. Rights are not
     /// roster entries and therefore do not affect roster size or matchday.
@@ -106,6 +117,22 @@ extension LeagueStateX on LeagueState {
       ],
     );
   }
+
+  LeagueState upsertTradeOffer(TradeOffer offer) {
+    return copyWith(
+      tradeOffers: [...tradeOffers.where((item) => item.id != offer.id), offer],
+    );
+  }
+
+  TradeOffer? tradeOfferById(String id) {
+    for (final offer in tradeOffers) {
+      if (offer.id == id) return offer;
+    }
+    return null;
+  }
+
+  List<TradeOffer> get activeTradeOffers =>
+      tradeOffers.where((offer) => !offer.isTerminal).toList();
 
   LeagueState addNegotiationBlock(NegotiationBlock block) {
     return copyWith(

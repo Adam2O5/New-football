@@ -148,6 +148,18 @@ class DaySimulator {
       state = _notifyStrengthTableChanges(state, previousTable, table);
     }
 
+    if (week == balance.calendar.tradeWindowOpenWeek && day == 1) {
+      state = messages.send(
+        state,
+        type: MessageType.tradeWindowEvent,
+        kind: 'open',
+        domain: MessageDomain.trades,
+        priority: MessagePriority.normal,
+        titleKey: 'msg_tradeWindowEvent_open_title',
+        bodyKey: 'msg_tradeWindowEvent_open_body',
+      );
+    }
+
     if (calendar.isTradeDeadline(week, day)) {
       state = messages.send(
         state,

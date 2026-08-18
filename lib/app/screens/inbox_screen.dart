@@ -322,6 +322,19 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
         title: _messageTitle(context, message),
         body: _messageBody(context, message),
         onDecision: (optionId) async {
+          final isTradeCounter =
+              optionId == 'counter' &&
+              (message.type == MessageType.tradeOffer ||
+                  (message.type == MessageType.trade &&
+                      message.kind == 'counter'));
+          final offerId = message.payload['tradeOfferId']?.toString();
+          if (isTradeCounter && offerId != null) {
+            if (sheetContext.mounted) Navigator.pop(sheetContext);
+            if (context.mounted) {
+              context.push('/game/trade?tradeOfferId=$offerId');
+            }
+            return;
+          }
           await ref
               .read(gameControllerProvider.notifier)
               .resolveMessageDecision(message.id, optionId);

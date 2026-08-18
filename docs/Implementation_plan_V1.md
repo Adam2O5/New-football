@@ -1193,47 +1193,48 @@ Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, le
 
 ---
 
-### ⬜ Task 30: Pełne reguły wymian
+### ✅ Task 30: Pełne reguły wymian
 
 **Cel:** `trades.md` w całości.
 
-- [ ] Matching 125% + 500 000 bufor per poziom capu (z Task 27)
-- [ ] Zakaz agregacji między apronami
-- [ ] Brak netto wzrostu pensji powyżej 2. aprogu
-- [ ] **Reguła Stepiena:** zakaz oddania picków R1 w dwóch kolejnych latach bez posiadania picka R1 w jednym z nich
-- [ ] Limit 3 picki w jednej wymianie
-- [ ] Limit 5 zawodników w jednej wymianie
-- [ ] Limit handlu pickami do 7 lat naprzód
-- [ ] Wyłącznie wymiany 2-drużynowe
-- [ ] Roster 20–30 po wymianie dla obu stron
-- [ ] Wyjątek: strona z rosterem <20 może wymieniać, jeśli roster po wymianie będzie **liczniejszy** niż przed
-- [ ] Druga strona w takiej wymianie musi pozostać w 20–30
-- [ ] Obie strony <20 → wymiana zabroniona
-- [ ] Assety: kontrakty zawodników, prawa do niepodpisanych draftowanych, picki R1–R3
-- [ ] **Zgoda NTC** rolowana po walidacji cap/roster/Stepien, przed wykonaniem
-- [ ] `P(zgoda) = 55% + statusModifier + contextModifier`, clamp 10–95%
-- [ ] `statusModifier`: wyższy status docelowy +20 pp, taki sam 0, niższy −15 pp
-- [ ] `contextModifier`: zaakceptowana prośba o transfer +30 pp, `loyal` −15 pp, `ambitious` do wyższego klubu +10 pp, atmosfera <40 +10 pp
-- [ ] Odmowa: transakcja anulowana w całości, bez zmian atmosfery i zgrania
-- [ ] Odmowa: blokada 30 dni na parę zawodnik × klub docelowy, inne kluby bez blokady
-- [ ] Skutki wykonania: `seasonsWithTeam = 0`, `hasBirdRights = false`, NTC wygasa
-- [ ] Statystyki sezonowe zostają przy zawodniku
-- [ ] Kara adaptacji do zgrania w nowym klubie
-- [ ] Historia wymian w `LeagueState`
-- [ ] Wiadomości `tradeOffer`, `tradeCounter`, `tradeOutcome` (3 kinds), `ntcRefusal`, `tradeLeagueDigest`, `tradeWindowEvent` (2 kinds)
-- [ ] Okno wymian: od pon tyg. 44 do pon tyg. 23; poza nim submit zablokowany
-- [ ] Walidacja na żywo w UI z konkretnym powodem odrzucenia
-- [ ] Podnieść `currentSchemaVersion`
+- [x] Matching 125% + 500 000 bufor per poziom capu (z Task 27)
+- [x] Zakaz agregacji między apronami
+- [x] Brak netto wzrostu pensji powyżej 2. aprogu
+- [x] **Reguła Stepiena:** zakaz oddania picków R1 w dwóch kolejnych latach bez posiadania picka R1 w jednym z nich
+- [x] Limit 3 picki w jednej wymianie
+- [x] Limit 5 zawodników w jednej wymianie
+- [x] Limit handlu pickami do 7 lat naprzód
+- [x] Wyłącznie wymiany 2-drużynowe
+- [x] Roster 20–30 po wymianie dla obu stron
+- [x] Wyjątek: strona z rosterem <20 może wymieniać, jeśli roster po wymianie będzie **liczniejszy** niż przed
+- [x] Druga strona w takiej wymianie musi pozostać w 20–30
+- [x] Obie strony <20 → wymiana zabroniona
+- [x] Assety: kontrakty zawodników, prawa do niepodpisanych draftowanych, picki R1–R3
+- [x] **Zgoda NTC** rolowana po walidacji cap/roster/Stepien, przed wykonaniem
+- [x] `P(zgoda) = 55% + statusModifier + contextModifier`, clamp 10–95%
+- [x] `statusModifier`: wyższy status docelowy +20 pp, taki sam 0, niższy −15 pp
+- [x] `contextModifier`: zaakceptowana prośba o transfer +30 pp, `loyal` −15 pp, `ambitious` do wyższego klubu +10 pp, atmosfera <40 +10 pp
+- [x] Odmowa: transakcja anulowana w całości, bez zmian atmosfery i zgrania
+- [x] Odmowa: blokada 30 dni na parę zawodnik × klub docelowy, inne kluby bez blokady
+- [x] Skutki wykonania: `seasonsWithTeam = 0`, `hasBirdRights = false`, NTC wygasa
+- [x] Statystyki sezonowe zostają przy zawodniku
+- [x] Kara adaptacji do zgrania w nowym klubie
+- [x] Historia wymian w `LeagueState`
+- [x] Wiadomości `tradeOffer`, `tradeOutcome` (3 kinds), `ntcRefusal`, `tradeLeagueDigest`, `tradeWindowEvent` (2 kinds)
+- [x] `tradeCounter` i pełny pending lifecycle ofert
+- [x] Okno wymian: od pon tyg. 44 do pon tyg. 23; poza nim submit zablokowany
+- [x] Walidacja na żywo w UI z konkretnym powodem odrzucenia
+- [x] Podnieść `currentSchemaVersion`
 
 **Testy**
-- [ ] Stepien blokuje drugi rok z rzędu
-- [ ] Wymiana obu stron <20 nie przechodzi walidacji
-- [ ] Strona <20 może wymieniać, jeśli roster rośnie
-- [ ] Drużyna powyżej 2. aprogu nie może podnieść pensji
-- [ ] Odmowa NTC anuluje całość i nakłada blokadę tylko na tę parę
-- [ ] Po wymianie `seasonsWithTeam` = 0 i Bird rights zresetowane
+- [x] Stepien blokuje drugi rok z rzędu
+- [x] Wymiana obu stron <20 nie przechodzi walidacji
+- [x] Strona <20 może wymieniać, jeśli roster rośnie
+- [x] Drużyna powyżej 2. aprogu nie może podnieść pensji
+- [x] Odmowa NTC anuluje całość i nakłada blokadę tylko na tę parę
+- [x] Po wymianie `seasonsWithTeam` = 0 i Bird rights zresetowane
 
-**Demo:** `TradeScreen` pokazuje walidację na żywo z konkretnym powodem odrzucenia, a wymiana zawodnika z NTC czeka na jego zgodę i potrafi się nie udać.
+**Demo:** `TradeScreen` pokazuje walidację na żywo z konkretnym powodem odrzucenia, wymiana zawodnika z NTC czeka na jego zgodę i potrafi się nie udać, a oferty oczekujące mogą być akceptowane, odrzucane, wygaszane lub zastępowane kontrofertą.
 
 ---
 

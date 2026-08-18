@@ -101,6 +101,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           initialOwnPlayerId: state.uri.queryParameters['ownPlayerId'],
           initialTargetTeamId: state.uri.queryParameters['targetTeamId'],
           initialTheirPlayerId: state.uri.queryParameters['theirPlayerId'],
+          initialTradeOfferId: state.uri.queryParameters['tradeOfferId'],
         ),
       ),
       GoRoute(

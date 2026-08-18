@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/enums.dart';
+import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/services/contract_service.dart';
@@ -13,10 +14,8 @@ import 'package:new_football/core/tactics/tactics_setup.dart';
 /// V1: jeden model AI — bez poziomów trudności i bez profili menedżera.
 /// Brak biasu przeciw graczowi (§1.3).
 class TeamAiService {
-  TeamAiService({
-    this.balance = BalanceConfig.defaults,
-    Random? random,
-  }) : _random = random ?? Random();
+  TeamAiService({this.balance = BalanceConfig.defaults, Random? random})
+    : _random = random ?? Random();
 
   final BalanceConfig balance;
   final Random _random;
@@ -29,15 +28,25 @@ class TeamAiService {
     required Team other,
     required TradeProposal proposal,
     required TradeService tradeService,
+    LeagueState? league,
     required int currentYear,
   }) {
+    int value(Team owner, TradeAsset asset) => league == null
+        ? tradeService.assetValue(owner, asset, currentYear: currentYear)
+        : tradeService.assetValueInLeague(
+            league,
+            owner,
+            asset,
+            currentYear: currentYear,
+          );
+
     final ourValue = proposal.assetsFromB.fold<int>(
       0,
-      (s, a) => s + tradeService.assetValue(other, a, currentYear: currentYear),
+      (s, a) => s + value(other, a),
     );
     final theirValue = proposal.assetsFromA.fold<int>(
       0,
-      (s, a) => s + tradeService.assetValue(self, a, currentYear: currentYear),
+      (s, a) => s + value(self, a),
     );
     if (theirValue == 0) return ourValue > 0;
 

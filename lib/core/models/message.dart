@@ -100,6 +100,7 @@ extension MessageSettingsX on MessageSettings {
         type == MessageType.contractOffer ||
         type == MessageType.contractOfferResponse ||
         type == MessageType.rfaOfferSheet ||
+        type == MessageType.trade ||
         type == MessageType.tradeOffer;
   }
 }

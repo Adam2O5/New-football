@@ -423,6 +423,7 @@ class SalaryCapBalance {
     this.salaryMatchPct = 1.25,
     this.salaryMatchBuffer = 500000,
     this.maxPicksPerTrade = 3,
+    this.maxPlayersPerTrade = 5,
     this.maxPickYearsAhead = 7,
   });
 
@@ -448,6 +449,7 @@ class SalaryCapBalance {
   final int salaryMatchBuffer;
 
   final int maxPicksPerTrade;
+  final int maxPlayersPerTrade;
   final int maxPickYearsAhead;
 
   /// Rookie scale salary for [pickSlot] (1-based).

@@ -24,6 +24,7 @@ import 'package:new_football/core/services/player_event_service.dart';
 import 'package:new_football/core/services/team_event_service.dart';
 import 'package:new_football/core/simulation/match_context_factory.dart';
 import 'package:new_football/core/services/staff_service.dart';
+import 'package:new_football/core/services/trade_service.dart';
 import 'package:new_football/data/save_repository.dart';
 
 final saveRepositoryProvider = Provider((ref) {
@@ -68,6 +69,8 @@ final contractServiceProvider = Provider((ref) => ContractService());
 final negotiationServiceProvider = Provider(
   (ref) => const NegotiationService(),
 );
+
+final tradeServiceProvider = Provider((ref) => TradeService());
 
 final contractMarketServiceProvider = Provider(
   (ref) => ContractMarketService(
@@ -239,6 +242,7 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
           day: state.currentDay,
           hour: state.currentHour ?? 0,
         );
+    state = _ref.read(tradeServiceProvider).expireOffers(state);
     state = _teamEvents.resolveExpiredDecisions(state, saveSeed: saveSeed);
     return _playerEvents.resolveExpiredDecisions(state, saveSeed: saveSeed);
   }
@@ -815,6 +819,53 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     await updateLeague((l) => l.copyWith(inbox: l.inbox.acknowledge(id)));
   }
 
+  Future<TradeOfferResult?> acceptTradeOffer(String offerId) async {
+    final current = save;
+    final actingTeamId = current?.leagueState.playerTeamId;
+    if (current == null || actingTeamId == null) return null;
+    final result = _ref
+        .read(tradeServiceProvider)
+        .acceptOffer(current.leagueState, offerId, actingTeamId: actingTeamId);
+    await updateLeague((_) => result.league);
+    return result;
+  }
+
+  Future<TradeOfferResult?> rejectTradeOffer(String offerId) async {
+    final current = save;
+    final actingTeamId = current?.leagueState.playerTeamId;
+    if (current == null || actingTeamId == null) return null;
+    final result = _ref
+        .read(tradeServiceProvider)
+        .rejectOffer(current.leagueState, offerId, actingTeamId: actingTeamId);
+    await updateLeague((_) => result.league);
+    return result;
+  }
+
+  Future<TradeOfferResult?> counterTradeOffer(
+    String offerId,
+    TradeProposal proposal,
+  ) async {
+    final current = save;
+    final actingTeamId = current?.leagueState.playerTeamId;
+    if (current == null || actingTeamId == null) return null;
+    final result = _ref
+        .read(tradeServiceProvider)
+        .counterOffer(
+          current.leagueState,
+          offerId,
+          proposal,
+          actingTeamId: actingTeamId,
+        );
+    if (result.changed) await updateLeague((_) => result.league);
+    return result;
+  }
+
+  Future<void> expireTradeOffers() async {
+    await updateLeague(
+      (league) => _ref.read(tradeServiceProvider).expireOffers(league),
+    );
+  }
+
   /// Applies a decision effect, then acknowledges the message.
   ///
   /// The optional dispatcher is deliberately injected by the caller because
@@ -836,6 +887,28 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
               option,
               saveSeed: saveSeed,
             );
+          }
+          if (message.type == MessageType.tradeOffer ||
+              (message.type == MessageType.trade &&
+                  message.kind == 'counter')) {
+            final offerId = message.payload['tradeOfferId']?.toString();
+            final actingTeamId = league.playerTeamId;
+            if (offerId == null || actingTeamId == null) return league;
+            final service = _ref.read(tradeServiceProvider);
+            final result = switch (option) {
+              'accept' => service.acceptOffer(
+                league,
+                offerId,
+                actingTeamId: actingTeamId,
+              ),
+              'reject' => service.rejectOffer(
+                league,
+                offerId,
+                actingTeamId: actingTeamId,
+              ),
+              _ => null,
+            };
+            return result?.league ?? league;
           }
           return _playerEvents.resolveDecision(
             league,
