@@ -6,10 +6,11 @@ import 'package:new_football/app/widgets/screen_background.dart';
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/app/utils/formatters.dart';
 import 'package:new_football/core/models/league_state.dart';
+import 'package:new_football/core/models/contract_negotiation.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/team.dart';
+import 'package:new_football/core/services/contract_market_service.dart';
 import 'package:new_football/core/services/contract_service.dart';
-import 'package:new_football/core/services/salary_cap_service.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
 enum _Target { none, ownExpiring, freeAgent }
@@ -70,6 +71,8 @@ class _ContractScreenState extends ConsumerState<ContractScreen> {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            _marketStatusCard(context, l10n, league),
+            const SizedBox(height: 12),
             Text(
               l10n.contract_expiringHeader,
               style: Theme.of(context).textTheme.titleMedium,
@@ -99,7 +102,7 @@ class _ContractScreenState extends ConsumerState<ContractScreen> {
                       setState(() {
                         _target = _Target.ownExpiring;
                         _selectedId = p.id;
-                        final want = ContractService().playerWant(p);
+                        final want = ContractService().expectedSalary(p);
                         _salaryCtrl.text = want.toString();
                       });
                     },
@@ -129,14 +132,17 @@ class _ContractScreenState extends ConsumerState<ContractScreen> {
                         p.position.code,
                         p.overall().round(),
                         p.contract.yearsRemaining,
-                        formatMoney(context, ContractService().playerWant(p)),
+                        formatMoney(
+                          context,
+                          ContractService().expectedSalary(p),
+                        ),
                       ),
                     ),
                     onTap: () {
                       setState(() {
                         _target = _Target.freeAgent;
                         _selectedId = p.id;
-                        final want = ContractService().playerWant(p);
+                        final want = ContractService().expectedSalary(p);
                         _salaryCtrl.text = want.toString();
                       });
                     },
@@ -164,10 +170,85 @@ class _ContractScreenState extends ConsumerState<ContractScreen> {
               const SizedBox(height: 12),
               Text(_status!),
             ],
+            ..._pendingFinalizations(context, l10n, league, team.id),
           ],
         ),
       ),
     );
+  }
+
+  Widget _marketStatusCard(
+    BuildContext context,
+    AppLocalizations l10n,
+    LeagueState league,
+  ) {
+    final window = ContractMarketService().windowAt(league);
+    final phaseLabel = switch (window) {
+      ContractMarketWindow.closed => l10n.market_closed,
+      ContractMarketWindow.extensions => l10n.market_extensions,
+      ContractMarketWindow.freeAgencyPhaseI => l10n.market_phaseI,
+      ContractMarketWindow.freeAgencyPhaseII => l10n.market_phaseII,
+    };
+    final hourly =
+        window == ContractMarketWindow.extensions ||
+        window == ContractMarketWindow.freeAgencyPhaseI;
+    return Card(
+      child: ListTile(
+        leading: const Icon(Icons.schedule),
+        title: Text(l10n.market_status),
+        subtitle: Text(
+          '${l10n.market_date(league.currentWeek, league.currentDay)} · $phaseLabel'
+          '${hourly ? '\\n${l10n.market_hour(league.currentHour ?? 1, 10)}' : ''}',
+        ),
+      ),
+    );
+  }
+
+  String _subjectName(LeagueState league, String id) {
+    for (final player in league.freeAgents) {
+      if (player.id == id) return player.name;
+    }
+    final team = league.playerTeam;
+    for (final player in team?.roster ?? const []) {
+      if (player.id == id) return player.name;
+    }
+    return id;
+  }
+
+  String _negotiationSubtitle(
+    BuildContext context,
+    AppLocalizations l10n,
+    LeagueState league,
+    ContractNegotiation negotiation,
+  ) {
+    final player =
+        [
+          ...league.freeAgents,
+          ...(league.playerTeam?.roster ?? const []),
+        ].cast<Player?>().firstWhere(
+          (item) => item?.id == negotiation.subjectId,
+          orElse: () => null,
+        );
+    final expectedSalary = player == null
+        ? null
+        : ContractService().expectedSalary(player);
+    final expectedLength = player == null
+        ? null
+        : ContractService().expectedLength(player);
+    final details = <String>[
+      l10n.market_round(negotiation.round),
+      l10n.market_score(negotiation.offerScore.toStringAsFixed(1)),
+      l10n.market_deadline(
+        negotiation.expiryWeek.toString(),
+        negotiation.expiryDay.toString(),
+        negotiation.expiryHour.toString(),
+      ),
+      if (expectedSalary != null)
+        l10n.market_expectedSalary(formatMoney(context, expectedSalary)),
+      if (expectedLength != null) l10n.market_expectedLength(expectedLength),
+      '${formatMoney(context, negotiation.lastOffer.salary)} × ${negotiation.lastOffer.years}',
+    ];
+    return details.join(' · ');
   }
 
   Future<void> _offer(AppLocalizations l10n, Team team) async {
@@ -197,35 +278,21 @@ class _ContractScreenState extends ConsumerState<ContractScreen> {
     String id,
     ContractOffer offer,
   ) async {
-    final player = team.roster.firstWhere((p) => p.id == id);
-    final service = ContractService();
-    final reaction = service.evaluate(player, offer);
+    final reaction = await ref
+        .read(gameControllerProvider.notifier)
+        .offerContractExtension(id, offer);
 
     switch (reaction) {
       case ContractReaction.accept:
-        await ref.read(gameControllerProvider.notifier).updateLeague((l) {
-          final t = l.playerTeam!;
-          final updatedRoster = t.roster.map((p) {
-            if (p.id != id) return p;
-            return p.copyWith(
-              contract: p.contract.copyWith(
-                salary: offer.salary,
-                yearsRemaining: offer.years,
-              ),
-            );
-          }).toList();
-          final updated = const SalaryCapService().applyPayroll(
-            t.copyWith(roster: updatedRoster),
-          );
-          return l.updateTeam(updated);
-        });
-        setState(() => _status = l10n.contract_accepted);
+        setState(() => _status = l10n.contract_pendingFinalization);
       case ContractReaction.hardReject:
+      case ContractReaction.reject:
         setState(() => _status = l10n.contract_rejected);
       case ContractReaction.waiting:
         setState(() => _status = l10n.contract_waiting);
       case ContractReaction.counter:
-        final counter = service.counterOffer(player, offer);
+        final player = team.roster.firstWhere((p) => p.id == id);
+        final counter = ContractService().counterOffer(player, offer);
         setState(
           () => _status = l10n.contract_counter(
             formatMoney(context, counter.salary),
@@ -245,13 +312,66 @@ class _ContractScreenState extends ConsumerState<ContractScreen> {
         .offerFreeAgent(id, offer);
     switch (reaction) {
       case ContractReaction.accept:
-        setState(() => _status = l10n.contract_accepted);
+        setState(() => _status = l10n.contract_pendingFinalization);
       case ContractReaction.hardReject:
+      case ContractReaction.reject:
         setState(() => _status = l10n.contract_rejected);
       case ContractReaction.waiting:
         setState(() => _status = l10n.contract_waiting);
       case ContractReaction.counter:
         setState(() => _status = l10n.contract_faCounter);
     }
+  }
+
+  List<Widget> _pendingFinalizations(
+    BuildContext context,
+    AppLocalizations l10n,
+    LeagueState league,
+    String teamId,
+  ) {
+    final pending = league.negotiations
+        .where(
+          (item) =>
+              item.teamId == teamId &&
+              item.subjectKind == NegotiationSubjectKind.player &&
+              item.status == NegotiationStatus.pendingFinalization,
+        )
+        .toList();
+    if (pending.isEmpty) return const [];
+    return [
+      const SizedBox(height: 12),
+      Card(
+        child: Column(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.pending_actions),
+              title: Text(l10n.contract_pendingFinalization),
+            ),
+            ...pending.map(
+              (negotiation) => ListTile(
+                title: Text(_subjectName(league, negotiation.subjectId)),
+                subtitle: Text(
+                  _negotiationSubtitle(context, l10n, league, negotiation),
+                ),
+                trailing: FilledButton.tonal(
+                  onPressed: () async {
+                    final ok = await ref
+                        .read(gameControllerProvider.notifier)
+                        .finalizeContractNegotiation(negotiation.id);
+                    if (!mounted) return;
+                    setState(
+                      () => _status = ok
+                          ? l10n.contract_accepted
+                          : l10n.contract_finalizationFailed,
+                    );
+                  },
+                  child: Text(l10n.contract_finalize),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ];
   }
 }

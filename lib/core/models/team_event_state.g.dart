@@ -39,6 +39,24 @@ Map<String, dynamic> _$MinutesHistoryEntryToJson(
   'possibleMinutes': instance.possibleMinutes,
 };
 
+_SeasonMinutesAggregate _$SeasonMinutesAggregateFromJson(
+  Map<String, dynamic> json,
+) => _SeasonMinutesAggregate(
+  playerId: json['playerId'] as String,
+  seasonYear: (json['seasonYear'] as num).toInt(),
+  actualMinutes: (json['actualMinutes'] as num?)?.toInt() ?? 0,
+  possibleMinutes: (json['possibleMinutes'] as num?)?.toInt() ?? 0,
+);
+
+Map<String, dynamic> _$SeasonMinutesAggregateToJson(
+  _SeasonMinutesAggregate instance,
+) => <String, dynamic>{
+  'playerId': instance.playerId,
+  'seasonYear': instance.seasonYear,
+  'actualMinutes': instance.actualMinutes,
+  'possibleMinutes': instance.possibleMinutes,
+};
+
 _TeamPromise _$TeamPromiseFromJson(Map<String, dynamic> json) => _TeamPromise(
   id: json['id'] as String,
   playerId: json['playerId'] as String,
@@ -105,6 +123,13 @@ _TeamEventState _$TeamEventStateFromJson(
           ?.map((e) => MinutesHistoryEntry.fromJson(e as Map<String, dynamic>))
           .toList() ??
       const [],
+  seasonMinutes:
+      (json['seasonMinutes'] as List<dynamic>?)
+          ?.map(
+            (e) => SeasonMinutesAggregate.fromJson(e as Map<String, dynamic>),
+          )
+          .toList() ??
+      const [],
   modifiers:
       (json['modifiers'] as List<dynamic>?)
           ?.map((e) => TeamTimedModifier.fromJson(e as Map<String, dynamic>))
@@ -135,6 +160,7 @@ Map<String, dynamic> _$TeamEventStateToJson(_TeamEventState instance) =>
       'promises': instance.promises,
       'transferSituations': instance.transferSituations,
       'minutesHistory': instance.minutesHistory,
+      'seasonMinutes': instance.seasonMinutes,
       'modifiers': instance.modifiers,
       'cooldowns': instance.cooldowns,
       'seasonFlags': instance.seasonFlags,

@@ -1,5 +1,7 @@
 import 'package:new_football/core/balance/balance_config.dart';
+import 'package:new_football/core/models/contract_market_models.dart';
 import 'package:new_football/core/models/draft_pick.dart';
+import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/models/team_event_state.dart';
@@ -8,7 +10,14 @@ import 'package:new_football/core/services/salary_cap_service.dart';
 
 class TradeAsset {
   const TradeAsset.player(this.playerId)
-    : pickYear = null,
+    : draftedRightsId = null,
+      pickYear = null,
+      pickRound = null,
+      originalTeamId = null;
+
+  const TradeAsset.draftedRights(this.draftedRightsId)
+    : playerId = null,
+      pickYear = null,
       pickRound = null,
       originalTeamId = null;
 
@@ -16,14 +25,17 @@ class TradeAsset {
     required this.pickYear,
     required this.pickRound,
     required this.originalTeamId,
-  }) : playerId = null;
+  }) : playerId = null,
+       draftedRightsId = null;
 
   final String? playerId;
+  final String? draftedRightsId;
   final int? pickYear;
   final int? pickRound;
   final String? originalTeamId;
 
   bool get isPlayer => playerId != null;
+  bool get isDraftedRights => draftedRightsId != null;
   bool get isPick => pickYear != null;
 }
 
@@ -80,6 +92,7 @@ class TradeService {
       return (baseValue * team.eventState.pointValueMultiplierFor(player.id))
           .round();
     }
+    if (asset.isDraftedRights) return 0;
     final owned = _findOwnedPick(team, asset);
     if (owned != null) {
       return owned.computeTradeValue(
@@ -94,6 +107,96 @@ class TradeService {
       teamId: team.id,
       originalTeamId: asset.originalTeamId!,
     ).computeTradeValue(currentYear: currentYear, balance: balance);
+  }
+
+  int rightsAssetValue(
+    DraftedPlayerRights rights, {
+    required int currentYear,
+  }) => rights.player.computePointValue(balance);
+
+  /// Validates and executes a proposal containing drafted rights. Rights are
+  /// not roster players, so they do not affect salary matching or the 20–30
+  /// roster check; ownership is transferred in the persistent league state.
+  TradeValidation validateLeague(
+    LeagueState league,
+    TradeProposal proposal, {
+    int? currentWeek,
+  }) {
+    final a = league.teamById(proposal.teamAId);
+    final b = league.teamById(proposal.teamBId);
+    if (a == null || b == null) {
+      return const TradeValidation(ok: false, reason: 'Nieznana drużyna');
+    }
+    final rightsValidation = _validateRights(league, proposal, a.id, b.id);
+    if (!rightsValidation.ok) return rightsValidation;
+    return validate(a, b, proposal, currentWeek: currentWeek);
+  }
+
+  LeagueState? executeLeague(LeagueState league, TradeProposal proposal) {
+    final validation = validateLeague(league, proposal);
+    if (!validation.ok) return null;
+    final a = league.teamById(proposal.teamAId);
+    final b = league.teamById(proposal.teamBId);
+    if (a == null || b == null) return null;
+    final result = execute(a, b, proposal);
+    if (result == null) return null;
+    final rights = league.draftedRights.map((right) {
+      if (proposal.assetsFromA.any(
+            (asset) =>
+                asset.isDraftedRights && asset.draftedRightsId == right.id,
+          ) &&
+          right.ownerTeamId == a.id) {
+        return right.copyWith(ownerTeamId: b.id);
+      }
+      if (proposal.assetsFromB.any(
+            (asset) =>
+                asset.isDraftedRights && asset.draftedRightsId == right.id,
+          ) &&
+          right.ownerTeamId == b.id) {
+        return right.copyWith(ownerTeamId: a.id);
+      }
+      return right;
+    }).toList();
+    return league.copyWith(
+      teams: league.teams.map((team) {
+        if (team.id == result.$1.id) return result.$1;
+        if (team.id == result.$2.id) return result.$2;
+        return team;
+      }).toList(),
+      draftedRights: rights,
+    );
+  }
+
+  TradeValidation _validateRights(
+    LeagueState league,
+    TradeProposal proposal,
+    String teamAId,
+    String teamBId,
+  ) {
+    for (final entry in [
+      (assets: proposal.assetsFromA, owner: teamAId, recipient: teamBId),
+      (assets: proposal.assetsFromB, owner: teamBId, recipient: teamAId),
+    ]) {
+      for (final asset in entry.assets.where((item) => item.isDraftedRights)) {
+        final right = league.draftedRights.cast<DraftedPlayerRights?>().firstWhere(
+          (item) => item?.id == asset.draftedRightsId,
+          orElse: () => null,
+        );
+        if (right == null || right.ownerTeamId != entry.owner) {
+          return const TradeValidation(
+            ok: false,
+            reason: 'Prawa draftowe nie należą do drużyny sprzedającej',
+          );
+        }
+        if (entry.owner == entry.recipient) {
+          return const TradeValidation(
+            ok: false,
+            reason: 'Nie można wymienić praw z samym sobą',
+          );
+        }
+      }
+    }
+    return const TradeValidation(ok: true);
   }
 
   TradeValidation validate(

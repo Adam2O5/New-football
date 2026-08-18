@@ -9,6 +9,7 @@ import 'package:new_football/core/simulation/match_message_emitter.dart';
 import 'package:new_football/core/simulation/pre_match_validator.dart';
 import 'package:new_football/core/balance/injury_catalog.dart';
 import 'package:new_football/core/models/contract.dart';
+import 'package:new_football/core/models/contract_market_models.dart';
 import 'package:new_football/core/models/draft_models.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
@@ -19,6 +20,7 @@ import 'package:new_football/core/models/draft_pick.dart';
 import 'package:new_football/core/models/season_awards.dart';
 import 'package:new_football/core/models/seed_data_generator.dart';
 import 'package:new_football/core/models/standing.dart';
+import 'package:new_football/core/models/staff.dart';
 import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/models/team_event_state.dart';
 import 'package:new_football/core/services/calendar_service.dart';
@@ -805,7 +807,7 @@ class SeasonService {
     if (draft == null) return league;
     final wasComplete = draft.currentPickIndex >= draft.order.length;
     var state = league;
-    var teams = List<Team>.from(state.teams);
+    var draftedRights = List<DraftedPlayerRights>.from(state.draftedRights);
 
     while (draft!.currentPickIndex < draft.order.length) {
       final pick = draft.order[draft.currentPickIndex];
@@ -813,7 +815,6 @@ class SeasonService {
       if (isPlayer && playerPickProspectId == null) {
         return state.copyWith(
           currentSeason: state.currentSeason.copyWith(draftState: draft),
-          teams: teams,
         );
       }
 
@@ -849,12 +850,15 @@ class SeasonService {
           )
           .recalculatePointValue(balance);
 
-      teams = teams.map((t) {
-        if (t.id != pick.teamId) return t;
-        return capService.applyPayroll(
-          t.copyWith(roster: [...t.roster, player]),
-        );
-      }).toList();
+      final right = DraftedPlayerRights(
+        id: 'rights:${state.currentSeason.year}:$overallPick:${chosen.id}',
+        ownerTeamId: pick.teamId,
+        player: player,
+        draftYear: state.currentSeason.year,
+        pickNumber: overallPick,
+        reminderSent: isPlayer,
+      );
+      draftedRights.add(right);
 
       final completed = pick.copyWith(
         prospectId: chosen.id,
@@ -869,6 +873,25 @@ class SeasonService {
       );
 
       if (isPlayer) {
+        state = state.copyWith(draftedRights: draftedRights);
+        state = _messages.send(
+          state,
+          type: MessageType.draftedRightsReminder,
+          domain: MessageDomain.draft,
+          args: {
+            'playerName': chosen.name,
+            'rosterCount': state.teamById(pick.teamId)?.roster.length ?? 0,
+          },
+          payload: {
+            'rightsId': right.id,
+            'playerId': player.id,
+            'teamId': pick.teamId,
+            'draftYear': state.currentSeason.year,
+            'pickNumber': overallPick,
+          },
+          dedupKey:
+              'draftedRightsReminder:${state.currentSeason.year}:${right.id}',
+        );
         state = _msg(
           state,
           MessageType.draftPick,
@@ -881,7 +904,7 @@ class SeasonService {
     }
 
     state = state.copyWith(
-      teams: teams,
+      draftedRights: draftedRights,
       currentSeason: state.currentSeason.copyWith(
         draftState: draft,
         phase: SeasonPhase.offseason,
@@ -934,10 +957,17 @@ class SeasonService {
         )
         .recalculatePointValue(balance);
 
-    var teams = league.teams.map((t) {
-      if (t.id != pick.teamId) return t;
-      return capService.applyPayroll(t.copyWith(roster: [...t.roster, player]));
-    }).toList();
+    final right = DraftedPlayerRights(
+      id: 'rights:${league.currentSeason.year}:$overallPick:${chosen.id}',
+      ownerTeamId: pick.teamId,
+      player: player,
+      draftYear: league.currentSeason.year,
+      pickNumber: overallPick,
+    );
+    final draftedRights = [
+      ...league.draftedRights.where((item) => item.id != right.id),
+      right,
+    ];
 
     final completed = pick.copyWith(
       prospectId: chosen.id,
@@ -952,7 +982,7 @@ class SeasonService {
     );
 
     var state = league.copyWith(
-      teams: teams,
+      draftedRights: draftedRights,
       currentSeason: league.currentSeason.copyWith(
         draftState: draft,
         phase: SeasonPhase.offseason,
@@ -961,30 +991,138 @@ class SeasonService {
     return _finalizeDraftFreeAgents(state, draft);
   }
 
-  /// Contracts that hit 0 years (decremented at rollover) leave the roster
-  /// and join the FA pool when the market opens (`docs/offseason.md` §10).
+  /// Removes player and staff contracts that have reached zero years. The
+  /// operation is idempotent, so the season rollover can call it exactly once
+  /// without duplicating free-agent entries.
   LeagueState expireContracts(LeagueState league) {
     final freeAgents = List<Player>.from(league.freeAgents);
+    final staffFreeAgents = List<StaffMember>.from(league.staffFreeAgents);
+    var state = league;
+    final playerTeamId = league.playerTeamId;
     final teams = league.teams.map((t) {
       final keep = <Player>[];
       final expiredIds = <String>{};
       for (final p in t.roster) {
+        if (t.id == playerTeamId && p.contract.yearsRemaining == 1) {
+          state = _messages.send(
+            state,
+            type: MessageType.contractExpiring,
+            kind: 'player',
+            domain: MessageDomain.contracts,
+            args: {
+              'playerName': p.name,
+              'teamName': t.name,
+              'yearsRemaining': p.contract.yearsRemaining,
+            },
+            payload: {
+              'playerId': p.id,
+              'teamId': t.id,
+              'contractKind': 'player',
+              'yearsRemaining': p.contract.yearsRemaining,
+            },
+            dedupKey:
+                'contractExpiring:player:${league.currentSeason.year}:${p.id}',
+          );
+        }
         if (p.contract.yearsRemaining <= 0) {
-          freeAgents.add(p);
+          if (!freeAgents.any((item) => item.id == p.id)) {
+            freeAgents.add(p);
+          }
           expiredIds.add(p.id);
+          if (t.id == playerTeamId) {
+            state = _messages.send(
+              state,
+              type: MessageType.contractExpired,
+              kind: 'player',
+              domain: MessageDomain.contracts,
+              args: {'playerName': p.name, 'teamName': t.name},
+              payload: {
+                'playerId': p.id,
+                'teamId': t.id,
+                'contractKind': 'player',
+                'expired': true,
+              },
+              dedupKey:
+                  'contractExpired:player:${league.currentSeason.year}:${p.id}',
+            );
+          }
         } else {
           keep.add(p);
         }
       }
-      if (expiredIds.isEmpty) return t;
+
+      var staff = t.staff;
+      for (final role in StaffRole.values) {
+        final member = staff.member(role);
+        final memberId = member?.id;
+        final contract = member?.contract;
+        if (member == null || memberId == null || contract == null) {
+          continue;
+        }
+        if (t.id == playerTeamId && contract.yearsRemaining == 1) {
+          state = _messages.send(
+            state,
+            type: MessageType.contractExpiring,
+            kind: 'staff',
+            domain: MessageDomain.staff,
+            args: {
+              'staffName': member.name,
+              'role': member.role.name,
+              'teamName': t.name,
+              'yearsRemaining': contract.yearsRemaining,
+            },
+            payload: {
+              'staffId': memberId,
+              'teamId': t.id,
+              'contractKind': 'staff',
+              'yearsRemaining': contract.yearsRemaining,
+            },
+            dedupKey:
+                'contractExpiring:staff:${league.currentSeason.year}:$memberId',
+          );
+        }
+        if (contract.yearsRemaining > 0) continue;
+        if (!staffFreeAgents.any((item) => item.id == memberId)) {
+          staffFreeAgents.add(member.copyWith(contract: null));
+        }
+        if (t.id == playerTeamId) {
+          state = _messages.send(
+            state,
+            type: MessageType.contractExpired,
+            kind: 'staff',
+            domain: MessageDomain.staff,
+            args: {
+              'staffName': member.name,
+              'role': member.role.name,
+              'teamName': t.name,
+            },
+            payload: {
+              'staffId': memberId,
+              'teamId': t.id,
+              'contractKind': 'staff',
+              'expired': true,
+            },
+            dedupKey:
+                'contractExpired:staff:${league.currentSeason.year}:$memberId',
+          );
+        }
+        staff = staff.withMember(role, null);
+      }
+
+      if (expiredIds.isEmpty && staff == t.staff) return t;
       return capService.applyPayroll(
         t.copyWith(
           roster: keep,
           eventState: t.eventState.clearPlayers(expiredIds),
+          staff: staff,
         ),
       );
     }).toList();
-    return league.copyWith(teams: teams, freeAgents: freeAgents);
+    return state.copyWith(
+      teams: teams,
+      freeAgents: freeAgents,
+      staffFreeAgents: staffFreeAgents,
+    );
   }
 
   LeagueState rolloverSeason(LeagueState league) {
@@ -1082,6 +1220,21 @@ class SeasonService {
             .recalculatePointValue(balance);
       }).toList();
 
+      var staff = t.staff;
+      for (final role in StaffRole.values) {
+        final member = staff.member(role);
+        final contract = member?.contract;
+        if (member == null || contract == null) continue;
+        staff = staff.withMember(
+          role,
+          member.copyWith(
+            contract: contract.copyWith(
+              yearsRemaining: (contract.yearsRemaining - 1).clamp(0, 10),
+            ),
+          ),
+        );
+      }
+
       // Player development ticks weekly in `DaySimulator`, not here — avoid
       // double-applying growth on top of the season's weekly ticks.
       var team = t.copyWith(
@@ -1089,11 +1242,13 @@ class SeasonService {
             .map(
               (p) => p.copyWith(
                 previousOvr: p.overall(balance).round(),
+                seasonStartOvr: p.overall(balance),
                 previousPotential: p.potentialStars,
               ),
             )
             .toList(),
         eventState: t.eventState.resetForSeason(),
+        staff: staff,
         finance: t.finance.copyWith(midLevelExceptionAvailable: true),
         // Prognoza miejsca w tabeli (`projectedFinish`) i dyskonto czasowe
         // zmieniają się co sezon — przeliczyć wartość wszystkich
@@ -1120,7 +1275,7 @@ class SeasonService {
         ),
     ];
 
-    return league.copyWith(
+    var nextLeague = league.copyWith(
       teams: teams,
       history: [...league.history, history],
       currentWeek: 1,
@@ -1145,6 +1300,8 @@ class SeasonService {
         capUpdateTvDone: false,
       ),
     );
+    nextLeague = expireContracts(nextLeague);
+    return nextLeague;
   }
 
   Set<String> _playoffQualifiedTeamIds(LeagueState league) {

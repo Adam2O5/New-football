@@ -153,6 +153,7 @@ _Player _$PlayerFromJson(Map<String, dynamic> json) => _Player(
     json['optimalRole'] as Map<String, dynamic>,
   ),
   previousOvr: (json['previousOvr'] as num?)?.toInt(),
+  seasonStartOvr: (json['seasonStartOvr'] as num?)?.toDouble(),
   previousPotential: (json['previousPotential'] as num?)?.toDouble(),
 );
 
@@ -173,6 +174,7 @@ Map<String, dynamic> _$PlayerToJson(_Player instance) => <String, dynamic>{
   'pointValue': instance.pointValue,
   'optimalRole': instance.optimalRole,
   'previousOvr': instance.previousOvr,
+  'seasonStartOvr': instance.seasonStartOvr,
   'previousPotential': instance.previousPotential,
 };
 

@@ -199,6 +199,11 @@ abstract class Player with _$Player {
     /// Used by the Development screen to compute OVR delta.
     int? previousOvr,
 
+    /// Raw overall rating captured at the start of the current season.
+    /// This is kept separate from [previousOvr], whose rounded value is part
+    /// of the existing development UI contract.
+    double? seasonStartOvr,
+
     /// Previous potentialStars captured at season start.
     /// Used by the Development screen to compute potential delta.
     double? previousPotential,

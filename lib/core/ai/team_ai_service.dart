@@ -47,14 +47,15 @@ class TeamAiService {
   }
 
   ContractOffer makeFaOffer(Player player, ContractService contracts) {
-    final want = contracts.playerWant(player);
+    final expectedSalary = contracts.expectedSalary(player);
+    final expectedLength = contracts.expectedLength(player);
     final mult = 0.95 + _random.nextDouble() * 0.15;
     return ContractOffer(
-      salary: (want * mult).round().clamp(
+      salary: (expectedSalary * mult).round().clamp(
         balance.salaryCap.minSalary,
         balance.salaryCap.maxSalary,
       ),
-      years: 2 + _random.nextInt(3),
+      years: (expectedLength + _random.nextInt(2) - 1).clamp(1, 5),
     );
   }
 

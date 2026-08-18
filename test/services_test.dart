@@ -40,14 +40,18 @@ void main() {
   });
 
   test('ContractService evaluates strong offer as accept', () {
-    final player = league.teams[0].roster.first;
-    final svc = ContractService();
-    final want = svc.playerWant(player);
-    final reaction = svc.evaluate(
-      player,
-      ContractOffer(salary: (want * 1.2).round(), years: 4),
+    final player = league.teams[0].roster.first.copyWith(
+      pointValue: 0,
+      personality: PlayerPersonality.balanced,
     );
-    expect(reaction, ContractReaction.accept);
+    final svc = ContractService();
+    final expectedSalary = svc.expectedSalary(player);
+    final offer = ContractOffer(
+      salary: (expectedSalary * 2).round(),
+      years: svc.expectedLength(player),
+    );
+    expect(svc.playerOfferScore(player, offer), greaterThanOrEqualTo(70));
+    expect(svc.evaluate(player, offer), ContractReaction.accept);
   });
 
   test('TeamAiService autoSelectLineup includes GK', () {

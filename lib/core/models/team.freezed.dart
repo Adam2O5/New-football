@@ -659,7 +659,7 @@ as TeamAiConfig?,
 @override
 @pragma('vm:prefer-inline')
 $TeamFinanceCopyWith<$Res> get finance {
-
+  
   return $TeamFinanceCopyWith<$Res>(_self.finance, (value) {
     return _then(_self.copyWith(finance: value));
   });
@@ -668,7 +668,7 @@ $TeamFinanceCopyWith<$Res> get finance {
 @override
 @pragma('vm:prefer-inline')
 $TacticsSetupCopyWith<$Res> get tactics {
-
+  
   return $TacticsSetupCopyWith<$Res>(_self.tactics, (value) {
     return _then(_self.copyWith(tactics: value));
   });
@@ -677,7 +677,7 @@ $TacticsSetupCopyWith<$Res> get tactics {
 @override
 @pragma('vm:prefer-inline')
 $TeamEventStateCopyWith<$Res> get eventState {
-
+  
   return $TeamEventStateCopyWith<$Res>(_self.eventState, (value) {
     return _then(_self.copyWith(eventState: value));
   });
@@ -686,7 +686,7 @@ $TeamEventStateCopyWith<$Res> get eventState {
 @override
 @pragma('vm:prefer-inline')
 $TeamStaffCopyWith<$Res> get staff {
-
+  
   return $TeamStaffCopyWith<$Res>(_self.staff, (value) {
     return _then(_self.copyWith(staff: value));
   });
@@ -695,7 +695,7 @@ $TeamStaffCopyWith<$Res> get staff {
 @override
 @pragma('vm:prefer-inline')
 $TeamScoutingCopyWith<$Res> get scouting {
-
+  
   return $TeamScoutingCopyWith<$Res>(_self.scouting, (value) {
     return _then(_self.copyWith(scouting: value));
   });
@@ -999,7 +999,7 @@ as TeamAiConfig?,
 @override
 @pragma('vm:prefer-inline')
 $TeamFinanceCopyWith<$Res> get finance {
-
+  
   return $TeamFinanceCopyWith<$Res>(_self.finance, (value) {
     return _then(_self.copyWith(finance: value));
   });
@@ -1008,7 +1008,7 @@ $TeamFinanceCopyWith<$Res> get finance {
 @override
 @pragma('vm:prefer-inline')
 $TacticsSetupCopyWith<$Res> get tactics {
-
+  
   return $TacticsSetupCopyWith<$Res>(_self.tactics, (value) {
     return _then(_self.copyWith(tactics: value));
   });
@@ -1017,7 +1017,7 @@ $TacticsSetupCopyWith<$Res> get tactics {
 @override
 @pragma('vm:prefer-inline')
 $TeamEventStateCopyWith<$Res> get eventState {
-
+  
   return $TeamEventStateCopyWith<$Res>(_self.eventState, (value) {
     return _then(_self.copyWith(eventState: value));
   });
@@ -1026,7 +1026,7 @@ $TeamEventStateCopyWith<$Res> get eventState {
 @override
 @pragma('vm:prefer-inline')
 $TeamStaffCopyWith<$Res> get staff {
-
+  
   return $TeamStaffCopyWith<$Res>(_self.staff, (value) {
     return _then(_self.copyWith(staff: value));
   });
@@ -1035,7 +1035,7 @@ $TeamStaffCopyWith<$Res> get staff {
 @override
 @pragma('vm:prefer-inline')
 $TeamScoutingCopyWith<$Res> get scouting {
-
+  
   return $TeamScoutingCopyWith<$Res>(_self.scouting, (value) {
     return _then(_self.copyWith(scouting: value));
   });

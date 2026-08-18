@@ -300,11 +300,16 @@ enum MessageType {
   rosterWarning,
   // Contracts (F)
   contractOffer,
+  contractOfferResponse,
   contractSigned,
+  contractExpiring,
+  contractLostToRival,
   contractExpired,
   declineToExtend,
   rfaOfferSheet,
   // Staff (G)
+  staffOfferResponse,
+  staffSigned,
   staffGrowth,
   staffHired,
   staffFired,
@@ -320,6 +325,7 @@ enum MessageType {
   mockDraft,
   draftPick,
   draftPickLeague,
+  draftedRightsReminder,
   // Finance (J)
   apronWarning,
   capUpdateTv,

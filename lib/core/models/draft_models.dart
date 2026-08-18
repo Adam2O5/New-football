@@ -50,7 +50,7 @@ extension ProspectX on Prospect {
   /// Rolls [DevelopmentOutcome] here (hidden while still a prospect).
   Player toPlayer({required Contract contract, required Random rng}) {
     final outcome = rollDevelopmentOutcome(determination, rng);
-    return Player(
+    final player = Player(
       id: id,
       name: name,
       position: position,
@@ -83,6 +83,7 @@ extension ProspectX on Prospect {
         ),
       ),
     );
+    return player.copyWith(seasonStartOvr: player.overall());
   }
 }
 

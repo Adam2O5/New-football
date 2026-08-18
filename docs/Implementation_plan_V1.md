@@ -157,7 +157,7 @@ Tryb **1a**: każda pozycja dostaje osobne pytanie w momencie, gdy zablokuje zad
 | - | ----------- | ------- | ------------ | ------ |
 | 1 | Tyg. 44: tabela „Exact schedule" mówi Awards pon / StaffGrowth wt; checklist „Kluczowe eventy" mówi StaffGrowth pon / Awards wt | Task 5 | **Rozstrzygnięto: Awards pon, StaffGrowth/retire wt, Retirements śr, Lottery pt.** Tabela „Exact schedule" jest kanoniczna; okno wymian otwiera się w pon tyg. 44 niezależnie od Awards. | ✅ |
 | 2 | Przeliczanie tabeli siły ligi: `team_management.md` „co miesiąc 1. dnia miesiąca + pon tyg. 23 + start kariery"; `AI_behaviour.md` §2.1 „wtorek tyg. 44 i poniedziałek tyg. 23" | Task 14 | Kanonem `team_management.md`. Gra liczy tygodnie, nie miesiące → **co 4 tygodnie (tyg. 1, 5, 9, 13, 17, 21) + pon tyg. 23 + wt tyg. 44 + start kariery**. Wtorek tyg. 44 dochodzi, bo AI potrzebuje świeżej wyceny przed loterią. | ✅ |
-| 3 | Progi `playerOfferScore`: pasmo 40–59 „Counter" nachodzi na 55–69 „Waiting/Counter/Accept" | Task 28 | **40–54 Counter, 55–69 pasmo mieszane** z losowaniem z docs (50/50 w punkcie 62, ±6 pkt rozkładu na punkt odchylenia). | ⏳ |
+| 3 | Progi `playerOfferScore`: pasmo 40–59 „Counter" nachodzi na 55–69 „Waiting/Counter/Accept" | Task 28 | **Rozstrzygnięto: 40–54 Counter, 55–69 pasmo mieszane** z losowaniem: 50/50 w punkcie 62, zmiana prawdopodobieństwa Accept o 3 pkt proc. na każdy punkt odchylenia. | ✅ |
 | 4 | Rookie scale: `contracts.md` §8 `baseScale / (1 + pickSlot × 0,06)`; kod `rookiePickDecay = 0,08` | Task 27 | **Rozstrzygnięto: 0,06**; kod i testy zsynchronizowane. | ✅ |
 | 5 | `publicCriticism` → „Kara dyscyplinarna: −2 atmosfera, −2 atmosfera" (duplikat) | Task 26 | **−2 atmosfera, −2 zgranie** — przez analogię do pozostałych opcji eventu. | ⏳ |
 | 6 | `messages.md` §13 wymienia `ovrDigest`, §9 definiuje `groupKey = ovr:own:{week}` bez odpowiadającego `type` | Task 7 | Dodać wzorzec **`ovrDigest`** do katalogu (domain `playerEvent`, `silenced`). | ✅ |
@@ -1092,100 +1092,104 @@ Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, le
 
 ---
 
-### ⬜ Task 28: Silnik negocjacji kontraktowych
+### ✅ Task 28: Silnik negocjacji kontraktowych
 
 **Cel:** `contracts.md` §5–7.
 
-- [ ] **Rozstrzygnąć sprzeczność #3** (nachodzące progi `offerScore`)
-- [ ] `playerWant = clamp(((pointValue + 1000) / 20) + personalityFactor + currentTeamStatus, 0, 100)`
-- [ ] `personalityFactor`: ambitious +5, temperamental +4, leader +1, balanced 0, professional −2, loyal −4
-- [ ] `currentTeamStatus`: rebuild −5, retool −3, pretender 0, contender +5, elite +7
-- [ ] `staffWant = clamp(roleStarsAvg × 20 + currentTeamStatus, 0, 100)`
-- [ ] `expectedSalary` zawodnika: `min + (max − min) × (want / 100)^3`
-- [ ] `expectedSalary` sztabu: `min + (max − min) × (want / 100)^2`
-- [ ] Oczekiwana długość zawodnika z tabeli wiek × want (4 przedziały wieku × 3 pasma)
-- [ ] Oczekiwana długość sztabu z tabeli wiek × want
-- [ ] `salaryFit`: baza 35, −2 za każdy procent poniżej, +1 za każdy procent powyżej
-- [ ] `lengthFit`: baza 15, −5 za każdy rok odchylenia
-- [ ] `teamStatus` jako składnik `offerScore`
-- [ ] `cfoDiscount` ze sztabu
-- [ ] Próg 0–24 → hard reject
-- [ ] Próg 25–39 → reject kontekstowy
-- [ ] Próg 40–54 → counter (po rozstrzygnięciu #3)
-- [ ] Próg 55–69 → pasmo mieszane z losowaniem (50/50 w punkcie 62, ±6 pkt na punkt odchylenia)
-- [ ] Próg 70–100 → accept
-- [ ] Reakcja `Waiting`: warunek 1 — kilka ofert w tej samej godzinie
-- [ ] Reakcja `Waiting`: warunek 2 — jedna oferta poniżej oczekiwań
-- [ ] Reakcja `Waiting`: warunek 3 — zawsze na 2 godziny (lub do przedostatniej)
-- [ ] `Waiting` aktywowany w przedostatniej godzinie → decyzja w ostatniej
-- [ ] Kontroferty: pierwsza w zakresie 65–100, druga 65–85, trzecia 60–70
-- [ ] Czwarta kontroferta nie następuje
-- [ ] Szansa hard reject przy kontr-kontrofercie: 15% / 30% / 50%
-- [ ] Trzecia kontr-kontroferta: 0% counter, więc 50/50 accept vs hard reject
-- [ ] Blokada 30 dni po hard reject (per klub × podmiot)
-- [ ] Okno finalizacji `Accept`: FA I 3 h lub do końca dnia
-- [ ] Okno finalizacji: FA II 3 dni
-- [ ] Okno finalizacji: extension 1 dzień
-- [ ] Brak finalizacji → hard reject
-- [ ] Brak finalizacji przez wybór innego klubu → **nie** hard reject
-- [ ] Model stanu negocjacji w `LeagueState` (id, podmiot, klub, runda, ostatnia oferta, termin, stan)
-- [ ] Wiadomości `contractOfferResponse` (5 kinds), `contractSigned`, `contractExpiring`, `contractLostToRival`
-- [ ] Wiadomości `staffOfferResponse` (5 kinds), `staffSigned`
-- [ ] Podnieść `currentSchemaVersion`
+- [x] **Rozstrzygnąć sprzeczność #3** (nachodzące progi `offerScore`) — rozwiązano przez rozłączne pasma `0–24`, `25–39`, `40–54`, `55–69`, `70–100`
+- [x] `playerWant = clamp(((pointValue + 1000) / 20) + personalityFactor + currentTeamStatus, 0, 100)`
+- [x] `personalityFactor`: ambitious +5, temperamental +4, leader +1, balanced 0, professional −2, loyal −4
+- [x] `currentTeamStatus`: rebuild −5, retool −3, pretender 0, contender +5, elite +7
+- [x] `staffWant = clamp(roleStarsAvg × 20 + currentTeamStatus, 0, 100)`
+- [x] `expectedSalary` zawodnika: `min + (max − min) × (want / 100)^3`
+- [x] `expectedSalary` sztabu: `min + (max − min) × (want / 100)^2`
+- [x] Oczekiwana długość zawodnika z tabeli wiek × want (4 przedziały wieku × 3 pasma)
+- [x] Oczekiwana długość sztabu z tabeli wiek × want
+- [x] `salaryFit`: baza 35, −2 za każdy procent poniżej, +1 za każdy procent powyżej
+- [x] `lengthFit`: baza 15, −5 za każdy rok odchylenia
+- [x] `teamStatus` jako składnik `offerScore`
+- [x] `cfoDiscount` ze sztabu
+- [x] Próg 0–24 → hard reject
+- [x] Próg 25–39 → reject kontekstowy
+- [x] Próg 40–54 → counter
+- [x] Próg 55–69 → pasmo mieszane z losowaniem (50/50 w punkcie 62, ±3 pkt proc. Accept na punkt odchylenia)
+- [x] Próg 70–100 → accept
+- [x] Reakcja `Waiting`: kilka ofert w tej samej godzinie lub oferta poniżej oczekiwań w FA phase I
+- [x] `Waiting` nie jest pasmem score i może być wymuszony przez kontekst negocjacji
+- [x] Reakcja `Waiting`: automatyczne oczekiwanie przez 2 godziny, z clampingiem do godziny 10
+- [x] `Waiting` aktywowany w przedostatniej godzinie → decyzja w ostatniej, a finalizacja pozostaje dostępna w tym slocie
+- [x] Kontroferty: pierwsza w zakresie 65–100, druga 65–85, trzecia 60–70
+- [x] Czwarta kontroferta nie następuje
+- [x] Szansa hard reject przy kontr-kontrofercie: 15% / 30% / 50%
+- [x] Trzecia kontr-kontroferta: 0% counter, więc 50/50 accept vs hard reject
+- [x] Blokada 30 dni po hard reject (per klub × podmiot)
+- [x] Okno finalizacji `Accept`: FA I 3 h lub do końca dnia
+- [x] Okno finalizacji: FA II 3 dni
+- [x] Okno finalizacji: extension 1 dzień
+- [x] Brak finalizacji → hard reject; wyjątek: anulowanie po wyborze rywala
+- [x] Brak finalizacji przez wybór innego klubu → **nie** hard reject
+- [x] Model stanu negocjacji w `LeagueState` (id, podmiot, klub, runda, ostatnia oferta, termin, stan)
+- [x] Wiadomości `contractOfferResponse` (5 kinds), `contractSigned`, `contractExpiring`, `contractLostToRival`
+- [x] Wiadomości `staffOfferResponse` (5 kinds), `staffSigned`
+- [x] Podnieść `currentSchemaVersion` do 16
 
 **Testy**
-- [ ] Oferta ~20 pkt → hard reject + blokada 30 dni
-- [ ] Timeout finalizacji przeradza Accept w hard reject
-- [ ] Trzecia kontr-kontroferta to ~50/50 accept vs hard reject
-- [ ] Utrata podmiotu na rzecz innego klubu nie blokuje przyszłych rozmów
-- [ ] `offerScore` 62 daje rozkład 50/50 counter vs accept
+- [x] Oferta ~20 pkt → hard reject + blokada 30 dni
+- [x] Timeout finalizacji przeradza Accept w hard reject
+- [x] Trzecia kontr-kontroferta to ~50/50 accept vs hard reject
+- [x] Utrata podmiotu na rzecz innego klubu nie blokuje przyszłych rozmów
+- [x] `offerScore` 62 daje rozkład 50/50 counter vs accept
+- [x] Waiting w godzinie 9 jest rozstrzygany w godzinie 10 bez automatycznego hard rejectu w tym samym slocie
 
-**Demo:** negocjacja przedłużenia z kontrofertą i kontr-kontrofertą, z widocznym licznikiem rund i terminem finalizacji.
+**Demo:** ✅ ekrany kontraktów pokazują okno, godzinę, rundę, wynik, deadline i CTA finalizacji.
 
 ---
 
-### ⬜ Task 29: Okna kontraktowe — extensions, FA I (godzinowe), FA II
+### ✅ Task 29: Okna kontraktowe — extensions, FA I (godzinowe), FA II
 
 **Cel:** `contracts.md` §1–4, §8–9.
 
-- [ ] **Extensions (tyg. 46 wt–niedz):** 1 oferta na podmiot na dzień
-- [ ] Extensions: wyłączność negocjacji przy Rookie Extension
-- [ ] Extensions: reguła „zawodnik bez oczekiwanych minut nie chce przedłużać" (progi z OVR)
-- [ ] Extensions: brak przedłużenia → sztab staje się FA, zawodnicy RFA/UFA wg kontraktu
-- [ ] **FA phase I (tyg. 47):** 10 godzin, 1 oferta zawodnik + 1 sztab na klub na godzinę
-- [ ] FA I: niezużyta godzina przepada
-- [ ] FA I: AI licytuje w tej samej godzinie
-- [ ] FA I: przy kilku ofertach podmiot wybiera wyższy `offerScore`
-- [ ] FA I: kontroferta w przedostatniej godzinie → „zastanawianie się" do końca dnia, prezentacja w pierwszej godzinie kolejnego dnia
-- [ ] Akceptacja kontroferty = natychmiastowe podpisanie bez finalizacji
-- [ ] Przy wielu akceptacjach kontroferty podmiot wybiera i od razu finalizuje
-- [ ] **FA phase II (tyg. 48 → niedziela tyg. 45):** bez limitu ofert
-- [ ] FA II: odpowiedź w 2–4 dni
-- [ ] FA II: negocjacja nieukończona do końca okna anulowana bez hard reject
-- [ ] Bufor: między niedzielą tyg. 45 a wtorkiem tyg. 46 żadne okno nie jest otwarte
-- [ ] **RFA:** QO ≥ 1,25 × ostatniej pensji rookie
-- [ ] RFA: offer sheet od innych klubów w ramach ich capu
-- [ ] RFA: prawo match klubu macierzystego do identycznych warunków
-- [ ] RFA: okno match FA I 3 h / do końca dnia, FA II 3 dni
-- [ ] Brak QO → zawodnik zostaje UFA bez prawa match
-- [ ] **Prawa do niepodpisanych draftowanych:** nie liczą się do rosteru, nie mogą grać
-- [ ] Podpis w dowolnym momencie przy wolnym miejscu, warunki jak w oknie extension
-- [ ] Możliwość wymiany praw jako assetu (odbierający nie musi mieć miejsca w momencie wymiany)
-- [ ] **Roll NTC 20%** przy podpisie/przedłużeniu po spełnieniu progu (wiek ≥30, staż ≥4, `pointValue` ≥200, kontrakt ≥2 lata)
-- [ ] NTC: roll raz, wynik widoczny od razu, klub nie może odmówić
-- [ ] NTC obowiązuje do końca kontraktu, nowy roll przy przedłużeniu
-- [ ] Blokada podpisu przy rosterze 30
-- [ ] Wiadomości `rfaQualifyingOffer`, `rfaOfferSheet`, `draftedRightsReminder`
-- [ ] Podnieść `currentSchemaVersion`
+- [x] **Extensions (tyg. 46 wt–niedz):** 1 oferta na podmiot na dzień
+- [x] Extensions: wyłączność negocjacji przy Rookie Extension
+- [x] Extensions: reguła minutowa „zawodnik bez oczekiwanych minut nie chce przedłużać": agregat całego sezonu (regular season + play-in + playoff), minimalna próba 1000 possible minutes, średnia surowego snapshotu OVR/current OVR, progi 65%/50%/35%/20% i hard reject z blokadą 30 dni
+- [x] Minutes: `minutesHistory` pozostaje sześciotygodniową historią eventów, a `seasonMinutes` jest osobnym serializowanym agregatem resetowanym przy rolloverze
+- [x] Player: surowy `seasonStartOvr` jest przechowywany niezależnie od zaokrąglonego `previousOvr`; schema save podniesione do 17
+- [x] Extensions: brak przedłużenia → sztab staje się FA, zawodnicy RFA/UFA wg kontraktu
+- [x] **FA phase I (tyg. 47):** 10 godzin, 1 oferta zawodnik + 1 sztab na klub na godzinę
+- [x] FA I: niezużyta godzina przepada
+- [x] FA I: AI licytuje w tej samej godzinie
+- [x] FA I: przy kilku ofertach podmiot wybiera wyższy `offerScore`
+- [x] FA I: kontroferta w przedostatniej godzinie → „zastanawianie się" do końca dnia, prezentacja w pierwszej godzinie kolejnego dnia
+- [x] Akceptacja kontroferty = natychmiastowe podpisanie bez finalizacji
+- [x] Przy wielu akceptacjach kontroferty podmiot wybiera i od razu finalizuje
+- [x] **FA phase II (tyg. 48 → niedziela tyg. 45):** bez limitu ofert
+- [x] FA II: odpowiedź w 2–4 dni
+- [x] FA II: negocjacja nieukończona do końca okna anulowana bez hard reject
+- [x] Bufor: między niedzielą tyg. 45 a wtorkiem tyg. 46 żadne okno nie jest otwarte
+- [x] **RFA:** QO ≥ 1,25 × ostatniej pensji rookie
+- [x] RFA: offer sheet od innych klubów w ramach ich capu
+- [x] RFA: prawo match klubu macierzystego do identycznych warunków
+- [x] RFA: okno match FA I 3 h / do końca dnia, FA II 3 dni
+- [x] Brak QO → zawodnik zostaje UFA bez prawa match
+- [x] **Prawa do niepodpisanych draftowanych:** nie liczą się do rosteru, nie mogą grać
+- [x] Podpis w dowolnym momencie przy wolnym miejscu, warunki jak w oknie extension
+- [x] Możliwość wymiany praw jako assetu (odbierający nie musi mieć miejsca w momencie wymiany)
+- [x] **Roll NTC 20%** przy podpisie/przedłużeniu po spełnieniu progu (wiek ≥30, staż ≥4, `pointValue` ≥200, kontrakt ≥2 lata)
+- [x] NTC: roll raz, wynik widoczny od razu, klub nie może odmówić
+- [x] NTC obowiązuje do końca kontraktu, nowy roll przy przedłużeniu
+- [x] Blokada podpisu przy rosterze 30
+- [x] Wiadomości `rfaQualifyingOffer`, `rfaOfferSheet`, `draftedRightsReminder`
+- [x] Podnieść `currentSchemaVersion` do 16
 
 **Testy**
-- [ ] QO poniżej progu jest odrzucane
-- [ ] NTC przyznawana w ~20% kwalifikujących się podpisów
-- [ ] Podpis przy rosterze 30 jest blokowany
-- [ ] Negocjacja z fazy II nieukończona do tyg. 45 anulowana bez hard reject
-- [ ] Prawa do draftowanego można wymienić bez miejsca w rosterze
+- [x] QO poniżej progu jest odrzucane
+- [x] NTC przyznawana w ~20% kwalifikujących się podpisów, z deterministycznym seedingiem
+- [x] Podpis przy rosterze 30 jest blokowany
+- [x] Negocjacja z fazy II nieukończona do tyg. 45 anulowana bez hard reject
+- [x] Prawa do draftowanego można wymienić bez miejsca w rosterze
+- [x] Okna kalendarza, FA II bez limitu, Waiting, ranking AI i natychmiastowy podpis kontroferty
 
-**Demo:** pełny dzień FA phase I przeklikany godzina po godzinie, z konkurencją AI i rozstrzygnięciem `waiting` w ostatniej godzinie.
+**Demo:** ✅ dzień FA phase I jest rozwiązywany slot po slocie; AI konkuruje w tym samym resolverze, a Waiting dochodzi do decyzji w ostatniej godzinie.
 
 ---
 

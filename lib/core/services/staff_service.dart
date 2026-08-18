@@ -1,13 +1,15 @@
 import 'dart:math';
 
 import 'package:new_football/core/balance/balance_config.dart';
+import 'package:new_football/core/models/contract_negotiation.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/staff.dart';
 import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/services/message_service.dart';
+import 'package:new_football/core/services/negotiation_rules.dart';
 
-enum StaffReaction { accept, hardReject, waiting, counter }
+enum StaffReaction { accept, hardReject, reject, waiting, counter }
 
 class StaffOffer {
   const StaffOffer({required this.salary, required this.years});
@@ -33,81 +35,273 @@ class StaffService {
   double marketSalary(StaffMember member) =>
       balance.staff.salaryFor(member.role, member.overall);
 
-  /// Uproszczony `staffWant` (0–100 score, `contract_signing.md` §7):
-  /// baseline ~55, podniesiony dla starszego sztabu preferującego krótsze
-  /// kontrakty.
-  double staffWant(StaffMember member) {
-    var want = 55.0;
-    if (member.age >= 55) want += 5;
-    return want;
+  /// Contractual demand score from 0 to 100 (`contracts.md` §7).
+  double staffWant(
+    StaffMember member, {
+    TeamStatus currentTeamStatus = TeamStatus.pretender,
+  }) {
+    final raw =
+        member.overall * 20 +
+        NegotiationRules.teamStatusBonus(currentTeamStatus);
+    return raw.clamp(0.0, 100.0).toDouble();
   }
 
-  double staffOfferScore(StaffMember member, StaffOffer offer) {
-    final salaryFit = (offer.salary / marketSalary(member)).clamp(0.0, 1.4);
-    final yearsFit = member.age >= 55
-        ? (offer.years <= 2 ? 1.1 : 0.7)
-        : (offer.years >= 2 && offer.years <= 4 ? 1.05 : 0.9);
-    const mandateFit = 1.0;
-    const clubFit = 1.0;
-    return 100 *
-        (0.55 * salaryFit +
-            0.25 * yearsFit +
-            0.15 * mandateFit +
-            0.05 * clubFit);
+  int expectedSalary(
+    StaffMember member, {
+    TeamStatus currentTeamStatus = TeamStatus.pretender,
+  }) {
+    final want = staffWant(member, currentTeamStatus: currentTeamStatus) / 100;
+    final salary =
+        balance.staff.minSalary +
+        (balance.staff.maxSalary - balance.staff.minSalary) * want * want;
+    return salary.round().clamp(
+      balance.staff.minSalary,
+      balance.staff.maxSalary,
+    );
   }
 
-  StaffReaction evaluateOffer(StaffMember member, StaffOffer offer) {
-    final c = balance.contracts;
-    final gap = staffOfferScore(member, offer) - staffWant(member);
-    final noise = (_random.nextDouble() * 2 - 1) * c.staffNoiseAbs;
-    final g = gap + noise;
-    if (g >= c.staffAcceptGap) return StaffReaction.accept;
-    if (g >= -6) return StaffReaction.counter;
-    if (g >= c.staffHardRejectGap) return StaffReaction.waiting;
-    return StaffReaction.hardReject;
+  int expectedLength(
+    StaffMember member, {
+    TeamStatus currentTeamStatus = TeamStatus.pretender,
+  }) {
+    final want = staffWant(member, currentTeamStatus: currentTeamStatus);
+    final band = want <= 39
+        ? 0
+        : want <= 69
+        ? 1
+        : 2;
+    if (member.age <= 54) return const [2, 3, 4][band];
+    if (member.age <= 59) return const [1, 2, 2][band];
+    return 1;
   }
 
-  StaffOffer counterOffer(StaffMember member, StaffOffer offer) {
-    final want = marketSalary(member);
-    final mult = 1.03 + _random.nextDouble() * 0.07;
-    final salary = max(offer.salary, (want * mult).round());
-    final years = member.age >= 55 ? min(offer.years, 2) : max(offer.years, 2);
+  double cfoDiscount({StaffMember? cfo, double? negotiation}) =>
+      NegotiationRules.cfoDiscount(negotiation ?? cfo?.attributes.negotiation);
+
+  OfferScoreBreakdown staffOfferBreakdown(
+    StaffMember member,
+    StaffOffer offer, {
+    TeamStatus offeringTeamStatus = TeamStatus.pretender,
+    TeamStatus currentTeamStatus = TeamStatus.pretender,
+    StaffMember? cfo,
+    double? cfoNegotiation,
+  }) {
+    return NegotiationRules.score(
+      salary: offer.salary,
+      expectedSalary: expectedSalary(
+        member,
+        currentTeamStatus: currentTeamStatus,
+      ),
+      years: offer.years,
+      expectedLength: expectedLength(
+        member,
+        currentTeamStatus: currentTeamStatus,
+      ),
+      offeringTeamStatus: offeringTeamStatus,
+      cfoNegotiation: cfoNegotiation ?? cfo?.attributes.negotiation,
+      balance: balance.contracts,
+    );
+  }
+
+  double staffOfferScore(
+    StaffMember member,
+    StaffOffer offer, {
+    TeamStatus offeringTeamStatus = TeamStatus.pretender,
+    TeamStatus currentTeamStatus = TeamStatus.pretender,
+    StaffMember? cfo,
+    double? cfoNegotiation,
+  }) => staffOfferBreakdown(
+    member,
+    offer,
+    offeringTeamStatus: offeringTeamStatus,
+    currentTeamStatus: currentTeamStatus,
+    cfo: cfo,
+    cfoNegotiation: cfoNegotiation,
+  ).score;
+
+  StaffReaction evaluateOffer(
+    StaffMember member,
+    StaffOffer offer, {
+    NegotiationPhase phase = NegotiationPhase.contractExtension,
+    TeamStatus offeringTeamStatus = TeamStatus.pretender,
+    TeamStatus currentTeamStatus = TeamStatus.pretender,
+    StaffMember? cfo,
+    double? cfoNegotiation,
+    bool competingOffers = false,
+    bool belowExpectation = false,
+    bool forceWaiting = false,
+    Random? random,
+  }) {
+    final decision = NegotiationRules.decisionForScore(
+      score: staffOfferScore(
+        member,
+        offer,
+        offeringTeamStatus: offeringTeamStatus,
+        currentTeamStatus: currentTeamStatus,
+        cfo: cfo,
+        cfoNegotiation: cfoNegotiation,
+      ),
+      phase: phase,
+      random: random ?? _random,
+      competingOffers: competingOffers,
+      belowExpectation: belowExpectation,
+      forceWaiting: forceWaiting,
+      balance: balance.contracts,
+    );
+    return _reactionFor(decision);
+  }
+
+  StaffOffer counterOffer(
+    StaffMember member,
+    StaffOffer offer, {
+    int round = 1,
+    TeamStatus offeringTeamStatus = TeamStatus.pretender,
+    TeamStatus currentTeamStatus = TeamStatus.pretender,
+    StaffMember? cfo,
+    double? cfoNegotiation,
+  }) =>
+      counterOfferForRound(
+        member,
+        offer,
+        round: round,
+        offeringTeamStatus: offeringTeamStatus,
+        currentTeamStatus: currentTeamStatus,
+        cfo: cfo,
+        cfoNegotiation: cfoNegotiation,
+      ) ??
+      offer;
+
+  StaffOffer? counterOfferForRound(
+    StaffMember member,
+    StaffOffer offer, {
+    required int round,
+    TeamStatus offeringTeamStatus = TeamStatus.pretender,
+    TeamStatus currentTeamStatus = TeamStatus.pretender,
+    StaffMember? cfo,
+    double? cfoNegotiation,
+  }) {
+    if (round < 1 || round > balance.contracts.maxCounterRounds) return null;
+    final target = NegotiationRules.counterTargetScore(
+      round,
+      balance: balance.contracts,
+    );
+    final years = expectedLength(
+      member,
+      currentTeamStatus: currentTeamStatus,
+    ).clamp(1, 4);
+    final expected = expectedSalary(
+      member,
+      currentTeamStatus: currentTeamStatus,
+    );
+    final discount = cfoDiscount(cfo: cfo, negotiation: cfoNegotiation);
+    final length = NegotiationRules.lengthFit(
+      years: years,
+      expectedLength: expectedLength(
+        member,
+        currentTeamStatus: currentTeamStatus,
+      ),
+      balance: balance.contracts,
+    );
+    final desiredSalaryFit =
+        target / discount -
+        length -
+        NegotiationRules.teamStatusBonus(offeringTeamStatus) -
+        balance.contracts.salaryFitBase;
+    final percentage = desiredSalaryFit >= 0
+        ? desiredSalaryFit / balance.contracts.salaryAboveBonusPerPct
+        : desiredSalaryFit / balance.contracts.salaryBelowPenaltyPerPct;
+    final salary = (expected * (1 + percentage / 100)).round().clamp(
+      balance.staff.minSalary,
+      balance.staff.maxSalary,
+    );
     return StaffOffer(salary: salary, years: years);
   }
+
+  double counterHardRejectChance(int round) =>
+      NegotiationRules.counterHardRejectChance(
+        round,
+        balance: balance.contracts,
+      );
+
+  StaffReaction evaluateCounterResponse(
+    StaffMember member,
+    StaffOffer offer, {
+    required int round,
+    Random? random,
+  }) {
+    if (round < 1 || round > balance.contracts.maxCounterRounds) {
+      return StaffReaction.hardReject;
+    }
+    return (random ?? _random).nextDouble() < counterHardRejectChance(round)
+        ? StaffReaction.hardReject
+        : StaffReaction.accept;
+  }
+
+  StaffReaction _reactionFor(NegotiationDecision decision) =>
+      switch (decision) {
+        NegotiationDecision.accept => StaffReaction.accept,
+        NegotiationDecision.hardReject => StaffReaction.hardReject,
+        NegotiationDecision.reject => StaffReaction.reject,
+        NegotiationDecision.waiting => StaffReaction.waiting,
+        NegotiationDecision.counter => StaffReaction.counter,
+      };
 
   bool isSalaryInRange(int salary) =>
       salary >= balance.staff.minSalary && salary <= balance.staff.maxSalary;
 
-  String? hireValidationReason(Team team, int salary) {
+  String? hireValidationReason(
+    Team team,
+    int salary, {
+    int replacingSalary = 0,
+  }) {
     if (!isSalaryInRange(salary)) {
       return 'Pensja sztabu musi mieścić się w zakresie '
           '${balance.staff.minSalary}–${balance.staff.maxSalary}';
     }
-    if (team.staff.totalSalary + salary > balance.staff.salaryCap) {
+    final adjustedPayroll = team.staff.totalSalary - replacingSalary;
+    if (adjustedPayroll + salary > balance.staff.salaryCap) {
       return 'Przekroczony staff salary cap';
     }
     return null;
   }
 
-  bool canHire(Team team, int salary) =>
-      hireValidationReason(team, salary) == null;
+  bool canHire(Team team, int salary, {int replacingSalary = 0}) =>
+      hireValidationReason(team, salary, replacingSalary: replacingSalary) ==
+      null;
+
+  /// Signs a staff member in either an empty slot or over their own expiring
+  /// contract. Replacing the member's old salary keeps an extension from
+  /// double-counting payroll against the staff cap.
+  Team? sign({
+    required Team team,
+    required StaffMember member,
+    required StaffOffer offer,
+  }) {
+    final existing = team.staff.member(member.role);
+    if (existing != null && existing.id != member.id) return null;
+    final replacingSalary = existing?.contract?.salary ?? 0;
+    if (!canHire(team, offer.salary, replacingSalary: replacingSalary)) {
+      return null;
+    }
+    final signed = member.copyWith(
+      contract: StaffContract(
+        salary: offer.salary,
+        yearsRemaining: offer.years,
+      ),
+    );
+    return team.copyWith(staff: team.staff.withMember(member.role, signed));
+  }
 
   /// Returns `null` if hiring would exceed the staff salary cap, the salary
-  /// range, or the role slot is already filled.
+  /// range, or the role slot is already filled. Extensions use [sign]
+  /// directly so this compatibility API remains a new-hire-only operation.
   Team? hire({
     required Team team,
     required StaffMember member,
     required StaffOffer offer,
   }) {
     if (team.staff.member(member.role) != null) return null;
-    if (!canHire(team, offer.salary)) return null;
-    final hired = member.copyWith(
-      contract: StaffContract(
-        salary: offer.salary,
-        yearsRemaining: offer.years,
-      ),
-    );
-    return team.copyWith(staff: team.staff.withMember(member.role, hired));
+    return sign(team: team, member: member, offer: offer);
   }
 
   /// V1 does not allow terminating an active staff contract. Retirement or

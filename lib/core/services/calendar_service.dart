@@ -35,13 +35,38 @@ class CalendarService {
 
   bool isBreakWeek(int week) => week == _c.breakWeek;
 
-  /// Contract extensions run Tuesday–Sunday of draft week; FA phase I runs
-  /// Monday–Sunday of the following week.
-  bool isHourlyContractMode(int week, int day) {
-    final validDay = day >= 1 && day <= 7;
-    if (!validDay) return false;
-    return (week == _c.draftWeek && day >= 2) || (week == _c.freeAgencyWeek);
+  /// Contract extensions run Tuesday–Sunday of draft week.
+  bool isContractExtensionWindow(int week, int day) =>
+      week == _c.draftWeek && day >= 2 && day <= 7;
+
+  /// Free agency phase I is the ten-slot hourly window in week 47.
+  bool isFreeAgencyPhaseI(int week, [int day = 1]) =>
+      week == _c.freeAgencyWeek && day >= 1 && day <= 7;
+
+  /// Free agency phase II wraps around the season boundary: it starts on
+  /// Monday of week 48 and ends on Sunday of week 45. Week 46 Monday is the
+  /// draft/buffer day and is intentionally closed.
+  bool isFreeAgencyPhaseII(int week, [int day = 1]) {
+    if (day < 1 ||
+        day > 7 ||
+        week == _c.draftWeek ||
+        week == _c.freeAgencyWeek) {
+      return false;
+    }
+    return (week > _c.freeAgencyWeek && week <= _c.seasonCycleWeeks) ||
+        (week >= 1 && week <= _c.freeAgencyPhaseIIEndWeek);
   }
+
+  /// True when any contract market window accepts a submission on the date.
+  bool isActiveContractWindow(int week, int day) =>
+      isContractExtensionWindow(week, day) ||
+      isFreeAgencyPhaseI(week, day) ||
+      isFreeAgencyPhaseII(week, day);
+
+  /// Hourly mode is limited to extensions and FA phase I. FA phase II is a
+  /// daily/unlimited market and therefore deliberately returns false here.
+  bool isHourlyContractMode(int week, int day) =>
+      isContractExtensionWindow(week, day) || isFreeAgencyPhaseI(week, day);
 
   int? initialHourForDate(int week, int day) =>
       isHourlyContractMode(week, day) ? 1 : null;

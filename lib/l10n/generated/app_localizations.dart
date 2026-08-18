@@ -1667,7 +1667,7 @@ abstract class AppLocalizations {
   /// No description provided for @freeAgency_accepted.
   ///
   /// In pl, this message translates to:
-  /// **'Oferta przyjęta, zawodnik podpisany'**
+  /// **'Oferta przyjęta — potwierdź finalizację'**
   String get freeAgency_accepted;
 
   /// No description provided for @freeAgency_rejected.
@@ -1705,6 +1705,144 @@ abstract class AppLocalizations {
   /// In pl, this message translates to:
   /// **'Wolne miejsce pod capem: {amount}'**
   String freeAgency_capSpace(Object amount);
+
+  /// No description provided for @market_status.
+  ///
+  /// In pl, this message translates to:
+  /// **'Rynek kontraktów'**
+  String get market_status;
+
+  /// No description provided for @market_closed.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zamknięty'**
+  String get market_closed;
+
+  /// No description provided for @market_extensions.
+  ///
+  /// In pl, this message translates to:
+  /// **'Przedłużenia'**
+  String get market_extensions;
+
+  /// No description provided for @market_phaseI.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wolna agentura — faza I'**
+  String get market_phaseI;
+
+  /// No description provided for @market_phaseII.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wolna agentura — faza II'**
+  String get market_phaseII;
+
+  /// No description provided for @market_date.
+  ///
+  /// In pl, this message translates to:
+  /// **'Tydzień {week} · dzień {day}'**
+  String market_date(Object day, Object week);
+
+  /// No description provided for @market_hour.
+  ///
+  /// In pl, this message translates to:
+  /// **'Godzina ofert: {hour}/{total}'**
+  String market_hour(Object hour, Object total);
+
+  /// No description provided for @market_round.
+  ///
+  /// In pl, this message translates to:
+  /// **'Runda {round}'**
+  String market_round(Object round);
+
+  /// No description provided for @market_deadline.
+  ///
+  /// In pl, this message translates to:
+  /// **'Termin: tydz. {week}, dzień {day}, godz. {hour}'**
+  String market_deadline(Object day, Object hour, Object week);
+
+  /// No description provided for @market_score.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wynik oferty: {score}'**
+  String market_score(Object score);
+
+  /// No description provided for @market_expectedSalary.
+  ///
+  /// In pl, this message translates to:
+  /// **'Oczekiwana pensja: {salary}'**
+  String market_expectedSalary(Object salary);
+
+  /// No description provided for @market_expectedLength.
+  ///
+  /// In pl, this message translates to:
+  /// **'Oczekiwana długość: {years} lat'**
+  String market_expectedLength(Object years);
+
+  /// No description provided for @market_staffCandidates.
+  ///
+  /// In pl, this message translates to:
+  /// **'Dostępny sztab'**
+  String get market_staffCandidates;
+
+  /// No description provided for @market_staffOffer.
+  ///
+  /// In pl, this message translates to:
+  /// **'Złóż ofertę sztabowi'**
+  String get market_staffOffer;
+
+  /// No description provided for @market_qo.
+  ///
+  /// In pl, this message translates to:
+  /// **'Qualifying Offers'**
+  String get market_qo;
+
+  /// No description provided for @market_submitQO.
+  ///
+  /// In pl, this message translates to:
+  /// **'Złóż QO'**
+  String get market_submitQO;
+
+  /// No description provided for @market_offerSheets.
+  ///
+  /// In pl, this message translates to:
+  /// **'Offer sheets RFA'**
+  String get market_offerSheets;
+
+  /// No description provided for @market_match.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wyrównaj'**
+  String get market_match;
+
+  /// No description provided for @market_release.
+  ///
+  /// In pl, this message translates to:
+  /// **'Odrzuć'**
+  String get market_release;
+
+  /// No description provided for @market_draftedRights.
+  ///
+  /// In pl, this message translates to:
+  /// **'Prawa do draftowanych'**
+  String get market_draftedRights;
+
+  /// No description provided for @market_signRights.
+  ///
+  /// In pl, this message translates to:
+  /// **'Podpisz prawa'**
+  String get market_signRights;
+
+  /// No description provided for @market_rosterFull.
+  ///
+  /// In pl, this message translates to:
+  /// **'Brak miejsca w rosterze'**
+  String get market_rosterFull;
+
+  /// No description provided for @market_noWindow.
+  ///
+  /// In pl, this message translates to:
+  /// **'Dziś nie jest otwarte żadne okno kontraktowe.'**
+  String get market_noWindow;
 
   /// No description provided for @tactics_noTeam.
   ///
@@ -2490,6 +2628,24 @@ abstract class AppLocalizations {
   /// **'Kontrakt przyjęty!'**
   String get contract_accepted;
 
+  /// No description provided for @contract_pendingFinalization.
+  ///
+  /// In pl, this message translates to:
+  /// **'Oferta przyjęta — potwierdź finalizację'**
+  String get contract_pendingFinalization;
+
+  /// No description provided for @contract_finalize.
+  ///
+  /// In pl, this message translates to:
+  /// **'Potwierdź i podpisz'**
+  String get contract_finalize;
+
+  /// No description provided for @contract_finalizationFailed.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nie udało się sfinalizować kontraktu'**
+  String get contract_finalizationFailed;
+
   /// No description provided for @contract_rejected.
   ///
   /// In pl, this message translates to:
@@ -2601,7 +2757,7 @@ abstract class AppLocalizations {
   /// No description provided for @staff_hireAccepted.
   ///
   /// In pl, this message translates to:
-  /// **'Zatrudniono {name}!'**
+  /// **'Oferta zaakceptowana: {name} — potwierdź finalizację'**
   String staff_hireAccepted(String name);
 
   /// No description provided for @staff_hireRejected.
@@ -4708,17 +4864,53 @@ abstract class AppLocalizations {
   /// **'Kontrakt został podpisany.'**
   String get msg_contractSigned_body;
 
-  /// No description provided for @msg_contractExpired_title.
+  /// No description provided for @msg_contractOfferResponse_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Odpowiedź na ofertę kontraktu'**
+  String get msg_contractOfferResponse_title;
+
+  /// No description provided for @msg_contractOfferResponse_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zaktualizowano negocjacje kontraktu.'**
+  String get msg_contractOfferResponse_body;
+
+  /// No description provided for @msg_contractExpiring_title.
   ///
   /// In pl, this message translates to:
   /// **'Wygasający kontrakt'**
+  String get msg_contractExpiring_title;
+
+  /// No description provided for @msg_contractExpiring_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kontrakt {playerName} wygasa po tym sezonie.'**
+  String msg_contractExpiring_body(Object playerName);
+
+  /// No description provided for @msg_contractLostToRival_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Utracony cel'**
+  String get msg_contractLostToRival_title;
+
+  /// No description provided for @msg_contractLostToRival_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'{subjectName} podpisał kontrakt z {rivalTeam}.'**
+  String msg_contractLostToRival_body(Object rivalTeam, Object subjectName);
+
+  /// No description provided for @msg_contractExpired_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wygasły kontrakt'**
   String get msg_contractExpired_title;
 
   /// No description provided for @msg_contractExpired_body.
   ///
   /// In pl, this message translates to:
-  /// **'Kontrakt zawodnika wygasa po sezonie.'**
-  String get msg_contractExpired_body;
+  /// **'Kontrakt {playerName} wygasł.'**
+  String msg_contractExpired_body(Object playerName);
 
   /// No description provided for @msg_declineToExtend_title.
   ///
@@ -4743,6 +4935,30 @@ abstract class AppLocalizations {
   /// In pl, this message translates to:
   /// **'Otrzymano ofertę od innego klubu.'**
   String get msg_rfaOfferSheet_body;
+
+  /// No description provided for @msg_staffOfferResponse_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Odpowiedź sztabu'**
+  String get msg_staffOfferResponse_title;
+
+  /// No description provided for @msg_staffOfferResponse_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zaktualizowano negocjacje kontraktu sztabu.'**
+  String get msg_staffOfferResponse_body;
+
+  /// No description provided for @msg_staffSigned_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Podpisany kontrakt sztabu'**
+  String get msg_staffSigned_title;
+
+  /// No description provided for @msg_staffSigned_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Członek sztabu podpisał nowy kontrakt.'**
+  String get msg_staffSigned_body;
 
   /// No description provided for @msg_staffGrowth_title.
   ///
@@ -4899,6 +5115,18 @@ abstract class AppLocalizations {
   /// In pl, this message translates to:
   /// **'Inna drużyna dokonała wyboru w drafcie.'**
   String get msg_draftPickLeague_body;
+
+  /// No description provided for @msg_draftedRightsReminder_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Niepodpisany draftowany'**
+  String get msg_draftedRightsReminder_title;
+
+  /// No description provided for @msg_draftedRightsReminder_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Masz prawa do {playerName}; roster: {rosterCount}/30.'**
+  String msg_draftedRightsReminder_body(Object playerName, Object rosterCount);
 
   /// No description provided for @msg_apronWarning_title.
   ///
@@ -5341,8 +5569,214 @@ abstract class AppLocalizations {
   /// No description provided for @msg_contractOffer_rfaQualifyingOffer_body.
   ///
   /// In pl, this message translates to:
-  /// **'Termin na złożenie Qualifying Offer.'**
+  /// **'Zbliża się termin złożenia Qualifying Offer.'**
   String get msg_contractOffer_rfaQualifyingOffer_body;
+
+  /// No description provided for @msg_contractOfferResponse_accept_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Oferta zaakceptowana'**
+  String get msg_contractOfferResponse_accept_title;
+
+  /// No description provided for @msg_contractOfferResponse_accept_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Oferta dla {subjectName} została zaakceptowana i czeka na finalizację.'**
+  String msg_contractOfferResponse_accept_body(Object subjectName);
+
+  /// No description provided for @msg_contractOfferResponse_reject_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Oferta odrzucona'**
+  String get msg_contractOfferResponse_reject_title;
+
+  /// No description provided for @msg_contractOfferResponse_reject_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Oferta dla {subjectName} została odrzucona.'**
+  String msg_contractOfferResponse_reject_body(Object subjectName);
+
+  /// No description provided for @msg_contractOfferResponse_hardReject_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Twarde odrzucenie'**
+  String get msg_contractOfferResponse_hardReject_title;
+
+  /// No description provided for @msg_contractOfferResponse_hardReject_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Negocjacje z {subjectName} zostały zablokowane.'**
+  String msg_contractOfferResponse_hardReject_body(Object subjectName);
+
+  /// No description provided for @msg_contractOfferResponse_waiting_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Oferta w toku'**
+  String get msg_contractOfferResponse_waiting_title;
+
+  /// No description provided for @msg_contractOfferResponse_waiting_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'{subjectName} rozważa ofertę.'**
+  String msg_contractOfferResponse_waiting_body(Object subjectName);
+
+  /// No description provided for @msg_contractOfferResponse_counter_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kontroferta'**
+  String get msg_contractOfferResponse_counter_title;
+
+  /// No description provided for @msg_contractOfferResponse_counter_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'{subjectName} złożył kontrofertę: {salary} na {years} lat.'**
+  String msg_contractOfferResponse_counter_body(
+    Object salary,
+    Object subjectName,
+    Object years,
+  );
+
+  /// No description provided for @msg_staffOfferResponse_accept_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Oferta sztabu zaakceptowana'**
+  String get msg_staffOfferResponse_accept_title;
+
+  /// No description provided for @msg_staffOfferResponse_accept_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Oferta dla {subjectName} została zaakceptowana i czeka na finalizację.'**
+  String msg_staffOfferResponse_accept_body(Object subjectName);
+
+  /// No description provided for @msg_staffOfferResponse_reject_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Oferta sztabu odrzucona'**
+  String get msg_staffOfferResponse_reject_title;
+
+  /// No description provided for @msg_staffOfferResponse_reject_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Oferta dla {subjectName} została odrzucona.'**
+  String msg_staffOfferResponse_reject_body(Object subjectName);
+
+  /// No description provided for @msg_staffOfferResponse_hardReject_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Twarde odrzucenie sztabu'**
+  String get msg_staffOfferResponse_hardReject_title;
+
+  /// No description provided for @msg_staffOfferResponse_hardReject_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Negocjacje z {subjectName} zostały zablokowane.'**
+  String msg_staffOfferResponse_hardReject_body(Object subjectName);
+
+  /// No description provided for @msg_staffOfferResponse_waiting_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Oferta sztabu w toku'**
+  String get msg_staffOfferResponse_waiting_title;
+
+  /// No description provided for @msg_staffOfferResponse_waiting_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'{subjectName} rozważa ofertę.'**
+  String msg_staffOfferResponse_waiting_body(Object subjectName);
+
+  /// No description provided for @msg_staffOfferResponse_counter_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kontroferta sztabu'**
+  String get msg_staffOfferResponse_counter_title;
+
+  /// No description provided for @msg_staffOfferResponse_counter_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'{subjectName} złożył kontrofertę: {salary} na {years} lat.'**
+  String msg_staffOfferResponse_counter_body(
+    Object salary,
+    Object subjectName,
+    Object years,
+  );
+
+  /// No description provided for @msg_staffOfferResponse_lostToRival_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Utracony cel sztabu'**
+  String get msg_staffOfferResponse_lostToRival_title;
+
+  /// No description provided for @msg_staffOfferResponse_lostToRival_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'{subjectName} podpisał kontrakt z {rivalTeam}.'**
+  String msg_staffOfferResponse_lostToRival_body(
+    Object rivalTeam,
+    Object subjectName,
+  );
+
+  /// No description provided for @msg_contractLostToRival_lostToRival_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Utracony cel'**
+  String get msg_contractLostToRival_lostToRival_title;
+
+  /// No description provided for @msg_contractLostToRival_lostToRival_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'{subjectName} podpisał kontrakt z {rivalTeam}.'**
+  String msg_contractLostToRival_lostToRival_body(
+    Object rivalTeam,
+    Object subjectName,
+  );
+
+  /// No description provided for @msg_contractExpiring_player_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wygasający kontrakt zawodnika'**
+  String get msg_contractExpiring_player_title;
+
+  /// No description provided for @msg_contractExpiring_player_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kontrakt {playerName} wygasa po tym sezonie.'**
+  String msg_contractExpiring_player_body(Object playerName);
+
+  /// No description provided for @msg_contractExpiring_staff_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wygasający kontrakt sztabu'**
+  String get msg_contractExpiring_staff_title;
+
+  /// No description provided for @msg_contractExpiring_staff_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kontrakt {staffName} wygasa po tym sezonie.'**
+  String msg_contractExpiring_staff_body(Object staffName);
+
+  /// No description provided for @msg_contractExpired_player_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wygasły kontrakt zawodnika'**
+  String get msg_contractExpired_player_title;
+
+  /// No description provided for @msg_contractExpired_player_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kontrakt {playerName} wygasł.'**
+  String msg_contractExpired_player_body(Object playerName);
+
+  /// No description provided for @msg_contractExpired_staff_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wygasły kontrakt sztabu'**
+  String get msg_contractExpired_staff_title;
+
+  /// No description provided for @msg_contractExpired_staff_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kontrakt {staffName} wygasł.'**
+  String msg_contractExpired_staff_body(Object staffName);
 
   /// No description provided for @msg_trade_counter_title.
   ///
@@ -5607,6 +6041,42 @@ abstract class AppLocalizations {
   /// In pl, this message translates to:
   /// **'Złóż QO'**
   String get msg_contractOffer_action_submit;
+
+  /// No description provided for @msg_contractOfferResponse_action_accept.
+  ///
+  /// In pl, this message translates to:
+  /// **'Akceptuj'**
+  String get msg_contractOfferResponse_action_accept;
+
+  /// No description provided for @msg_contractOfferResponse_action_counter.
+  ///
+  /// In pl, this message translates to:
+  /// **'Złóż kontrofertę'**
+  String get msg_contractOfferResponse_action_counter;
+
+  /// No description provided for @msg_contractOfferResponse_action_decline.
+  ///
+  /// In pl, this message translates to:
+  /// **'Odrzuć'**
+  String get msg_contractOfferResponse_action_decline;
+
+  /// No description provided for @msg_staffOfferResponse_action_accept.
+  ///
+  /// In pl, this message translates to:
+  /// **'Akceptuj'**
+  String get msg_staffOfferResponse_action_accept;
+
+  /// No description provided for @msg_staffOfferResponse_action_counter.
+  ///
+  /// In pl, this message translates to:
+  /// **'Złóż kontrofertę'**
+  String get msg_staffOfferResponse_action_counter;
+
+  /// No description provided for @msg_staffOfferResponse_action_decline.
+  ///
+  /// In pl, this message translates to:
+  /// **'Odrzuć'**
+  String get msg_staffOfferResponse_action_decline;
 
   /// No description provided for @msg_tradeOffer_action_accept.
   ///

@@ -557,6 +557,278 @@ as int,
 
 
 /// @nodoc
+mixin _$SeasonMinutesAggregate {
+
+ String get playerId; int get seasonYear; int get actualMinutes; int get possibleMinutes;
+/// Create a copy of SeasonMinutesAggregate
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$SeasonMinutesAggregateCopyWith<SeasonMinutesAggregate> get copyWith => _$SeasonMinutesAggregateCopyWithImpl<SeasonMinutesAggregate>(this as SeasonMinutesAggregate, _$identity);
+
+  /// Serializes this SeasonMinutesAggregate to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SeasonMinutesAggregate&&(identical(other.playerId, playerId) || other.playerId == playerId)&&(identical(other.seasonYear, seasonYear) || other.seasonYear == seasonYear)&&(identical(other.actualMinutes, actualMinutes) || other.actualMinutes == actualMinutes)&&(identical(other.possibleMinutes, possibleMinutes) || other.possibleMinutes == possibleMinutes));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,playerId,seasonYear,actualMinutes,possibleMinutes);
+
+@override
+String toString() {
+  return 'SeasonMinutesAggregate(playerId: $playerId, seasonYear: $seasonYear, actualMinutes: $actualMinutes, possibleMinutes: $possibleMinutes)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $SeasonMinutesAggregateCopyWith<$Res>  {
+  factory $SeasonMinutesAggregateCopyWith(SeasonMinutesAggregate value, $Res Function(SeasonMinutesAggregate) _then) = _$SeasonMinutesAggregateCopyWithImpl;
+@useResult
+$Res call({
+ String playerId, int seasonYear, int actualMinutes, int possibleMinutes
+});
+
+
+
+
+}
+/// @nodoc
+class _$SeasonMinutesAggregateCopyWithImpl<$Res>
+    implements $SeasonMinutesAggregateCopyWith<$Res> {
+  _$SeasonMinutesAggregateCopyWithImpl(this._self, this._then);
+
+  final SeasonMinutesAggregate _self;
+  final $Res Function(SeasonMinutesAggregate) _then;
+
+/// Create a copy of SeasonMinutesAggregate
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? playerId = null,Object? seasonYear = null,Object? actualMinutes = null,Object? possibleMinutes = null,}) {
+  return _then(_self.copyWith(
+playerId: null == playerId ? _self.playerId : playerId // ignore: cast_nullable_to_non_nullable
+as String,seasonYear: null == seasonYear ? _self.seasonYear : seasonYear // ignore: cast_nullable_to_non_nullable
+as int,actualMinutes: null == actualMinutes ? _self.actualMinutes : actualMinutes // ignore: cast_nullable_to_non_nullable
+as int,possibleMinutes: null == possibleMinutes ? _self.possibleMinutes : possibleMinutes // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [SeasonMinutesAggregate].
+extension SeasonMinutesAggregatePatterns on SeasonMinutesAggregate {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _SeasonMinutesAggregate value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _SeasonMinutesAggregate() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _SeasonMinutesAggregate value)  $default,){
+final _that = this;
+switch (_that) {
+case _SeasonMinutesAggregate():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _SeasonMinutesAggregate value)?  $default,){
+final _that = this;
+switch (_that) {
+case _SeasonMinutesAggregate() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String playerId,  int seasonYear,  int actualMinutes,  int possibleMinutes)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _SeasonMinutesAggregate() when $default != null:
+return $default(_that.playerId,_that.seasonYear,_that.actualMinutes,_that.possibleMinutes);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String playerId,  int seasonYear,  int actualMinutes,  int possibleMinutes)  $default,) {final _that = this;
+switch (_that) {
+case _SeasonMinutesAggregate():
+return $default(_that.playerId,_that.seasonYear,_that.actualMinutes,_that.possibleMinutes);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String playerId,  int seasonYear,  int actualMinutes,  int possibleMinutes)?  $default,) {final _that = this;
+switch (_that) {
+case _SeasonMinutesAggregate() when $default != null:
+return $default(_that.playerId,_that.seasonYear,_that.actualMinutes,_that.possibleMinutes);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _SeasonMinutesAggregate implements SeasonMinutesAggregate {
+  const _SeasonMinutesAggregate({required this.playerId, required this.seasonYear, this.actualMinutes = 0, this.possibleMinutes = 0});
+  factory _SeasonMinutesAggregate.fromJson(Map<String, dynamic> json) => _$SeasonMinutesAggregateFromJson(json);
+
+@override final  String playerId;
+@override final  int seasonYear;
+@override@JsonKey() final  int actualMinutes;
+@override@JsonKey() final  int possibleMinutes;
+
+/// Create a copy of SeasonMinutesAggregate
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$SeasonMinutesAggregateCopyWith<_SeasonMinutesAggregate> get copyWith => __$SeasonMinutesAggregateCopyWithImpl<_SeasonMinutesAggregate>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$SeasonMinutesAggregateToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SeasonMinutesAggregate&&(identical(other.playerId, playerId) || other.playerId == playerId)&&(identical(other.seasonYear, seasonYear) || other.seasonYear == seasonYear)&&(identical(other.actualMinutes, actualMinutes) || other.actualMinutes == actualMinutes)&&(identical(other.possibleMinutes, possibleMinutes) || other.possibleMinutes == possibleMinutes));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,playerId,seasonYear,actualMinutes,possibleMinutes);
+
+@override
+String toString() {
+  return 'SeasonMinutesAggregate(playerId: $playerId, seasonYear: $seasonYear, actualMinutes: $actualMinutes, possibleMinutes: $possibleMinutes)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$SeasonMinutesAggregateCopyWith<$Res> implements $SeasonMinutesAggregateCopyWith<$Res> {
+  factory _$SeasonMinutesAggregateCopyWith(_SeasonMinutesAggregate value, $Res Function(_SeasonMinutesAggregate) _then) = __$SeasonMinutesAggregateCopyWithImpl;
+@override @useResult
+$Res call({
+ String playerId, int seasonYear, int actualMinutes, int possibleMinutes
+});
+
+
+
+
+}
+/// @nodoc
+class __$SeasonMinutesAggregateCopyWithImpl<$Res>
+    implements _$SeasonMinutesAggregateCopyWith<$Res> {
+  __$SeasonMinutesAggregateCopyWithImpl(this._self, this._then);
+
+  final _SeasonMinutesAggregate _self;
+  final $Res Function(_SeasonMinutesAggregate) _then;
+
+/// Create a copy of SeasonMinutesAggregate
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? playerId = null,Object? seasonYear = null,Object? actualMinutes = null,Object? possibleMinutes = null,}) {
+  return _then(_SeasonMinutesAggregate(
+playerId: null == playerId ? _self.playerId : playerId // ignore: cast_nullable_to_non_nullable
+as String,seasonYear: null == seasonYear ? _self.seasonYear : seasonYear // ignore: cast_nullable_to_non_nullable
+as int,actualMinutes: null == actualMinutes ? _self.actualMinutes : actualMinutes // ignore: cast_nullable_to_non_nullable
+as int,possibleMinutes: null == possibleMinutes ? _self.possibleMinutes : possibleMinutes // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
 mixin _$TeamPromise {
 
  String get id; String get playerId; String get kind; int get createdSeasonYear; int get createdWeek; int get weeksElapsed; int get durationWeeks; double get requiredMinutesShare;
@@ -1121,7 +1393,7 @@ as int,
 /// @nodoc
 mixin _$TeamEventState {
 
- List<TeamPromise> get promises; List<TeamTransferSituation> get transferSituations; List<MinutesHistoryEntry> get minutesHistory; List<TeamTimedModifier> get modifiers; Map<String, int> get cooldowns; Map<String, int> get seasonFlags; Map<String, double> get pointValueMultipliers; double get publicCriticismRollMultiplier; int get lowAtmosphereWeeks;
+ List<TeamPromise> get promises; List<TeamTransferSituation> get transferSituations; List<MinutesHistoryEntry> get minutesHistory; List<SeasonMinutesAggregate> get seasonMinutes; List<TeamTimedModifier> get modifiers; Map<String, int> get cooldowns; Map<String, int> get seasonFlags; Map<String, double> get pointValueMultipliers; double get publicCriticismRollMultiplier; int get lowAtmosphereWeeks;
 /// Create a copy of TeamEventState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1134,16 +1406,16 @@ $TeamEventStateCopyWith<TeamEventState> get copyWith => _$TeamEventStateCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is TeamEventState&&const DeepCollectionEquality().equals(other.promises, promises)&&const DeepCollectionEquality().equals(other.transferSituations, transferSituations)&&const DeepCollectionEquality().equals(other.minutesHistory, minutesHistory)&&const DeepCollectionEquality().equals(other.modifiers, modifiers)&&const DeepCollectionEquality().equals(other.cooldowns, cooldowns)&&const DeepCollectionEquality().equals(other.seasonFlags, seasonFlags)&&const DeepCollectionEquality().equals(other.pointValueMultipliers, pointValueMultipliers)&&(identical(other.publicCriticismRollMultiplier, publicCriticismRollMultiplier) || other.publicCriticismRollMultiplier == publicCriticismRollMultiplier)&&(identical(other.lowAtmosphereWeeks, lowAtmosphereWeeks) || other.lowAtmosphereWeeks == lowAtmosphereWeeks));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TeamEventState&&const DeepCollectionEquality().equals(other.promises, promises)&&const DeepCollectionEquality().equals(other.transferSituations, transferSituations)&&const DeepCollectionEquality().equals(other.minutesHistory, minutesHistory)&&const DeepCollectionEquality().equals(other.seasonMinutes, seasonMinutes)&&const DeepCollectionEquality().equals(other.modifiers, modifiers)&&const DeepCollectionEquality().equals(other.cooldowns, cooldowns)&&const DeepCollectionEquality().equals(other.seasonFlags, seasonFlags)&&const DeepCollectionEquality().equals(other.pointValueMultipliers, pointValueMultipliers)&&(identical(other.publicCriticismRollMultiplier, publicCriticismRollMultiplier) || other.publicCriticismRollMultiplier == publicCriticismRollMultiplier)&&(identical(other.lowAtmosphereWeeks, lowAtmosphereWeeks) || other.lowAtmosphereWeeks == lowAtmosphereWeeks));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(promises),const DeepCollectionEquality().hash(transferSituations),const DeepCollectionEquality().hash(minutesHistory),const DeepCollectionEquality().hash(modifiers),const DeepCollectionEquality().hash(cooldowns),const DeepCollectionEquality().hash(seasonFlags),const DeepCollectionEquality().hash(pointValueMultipliers),publicCriticismRollMultiplier,lowAtmosphereWeeks);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(promises),const DeepCollectionEquality().hash(transferSituations),const DeepCollectionEquality().hash(minutesHistory),const DeepCollectionEquality().hash(seasonMinutes),const DeepCollectionEquality().hash(modifiers),const DeepCollectionEquality().hash(cooldowns),const DeepCollectionEquality().hash(seasonFlags),const DeepCollectionEquality().hash(pointValueMultipliers),publicCriticismRollMultiplier,lowAtmosphereWeeks);
 
 @override
 String toString() {
-  return 'TeamEventState(promises: $promises, transferSituations: $transferSituations, minutesHistory: $minutesHistory, modifiers: $modifiers, cooldowns: $cooldowns, seasonFlags: $seasonFlags, pointValueMultipliers: $pointValueMultipliers, publicCriticismRollMultiplier: $publicCriticismRollMultiplier, lowAtmosphereWeeks: $lowAtmosphereWeeks)';
+  return 'TeamEventState(promises: $promises, transferSituations: $transferSituations, minutesHistory: $minutesHistory, seasonMinutes: $seasonMinutes, modifiers: $modifiers, cooldowns: $cooldowns, seasonFlags: $seasonFlags, pointValueMultipliers: $pointValueMultipliers, publicCriticismRollMultiplier: $publicCriticismRollMultiplier, lowAtmosphereWeeks: $lowAtmosphereWeeks)';
 }
 
 
@@ -1154,7 +1426,7 @@ abstract mixin class $TeamEventStateCopyWith<$Res>  {
   factory $TeamEventStateCopyWith(TeamEventState value, $Res Function(TeamEventState) _then) = _$TeamEventStateCopyWithImpl;
 @useResult
 $Res call({
- List<TeamPromise> promises, List<TeamTransferSituation> transferSituations, List<MinutesHistoryEntry> minutesHistory, List<TeamTimedModifier> modifiers, Map<String, int> cooldowns, Map<String, int> seasonFlags, Map<String, double> pointValueMultipliers, double publicCriticismRollMultiplier, int lowAtmosphereWeeks
+ List<TeamPromise> promises, List<TeamTransferSituation> transferSituations, List<MinutesHistoryEntry> minutesHistory, List<SeasonMinutesAggregate> seasonMinutes, List<TeamTimedModifier> modifiers, Map<String, int> cooldowns, Map<String, int> seasonFlags, Map<String, double> pointValueMultipliers, double publicCriticismRollMultiplier, int lowAtmosphereWeeks
 });
 
 
@@ -1171,12 +1443,13 @@ class _$TeamEventStateCopyWithImpl<$Res>
 
 /// Create a copy of TeamEventState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? promises = null,Object? transferSituations = null,Object? minutesHistory = null,Object? modifiers = null,Object? cooldowns = null,Object? seasonFlags = null,Object? pointValueMultipliers = null,Object? publicCriticismRollMultiplier = null,Object? lowAtmosphereWeeks = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? promises = null,Object? transferSituations = null,Object? minutesHistory = null,Object? seasonMinutes = null,Object? modifiers = null,Object? cooldowns = null,Object? seasonFlags = null,Object? pointValueMultipliers = null,Object? publicCriticismRollMultiplier = null,Object? lowAtmosphereWeeks = null,}) {
   return _then(_self.copyWith(
 promises: null == promises ? _self.promises : promises // ignore: cast_nullable_to_non_nullable
 as List<TeamPromise>,transferSituations: null == transferSituations ? _self.transferSituations : transferSituations // ignore: cast_nullable_to_non_nullable
 as List<TeamTransferSituation>,minutesHistory: null == minutesHistory ? _self.minutesHistory : minutesHistory // ignore: cast_nullable_to_non_nullable
-as List<MinutesHistoryEntry>,modifiers: null == modifiers ? _self.modifiers : modifiers // ignore: cast_nullable_to_non_nullable
+as List<MinutesHistoryEntry>,seasonMinutes: null == seasonMinutes ? _self.seasonMinutes : seasonMinutes // ignore: cast_nullable_to_non_nullable
+as List<SeasonMinutesAggregate>,modifiers: null == modifiers ? _self.modifiers : modifiers // ignore: cast_nullable_to_non_nullable
 as List<TeamTimedModifier>,cooldowns: null == cooldowns ? _self.cooldowns : cooldowns // ignore: cast_nullable_to_non_nullable
 as Map<String, int>,seasonFlags: null == seasonFlags ? _self.seasonFlags : seasonFlags // ignore: cast_nullable_to_non_nullable
 as Map<String, int>,pointValueMultipliers: null == pointValueMultipliers ? _self.pointValueMultipliers : pointValueMultipliers // ignore: cast_nullable_to_non_nullable
@@ -1267,10 +1540,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<TeamPromise> promises,  List<TeamTransferSituation> transferSituations,  List<MinutesHistoryEntry> minutesHistory,  List<TeamTimedModifier> modifiers,  Map<String, int> cooldowns,  Map<String, int> seasonFlags,  Map<String, double> pointValueMultipliers,  double publicCriticismRollMultiplier,  int lowAtmosphereWeeks)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<TeamPromise> promises,  List<TeamTransferSituation> transferSituations,  List<MinutesHistoryEntry> minutesHistory,  List<SeasonMinutesAggregate> seasonMinutes,  List<TeamTimedModifier> modifiers,  Map<String, int> cooldowns,  Map<String, int> seasonFlags,  Map<String, double> pointValueMultipliers,  double publicCriticismRollMultiplier,  int lowAtmosphereWeeks)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _TeamEventState() when $default != null:
-return $default(_that.promises,_that.transferSituations,_that.minutesHistory,_that.modifiers,_that.cooldowns,_that.seasonFlags,_that.pointValueMultipliers,_that.publicCriticismRollMultiplier,_that.lowAtmosphereWeeks);case _:
+return $default(_that.promises,_that.transferSituations,_that.minutesHistory,_that.seasonMinutes,_that.modifiers,_that.cooldowns,_that.seasonFlags,_that.pointValueMultipliers,_that.publicCriticismRollMultiplier,_that.lowAtmosphereWeeks);case _:
   return orElse();
 
 }
@@ -1288,10 +1561,10 @@ return $default(_that.promises,_that.transferSituations,_that.minutesHistory,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<TeamPromise> promises,  List<TeamTransferSituation> transferSituations,  List<MinutesHistoryEntry> minutesHistory,  List<TeamTimedModifier> modifiers,  Map<String, int> cooldowns,  Map<String, int> seasonFlags,  Map<String, double> pointValueMultipliers,  double publicCriticismRollMultiplier,  int lowAtmosphereWeeks)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<TeamPromise> promises,  List<TeamTransferSituation> transferSituations,  List<MinutesHistoryEntry> minutesHistory,  List<SeasonMinutesAggregate> seasonMinutes,  List<TeamTimedModifier> modifiers,  Map<String, int> cooldowns,  Map<String, int> seasonFlags,  Map<String, double> pointValueMultipliers,  double publicCriticismRollMultiplier,  int lowAtmosphereWeeks)  $default,) {final _that = this;
 switch (_that) {
 case _TeamEventState():
-return $default(_that.promises,_that.transferSituations,_that.minutesHistory,_that.modifiers,_that.cooldowns,_that.seasonFlags,_that.pointValueMultipliers,_that.publicCriticismRollMultiplier,_that.lowAtmosphereWeeks);case _:
+return $default(_that.promises,_that.transferSituations,_that.minutesHistory,_that.seasonMinutes,_that.modifiers,_that.cooldowns,_that.seasonFlags,_that.pointValueMultipliers,_that.publicCriticismRollMultiplier,_that.lowAtmosphereWeeks);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1308,10 +1581,10 @@ return $default(_that.promises,_that.transferSituations,_that.minutesHistory,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<TeamPromise> promises,  List<TeamTransferSituation> transferSituations,  List<MinutesHistoryEntry> minutesHistory,  List<TeamTimedModifier> modifiers,  Map<String, int> cooldowns,  Map<String, int> seasonFlags,  Map<String, double> pointValueMultipliers,  double publicCriticismRollMultiplier,  int lowAtmosphereWeeks)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<TeamPromise> promises,  List<TeamTransferSituation> transferSituations,  List<MinutesHistoryEntry> minutesHistory,  List<SeasonMinutesAggregate> seasonMinutes,  List<TeamTimedModifier> modifiers,  Map<String, int> cooldowns,  Map<String, int> seasonFlags,  Map<String, double> pointValueMultipliers,  double publicCriticismRollMultiplier,  int lowAtmosphereWeeks)?  $default,) {final _that = this;
 switch (_that) {
 case _TeamEventState() when $default != null:
-return $default(_that.promises,_that.transferSituations,_that.minutesHistory,_that.modifiers,_that.cooldowns,_that.seasonFlags,_that.pointValueMultipliers,_that.publicCriticismRollMultiplier,_that.lowAtmosphereWeeks);case _:
+return $default(_that.promises,_that.transferSituations,_that.minutesHistory,_that.seasonMinutes,_that.modifiers,_that.cooldowns,_that.seasonFlags,_that.pointValueMultipliers,_that.publicCriticismRollMultiplier,_that.lowAtmosphereWeeks);case _:
   return null;
 
 }
@@ -1323,7 +1596,7 @@ return $default(_that.promises,_that.transferSituations,_that.minutesHistory,_th
 @JsonSerializable()
 
 class _TeamEventState implements TeamEventState {
-  const _TeamEventState({final  List<TeamPromise> promises = const [], final  List<TeamTransferSituation> transferSituations = const [], final  List<MinutesHistoryEntry> minutesHistory = const [], final  List<TeamTimedModifier> modifiers = const [], final  Map<String, int> cooldowns = const {}, final  Map<String, int> seasonFlags = const {}, final  Map<String, double> pointValueMultipliers = const {}, this.publicCriticismRollMultiplier = 1.0, this.lowAtmosphereWeeks = 0}): _promises = promises,_transferSituations = transferSituations,_minutesHistory = minutesHistory,_modifiers = modifiers,_cooldowns = cooldowns,_seasonFlags = seasonFlags,_pointValueMultipliers = pointValueMultipliers;
+  const _TeamEventState({final  List<TeamPromise> promises = const [], final  List<TeamTransferSituation> transferSituations = const [], final  List<MinutesHistoryEntry> minutesHistory = const [], final  List<SeasonMinutesAggregate> seasonMinutes = const [], final  List<TeamTimedModifier> modifiers = const [], final  Map<String, int> cooldowns = const {}, final  Map<String, int> seasonFlags = const {}, final  Map<String, double> pointValueMultipliers = const {}, this.publicCriticismRollMultiplier = 1.0, this.lowAtmosphereWeeks = 0}): _promises = promises,_transferSituations = transferSituations,_minutesHistory = minutesHistory,_seasonMinutes = seasonMinutes,_modifiers = modifiers,_cooldowns = cooldowns,_seasonFlags = seasonFlags,_pointValueMultipliers = pointValueMultipliers;
   factory _TeamEventState.fromJson(Map<String, dynamic> json) => _$TeamEventStateFromJson(json);
 
  final  List<TeamPromise> _promises;
@@ -1345,6 +1618,13 @@ class _TeamEventState implements TeamEventState {
   if (_minutesHistory is EqualUnmodifiableListView) return _minutesHistory;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_minutesHistory);
+}
+
+ final  List<SeasonMinutesAggregate> _seasonMinutes;
+@override@JsonKey() List<SeasonMinutesAggregate> get seasonMinutes {
+  if (_seasonMinutes is EqualUnmodifiableListView) return _seasonMinutes;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_seasonMinutes);
 }
 
  final  List<TeamTimedModifier> _modifiers;
@@ -1391,16 +1671,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TeamEventState&&const DeepCollectionEquality().equals(other._promises, _promises)&&const DeepCollectionEquality().equals(other._transferSituations, _transferSituations)&&const DeepCollectionEquality().equals(other._minutesHistory, _minutesHistory)&&const DeepCollectionEquality().equals(other._modifiers, _modifiers)&&const DeepCollectionEquality().equals(other._cooldowns, _cooldowns)&&const DeepCollectionEquality().equals(other._seasonFlags, _seasonFlags)&&const DeepCollectionEquality().equals(other._pointValueMultipliers, _pointValueMultipliers)&&(identical(other.publicCriticismRollMultiplier, publicCriticismRollMultiplier) || other.publicCriticismRollMultiplier == publicCriticismRollMultiplier)&&(identical(other.lowAtmosphereWeeks, lowAtmosphereWeeks) || other.lowAtmosphereWeeks == lowAtmosphereWeeks));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TeamEventState&&const DeepCollectionEquality().equals(other._promises, _promises)&&const DeepCollectionEquality().equals(other._transferSituations, _transferSituations)&&const DeepCollectionEquality().equals(other._minutesHistory, _minutesHistory)&&const DeepCollectionEquality().equals(other._seasonMinutes, _seasonMinutes)&&const DeepCollectionEquality().equals(other._modifiers, _modifiers)&&const DeepCollectionEquality().equals(other._cooldowns, _cooldowns)&&const DeepCollectionEquality().equals(other._seasonFlags, _seasonFlags)&&const DeepCollectionEquality().equals(other._pointValueMultipliers, _pointValueMultipliers)&&(identical(other.publicCriticismRollMultiplier, publicCriticismRollMultiplier) || other.publicCriticismRollMultiplier == publicCriticismRollMultiplier)&&(identical(other.lowAtmosphereWeeks, lowAtmosphereWeeks) || other.lowAtmosphereWeeks == lowAtmosphereWeeks));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_promises),const DeepCollectionEquality().hash(_transferSituations),const DeepCollectionEquality().hash(_minutesHistory),const DeepCollectionEquality().hash(_modifiers),const DeepCollectionEquality().hash(_cooldowns),const DeepCollectionEquality().hash(_seasonFlags),const DeepCollectionEquality().hash(_pointValueMultipliers),publicCriticismRollMultiplier,lowAtmosphereWeeks);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(_promises),const DeepCollectionEquality().hash(_transferSituations),const DeepCollectionEquality().hash(_minutesHistory),const DeepCollectionEquality().hash(_seasonMinutes),const DeepCollectionEquality().hash(_modifiers),const DeepCollectionEquality().hash(_cooldowns),const DeepCollectionEquality().hash(_seasonFlags),const DeepCollectionEquality().hash(_pointValueMultipliers),publicCriticismRollMultiplier,lowAtmosphereWeeks);
 
 @override
 String toString() {
-  return 'TeamEventState(promises: $promises, transferSituations: $transferSituations, minutesHistory: $minutesHistory, modifiers: $modifiers, cooldowns: $cooldowns, seasonFlags: $seasonFlags, pointValueMultipliers: $pointValueMultipliers, publicCriticismRollMultiplier: $publicCriticismRollMultiplier, lowAtmosphereWeeks: $lowAtmosphereWeeks)';
+  return 'TeamEventState(promises: $promises, transferSituations: $transferSituations, minutesHistory: $minutesHistory, seasonMinutes: $seasonMinutes, modifiers: $modifiers, cooldowns: $cooldowns, seasonFlags: $seasonFlags, pointValueMultipliers: $pointValueMultipliers, publicCriticismRollMultiplier: $publicCriticismRollMultiplier, lowAtmosphereWeeks: $lowAtmosphereWeeks)';
 }
 
 
@@ -1411,7 +1691,7 @@ abstract mixin class _$TeamEventStateCopyWith<$Res> implements $TeamEventStateCo
   factory _$TeamEventStateCopyWith(_TeamEventState value, $Res Function(_TeamEventState) _then) = __$TeamEventStateCopyWithImpl;
 @override @useResult
 $Res call({
- List<TeamPromise> promises, List<TeamTransferSituation> transferSituations, List<MinutesHistoryEntry> minutesHistory, List<TeamTimedModifier> modifiers, Map<String, int> cooldowns, Map<String, int> seasonFlags, Map<String, double> pointValueMultipliers, double publicCriticismRollMultiplier, int lowAtmosphereWeeks
+ List<TeamPromise> promises, List<TeamTransferSituation> transferSituations, List<MinutesHistoryEntry> minutesHistory, List<SeasonMinutesAggregate> seasonMinutes, List<TeamTimedModifier> modifiers, Map<String, int> cooldowns, Map<String, int> seasonFlags, Map<String, double> pointValueMultipliers, double publicCriticismRollMultiplier, int lowAtmosphereWeeks
 });
 
 
@@ -1428,12 +1708,13 @@ class __$TeamEventStateCopyWithImpl<$Res>
 
 /// Create a copy of TeamEventState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? promises = null,Object? transferSituations = null,Object? minutesHistory = null,Object? modifiers = null,Object? cooldowns = null,Object? seasonFlags = null,Object? pointValueMultipliers = null,Object? publicCriticismRollMultiplier = null,Object? lowAtmosphereWeeks = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? promises = null,Object? transferSituations = null,Object? minutesHistory = null,Object? seasonMinutes = null,Object? modifiers = null,Object? cooldowns = null,Object? seasonFlags = null,Object? pointValueMultipliers = null,Object? publicCriticismRollMultiplier = null,Object? lowAtmosphereWeeks = null,}) {
   return _then(_TeamEventState(
 promises: null == promises ? _self._promises : promises // ignore: cast_nullable_to_non_nullable
 as List<TeamPromise>,transferSituations: null == transferSituations ? _self._transferSituations : transferSituations // ignore: cast_nullable_to_non_nullable
 as List<TeamTransferSituation>,minutesHistory: null == minutesHistory ? _self._minutesHistory : minutesHistory // ignore: cast_nullable_to_non_nullable
-as List<MinutesHistoryEntry>,modifiers: null == modifiers ? _self._modifiers : modifiers // ignore: cast_nullable_to_non_nullable
+as List<MinutesHistoryEntry>,seasonMinutes: null == seasonMinutes ? _self._seasonMinutes : seasonMinutes // ignore: cast_nullable_to_non_nullable
+as List<SeasonMinutesAggregate>,modifiers: null == modifiers ? _self._modifiers : modifiers // ignore: cast_nullable_to_non_nullable
 as List<TeamTimedModifier>,cooldowns: null == cooldowns ? _self._cooldowns : cooldowns // ignore: cast_nullable_to_non_nullable
 as Map<String, int>,seasonFlags: null == seasonFlags ? _self._seasonFlags : seasonFlags // ignore: cast_nullable_to_non_nullable
 as Map<String, int>,pointValueMultipliers: null == pointValueMultipliers ? _self._pointValueMultipliers : pointValueMultipliers // ignore: cast_nullable_to_non_nullable

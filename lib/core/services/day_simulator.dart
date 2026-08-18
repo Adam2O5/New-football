@@ -8,21 +8,19 @@ import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/league_strength.dart';
 import 'package:new_football/core/models/match_models.dart';
-import 'package:new_football/core/ai/team_ai_service.dart';
 import 'package:new_football/core/models/message.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/standing.dart';
 import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/services/calendar_event_registry.dart';
 import 'package:new_football/core/services/calendar_service.dart';
-import 'package:new_football/core/services/contract_service.dart';
+import 'package:new_football/core/services/contract_market_service.dart';
 import 'package:new_football/core/services/development_service.dart';
 import 'package:new_football/core/services/discipline_service.dart';
 import 'package:new_football/core/services/league_strength_service.dart';
 import 'package:new_football/core/services/match_post_match_service.dart';
 import 'package:new_football/core/services/message_service.dart';
 import 'package:new_football/core/services/player_event_service.dart';
-import 'package:new_football/core/services/salary_cap_service.dart';
 import 'package:new_football/core/services/team_management_service.dart';
 import 'package:new_football/core/services/team_event_service.dart';
 import 'package:new_football/core/services/schedule_generator.dart';
@@ -60,8 +58,7 @@ class DaySimulator {
     MatchMessageEmitter? matchMessageEmitter,
     DevelopmentService? development,
     ScoutingService? scouting,
-    ContractService? contracts,
-    SalaryCapService? capService,
+    ContractMarketService? contractMarket,
     MessageService? messages,
     TeamManagementService? teamManagement,
     PlayerEventService? playerEvents,
@@ -78,8 +75,8 @@ class DaySimulator {
            MatchMessageEmitter(messages: messages ?? MessageService()),
        development = development ?? DevelopmentService(balance: balance),
        scouting = scouting ?? ScoutingService(balance: balance),
-       contracts = contracts ?? ContractService(balance: balance),
-       capService = capService ?? SalaryCapService(balance: balance),
+       contractMarket =
+           contractMarket ?? ContractMarketService(balance: balance),
        messages = messages ?? MessageService(),
        teamManagement = teamManagement ?? const TeamManagementService(),
        playerEvents =
@@ -95,14 +92,17 @@ class DaySimulator {
   final MatchMessageEmitter matchMessageEmitter;
   final DevelopmentService development;
   final ScoutingService scouting;
-  final ContractService contracts;
-  final SalaryCapService capService;
+  final ContractMarketService contractMarket;
   final MessageService messages;
   final TeamManagementService teamManagement;
   final PlayerEventService playerEvents;
   final TeamEventService teamEvents;
 
-  DaySimulationResult simulateDay(LeagueState league, {int saveSeed = 0}) {
+  DaySimulationResult simulateDay(
+    LeagueState league, {
+    int saveSeed = 0,
+    bool resolveContractMarket = true,
+  }) {
     final week = league.currentWeek;
     final day = league.currentDay;
     var state = league;
@@ -187,10 +187,8 @@ class DaySimulator {
     };
     state = _dailyRecovery(state, excludedTeamIds: administrativeTeamIds);
 
-    // Free agency (`docs/contract_signing.md`): AI clubs bid on FA players
-    // every day of the FA window; highest legal offerScore wins.
-    if (week == balance.calendar.freeAgencyWeek) {
-      state = _resolveFreeAgencyDay(state);
+    if (resolveContractMarket) {
+      state = contractMarket.resolveDay(state, saveSeed: saveSeed);
     }
 
     final (nextWeek, nextDay) = calendar.advanceDay(week, day);
@@ -758,57 +756,6 @@ class DaySimulator {
   /// side-effect free prevents teams in later fixtures from recovering twice
   /// when a round contains several matches.
   Team _recoverTeam(Team team) => team;
-
-  LeagueState _resolveFreeAgencyDay(LeagueState league) {
-    if (league.freeAgents.isEmpty) return league;
-    final ai = TeamAiService(balance: balance);
-    var state = league;
-    final remaining = <Player>[];
-
-    for (final player in state.freeAgents) {
-      ({String teamId, ContractOffer offer, double score})? best;
-      for (final team in state.teams) {
-        // Player's own offers are submitted via the UI, not auto-bid here.
-        if (team.id == state.playerTeamId) continue;
-        if (team.roster.length >= balance.roster.maxSize) continue;
-        final offer = ai.makeFaOffer(player, contracts);
-        if (!capService.canSign(team: team, salary: offer.salary)) continue;
-        if (contracts.evaluate(player, offer) != ContractReaction.accept) {
-          continue;
-        }
-        final score = contracts.playerOfferScore(player, offer);
-        if (best == null || score > best.score) {
-          best = (teamId: team.id, offer: offer, score: score);
-        }
-      }
-
-      if (best == null) {
-        remaining.add(player);
-        continue;
-      }
-      final winningTeam = state.teamById(best.teamId)!;
-      final signed = contracts.signPlayer(
-        team: winningTeam,
-        player: player,
-        offer: best.offer,
-      );
-      if (signed == null) {
-        remaining.add(player);
-        continue;
-      }
-      state = state.updateTeam(signed);
-      state = messages.send(
-        state,
-        type: MessageType.contractSigned,
-        domain: MessageDomain.contracts,
-        titleKey: 'msg_contractSigned_fa_title',
-        bodyKey: 'msg_contractSigned_fa_body',
-        args: {'playerName': player.name, 'teamName': winningTeam.name},
-      );
-    }
-
-    return state.copyWith(freeAgents: remaining);
-  }
 
   LeagueState _dailyRecovery(
     LeagueState league, {

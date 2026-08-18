@@ -43,6 +43,24 @@ abstract class MinutesHistoryEntry with _$MinutesHistoryEntry {
 }
 
 /// A promise made by the manager to a player after a more-minutes request.
+/// Whole-season minutes accumulated for one player in the current club.
+///
+/// Unlike [MinutesHistoryEntry], this record is intentionally not a rolling
+/// window. It is reset at season rollover and is used by season-long contract
+/// extension rules.
+@freezed
+abstract class SeasonMinutesAggregate with _$SeasonMinutesAggregate {
+  const factory SeasonMinutesAggregate({
+    required String playerId,
+    required int seasonYear,
+    @Default(0) int actualMinutes,
+    @Default(0) int possibleMinutes,
+  }) = _SeasonMinutesAggregate;
+
+  factory SeasonMinutesAggregate.fromJson(Map<String, dynamic> json) =>
+      _$SeasonMinutesAggregateFromJson(json);
+}
+
 @freezed
 abstract class TeamPromise with _$TeamPromise {
   const factory TeamPromise({
@@ -87,6 +105,7 @@ abstract class TeamEventState with _$TeamEventState {
     @Default([]) List<TeamPromise> promises,
     @Default([]) List<TeamTransferSituation> transferSituations,
     @Default([]) List<MinutesHistoryEntry> minutesHistory,
+    @Default([]) List<SeasonMinutesAggregate> seasonMinutes,
     @Default([]) List<TeamTimedModifier> modifiers,
     @Default({}) Map<String, int> cooldowns,
     @Default({}) Map<String, int> seasonFlags,
@@ -204,13 +223,50 @@ extension TeamEventStateX on TeamEventState {
     required int currentSeasonYear,
     required int currentWeek,
   }) {
-    final all = [...minutesHistory, ...entries];
+    final entryList = entries.toList();
+    final all = [...minutesHistory, ...entryList];
     final currentKey = currentSeasonYear * 52 + currentWeek;
     final retained = all.where((entry) {
       final key = entry.seasonYear * 52 + entry.week;
       return key <= currentKey && key >= currentKey - 5;
     }).toList();
-    return copyWith(minutesHistory: retained);
+
+    // Keep the event history rolling, but aggregate the same match entries
+    // for the whole current season separately. The map also normalizes any
+    // duplicate rows that may have come from an older in-memory state.
+    final aggregates = <String, SeasonMinutesAggregate>{
+      for (final aggregate in seasonMinutes)
+        if (aggregate.seasonYear == currentSeasonYear)
+          aggregate.playerId: aggregate,
+    };
+    for (final entry in entryList.where(
+      (entry) => entry.seasonYear == currentSeasonYear,
+    )) {
+      final previous = aggregates[entry.playerId];
+      aggregates[entry.playerId] = previous == null
+          ? SeasonMinutesAggregate(
+              playerId: entry.playerId,
+              seasonYear: entry.seasonYear,
+              actualMinutes: entry.minutes,
+              possibleMinutes: entry.possibleMinutes,
+            )
+          : previous.copyWith(
+              actualMinutes: previous.actualMinutes + entry.minutes,
+              possibleMinutes: previous.possibleMinutes + entry.possibleMinutes,
+            );
+    }
+
+    return copyWith(
+      minutesHistory: retained,
+      seasonMinutes: aggregates.values.toList(),
+    );
+  }
+
+  SeasonMinutesAggregate? seasonMinutesFor(String playerId) {
+    for (final aggregate in seasonMinutes.reversed) {
+      if (aggregate.playerId == playerId) return aggregate;
+    }
+    return null;
   }
 
   TeamEventState clearPlayer(String playerId) => clearPlayers({playerId});
@@ -225,6 +281,9 @@ extension TeamEventStateX on TeamEventState {
     minutesHistory: minutesHistory
         .where((entry) => !playerIds.contains(entry.playerId))
         .toList(),
+    seasonMinutes: seasonMinutes
+        .where((entry) => !playerIds.contains(entry.playerId))
+        .toList(),
     pointValueMultipliers: Map<String, double>.from(pointValueMultipliers)
       ..removeWhere((playerId, _) => playerIds.contains(playerId)),
   );
@@ -233,6 +292,7 @@ extension TeamEventStateX on TeamEventState {
     promises: const [],
     transferSituations: const [],
     minutesHistory: const [],
+    seasonMinutes: const [],
     modifiers: const [],
     cooldowns: const {},
     seasonFlags: const {},

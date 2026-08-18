@@ -195,7 +195,7 @@ Wartość oparta na obecnym teamStatus:
 | ---------- | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
 | 0–24       | Hard reject                                 | Oferta wyraźnie poniżej oczekiwań. Kończy rozmowy na standardowy okres blokady.                                |
 | 25–39      | Reject zależnie od kontekstu                | Oferta za słaba, ale jeszcze nie skrajnie zła.                                                                 |
-| 40–59      | Counter                                     | Oferta bliska akceptacji, ale wymaga poprawy. Podmiot może złożyć kontrofertę.                                 |
+| 40–54      | Counter                                     | Oferta bliska akceptacji, ale wymaga poprawy. Podmiot może złożyć kontrofertę.                                 |
 | 55–69      | Waiting / Counter / Accept                  | Oferta wystarczająca. Waiting w FA phase I zastępuje Accept. W innych fazach losowa decyzja, czy Accept, czy Counter.            |
 | 70–100     | Accept                                      | Oferta dobra. Zawsze prowadzi do akceptacji.                                                                   |
 
@@ -212,7 +212,7 @@ W zakresie 55-69 losowanie decyzji jest zdefinowane tak:
 
 ### Contract Extension
 
-- jeśli gracz nie rozegrał oczekiwanej liczby minut to nie chce przedłużać umowy (liczone na podstawie OVR - bez dodatkowego mechanizmu)
+Szczegółowa reguła minutowa znajduje się w sekcji „Reguła minut przy extension” na końcu dokumentu.
 
 ### FA
 
@@ -351,3 +351,37 @@ maxSalary - salary_cap.md
 
 - user nie może podpisać kontraktu z kolejnym graczem, jeśli ma już w rosterze 30 graczy
 - kontrakt dla wydraftowanego zawodnika może, lecz nie musi zostać zaoferowany. Jeśli klub nie zaoferuje kontraktu to gracz dalej jest assetem zespołu, nie liczy się do limitu graczy, ale też nie może grać. User może w każdym momencie podpisać takiego zawodnika, jeśli jest miejsce w rosterze lub wytradeować jako asset - drużyna otrzymująca prawa do gracza nie musi mieć miejsca w rosterze w trakcie wymiany, dopiero w momencie podpisu musi je mieć (analogicznie jak dla poprzedniej drużyny). Zasady kontraktowe działają tak jak w momencie podpisu w trakcie contract extension (długość kontraktu taka sama).
+
+---
+
+### Utrwalony lifecycle negocjacji
+
+User i AI korzystają ze wspólnego `LeagueState.negotiations` i modelu `ContractNegotiation`. Rekord przechowuje podmiot, klub, fazę, rundę, ostatnią ofertę, reakcję, deadline i stan terminalny. Dzięki temu restart lub przejście przez kolejną godzinę nie tworzy osobnego, ulotnego stanu AI.
+
+`Waiting` jest zapisany w negocjacji wraz z terminem i jest rozstrzygany przez hourly resolver; deadline nie jest rekonstruowany wyłącznie z bieżącej godziny. `Accept` przechodzi do `pendingFinalization` z terminem właściwym dla fazy, a brak finalizacji wygasza negocjację zgodnie z regułami §5. Negocjacja rozstrzygnięta w bieżącym slocie jest pomijana przez ten sam tick podczas wygaszania, aby nowa decyzja nie została natychmiast zastąpiona przez hard reject.
+
+### Reguła minut przy extension
+
+Zawodnik ocenia przedłużenie na podstawie minut z całego bieżącego sezonu, obejmującego sezon regularny, play-in i playoffy. Rynek korzysta z osobnego agregatu `seasonMinutes`; istniejące `minutesHistory` pozostaje sześciotygodniowym oknem używanym przez eventy drużynowe.
+
+```text
+actualMinutesShare = sum(actualMinutes) / sum(possibleMinutes)
+```
+
+Wpisy z `possibleMinutes = 0` są wyłączone z mianownika. Kontuzja i zawieszenie ustawiają `possibleMinutes = 0`, a walkower nie zapisuje minut w ogóle. Reguła jest oceniana dopiero przy `possibleMinutes >= 1000`; przy mniejszej próbie działa standardowa negocjacja.
+
+OVR używany przez regułę to średnia surowego snapshotu z początku sezonu i bieżącego surowego OVR:
+
+```text
+effectiveOvr = (seasonStartRawOvr + currentRawOvr) / 2
+```
+
+| Zakres effective OVR | Wymagany actualMinutesShare | Reakcja przy niespełnieniu |
+| --- | ---: | --- |
+| `>= 87` | `>= 65%` | Hard reject |
+| `80–<87` | `>= 50%` | Hard reject |
+| `75–<80` | `>= 35%` | Hard reject |
+| `70–<75` | `>= 20%` | Hard reject |
+| `< 70` | reguła nieaktywna | brak odmowy minutowej |
+
+Niespełnienie aktywnego progu kończy rozmowy jako `hardReject` i tworzy istniejącą blokadę negocjacji na 30 dni. Wiadomość odpowiedzi zawiera `reasonCode` oraz dane OVR, licznika minut i udziału, aby UI mogło wyjaśnić odmowę. Zmiana modelu zapisu podnosi `SaveSchema.currentVersion` do 17.

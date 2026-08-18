@@ -300,7 +300,9 @@ class SeedDataGenerator {
         ),
       ),
     );
-    return player.recalculatePointValue();
+    return player
+        .copyWith(seasonStartOvr: player.overall())
+        .recalculatePointValue();
   }
 
   int _heightCmFor(Position position, Random rng) {

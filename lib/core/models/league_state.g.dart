@@ -46,6 +46,31 @@ _LeagueState _$LeagueStateFromJson(Map<String, dynamic> json) => _LeagueState(
       : LeagueStrengthTable.fromJson(
           json['strengthTable'] as Map<String, dynamic>,
         ),
+  negotiations:
+      (json['negotiations'] as List<dynamic>?)
+          ?.map((e) => ContractNegotiation.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+  negotiationBlocks:
+      (json['negotiationBlocks'] as List<dynamic>?)
+          ?.map((e) => NegotiationBlock.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+  draftedRights:
+      (json['draftedRights'] as List<dynamic>?)
+          ?.map((e) => DraftedPlayerRights.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+  rfaQualifyingOffers:
+      (json['rfaQualifyingOffers'] as List<dynamic>?)
+          ?.map((e) => RfaQualifyingOffer.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+  rfaOfferSheets:
+      (json['rfaOfferSheets'] as List<dynamic>?)
+          ?.map((e) => RfaOfferSheet.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
 );
 
 Map<String, dynamic> _$LeagueStateToJson(_LeagueState instance) =>
@@ -65,4 +90,9 @@ Map<String, dynamic> _$LeagueStateToJson(_LeagueState instance) =>
       'staffFreeAgents': instance.staffFreeAgents,
       'freeAgents': instance.freeAgents,
       'strengthTable': instance.strengthTable,
+      'negotiations': instance.negotiations,
+      'negotiationBlocks': instance.negotiationBlocks,
+      'draftedRights': instance.draftedRights,
+      'rfaQualifyingOffers': instance.rfaQualifyingOffers,
+      'rfaOfferSheets': instance.rfaOfferSheets,
     };

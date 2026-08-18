@@ -830,7 +830,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Enter a valid salary and 1–5 contract years';
 
   @override
-  String get freeAgency_accepted => 'Offer accepted and player signed';
+  String get freeAgency_accepted => 'Offer accepted — confirm finalization';
 
   @override
   String get freeAgency_rejected => 'Offer rejected';
@@ -853,6 +853,89 @@ class AppLocalizationsEn extends AppLocalizations {
   String freeAgency_capSpace(Object amount) {
     return 'Cap space: $amount';
   }
+
+  @override
+  String get market_status => 'Contract market';
+
+  @override
+  String get market_closed => 'Closed';
+
+  @override
+  String get market_extensions => 'Extensions';
+
+  @override
+  String get market_phaseI => 'Free agency phase I';
+
+  @override
+  String get market_phaseII => 'Free agency phase II';
+
+  @override
+  String market_date(Object day, Object week) {
+    return 'Week $week · day $day';
+  }
+
+  @override
+  String market_hour(Object hour, Object total) {
+    return 'Offer hour: $hour/$total';
+  }
+
+  @override
+  String market_round(Object round) {
+    return 'Round $round';
+  }
+
+  @override
+  String market_deadline(Object day, Object hour, Object week) {
+    return 'Deadline: week $week, day $day, hour $hour';
+  }
+
+  @override
+  String market_score(Object score) {
+    return 'Offer score: $score';
+  }
+
+  @override
+  String market_expectedSalary(Object salary) {
+    return 'Expected salary: $salary';
+  }
+
+  @override
+  String market_expectedLength(Object years) {
+    return 'Expected length: $years years';
+  }
+
+  @override
+  String get market_staffCandidates => 'Available staff';
+
+  @override
+  String get market_staffOffer => 'Offer staff contract';
+
+  @override
+  String get market_qo => 'Qualifying offers';
+
+  @override
+  String get market_submitQO => 'Submit QO';
+
+  @override
+  String get market_offerSheets => 'RFA offer sheets';
+
+  @override
+  String get market_match => 'Match';
+
+  @override
+  String get market_release => 'Decline';
+
+  @override
+  String get market_draftedRights => 'Drafted rights';
+
+  @override
+  String get market_signRights => 'Sign rights';
+
+  @override
+  String get market_rosterFull => 'No roster space available';
+
+  @override
+  String get market_noWindow => 'No contract market is open today.';
 
   @override
   String get tactics_noTeam => 'No player team';
@@ -1295,6 +1378,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get contract_accepted => 'Contract accepted!';
 
   @override
+  String get contract_pendingFinalization =>
+      'Offer accepted — confirm finalization';
+
+  @override
+  String get contract_finalize => 'Confirm and sign';
+
+  @override
+  String get contract_finalizationFailed => 'Contract finalization failed';
+
+  @override
   String get contract_rejected => 'Offer rejected';
 
   @override
@@ -1356,7 +1449,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String staff_hireAccepted(String name) {
-    return 'Hired $name!';
+    return 'Offer accepted for $name — confirm finalization';
   }
 
   @override
@@ -2523,11 +2616,35 @@ class AppLocalizationsEn extends AppLocalizations {
   String get msg_contractSigned_body => 'The contract has been signed.';
 
   @override
-  String get msg_contractExpired_title => 'Expiring contract';
+  String get msg_contractOfferResponse_title => 'Contract offer response';
 
   @override
-  String get msg_contractExpired_body =>
-      'The player\'s contract expires after the season.';
+  String get msg_contractOfferResponse_body =>
+      'The contract negotiation was updated.';
+
+  @override
+  String get msg_contractExpiring_title => 'Contract expiring';
+
+  @override
+  String msg_contractExpiring_body(Object playerName) {
+    return '$playerName\'s contract expires after this season.';
+  }
+
+  @override
+  String get msg_contractLostToRival_title => 'Lost target';
+
+  @override
+  String msg_contractLostToRival_body(Object rivalTeam, Object subjectName) {
+    return '$subjectName signed with $rivalTeam.';
+  }
+
+  @override
+  String get msg_contractExpired_title => 'Expired contract';
+
+  @override
+  String msg_contractExpired_body(Object playerName) {
+    return '$playerName\'s contract has expired.';
+  }
 
   @override
   String get msg_declineToExtend_title => 'No extension';
@@ -2542,6 +2659,19 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get msg_rfaOfferSheet_body =>
       'An offer from another club has arrived.';
+
+  @override
+  String get msg_staffOfferResponse_title => 'Staff offer response';
+
+  @override
+  String get msg_staffOfferResponse_body =>
+      'A staff contract negotiation was updated.';
+
+  @override
+  String get msg_staffSigned_title => 'Staff contract signed';
+
+  @override
+  String get msg_staffSigned_body => 'A staff member signed a new contract.';
 
   @override
   String get msg_staffGrowth_title => 'Staff growth';
@@ -2622,6 +2752,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get msg_draftPickLeague_body => 'Another team made a draft selection.';
+
+  @override
+  String get msg_draftedRightsReminder_title => 'Unsigned drafted player';
+
+  @override
+  String msg_draftedRightsReminder_body(Object playerName, Object rosterCount) {
+    return 'You hold the rights to $playerName; roster: $rosterCount/30.';
+  }
 
   @override
   String get msg_apronWarning_title => 'Apron exceeded';
@@ -2894,6 +3032,148 @@ class AppLocalizationsEn extends AppLocalizations {
       'The deadline to submit the qualifying offer is approaching.';
 
   @override
+  String get msg_contractOfferResponse_accept_title => 'Offer accepted';
+
+  @override
+  String msg_contractOfferResponse_accept_body(Object subjectName) {
+    return 'The offer for $subjectName was accepted and awaits finalization.';
+  }
+
+  @override
+  String get msg_contractOfferResponse_reject_title => 'Offer rejected';
+
+  @override
+  String msg_contractOfferResponse_reject_body(Object subjectName) {
+    return 'The offer for $subjectName was rejected.';
+  }
+
+  @override
+  String get msg_contractOfferResponse_hardReject_title => 'Hard rejection';
+
+  @override
+  String msg_contractOfferResponse_hardReject_body(Object subjectName) {
+    return 'Negotiations for $subjectName have been blocked.';
+  }
+
+  @override
+  String get msg_contractOfferResponse_waiting_title => 'Offer pending';
+
+  @override
+  String msg_contractOfferResponse_waiting_body(Object subjectName) {
+    return '$subjectName is considering the offer.';
+  }
+
+  @override
+  String get msg_contractOfferResponse_counter_title => 'Counter offer';
+
+  @override
+  String msg_contractOfferResponse_counter_body(
+    Object salary,
+    Object subjectName,
+    Object years,
+  ) {
+    return '$subjectName returned a counter offer for $salary over $years years.';
+  }
+
+  @override
+  String get msg_staffOfferResponse_accept_title => 'Staff offer accepted';
+
+  @override
+  String msg_staffOfferResponse_accept_body(Object subjectName) {
+    return 'The offer for $subjectName was accepted and awaits finalization.';
+  }
+
+  @override
+  String get msg_staffOfferResponse_reject_title => 'Staff offer rejected';
+
+  @override
+  String msg_staffOfferResponse_reject_body(Object subjectName) {
+    return 'The offer for $subjectName was rejected.';
+  }
+
+  @override
+  String get msg_staffOfferResponse_hardReject_title => 'Staff hard rejection';
+
+  @override
+  String msg_staffOfferResponse_hardReject_body(Object subjectName) {
+    return 'Negotiations for $subjectName have been blocked.';
+  }
+
+  @override
+  String get msg_staffOfferResponse_waiting_title => 'Staff offer pending';
+
+  @override
+  String msg_staffOfferResponse_waiting_body(Object subjectName) {
+    return '$subjectName is considering the offer.';
+  }
+
+  @override
+  String get msg_staffOfferResponse_counter_title => 'Staff counter offer';
+
+  @override
+  String msg_staffOfferResponse_counter_body(
+    Object salary,
+    Object subjectName,
+    Object years,
+  ) {
+    return '$subjectName returned a counter offer for $salary over $years years.';
+  }
+
+  @override
+  String get msg_staffOfferResponse_lostToRival_title => 'Staff target lost';
+
+  @override
+  String msg_staffOfferResponse_lostToRival_body(
+    Object rivalTeam,
+    Object subjectName,
+  ) {
+    return '$subjectName signed with $rivalTeam.';
+  }
+
+  @override
+  String get msg_contractLostToRival_lostToRival_title => 'Lost target';
+
+  @override
+  String msg_contractLostToRival_lostToRival_body(
+    Object rivalTeam,
+    Object subjectName,
+  ) {
+    return '$subjectName signed with $rivalTeam.';
+  }
+
+  @override
+  String get msg_contractExpiring_player_title => 'Player contract expiring';
+
+  @override
+  String msg_contractExpiring_player_body(Object playerName) {
+    return '$playerName\'s contract expires after this season.';
+  }
+
+  @override
+  String get msg_contractExpiring_staff_title => 'Staff contract expiring';
+
+  @override
+  String msg_contractExpiring_staff_body(Object staffName) {
+    return '$staffName\'s contract expires after this season.';
+  }
+
+  @override
+  String get msg_contractExpired_player_title => 'Player contract expired';
+
+  @override
+  String msg_contractExpired_player_body(Object playerName) {
+    return '$playerName\'s contract has expired.';
+  }
+
+  @override
+  String get msg_contractExpired_staff_title => 'Staff contract expired';
+
+  @override
+  String msg_contractExpired_staff_body(Object staffName) {
+    return '$staffName\'s contract has expired.';
+  }
+
+  @override
   String get msg_trade_counter_title => 'Trade counter offer';
 
   @override
@@ -3032,6 +3312,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get msg_contractOffer_action_submit => 'Submit QO';
+
+  @override
+  String get msg_contractOfferResponse_action_accept => 'Accept';
+
+  @override
+  String get msg_contractOfferResponse_action_counter => 'Counter offer';
+
+  @override
+  String get msg_contractOfferResponse_action_decline => 'Decline';
+
+  @override
+  String get msg_staffOfferResponse_action_accept => 'Accept';
+
+  @override
+  String get msg_staffOfferResponse_action_counter => 'Counter offer';
+
+  @override
+  String get msg_staffOfferResponse_action_decline => 'Decline';
 
   @override
   String get msg_tradeOffer_action_accept => 'Accept';

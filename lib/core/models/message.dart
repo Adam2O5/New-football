@@ -98,8 +98,9 @@ extension MessageSettingsX on MessageSettings {
     return type == MessageType.playerEvent ||
         type == MessageType.teamEvent ||
         type == MessageType.contractOffer ||
-        type == MessageType.tradeOffer ||
-        type == MessageType.rfaOfferSheet;
+        type == MessageType.contractOfferResponse ||
+        type == MessageType.rfaOfferSheet ||
+        type == MessageType.tradeOffer;
   }
 }
 

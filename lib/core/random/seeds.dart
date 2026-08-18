@@ -97,3 +97,25 @@ int _stableHash(List<Object?> parts) {
   }
   return hash;
 }
+
+/// Returns a deterministic negotiation roll seed while preserving the
+/// canonical [aiSeed] contract. The subject and round make separate offers
+/// independent without falling back to the runtime's process-random hash.
+int negotiationSeed(
+  int saveSeed,
+  int seasonYear,
+  int week,
+  String teamId,
+  DecisionType decisionType,
+  String subjectId,
+  String phase, {
+  int round = 0,
+}) {
+  return _stableHash([
+    'negotiation',
+    aiSeed(saveSeed, seasonYear, week, teamId, decisionType),
+    subjectId,
+    phase,
+    round,
+  ]);
+}

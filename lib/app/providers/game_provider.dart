@@ -7,11 +7,12 @@ import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/match_models.dart';
 import 'package:new_football/core/models/message.dart';
-import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/staff.dart';
 import 'package:new_football/core/services/calendar_event_registry.dart';
 import 'package:new_football/core/services/calendar_service.dart';
+import 'package:new_football/core/services/contract_market_service.dart';
 import 'package:new_football/core/services/contract_service.dart';
+import 'package:new_football/core/services/negotiation_service.dart';
 import 'package:new_football/core/services/day_simulator.dart';
 import 'package:new_football/core/services/draft_service.dart';
 import 'package:new_football/core/services/game_factory.dart';
@@ -48,6 +49,7 @@ final daySimulatorProvider = Provider((ref) {
     matchEngine: ref.watch(matchEngineProvider),
     playerEvents: ref.watch(playerEventServiceProvider),
     teamEvents: ref.watch(teamEventServiceProvider),
+    contractMarket: ref.watch(contractMarketServiceProvider),
   );
 });
 
@@ -62,6 +64,19 @@ final staffServiceProvider = Provider((ref) => StaffService());
 final scoutingServiceProvider = Provider((ref) => ScoutingService());
 
 final contractServiceProvider = Provider((ref) => ContractService());
+
+final negotiationServiceProvider = Provider(
+  (ref) => const NegotiationService(),
+);
+
+final contractMarketServiceProvider = Provider(
+  (ref) => ContractMarketService(
+    calendar: ref.watch(calendarServiceProvider),
+    contracts: ref.watch(contractServiceProvider),
+    staff: ref.watch(staffServiceProvider),
+    negotiations: ref.watch(negotiationServiceProvider),
+  ),
+);
 
 final savesListProvider = FutureProvider.autoDispose<List<GameSaveMeta>>((
   ref,
@@ -145,6 +160,7 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   TeamEventService get _teamEvents => _ref.read(teamEventServiceProvider);
   SeasonService get _season => _ref.read(seasonServiceProvider);
   CalendarService get _calendar => _ref.read(calendarServiceProvider);
+  ContractMarketService get _market => _ref.read(contractMarketServiceProvider);
 
   GameSave? get save => state.value;
 
@@ -214,6 +230,15 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
       ),
     );
     if (!resolveExpired) return state;
+    state = _ref
+        .read(negotiationServiceProvider)
+        .expireAt(
+          league: state,
+          seasonYear: state.currentSeason.year,
+          week: state.currentWeek,
+          day: state.currentDay,
+          hour: state.currentHour ?? 0,
+        );
     state = _teamEvents.resolveExpiredDecisions(state, saveSeed: saveSeed);
     return _playerEvents.resolveExpiredDecisions(state, saveSeed: saveSeed);
   }
@@ -233,7 +258,9 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   /// Advances the calendar by exactly one day: no phase hooks, no
   /// calendar-event auto-resolution, no auto-simulating the player's match.
   /// This is the raw primitive `simulateToEvent`/`simulateToDate` build on.
-  Future<DaySimulationResult?> advanceOneDay() async {
+  Future<DaySimulationResult?> advanceOneDay({
+    bool resolveContractMarket = true,
+  }) async {
     final current = save;
     if (current == null) return null;
 
@@ -272,7 +299,11 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
       );
     }
 
-    final result = _days.simulateDay(league, saveSeed: current.saveSeed);
+    final result = _days.simulateDay(
+      league,
+      saveSeed: current.saveSeed,
+      resolveContractMarket: resolveContractMarket,
+    );
     var updatedLeague = result.league;
     final isCycleEnd =
         current.leagueState.currentWeek ==
@@ -330,15 +361,22 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     }
 
     final hour = league.currentHour ?? 1;
-    if (hour >= 10) {
+    final resolved = _market.resolveHour(
+      league,
+      hour: hour,
+      saveSeed: current.saveSeed,
+    );
+    if (hour >= _calendar.balance.contracts.hoursPerDay) {
       await updateLeague(
-        (_) => league.copyWith(currentHour: 10),
+        (_) => resolved.copyWith(
+          currentHour: _calendar.balance.contracts.hoursPerDay,
+        ),
         autosave: true,
       );
-      return advanceOneDay();
+      return advanceOneDay(resolveContractMarket: false);
     }
 
-    final next = league.copyWith(
+    final next = resolved.copyWith(
       currentHour: hour + 1,
       hourlyPlayerOfferUsed: false,
       hourlyStaffOfferUsed: false,
@@ -830,117 +868,201 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     await updateLeague((l) => _season.advanceDraft(l));
   }
 
-  ContractService get _contracts => _ref.read(contractServiceProvider);
-
-  /// Submits the player's offer for a free agent. On `accept` the player
-  /// signs immediately and the FA pool updates (`docs/contract_signing.md`).
+  /// Submits a free-agent offer through the central contract-market
+  /// resolver. Accept remains pending until explicit finalization.
   Future<ContractReaction> offerFreeAgent(
     String freeAgentId,
     ContractOffer offer,
   ) async {
     final current = save;
     if (current == null) return ContractReaction.hardReject;
-    final league = current.leagueState;
-    final hourly = _calendar.isHourlyContractMode(
-      league.currentWeek,
-      league.currentDay,
+    final submission = _market.submitPlayerOffer(
+      league: current.leagueState,
+      playerId: freeAgentId,
+      offer: offer,
+      saveSeed: current.saveSeed,
     );
-    if (hourly && league.hourlyPlayerOfferUsed) {
-      return ContractReaction.hardReject;
-    }
-    final team = league.playerTeam;
-    Player? player;
-    for (final p in league.freeAgents) {
-      if (p.id == freeAgentId) player = p;
-    }
-    if (team == null || player == null) return ContractReaction.hardReject;
+    if (submission == null) return ContractReaction.hardReject;
+    await updateLeague((_) => submission.league);
+    return submission.reaction;
+  }
 
-    final reaction = _contracts.evaluate(player, offer);
-    if (reaction == ContractReaction.accept) {
-      final signed = _contracts.signPlayer(
-        team: team,
-        player: player,
-        offer: offer,
-      );
-      if (signed == null) return ContractReaction.hardReject;
-      await updateLeague((l) {
-        var next = l
-            .updateTeam(signed)
-            .copyWith(
-              freeAgents: l.freeAgents
-                  .where((p) => p.id != freeAgentId)
-                  .toList(),
-            );
-        if (hourly) next = next.copyWith(hourlyPlayerOfferUsed: true);
-        return next;
-      });
-    } else if (hourly) {
-      await updateLeague((l) => l.copyWith(hourlyPlayerOfferUsed: true));
+  /// Submits a player extension through the central contract-market
+  /// resolver. The accepted offer remains pending until finalization.
+  Future<ContractReaction> offerContractExtension(
+    String playerId,
+    ContractOffer offer,
+  ) async {
+    final current = save;
+    if (current == null) return ContractReaction.hardReject;
+    final submission = _market.submitPlayerOffer(
+      league: current.leagueState,
+      playerId: playerId,
+      offer: offer,
+      saveSeed: current.saveSeed,
+    );
+    if (submission == null) return ContractReaction.hardReject;
+    await updateLeague((_) => submission.league);
+    return submission.reaction;
+  }
+
+  Future<bool> finalizeContractNegotiation(String negotiationId) async {
+    final current = save;
+    if (current == null) return false;
+    final next = _market.finalizeNegotiation(
+      current.leagueState,
+      negotiationId,
+      saveSeed: current.saveSeed,
+    );
+    if (next == null) return false;
+    await updateLeague((_) => next);
+    return true;
+  }
+
+  Future<bool> respondToContractCounter(
+    String negotiationId, {
+    required bool accept,
+    ContractOffer? offer,
+  }) async {
+    final current = save;
+    if (current == null) return false;
+    final next = _market.resolveCounterResponse(
+      current.leagueState,
+      negotiationId,
+      accept: accept,
+      playerOffer: offer,
+      saveSeed: current.saveSeed,
+    );
+    if (next == null) return false;
+    await updateLeague((_) => next);
+    return true;
+  }
+
+  Future<bool> respondToStaffCounter(
+    String negotiationId, {
+    required bool accept,
+    StaffOffer? offer,
+  }) async {
+    final current = save;
+    if (current == null) return false;
+    final next = _market.resolveCounterResponse(
+      current.leagueState,
+      negotiationId,
+      accept: accept,
+      staffOffer: offer,
+      saveSeed: current.saveSeed,
+    );
+    if (next == null) return false;
+    await updateLeague((_) => next);
+    return true;
+  }
+
+  Future<bool> submitQualifyingOffer(
+    String playerId, {
+    int? salary,
+    int years = 1,
+  }) async {
+    final current = save;
+    final teamId = current?.leagueState.playerTeamId;
+    if (current == null || teamId == null) return false;
+    final next = _market.submitQualifyingOffer(
+      league: current.leagueState,
+      ownerTeamId: teamId,
+      playerId: playerId,
+      salary: salary,
+      years: years,
+    );
+    if (next == null) return false;
+    await updateLeague((_) => next);
+    return true;
+  }
+
+  Future<bool> declineQualifyingOffer(String playerId) async {
+    final current = save;
+    if (current == null || current.leagueState.playerTeamId == null) {
+      return false;
     }
-    return reaction;
+    await updateLeague(
+      (league) => _market.declineQualifyingOffer(league, playerId),
+    );
+    return true;
+  }
+
+  Future<bool> submitRfaOfferSheet(String playerId, ContractOffer offer) async {
+    final current = save;
+    final teamId = current?.leagueState.playerTeamId;
+    if (current == null || teamId == null) return false;
+    final next = _market.submitOfferSheet(
+      league: current.leagueState,
+      offeringTeamId: teamId,
+      playerId: playerId,
+      offer: offer,
+      saveSeed: current.saveSeed,
+    );
+    if (next == null) return false;
+    await updateLeague((_) => next);
+    return true;
+  }
+
+  Future<bool> matchRfaOfferSheet(String sheetId) async {
+    final current = save;
+    if (current == null) return false;
+    final next = _market.matchOfferSheet(
+      current.leagueState,
+      sheetId,
+      saveSeed: current.saveSeed,
+    );
+    if (next == null) return false;
+    await updateLeague((_) => next);
+    return true;
+  }
+
+  Future<bool> declineRfaOfferSheet(String sheetId) async {
+    final current = save;
+    if (current == null) return false;
+    await updateLeague((league) => _market.declineOfferSheet(league, sheetId));
+    return true;
+  }
+
+  Future<bool> signDraftedRight(String rightId) async {
+    final current = save;
+    if (current == null) return false;
+    final next = _market.signDraftedRight(
+      current.leagueState,
+      rightId,
+      saveSeed: current.saveSeed,
+    );
+    if (next == null) return false;
+    await updateLeague((_) => next);
+    return true;
   }
 
   StaffService get _staff => _ref.read(staffServiceProvider);
 
-  /// Hires [candidate] from `staffFreeAgents` for the player's team at
-  /// [offer]. Returns `false` if the offer is rejected or invalid.
-  Future<bool> hireStaff(StaffMember candidate, StaffOffer offer) async {
+  /// Submits a staff offer through the central contract-market resolver.
+  Future<StaffReaction> offerStaff(
+    StaffMember candidate,
+    StaffOffer offer,
+  ) async {
     final current = save;
-    if (current == null) return false;
-    final league = current.leagueState;
-    final hourly = _calendar.isHourlyContractMode(
-      league.currentWeek,
-      league.currentDay,
+    if (current == null) return StaffReaction.hardReject;
+    final submission = _market.submitStaffOffer(
+      league: current.leagueState,
+      candidate: candidate,
+      offer: offer,
+      saveSeed: current.saveSeed,
     );
-    if (hourly && league.hourlyStaffOfferUsed) return false;
-    final team = league.playerTeam;
-    if (team == null) return false;
+    if (submission == null) return StaffReaction.hardReject;
+    await updateLeague((_) => submission.league);
+    return submission.reaction;
+  }
 
-    final hireViolation = _staff.hireValidationReason(team, offer.salary);
-    if (hireViolation != null) {
-      await updateLeague(
-        (l) => MessageService().send(
-          l,
-          type: MessageType.staffCapViolation,
-          domain: MessageDomain.finance,
-          priority: MessagePriority.urgent,
-          args: {
-            'reason': hireViolation,
-            'staffPayroll': team.staff.totalSalary,
-            'staffCap': _staff.balance.staff.salaryCap,
-          },
-          payload: {
-            'teamId': team.id,
-            'attemptedSalary': offer.salary,
-            'staffPayroll': team.staff.totalSalary,
-            'staffCap': _staff.balance.staff.salaryCap,
-          },
-        ),
-      );
-      return false;
-    }
-
-    if (hourly) {
-      await updateLeague((l) => l.copyWith(hourlyStaffOfferUsed: true));
-    }
-    final reaction = _staff.evaluateOffer(candidate, offer);
-    if (reaction != StaffReaction.accept) return false;
-
-    final hired = _staff.hire(team: team, member: candidate, offer: offer);
-    if (hired == null) return false;
-
-    await updateLeague((l) {
-      var next = l
-          .updateTeam(hired)
-          .copyWith(
-            staffFreeAgents: l.staffFreeAgents
-                .where((m) => m.id != candidate.id)
-                .toList(),
-          );
-      if (hourly) next = next.copyWith(hourlyStaffOfferUsed: true);
-      return next;
-    });
-    return true;
+  /// Compatibility wrapper for callers that only need to know whether the
+  /// offer reached Accept. It no longer hires immediately; the returned true
+  /// means a pending finalization record was created.
+  Future<bool> hireStaff(StaffMember candidate, StaffOffer offer) async {
+    final reaction = await offerStaff(candidate, offer);
+    return reaction == StaffReaction.accept;
   }
 
   Future<void> fireStaff(StaffRole role) async {

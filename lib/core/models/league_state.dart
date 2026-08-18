@@ -1,4 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:new_football/core/models/contract_negotiation.dart';
+import 'package:new_football/core/models/contract_market_models.dart';
 import 'package:new_football/core/models/draft_models.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_strength.dart';
@@ -43,6 +45,23 @@ abstract class LeagueState with _$LeagueState {
     /// `null` = jeszcze nie przeliczona (zostanie obliczona przy pierwszym
     /// `shouldRecalculate` w `DaySimulator`).
     LeagueStrengthTable? strengthTable,
+
+    /// Persistent player/staff negotiation records. A score reaction is not
+    /// enough to reconstruct deadlines, counters or finalization after load.
+    @Default([]) List<ContractNegotiation> negotiations,
+
+    /// Temporary subject × club blocks created by hard rejects or expired
+    /// finalization windows.
+    @Default([]) List<NegotiationBlock> negotiationBlocks,
+
+    /// Drafted players under team control but not yet signed. Rights are not
+    /// roster entries and therefore do not affect roster size or matchday.
+    @Default([]) List<DraftedPlayerRights> draftedRights,
+
+    /// Explicit RFA state. A player has matching rights only while a
+    /// qualifying offer is present in this list.
+    @Default([]) List<RfaQualifyingOffer> rfaQualifyingOffers,
+    @Default([]) List<RfaOfferSheet> rfaOfferSheets,
   }) = _LeagueState;
 
   factory LeagueState.fromJson(Map<String, dynamic> json) =>
@@ -69,6 +88,36 @@ extension LeagueStateX on LeagueState {
   LeagueState updateTeam(Team team) {
     return copyWith(
       teams: teams.map((t) => t.id == team.id ? team : t).toList(),
+    );
+  }
+
+  ContractNegotiation? negotiationById(String id) {
+    for (final negotiation in negotiations) {
+      if (negotiation.id == id) return negotiation;
+    }
+    return null;
+  }
+
+  LeagueState upsertNegotiation(ContractNegotiation negotiation) {
+    return copyWith(
+      negotiations: [
+        ...negotiations.where((item) => item.id != negotiation.id),
+        negotiation,
+      ],
+    );
+  }
+
+  LeagueState addNegotiationBlock(NegotiationBlock block) {
+    return copyWith(
+      negotiationBlocks: [
+        ...negotiationBlocks.where(
+          (item) =>
+              !(item.subjectId == block.subjectId &&
+                  item.subjectKind == block.subjectKind &&
+                  item.teamId == block.teamId),
+        ),
+        block,
+      ],
     );
   }
 }

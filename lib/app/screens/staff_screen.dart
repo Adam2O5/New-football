@@ -11,6 +11,7 @@ import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/staff.dart';
 import 'package:new_football/core/models/team.dart';
+import 'package:new_football/core/services/contract_market_service.dart';
 import 'package:new_football/core/services/staff_service.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
@@ -71,13 +72,94 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
               ),
             ),
             const SizedBox(height: 12),
+            _marketStatusCard(context, l10n, league),
+            const SizedBox(height: 12),
             for (final role in StaffRole.values)
               _roleSection(context, l10n, league, team, role),
             if (_status != null) ...[
               const SizedBox(height: 12),
               Text(_status!, textAlign: TextAlign.center),
             ],
+            if (league.negotiations.any(
+              (item) =>
+                  item.teamId == team.id &&
+                  item.subjectKind.name == 'staff' &&
+                  item.status.name == 'pendingFinalization',
+            )) ...[
+              const SizedBox(height: 12),
+              Card(
+                child: Column(
+                  children: [
+                    ListTile(
+                      leading: const Icon(Icons.pending_actions),
+                      title: Text(l10n.contract_pendingFinalization),
+                    ),
+                    ...league.negotiations
+                        .where(
+                          (item) =>
+                              item.teamId == team.id &&
+                              item.subjectKind.name == 'staff' &&
+                              item.status.name == 'pendingFinalization',
+                        )
+                        .map(
+                          (negotiation) => ListTile(
+                            title: Text(negotiation.subjectId),
+                            subtitle: Text(
+                              '${formatMoney(context, negotiation.lastOffer.salary)} × ${negotiation.lastOffer.years} · '
+                              '${l10n.market_round(negotiation.round)} · '
+                              '${l10n.market_score(negotiation.offerScore.toStringAsFixed(1))} · '
+                              '${l10n.market_deadline(negotiation.expiryWeek, negotiation.expiryDay, negotiation.expiryHour)}',
+                            ),
+                            trailing: FilledButton.tonal(
+                              onPressed: () async {
+                                final ok = await ref
+                                    .read(gameControllerProvider.notifier)
+                                    .finalizeContractNegotiation(
+                                      negotiation.id,
+                                    );
+                                if (!mounted) return;
+                                setState(
+                                  () => _status = ok
+                                      ? l10n.contract_accepted
+                                      : l10n.contract_finalizationFailed,
+                                );
+                              },
+                              child: Text(l10n.contract_finalize),
+                            ),
+                          ),
+                        ),
+                  ],
+                ),
+              ),
+            ],
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _marketStatusCard(
+    BuildContext context,
+    AppLocalizations l10n,
+    LeagueState league,
+  ) {
+    final window = ContractMarketService().windowAt(league);
+    final label = switch (window) {
+      ContractMarketWindow.closed => l10n.market_closed,
+      ContractMarketWindow.extensions => l10n.market_extensions,
+      ContractMarketWindow.freeAgencyPhaseI => l10n.market_phaseI,
+      ContractMarketWindow.freeAgencyPhaseII => l10n.market_phaseII,
+    };
+    final hourly =
+        window == ContractMarketWindow.extensions ||
+        window == ContractMarketWindow.freeAgencyPhaseI;
+    return Card(
+      child: ListTile(
+        leading: const Icon(Icons.schedule),
+        title: Text(l10n.market_status),
+        subtitle: Text(
+          '${l10n.market_date(league.currentWeek, league.currentDay)} · $label'
+          '${hourly ? '\\n${l10n.market_hour(league.currentHour ?? 1, 10)}' : ''}',
         ),
       ),
     );
@@ -120,13 +202,23 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
                     formatMoney(context, member.contract?.salary ?? 0),
                   ),
                 ),
-                trailing: TextButton(
-                  onPressed: () async {
-                    await ref
-                        .read(gameControllerProvider.notifier)
-                        .fireStaff(role);
-                  },
-                  child: Text(l10n.staff_fire),
+                trailing: Wrap(
+                  spacing: 4,
+                  children: [
+                    if ((member.contract?.yearsRemaining ?? 99) <= 1)
+                      TextButton(
+                        onPressed: () => _extend(l10n, member),
+                        child: Text(l10n.contract_submitOffer),
+                      ),
+                    TextButton(
+                      onPressed: () async {
+                        await ref
+                            .read(gameControllerProvider.notifier)
+                            .fireStaff(role);
+                      },
+                      child: Text(l10n.staff_fire),
+                    ),
+                  ],
                 ),
               ),
             if (member == null) ...[
@@ -166,18 +258,44 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
     );
   }
 
+  Future<void> _extend(AppLocalizations l10n, StaffMember member) async {
+    final reaction = await ref
+        .read(gameControllerProvider.notifier)
+        .offerStaff(
+          member,
+          StaffOffer(
+            salary: _staffService.expectedSalary(member),
+            years: _staffService.expectedLength(member),
+          ),
+        );
+    if (!mounted) return;
+    setState(() {
+      _status = switch (reaction) {
+        StaffReaction.accept => l10n.staff_hireAccepted(member.name),
+        StaffReaction.hardReject ||
+        StaffReaction.reject => l10n.staff_hireRejected,
+        StaffReaction.waiting => l10n.contract_waiting,
+        StaffReaction.counter => l10n.contract_faCounter,
+      };
+    });
+  }
+
   Future<void> _hire(
     AppLocalizations l10n,
     StaffMember candidate,
     StaffOffer offer,
   ) async {
-    final ok = await ref
+    final reaction = await ref
         .read(gameControllerProvider.notifier)
-        .hireStaff(candidate, offer);
+        .offerStaff(candidate, offer);
     setState(() {
-      _status = ok
-          ? l10n.staff_hireAccepted(candidate.name)
-          : l10n.staff_hireRejected;
+      _status = switch (reaction) {
+        StaffReaction.accept => l10n.staff_hireAccepted(candidate.name),
+        StaffReaction.hardReject ||
+        StaffReaction.reject => l10n.staff_hireRejected,
+        StaffReaction.waiting => l10n.contract_waiting,
+        StaffReaction.counter => l10n.contract_faCounter,
+      };
     });
   }
 }
