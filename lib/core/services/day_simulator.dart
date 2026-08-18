@@ -1,4 +1,5 @@
 import 'package:new_football/core/ai/ai_matchday_service.dart';
+import 'package:new_football/core/ai/ai_trade_service.dart';
 import 'package:new_football/core/balance/injury_catalog.dart';
 import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/simulation/match_engine.dart';
@@ -55,6 +56,7 @@ class DaySimulator {
     this.balance = BalanceConfig.defaults,
     SimulationMatchEngine? matchEngine,
     AiMatchdayService? aiMatchdayService,
+    AiTradeService? aiTradeService,
     CalendarService? calendar,
     MatchContextFactory? contextFactory,
     MatchMessageEmitter? matchMessageEmitter,
@@ -73,6 +75,7 @@ class DaySimulator {
              matchEngine:
                  matchEngine ?? SimulationMatchEngine(balance: balance),
            ),
+       aiTradeService = aiTradeService ?? AiTradeService(balance: balance),
        calendar = calendar ?? CalendarService(balance: balance),
        contextFactory =
            contextFactory ??
@@ -97,6 +100,7 @@ class DaySimulator {
   final BalanceConfig balance;
   final SimulationMatchEngine matchEngine;
   final AiMatchdayService aiMatchdayService;
+  final AiTradeService aiTradeService;
   final CalendarService calendar;
   final MatchContextFactory contextFactory;
   final MatchMessageEmitter matchMessageEmitter;
@@ -336,6 +340,12 @@ class DaySimulator {
           }).toList(),
         );
       }
+
+      // The market runs once at the same Sunday → Monday boundary as the
+      // other weekly AI systems. It is headless and therefore also runs when
+      // the player is not looking at TradeScreen.
+      state = aiTradeService.weeklyTick(state, saveSeed: saveSeed).league;
+
       state = messages.send(
         state,
         type: MessageType.calendar,

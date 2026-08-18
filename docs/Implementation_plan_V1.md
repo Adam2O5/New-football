@@ -1350,50 +1350,52 @@ Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, le
 
 ---
 
-### ⬜ Task 34: AI wymian
+### ✅ Task 34: AI wymian
 
 **Cel:** `AI_behaviour.md` §5, §9.3.
 
-- [ ] `surplusPct = netValue / max(100, outValue) × 100%` + `evaluationNoise`
-- [ ] `netValue = inValue − outValue − apronPenalty` (gdy podnosi poziom)
-- [ ] Korekta progu: luka krytyczna −8 pp
-- [ ] Korekta: oddanie ostatniego zawodnika z pozycji min +12 pp
-- [ ] Korekta: partner z tej samej konferencji, obaj `contender`+ → +10 pp
-- [ ] Korekta: oddawany złożył zaakceptowaną prośbę o transfer −10 pp
-- [ ] Korekta: <2 tyg. do deadline i luka krytyczna −6 pp
-- [ ] Tabela decyzji §5.2: 6 pasm `surplusPct` × 4 reakcje
-- [ ] Hard reject → blokada rozmów 30 dni
-- [ ] Kontroferty AI: cele +10% / +6% / +2%, P hard reject 0/15/35%, czwarta runda = koniec
-- [ ] Oferty AI→gracz: P 2,0% (sezon), 4,5% (offseason), 5,0% (deadline) na drużynę na tydzień
-- [ ] Cooldown 3 tygodnie po dowolnej ofercie, 4 tygodnie po hard reject gracza
-- [ ] Limit 3 ofert do gracza na tydzień łącznie
-- [ ] Cel `surplusPct` oferty startowej +10%, minimum +2%
-- [ ] Wybór celu: zawodnik gracza z dodatnią różnicą `assetValue`, na jawnych danych
-- [ ] Pełna walidacja `trades.md` **przed** wysłaniem oferty
-- [ ] Silnik AI↔AI: 12 losowanych par na tydzień
-- [ ] AI↔AI: do 6 pakietów testowanych na parę
-- [ ] AI↔AI: warunek wykonania `surplusPct ≥ +2%` dla obu stron
-- [ ] AI↔AI: limit 2 wymiany na drużynę na tydzień, 6 na sezon
-- [ ] `tradeAppetite = 0,35 × maxNeedScore/100 + 0,25 × surplusPositionPressure + 0,20 × deadlineProximity + 0,20 × injuryPressure`
-- [ ] Próg wejścia do puli `tradeAppetite ≥ 0,30`
-- [ ] Po zaakceptowanej prośbie o transfer `tradeAppetite` dla zawodnika ×3 na 4 tygodnie
-- [ ] Guardrail: max 2 picki R1 oddane w 3 kolejnych latach
-- [ ] Guardrail: `rebuild`/`retool` nie oddaje R1 za zawodników 30+
-- [ ] Guardrail: hamulec superteamu ×0,5 przy `teamPower` > średnia +12
-- [ ] Guardrail: `NTC_MIN_CONSENT_TO_PURSUE` 35%, rezygnacja z celu P = 70%
-- [ ] Zdejmowanie kontraktów: tabela akceptowalnego ujemnego surplusu (−10% / −25% / −40%)
-- [ ] Zdejmowanie: dokładane assety per poziom `contractDrag`
-- [ ] Hard limit: nigdy pick R1 z najbliższych 3 roczników tylko za zdjęcie kontraktu
-- [ ] Rola nabywcy: `rebuild`/`retool` z cap space przyjmują kotwice (tabela P)
-- [ ] Deadline (tyg. 21–23): `tradeAppetite` ×1,8, próg −6 pp, sprzedaż 30+ z wygasającym kontraktem P = 45%
+- [x] `surplusPct = netValue / max(100, outValue) × 100%` + `evaluationNoise`
+- [x] `netValue = inValue − outValue − apronPenalty` (gdy podnosi poziom)
+- [x] Korekta progu: luka krytyczna −8 pp
+- [x] Korekta: oddanie ostatniego zawodnika z pozycji min +12 pp
+- [x] Korekta: partner z tej samej konferencji, obaj `contender`+ → +10 pp
+- [x] Korekta: oddawany złożył zaakceptowaną prośbę o transfer −10 pp
+- [x] Korekta: <2 tyg. do deadline i luka krytyczna −6 pp
+- [x] Tabela decyzji §5.2: 6 pasm `surplusPct` × 4 reakcje
+- [x] Hard reject → blokada rozmów 30 dni
+- [x] Kontroferty AI: cele +10% / +6% / +2%, P hard reject 0/15/35%, czwarta runda = koniec
+- [x] Oferty AI→gracz: P 2,0% (sezon), 4,5% (offseason), 5,0% (deadline) na drużynę na tydzień
+- [x] Cooldown 3 tygodnie po dowolnej ofercie, 4 tygodnie po hard reject gracza
+- [x] Limit 3 ofert do gracza na tydzień łącznie
+- [x] Cel `surplusPct` oferty startowej +10%, minimum +2%
+- [x] Wybór celu: zawodnik gracza z dodatnią różnicą `assetValue`, na jawnych danych
+- [x] Pełna walidacja `trades.md` **przed** wysłaniem oferty
+- [x] Silnik AI↔AI: 12 losowanych par na tydzień
+- [x] AI↔AI: do 6 pakietów testowanych na parę
+- [x] AI↔AI: warunek wykonania `surplusPct ≥ +2%` dla obu stron
+- [x] AI↔AI: limit 2 wymiany na drużynę na tydzień, 6 na sezon
+- [x] `tradeAppetite = 0,35 × maxNeedScore/100 + 0,25 × surplusPositionPressure + 0,20 × deadlineProximity + 0,20 × injuryPressure`
+- [x] Próg wejścia do puli `tradeAppetite ≥ 0,30`
+- [x] Po zaakceptowanej prośbie o transfer `tradeAppetite` dla zawodnika ×3 na 4 tygodnie
+- [x] Guardrail: max 2 picki R1 oddane w 3 kolejnych latach
+- [x] Guardrail: `rebuild`/`retool` nie oddaje R1 za zawodników 30+
+- [x] Guardrail: hamulec superteamu ×0,5 przy `teamPower` > średnia +12
+- [x] Guardrail: `NTC_MIN_CONSENT_TO_PURSUE` 35%, rezygnacja z celu P = 70%
+- [x] Zdejmowanie kontraktów: tabela akceptowalnego ujemnego surplusu (−10% / −25% / −40%)
+- [x] Zdejmowanie: dokładane assety per poziom `contractDrag`
+- [x] Hard limit: nigdy pick R1 z najbliższych 3 roczników tylko za zdjęcie kontraktu
+- [x] Rola nabywcy: `rebuild`/`retool` z cap space przyjmują kotwice (tabela P)
+- [x] Deadline (tyg. 21–23): `tradeAppetite` ×1,8, próg −6 pp, sprzedaż 30+ z wygasającym kontraktem P = 45%
 
 **Testy**
-- [ ] 25–45 wymian AI↔AI na sezon
-- [ ] 12–20 ofert do gracza na sezon
-- [ ] 0 drużyn bez picka R1 w dwóch kolejnych latach
-- [ ] 3–10 wymian typu „zdjęcie kontraktu" na sezon
-- [ ] Każda oferta do gracza przechodzi walidację (0 niewykonalnych)
-- [ ] Fair trade od gracza akceptowany w ~70% przypadków
+- [x] 25–45 wymian AI↔AI na sezon
+- [x] 12–20 ofert do gracza na sezon
+- [x] 0 drużyn bez picka R1 w dwóch kolejnych latach
+- [x] 3–10 wymian typu „zdjęcie kontraktu" na sezon
+- [x] Każda oferta do gracza przechodzi walidację (0 niewykonalnych)
+- [x] Fair trade od gracza akceptowany w ~70% przypadków
+
+**Walidacja:** `test/task34_ai_trade_test.dart` — 4/4; ukierunkowana regresja Task 30–34 — 29/29; pełny `flutter test --no-pub --timeout=3m --reporter compact .\\test` — 293/293; `flutter analyze --no-pub --no-fatal-infos` — exit 0 (119 istniejących `info`); diagnostyka zmienionych plików — bez błędów.
 
 **Demo:** symulacja sezonu bez ingerencji gracza produkuje żywy rynek, a gracz dostaje kilkanaście sensownych, wykonalnych ofert.
 

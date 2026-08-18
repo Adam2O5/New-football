@@ -4,7 +4,6 @@ import 'package:go_router/go_router.dart';
 
 import 'package:new_football/app/widgets/screen_background.dart';
 import 'package:new_football/app/providers/game_provider.dart';
-import 'package:new_football/core/ai/team_ai_service.dart';
 import 'package:new_football/core/models/draft_pick.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/player.dart';
@@ -351,13 +350,15 @@ class _TradeScreenState extends ConsumerState<TradeScreen> {
       if (theirRightsId != null) TradeAsset.draftedRights(theirRightsId),
     ];
 
-    final service = TradeService();
+    final service = ref.read(tradeServiceProvider);
+    final aiService = ref.read(aiTradeServiceProvider);
     final proposal = TradeProposal(
       teamAId: own.id,
       teamBId: target.id,
       assetsFromA: assetsFromA,
       assetsFromB: assetsFromB,
     );
+    final saveSeed = ref.read(gameControllerProvider).value?.saveSeed ?? 0;
     final counterOfferId = widget.initialTradeOfferId;
     if (counterOfferId != null) {
       final counter = service.counterOffer(
@@ -366,16 +367,27 @@ class _TradeScreenState extends ConsumerState<TradeScreen> {
         proposal,
         actingTeamId: own.id,
       );
-      if (counter.changed) {
+      var finalResult = counter;
+      if (counter.changed && counter.offerId != null) {
+        finalResult = aiService.respondToOffer(
+          counter.league,
+          counter.offerId!,
+          saveSeed: saveSeed,
+        );
+      }
+      if (finalResult.changed) {
         await ref
             .read(gameControllerProvider.notifier)
-            .updateLeague((_) => counter.league);
+            .updateLeague((_) => finalResult.league);
       }
       if (!mounted) return;
       setState(
-        () => _status = counter.changed
+        () => _status = finalResult.outcome == 'accepted'
             ? l10n.trade_success
-            : counter.validation.reason ?? l10n.trade_notAllowed,
+            : finalResult.outcome == 'rejected' ||
+                  finalResult.outcome == 'hardRejected'
+            ? l10n.trade_aiRejected
+            : finalResult.validation.reason ?? l10n.trade_notAllowed,
       );
       return;
     }
@@ -396,37 +408,29 @@ class _TradeScreenState extends ConsumerState<TradeScreen> {
       return;
     }
 
-    final currentYear = league.currentSeason.year;
-    final aiService = TeamAiService();
-    // shouldAcceptTrade values `assetsFromA` against `self`'s roster and
-    // `assetsFromB` against `other`'s — mirror the proposal so `self`
-    // (the target) is evaluated on what it actually gives/receives.
-    final mirroredProposal = TradeProposal(
-      teamAId: target.id,
-      teamBId: own.id,
-      assetsFromA: proposal.assetsFromB,
-      assetsFromB: proposal.assetsFromA,
-    );
-    final aiAccepts = aiService.shouldAcceptTrade(
-      self: target,
-      other: own,
-      proposal: mirroredProposal,
-      tradeService: service,
-      league: league,
-      currentYear: currentYear,
-      saveSeed: ref.read(gameControllerProvider).value?.saveSeed ?? 0,
-      week: league.currentWeek,
-    );
-    final submission = service.submitLeague(
+    // Every player→AI proposal is now a persisted offer. The AI answers the
+    // pending offer through the same decision/counter policy used by the
+    // headless market; no direct roster mutation or legacy boolean decision
+    // path remains for valid UI submissions.
+    final created = service.createOffer(
       league,
       proposal,
-      aiAccepted: aiAccepts,
+      offeringTeamId: own.id,
+      emitMessages: true,
     );
+    var result = created;
+    if (created.changed && created.offerId != null) {
+      result = aiService.respondToOffer(
+        created.league,
+        created.offerId!,
+        saveSeed: saveSeed,
+      );
+    }
     await ref
         .read(gameControllerProvider.notifier)
-        .updateLeague((_) => submission.league);
+        .updateLeague((_) => result.league);
     if (!mounted) return;
-    if (submission.executed) {
+    if (result.outcome == 'accepted') {
       setState(() {
         _status = l10n.trade_success;
         _ownPlayerId = null;
@@ -438,9 +442,10 @@ class _TradeScreenState extends ConsumerState<TradeScreen> {
       });
     } else {
       setState(
-        () => _status = submission.outcome == 'rejected'
+        () => _status =
+            result.outcome == 'rejected' || result.outcome == 'hardRejected'
             ? l10n.trade_aiRejected
-            : submission.validation.reason ?? l10n.trade_executeFailed,
+            : result.validation.reason ?? l10n.trade_executeFailed,
       );
     }
   }

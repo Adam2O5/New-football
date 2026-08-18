@@ -214,6 +214,37 @@ class TradeService {
     required int currentYear,
   }) => rights.player.computePointValue(balance);
 
+  /// Returns whether a previous hard reject still blocks this club pair.
+  /// The block is reconstructed from persisted history, so no save-schema
+  /// field or migration is required.
+  bool isPairTradeBlocked(LeagueState league, String teamAId, String teamBId) {
+    final now = _logicalDate(league);
+    for (final entry in league.tradeHistory.reversed) {
+      if (entry.outcome != 'hardRejected' ||
+          !_samePair(entry.teamAId, entry.teamBId, teamAId, teamBId)) {
+        continue;
+      }
+      final created = DateTime.utc(
+        entry.seasonYear,
+        1,
+        1,
+      ).add(Duration(days: (entry.week - 1) * 7 + (entry.day - 1)));
+      if (now.isBefore(created.add(const Duration(days: 30)))) return true;
+    }
+    return false;
+  }
+
+  /// Rehydrates a proposal from the persisted offer snapshot for AI and UI
+  /// responders. The conversion stays in TradeService so snapshot parsing has
+  /// one canonical implementation.
+  TradeProposal? proposalForOffer(LeagueState league, String offerId) {
+    final offer = league.tradeOfferById(offerId);
+    return offer == null ? null : _proposalFromOffer(offer);
+  }
+
+  bool _samePair(String a, String b, String c, String d) =>
+      (a == c && b == d) || (a == d && b == c);
+
   /// Full validation against the persisted league state. [currentWeek] is
   /// optional for backwards-compatible callers that validate an in-memory
   /// proposal without applying the calendar gate.
@@ -230,6 +261,13 @@ class TradeService {
         ok: false,
         code: 'unknownTeam',
         reason: 'Nieznana drużyna',
+      );
+    }
+    if (isPairTradeBlocked(league, a.id, b.id)) {
+      return const TradeValidation(
+        ok: false,
+        code: 'tradePairBlocked',
+        reason: 'Rozmowy z tym klubem są czasowo zablokowane',
       );
     }
     final basic = _validateLeagueAssets(
@@ -425,6 +463,7 @@ class TradeService {
     String offerId, {
     required String actingTeamId,
     String reason = 'Partner odrzucił propozycję wymiany',
+    bool hardReject = false,
     bool emitMessages = true,
   }) {
     final offer = league.tradeOfferById(offerId);
@@ -452,7 +491,9 @@ class TradeService {
     final next = _closeTradeOffer(
       league,
       offer,
-      status: TradeOfferStatus.rejected,
+      status: hardReject
+          ? TradeOfferStatus.hardRejected
+          : TradeOfferStatus.rejected,
       reason: reason,
       proposal: proposal,
       emitMessages: emitMessages,
@@ -461,7 +502,7 @@ class TradeService {
       league: next,
       validation: const TradeValidation(ok: true),
       changed: true,
-      outcome: 'rejected',
+      outcome: hardReject ? 'hardRejected' : 'rejected',
       offerId: offer.id,
     );
   }
@@ -487,7 +528,28 @@ class TradeService {
         offerId: parent?.id,
       );
     }
-    if (proposal.teamAId != parent!.teamAId ||
+    if (parent!.round > balance.ai.tradeMaxCounters) {
+      final closed = _closeTradeOffer(
+        league,
+        parent,
+        status: TradeOfferStatus.hardRejected,
+        reason: 'Osiągnięto maksymalną liczbę kontrofert',
+        proposal: _proposalFromOffer(parent),
+        emitMessages: emitMessages,
+      );
+      return TradeOfferResult(
+        league: closed,
+        validation: const TradeValidation(
+          ok: false,
+          code: 'counterLimit',
+          reason: 'Osiągnięto maksymalną liczbę kontrofert',
+        ),
+        changed: true,
+        outcome: 'hardRejected',
+        offerId: parent.id,
+      );
+    }
+    if (proposal.teamAId != parent.teamAId ||
         proposal.teamBId != parent.teamBId) {
       return TradeOfferResult(
         league: league,

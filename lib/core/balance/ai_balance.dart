@@ -191,6 +191,46 @@ class AiBalance {
     this.tradeAcceptLow = 0.04,
     this.tradeHardReject = -0.30,
     this.tradeNeedShift = -8,
+    this.tradeLastAtPositionShift = 12,
+    this.tradeSameConferenceContenderShift = 10,
+    this.tradeTransferRequestShift = -10,
+    this.tradeDeadlineNeedShift = -6,
+    this.tradeAcceptProbabilityHigh = 0.95,
+    this.tradeAcceptProbabilityLow = 0.70,
+    this.tradeCounterProbabilityHigh = 0.30,
+    this.tradeCounterProbabilityNearFair = 0.60,
+    this.tradeCounterProbabilityLow = 0.15,
+    this.tradeRejectProbabilityNearFair = 0.40,
+    this.tradeRejectProbabilityLow = 0.85,
+    this.tradeRejectProbabilityHardBand = 0.70,
+    this.tradeHardRejectProbabilityHardBand = 0.30,
+    this.tradeCounterTargetRound1 = 10.0,
+    this.tradeCounterTargetRound2 = 6.0,
+    this.tradeCounterTargetRound3 = 2.0,
+    this.tradeHardRejectProbabilityRound1 = 0.0,
+    this.tradeHardRejectProbabilityRound2 = 0.15,
+    this.tradeHardRejectProbabilityRound3 = 0.35,
+    this.tradeMaxCounters = 3,
+    this.tradeOfferTarget = 10.0,
+    this.tradeOfferMinimum = 2.0,
+    this.tradeHardRejectCooldownWeeks = 4,
+    this.aiTradeCandidatePairs = 12,
+    this.aiTradePackagesPerPair = 6,
+    this.aiTradeWeeklyTeamLimit = 2,
+    this.tradeFirstRoundLimit = 2,
+    this.tradeFirstRoundWindowYears = 3,
+    this.tradeDeadlineAppetiteMultiplier = 1.8,
+    this.tradeDeadlinePickBump = 10.0,
+    this.tradeDumpBurdenMaxNegative = -10.0,
+    this.tradeDumpAnchorMaxNegative = -25.0,
+    this.tradeDumpToxicMaxNegative = -40.0,
+    this.tradeRebuildR1ContractProbability = 0.55,
+    this.tradeRebuildR2ContractProbability = 0.35,
+    this.tradeRetoolR2ContractProbability = 0.25,
+    this.tradeVeteranSaleProbability = 0.45,
+    this.tradeNtcPlanningMinConsent = 0.35,
+    this.tradeNtcPlanningFallbackConsent = 0.70,
+    this.tradeSuperteamStarOverall = 80,
     this.pOfferToUserRegular = 0.020,
     this.pOfferToUserOffseason = 0.045,
     this.pOfferToUserDeadline = 0.050,
@@ -284,6 +324,46 @@ class AiBalance {
   final double tradeAcceptLow;
   final double tradeHardReject;
   final int tradeNeedShift;
+  final double tradeLastAtPositionShift;
+  final double tradeSameConferenceContenderShift;
+  final double tradeTransferRequestShift;
+  final double tradeDeadlineNeedShift;
+  final double tradeAcceptProbabilityHigh;
+  final double tradeAcceptProbabilityLow;
+  final double tradeCounterProbabilityHigh;
+  final double tradeCounterProbabilityNearFair;
+  final double tradeCounterProbabilityLow;
+  final double tradeRejectProbabilityNearFair;
+  final double tradeRejectProbabilityLow;
+  final double tradeRejectProbabilityHardBand;
+  final double tradeHardRejectProbabilityHardBand;
+  final double tradeCounterTargetRound1;
+  final double tradeCounterTargetRound2;
+  final double tradeCounterTargetRound3;
+  final double tradeHardRejectProbabilityRound1;
+  final double tradeHardRejectProbabilityRound2;
+  final double tradeHardRejectProbabilityRound3;
+  final int tradeMaxCounters;
+  final double tradeOfferTarget;
+  final double tradeOfferMinimum;
+  final int tradeHardRejectCooldownWeeks;
+  final int aiTradeCandidatePairs;
+  final int aiTradePackagesPerPair;
+  final int aiTradeWeeklyTeamLimit;
+  final int tradeFirstRoundLimit;
+  final int tradeFirstRoundWindowYears;
+  final double tradeDeadlineAppetiteMultiplier;
+  final double tradeDeadlinePickBump;
+  final double tradeDumpBurdenMaxNegative;
+  final double tradeDumpAnchorMaxNegative;
+  final double tradeDumpToxicMaxNegative;
+  final double tradeRebuildR1ContractProbability;
+  final double tradeRebuildR2ContractProbability;
+  final double tradeRetoolR2ContractProbability;
+  final double tradeVeteranSaleProbability;
+  final double tradeNtcPlanningMinConsent;
+  final double tradeNtcPlanningFallbackConsent;
+  final int tradeSuperteamStarOverall;
 
   final double pOfferToUserRegular;
   final double pOfferToUserOffseason;

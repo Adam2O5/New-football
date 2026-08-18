@@ -131,6 +131,7 @@ int negotiationSeed(
   String subjectId,
   String phase, {
   int round = 0,
+  int salt = 0,
 }) {
   return _stableHash([
     'negotiation',
@@ -138,5 +139,6 @@ int negotiationSeed(
     subjectId,
     phase,
     round,
+    salt,
   ]);
 }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/legacy.dart';
 
 import 'package:new_football/core/simulation/match_engine.dart';
 import 'package:new_football/core/ai/ai_matchday_service.dart';
+import 'package:new_football/core/ai/ai_trade_service.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/core/models/league_state.dart';
@@ -46,6 +47,10 @@ final aiMatchdayServiceProvider = Provider(
   (ref) => AiMatchdayService(matchEngine: ref.watch(matchEngineProvider)),
 );
 
+final aiTradeServiceProvider = Provider(
+  (ref) => AiTradeService(tradeService: ref.watch(tradeServiceProvider)),
+);
+
 final playerEventServiceProvider = Provider((ref) => PlayerEventService());
 
 final teamEventServiceProvider = Provider((ref) => TeamEventService());
@@ -54,6 +59,7 @@ final daySimulatorProvider = Provider((ref) {
   return DaySimulator(
     matchEngine: ref.watch(matchEngineProvider),
     aiMatchdayService: ref.watch(aiMatchdayServiceProvider),
+    aiTradeService: ref.watch(aiTradeServiceProvider),
     playerEvents: ref.watch(playerEventServiceProvider),
     teamEvents: ref.watch(teamEventServiceProvider),
     contractMarket: ref.watch(contractMarketServiceProvider),

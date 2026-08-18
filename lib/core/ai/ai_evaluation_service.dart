@@ -244,6 +244,7 @@ class AiEvaluationService {
     Iterable<AiAssetValuation> outgoing = const [],
     int? currentPayroll,
     int? resultingPayroll,
+    int packageSalt = 0,
   }) {
     final incomingList = List<AiAssetValuation>.unmodifiable(incoming);
     final outgoingList = List<AiAssetValuation>.unmodifiable(outgoing);
@@ -270,12 +271,13 @@ class AiEvaluationService {
 
     final random = Random(
       aiSeed(
-        recipient.saveSeed,
-        recipient.seasonYear,
-        recipient.week,
-        recipient.team.id,
-        recipient.decisionType,
-      ),
+            recipient.saveSeed,
+            recipient.seasonYear,
+            recipient.week,
+            recipient.team.id,
+            recipient.decisionType,
+          ) ^
+          packageSalt,
     );
     final evaluationNoisePp = _gaussian(random) * balance.ai.evaluationNoiseSd;
     final entersSecondApron =
@@ -317,6 +319,7 @@ class AiEvaluationService {
     required int currentYear,
     int saveSeed = 0,
     int? week,
+    int packageSalt = 0,
   }) {
     final context = contextForTeam(
       team: recipient,
@@ -354,6 +357,7 @@ class AiEvaluationService {
       outgoing: outgoing,
       currentPayroll: currentPayroll,
       resultingPayroll: currentPayroll + incomingSalary - outgoingSalary,
+      packageSalt: packageSalt,
     );
   }
 
