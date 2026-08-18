@@ -365,6 +365,11 @@ class SimulationLiveMatch {
   Map<String, Position> get awayAssignedPositions =>
       Map.unmodifiable(_awayAssignedPositions);
 
+  double currentStamina(String playerId) =>
+      legacyMatch.staminaRemaining[playerId] ??
+      legacyMatch.playersById[playerId]?.state.stamina.toDouble() ??
+      0.0;
+
   bool get isHalfTime =>
       state.minute == 45 ||
       (_firstHalfEndMinute != null && state.minute == _firstHalfEndMinute);
@@ -684,6 +689,8 @@ class SimulationMatchEngine {
     required Team away,
     MatchContext context = const MatchContext(),
     int rngSeed = 0,
+    Map<String, Position> homeAssignedPositions = const {},
+    Map<String, Position> awayAssignedPositions = const {},
   }) {
     final seed = context.seed == 0 ? rngSeed : context.seed;
     final seededContext = context.copyWith(seed: seed);
@@ -693,6 +700,8 @@ class SimulationMatchEngine {
       context: seededContext,
       rngSeed: seed,
       refreshDerivedRatings: false,
+      homeAssignedPositions: homeAssignedPositions,
+      awayAssignedPositions: awayAssignedPositions,
     );
     final simulation = SimulationLiveMatch(
       legacyMatch: live,

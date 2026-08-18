@@ -7,6 +7,8 @@ import 'package:go_router/go_router.dart';
 import 'package:new_football/app/l10n/enum_labels.dart';
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/app/widgets/screen_background.dart';
+import 'package:new_football/core/ai/ai_matchday_models.dart';
+import 'package:new_football/core/ai/ai_matchday_service.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/match_models.dart';
@@ -30,6 +32,8 @@ class _MatchdayScreenState extends ConsumerState<MatchdayScreen> {
   SimulationLiveMatch? _live;
   Team? _home;
   Team? _away;
+  AiMatchdayRuntime? _homeAiRuntime;
+  AiMatchdayRuntime? _awayAiRuntime;
   bool _paused = true;
   bool _finishing = false;
   bool _finalized = false;
@@ -55,19 +59,74 @@ class _MatchdayScreenState extends ConsumerState<MatchdayScreen> {
     if (home == null || away == null) return;
 
     final engine = ref.read(matchEngineProvider);
+    final aiMatchday = ref.read(aiMatchdayServiceProvider);
     final matchContext = ref
         .read(matchContextFactoryProvider)
         .create(league: league, match: widget.match, saveSeed: save.saveSeed);
+    final homeHistory = AiMatchdayService.formationHistoryFromSchedule(
+      league.currentSeason.schedule,
+      home.id,
+      away.id,
+    );
+    final awayHistory = AiMatchdayService.formationHistoryFromSchedule(
+      league.currentSeason.schedule,
+      away.id,
+      home.id,
+    );
+    final homePlan = home.ai == null
+        ? null
+        : aiMatchday.planForTeam(
+            aiMatchday.contextForTeam(
+              team: home,
+              opponent: away,
+              matchId: widget.match.id,
+              matchContext: matchContext,
+              saveSeed: save.saveSeed,
+              seasonYear: league.currentSeason.year,
+              week: league.currentWeek,
+              phase: league.currentSeason.phase,
+              opponentFormation: away.tactics.formation,
+              opponentFormationHistory: homeHistory,
+              nextMatchWithinThreeDays: matchContext.homeMatchInWeek >= 2,
+            ),
+          );
+    final plannedHome = homePlan?.applyTo(home) ?? home;
+    final awayPlan = away.ai == null
+        ? null
+        : aiMatchday.planForTeam(
+            aiMatchday.contextForTeam(
+              team: away,
+              opponent: plannedHome,
+              matchId: widget.match.id,
+              matchContext: matchContext,
+              saveSeed: save.saveSeed,
+              seasonYear: league.currentSeason.year,
+              week: league.currentWeek,
+              phase: league.currentSeason.phase,
+              opponentFormation: homePlan?.formation ?? home.tactics.formation,
+              opponentFormationHistory: awayHistory,
+              nextMatchWithinThreeDays: matchContext.awayMatchInWeek >= 2,
+            ),
+          );
+    final plannedAway = awayPlan?.applyTo(away) ?? away;
     final live = engine.start(
-      home: home,
-      away: away,
+      home: plannedHome,
+      away: plannedAway,
       context: matchContext,
       rngSeed: matchContext.seed,
+      homeAssignedPositions: homePlan?.assignedPositions ?? const {},
+      awayAssignedPositions: awayPlan?.assignedPositions ?? const {},
     );
 
     setState(() {
-      _home = home;
-      _away = away;
+      _home = plannedHome;
+      _away = plannedAway;
+      _homeAiRuntime = homePlan == null
+          ? null
+          : AiMatchdayRuntime(plan: homePlan);
+      _awayAiRuntime = awayPlan == null
+          ? null
+          : AiMatchdayRuntime(plan: awayPlan);
       _live = live;
     });
     if (live.isFinished) {
@@ -85,6 +144,23 @@ class _MatchdayScreenState extends ConsumerState<MatchdayScreen> {
     final previousEventCount = live.events.length;
     final engine = ref.read(matchEngineProvider);
     engine.simulateMinute(live);
+    final aiMatchday = ref.read(aiMatchdayServiceProvider);
+    final homeRuntime = _homeAiRuntime;
+    if (homeRuntime != null) {
+      aiMatchday.applyInMatchDecisions(
+        live: live,
+        runtime: homeRuntime,
+        homeSide: true,
+      );
+    }
+    final awayRuntime = _awayAiRuntime;
+    if (awayRuntime != null) {
+      aiMatchday.applyInMatchDecisions(
+        live: live,
+        runtime: awayRuntime,
+        homeSide: false,
+      );
+    }
     final newEvents = live.events.skip(previousEventCount).toList();
     final pauseReason = _autoPauseReason(
       live,
@@ -197,8 +273,25 @@ class _MatchdayScreenState extends ConsumerState<MatchdayScreen> {
     });
 
     final engine = ref.read(matchEngineProvider);
+    final aiMatchday = ref.read(aiMatchdayServiceProvider);
     while (!live.isFinished) {
       engine.simulateMinute(live);
+      final homeRuntime = _homeAiRuntime;
+      if (homeRuntime != null) {
+        aiMatchday.applyInMatchDecisions(
+          live: live,
+          runtime: homeRuntime,
+          homeSide: true,
+        );
+      }
+      final awayRuntime = _awayAiRuntime;
+      if (awayRuntime != null) {
+        aiMatchday.applyInMatchDecisions(
+          live: live,
+          runtime: awayRuntime,
+          homeSide: false,
+        );
+      }
       if (!mounted) return;
       setState(() {});
       // Yield after each minute so progress and the final state are rendered;

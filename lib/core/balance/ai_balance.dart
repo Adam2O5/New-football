@@ -158,6 +158,35 @@ class AiBalance {
     this.pCounterFormation = 0.65,
     this.pTacticalMatchupAdjust = 0.70,
     this.pRoleOverride = 0.45,
+    this.staminaReadinessFull = 1.00,
+    this.staminaReadinessGood = 0.94,
+    this.staminaReadinessMid = 0.82,
+    this.staminaReadinessLow = 0.60,
+    this.lineupSwapPasses = 2,
+    this.formationFitWeight = 0.65,
+    this.formationMatchupWeight = 0.35,
+    this.counterFormationMinMatches = 2,
+    this.pRotationShortRest = 0.80,
+    this.pRotationCriticalStamina = 0.95,
+    this.rotationInjuryProneThreshold = 7,
+    this.pRotationMeaningless = 0.60,
+    this.pRotationMajorReturn = 0.70,
+    this.pPlayoffBestXi = 0.90,
+    this.pSubstitutionStaminaLow = 0.85,
+    this.pSubstitutionStaminaCritical = 0.95,
+    this.pSubstitutionLowRating = 0.40,
+    this.pSubstitutionYellowCard = 0.30,
+    this.pSubstitutionTrailingOne = 0.70,
+    this.pSubstitutionTrailingTwo = 0.80,
+    this.pSubstitutionLeadingOne = 0.55,
+    this.pSubstitutionLeadingTwo = 0.60,
+    this.pTacticalLateCorrection = 0.50,
+    this.sfgAerialAttackThreshold = 68,
+    this.sfgShootingThreshold = 82,
+    this.sfgStrongValue = 65,
+    this.sfgDefaultValue = 50,
+    this.sfgAerialDefenseThreshold = 68,
+    this.sfgDefenseStrongValue = 60,
     this.tradeAcceptHigh = 0.12,
     this.tradeAcceptLow = 0.04,
     this.tradeHardReject = -0.30,
@@ -216,6 +245,39 @@ class AiBalance {
   final double pCounterFormation;
   final double pTacticalMatchupAdjust;
   final double pRoleOverride;
+
+  final double staminaReadinessFull;
+  final double staminaReadinessGood;
+  final double staminaReadinessMid;
+  final double staminaReadinessLow;
+  final int lineupSwapPasses;
+  final double formationFitWeight;
+  final double formationMatchupWeight;
+  final int counterFormationMinMatches;
+
+  final double pRotationShortRest;
+  final double pRotationCriticalStamina;
+  final int rotationInjuryProneThreshold;
+  final double pRotationMeaningless;
+  final double pRotationMajorReturn;
+  final double pPlayoffBestXi;
+
+  final double pSubstitutionStaminaLow;
+  final double pSubstitutionStaminaCritical;
+  final double pSubstitutionLowRating;
+  final double pSubstitutionYellowCard;
+  final double pSubstitutionTrailingOne;
+  final double pSubstitutionTrailingTwo;
+  final double pSubstitutionLeadingOne;
+  final double pSubstitutionLeadingTwo;
+  final double pTacticalLateCorrection;
+
+  final int sfgAerialAttackThreshold;
+  final int sfgShootingThreshold;
+  final int sfgStrongValue;
+  final int sfgDefaultValue;
+  final int sfgAerialDefenseThreshold;
+  final int sfgDefenseStrongValue;
 
   /// Trade acceptance and need-shift values are percentage deltas.
   final double tradeAcceptHigh;

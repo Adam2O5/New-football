@@ -399,6 +399,8 @@ class MatchEngine {
     MatchContext context = const MatchContext(),
     required int rngSeed,
     bool refreshDerivedRatings = true,
+    Map<String, Position> homeAssignedPositions = const {},
+    Map<String, Position> awayAssignedPositions = const {},
   }) {
     final report = PreMatchValidator(
       balance: balance,
@@ -422,11 +424,13 @@ class MatchEngine {
       home,
       report.home,
       cohesionMultiplier: homeCohesionMult,
+      assignedPositions: homeAssignedPositions,
     );
     final awaySnapshot = _snapshotFor(
       away,
       report.away,
       cohesionMultiplier: awayCohesionMult,
+      assignedPositions: awayAssignedPositions,
     );
 
     if (report.status != MatchStatus.played) {
@@ -645,12 +649,14 @@ class MatchEngine {
     Team team,
     PreMatchTeamReport report, {
     required double cohesionMultiplier,
+    Map<String, Position> assignedPositions = const {},
   }) => MatchTeamSnapshot(
     teamId: team.id,
     startingXi: report.startingXi,
     bench: report.bench,
     assignedPositions: [
-      for (final player in report.startingXi) player.position,
+      for (final player in report.startingXi)
+        assignedPositions[player.id] ?? player.position,
     ],
     assignedRoles: [for (final player in report.startingXi) player.state.role],
     tactics: team.tactics,

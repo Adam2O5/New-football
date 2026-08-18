@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
 import 'package:new_football/core/simulation/match_engine.dart';
+import 'package:new_football/core/ai/ai_matchday_service.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/core/models/league_state.dart';
@@ -41,6 +42,10 @@ final matchContextFactoryProvider = Provider(
 
 final matchEngineProvider = Provider((ref) => SimulationMatchEngine());
 
+final aiMatchdayServiceProvider = Provider(
+  (ref) => AiMatchdayService(matchEngine: ref.watch(matchEngineProvider)),
+);
+
 final playerEventServiceProvider = Provider((ref) => PlayerEventService());
 
 final teamEventServiceProvider = Provider((ref) => TeamEventService());
@@ -48,6 +53,7 @@ final teamEventServiceProvider = Provider((ref) => TeamEventService());
 final daySimulatorProvider = Provider((ref) {
   return DaySimulator(
     matchEngine: ref.watch(matchEngineProvider),
+    aiMatchdayService: ref.watch(aiMatchdayServiceProvider),
     playerEvents: ref.watch(playerEventServiceProvider),
     teamEvents: ref.watch(teamEventServiceProvider),
     contractMarket: ref.watch(contractMarketServiceProvider),
@@ -55,7 +61,11 @@ final daySimulatorProvider = Provider((ref) {
 });
 
 final seasonServiceProvider = Provider(
-  (ref) => SeasonService(teamEvents: ref.watch(teamEventServiceProvider)),
+  (ref) => SeasonService(
+    matchEngine: ref.watch(matchEngineProvider),
+    aiMatchdayService: ref.watch(aiMatchdayServiceProvider),
+    teamEvents: ref.watch(teamEventServiceProvider),
+  ),
 );
 
 final draftServiceProvider = Provider((ref) => DraftService());
@@ -556,7 +566,6 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     final away = league.teamById(match.awayTeamId);
     if (home == null || away == null) return null;
 
-    final engine = _ref.read(matchEngineProvider);
     final context = _ref
         .read(matchContextFactoryProvider)
         .create(
@@ -565,12 +574,18 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
           saveSeed: current.saveSeed,
           stake: MatchStake.regular,
         );
-    final result = engine.simulateFullMatch(
-      home: home,
-      away: away,
-      context: context,
-      rngSeed: context.seed,
-    );
+    final result = _ref
+        .read(aiMatchdayServiceProvider)
+        .simulateFullMatch(
+          home: home,
+          away: away,
+          context: context,
+          saveSeed: current.saveSeed,
+          seasonYear: league.currentSeason.year,
+          week: league.currentWeek,
+          matchId: match.id,
+          phase: league.currentSeason.phase,
+        );
     await updateLeague(
       (l) => _days.applyPlayerMatchResult(
         l,

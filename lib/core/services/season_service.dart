@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:uuid/uuid.dart';
 
+import 'package:new_football/core/ai/ai_matchday_service.dart';
 import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/simulation/match_engine.dart';
 import 'package:new_football/core/simulation/match_context_factory.dart';
@@ -41,6 +42,7 @@ class SeasonService {
   SeasonService({
     this.balance = BalanceConfig.defaults,
     SimulationMatchEngine? matchEngine,
+    AiMatchdayService? aiMatchdayService,
     CalendarService? calendar,
     MatchContextFactory? contextFactory,
     MatchMessageEmitter? matchMessageEmitter,
@@ -52,6 +54,13 @@ class SeasonService {
     TeamEventService? teamEvents,
     Random? random,
   }) : matchEngine = matchEngine ?? SimulationMatchEngine(balance: balance),
+       aiMatchdayService =
+           aiMatchdayService ??
+           AiMatchdayService(
+             balance: balance,
+             matchEngine:
+                 matchEngine ?? SimulationMatchEngine(balance: balance),
+           ),
        calendar = calendar ?? CalendarService(balance: balance),
        contextFactory =
            contextFactory ??
@@ -72,6 +81,7 @@ class SeasonService {
 
   final BalanceConfig balance;
   final SimulationMatchEngine matchEngine;
+  final AiMatchdayService aiMatchdayService;
   final CalendarService calendar;
   final MatchContextFactory contextFactory;
   final MatchMessageEmitter matchMessageEmitter;
@@ -1341,11 +1351,27 @@ class SeasonService {
       stake: stake ?? _stakeForPhase(phase),
       week: league.currentWeek,
     );
-    return matchEngine.simulateFullMatch(
+    return aiMatchdayService.simulateFullMatch(
       home: home,
       away: away,
       context: context,
-      rngSeed: context.seed,
+      saveSeed: saveSeed,
+      seasonYear: league.currentSeason.year,
+      week: league.currentWeek,
+      matchId: matchId,
+      phase: phase,
+      homeOpponentFormationHistory:
+          AiMatchdayService.formationHistoryFromSchedule(
+            league.currentSeason.schedule,
+            home.id,
+            away.id,
+          ),
+      awayOpponentFormationHistory:
+          AiMatchdayService.formationHistoryFromSchedule(
+            league.currentSeason.schedule,
+            away.id,
+            home.id,
+          ),
     );
   }
 

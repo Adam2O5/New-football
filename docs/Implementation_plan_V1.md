@@ -1308,38 +1308,43 @@ Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, le
 
 ---
 
-### ⬜ Task 33: AI matchday
+### ✅ Task 33: AI matchday
 
 **Cel:** `AI_behaviour.md` §4.
 
-- [ ] `playerMatchScore = effectiveOvrForSlot × formMult × staminaReadiness × roleFitBonus × availabilityGate`
-- [ ] `staminaReadiness`: 1,00 / 0,94 / 0,82 / 0,60 z progów
-- [ ] `roleFitBonus` ×1,03, obca pozycja ×0,90, kontuzja/zawieszenie ×0
-- [ ] Przypisanie zachłanne do slotów formacji + 2 przebiegi wymiany par
-- [ ] **Twarda reguła:** zawsze zawodnik z `Position.gk` w bramce, jeśli jakikolwiek zdolny jest w rosterze
-- [ ] Rotacja: kolejny mecz ≤3 dni i stamina <65 → ława 80%
-- [ ] Rotacja: stamina <45 → ława 95%
-- [ ] Rotacja: mecz bez znaczenia (tyg. 27–29) → odpoczynek `injuryProne` ≥7, 60%
-- [ ] Rotacja: pierwszy tydzień po Major → ograniczone minuty 70%
-- [ ] Rotacja: playoff i stamina ≥55 → best XI 90%
-- [ ] `formationFitScore` = średnia najlepszych `playerMatchScore` na slot
-- [ ] Wybór z 3 najlepszych formacji, waga matchup/fit 35/65
-- [ ] Pamięć kontr-formacji: ≥2 mecze, okno 2 sezony, P = 65%
-- [ ] Ustawienia taktyczne z tabeli różnicy siły (5 wierszy)
-- [ ] Korekty matchupów z `tactics.md` z P = 70%
-- [ ] Role: P = 45% odejścia od optymalnej na rzecz kierunku taktycznego
-- [ ] SFG: `cornersAttack`/`freeKicks`/`penalties` = 65 przy `teamAerialAtk ≥ 68` lub `shooting ≥ 82`, inaczej 50
-- [ ] SFG: `cornersDefense` = 60 przy `teamAerialDef ≥ 68`, inaczej 50
-- [ ] Ławka: 1 GK + 2 DEF + 2 MID + 2 ATK
-- [ ] Decyzje w meczu: 10 triggerów z tabeli §4.7 z prawdopodobieństwami
-- [ ] Korekta taktyki poza przerwą tylko przy stracie 2+ goli po 70', P = 50%
-- [ ] Limity zmian i okien identyczne jak dla gracza
+- [x] `playerMatchScore = effectiveOvrForSlot × formMult × staminaReadiness × roleFitBonus × availabilityGate`
+- [x] `staminaReadiness`: 1,00 / 0,94 / 0,82 / 0,60 z progów
+- [x] `roleFitBonus` ×1,03, obca pozycja ×0,90, kontuzja/zawieszenie ×0
+- [x] Przypisanie zachłanne do slotów formacji + 2 przebiegi wymiany par
+- [x] **Twarda reguła:** zawsze zawodnik z `Position.gk` w bramce, jeśli jakikolwiek zdolny jest w rosterze
+- [x] Rotacja: kolejny mecz ≤3 dni i stamina <65 → ława 80%
+- [x] Rotacja: stamina <45 → ława 95%
+- [x] Rotacja: mecz bez znaczenia (tyg. 27–29) → odpoczynek `injuryProne` ≥7, 60%
+- [x] Rotacja: pierwszy tydzień po Major → ograniczone minuty 70%
+- [x] Rotacja: playoff i stamina ≥55 → best XI 90%
+- [x] `formationFitScore` = średnia najlepszych `playerMatchScore` na slot
+- [x] Wybór z 3 najlepszych formacji, waga matchup/fit 35/65
+- [x] Pamięć kontr-formacji: ≥2 mecze, okno 2 sezony, P = 65%
+- [x] Ustawienia taktyczne z tabeli różnicy siły (5 wierszy)
+- [x] Korekty matchupów z `tactics.md` z P = 70%
+- [x] Role: P = 45% odejścia od optymalnej na rzecz kierunku taktycznego
+- [x] SFG: `cornersAttack`/`freeKicks`/`penalties` = 65 przy `teamAerialAtk ≥ 68` lub `shooting ≥ 82`, inaczej 50
+- [x] SFG: `cornersDefense` = 60 przy `teamAerialDef ≥ 68`, inaczej 50
+- [x] Ławka: 1 GK + 2 DEF + 2 MID + 2 ATK
+- [x] Decyzje w meczu: 10 triggerów z tabeli §4.7 z prawdopodobieństwami
+- [x] Korekta taktyki poza przerwą tylko przy stracie 2+ goli po 70', P = 50%
+- [x] Limity zmian i okien identyczne jak dla gracza
 
-**Testy**
-- [ ] 0 przypadków braku GK w XI w 1000 symulowanych kolejek
-- [ ] Kontr-formacja stosowana w ~65% trzecich spotkań z tym samym rywalem
-- [ ] AI rotuje skład przy dwóch meczach w tygodniu
-- [ ] AI wykonuje zmianę przy kontuzji w 100% przypadków
+**Integracja:** `AiMatchdayService` współdzieli kanoniczny `SimulationMatchEngine` z symulacją headless i `MatchdayScreen`; plan jest nakładany na kopię `Team`, a przypisania slotów są przekazywane jako mapy `playerId → Position`. `DaySimulator` i `SeasonService` budują historię formacji z publicznych `ScheduledMatch.result`, bez zmian schematu zapisu. Losowania decyzji AI używają fixture-scoped `matchAiSeed`, niezależnego od RNG fizyki meczu.
+
+**Testy** (`test/task33_ai_matchday_test.dart`, 5 przypadków)
+- [x] 1000 deterministycznych planów nie wystawia bramkarza z pola w slocie GK
+- [x] Cztery pasma readiness mają wartości 1,00 / 0,94 / 0,82 / 0,60
+- [x] Kontr-formacja jest stosowana ze średnią około 65% po spełnieniu minimum 2 meczów
+- [x] AI rotuje zmęczonego zawodnika przy krótkim odpoczynku
+- [x] Kontuzja zawodnika XI wymusza zmianę przez kanoniczny silnik
+
+**Walidacja:** `flutter test --no-pub --timeout=3m --reporter compact .\\test` — 289 testów; `test/task33_ai_matchday_test.dart` — 5/5; `test/task32_ai_evaluation_test.dart` — 9/9; `flutter analyze --no-pub --no-fatal-infos` — exit 0 (112 istniejących `info`).
 
 **Demo:** mecz przeciw AI, które rotuje skład po intensywnym tygodniu, reaguje zmianami na wynik i dobiera kontr-formację.
 

@@ -1,3 +1,4 @@
+import 'package:new_football/core/ai/ai_matchday_service.dart';
 import 'package:new_football/core/balance/injury_catalog.dart';
 import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/simulation/match_engine.dart';
@@ -53,6 +54,7 @@ class DaySimulator {
   DaySimulator({
     this.balance = BalanceConfig.defaults,
     SimulationMatchEngine? matchEngine,
+    AiMatchdayService? aiMatchdayService,
     CalendarService? calendar,
     MatchContextFactory? contextFactory,
     MatchMessageEmitter? matchMessageEmitter,
@@ -64,6 +66,13 @@ class DaySimulator {
     PlayerEventService? playerEvents,
     TeamEventService? teamEvents,
   }) : matchEngine = matchEngine ?? SimulationMatchEngine(balance: balance),
+       aiMatchdayService =
+           aiMatchdayService ??
+           AiMatchdayService(
+             balance: balance,
+             matchEngine:
+                 matchEngine ?? SimulationMatchEngine(balance: balance),
+           ),
        calendar = calendar ?? CalendarService(balance: balance),
        contextFactory =
            contextFactory ??
@@ -87,6 +96,7 @@ class DaySimulator {
 
   final BalanceConfig balance;
   final SimulationMatchEngine matchEngine;
+  final AiMatchdayService aiMatchdayService;
   final CalendarService calendar;
   final MatchContextFactory contextFactory;
   final MatchMessageEmitter matchMessageEmitter;
@@ -412,11 +422,27 @@ class DaySimulator {
         saveSeed: saveSeed,
         stake: MatchStake.regular,
       );
-      final result = matchEngine.simulateFullMatch(
+      final result = aiMatchdayService.simulateFullMatch(
         home: home,
         away: away,
         context: context,
-        rngSeed: context.seed,
+        saveSeed: saveSeed,
+        seasonYear: state.currentSeason.year,
+        week: state.currentWeek,
+        matchId: f.id,
+        phase: SeasonPhase.regular,
+        homeOpponentFormationHistory:
+            AiMatchdayService.formationHistoryFromSchedule(
+              state.currentSeason.schedule,
+              home.id,
+              away.id,
+            ),
+        awayOpponentFormationHistory:
+            AiMatchdayService.formationHistoryFromSchedule(
+              state.currentSeason.schedule,
+              away.id,
+              home.id,
+            ),
       );
       state = _applyResult(state, f, result, saveSeed: saveSeed);
       results.add(result);

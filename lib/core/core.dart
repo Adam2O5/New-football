@@ -1,6 +1,8 @@
 export 'ai/ai_evaluation_context.dart';
 export 'ai/ai_evaluation_models.dart';
 export 'ai/ai_evaluation_service.dart';
+export 'ai/ai_matchday_models.dart';
+export 'ai/ai_matchday_service.dart';
 export 'ai/team_ai_service.dart';
 export 'balance/balance_config.dart';
 export 'random/match_random.dart';

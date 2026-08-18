@@ -39,6 +39,27 @@ int aiSeed(
   ]);
 }
 
+/// Returns a fixture-scoped AI seed without sharing the match-physics stream.
+///
+/// The base contract remains [aiSeed]; the fixture and opponent make separate
+/// matchday decisions independent from another fixture in the same week.
+int matchAiSeed(
+  int saveSeed,
+  int seasonYear,
+  int week,
+  String teamId,
+  DecisionType decisionType,
+  String matchId, {
+  String? opponentId,
+}) {
+  return _stableHash([
+    'ai-match',
+    aiSeed(saveSeed, seasonYear, week, teamId, decisionType),
+    matchId,
+    opponentId ?? '',
+  ]);
+}
+
 /// Returns a deterministic seed for one individual-player event roll.
 ///
 /// The player id and event kind are part of the key, so changing roster order
