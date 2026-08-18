@@ -889,6 +889,25 @@
   "rankings_statusPretender": "Pretender",
   "rankings_statusContender": "Contender",
   "rankings_statusElite": "Elite",
+  "rankings_rightsAsset": "Draft rights",
+  "rankings_aiValuationTeam": "Valuation from team perspective",
+  "rankings_aiValuationDisclaimer": "Asset values are calculated from: {team} perspective.",
+  "@rankings_aiValuationDisclaimer": {
+    "placeholders": {
+      "team": {"type": "String"}
+    }
+  },
+  "rankings_openPlayer": "Open player profile",
+  "rankings_aiBaseValue": "pointValue base",
+  "rankings_aiStatusAge": "Status/age multiplier",
+  "rankings_aiNeedMultiplier": "Need multiplier",
+  "rankings_aiContextMultiplier": "Context multiplier",
+  "rankings_aiProjectedSlot": "Projected slot",
+  "rankings_aiFutureDiscount": "Future discount",
+  "rankings_aiUncertainty": "Uncertainty",
+  "rankings_aiRightsMultiplier": "Rights multiplier",
+  "rankings_aiContractDrag": "contractDrag",
+  "rankings_aiFactors": "Active factors",
   "stats_title": "Statistics",
   "stats_players": "Player stats",
   "stats_teamOverview": "Team overview",

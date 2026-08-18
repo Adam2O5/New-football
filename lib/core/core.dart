@@ -1,3 +1,6 @@
+export 'ai/ai_evaluation_context.dart';
+export 'ai/ai_evaluation_models.dart';
+export 'ai/ai_evaluation_service.dart';
 export 'ai/team_ai_service.dart';
 export 'balance/balance_config.dart';
 export 'random/match_random.dart';
@@ -33,6 +36,7 @@ export 'models/match_models.dart';
 export 'models/match_state.dart';
 export 'models/message.dart';
 export 'models/player.dart';
+export 'models/player_value.dart';
 export 'models/player_attributes.dart';
 export 'models/player_event_state.dart';
 export 'models/scouting.dart';

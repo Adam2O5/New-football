@@ -2472,6 +2472,50 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rankings_statusElite => 'Elite';
 
   @override
+  String get rankings_rightsAsset => 'Draft rights';
+
+  @override
+  String get rankings_aiValuationTeam => 'Valuation from team perspective';
+
+  @override
+  String rankings_aiValuationDisclaimer(String team) {
+    return 'Asset values are calculated from: $team perspective.';
+  }
+
+  @override
+  String get rankings_openPlayer => 'Open player profile';
+
+  @override
+  String get rankings_aiBaseValue => 'pointValue base';
+
+  @override
+  String get rankings_aiStatusAge => 'Status/age multiplier';
+
+  @override
+  String get rankings_aiNeedMultiplier => 'Need multiplier';
+
+  @override
+  String get rankings_aiContextMultiplier => 'Context multiplier';
+
+  @override
+  String get rankings_aiProjectedSlot => 'Projected slot';
+
+  @override
+  String get rankings_aiFutureDiscount => 'Future discount';
+
+  @override
+  String get rankings_aiUncertainty => 'Uncertainty';
+
+  @override
+  String get rankings_aiRightsMultiplier => 'Rights multiplier';
+
+  @override
+  String get rankings_aiContractDrag => 'contractDrag';
+
+  @override
+  String get rankings_aiFactors => 'Active factors';
+
+  @override
   String get stats_title => 'Statistics';
 
   @override

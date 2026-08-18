@@ -414,6 +414,8 @@ class _TradeScreenState extends ConsumerState<TradeScreen> {
       tradeService: service,
       league: league,
       currentYear: currentYear,
+      saveSeed: ref.read(gameControllerProvider).value?.saveSeed ?? 0,
+      week: league.currentWeek,
     );
     final submission = service.submitLeague(
       league,

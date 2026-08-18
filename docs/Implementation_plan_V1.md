@@ -1268,40 +1268,41 @@ Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, le
 
 > Warstwa decyzyjna nad gotowymi silnikami. Symetria reguł z `AI_behaviour.md` §1.1 oznacza, że AI nie implementuje własnych reguł, tylko wybiera w ramach istniejących.
 
-### ⬜ Task 32: Fundament oceny AI
+### ✅ Task 32: Fundament oceny AI
 
 **Cel:** `AI_behaviour.md` §2.
 
-- [ ] Struktura rosteru: 7 grup z min/target/max (suma target = 25)
-- [ ] `gapPenalty`: `count < min` → `40 + (min − count) × 15`; `count < target` → `(target − count) × 8`; `≥ target` → 0; `≥ max` → −12
-- [ ] `qualityGap = max(0, ligaMedianaOvrGrupy − najlepszyOvrWGrupie) × 1,5`
-- [ ] `needScore ≥ 40` = luka krytyczna
-- [ ] `assetValue = pointValue × statusAgeMult × needMult × contextMult`
-- [ ] `statusAgeMult`: pełna tabela 5 statusów × 4 przedziały wieku
-- [ ] `needMult`: 1,18 / 1,08 / 1,00 / 0,88
-- [ ] `contextMult`: 6 warunków z tabeli §2.3
-- [ ] Tabela slotów picków: R1 #1 = 900 … R3 #76–90 = 40
-- [ ] `projectedSlot(runda, właściciel) = (31 − expectedRank) + (runda − 1) × 30`
-- [ ] Dyskonto `0,90^(yearsAhead − 1)` × `uncertaintyMult` (tabela 1–7 lat)
-- [ ] Wygładzenie loterii dla `expectedRank ≥ 21` — tabela wartości oczekiwanych 3,5–9,4
-- [ ] Interpolacja wartości między progami tabeli slotów
-- [ ] Premia rebuildu: `rebuild`/`retool` picki R1 ×1,15; `contender`/`elite` ×0,88
-- [ ] Prawa do niepodpisanego draftowanego: jak pick × 0,85
-- [ ] `apronPenalty`: pretender 40, contender 25, elite 15
-- [ ] Pasma payrollu per status (5 wierszy z §3.1)
-- [ ] Wejście powyżej 2. aprogu tylko `elite` i tylko z P = 20%
-- [ ] `evaluationNoise ~ N(0; 4%)` od wartości pakietu
-- [ ] `contractDrag = (salary − estimatedSalary) / 1M × yearsRemaining` z 4-poziomową klasyfikacją
-- [ ] Wszystkie rolle na `aiSeed` z Task 1
-- [ ] Domknąć `projectedFinish` z Task 4
-- [ ] AI nie ma dostępu do ukrytych danych innych klubów — audyt dostępów
+- [x] Struktura rosteru: 7 grup z min/target/max (suma target = 25)
+- [x] `gapPenalty`: `count < min` → `40 + (min − count) × 15`; `count < target` → `(target − count) × 8`; `≥ target` → 0; `≥ max` → −12
+- [x] `qualityGap = max(0, ligaMedianaOvrGrupy − najlepszyOvrWGrupie) × 1,5`
+- [x] `needScore ≥ 40` = luka krytyczna
+- [x] `assetValue = pointValue × statusAgeMult × needMult × contextMult`
+- [x] `statusAgeMult`: pełna tabela 5 statusów × 4 przedziały wieku
+- [x] `needMult`: 1,18 / 1,08 / 1,00 / 0,88
+- [x] `contextMult`: 6 warunków z tabeli §2.3
+- [x] Tabela slotów picków: R1 #1 = 900 … R3 #76–90 = 40
+- [x] `projectedSlot(runda, właściciel) = (31 − expectedRank) + (runda − 1) × 30`
+- [x] Dyskonto `0,90^(yearsAhead − 1)` × `uncertaintyMult` (tabela 1–7 lat)
+- [x] Wygładzenie loterii dla `expectedRank ≥ 21` — tabela wartości oczekiwanych 3,5–9,4
+- [x] Interpolacja wartości między progami tabeli slotów
+- [x] Premia rebuildu: `rebuild`/`retool` picki R1 ×1,15; `contender`/`elite` ×0,88
+- [x] Prawa do niepodpisanego draftowanego: jak pick × 0,85
+- [x] `apronPenalty`: pretender 40, contender 25, elite 15
+- [x] Pasma payrollu per status (5 wierszy z §3.1)
+- [x] Wejście powyżej 2. aprogu tylko `elite` i tylko z P = 20%
+- [x] `evaluationNoise ~ N(0; 4%)` od wartości pakietu
+- [x] `contractDrag = (salary − estimatedSalary) / 1M × yearsRemaining` z 4-poziomową klasyfikacją
+- [x] Wszystkie rolle wyceny i ofert FA są oparte na `aiSeed` z Task 1
+- [x] `projectedFinish`/projektowany slot jest domknięty w kanonicznym evaluatorze picków
+- [x] AI nie ma dostępu do ukrytych danych innych klubów — audyt dostępu przez brak odczytu `PlayerHidden`
 
-**Testy**
-- [ ] 22-latek ma wyższy `assetValue` dla `rebuild`, 30-latek dla `elite`
-- [ ] Pick najsłabszej drużyny nie jest wyceniany jak gwarantowana „jedynka"
-- [ ] `needScore` przy braku GK przekracza próg krytyczny
-- [ ] `aiSeed` gwarantuje powtarzalność decyzji dla tego samego stanu
-- [ ] AI nie czyta `injuryProne` / `determination` / `growthRate` obcych zawodników
+**Testy** (`test/task32_ai_evaluation_test.dart`, 9 przypadków)
+- [x] 22-latek ma wyższy `assetValue` dla `rebuild`, 30-latek dla `elite`
+- [x] Pick najsłabszej drużyny nie jest wyceniany jak gwarantowana „jedynka"
+- [x] `needScore` przy braku GK przekracza próg krytyczny
+- [x] `aiSeed` gwarantuje powtarzalność decyzji dla tego samego stanu
+- [x] AI nie czyta `injuryProne` / `determination` / `growthRate` obcych zawodników
+- [x] Sześć mnożników kontekstu, rights ×0,85, contractDrag i kara apronów mają wartości graniczne
 
 **Demo:** `RankingsScreen` pokazuje wycenę assetów oczami wybranej drużyny AI, z rozbiciem mnożników.
 

@@ -4590,6 +4590,90 @@ abstract class AppLocalizations {
   /// **'Elita'**
   String get rankings_statusElite;
 
+  /// No description provided for @rankings_rightsAsset.
+  ///
+  /// In pl, this message translates to:
+  /// **'Prawa draftowe'**
+  String get rankings_rightsAsset;
+
+  /// No description provided for @rankings_aiValuationTeam.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wycena oczami drużyny'**
+  String get rankings_aiValuationTeam;
+
+  /// No description provided for @rankings_aiValuationDisclaimer.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wartości aktywów są liczone z perspektywy: {team}.'**
+  String rankings_aiValuationDisclaimer(String team);
+
+  /// No description provided for @rankings_openPlayer.
+  ///
+  /// In pl, this message translates to:
+  /// **'Otwórz profil zawodnika'**
+  String get rankings_openPlayer;
+
+  /// No description provided for @rankings_aiBaseValue.
+  ///
+  /// In pl, this message translates to:
+  /// **'Baza pointValue'**
+  String get rankings_aiBaseValue;
+
+  /// No description provided for @rankings_aiStatusAge.
+  ///
+  /// In pl, this message translates to:
+  /// **'Mnożnik status/wiek'**
+  String get rankings_aiStatusAge;
+
+  /// No description provided for @rankings_aiNeedMultiplier.
+  ///
+  /// In pl, this message translates to:
+  /// **'Mnożnik potrzeby'**
+  String get rankings_aiNeedMultiplier;
+
+  /// No description provided for @rankings_aiContextMultiplier.
+  ///
+  /// In pl, this message translates to:
+  /// **'Mnożnik kontekstu'**
+  String get rankings_aiContextMultiplier;
+
+  /// No description provided for @rankings_aiProjectedSlot.
+  ///
+  /// In pl, this message translates to:
+  /// **'Projektowany slot'**
+  String get rankings_aiProjectedSlot;
+
+  /// No description provided for @rankings_aiFutureDiscount.
+  ///
+  /// In pl, this message translates to:
+  /// **'Dyskonto przyszłości'**
+  String get rankings_aiFutureDiscount;
+
+  /// No description provided for @rankings_aiUncertainty.
+  ///
+  /// In pl, this message translates to:
+  /// **'Niepewność'**
+  String get rankings_aiUncertainty;
+
+  /// No description provided for @rankings_aiRightsMultiplier.
+  ///
+  /// In pl, this message translates to:
+  /// **'Mnożnik praw'**
+  String get rankings_aiRightsMultiplier;
+
+  /// No description provided for @rankings_aiContractDrag.
+  ///
+  /// In pl, this message translates to:
+  /// **'contractDrag'**
+  String get rankings_aiContractDrag;
+
+  /// No description provided for @rankings_aiFactors.
+  ///
+  /// In pl, this message translates to:
+  /// **'Aktywne czynniki'**
+  String get rankings_aiFactors;
+
   /// No description provided for @stats_title.
   ///
   /// In pl, this message translates to:

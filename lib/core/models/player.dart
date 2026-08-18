@@ -5,6 +5,7 @@ import 'package:new_football/core/models/contract.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/injury.dart';
 import 'package:new_football/core/models/player_attributes.dart';
+import 'package:new_football/core/models/player_value.dart';
 import 'package:new_football/core/models/player_event_state.dart';
 
 part 'player.freezed.dart';
@@ -323,12 +324,7 @@ extension PlayerX on Player {
     final ageComponent = ageScore * 150;
 
     // 4. Komponent kontraktowy: salaryScore * 260 * (0.5 + 0.5*lengthFactor)
-    const pvMinSalary = 1000000;
-    const pvMaxSalary = 60000000;
-    final ovrNorm = ((ovr - 50) * 2 / 100).clamp(0.0, 1.0);
-    final estimatedSalary =
-        pvMinSalary +
-        (pvMaxSalary - pvMinSalary) * (ovrNorm * ovrNorm * ovrNorm);
+    final estimatedSalary = estimatedSalaryForOverall(ovr);
     final salaryScore = estimatedSalary > 0
         ? (1.0 - contract.salary / estimatedSalary).clamp(-1.0, 1.0)
         : 0.0;

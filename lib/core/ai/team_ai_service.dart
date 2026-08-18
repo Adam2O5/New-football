@@ -1,10 +1,12 @@
 import 'dart:math';
 
+import 'package:new_football/core/ai/ai_evaluation_service.dart';
 import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/team.dart';
+import 'package:new_football/core/random/seeds.dart';
 import 'package:new_football/core/services/contract_service.dart';
 import 'package:new_football/core/services/trade_service.dart';
 import 'package:new_football/core/tactics/tactics_setup.dart';
@@ -14,11 +16,16 @@ import 'package:new_football/core/tactics/tactics_setup.dart';
 /// V1: jeden model AI — bez poziomów trudności i bez profili menedżera.
 /// Brak biasu przeciw graczowi (§1.3).
 class TeamAiService {
-  TeamAiService({this.balance = BalanceConfig.defaults, Random? random})
-    : _random = random ?? Random();
+  TeamAiService({
+    this.balance = BalanceConfig.defaults,
+    Random? random,
+    AiEvaluationService? evaluator,
+  }) : _random = random ?? Random(),
+       _evaluator = evaluator ?? AiEvaluationService(balance: balance);
 
   final BalanceConfig balance;
   final Random _random;
+  final AiEvaluationService _evaluator;
 
   /// Fixed value margin for trade acceptance (AI_behaviour.md §1: no difficulty).
   static const double _valueMargin = 0.12;
@@ -30,15 +37,26 @@ class TeamAiService {
     required TradeService tradeService,
     LeagueState? league,
     required int currentYear,
+    int saveSeed = 0,
+    int? week,
   }) {
-    int value(Team owner, TradeAsset asset) => league == null
-        ? tradeService.assetValue(owner, asset, currentYear: currentYear)
-        : tradeService.assetValueInLeague(
-            league,
-            owner,
-            asset,
-            currentYear: currentYear,
-          );
+    if (league != null) {
+      final evaluation = _evaluator.evaluateTradeAssets(
+        recipient: self,
+        partner: other,
+        incomingAssets: proposal.assetsFromB,
+        outgoingAssets: proposal.assetsFromA,
+        league: league,
+        currentYear: currentYear,
+        saveSeed: saveSeed,
+        week: week,
+      );
+      if (evaluation.hardRejected) return false;
+      return evaluation.surplusPct >= balance.ai.tradeAcceptLow * 100.0;
+    }
+
+    int value(Team owner, TradeAsset asset) =>
+        tradeService.assetValue(owner, asset, currentYear: currentYear);
 
     final ourValue = proposal.assetsFromB.fold<int>(
       0,
@@ -51,20 +69,32 @@ class TeamAiService {
     if (theirValue == 0) return ourValue > 0;
 
     final ratio = ourValue / theirValue;
-    // V1: single acceptance threshold, no profile differentiation.
+    // Legacy in-memory callers without a league snapshot retain the old API.
     return ratio >= 1.0 - _valueMargin * 0.5;
   }
 
-  ContractOffer makeFaOffer(Player player, ContractService contracts) {
+  ContractOffer makeFaOffer(
+    Player player,
+    ContractService contracts, {
+    int? saveSeed,
+    int seasonYear = 0,
+    int week = 1,
+    String teamId = '',
+  }) {
     final expectedSalary = contracts.expectedSalary(player);
     final expectedLength = contracts.expectedLength(player);
-    final mult = 0.95 + _random.nextDouble() * 0.15;
+    final random = saveSeed == null
+        ? _random
+        : Random(
+            aiSeed(saveSeed, seasonYear, week, teamId, DecisionType.faOffer),
+          );
+    final mult = 0.95 + random.nextDouble() * 0.15;
     return ContractOffer(
       salary: (expectedSalary * mult).round().clamp(
         balance.salaryCap.minSalary,
         balance.salaryCap.maxSalary,
       ),
-      years: (expectedLength + _random.nextInt(2) - 1).clamp(1, 5),
+      years: (expectedLength + random.nextInt(2) - 1).clamp(1, 5),
     );
   }
 

@@ -2474,6 +2474,50 @@ class AppLocalizationsPl extends AppLocalizations {
   String get rankings_statusElite => 'Elita';
 
   @override
+  String get rankings_rightsAsset => 'Prawa draftowe';
+
+  @override
+  String get rankings_aiValuationTeam => 'Wycena oczami drużyny';
+
+  @override
+  String rankings_aiValuationDisclaimer(String team) {
+    return 'Wartości aktywów są liczone z perspektywy: $team.';
+  }
+
+  @override
+  String get rankings_openPlayer => 'Otwórz profil zawodnika';
+
+  @override
+  String get rankings_aiBaseValue => 'Baza pointValue';
+
+  @override
+  String get rankings_aiStatusAge => 'Mnożnik status/wiek';
+
+  @override
+  String get rankings_aiNeedMultiplier => 'Mnożnik potrzeby';
+
+  @override
+  String get rankings_aiContextMultiplier => 'Mnożnik kontekstu';
+
+  @override
+  String get rankings_aiProjectedSlot => 'Projektowany slot';
+
+  @override
+  String get rankings_aiFutureDiscount => 'Dyskonto przyszłości';
+
+  @override
+  String get rankings_aiUncertainty => 'Niepewność';
+
+  @override
+  String get rankings_aiRightsMultiplier => 'Mnożnik praw';
+
+  @override
+  String get rankings_aiContractDrag => 'contractDrag';
+
+  @override
+  String get rankings_aiFactors => 'Aktywne czynniki';
+
+  @override
   String get stats_title => 'Statystyki';
 
   @override

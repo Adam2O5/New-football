@@ -10,6 +10,7 @@ import 'package:new_football/core/models/league_strength.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/staff.dart';
 import 'package:new_football/core/models/team.dart';
+import 'package:new_football/core/random/seeds.dart';
 import 'package:new_football/core/services/calendar_service.dart';
 import 'package:new_football/core/services/contract_service.dart';
 import 'package:new_football/core/services/message_service.dart';
@@ -1133,8 +1134,9 @@ class ContractMarketService {
     );
     if (right == null) return null;
     final team = league.teamById(right.ownerTeamId);
-    if (team == null || team.roster.length >= balance.roster.maxSize)
+    if (team == null || team.roster.length >= balance.roster.maxSize) {
       return null;
+    }
     final offer = ContractOffer(
       salary: right.player.contract.salary,
       years: right.player.contract.yearsRemaining,
@@ -1226,20 +1228,26 @@ class ContractMarketService {
         final players = [...state.freeAgents]
           ..sort((a, b) => b.overall(balance).compareTo(a.overall(balance)));
         final index =
-            _stableSeed(
-              '$saveSeed:${state.currentSeason.year}:${state.currentWeek}:$hour:${team.id}:player',
+            negotiationSeed(
+              saveSeed,
+              state.currentSeason.year,
+              state.currentWeek,
+              team.id,
+              DecisionType.faOffer,
+              'player-selection',
+              'hour',
+              round: hour,
             ) %
             players.length;
         final player = players[index];
-        final random = Random(
-          _stableSeed(
-            '$saveSeed:${state.currentSeason.year}:${state.currentWeek}:${state.currentDay}:$hour:${team.id}:${player.id}',
-          ),
+        final offer = TeamAiService(balance: balance).makeFaOffer(
+          player,
+          contracts,
+          saveSeed: saveSeed,
+          seasonYear: state.currentSeason.year,
+          week: state.currentWeek,
+          teamId: team.id,
         );
-        final offer = TeamAiService(
-          balance: balance,
-          random: random,
-        ).makeFaOffer(player, contracts);
         final legal = contracts.validateOffer(
           team: team,
           player: player,

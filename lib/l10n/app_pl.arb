@@ -1104,6 +1104,25 @@
   "rankings_statusPretender": "Pretendent",
   "rankings_statusContender": "Faworyt",
   "rankings_statusElite": "Elita",
+  "rankings_rightsAsset": "Prawa draftowe",
+  "rankings_aiValuationTeam": "Wycena oczami drużyny",
+  "rankings_aiValuationDisclaimer": "Wartości aktywów są liczone z perspektywy: {team}.",
+  "@rankings_aiValuationDisclaimer": {
+    "placeholders": {
+      "team": {"type": "String"}
+    }
+  },
+  "rankings_openPlayer": "Otwórz profil zawodnika",
+  "rankings_aiBaseValue": "Baza pointValue",
+  "rankings_aiStatusAge": "Mnożnik status/wiek",
+  "rankings_aiNeedMultiplier": "Mnożnik potrzeby",
+  "rankings_aiContextMultiplier": "Mnożnik kontekstu",
+  "rankings_aiProjectedSlot": "Projektowany slot",
+  "rankings_aiFutureDiscount": "Dyskonto przyszłości",
+  "rankings_aiUncertainty": "Niepewność",
+  "rankings_aiRightsMultiplier": "Mnożnik praw",
+  "rankings_aiContractDrag": "contractDrag",
+  "rankings_aiFactors": "Aktywne czynniki",
   "stats_title": "Statystyki",
   "stats_players": "Statystyki zawodników",
   "stats_teamOverview": "Przegląd drużyn",
