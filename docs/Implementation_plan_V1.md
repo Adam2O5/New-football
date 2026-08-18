@@ -1344,8 +1344,6 @@ Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, le
 - [x] AI rotuje zmęczonego zawodnika przy krótkim odpoczynku
 - [x] Kontuzja zawodnika XI wymusza zmianę przez kanoniczny silnik
 
-**Walidacja:** `flutter test --no-pub --timeout=3m --reporter compact .\\test` — 289 testów; `test/task33_ai_matchday_test.dart` — 5/5; `test/task32_ai_evaluation_test.dart` — 9/9; `flutter analyze --no-pub --no-fatal-infos` — exit 0 (112 istniejących `info`).
-
 **Demo:** mecz przeciw AI, które rotuje skład po intensywnym tygodniu, reaguje zmianami na wynik i dobiera kontr-formację.
 
 ---
@@ -1395,8 +1393,6 @@ Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, le
 - [x] Każda oferta do gracza przechodzi walidację (0 niewykonalnych)
 - [x] Fair trade od gracza akceptowany w ~70% przypadków
 
-**Walidacja:** `test/task34_ai_trade_test.dart` — 4/4; ukierunkowana regresja Task 30–34 — 29/29; pełny `flutter test --no-pub --timeout=3m --reporter compact .\\test` — 293/293; `flutter analyze --no-pub --no-fatal-infos` — exit 0 (119 istniejących `info`); diagnostyka zmienionych plików — bez błędów.
-
 **Demo:** symulacja sezonu bez ingerencji gracza produkuje żywy rynek, a gracz dostaje kilkanaście sensownych, wykonalnych ofert.
 
 ---
@@ -1443,48 +1439,56 @@ Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, le
 
 **Implementacja:** stateless `AiContractMarketService` dostarcza politykę rozszerzeń, FA I/II, RFA i sztabu, a `ContractMarketService` pozostaje jedynym właścicielem walidacji, mutacji i podpisywania. Wishlist, limity FA II i wszystkie decyzje losowe są odtwarzane z publicznego stanu i deterministycznego `negotiationSeed`; nie zmieniono `SaveSchema`, `LeagueState`, providerów ani zależności.
 
-**Walidacja:** `test/task35_ai_contract_market_test.dart` — 7/7; benchmark `test/task35_ai_contract_market_benchmark_test.dart` — jakość FA oraz 8-seedowe benchmarki sztabu/payrollu; ukierunkowana regresja Task 28–35 wraz z benchmarkiem — 67/67; pełny `flutter test --no-pub --timeout=10m --reporter compact .\\test` — 302/302; `flutter analyze --no-pub --no-fatal-infos` — exit 0 (123 niekrytyczne `info`/linty, w tym 121 wcześniejszych i 2 w benchmarku); diagnostyka zmienionych plików — bez błędów; `git diff --check` — exit 0.
-
 **Demo:** integracja `ContractMarketService.resolveHour/resolveDay` potwierdza headless obsługę ofert AI, rozszerzeń i FA przy zachowaniu legalnych lifecycle’ów. Benchmark jakości FA nie wymusza minimalnej liczby podpisów; osobno mierzy pełną obsadę sztabu oraz payroll z zachowaniem cap flexibility.
 
 ---
 
-### ⬜ Task 36: AI draftu i skautingu
+### ✅ Task 36: AI draftu i skautingu
 
 **Cel:** `AI_behaviour.md` §6–7.
 
-- [ ] `aiProspectScore = 0,55 × estOvrMid + 0,45 × (estPotentialStars × 12) + needBonus + N(0; 3,5)`
-- [ ] Tier osiągnięty → dane scouta (środek przedziału)
-- [ ] Tier nieosiągnięty → ranga mocka + szum ±8 pozycji
-- [ ] Brak scouta (0★) → mock finalny + szum ±14 pozycji
-- [ ] `needBonus`: luka krytyczna +8, poniżej target +4, na target 0, na max −6
-- [ ] GK: `needBonus` +20 przy <2 bramkarzy i picku po #45
-- [ ] Wybór prospekta z najwyższym `aiProspectScore` wśród dostępnych
-- [ ] Trade-up: P = 8% na drużynę na draft, warunek prospekta z top-5 boardu ≥4 picki dalej
-- [ ] Trade-up: cel `surplusPct` +5% dla oddającego pick
-- [ ] Trade-down: P = 4%, warunek braku nikogo powyżej progu dla slotu
-- [ ] Oferty trade-up mogą trafić do gracza jak zwykła oferta wymiany
-- [ ] Podpisywanie draftowanych: R1 100% (roster <30), R2 85% (<29), R3 55% (<28 i `needScore` >0)
-- [ ] Niepodpisany zostaje assetem; podpis później z P = 35%/tydzień w oknie FA
-- [ ] Niedraftowani: luka krytyczna i roster <26 → P 60%
-- [ ] Niedraftowani: poniżej target i roster <24 → P 30%
-- [ ] Niedraftowani: roster <20 → P 95%
-- [ ] Niedraftowani: pozostałe → P 5%
-- [ ] Niedraftowani: oferta zawsze `minPlayerSalary`, kontrakt 2-letni
-- [ ] Skauting: `maxWatched = round(4 + Coverage × 6)`, wykorzystanie 100%
-- [ ] Skauting: 70% obserwowanych wg rangi mocka wstępnego, 30% wg potrzeb pozycyjnych
-- [ ] Skauting: brak scouta → brak watchlisty, draft z mocka
-- [ ] Skauting: podmiana przy awansie >20 pozycji w mocku, P = 40% na raport miesięczny
-- [ ] Combine: limit ½ Coverage (w dół), wybór prospektów z największą niepewnością
-- [ ] Przypisanie scouta od wtorku tyg. 46 do klasy N+1
+**Stan:** rdzeń polityki boardu, przypisywania scouta, Combine, aktywnych wymian pickami oraz automatycznego podpisywania praw draftowych i świeżych niedraftowanych jest zaimplementowany i podpięty do lifecycle’u. Benchmark trzysezonowy bez scouta pozostaje jawnie przeniesiony do Task 38.
+
+- [x] `aiProspectScore = 0,55 × estOvrMid + 0,45 × (estPotentialStars × 12) + needBonus + N(0; 3,5)`
+- [x] Tier osiągnięty → dane scouta (środek przedziału)
+- [x] Tier nieosiągnięty → ranga mocka + szum ±8 pozycji
+- [x] Brak scouta (0★) → mock finalny + szum ±14 pozycji
+- [x] `needBonus`: luka krytyczna +8, poniżej target +4, na target 0, na max −6
+- [x] GK: `needBonus` +20 przy <2 bramkarzy i picku po #45
+- [x] Wybór prospekta z najwyższym `aiProspectScore` wśród dostępnych
+- [x] Trade-up: P = 8% na drużynę na draft, warunek prospekta z top-5 boardu ≥4 picki dalej (polityka zwraca deterministyczny plan)
+- [x] Trade-up: cel `surplusPct` +5% dla oddającego pick (zapisany w planie decyzji)
+- [x] Trade-down: P = 4%, warunek braku nikogo powyżej progu dla slotu (polityka zwraca plan)
+- [x] Oferty trade-up mogą trafić do gracza jak zwykła oferta wymiany — aktywny adapter zamienia legalne sloty w `DraftState.order`, zapisuje ofertę i obsługuje accept/reject/expiry
+- [x] Podpisywanie draftowanych: R1 100% (roster <30), R2 85% (<29), R3 55% (<28 i `needScore` >0)
+- [x] Niepodpisany zostaje assetem; podpis później z P = 35%/tydzień w oknie FA — weekly pass korzysta z `signDraftedRight` i zachowuje idempotencję przez usunięcie prawa po sukcesie
+- [x] Niedraftowani: luka krytyczna i roster <26 → P 60% — weekly pass tworzy AI `ContractNegotiation`
+- [x] Niedraftowani: poniżej target i roster <24 → P 30% — weekly pass tworzy AI `ContractNegotiation`
+- [x] Niedraftowani: roster <20 → P 95% — weekly pass tworzy AI `ContractNegotiation`
+- [x] Niedraftowani: pozostałe → P 5% — weekly pass tworzy AI `ContractNegotiation`
+- [x] Niedraftowani: oferta zawsze `minPlayerSalary`, kontrakt 2-letni — walidacja przechodzi przez `ContractService` i centralny resolver rynku
+- [x] Skauting: `maxWatched = round(4 + Coverage × 6)`, wykorzystanie 100%
+- [x] Skauting: 70% obserwowanych wg rangi mocka wstępnego, 30% wg potrzeb pozycyjnych
+- [x] Skauting: brak scouta → brak watchlisty, draft z mocka
+- [x] Skauting: podmiana przy awansie >20 pozycji w mocku, P = 40% na raport miesięczny
+- [x] Combine: limit ½ Coverage (w dół), wybór prospektów z największą niepewnością
+- [x] Przypisanie scouta od wtorku tyg. 46 do klasy N+1
 
 **Testy**
-- [ ] Drużyna bez scouta drafuje mierzalnie słabiej (średni OVR wybranych po 3 sezonach)
-- [ ] `needBonus` dla GK podnosi się po picku #45 przy <2 bramkarzach
-- [ ] Limit watchlisty respektuje Coverage scouta
-- [ ] Assign na Combine nie przekracza ½ Coverage
+- [ ] Drużyna bez scouta drafuje mierzalnie słabiej (średni OVR wybranych po 3 sezonach) — benchmark przeniesiony do Task 38
+- [x] `needBonus` dla GK podnosi się po picku #45 przy <2 bramkarzy
+- [x] Limit watchlisty respektuje Coverage scouta
+- [x] Assign na Combine nie przekracza ½ Coverage
+- [x] Board i decyzje draftowe używają snapshotów wiedzy, publicznych mocków oraz deterministycznych scoped seedów
+- [x] Miesięczny refresh scoutingu działa w `DaySimulator` (tyg. 5/9/13/17/21), emituje deduplikowany `scoutReport`
+- [x] Draft lifecycle AI wybiera prospekta przez politykę i podpisuje draftowane prawa tylko w podłączonych, legalnych przypadkach
+- [x] Finalizacja undrafted jest idempotentna, provenance i `LeagueState` round-trip serializują się, a weekly pass obsługuje deferred rights, konkurencję, cap/roster rejection, FA-II limit i `resolveContractMarket: false`
 
-**Demo:** draft przesymulowany do końca, w którym lepszy scouting przekłada się na lepsze wybory, a gracz dostaje propozycję trade-up.
+**Implementacja:** stateless `AiDraftService` buduje board wyłącznie ze snapshotów `ScoutingKnowledge` i publicznych rang mocka, bez odczytu ukrytych pól prospekta. `SeasonService` używa polityki przy wyborze AI, natychmiastowym podpisywaniu draftowanych praw i idempotentnej finalizacji świeżych undrafted FA z serializowanym provenance; `ContractMarketService` uruchamia na granicy niedziela → poniedziałek deferred rights oraz AI oferty undrafted przez `ContractNegotiation`. `ScoutingService` obsługuje limit watchlisty, podział 70/30, Combine i wymiany obserwowanych przy miesięcznym raporcie. `DaySimulator` uruchamia sezonowy refresh miesięczny i weekly market hook tylko przy `resolveContractMarket: true`. Decyzje są deterministyczne przez `aiSeed`, `teamEventSeed`, `DecisionType.draftPick`, `DecisionType.scoutAssign` i `draft-deferred-sign`; serializacja provenance działa w SaveSchema 21. `DraftTradeService` i `ContractMarketService` pozostają właścicielami legalnych mutacji.
+
+**Ograniczenia:** benchmark trzysezonowy jakości draftu bez scouta nie jest częścią Task 36 i został przeniesiony do Task 38.
+
+**Demo:** headless lifecycle draftu wybiera AI prospekta z ograniczonego boardu, zachowuje legalny stan praw, obsługuje aktywne oferty trade-up do gracza oraz automatyczne podpisy deferred/undrafted, a także generuje raporty scoutingu z miesięcznym refresh’em w sezonie.
 
 ---
 

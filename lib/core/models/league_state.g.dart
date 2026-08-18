@@ -41,6 +41,11 @@ _LeagueState _$LeagueStateFromJson(Map<String, dynamic> json) => _LeagueState(
           ?.map((e) => Player.fromJson(e as Map<String, dynamic>))
           .toList() ??
       const [],
+  freshUndraftedPlayers:
+      (json['freshUndraftedPlayers'] as List<dynamic>?)
+          ?.map((e) => FreshUndraftedPlayer.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
   strengthTable: json['strengthTable'] == null
       ? null
       : LeagueStrengthTable.fromJson(
@@ -104,6 +109,7 @@ Map<String, dynamic> _$LeagueStateToJson(_LeagueState instance) =>
       'messageSettings': instance.messageSettings,
       'staffFreeAgents': instance.staffFreeAgents,
       'freeAgents': instance.freeAgents,
+      'freshUndraftedPlayers': instance.freshUndraftedPlayers,
       'strengthTable': instance.strengthTable,
       'negotiations': instance.negotiations,
       'negotiationBlocks': instance.negotiationBlocks,

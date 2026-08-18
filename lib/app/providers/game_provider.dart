@@ -17,6 +17,7 @@ import 'package:new_football/core/services/contract_service.dart';
 import 'package:new_football/core/services/negotiation_service.dart';
 import 'package:new_football/core/services/day_simulator.dart';
 import 'package:new_football/core/services/draft_service.dart';
+import 'package:new_football/core/services/draft_trade_service.dart';
 import 'package:new_football/core/services/game_factory.dart';
 import 'package:new_football/core/services/schedule_generator.dart';
 import 'package:new_football/core/services/scouting_service.dart';
@@ -71,10 +72,15 @@ final seasonServiceProvider = Provider(
     matchEngine: ref.watch(matchEngineProvider),
     aiMatchdayService: ref.watch(aiMatchdayServiceProvider),
     teamEvents: ref.watch(teamEventServiceProvider),
+    draftTrade: ref.watch(draftTradeServiceProvider),
   ),
 );
 
 final draftServiceProvider = Provider((ref) => DraftService());
+
+final draftTradeServiceProvider = Provider(
+  (ref) => DraftTradeService(calendar: ref.watch(calendarServiceProvider)),
+);
 
 final staffServiceProvider = Provider((ref) => StaffService());
 
@@ -180,6 +186,7 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   SeasonService get _season => _ref.read(seasonServiceProvider);
   CalendarService get _calendar => _ref.read(calendarServiceProvider);
   ContractMarketService get _market => _ref.read(contractMarketServiceProvider);
+  DraftTradeService get _draftTrades => _ref.read(draftTradeServiceProvider);
 
   GameSave? get save => state.value;
 
@@ -258,6 +265,7 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
           day: state.currentDay,
           hour: state.currentHour ?? 0,
         );
+    state = _draftTrades.expireOffers(state);
     state = _ref.read(tradeServiceProvider).expireOffers(state);
     state = _teamEvents.resolveExpiredDecisions(state, saveSeed: saveSeed);
     return _playerEvents.resolveExpiredDecisions(state, saveSeed: saveSeed);
@@ -531,13 +539,13 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
           // playerAction — handled by the lottery screen interactively.
           return league;
         case CalendarEventId.scoutReport:
-          return _season.runScoutReport(league);
+          return _season.runScoutReport(league, saveSeed: saveSeed);
         case CalendarEventId.combine:
-          return _season.runCombine(league);
+          return _season.runCombine(league, saveSeed: saveSeed);
         case CalendarEventId.finalMock:
-          return _season.runFinalMock(league);
+          return _season.runFinalMock(league, saveSeed: saveSeed);
         case CalendarEventId.nextClassGeneration:
-          return _season.runNextClassGeneration(league);
+          return _season.runNextClassGeneration(league, saveSeed: saveSeed);
         case CalendarEventId.tradeWindowOpen:
         case CalendarEventId.contractExtensions:
           // Ranges are derived windows, not one-shot actions.
@@ -844,9 +852,19 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     final current = save;
     final actingTeamId = current?.leagueState.playerTeamId;
     if (current == null || actingTeamId == null) return null;
-    final result = _ref
-        .read(tradeServiceProvider)
-        .acceptOffer(current.leagueState, offerId, actingTeamId: actingTeamId);
+    final result = _draftTrades.isDraftOffer(current.leagueState, offerId)
+        ? _draftTrades.acceptOffer(
+            current.leagueState,
+            offerId,
+            actingTeamId: actingTeamId,
+          )
+        : _ref
+              .read(tradeServiceProvider)
+              .acceptOffer(
+                current.leagueState,
+                offerId,
+                actingTeamId: actingTeamId,
+              );
     await updateLeague((_) => result.league);
     return result;
   }
@@ -855,9 +873,19 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     final current = save;
     final actingTeamId = current?.leagueState.playerTeamId;
     if (current == null || actingTeamId == null) return null;
-    final result = _ref
-        .read(tradeServiceProvider)
-        .rejectOffer(current.leagueState, offerId, actingTeamId: actingTeamId);
+    final result = _draftTrades.isDraftOffer(current.leagueState, offerId)
+        ? _draftTrades.rejectOffer(
+            current.leagueState,
+            offerId,
+            actingTeamId: actingTeamId,
+          )
+        : _ref
+              .read(tradeServiceProvider)
+              .rejectOffer(
+                current.leagueState,
+                offerId,
+                actingTeamId: actingTeamId,
+              );
     await updateLeague((_) => result.league);
     return result;
   }
@@ -869,22 +897,30 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     final current = save;
     final actingTeamId = current?.leagueState.playerTeamId;
     if (current == null || actingTeamId == null) return null;
-    final result = _ref
-        .read(tradeServiceProvider)
-        .counterOffer(
-          current.leagueState,
-          offerId,
-          proposal,
-          actingTeamId: actingTeamId,
-        );
+    final result = _draftTrades.isDraftOffer(current.leagueState, offerId)
+        ? _draftTrades.counterOffer(
+            current.leagueState,
+            offerId,
+            proposal,
+            actingTeamId: actingTeamId,
+          )
+        : _ref
+              .read(tradeServiceProvider)
+              .counterOffer(
+                current.leagueState,
+                offerId,
+                proposal,
+                actingTeamId: actingTeamId,
+              );
     if (result.changed) await updateLeague((_) => result.league);
     return result;
   }
 
   Future<void> expireTradeOffers() async {
-    await updateLeague(
-      (league) => _ref.read(tradeServiceProvider).expireOffers(league),
-    );
+    await updateLeague((league) {
+      final draftExpired = _draftTrades.expireOffers(league);
+      return _ref.read(tradeServiceProvider).expireOffers(draftExpired);
+    });
   }
 
   /// Applies a decision effect, then acknowledges the message.
@@ -915,18 +951,33 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
             final offerId = message.payload['tradeOfferId']?.toString();
             final actingTeamId = league.playerTeamId;
             if (offerId == null || actingTeamId == null) return league;
+            final draftService = _ref.read(draftTradeServiceProvider);
             final service = _ref.read(tradeServiceProvider);
             final result = switch (option) {
-              'accept' => service.acceptOffer(
-                league,
-                offerId,
-                actingTeamId: actingTeamId,
-              ),
-              'reject' => service.rejectOffer(
-                league,
-                offerId,
-                actingTeamId: actingTeamId,
-              ),
+              'accept' =>
+                draftService.isDraftOffer(league, offerId)
+                    ? draftService.acceptOffer(
+                        league,
+                        offerId,
+                        actingTeamId: actingTeamId,
+                      )
+                    : service.acceptOffer(
+                        league,
+                        offerId,
+                        actingTeamId: actingTeamId,
+                      ),
+              'reject' =>
+                draftService.isDraftOffer(league, offerId)
+                    ? draftService.rejectOffer(
+                        league,
+                        offerId,
+                        actingTeamId: actingTeamId,
+                      )
+                    : service.rejectOffer(
+                        league,
+                        offerId,
+                        actingTeamId: actingTeamId,
+                      ),
               _ => null,
             };
             return result?.league ?? league;
@@ -949,17 +1000,24 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   }
 
   Future<void> makeDraftPick(String prospectId) async {
+    final seed = save?.saveSeed ?? 0;
     await updateLeague(
-      (l) => _season.advanceDraft(l, playerPickProspectId: prospectId),
+      (l) => _season.advanceDraft(
+        l,
+        playerPickProspectId: prospectId,
+        saveSeed: seed,
+      ),
     );
   }
 
   Future<void> simulateOneDraftPick() async {
-    await updateLeague((l) => _season.advanceDraftOnePick(l));
+    final seed = save?.saveSeed ?? 0;
+    await updateLeague((l) => _season.advanceDraftOnePick(l, saveSeed: seed));
   }
 
   Future<void> simulateDraftToPlayerTurn() async {
-    await updateLeague((l) => _season.advanceDraft(l));
+    final seed = save?.saveSeed ?? 0;
+    await updateLeague((l) => _season.advanceDraft(l, saveSeed: seed));
   }
 
   /// Submits a free-agent offer through the central contract-market

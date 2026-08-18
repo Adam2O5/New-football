@@ -41,6 +41,11 @@ abstract class LeagueState with _$LeagueState {
     /// (`docs/contract_signing.md`, `docs/offseason.md`).
     @Default([]) List<Player> freeAgents,
 
+    /// Provenance and active window for players added by the just-completed
+    /// draft. This must stay separate from [Player.contract] because expired
+    /// contracts can have the same zero-year shape.
+    @Default([]) List<FreshUndraftedPlayer> freshUndraftedPlayers,
+
     /// Tabela siły ligi (`team_management.md`). Jedno źródło prawdy dla
     /// `teamStatus`, `expectedRank` i `teamPower` wszystkich 30 drużyn.
     /// `null` = jeszcze nie przeliczona (zostanie obliczona przy pierwszym

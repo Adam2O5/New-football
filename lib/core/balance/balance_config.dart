@@ -500,7 +500,7 @@ class StaffBalance {
     this.starMax = 5.0,
     this.starStep = 0.5,
     this.maxWatchedBase = 4,
-    this.maxWatchedPerCoverageStar = 4,
+    this.maxWatchedPerCoverageStar = 6,
     this.combineAssignCoverageFraction = 0.5,
     this.youthCoachMaxAge = 23,
     this.growthAgeMin = 35,

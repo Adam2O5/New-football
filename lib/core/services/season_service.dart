@@ -2,6 +2,8 @@ import 'dart:math';
 
 import 'package:uuid/uuid.dart';
 
+import 'package:new_football/core/ai/ai_draft_service.dart';
+import 'package:new_football/core/ai/ai_draft_models.dart';
 import 'package:new_football/core/ai/ai_matchday_service.dart';
 import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/simulation/match_engine.dart';
@@ -24,7 +26,10 @@ import 'package:new_football/core/models/standing.dart';
 import 'package:new_football/core/models/staff.dart';
 import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/models/team_event_state.dart';
+import 'package:new_football/core/random/seeds.dart';
 import 'package:new_football/core/services/calendar_service.dart';
+import 'package:new_football/core/services/draft_trade_service.dart';
+import 'package:new_football/core/services/contract_market_service.dart';
 import 'package:new_football/core/services/development_service.dart';
 import 'package:new_football/core/services/discipline_service.dart';
 import 'package:new_football/core/services/prospect_service.dart';
@@ -43,6 +48,9 @@ class SeasonService {
     this.balance = BalanceConfig.defaults,
     SimulationMatchEngine? matchEngine,
     AiMatchdayService? aiMatchdayService,
+    AiDraftService? aiDraftService,
+    DraftTradeService? draftTrade,
+    ContractMarketService? contractMarket,
     CalendarService? calendar,
     MatchContextFactory? contextFactory,
     MatchMessageEmitter? matchMessageEmitter,
@@ -61,6 +69,10 @@ class SeasonService {
              matchEngine:
                  matchEngine ?? SimulationMatchEngine(balance: balance),
            ),
+       aiDraftService = aiDraftService ?? AiDraftService(balance: balance),
+       draftTrade = draftTrade ?? DraftTradeService(balance: balance),
+       contractMarket =
+           contractMarket ?? ContractMarketService(balance: balance),
        calendar = calendar ?? CalendarService(balance: balance),
        contextFactory =
            contextFactory ??
@@ -82,6 +94,9 @@ class SeasonService {
   final BalanceConfig balance;
   final SimulationMatchEngine matchEngine;
   final AiMatchdayService aiMatchdayService;
+  final AiDraftService aiDraftService;
+  final DraftTradeService draftTrade;
+  final ContractMarketService contractMarket;
   final CalendarService calendar;
   final MatchContextFactory contextFactory;
   final MatchMessageEmitter matchMessageEmitter;
@@ -693,13 +708,29 @@ class SeasonService {
     );
   }
 
-  /// Generuje klasę draftową na przyszły rok oraz przedłuża o jeden rok
-  /// horyzont handlowalnych picków każdej drużyny (`docs/trade_rules.md` —
-  /// max 7 lat w przód). Sygnał „done” = `season.nextDraftState != null`.
-  /// Promocja do `draftState` przy rollover jeszcze nieprzeanalizowana —
-  /// patrz uwaga w odpowiedzi.
-  LeagueState runNextClassGeneration(LeagueState league) {
-    return ProspectService(random: _random).generateNextClassForLeague(league);
+  /// Generates the next draft class and immediately assigns AI scouting
+  /// watchlists for the class that becomes active after the current draft.
+  LeagueState runNextClassGeneration(LeagueState league, {int saveSeed = 0}) {
+    var state = ProspectService(
+      random: _random,
+    ).generateNextClassForLeague(league);
+    final nextDraft = state.currentSeason.nextDraftState;
+    if (nextDraft == null) return state;
+    final year = nextDraft.year;
+    final teams = state.teams.map((team) {
+      if (team.isPlayerControlled) return team;
+      return team.copyWith(
+        scouting: aiDraftService.assignWatchlist(
+          team: team,
+          draftClass: nextDraft.draftClass,
+          league: state,
+          saveSeed: saveSeed,
+          seasonYear: year,
+          week: state.currentWeek,
+        ),
+      );
+    }).toList();
+    return state.copyWith(teams: teams);
   }
 
   LeagueState runFreeAgencyOpen(LeagueState league) {
@@ -714,27 +745,48 @@ class SeasonService {
     );
   }
 
-  /// Scout Report (pon tyg. 45, `docs/offseason.md` §5): AI auto-assigns a
-  /// watchlist if it hasn't yet, then everyone picks Combine focus targets.
-  LeagueState runScoutReport(LeagueState league) {
+  /// Scout Report (pon tyg. 45, `docs/offseason.md` §5): AI builds or
+  /// refreshes its watchlist, then every team picks uncertain Combine targets.
+  LeagueState runScoutReport(LeagueState league, {int saveSeed = 0}) {
     final draftClass = league.currentSeason.draftState?.draftClass;
     if (draftClass == null) return league;
-    final teams = league.teams.map((t) {
-      final coverage = t.staff.scout?.attributes.coverage ?? 0.0;
-      var scouting = t.scouting;
-      if (!t.isPlayerControlled && scouting.watchlistProspectIds.isEmpty) {
-        final picks = draftClass.prospects
-            .take(scoutingService.maxWatched(coverage))
-            .map((p) => p.id)
-            .toList();
-        scouting = scoutingService.setWatchlist(
+    final ranked = [...draftClass.prospects]
+      ..sort((a, b) {
+        final grade = b.scoutGrade.compareTo(a.scoutGrade);
+        return grade != 0 ? grade : a.id.compareTo(b.id);
+      });
+    final teams = league.teams.map((team) {
+      final coverage = team.staff.scout?.attributes.coverage ?? 0.0;
+      var scouting = team.scouting;
+      if (!team.isPlayerControlled) {
+        if (scouting.watchlistProspectIds.isEmpty) {
+          scouting = aiDraftService.assignWatchlist(
+            team: team,
+            draftClass: draftClass,
+            league: league,
+            saveSeed: saveSeed,
+            seasonYear: league.currentSeason.year,
+            week: league.currentWeek,
+          );
+        }
+        scouting = scoutingService.updateMonthlyWatchlist(
           scouting,
-          picks,
+          rankedProspects: ranked,
           coverageStars: coverage,
+          seed: saveSeed,
+          seasonYear: league.currentSeason.year,
+          week: league.currentWeek,
+          teamId: team.id,
         );
       }
-      scouting = scoutingService.runScoutReport(scouting, coverage);
-      return t.copyWith(scouting: scouting);
+      scouting = scoutingService.runScoutReport(
+        scouting,
+        coverage,
+        prospects: draftClass.prospects,
+        rankedProspects: ranked,
+        seed: saveSeed,
+      );
+      return team.copyWith(scouting: scouting);
     }).toList();
     return _msg(
       league.copyWith(
@@ -748,11 +800,20 @@ class SeasonService {
   }
 
   /// Draft Combine (śr tyg. 45, `docs/offseason.md` §6).
-  LeagueState runCombine(LeagueState league) {
-    final teams = league.teams.map((t) {
-      final evalStars = t.staff.scout?.attributes.evaluation ?? 0.0;
-      return t.copyWith(
-        scouting: scoutingService.runCombine(t.scouting, evalStars),
+  LeagueState runCombine(LeagueState league, {int saveSeed = 0}) {
+    final draftClass = league.currentSeason.draftState?.draftClass;
+    final teams = league.teams.map((team) {
+      final evalStars = team.staff.scout?.attributes.evaluation ?? 0.0;
+      return team.copyWith(
+        scouting: scoutingService.runCombine(
+          team.scouting,
+          evalStars,
+          prospects: draftClass?.prospects ?? const [],
+          seed: saveSeed,
+          seasonYear: league.currentSeason.year,
+          week: league.currentWeek,
+          teamId: team.id,
+        ),
       );
     }).toList();
     return _msg(
@@ -767,15 +828,26 @@ class SeasonService {
   }
 
   /// Mock Draft finalny (pt tyg. 45, `docs/offseason.md` §7).
-  LeagueState runFinalMock(LeagueState league) {
+  LeagueState runFinalMock(LeagueState league, {int saveSeed = 0}) {
     final draftClass = league.currentSeason.draftState?.draftClass;
     if (draftClass == null) return league;
     final ranked = [...draftClass.prospects]
-      ..sort((a, b) => b.scoutGrade.compareTo(a.scoutGrade));
-    final teams = league.teams.map((t) {
-      final evalStars = t.staff.scout?.attributes.evaluation ?? 0.0;
-      return t.copyWith(
-        scouting: scoutingService.runFinalMock(t.scouting, ranked, evalStars),
+      ..sort((a, b) {
+        final grade = b.scoutGrade.compareTo(a.scoutGrade);
+        return grade != 0 ? grade : a.id.compareTo(b.id);
+      });
+    final teams = league.teams.map((team) {
+      final evalStars = team.staff.scout?.attributes.evaluation ?? 0.0;
+      return team.copyWith(
+        scouting: scoutingService.runFinalMock(
+          team.scouting,
+          ranked,
+          evalStars,
+          seed: saveSeed,
+          seasonYear: league.currentSeason.year,
+          week: league.currentWeek,
+          teamId: team.id,
+        ),
       );
     }).toList();
     return _msg(
@@ -795,24 +867,255 @@ class SeasonService {
         .map((c) => c.prospectId)
         .whereType<String>()
         .toSet();
-    final undrafted = draft.draftClass.prospects
-        .where((p) => !draftedIds.contains(p.id))
-        .map(
-          (p) => p
-              .toPlayer(
-                contract: Contract(
-                  salary: balance.salaryCap.minSalary,
-                  yearsRemaining: 0,
-                ),
-                rng: _random,
-              )
-              .recalculatePointValue(balance),
-        )
-        .toList();
-    return state.copyWith(freeAgents: [...state.freeAgents, ...undrafted]);
+
+    // Draft finalization can be replayed after a save/load boundary. Keep the
+    // first existing free-agent snapshot for each id and only create
+    // provenance for players that are genuinely added by this finalization.
+    final freeAgents = <Player>[];
+    final freeAgentIds = <String>{};
+    for (final player in state.freeAgents) {
+      if (freeAgentIds.add(player.id)) freeAgents.add(player);
+    }
+
+    final freshByPlayerId = <String, FreshUndraftedPlayer>{};
+    for (final record in state.freshUndraftedPlayers) {
+      if (freeAgentIds.contains(record.playerId)) {
+        freshByPlayerId.putIfAbsent(record.playerId, () => record);
+      }
+    }
+
+    for (final prospect in draft.draftClass.prospects) {
+      if (draftedIds.contains(prospect.id)) continue;
+      final player = prospect
+          .toPlayer(
+            contract: Contract(
+              salary: balance.salaryCap.minSalary,
+              yearsRemaining: 0,
+            ),
+            rng: _random,
+          )
+          .recalculatePointValue(balance);
+      if (!freeAgentIds.add(player.id)) continue;
+      freeAgents.add(player);
+      freshByPlayerId[player.id] = FreshUndraftedPlayer(
+        playerId: player.id,
+        draftYear: draft.year,
+        activeFromSeasonYear: state.currentSeason.year,
+        activeFromWeek: balance.calendar.freeAgencyWeek,
+        activeUntilSeasonYear: state.currentSeason.year + 1,
+        activeUntilWeek: balance.calendar.freeAgencyPhaseIIEndWeek,
+      );
+    }
+
+    return state.copyWith(
+      freeAgents: freeAgents,
+      freshUndraftedPlayers: freshByPlayerId.values.toList(),
+    );
   }
 
-  LeagueState advanceDraft(LeagueState league, {String? playerPickProspectId}) {
+  AiDraftDecision _decideAiDraft(
+    LeagueState state,
+    DraftState draft,
+    DraftPick pick,
+    int overallPick, {
+    required int saveSeed,
+  }) {
+    final team = state.teamById(pick.teamId);
+    if (team == null) {
+      return const AiDraftDecision(action: AiDraftAction.pick, board: []);
+    }
+    final taken = draft.completedPicks
+        .map((completed) => completed.prospectId)
+        .whereType<String>()
+        .toSet();
+    return aiDraftService.decidePick(
+      team: team,
+      prospects: draft.draftClass.prospects,
+      pickNumber: overallPick,
+      currentPickIndex: draft.currentPickIndex,
+      draftOrder: draft.order,
+      unavailableProspectIds: taken,
+      league: state,
+      saveSeed: saveSeed,
+      seasonYear: state.currentSeason.year,
+      week: state.currentWeek,
+    );
+  }
+
+  Prospect _chooseAiDraftProspect(
+    List<Prospect> remaining,
+    AiDraftDecision decision,
+  ) {
+    final selectedId = decision.selection?.prospect.id;
+    return remaining.firstWhere(
+      (prospect) => prospect.id == selectedId,
+      orElse: () => remaining.first,
+    );
+  }
+
+  ({LeagueState state, bool swapped, bool pending}) _resolveAiDraftTrade(
+    LeagueState state,
+    DraftState draft,
+    DraftPick pick,
+    AiDraftDecision decision,
+  ) {
+    if (_draftSlotTradeAlreadyResolved(state, pick.id)) {
+      return (state: state, swapped: false, pending: false);
+    }
+    if (decision.action == AiDraftAction.pick) {
+      return (state: state, swapped: false, pending: false);
+    }
+
+    final targetIndex = decision.action == AiDraftAction.tradeUp
+        ? decision.targetPickIndex
+        : _tradeDownTargetIndex(state, draft, pick);
+    if (targetIndex == null ||
+        targetIndex < 0 ||
+        targetIndex >= draft.order.length ||
+        targetIndex == draft.currentPickIndex) {
+      return (state: state, swapped: false, pending: false);
+    }
+    final target = draft.order[targetIndex];
+    final targetValidation = draftTrade.validateActiveSwap(
+      state,
+      firstPickId: pick.id,
+      secondPickId: target.id,
+      firstOwnerId: pick.teamId,
+      secondOwnerId: target.teamId,
+    );
+    if (!targetValidation.ok) {
+      return (state: state, swapped: false, pending: false);
+    }
+
+    final targetTeam = state.teamById(target.teamId);
+    if (targetTeam == null || target.teamId == pick.teamId) {
+      return (state: state, swapped: false, pending: false);
+    }
+
+    // Only documented trade-up plans may pause the player's draft for a
+    // response. A weak-board trade-down never creates a player-facing offer.
+    if (target.teamId == state.playerTeamId) {
+      if (decision.action != AiDraftAction.tradeUp) {
+        return (state: state, swapped: false, pending: false);
+      }
+      final existing = draftTrade.pendingOfferForPick(state, pick.id);
+      if (existing != null) {
+        return (state: state, swapped: false, pending: true);
+      }
+      final created = draftTrade.createOfferForSlots(
+        state,
+        offeredPickId: pick.id,
+        targetPickId: target.id,
+        offeringTeamId: pick.teamId,
+      );
+      if (created.outcome != 'pending' || created.offerId == null) {
+        return (state: state, swapped: false, pending: false);
+      }
+      return (state: created.league, swapped: false, pending: true);
+    }
+
+    final operationId =
+        'draftSwap:${state.currentSeason.year}:${pick.id}:${target.id}';
+    final swapped = draftTrade.swapActiveSlots(
+      state,
+      firstPickId: pick.id,
+      secondPickId: target.id,
+      firstOwnerId: pick.teamId,
+      secondOwnerId: target.teamId,
+      operationId: operationId,
+      reason:
+          'draftTrade:${decision.action.name}:surplus=${decision.surplusPct}',
+    );
+    return (state: swapped.league, swapped: swapped.changed, pending: false);
+  }
+
+  int? _tradeDownTargetIndex(
+    LeagueState state,
+    DraftState draft,
+    DraftPick current,
+  ) {
+    for (
+      var index = draft.currentPickIndex + 1;
+      index < draft.order.length;
+      index++
+    ) {
+      final candidate = draft.order[index];
+      if (candidate.prospectId != null || candidate.playerName != null) {
+        continue;
+      }
+      final team = state.teamById(candidate.teamId);
+      if (team == null ||
+          candidate.teamId == state.playerTeamId ||
+          team.id == current.teamId) {
+        continue;
+      }
+      return index;
+    }
+    return null;
+  }
+
+  bool _draftSlotTradeAlreadyResolved(LeagueState state, String pickId) {
+    for (final entry in state.tradeHistory.reversed) {
+      if (entry.seasonYear != state.currentSeason.year) continue;
+      final isDraftOutcome = switch (entry.outcome) {
+        'accepted' || 'rejected' || 'expired' || 'hardRejected' => true,
+        _ => false,
+      };
+      if (!isDraftOutcome) continue;
+      final assets = [...entry.assetsFromA, ...entry.assetsFromB];
+      if (assets.any(
+        (asset) => asset.type == 'pick' && asset.pickId == pickId,
+      )) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  LeagueState _maybeSignAiDraftedRight(
+    LeagueState state,
+    DraftedPlayerRights right,
+    DraftPick pick, {
+    required int saveSeed,
+  }) {
+    final team = state.teamById(pick.teamId);
+    if (team == null || team.isPlayerControlled) return state;
+    final context = aiDraftService.evaluator.contextForTeam(
+      team: team,
+      league: state,
+      saveSeed: saveSeed,
+      seasonYear: state.currentSeason.year,
+      week: state.currentWeek,
+      decisionType: DecisionType.draftPick,
+    );
+    final needScore =
+        aiDraftService.evaluator
+            .needForPosition(context, right.player.position)
+            ?.needScore ??
+        0.0;
+    final decision = aiDraftService.draftedSigningDecision(
+      team: team,
+      round: pick.round,
+      prospectId: right.player.id,
+      needScore: needScore,
+      saveSeed: saveSeed,
+      seasonYear: state.currentSeason.year,
+      week: state.currentWeek,
+    );
+    if (!decision.sign) return state;
+    return contractMarket.signDraftedRight(
+          state,
+          right.id,
+          saveSeed: saveSeed,
+        ) ??
+        state;
+  }
+
+  LeagueState advanceDraft(
+    LeagueState league, {
+    String? playerPickProspectId,
+    int saveSeed = 0,
+  }) {
     var draft = league.currentSeason.draftState;
     if (draft == null) return league;
     final wasComplete = draft.currentPickIndex >= draft.order.length;
@@ -839,14 +1142,26 @@ class SeasonService {
             ..sort((a, b) => b.scoutGrade.compareTo(a.scoutGrade));
       if (remaining.isEmpty) break;
 
+      final overallPick = pick.pickNumber ?? draft.currentPickIndex + 1;
+      final decision = isPlayer
+          ? null
+          : _decideAiDraft(state, draft, pick, overallPick, saveSeed: saveSeed);
+      if (!isPlayer) {
+        final trade = _resolveAiDraftTrade(state, draft, pick, decision!);
+        if (trade.pending) return trade.state;
+        if (trade.swapped) {
+          state = trade.state;
+          draft = state.currentSeason.draftState!;
+          draftedRights = List<DraftedPlayerRights>.from(state.draftedRights);
+          continue;
+        }
+      }
       final chosen = isPlayer
           ? remaining.firstWhere(
               (p) => p.id == playerPickProspectId,
               orElse: () => remaining.first,
             )
-          : remaining.first;
-
-      final overallPick = pick.pickNumber ?? draft.currentPickIndex + 1;
+          : _chooseAiDraftProspect(remaining, decision!);
       final salary = balance.salaryCap.rookieSalaryForPick(overallPick);
       final player = chosen
           .toPlayer(
@@ -869,6 +1184,16 @@ class SeasonService {
         reminderSent: isPlayer,
       );
       draftedRights.add(right);
+      state = state.copyWith(draftedRights: draftedRights);
+      if (!isPlayer) {
+        state = _maybeSignAiDraftedRight(
+          state,
+          right,
+          pick,
+          saveSeed: saveSeed,
+        );
+        draftedRights = List<DraftedPlayerRights>.from(state.draftedRights);
+      }
 
       final completed = pick.copyWith(
         prospectId: chosen.id,
@@ -935,7 +1260,7 @@ class SeasonService {
   /// - draftState is null
   /// - draft is already complete
   /// - the current pick belongs to the player's team
-  LeagueState advanceDraftOnePick(LeagueState league) {
+  LeagueState advanceDraftOnePick(LeagueState league, {int saveSeed = 0}) {
     var draft = league.currentSeason.draftState;
     if (draft == null) return league;
     if (draft.currentPickIndex >= draft.order.length) return league;
@@ -952,8 +1277,17 @@ class SeasonService {
           ..sort((a, b) => b.scoutGrade.compareTo(a.scoutGrade));
     if (remaining.isEmpty) return league;
 
-    final chosen = remaining.first;
     final overallPick = pick.pickNumber ?? draft.currentPickIndex + 1;
+    final decision = _decideAiDraft(
+      league,
+      draft,
+      pick,
+      overallPick,
+      saveSeed: saveSeed,
+    );
+    final trade = _resolveAiDraftTrade(league, draft, pick, decision);
+    if (trade.pending || trade.swapped) return trade.state;
+    final chosen = _chooseAiDraftProspect(remaining, decision);
     final salary = balance.salaryCap.rookieSalaryForPick(overallPick);
     final player = chosen
         .toPlayer(
@@ -998,6 +1332,7 @@ class SeasonService {
         phase: SeasonPhase.offseason,
       ),
     );
+    state = _maybeSignAiDraftedRight(state, right, pick, saveSeed: saveSeed);
     return _finalizeDraftFreeAgents(state, draft);
   }
 

@@ -240,7 +240,21 @@ class AiBalance {
     this.aiTradeSeasonLimit = 6,
     this.draftScoreNoiseSd = 3.5,
     this.pDraftTradeUp = 0.08,
+    this.pDraftTradeDown = 0.04,
+    this.draftTradeUpSurplusPct = 5.0,
     this.scoutCoverageUsage = 1.0,
+    this.scoutMockRankShare = 0.70,
+    this.scoutNeedShare = 0.30,
+    this.scoutKnownNoiseRank = 8,
+    this.scoutNoScoutNoiseRank = 14,
+    this.draftR1SigningProbability = 1.0,
+    this.draftR2SigningProbability = 0.85,
+    this.draftR3SigningProbability = 0.55,
+    this.draftDeferredSigningProbability = 0.35,
+    this.draftUndraftedCriticalProbability = 0.60,
+    this.draftUndraftedBelowTargetProbability = 0.30,
+    this.draftUndraftedUnderRosterProbability = 0.95,
+    this.draftUndraftedDefaultProbability = 0.05,
     this.extTargetOfferScore = 72,
     this.extMaxOfferScore = 85,
     this.extensionCounterRaiseHighProbability = 0.70,
@@ -431,7 +445,21 @@ class AiBalance {
 
   final double draftScoreNoiseSd;
   final double pDraftTradeUp;
+  final double pDraftTradeDown;
+  final double draftTradeUpSurplusPct;
   final double scoutCoverageUsage;
+  final double scoutMockRankShare;
+  final double scoutNeedShare;
+  final int scoutKnownNoiseRank;
+  final int scoutNoScoutNoiseRank;
+  final double draftR1SigningProbability;
+  final double draftR2SigningProbability;
+  final double draftR3SigningProbability;
+  final double draftDeferredSigningProbability;
+  final double draftUndraftedCriticalProbability;
+  final double draftUndraftedBelowTargetProbability;
+  final double draftUndraftedUnderRosterProbability;
+  final double draftUndraftedDefaultProbability;
 
   final int extTargetOfferScore;
   final int extMaxOfferScore;

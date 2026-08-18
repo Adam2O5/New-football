@@ -264,7 +264,7 @@ void main() {
   });
 
   test('save schema rejects versions other than current version', () {
-    expect(SaveSchema.currentVersion, 19);
+    expect(SaveSchema.currentVersion, 21);
     final meta = GameSaveMeta(
       id: 'save',
       name: 'Save',

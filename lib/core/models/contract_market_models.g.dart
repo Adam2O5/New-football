@@ -27,6 +27,28 @@ Map<String, dynamic> _$DraftedPlayerRightsToJson(
   'reminderSent': instance.reminderSent,
 };
 
+_FreshUndraftedPlayer _$FreshUndraftedPlayerFromJson(
+  Map<String, dynamic> json,
+) => _FreshUndraftedPlayer(
+  playerId: json['playerId'] as String,
+  draftYear: (json['draftYear'] as num).toInt(),
+  activeFromSeasonYear: (json['activeFromSeasonYear'] as num).toInt(),
+  activeFromWeek: (json['activeFromWeek'] as num).toInt(),
+  activeUntilSeasonYear: (json['activeUntilSeasonYear'] as num).toInt(),
+  activeUntilWeek: (json['activeUntilWeek'] as num).toInt(),
+);
+
+Map<String, dynamic> _$FreshUndraftedPlayerToJson(
+  _FreshUndraftedPlayer instance,
+) => <String, dynamic>{
+  'playerId': instance.playerId,
+  'draftYear': instance.draftYear,
+  'activeFromSeasonYear': instance.activeFromSeasonYear,
+  'activeFromWeek': instance.activeFromWeek,
+  'activeUntilSeasonYear': instance.activeUntilSeasonYear,
+  'activeUntilWeek': instance.activeUntilWeek,
+};
+
 _RfaQualifyingOffer _$RfaQualifyingOfferFromJson(Map<String, dynamic> json) =>
     _RfaQualifyingOffer(
       playerId: json['playerId'] as String,

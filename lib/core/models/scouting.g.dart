@@ -6,25 +6,44 @@ part of 'scouting.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_ScoutingKnowledge _$ScoutingKnowledgeFromJson(Map<String, dynamic> json) =>
-    _ScoutingKnowledge(
-      prospectId: json['prospectId'] as String,
-      tier:
-          $enumDecodeNullable(_$ScoutingTierEnumMap, json['tier']) ??
-          ScoutingTier.tier1,
-      estimatedSlot: $enumDecodeNullable(
-        _$EstimatedDraftSlotEnumMap,
-        json['estimatedSlot'],
-      ),
-      injuryProneKnown: json['injuryProneKnown'] as bool? ?? false,
-      determinationKnown: json['determinationKnown'] as bool? ?? false,
-    );
+_ScoutingKnowledge _$ScoutingKnowledgeFromJson(
+  Map<String, dynamic> json,
+) => _ScoutingKnowledge(
+  prospectId: json['prospectId'] as String,
+  tier:
+      $enumDecodeNullable(_$ScoutingTierEnumMap, json['tier']) ??
+      ScoutingTier.tier1,
+  estimatedSlot: $enumDecodeNullable(
+    _$EstimatedDraftSlotEnumMap,
+    json['estimatedSlot'],
+  ),
+  mockRank: (json['mockRank'] as num?)?.toInt() ?? 0,
+  estimatedOvrMin: (json['estimatedOvrMin'] as num?)?.toInt(),
+  estimatedOvrMax: (json['estimatedOvrMax'] as num?)?.toInt(),
+  estimatedPotentialMin: (json['estimatedPotentialMin'] as num?)?.toDouble(),
+  estimatedPotentialMax: (json['estimatedPotentialMax'] as num?)?.toDouble(),
+  injuryProneMin: (json['injuryProneMin'] as num?)?.toInt(),
+  injuryProneMax: (json['injuryProneMax'] as num?)?.toInt(),
+  determinationMin: (json['determinationMin'] as num?)?.toInt(),
+  determinationMax: (json['determinationMax'] as num?)?.toInt(),
+  injuryProneKnown: json['injuryProneKnown'] as bool? ?? false,
+  determinationKnown: json['determinationKnown'] as bool? ?? false,
+);
 
 Map<String, dynamic> _$ScoutingKnowledgeToJson(_ScoutingKnowledge instance) =>
     <String, dynamic>{
       'prospectId': instance.prospectId,
       'tier': _$ScoutingTierEnumMap[instance.tier]!,
       'estimatedSlot': _$EstimatedDraftSlotEnumMap[instance.estimatedSlot],
+      'mockRank': instance.mockRank,
+      'estimatedOvrMin': instance.estimatedOvrMin,
+      'estimatedOvrMax': instance.estimatedOvrMax,
+      'estimatedPotentialMin': instance.estimatedPotentialMin,
+      'estimatedPotentialMax': instance.estimatedPotentialMax,
+      'injuryProneMin': instance.injuryProneMin,
+      'injuryProneMax': instance.injuryProneMax,
+      'determinationMin': instance.determinationMin,
+      'determinationMax': instance.determinationMax,
       'injuryProneKnown': instance.injuryProneKnown,
       'determinationKnown': instance.determinationKnown,
     };
@@ -67,6 +86,11 @@ _TeamScouting _$TeamScoutingFromJson(Map<String, dynamic> json) =>
               ?.map((e) => e as String)
               .toList() ??
           const [],
+      mockRanks:
+          (json['mockRanks'] as Map<String, dynamic>?)?.map(
+            (k, e) => MapEntry(k, (e as num).toInt()),
+          ) ??
+          const {},
     );
 
 Map<String, dynamic> _$TeamScoutingToJson(_TeamScouting instance) =>
@@ -74,4 +98,5 @@ Map<String, dynamic> _$TeamScoutingToJson(_TeamScouting instance) =>
       'watchlistProspectIds': instance.watchlistProspectIds,
       'knowledge': instance.knowledge,
       'combineAssignedProspectIds': instance.combineAssignedProspectIds,
+      'mockRanks': instance.mockRanks,
     };

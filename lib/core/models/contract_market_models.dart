@@ -23,6 +23,36 @@ abstract class DraftedPlayerRights with _$DraftedPlayerRights {
       _$DraftedPlayerRightsFromJson(json);
 }
 
+/// A newly undrafted player is eligible for the special AI signing policy only
+/// inside this explicit window. Expired contracts are deliberately not
+/// represented here even though they can also have zero years remaining.
+@freezed
+abstract class FreshUndraftedPlayer with _$FreshUndraftedPlayer {
+  const factory FreshUndraftedPlayer({
+    required String playerId,
+    required int draftYear,
+    required int activeFromSeasonYear,
+    required int activeFromWeek,
+    required int activeUntilSeasonYear,
+    required int activeUntilWeek,
+  }) = _FreshUndraftedPlayer;
+
+  factory FreshUndraftedPlayer.fromJson(Map<String, dynamic> json) =>
+      _$FreshUndraftedPlayerFromJson(json);
+}
+
+extension FreshUndraftedPlayerX on FreshUndraftedPlayer {
+  bool isActiveAt({required int seasonYear, required int week}) {
+    final afterStart =
+        seasonYear > activeFromSeasonYear ||
+        (seasonYear == activeFromSeasonYear && week >= activeFromWeek);
+    final beforeEnd =
+        seasonYear < activeUntilSeasonYear ||
+        (seasonYear == activeUntilSeasonYear && week <= activeUntilWeek);
+    return afterStart && beforeEnd;
+  }
+}
+
 /// A qualifying offer is the switch that turns an expired rookie into an RFA.
 /// Without this record the same player is treated as an unrestricted FA.
 @freezed

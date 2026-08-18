@@ -162,6 +162,10 @@ class DaySimulator {
       state = _notifyStrengthTableChanges(state, previousTable, table);
     }
 
+    if (_isMonthlyScoutingReport(week, day)) {
+      state = _runMonthlyScoutingReport(state, saveSeed: saveSeed);
+    }
+
     if (week == balance.calendar.tradeWindowOpenWeek && day == 1) {
       state = messages.send(
         state,
@@ -331,11 +335,20 @@ class DaySimulator {
       // Continuous scouting tick (`docs/staff_rules.md` §5), while a draft
       // class is known (from lottery through draft week).
       if (state.currentSeason.draftState != null) {
+        final draftClass = state.currentSeason.draftState!.draftClass;
         state = state.copyWith(
-          teams: state.teams.map((t) {
-            final evalStars = t.staff.scout?.attributes.evaluation ?? 0.0;
-            return t.copyWith(
-              scouting: scouting.tickKnowledge(t.scouting, evalStars),
+          teams: state.teams.map((team) {
+            final evalStars = team.staff.scout?.attributes.evaluation ?? 0.0;
+            return team.copyWith(
+              scouting: scouting.tickKnowledge(
+                team.scouting,
+                evalStars,
+                prospects: draftClass.prospects,
+                seed: saveSeed,
+                seasonYear: state.currentSeason.year,
+                week: state.currentWeek,
+                teamId: team.id,
+              ),
             );
           }).toList(),
         );
@@ -344,6 +357,9 @@ class DaySimulator {
       // The market runs once at the same Sunday → Monday boundary as the
       // other weekly AI systems. It is headless and therefore also runs when
       // the player is not looking at TradeScreen.
+      if (resolveContractMarket) {
+        state = contractMarket.weeklyTick(state, saveSeed: saveSeed);
+      }
       state = aiTradeService.weeklyTick(state, saveSeed: saveSeed).league;
 
       state = messages.send(
@@ -849,6 +865,54 @@ class DaySimulator {
       }
     }
     return state;
+  }
+
+  bool _isMonthlyScoutingReport(int week, int day) {
+    return day == 1 &&
+        week >= 5 &&
+        week < balance.calendar.tradeDeadlineWeek &&
+        (week - 1) % 4 == 0;
+  }
+
+  LeagueState _runMonthlyScoutingReport(
+    LeagueState league, {
+    required int saveSeed,
+  }) {
+    final draftClass = league.currentSeason.draftState?.draftClass;
+    if (draftClass == null) return league;
+
+    final ranked = [...draftClass.prospects]
+      ..sort((a, b) {
+        final grade = b.scoutGrade.compareTo(a.scoutGrade);
+        return grade != 0 ? grade : a.id.compareTo(b.id);
+      });
+    final teams = league.teams.map((team) {
+      if (team.isPlayerControlled) return team;
+      final coverage = team.staff.scout?.attributes.coverage ?? 0.0;
+      return team.copyWith(
+        scouting: scouting.updateMonthlyWatchlist(
+          team.scouting,
+          rankedProspects: ranked,
+          coverageStars: coverage,
+          seed: saveSeed,
+          seasonYear: league.currentSeason.year,
+          week: league.currentWeek,
+          teamId: team.id,
+        ),
+      );
+    }).toList();
+
+    return messages.send(
+      league.copyWith(teams: teams),
+      type: MessageType.scoutReport,
+      kind: 'monthly',
+      domain: MessageDomain.draft,
+      args: {'draftYear': draftClass.year},
+      payload: {'draftYear': draftClass.year},
+      groupKey: 'scout:monthly:${league.currentSeason.year}',
+      dedupKey:
+          'scoutReport:monthly:${league.currentSeason.year}:${league.currentWeek}',
+    );
   }
 
   LeagueState _notifyStrengthTableChanges(

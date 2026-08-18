@@ -1,5 +1,7 @@
 export 'ai/ai_evaluation_context.dart';
 export 'ai/ai_contract_market_service.dart';
+export 'ai/ai_draft_models.dart';
+export 'ai/ai_draft_service.dart';
 export 'ai/ai_evaluation_models.dart';
 export 'ai/ai_evaluation_service.dart';
 export 'ai/ai_matchday_models.dart';

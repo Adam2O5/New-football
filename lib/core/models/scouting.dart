@@ -10,6 +10,15 @@ abstract class ScoutingKnowledge with _$ScoutingKnowledge {
     required String prospectId,
     @Default(ScoutingTier.tier1) ScoutingTier tier,
     EstimatedDraftSlot? estimatedSlot,
+    @Default(0) int mockRank,
+    int? estimatedOvrMin,
+    int? estimatedOvrMax,
+    double? estimatedPotentialMin,
+    double? estimatedPotentialMax,
+    int? injuryProneMin,
+    int? injuryProneMax,
+    int? determinationMin,
+    int? determinationMax,
     @Default(false) bool injuryProneKnown,
     @Default(false) bool determinationKnown,
   }) = _ScoutingKnowledge;
@@ -24,6 +33,7 @@ abstract class TeamScouting with _$TeamScouting {
     @Default([]) List<String> watchlistProspectIds,
     @Default([]) List<ScoutingKnowledge> knowledge,
     @Default([]) List<String> combineAssignedProspectIds,
+    @Default({}) Map<String, int> mockRanks,
   }) = _TeamScouting;
 
   factory TeamScouting.fromJson(Map<String, dynamic> json) =>

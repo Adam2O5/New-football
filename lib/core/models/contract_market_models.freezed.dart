@@ -309,6 +309,284 @@ $PlayerCopyWith<$Res> get player {
 
 
 /// @nodoc
+mixin _$FreshUndraftedPlayer {
+
+ String get playerId; int get draftYear; int get activeFromSeasonYear; int get activeFromWeek; int get activeUntilSeasonYear; int get activeUntilWeek;
+/// Create a copy of FreshUndraftedPlayer
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$FreshUndraftedPlayerCopyWith<FreshUndraftedPlayer> get copyWith => _$FreshUndraftedPlayerCopyWithImpl<FreshUndraftedPlayer>(this as FreshUndraftedPlayer, _$identity);
+
+  /// Serializes this FreshUndraftedPlayer to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FreshUndraftedPlayer&&(identical(other.playerId, playerId) || other.playerId == playerId)&&(identical(other.draftYear, draftYear) || other.draftYear == draftYear)&&(identical(other.activeFromSeasonYear, activeFromSeasonYear) || other.activeFromSeasonYear == activeFromSeasonYear)&&(identical(other.activeFromWeek, activeFromWeek) || other.activeFromWeek == activeFromWeek)&&(identical(other.activeUntilSeasonYear, activeUntilSeasonYear) || other.activeUntilSeasonYear == activeUntilSeasonYear)&&(identical(other.activeUntilWeek, activeUntilWeek) || other.activeUntilWeek == activeUntilWeek));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,playerId,draftYear,activeFromSeasonYear,activeFromWeek,activeUntilSeasonYear,activeUntilWeek);
+
+@override
+String toString() {
+  return 'FreshUndraftedPlayer(playerId: $playerId, draftYear: $draftYear, activeFromSeasonYear: $activeFromSeasonYear, activeFromWeek: $activeFromWeek, activeUntilSeasonYear: $activeUntilSeasonYear, activeUntilWeek: $activeUntilWeek)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $FreshUndraftedPlayerCopyWith<$Res>  {
+  factory $FreshUndraftedPlayerCopyWith(FreshUndraftedPlayer value, $Res Function(FreshUndraftedPlayer) _then) = _$FreshUndraftedPlayerCopyWithImpl;
+@useResult
+$Res call({
+ String playerId, int draftYear, int activeFromSeasonYear, int activeFromWeek, int activeUntilSeasonYear, int activeUntilWeek
+});
+
+
+
+
+}
+/// @nodoc
+class _$FreshUndraftedPlayerCopyWithImpl<$Res>
+    implements $FreshUndraftedPlayerCopyWith<$Res> {
+  _$FreshUndraftedPlayerCopyWithImpl(this._self, this._then);
+
+  final FreshUndraftedPlayer _self;
+  final $Res Function(FreshUndraftedPlayer) _then;
+
+/// Create a copy of FreshUndraftedPlayer
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? playerId = null,Object? draftYear = null,Object? activeFromSeasonYear = null,Object? activeFromWeek = null,Object? activeUntilSeasonYear = null,Object? activeUntilWeek = null,}) {
+  return _then(_self.copyWith(
+playerId: null == playerId ? _self.playerId : playerId // ignore: cast_nullable_to_non_nullable
+as String,draftYear: null == draftYear ? _self.draftYear : draftYear // ignore: cast_nullable_to_non_nullable
+as int,activeFromSeasonYear: null == activeFromSeasonYear ? _self.activeFromSeasonYear : activeFromSeasonYear // ignore: cast_nullable_to_non_nullable
+as int,activeFromWeek: null == activeFromWeek ? _self.activeFromWeek : activeFromWeek // ignore: cast_nullable_to_non_nullable
+as int,activeUntilSeasonYear: null == activeUntilSeasonYear ? _self.activeUntilSeasonYear : activeUntilSeasonYear // ignore: cast_nullable_to_non_nullable
+as int,activeUntilWeek: null == activeUntilWeek ? _self.activeUntilWeek : activeUntilWeek // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [FreshUndraftedPlayer].
+extension FreshUndraftedPlayerPatterns on FreshUndraftedPlayer {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _FreshUndraftedPlayer value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _FreshUndraftedPlayer() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _FreshUndraftedPlayer value)  $default,){
+final _that = this;
+switch (_that) {
+case _FreshUndraftedPlayer():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _FreshUndraftedPlayer value)?  $default,){
+final _that = this;
+switch (_that) {
+case _FreshUndraftedPlayer() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String playerId,  int draftYear,  int activeFromSeasonYear,  int activeFromWeek,  int activeUntilSeasonYear,  int activeUntilWeek)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _FreshUndraftedPlayer() when $default != null:
+return $default(_that.playerId,_that.draftYear,_that.activeFromSeasonYear,_that.activeFromWeek,_that.activeUntilSeasonYear,_that.activeUntilWeek);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String playerId,  int draftYear,  int activeFromSeasonYear,  int activeFromWeek,  int activeUntilSeasonYear,  int activeUntilWeek)  $default,) {final _that = this;
+switch (_that) {
+case _FreshUndraftedPlayer():
+return $default(_that.playerId,_that.draftYear,_that.activeFromSeasonYear,_that.activeFromWeek,_that.activeUntilSeasonYear,_that.activeUntilWeek);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String playerId,  int draftYear,  int activeFromSeasonYear,  int activeFromWeek,  int activeUntilSeasonYear,  int activeUntilWeek)?  $default,) {final _that = this;
+switch (_that) {
+case _FreshUndraftedPlayer() when $default != null:
+return $default(_that.playerId,_that.draftYear,_that.activeFromSeasonYear,_that.activeFromWeek,_that.activeUntilSeasonYear,_that.activeUntilWeek);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _FreshUndraftedPlayer implements FreshUndraftedPlayer {
+  const _FreshUndraftedPlayer({required this.playerId, required this.draftYear, required this.activeFromSeasonYear, required this.activeFromWeek, required this.activeUntilSeasonYear, required this.activeUntilWeek});
+  factory _FreshUndraftedPlayer.fromJson(Map<String, dynamic> json) => _$FreshUndraftedPlayerFromJson(json);
+
+@override final  String playerId;
+@override final  int draftYear;
+@override final  int activeFromSeasonYear;
+@override final  int activeFromWeek;
+@override final  int activeUntilSeasonYear;
+@override final  int activeUntilWeek;
+
+/// Create a copy of FreshUndraftedPlayer
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$FreshUndraftedPlayerCopyWith<_FreshUndraftedPlayer> get copyWith => __$FreshUndraftedPlayerCopyWithImpl<_FreshUndraftedPlayer>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$FreshUndraftedPlayerToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _FreshUndraftedPlayer&&(identical(other.playerId, playerId) || other.playerId == playerId)&&(identical(other.draftYear, draftYear) || other.draftYear == draftYear)&&(identical(other.activeFromSeasonYear, activeFromSeasonYear) || other.activeFromSeasonYear == activeFromSeasonYear)&&(identical(other.activeFromWeek, activeFromWeek) || other.activeFromWeek == activeFromWeek)&&(identical(other.activeUntilSeasonYear, activeUntilSeasonYear) || other.activeUntilSeasonYear == activeUntilSeasonYear)&&(identical(other.activeUntilWeek, activeUntilWeek) || other.activeUntilWeek == activeUntilWeek));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,playerId,draftYear,activeFromSeasonYear,activeFromWeek,activeUntilSeasonYear,activeUntilWeek);
+
+@override
+String toString() {
+  return 'FreshUndraftedPlayer(playerId: $playerId, draftYear: $draftYear, activeFromSeasonYear: $activeFromSeasonYear, activeFromWeek: $activeFromWeek, activeUntilSeasonYear: $activeUntilSeasonYear, activeUntilWeek: $activeUntilWeek)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$FreshUndraftedPlayerCopyWith<$Res> implements $FreshUndraftedPlayerCopyWith<$Res> {
+  factory _$FreshUndraftedPlayerCopyWith(_FreshUndraftedPlayer value, $Res Function(_FreshUndraftedPlayer) _then) = __$FreshUndraftedPlayerCopyWithImpl;
+@override @useResult
+$Res call({
+ String playerId, int draftYear, int activeFromSeasonYear, int activeFromWeek, int activeUntilSeasonYear, int activeUntilWeek
+});
+
+
+
+
+}
+/// @nodoc
+class __$FreshUndraftedPlayerCopyWithImpl<$Res>
+    implements _$FreshUndraftedPlayerCopyWith<$Res> {
+  __$FreshUndraftedPlayerCopyWithImpl(this._self, this._then);
+
+  final _FreshUndraftedPlayer _self;
+  final $Res Function(_FreshUndraftedPlayer) _then;
+
+/// Create a copy of FreshUndraftedPlayer
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? playerId = null,Object? draftYear = null,Object? activeFromSeasonYear = null,Object? activeFromWeek = null,Object? activeUntilSeasonYear = null,Object? activeUntilWeek = null,}) {
+  return _then(_FreshUndraftedPlayer(
+playerId: null == playerId ? _self.playerId : playerId // ignore: cast_nullable_to_non_nullable
+as String,draftYear: null == draftYear ? _self.draftYear : draftYear // ignore: cast_nullable_to_non_nullable
+as int,activeFromSeasonYear: null == activeFromSeasonYear ? _self.activeFromSeasonYear : activeFromSeasonYear // ignore: cast_nullable_to_non_nullable
+as int,activeFromWeek: null == activeFromWeek ? _self.activeFromWeek : activeFromWeek // ignore: cast_nullable_to_non_nullable
+as int,activeUntilSeasonYear: null == activeUntilSeasonYear ? _self.activeUntilSeasonYear : activeUntilSeasonYear // ignore: cast_nullable_to_non_nullable
+as int,activeUntilWeek: null == activeUntilWeek ? _self.activeUntilWeek : activeUntilWeek // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
 mixin _$RfaQualifyingOffer {
 
  String get playerId; String get ownerTeamId; int get salary; int get years; int get seasonYear; bool get declined;
