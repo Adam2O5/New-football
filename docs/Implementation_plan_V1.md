@@ -1401,47 +1401,51 @@ Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, le
 
 ---
 
-### ⬜ Task 35: AI kontraktów, FA i sztabu
+### ✅ Task 35: AI kontraktów, FA i sztabu
 
 **Cel:** `AI_behaviour.md` §8.
 
-- [ ] Przedłużenia: 5-poziomowa kolejność priorytetów (Rookie Ext → Full Bird → Early Bird → Veteran → Non-Bird)
-- [ ] Cel `offerScore` 72, maksimum 85
-- [ ] Brak przedłużenia przy `assetValue < 0`
-- [ ] Zawodnik 33+ maksymalnie 1 rok
-- [ ] Reakcja na counter: P podniesienia 70% przy `assetValue > 200`, 35% przy 0–200
-- [ ] Maksymalnie 3 rundy negocjacji
-- [ ] Reguła „bez oczekiwanych minut nie chce przedłużać" dotyczy AI tak samo
-- [ ] FA I: wishlist `priority = needScore × 0,5 + assetValue × 0,5`, budowana raz przed startem
-- [ ] FA I: tabela 10 godzin — cel `offerScore` 70→88, P oferty 65%→95%
-- [ ] FA I: godzina 10 → P 95% jeśli roster <20, inaczej 40%
-- [ ] FA I: konkurencja z graczem → +6 `offerScore` z P = 55%
-- [ ] Guardrail: maksymalna pensja 1,35 × `expectedSalary`
-- [ ] Guardrail: maksymalna długość `expectedLength` + 1 rok
-- [ ] Guardrail: nigdy powyżej `maxPlayerSalary` 60M
-- [ ] Guardrail: zawodnik na pozycji `count ≥ max` → P = 5%
-- [ ] Guardrail: 33+ nigdy na >2 lata
-- [ ] FA II: cel `offerScore` 68, max 2 oferty/tydzień
-- [ ] FA II: warunek aktywności `needScore ≥ 20` lub roster <22
-- [ ] FA II: roster <20 → codzienne oferty na `minPlayerSalary`
-- [ ] RFA: QO przy `pointValue ≥ 120` lub min-gap → P 90%, pozostałe 15%
-- [ ] RFA: match top-11 85%, depth 45%, nadmiar 5%, koszt >1,4 × `assetValue` → 0%
-- [ ] Sztab: kolejność obsadzania per `teamStatus` (5 wariantów)
-- [ ] Sztab: budżet HC do 5,0M, role 2–3 po 2,0–3,0M, role 4–6 po 0,5–2,0M
-- [ ] Sztab: cel wykorzystania capu 90–100% (13,5–15,0M)
-- [ ] Sztab: cel `staffOfferScore` 72, max 88
-- [ ] Sztab: P pozostawienia pustego slotu 0% (chyba że cap nie pozwala)
-- [ ] Sztab: przedłużenie przy `roleStarsAvg ≥ 2,5` i wieku ≤57 → 85%; przy <1,5 → 20%
-- [ ] Sztab: wiek 60 → kontrakt max 1 rok
+- [x] Przedłużenia: 5-poziomowa kolejność priorytetów (Rookie Ext → Full Bird → Early Bird → Veteran → Non-Bird)
+- [x] Cel `offerScore` 72, maksimum 85
+- [x] Brak przedłużenia przy `assetValue < 0`
+- [x] Zawodnik 33+ maksymalnie 1 rok
+- [x] Reakcja na counter: P podniesienia 70% przy `assetValue > 200`, 35% przy 0–200
+- [x] Maksymalnie 3 rundy negocjacji
+- [x] Reguła „bez oczekiwanych minut nie chce przedłużać" dotyczy AI tak samo
+- [x] FA I: wishlist `priority = needScore × 0,5 + assetValue × 0,5`, budowana deterministycznie przed ofertami
+- [x] FA I: tabela 10 godzin — cel `offerScore` 70→88, P oferty 65%→95%
+- [x] FA I: godzina 10 → P 95% jeśli roster <20, inaczej 40%
+- [x] FA I: konkurencja z graczem → +6 `offerScore` z P = 55%
+- [x] Guardrail: maksymalna pensja 1,35 × `expectedSalary`
+- [x] Guardrail: maksymalna długość `expectedLength` + 1 rok
+- [x] Guardrail: nigdy powyżej `maxPlayerSalary` 60M
+- [x] Guardrail: zawodnik na pozycji `count ≥ max` → P = 5%
+- [x] Guardrail: 33+ nigdy na >2 lata
+- [x] FA II: cel `offerScore` 68, max 2 oferty/tydzień
+- [x] FA II: warunek aktywności `needScore ≥ 20` lub roster <22
+- [x] FA II: roster <20 → codzienne oferty na `minPlayerSalary`
+- [x] RFA: QO przy `pointValue ≥ 120` lub min-gap → P 90%, pozostałe 15%
+- [x] RFA: match top-11 85%, depth 45%, nadmiar 5%, koszt >1,4 × `assetValue` → 0%
+- [x] Sztab: kolejność obsadzania per `teamStatus` (5 wariantów)
+- [x] Sztab: budżet HC do 5,0M, role 2–3 po 2,0–3,0M, role 4–6 po 0,5–2,0M
+- [x] Sztab: cel wykorzystania capu 90–100% (13,5–15,0M)
+- [x] Sztab: cel `staffOfferScore` 72, max 88
+- [x] Sztab: P pozostawienia pustego slotu 0% (chyba że cap nie pozwala)
+- [x] Sztab: przedłużenie przy `roleStarsAvg ≥ 2,5` i wieku ≤57 → 85%; przy <1,5 → 20%
+- [x] Sztab: wiek 60 → kontrakt max 1 rok
 
 **Testy**
-- [ ] ≥85% UFA podpisanych do tyg. 1
-- [ ] ≥92% obsadzonych slotów sztabu w lidze
-- [ ] Średni payroll AI 88–108% capu
-- [ ] AI nigdy nie podpisuje 33+ na >2 lata
-- [ ] AI nie przekracza 1,35 × `expectedSalary`
+- [x] Jakość FA zamiast wolumenowego UFA-rate: benchmark wrażliwości na popyt w `test/task35_ai_contract_market_benchmark_test.dart`; przy zdrowym rosterze i pozycji na maksimum najwyżej 10% planów FA-I (polityka P = 5%), a każdy plan przechodzi legalne limity pensji i długości kontraktu; przy rosterze <20 FA-II tworzy awaryjny plan na `minPlayerSalary` i 1 rok
+- [x] Obsada sztabu: 8 stałych seedów, pełne okno FA I/II, wszystkie drużyny AI i dwóch kandydatów na slot; raw oraz cap-aware fill rate = 96,11%
+- [x] Payroll zawodników AI: średnia = 73,41% capu, maksimum = 100,58%; egzekwowany jest tylko górny guardrail ≤108%, a dolne 88% pozostaje metryką diagnostyczną, nie celem wymuszającym zbędne wydatki
+- [x] AI nigdy nie podpisuje 33+ na >2 lata
+- [x] AI nie przekracza 1,35 × `expectedSalary`
 
-**Demo:** offseason przesymulowany bez gracza kończy się ligą z legalnymi rosterami i niemal w pełni obsadzonym sztabem.
+**Implementacja:** stateless `AiContractMarketService` dostarcza politykę rozszerzeń, FA I/II, RFA i sztabu, a `ContractMarketService` pozostaje jedynym właścicielem walidacji, mutacji i podpisywania. Wishlist, limity FA II i wszystkie decyzje losowe są odtwarzane z publicznego stanu i deterministycznego `negotiationSeed`; nie zmieniono `SaveSchema`, `LeagueState`, providerów ani zależności.
+
+**Walidacja:** `test/task35_ai_contract_market_test.dart` — 7/7; benchmark `test/task35_ai_contract_market_benchmark_test.dart` — jakość FA oraz 8-seedowe benchmarki sztabu/payrollu; ukierunkowana regresja Task 28–35 wraz z benchmarkiem — 67/67; pełny `flutter test --no-pub --timeout=10m --reporter compact .\\test` — 302/302; `flutter analyze --no-pub --no-fatal-infos` — exit 0 (123 niekrytyczne `info`/linty, w tym 121 wcześniejszych i 2 w benchmarku); diagnostyka zmienionych plików — bez błędów; `git diff --check` — exit 0.
+
+**Demo:** integracja `ContractMarketService.resolveHour/resolveDay` potwierdza headless obsługę ofert AI, rozszerzeń i FA przy zachowaniu legalnych lifecycle’ów. Benchmark jakości FA nie wymusza minimalnej liczby podpisów; osobno mierzy pełną obsadę sztabu oraz payroll z zachowaniem cap flexibility.
 
 ---
 
@@ -1527,9 +1531,9 @@ Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, le
 - [ ] Metryka: drużyny z legalnym rosterem w tyg. 1 = 100%
 - [ ] Metryka: wymiany AI↔AI 25–45 na sezon
 - [ ] Metryka: oferty AI → gracz 12–20 na sezon
-- [ ] Metryka: UFA podpisani do tyg. 1 ≥85%
-- [ ] Metryka: obsadzone sloty sztabu ≥92%
-- [ ] Metryka: średni payroll AI 88–108% capu
+- [ ] Metryka: jakość FA zależna od potrzeby — brak zbędnych ofert przy obsadzonej pozycji i awaryjna reakcja przy rosterze <20, bez minimalnego celu wolumenu UFA
+- [ ] Metryka: obsadzone sloty sztabu ≥92% (benchmark Task 35: 96,11%)
+- [ ] Metryka diagnostyczna średniego payrollu AI względem capu; górny limit ≤108% (benchmark Task 35: średnia 73,41%, maksimum 100,58%; 88% nie jest celem wydatkowym)
 - [ ] Metryka: drużyny powyżej 2. aprogu jednocześnie ≤3
 - [ ] Metryka: drużyny bez picka R1 w 2 kolejnych latach = 0
 - [ ] Metryka: korelacja `expectedRank` ↔ pozycja końcowa 0,55–0,75

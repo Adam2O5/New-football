@@ -243,11 +243,66 @@ class AiBalance {
     this.scoutCoverageUsage = 1.0,
     this.extTargetOfferScore = 72,
     this.extMaxOfferScore = 85,
+    this.extensionCounterRaiseHighProbability = 0.70,
+    this.extensionCounterRaiseNormalProbability = 0.35,
     this.faMaxSalaryMult = 1.35,
     this.faCompeteBump = 6,
     this.pFaCompete = 0.55,
+    this.faPhaseOneTargetScores = const [
+      70,
+      70,
+      72,
+      74,
+      74,
+      76,
+      78,
+      80,
+      82,
+      88,
+    ],
+    this.faPhaseOneOfferProbabilities = const [
+      0.65,
+      0.70,
+      0.70,
+      0.75,
+      0.75,
+      0.80,
+      0.80,
+      0.85,
+      0.85,
+      0.40,
+    ],
+    this.faPhaseOneFinalHourProbability = 0.40,
+    this.faPhaseOneFinalHourUnderRosterProbability = 0.95,
+    this.faPhaseTwoTargetScore = 68,
+    this.faPhaseTwoWeeklyOfferLimit = 2,
+    this.faPhaseTwoNeedThreshold = 20,
+    this.faPhaseTwoNeedRosterThreshold = 22,
+    this.faRosterRepairSize = 20,
+    this.faPositionMaxProbability = 0.05,
+    this.faAge33MaxYears = 2,
+    this.rfaQualifyingHighProbability = 0.90,
+    this.rfaQualifyingDefaultProbability = 0.15,
+    this.rfaMatchDepthProbability = 0.45,
+    this.rfaMatchSurplusProbability = 0.05,
+    this.rfaMatchCostMultiplier = 1.40,
+    this.rfaCostScale = 100.0,
     this.staffCapUsageTargetMin = 0.90,
     this.staffCapUsageTargetMax = 1.00,
+    this.staffHeadCoachMaxSalary = 5000000,
+    this.staffPriorityRoleMinSalary = 2000000,
+    this.staffPriorityRoleMaxSalary = 3000000,
+    this.staffOtherRoleMinSalary = 500000,
+    this.staffOtherRoleMaxSalary = 2000000,
+    this.staffTargetOfferScore = 72,
+    this.staffMaxOfferScore = 88,
+    this.staffRenewalHighProbability = 0.85,
+    this.staffRenewalLowProbability = 0.20,
+    this.staffRenewalQualityHigh = 2.5,
+    this.staffRenewalQualityLow = 1.5,
+    this.staffRenewalMaxAge = 57,
+    this.staffAge60MaxAge = 60,
+    this.staffAge60MaxYears = 1,
     this.pMatchOfferSheetTop11 = 0.85,
     this.contractDragAnchor = 30,
     this.contractDragToxic = 60,
@@ -380,13 +435,46 @@ class AiBalance {
 
   final int extTargetOfferScore;
   final int extMaxOfferScore;
+  final double extensionCounterRaiseHighProbability;
+  final double extensionCounterRaiseNormalProbability;
   final double faMaxSalaryMult;
   final int faCompeteBump;
   final double pFaCompete;
+  final List<int> faPhaseOneTargetScores;
+  final List<double> faPhaseOneOfferProbabilities;
+  final double faPhaseOneFinalHourProbability;
+  final double faPhaseOneFinalHourUnderRosterProbability;
+  final int faPhaseTwoTargetScore;
+  final int faPhaseTwoWeeklyOfferLimit;
+  final double faPhaseTwoNeedThreshold;
+  final int faPhaseTwoNeedRosterThreshold;
+  final int faRosterRepairSize;
+  final double faPositionMaxProbability;
+  final int faAge33MaxYears;
+  final double rfaQualifyingHighProbability;
+  final double rfaQualifyingDefaultProbability;
+  final double rfaMatchDepthProbability;
+  final double rfaMatchSurplusProbability;
+  final double rfaMatchCostMultiplier;
+  final double rfaCostScale;
 
   /// The documentation specifies a 90–100% target range.
   final double staffCapUsageTargetMin;
   final double staffCapUsageTargetMax;
+  final int staffHeadCoachMaxSalary;
+  final int staffPriorityRoleMinSalary;
+  final int staffPriorityRoleMaxSalary;
+  final int staffOtherRoleMinSalary;
+  final int staffOtherRoleMaxSalary;
+  final int staffTargetOfferScore;
+  final int staffMaxOfferScore;
+  final double staffRenewalHighProbability;
+  final double staffRenewalLowProbability;
+  final double staffRenewalQualityHigh;
+  final double staffRenewalQualityLow;
+  final int staffRenewalMaxAge;
+  final int staffAge60MaxAge;
+  final int staffAge60MaxYears;
 
   final double pMatchOfferSheetTop11;
   final int contractDragAnchor;
