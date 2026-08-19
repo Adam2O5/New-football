@@ -11,8 +11,8 @@
 - [ ] Nie wykonywać tuningu AI bez raportu; jeśli raport wykaże odchylenia, stroić parametry w kolejności opisanej w Task 38.
 
 ## Lokalizacja i dokumentacja
-- [ ] Dokończyć audyt kompletności i spójności lokalizacji PL/EN oraz uzupełnić ewentualne brakujące napisy.
-- [ ] Wykonać testy strażnicze i końcowy audyt dokumentacji zgodnie z Task 42.
+- [x] Dokończyć audyt kompletności i spójności lokalizacji PL/EN oraz uzupełnić ewentualne brakujące napisy — guard `test/task42_audit_test.dart` potwierdza identyczne klucze i placeholdery.
+- [x] Wykonać testy strażnicze i końcowy audyt dokumentacji zgodnie z Task 42 — zrealizowano w Task 42.
 
 ## Zasada
 - Pozycje już zrealizowane — finanse, wspólne tło i styl, Home, Squad/roster, ustawienia i zapis w Shell, autosave taktyki, draft, lottery, prospects, rankings, rewards, stats, development, FA, contracts, draft history, search, playoff/play-in w standings, chemistry/atmosphere, trades, salary cap, random events i scouting — nie są powtarzane jako TODO.

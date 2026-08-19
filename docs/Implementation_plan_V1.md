@@ -75,7 +75,9 @@ Celem planu jest domknięcie wszystkich tych obszarów do pełnej zgodności z d
 | UI | 34 ekrany, shell z 6 zakładkami, go_router, pełne l10n pl/en |
 | Persystencja | JSON per save + indeks, `schemaVersion` |
 
-### Główne luki
+### Główne luki (stan początkowy planu)
+
+> Poniższa tabela opisuje stan rozpoznany przed realizacją zadań 1–41. Nie jest bieżącym raportem regresji; aktualny status funkcji wynika z checklist poszczególnych zadań oraz testów.
 
 | # | Luka | Dowód w kodzie |
 | - | ---- | -------------- |
@@ -90,7 +92,7 @@ Celem planu jest domknięcie wszystkich tych obszarów do pełnej zgodności z d
 | 9 | Balans rozjechany | cap 300M (docs 350M), aprony 340/370M (docs 396,7/431,7M), pensje 0,5–80M (docs 1–60M), staff cap 12M (docs 15M) |
 | 10 | Brak harnessu kalibracyjnego | Kryteria akceptacji z docs (10k meczów, 10 sezonów) nie są mierzone |
 | 11 | Martwy kod | `simple_match_engine.dart` (217 linii), osierocony `tactics_screen.dart` (166 linii) |
-| 12 | Zero testów UI | 34 ekrany, 689 linii testów wyłącznie na core |
+| 12 | Krytyczne ścieżki UI wymagają testów strażniczych | Task 41 dodał testy widgetowe dla Home/Inbox, Matchday/Squad, Trade/Contract/Draft; Task 42 dodaje guardy statyczne |
 
 ---
 
@@ -159,9 +161,9 @@ Tryb **1a**: każda pozycja dostaje osobne pytanie w momencie, gdy zablokuje zad
 | 2 | Przeliczanie tabeli siły ligi: `team_management.md` „co miesiąc 1. dnia miesiąca + pon tyg. 23 + start kariery"; `AI_behaviour.md` §2.1 „wtorek tyg. 44 i poniedziałek tyg. 23" | Task 14 | Kanonem `team_management.md`. Gra liczy tygodnie, nie miesiące → **co 4 tygodnie (tyg. 1, 5, 9, 13, 17, 21) + pon tyg. 23 + wt tyg. 44 + start kariery**. Wtorek tyg. 44 dochodzi, bo AI potrzebuje świeżej wyceny przed loterią. | ✅ |
 | 3 | Progi `playerOfferScore`: pasmo 40–59 „Counter" nachodzi na 55–69 „Waiting/Counter/Accept" | Task 28 | **Rozstrzygnięto: 40–54 Counter, 55–69 pasmo mieszane** z losowaniem: 50/50 w punkcie 62, zmiana prawdopodobieństwa Accept o 3 pkt proc. na każdy punkt odchylenia. | ✅ |
 | 4 | Rookie scale: `contracts.md` §8 `baseScale / (1 + pickSlot × 0,06)`; kod `rookiePickDecay = 0,08` | Task 27 | **Rozstrzygnięto: 0,06**; kod i testy zsynchronizowane. | ✅ |
-| 5 | `publicCriticism` → „Kara dyscyplinarna: −2 atmosfera, −2 atmosfera" (duplikat) | Task 26 | **−2 atmosfera, −2 zgranie** — przez analogię do pozostałych opcji eventu. | ⏳ |
+| 5 | `publicCriticism` → „Kara dyscyplinarna: −2 atmosfera, −2 atmosfera" (duplikat) | Task 26 | **−2 atmosfera, −2 zgranie** — przez analogię do pozostałych opcji eventu; kod i testy są z tym zgodne. | ✅ |
 | 6 | `messages.md` §13 wymienia `ovrDigest`, §9 definiuje `groupKey = ovr:own:{week}` bez odpowiadającego `type` | Task 7 | Dodać wzorzec **`ovrDigest`** do katalogu (domain `playerEvent`, `silenced`). | ✅ |
-| 7 | Literówki formatowania: „zaokrąglane do 2 miejsc po przecinku.0" oraz zdublowana kolumna w tabeli skutków atmosfery (`team_management.md`) | Task 14 | Poprawka kosmetyczna w docs. | ✅ |
+| 7 | Literówki formatowania: „zaokrąglane do 2 miejsc po przecinku.0" oraz zdublowana kolumna w tabeli skutków atmosfery (`team_management.md`) | Task 14 | Poprawka kosmetyczna wykonana; audyt Task 42 potwierdził pojedynczy, spójny nagłówek tabeli atmosfery. | ✅ |
 | 8 | `game_rules.md`: cap „uzgadniany co 5–7 lat przy nowej umowie TV" — mechanizm nieopisany w szczegółach | Task 27 | **Rozstrzygnięto:** deterministyczny reset za 5–7 sezonów i wzrost 4–12%, oba parametry znane i zapisane przy rozpoczęciu save'a. | ✅ |
 
 ---
@@ -1647,19 +1649,21 @@ Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, le
 
 ---
 
-### ⬜ Task 42: Audyt zgodności z `general_rules.md` i domknięcie docs
+### ✅ Task 42: Audyt zgodności z `general_rules.md` i domknięcie docs
 
 **Cel:** ostatnia brama jakościowa.
 
-- [ ] Test strażniczy wykrywający literały tekstowe w warstwie logiki
-- [ ] Test strażniczy wykrywający literały tekstowe w widgetach
-- [ ] Test strażniczy wykrywający liczby magiczne poza `/balance`
-- [ ] Weryfikacja kompletności `app_pl.arb` vs `app_en.arb` (identyczne zestawy kluczy)
-- [ ] Wniesienie do docs wszystkich poprawek zatwierdzonych w trybie 1a
-- [ ] Aktualizacja tabeli „Znane sprzeczności" — wszystkie pozycje na ✅
-- [ ] Przegląd docs pod kątem rozbieżności powstałych w trakcie prac
+**Guard:** `test/task42_audit_test.dart` porównuje pełne, znormalizowane zestawy kluczy ARB oraz placeholdery, a także skanuje produkcyjne teksty i nazwane stałe liczbowe. Istniejące odstępstwa legacy są jawnie zinwentaryzowane w manifestach testu; nowe trafienia poza tym manifestem powodują failure zamiast cichego regresu.
 
-**Demo:** testy strażnicze przechodzą, a docs i kod mówią to samo.
+- [x] Test strażniczy wykrywający literały tekstowe w warstwie logiki
+- [x] Test strażniczy wykrywający literały tekstowe w widgetach
+- [x] Test strażniczy wykrywający nazwane liczby domenowe poza `/balance` z jawnym manifestem istniejących wyjątków
+- [x] Weryfikacja kompletności `app_pl.arb` vs `app_en.arb` (identyczne zestawy kluczy i placeholdery)
+- [x] Wniesienie do docs wszystkich poprawek zatwierdzonych w trybie 1a
+- [x] Aktualizacja tabeli „Znane sprzeczności" — wszystkie pozycje na ✅
+- [x] Przegląd docs pod kątem rozbieżności powstałych w trakcie prac; stan początkowy planu został oznaczony jako historyczny
+
+**Demo:** testy `test/task42_audit_test.dart` przechodzą, a docs opisują zarówno centralizację reguł, jak i jawny legacy baseline wymagający dalszej migracji.
 
 ---
 
