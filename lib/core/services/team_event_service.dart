@@ -9,6 +9,7 @@ import 'package:new_football/core/models/league_strength.dart';
 import 'package:new_football/core/models/match_models.dart';
 import 'package:new_football/core/models/message.dart';
 import 'package:new_football/core/models/player.dart';
+import 'package:new_football/core/models/player_event_state.dart';
 import 'package:new_football/core/models/player_attributes.dart';
 import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/models/team_event_state.dart';
@@ -758,7 +759,7 @@ class TeamEventService {
             durationWeeks: balance.events.moreMinutesPromiseWeeks,
             requiredMinutesShare: balance.events.moreMinutesPromiseShare,
           );
-          return _applyTeamStateAndDeltas(
+          var next = _applyTeamStateAndDeltas(
             state,
             teamId,
             team.eventState.copyWith(
@@ -772,6 +773,36 @@ class TeamEventService {
             atmosphere: -3,
             reason: 'moreMinutesAccept',
             payload: {'playerId': player.id, 'promiseId': promise.id},
+          );
+          final updatedTeam = next.teamById(teamId);
+          if (updatedTeam == null) return next;
+          final promisedPlayer = updatedTeam.roster.cast<Player?>().firstWhere(
+            (candidate) => candidate?.id == player.id,
+            orElse: () => null,
+          );
+          if (promisedPlayer == null) return next;
+          return next.updateTeam(
+            updatedTeam.copyWith(
+              roster: updatedTeam.roster
+                  .map(
+                    (candidate) => candidate.id == player.id
+                        ? candidate.copyWith(
+                            state: candidate.state.copyWith(
+                              eventState: candidate.state.eventState
+                                  .replaceModifier(
+                                    type: 'promiseMatchScoreBonus',
+                                    value: balance
+                                        .events
+                                        .moreMinutesPromiseMatchScoreBonus,
+                                    weeks:
+                                        balance.events.moreMinutesPromiseWeeks,
+                                  ),
+                            ),
+                          )
+                        : candidate,
+                  )
+                  .toList(),
+            ),
           );
         }
         if (optionId == 'decline') {
@@ -817,7 +848,24 @@ class TeamEventService {
             reason: '${kind}Accept',
             payload: {'playerId': player.id, 'situationId': situation.id},
           );
-          return _setPointValueMultiplier(next, teamId, player.id, 0.9);
+          next = _setPointValueMultiplier(next, teamId, player.id, 0.9);
+          final updated = next.teamById(teamId);
+          if (updated == null) return next;
+          return _setTeamEventState(
+            next,
+            teamId,
+            updated.eventState
+                .replaceModifier(
+                  type: 'tradeAppetite:${player.id}',
+                  value: balance.events.transferTradeAppetiteMultiplier - 1.0,
+                  weeks: balance.events.transferSituationWeeks,
+                )
+                .replaceModifier(
+                  type: 'tradeSurplusPct:${player.id}',
+                  value: balance.events.transferTradeSurplusShift,
+                  weeks: balance.events.transferSituationWeeks,
+                ),
+          );
         }
         if (optionId == 'decline') {
           var next = _applyTeamDeltas(
@@ -1044,8 +1092,8 @@ class TeamEventService {
     switch (kind) {
       case 'moreMinutesRequest':
         final acceptChance = player != null && _isTopFourteen(team, player.id)
-            ? 0.75
-            : 0.35;
+            ? balance.events.aiMoreMinutesTopFourteenAcceptChance
+            : balance.events.aiMoreMinutesDepthAcceptChance;
         return roll < acceptChance ? 'accept' : 'decline';
       case 'transferRequestI':
         // `TradeService.assetValue` has no player-only API here. pointValue is
@@ -1060,15 +1108,24 @@ class TeamEventService {
           state.currentWeek,
           day: state.currentDay,
         );
-        final acceptChance = positiveAsset && inTradeWindow ? 0.60 : 0.30;
+        final acceptChance = positiveAsset && inTradeWindow
+            ? balance.events.aiTransferRequestAcceptChance
+            : balance.events.aiTransferRequestOtherAcceptChance;
         return roll < acceptChance ? 'accept' : 'decline';
       case 'transferRequestII':
-        return roll < 0.70 ? 'accept' : 'decline';
+        return roll < balance.events.aiTransferRequestIIAcceptChance
+            ? 'accept'
+            : 'decline';
       case 'dressingRoomConflict':
-        return roll < 0.60 ? 'intervene' : 'ignore';
+        return roll < balance.events.aiDressingRoomInterveneChance
+            ? 'intervene'
+            : 'ignore';
       case 'publicCriticism':
-        if (roll < 0.45) return 'punish';
-        if (roll < 0.80) return 'response';
+        if (roll < balance.events.aiPublicCriticismPunishChance)
+          return 'punish';
+        if (roll < balance.events.aiPublicCriticismResponseCutoff) {
+          return 'response';
+        }
         return 'ignore';
       default:
         return 'decline';
@@ -1080,30 +1137,15 @@ class TeamEventService {
     String teamId,
     String kind,
     int saveSeed,
-  ) {
-    final random = Random(
-      aiSeed(
-        saveSeed,
-        state.currentSeason.year,
-        state.currentWeek,
-        teamId,
-        DecisionType.eventResolve,
-      ),
-    );
-    for (var index = 0; index < _aiDecisionOffset(kind); index++) {
-      random.nextDouble();
-    }
-    return random.nextDouble();
-  }
-
-  int _aiDecisionOffset(String kind) => switch (kind) {
-    'moreMinutesRequest' => 0,
-    'transferRequestI' => 1,
-    'transferRequestII' => 2,
-    'dressingRoomConflict' => 3,
-    'publicCriticism' => 4,
-    _ => 5,
-  };
+  ) => Random(
+    teamEventSeed(
+      saveSeed,
+      state.currentSeason.year,
+      state.currentWeek,
+      teamId,
+      'aiDecision:$kind',
+    ),
+  ).nextDouble();
 
   bool _isTopFourteen(Team team, String playerId) {
     final ranked = [...team.roster]
@@ -1305,13 +1347,12 @@ class TeamEventService {
     String playerId,
   ) {
     final team = state.teamById(teamId);
-    return team == null
-        ? state
-        : _setTeamEventState(
-            state,
-            teamId,
-            team.eventState.clearPointValueMultiplier(playerId),
-          );
+    if (team == null) return state;
+    final eventState = team.eventState
+        .clearPointValueMultiplier(playerId)
+        .clearModifier('tradeAppetite:$playerId')
+        .clearModifier('tradeSurplusPct:$playerId');
+    return _setTeamEventState(state, teamId, eventState);
   }
 
   bool _isUnderplayed(Team team, String playerId, double threshold) {

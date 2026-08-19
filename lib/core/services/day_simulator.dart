@@ -1,4 +1,5 @@
 import 'package:new_football/core/ai/ai_matchday_service.dart';
+import 'package:new_football/core/ai/ai_roster_management_service.dart';
 import 'package:new_football/core/ai/ai_trade_service.dart';
 import 'package:new_football/core/balance/injury_catalog.dart';
 import 'package:new_football/core/balance/balance_config.dart';
@@ -57,6 +58,7 @@ class DaySimulator {
     SimulationMatchEngine? matchEngine,
     AiMatchdayService? aiMatchdayService,
     AiTradeService? aiTradeService,
+    AiRosterManagementService? rosterManagement,
     CalendarService? calendar,
     MatchContextFactory? contextFactory,
     MatchMessageEmitter? matchMessageEmitter,
@@ -76,6 +78,13 @@ class DaySimulator {
                  matchEngine ?? SimulationMatchEngine(balance: balance),
            ),
        aiTradeService = aiTradeService ?? AiTradeService(balance: balance),
+       rosterManagement =
+           rosterManagement ??
+           AiRosterManagementService(
+             balance: balance,
+             contractMarket: contractMarket,
+             aiTradeService: aiTradeService,
+           ),
        calendar = calendar ?? CalendarService(balance: balance),
        contextFactory =
            contextFactory ??
@@ -101,6 +110,7 @@ class DaySimulator {
   final SimulationMatchEngine matchEngine;
   final AiMatchdayService aiMatchdayService;
   final AiTradeService aiTradeService;
+  final AiRosterManagementService rosterManagement;
   final CalendarService calendar;
   final MatchContextFactory contextFactory;
   final MatchMessageEmitter matchMessageEmitter;
@@ -116,6 +126,7 @@ class DaySimulator {
     LeagueState league, {
     int saveSeed = 0,
     bool resolveContractMarket = true,
+    bool simulatePlayerMatch = false,
   }) {
     final week = league.currentWeek;
     final day = league.currentDay;
@@ -193,8 +204,17 @@ class DaySimulator {
     if (calendar.isRegularSeasonWeek(week)) {
       final slot = calendar.regularSeasonSlotForDay(day);
       if (slot != null && calendar.isActualMatchDay(week, day)) {
+        state = rosterManagement.ensurePreMatchdaySafety(
+          state,
+          saveSeed: saveSeed,
+        );
         final round = scheduleRoundForWeekSlot(week, slot);
-        final outcome = _resolveRound(state, round, saveSeed);
+        final outcome = _resolveRound(
+          state,
+          round,
+          saveSeed,
+          simulatePlayerMatch: simulatePlayerMatch,
+        );
         state = outcome.league;
         results.addAll(outcome.results);
         playerMatch = outcome.playerMatch;
@@ -415,7 +435,12 @@ class DaySimulator {
   }
 
   ({LeagueState league, List<MatchResult> results, ScheduledMatch? playerMatch})
-  _resolveRound(LeagueState league, int round, int saveSeed) {
+  _resolveRound(
+    LeagueState league,
+    int round,
+    int saveSeed, {
+    bool simulatePlayerMatch = false,
+  }) {
     final schedule = league.currentSeason.schedule;
     final fixtures = schedule
         .where((m) => m.round == round && m.result == null)
@@ -429,7 +454,8 @@ class DaySimulator {
     final aiFixtures = <ScheduledMatch>[];
     for (final f in fixtures) {
       if (playerId != null &&
-          (f.homeTeamId == playerId || f.awayTeamId == playerId)) {
+          (f.homeTeamId == playerId || f.awayTeamId == playerId) &&
+          !simulatePlayerMatch) {
         playerFixture = f;
       } else {
         aiFixtures.add(f);
@@ -764,10 +790,15 @@ class DaySimulator {
         (playerTeamId == result.homeTeamId ||
             playerTeamId == result.awayTeamId)) {
       final team = state.teamById(playerTeamId);
-      final player = team?.roster.firstWhere(
-        (candidate) => candidate.id == inspiredId,
-        orElse: () => throw StateError('Missing inspired player'),
-      );
+      Player? player;
+      if (team != null) {
+        for (final candidate in team.roster) {
+          if (candidate.id == inspiredId) {
+            player = candidate;
+            break;
+          }
+        }
+      }
       if (team != null && player != null) {
         final stat = result.playerStats.firstWhere(
           (candidate) => candidate.playerId == inspiredId,

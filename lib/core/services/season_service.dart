@@ -5,6 +5,7 @@ import 'package:uuid/uuid.dart';
 import 'package:new_football/core/ai/ai_draft_service.dart';
 import 'package:new_football/core/ai/ai_draft_models.dart';
 import 'package:new_football/core/ai/ai_matchday_service.dart';
+import 'package:new_football/core/ai/ai_roster_management_service.dart';
 import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/simulation/match_engine.dart';
 import 'package:new_football/core/simulation/match_context_factory.dart';
@@ -49,6 +50,7 @@ class SeasonService {
     SimulationMatchEngine? matchEngine,
     AiMatchdayService? aiMatchdayService,
     AiDraftService? aiDraftService,
+    AiRosterManagementService? rosterManagement,
     DraftTradeService? draftTrade,
     ContractMarketService? contractMarket,
     CalendarService? calendar,
@@ -70,6 +72,8 @@ class SeasonService {
                  matchEngine ?? SimulationMatchEngine(balance: balance),
            ),
        aiDraftService = aiDraftService ?? AiDraftService(balance: balance),
+       rosterManagement =
+           rosterManagement ?? AiRosterManagementService(balance: balance),
        draftTrade = draftTrade ?? DraftTradeService(balance: balance),
        contractMarket =
            contractMarket ?? ContractMarketService(balance: balance),
@@ -95,6 +99,7 @@ class SeasonService {
   final SimulationMatchEngine matchEngine;
   final AiMatchdayService aiMatchdayService;
   final AiDraftService aiDraftService;
+  final AiRosterManagementService rosterManagement;
   final DraftTradeService draftTrade;
   final ContractMarketService contractMarket;
   final CalendarService calendar;
@@ -618,7 +623,7 @@ class SeasonService {
 
   /// Emerytury (śr tyg. 44): wyłącznie tabela bazowa
   /// `BalanceConfig.retirement.baseChanceForAge(age)`, bez modyfikatorów.
-  LeagueState runPlayerRetirements(LeagueState league) {
+  LeagueState runPlayerRetirements(LeagueState league, {int saveSeed = 0}) {
     final retired = <String>[];
     final teams = league.teams.map((t) {
       final keep = <Player>[];
@@ -653,7 +658,10 @@ class SeasonService {
         'Kariery zakończyli: ${retired.join(', ')}.',
       );
     }
-    return state;
+    return rosterManagement.replenishAfterRetirements(
+      state,
+      saveSeed: saveSeed,
+    );
   }
 
   LeagueState runLottery(LeagueState league) {
@@ -1121,7 +1129,6 @@ class SeasonService {
     final wasComplete = draft.currentPickIndex >= draft.order.length;
     var state = league;
     var draftedRights = List<DraftedPlayerRights>.from(state.draftedRights);
-
     while (draft!.currentPickIndex < draft.order.length) {
       final pick = draft.order[draft.currentPickIndex];
       final isPlayer = pick.teamId == state.playerTeamId;
@@ -1141,14 +1148,15 @@ class SeasonService {
               .toList()
             ..sort((a, b) => b.scoutGrade.compareTo(a.scoutGrade));
       if (remaining.isEmpty) break;
-
       final overallPick = pick.pickNumber ?? draft.currentPickIndex + 1;
       final decision = isPlayer
           ? null
           : _decideAiDraft(state, draft, pick, overallPick, saveSeed: saveSeed);
       if (!isPlayer) {
         final trade = _resolveAiDraftTrade(state, draft, pick, decision!);
-        if (trade.pending) return trade.state;
+        if (trade.pending) {
+          return trade.state;
+        }
         if (trade.swapped) {
           state = trade.state;
           draft = state.currentSeason.draftState!;
@@ -1206,9 +1214,11 @@ class SeasonService {
         currentPickIndex: draft.currentPickIndex + 1,
         order: newOrder,
       );
-
       if (isPlayer) {
-        state = state.copyWith(draftedRights: draftedRights);
+        state = state.copyWith(
+          draftedRights: draftedRights,
+          currentSeason: state.currentSeason.copyWith(draftState: draft),
+        );
         state = _messages.send(
           state,
           type: MessageType.draftedRightsReminder,
@@ -1470,7 +1480,7 @@ class SeasonService {
     );
   }
 
-  LeagueState rolloverSeason(LeagueState league) {
+  LeagueState rolloverSeason(LeagueState league, {int saveSeed = 0}) {
     if (!league.currentSeason.playoffMissAtmosphereApplied) {
       final table = league.strengthTable;
       final qualified = _playoffQualifiedTeamIds(league);
@@ -1646,7 +1656,10 @@ class SeasonService {
       ),
     );
     nextLeague = expireContracts(nextLeague);
-    return nextLeague;
+    return rosterManagement.ensurePreseasonRoster(
+      nextLeague,
+      saveSeed: saveSeed,
+    );
   }
 
   Set<String> _playoffQualifiedTeamIds(LeagueState league) {
@@ -1725,13 +1738,16 @@ class SeasonService {
     required SeasonPhase phase,
     MatchStake? stake,
   }) {
-    var state = league;
+    var state = rosterManagement.ensurePreMatchdaySafety(
+      league,
+      saveSeed: saveSeed,
+    );
     final effectiveStake = stake ?? _stakeForPhase(phase);
-    final home = league.teamById(homeId);
-    final away = league.teamById(awayId);
-    if (home != null && away != null && league.playerTeamId != null) {
+    final home = state.teamById(homeId);
+    final away = state.teamById(awayId);
+    if (home != null && away != null && state.playerTeamId != null) {
       final playerInFixture =
-          league.playerTeamId == homeId || league.playerTeamId == awayId;
+          state.playerTeamId == homeId || state.playerTeamId == awayId;
       if (playerInFixture) {
         final context = contextFactory.createForPostseason(
           home: home,

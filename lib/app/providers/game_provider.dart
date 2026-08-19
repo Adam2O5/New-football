@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/legacy.dart';
 
 import 'package:new_football/core/simulation/match_engine.dart';
 import 'package:new_football/core/ai/ai_matchday_service.dart';
+import 'package:new_football/core/ai/ai_roster_management_service.dart';
 import 'package:new_football/core/ai/ai_trade_service.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/game_save.dart';
@@ -52,6 +53,14 @@ final aiTradeServiceProvider = Provider(
   (ref) => AiTradeService(tradeService: ref.watch(tradeServiceProvider)),
 );
 
+final aiRosterManagementServiceProvider = Provider(
+  (ref) => AiRosterManagementService(
+    contractMarket: ref.watch(contractMarketServiceProvider),
+    tradeService: ref.watch(tradeServiceProvider),
+    aiTradeService: ref.watch(aiTradeServiceProvider),
+  ),
+);
+
 final playerEventServiceProvider = Provider((ref) => PlayerEventService());
 
 final teamEventServiceProvider = Provider((ref) => TeamEventService());
@@ -61,6 +70,7 @@ final daySimulatorProvider = Provider((ref) {
     matchEngine: ref.watch(matchEngineProvider),
     aiMatchdayService: ref.watch(aiMatchdayServiceProvider),
     aiTradeService: ref.watch(aiTradeServiceProvider),
+    rosterManagement: ref.watch(aiRosterManagementServiceProvider),
     playerEvents: ref.watch(playerEventServiceProvider),
     teamEvents: ref.watch(teamEventServiceProvider),
     contractMarket: ref.watch(contractMarketServiceProvider),
@@ -72,6 +82,7 @@ final seasonServiceProvider = Provider(
     matchEngine: ref.watch(matchEngineProvider),
     aiMatchdayService: ref.watch(aiMatchdayServiceProvider),
     teamEvents: ref.watch(teamEventServiceProvider),
+    rosterManagement: ref.watch(aiRosterManagementServiceProvider),
     draftTrade: ref.watch(draftTradeServiceProvider),
   ),
 );
@@ -338,7 +349,10 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
             calendar.balance.calendar.seasonCycleWeeks &&
         current.leagueState.currentDay == 7;
     if (isCycleEnd) {
-      updatedLeague = _season.rolloverSeason(updatedLeague);
+      updatedLeague = _season.rolloverSeason(
+        updatedLeague,
+        saveSeed: current.saveSeed,
+      );
     }
     updatedLeague = _setClockForDate(updatedLeague);
     updatedLeague = _deliverStartOfDay(
@@ -532,7 +546,7 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
         case CalendarEventId.staffGrowth:
           return _season.runStaffGrowthAndRetire(league);
         case CalendarEventId.retirements:
-          return _season.runPlayerRetirements(league);
+          return _season.runPlayerRetirements(league, saveSeed: saveSeed);
         case CalendarEventId.awards:
           return _season.runAwards(league);
         case CalendarEventId.lottery:

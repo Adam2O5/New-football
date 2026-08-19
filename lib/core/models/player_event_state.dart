@@ -84,6 +84,26 @@ extension PlayerEventStateX on PlayerEventState {
     );
   }
 
+  PlayerEventState replaceModifier({
+    required String type,
+    required double value,
+    required int weeks,
+  }) {
+    final replacement = weeks > 0 && value != 0
+        ? TimedModifier(type: type, value: value, weeksRemaining: weeks)
+        : null;
+    return copyWith(
+      modifiers: [
+        ...modifiers.where((modifier) => modifier.type != type),
+        if (replacement != null) replacement,
+      ],
+    );
+  }
+
+  PlayerEventState clearModifier(String type) => copyWith(
+    modifiers: modifiers.where((modifier) => modifier.type != type).toList(),
+  );
+
   PlayerEventState withCooldown(String event, int weeks) {
     final next = {...cooldowns};
     if (weeks <= 0) {

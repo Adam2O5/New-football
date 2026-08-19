@@ -1376,6 +1376,107 @@ class ContractMarketService {
     );
   }
 
+  /// Signs one emergency free agent for an AI roster outside the normal FA
+  /// window. It is intentionally a thin orchestration layer: cap legality,
+  /// roster limits, payroll and NTC creation remain owned by [ContractService].
+  /// A null result means no legal candidate/offer was available.
+  LeagueState? signEmergencyFreeAgent(
+    LeagueState league, {
+    required String teamId,
+    Position? preferredPosition,
+    bool requireAvailable = false,
+    int? years,
+    int saveSeed = 0,
+  }) {
+    final team = league.teamById(teamId);
+    if (team == null || team.roster.length >= balance.roster.maxSize) {
+      return null;
+    }
+    final candidates = [...league.freeAgents]
+      ..removeWhere(
+        (player) =>
+            team.roster.any((rostered) => rostered.id == player.id) ||
+            (requireAvailable && !player.isAvailable),
+      )
+      ..sort((a, b) {
+        final aPosition =
+            preferredPosition != null && a.position == preferredPosition;
+        final bPosition =
+            preferredPosition != null && b.position == preferredPosition;
+        if (aPosition != bPosition) return aPosition ? -1 : 1;
+        if (a.isAvailable != b.isAvailable) return a.isAvailable ? -1 : 1;
+        final byValue = b.pointValue.compareTo(a.pointValue);
+        return byValue != 0 ? byValue : a.id.compareTo(b.id);
+      });
+    if (candidates.isEmpty) return null;
+
+    final contractYears = (years ?? balance.ai.rosterEmergencyOfferYears)
+        .clamp(1, 5)
+        .toInt();
+    final offers = <ContractOffer>[
+      ContractOffer(salary: balance.salaryCap.minSalary, years: contractYears),
+      if (team.finance.midLevelExceptionAvailable)
+        ContractOffer(
+          salary: balance.salaryCap.minSalary,
+          years: contractYears,
+          exception: CapExceptionType.midLevelException,
+        ),
+    ];
+
+    for (final player in candidates) {
+      for (final offer in offers) {
+        final validation = contracts.validateOffer(
+          team: team,
+          player: player,
+          offer: offer,
+        );
+        if (!validation.ok) continue;
+        final signed = contracts.signPlayer(
+          team: team,
+          player: player,
+          offer: offer,
+          ntcRandom: Random(
+            _seed(saveSeed, league, team.id, player.id, 'emergency'),
+          ),
+        );
+        if (signed == null) continue;
+        var state = league
+            .updateTeam(signed)
+            .copyWith(
+              freeAgents: league.freeAgents
+                  .where((candidate) => candidate.id != player.id)
+                  .toList(),
+              rfaQualifyingOffers: league.rfaQualifyingOffers
+                  .where((candidate) => candidate.playerId != player.id)
+                  .toList(),
+              rfaOfferSheets: league.rfaOfferSheets
+                  .where((candidate) => candidate.playerId != player.id)
+                  .toList(),
+            );
+        state = _removeFreshUndrafted(state, player.id);
+        return state;
+      }
+    }
+    return null;
+  }
+
+  /// Compatibility alias used by roster-safety callers.
+  LeagueState? emergencyRosterSigning(
+    LeagueState league, {
+    required String teamId,
+    Position? preferredPosition,
+    bool requireAvailable = false,
+    int? years,
+    int saveSeed = 0,
+  }) => signEmergencyFreeAgent(
+    league,
+    teamId: teamId,
+    preferredPosition: preferredPosition,
+    requireAvailable: requireAvailable,
+    years: years,
+    saveSeed: saveSeed,
+  );
+
   /// Signs a draft right without counting the right as a roster slot before
   /// this call. The operation is available whenever the destination has room.
   LeagueState? signDraftedRight(

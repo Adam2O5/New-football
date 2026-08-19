@@ -1443,7 +1443,7 @@ Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, le
 
 ---
 
-### ✅ Task 36: AI draftu i skautingu
+### ⬜ Task 36: AI draftu i skautingu
 
 **Cel:** `AI_behaviour.md` §6–7.
 
@@ -1496,31 +1496,35 @@ Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, le
 
 **Cel:** `AI_behaviour.md` §9–10.
 
-- [ ] Kontrola legalności rosteru **przed każdym dniem meczowym**
-- [ ] Roster <20 po emeryturach (śr tyg. 44) → plan uzupełnienia
-- [ ] Roster <20 na 2 tygodnie przed tyg. 1 → codzienne oferty FA, `offerScore` 90
-- [ ] Roster <20 w trakcie sezonu → natychmiastowa oferta FA, priorytet nad wszystkim
-- [ ] Roster = 30 i potrzeba podpisu → wymiana zwalniająca miejsce albo rezygnacja
-- [ ] <11 zdolnych do gry → awaryjny podpis FA w ciągu 1 dnia
-- [ ] Kontuzja Major w XI bez zmiennika w zasięgu 6 OVR → poszukiwanie wymiany/FA, P 70%
-- [ ] Kontuzja Major GK przy 1 pozostałym → podpis FA bramkarza, P 85%
-- [ ] Kontuzja Minor → brak reakcji rynkowej, rotacja
-- [ ] Zdolnych ≤13 → podpis FA, P 90%
-- [ ] Roster 30 + luka krytyczna + zbywalny nadmiarowy → wymiana 2-za-1, P 50%
-- [ ] Roster 30 przed draftem → nie podpisuje draftowanych, trzyma prawa
-- [ ] Rozwiązywanie 9 eventów zespołowych wg tabeli §10
-- [ ] Rozwiązywanie 6 decyzyjnych eventów zawodnika wg tabeli §10
-- [ ] Dotrzymywanie obietnic: +8% `playerMatchScore` na 4 tygodnie po Accept, realizacja w ~80%
-- [ ] Po Accept na prośbę o transfer: `tradeAppetite` ×3 na 4 tyg., gotowość do `surplusPct` −8%
-- [ ] AI odpowiada na wiadomości decyzyjne natychmiast (tego samego dnia/godziny)
+- [x] Kontrola legalności rosteru **przed każdym dniem meczowym**
+- [x] Roster <20 po emeryturach (śr tyg. 44) → plan uzupełnienia
+- [x] Roster <20 na 2 tygodnie przed tyg. 1 → codzienne oferty FA, `offerScore` 90
+- [x] Roster <20 w trakcie sezonu → natychmiastowa oferta FA, priorytet nad wszystkim
+- [x] Roster = 30 i potrzeba podpisu → wymiana zwalniająca miejsce albo rezygnacja
+- [x] <11 zdolnych do gry → awaryjny podpis FA w ciągu 1 dnia
+- [x] Kontuzja Major w XI bez zmiennika w zasięgu 6 OVR → poszukiwanie wymiany/FA, P 70%
+- [x] Kontuzja Major GK przy 1 pozostałym → podpis FA bramkarza, P 85%
+- [x] Kontuzja Minor → brak reakcji rynkowej, rotacja
+- [x] Zdolnych ≤13 → podpis FA, P 90%
+- [x] Roster 30 + luka krytyczna + zbywalny nadmiarowy → wymiana 2-za-1, P 50%
+- [x] Roster 30 przed draftem → nie podpisuje draftowanych, trzyma prawa
+- [x] Rozwiązywanie 9 eventów zespołowych wg tabeli §10
+- [x] Rozwiązywanie 6 decyzyjnych eventów zawodnika wg tabeli §10
+- [x] Dotrzymywanie obietnic: +8% `playerMatchScore` na 4 tygodnie po Accept, realizacja wynika z polityki AI
+- [x] Po Accept na prośbę o transfer: `tradeAppetite` ×3 na 4 tyg., gotowość do `surplusPct` −8%
+- [x] AI odpowiada na wiadomości decyzyjne natychmiast (tego samego dnia/godziny)
 
 **Testy**
-- [ ] 0 walkowerów spowodowanych przez AI w 10 symulowanych sezonach
-- [ ] 100% legalnych rosterów w tyg. 1
-- [ ] AI nie zwalnia zawodników (opcja niedostępna)
-- [ ] Obietnica dotrzymana w ~80% przypadków
+- [ ] 0 walkowerów spowodowanych przez AI w 10 symulowanych sezonach — pełny harness kalibracyjny pozostaje w Task 38
+- [x] 100% legalnych rosterów w 10 deterministycznych stanach startowych (20–30 zawodników i minimum 11 dostępnych)
+- [x] AI nie zwalnia zawodników (opcja niedostępna); pełny roster zachowuje zawodników i prawa draftowe
+- [ ] Obietnica dotrzymana w ~80% przypadków — testy potwierdzają mechanizm +8% i jego wygaśnięcie po 4 tygodniach, ale nie wykonują kalibracji statystycznej
 
-**Demo:** 10 sezonów bez ingerencji gracza bez ani jednego walkoweru AI i bez nielegalnego rosteru na starcie sezonu.
+**Implementacja:** stateless `AiRosterManagementService` jest uruchamiany przed rozstrzygnięciem dnia meczowego i przez `ContractMarketService.signEmergencyFreeAgent` obsługuje minimalny roster, dostępność, kontuzje, awaryjne FA oraz idempotentne naprawy. Przy pełnym rosterze dopuszczony jest wyłącznie legalny trade 2-za-1; brak legalnego ruchu nie powoduje zwolnienia zawodnika ani podpisania posiadanych praw draftowych. `TeamEventService` i `PlayerEventService` stosują politykę AI dla eventów zespołowych i zawodniczych, rozwiązują decyzje AI synchronicznie oraz zapisują czasowe modifier’y obietnic i transferów.
+
+**Ograniczenia:** brak walkowerów w 10 pełnych sezonach oraz kalibracja realizacji obietnic do ~80% wymagają harnessu z Task 38; obecne testy nie deklarują tych wyników.
+
+**Demo:** headless testy deterministycznie naprawiają roster AI i rozwiązują eventy bez blokowania symulacji, zachowując legalny zakres 20–30 zawodników, minimum 11 dostępnych, brak zwolnień oraz poprawne wygaszanie modifierów.
 
 ---
 
@@ -1528,28 +1532,36 @@ Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, le
 
 **Cel:** `AI_behaviour.md` §13 — 17 metryk akceptacyjnych.
 
-- [ ] Harness symulujący 10 sezonów ligi bez ingerencji gracza
-- [ ] Metryka: różnych mistrzów ≥6
-- [ ] Metryka: najdłuższa seria playoff jednej drużyny ≤8 sezonów
-- [ ] Metryka: walkowery spowodowane przez AI = 0
-- [ ] Metryka: drużyny z legalnym rosterem w tyg. 1 = 100%
-- [ ] Metryka: wymiany AI↔AI 25–45 na sezon
-- [ ] Metryka: oferty AI → gracz 12–20 na sezon
-- [ ] Metryka: jakość FA zależna od potrzeby — brak zbędnych ofert przy obsadzonej pozycji i awaryjna reakcja przy rosterze <20, bez minimalnego celu wolumenu UFA
-- [ ] Metryka: obsadzone sloty sztabu ≥92% (benchmark Task 35: 96,11%)
-- [ ] Metryka diagnostyczna średniego payrollu AI względem capu; górny limit ≤108% (benchmark Task 35: średnia 73,41%, maksimum 100,58%; 88% nie jest celem wydatkowym)
-- [ ] Metryka: drużyny powyżej 2. aprogu jednocześnie ≤3
-- [ ] Metryka: drużyny bez picka R1 w 2 kolejnych latach = 0
-- [ ] Metryka: korelacja `expectedRank` ↔ pozycja końcowa 0,55–0,75
-- [ ] Metryka: mediana wieku rosteru 25–28
-- [ ] Metryka: przejścia rebuild → contender w ≤4 sezony: 2–6
-- [ ] Metryka: kontrakty z `contractDrag ≥ 60` dłużej niż 2 sezony ≤2
-- [ ] Metryka: wymiany „zdjęcie kontraktu" 3–10 na sezon
-- [ ] Metryka: odmowy NTC 0–4 na sezon
-- [ ] Tuning w kolejności: `EVALUATION_NOISE_SD` → progi §5.2 → `statusAgeMult` → wolumeny §5.4–5.5
-- [ ] Raport jako czytelny output testu
+**Status:** infrastruktura testowa Task 38 jest przygotowana, ale końcowa kalibracja AI nie została zamknięta. Tuning parametrów oraz pełny benchmark zostają odroczone do końca prac nad pozostałymi taskami. Task 39 nie jest przez to zablokowany.
 
-**Demo:** raport z 10 sezonów mieszczący się we wszystkich 17 przedziałach.
+**Wykonano — infrastruktura i rozdzielenie profili**
+
+- [x] Dodano deterministyczny, ciągły harness in-memory w `test/task38_ai_season_calibration_test.dart`, z pasywnym klubem gracza i raportem per sezon oraz agregatami.
+- [x] Zachowano obecny zakres 17 metryk Task 38: mistrzowie, playoff streak, walkowery, legalność rosterów, trade’y AI, oferty AI → gracz, FA, sztab, payroll, aprony, Stepien, korelacja rankingu, wiek, odbudowa, toksyczne kontrakty, dumpy kontraktowe i odmowy NTC.
+- [x] Profil **accelerated** jest domyślny i został skonfigurowany na 10 sezonów. Przesuwa pełny zegar logiczny, zachowując krytyczne ticki kalendarza, recovery, tygodniowe AI, FA phase II, historię, draft oraz wygaszanie ofert.
+- [x] Profil **full-fidelity** wykonuje pełne ticki z `simulatePlayerMatch: true`; zachowano osobny smoke test jednego sezonu.
+- [x] Pełny benchmark 10 sezonów pozostaje dostępny wyłącznie przez `TASK38_RUN_FULL=true` i jest pomijany przy zwykłym `flutter test`.
+- [x] Nie wykonano tuningu `EVALUATION_NOISE_SD`, progów decyzyjnych, `statusAgeMult` ani wolumenów AI.
+
+**Wynik dotychczasowej walidacji**
+
+- [x] Diagnostyka pliku testowego była czysta (`No diagnostics found`).
+- [ ] Nie ma jeszcze końcowego raportu accelerated 10 sezonów: wcześniejszy przebieg ujawnił problem z przejściem pasywnego picka draftowego, a kolejny długi przebieg został zatrzymany bez raportu.
+- [ ] Smoke full-fidelity jednego sezonu po rozdzieleniu profili wymaga powtórzenia.
+- [ ] Nie uruchamiano pełnego benchmarku 10 sezonów; pozostaje on świadomie poza zwykłym suite’em.
+
+**Pozostało do wykonania — po zakończeniu Task 39–42**
+
+- [ ] Naprawić i zwalidować mechanikę accelerated runnera (draft/offseason) bez zmiany parametrów AI.
+- [ ] Uruchomić accelerated 10 sezonów i zapisać rzeczywisty raport z `logicalDays` oraz `executedTicks`.
+- [ ] Powtórzyć smoke full-fidelity jednego sezonu oraz sprawdzić, że domyślny plik pomija benchmark.
+- [ ] Porównać wszystkie 17 metryk z progami akceptacyjnymi i dopiero wtedy zdecydować, czy tuning jest potrzebny.
+- [ ] Opcjonalnie uruchomić `TASK38_RUN_FULL=true` jako końcowy benchmark referencyjny.
+- [ ] Jeśli raport wykaże odchylenia, wykonać tuning w kolejności: `EVALUATION_NOISE_SD` → progi §5.2 → `statusAgeMult` → wolumeny §5.4–5.5.
+
+**Decyzja procesowa:** Task 38 pozostaje otwarty jako zadanie kalibracyjne, ale jego infrastruktura nie blokuje przejścia do Task 39. Do czasu uzyskania raportu nie zmieniamy zachowania AI.
+
+**Demo końcowe Task 38:** raport z 10 sezonów mieszczący się we wszystkich 17 przedziałach, poprzedzony przechodzącym smoke testem full-fidelity i bez uruchamiania benchmarku przy zwykłym `flutter test`.
 
 ---
 

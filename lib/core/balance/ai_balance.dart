@@ -295,6 +295,13 @@ class AiBalance {
     this.faRosterRepairSize = 20,
     this.faPositionMaxProbability = 0.05,
     this.faAge33MaxYears = 2,
+    this.rosterEmergencyOfferScore = 90,
+    this.rosterEmergencyOfferYears = 1,
+    this.pRosterMajorInjury = 0.70,
+    this.pRosterMajorGk = 0.85,
+    this.pRosterAvailableDepth = 0.90,
+    this.pRosterSpaceTrade = 0.50,
+    this.rosterMajorInjuryOvrGap = 6.0,
     this.rfaQualifyingHighProbability = 0.90,
     this.rfaQualifyingDefaultProbability = 0.15,
     this.rfaMatchDepthProbability = 0.45,
@@ -479,6 +486,16 @@ class AiBalance {
   final int faRosterRepairSize;
   final double faPositionMaxProbability;
   final int faAge33MaxYears;
+
+  /// Task 37 roster-safety and injury-response policy.
+  final int rosterEmergencyOfferScore;
+  final int rosterEmergencyOfferYears;
+  final double pRosterMajorInjury;
+  final double pRosterMajorGk;
+  final double pRosterAvailableDepth;
+  final double pRosterSpaceTrade;
+  final double rosterMajorInjuryOvrGap;
+
   final double rfaQualifyingHighProbability;
   final double rfaQualifyingDefaultProbability;
   final double rfaMatchDepthProbability;

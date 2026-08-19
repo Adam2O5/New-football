@@ -21,7 +21,25 @@ class EventsBalance {
     this.moreMinutesLowShareThreshold = 0.25,
     this.moreMinutesPromiseShare = 0.40,
     this.moreMinutesPromiseWeeks = 4,
+    this.moreMinutesPromiseMatchScoreBonus = 0.08,
     this.transferSituationWeeks = 4,
+    this.transferTradeAppetiteMultiplier = 3.0,
+    this.transferTradeSurplusShift = -8.0,
+    this.aiMoreMinutesTopFourteenAcceptChance = 0.75,
+    this.aiMoreMinutesDepthAcceptChance = 0.35,
+    this.aiTransferRequestAcceptChance = 0.60,
+    this.aiTransferRequestOtherAcceptChance = 0.30,
+    this.aiTransferRequestIIAcceptChance = 0.70,
+    this.aiDressingRoomInterveneChance = 0.60,
+    this.aiPublicCriticismPunishChance = 0.45,
+    this.aiPublicCriticismResponseCutoff = 0.80,
+    this.aiPlateauAcceptChance = 0.70,
+    this.aiColdStreakAcceptChance = 0.65,
+    this.aiInjuryComplicationCautiousChance = 0.75,
+    this.aiVeteranMentorChance = 0.80,
+    this.aiExtraTrainingAcceptChance = 0.60,
+    this.aiExtraTrainingPlayoffAcceptChance = 0.30,
+    this.aiPersonalSupportAcceptChance = 0.85,
     this.transferRequestIChance = 0.01,
     this.transferRequestIIChanceAfterBrokenPromise = 0.20,
     this.dressingRoomConflictPenaltyWeeks = 2,
@@ -105,7 +123,28 @@ class EventsBalance {
   final double moreMinutesLowShareThreshold;
   final double moreMinutesPromiseShare;
   final int moreMinutesPromiseWeeks;
+  final double moreMinutesPromiseMatchScoreBonus;
   final int transferSituationWeeks;
+  final double transferTradeAppetiteMultiplier;
+  final double transferTradeSurplusShift;
+
+  /// AI choices from `docs/AI_behaviour.md` §10.
+  final double aiMoreMinutesTopFourteenAcceptChance;
+  final double aiMoreMinutesDepthAcceptChance;
+  final double aiTransferRequestAcceptChance;
+  final double aiTransferRequestOtherAcceptChance;
+  final double aiTransferRequestIIAcceptChance;
+  final double aiDressingRoomInterveneChance;
+  final double aiPublicCriticismPunishChance;
+  final double aiPublicCriticismResponseCutoff;
+  final double aiPlateauAcceptChance;
+  final double aiColdStreakAcceptChance;
+  final double aiInjuryComplicationCautiousChance;
+  final double aiVeteranMentorChance;
+  final double aiExtraTrainingAcceptChance;
+  final double aiExtraTrainingPlayoffAcceptChance;
+  final double aiPersonalSupportAcceptChance;
+
   final double transferRequestIChance;
   final double transferRequestIIChanceAfterBrokenPromise;
   final int dressingRoomConflictPenaltyWeeks;

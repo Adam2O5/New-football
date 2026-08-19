@@ -8,6 +8,7 @@ import 'package:new_football/core/models/goalkeeper_attributes.dart';
 import 'package:new_football/core/models/match_models.dart';
 import 'package:new_football/core/models/match_state.dart';
 import 'package:new_football/core/models/player.dart';
+import 'package:new_football/core/models/player_event_state.dart';
 import 'package:new_football/core/models/player_attributes.dart';
 import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/random/seeds.dart';
@@ -445,10 +446,13 @@ class AiMatchdayService {
         ? balance.matchday.roleFitBonus
         : 1.0;
     final gate = availabilityGate && !player.isAvailable ? 0.0 : 1.0;
+    final promiseBonus =
+        1.0 + player.state.eventState.modifierValue('promiseMatchScoreBonus');
     return effectiveOvr *
         balance.player.formMult(player.state.form) *
         staminaReadiness(player.state.stamina) *
         roleFit *
+        promiseBonus *
         gate;
   }
 

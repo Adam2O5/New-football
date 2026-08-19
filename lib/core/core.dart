@@ -6,6 +6,7 @@ export 'ai/ai_evaluation_models.dart';
 export 'ai/ai_evaluation_service.dart';
 export 'ai/ai_matchday_models.dart';
 export 'ai/ai_matchday_service.dart';
+export 'ai/ai_roster_management_service.dart';
 export 'ai/ai_trade_models.dart';
 export 'ai/ai_trade_service.dart';
 export 'ai/team_ai_service.dart';

@@ -150,6 +150,26 @@ extension TeamEventStateX on TeamEventState {
     );
   }
 
+  TeamEventState replaceModifier({
+    required String type,
+    required double value,
+    required int weeks,
+  }) {
+    final replacement = weeks > 0 && value != 0
+        ? TeamTimedModifier(type: type, value: value, weeksRemaining: weeks)
+        : null;
+    return copyWith(
+      modifiers: [
+        ...modifiers.where((modifier) => modifier.type != type),
+        if (replacement != null) replacement,
+      ],
+    );
+  }
+
+  TeamEventState clearModifier(String type) => copyWith(
+    modifiers: modifiers.where((modifier) => modifier.type != type).toList(),
+  );
+
   TeamEventState advanceWeek() {
     final nextModifiers = <TeamTimedModifier>[];
     for (final modifier in modifiers) {
@@ -284,6 +304,17 @@ extension TeamEventStateX on TeamEventState {
     seasonMinutes: seasonMinutes
         .where((entry) => !playerIds.contains(entry.playerId))
         .toList(),
+    modifiers: modifiers.where((modifier) {
+      final isPlayerScoped =
+          modifier.type.startsWith('tradeAppetite:') ||
+          modifier.type.startsWith('tradeSurplusPct:');
+      if (!isPlayerScoped) return true;
+      return !playerIds.any(
+        (playerId) =>
+            modifier.type == 'tradeAppetite:$playerId' ||
+            modifier.type == 'tradeSurplusPct:$playerId',
+      );
+    }).toList(),
     pointValueMultipliers: Map<String, double>.from(pointValueMultipliers)
       ..removeWhere((playerId, _) => playerIds.contains(playerId)),
   );

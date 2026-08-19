@@ -101,6 +101,20 @@ class AiTradeService {
   double tradeAppetite({required LeagueState league, required Team team}) =>
       appetiteForTeam(league: league, team: team).value;
 
+  /// Returns the club appetite after a player-specific transfer request. The
+  /// event modifier stores the additive multiplier delta (`2.0` means ×3), so
+  /// it remains compatible with the existing timed-modifier save format.
+  double tradeAppetiteForPlayer({
+    required LeagueState league,
+    required Team team,
+    required String playerId,
+  }) {
+    final base = tradeAppetite(league: league, team: team);
+    final multiplier =
+        1.0 + team.eventState.modifierValue('tradeAppetite:$playerId');
+    return (base * multiplier).clamp(0.0, 1.0).toDouble();
+  }
+
   /// Evaluates an offer from [evaluatingTeamId]'s point of view.
   ///
   /// `surplusPct` is the canonical evaluator result after converting the
@@ -1142,13 +1156,16 @@ class AiTradeService {
         _isContenderOrBetter(partnerStatus)) {
       shift += balance.ai.tradeSameConferenceContenderShift;
     }
-    if (outgoingPlayers.any(
-      (player) =>
-          self.eventState.transferSituationFor(player.id)?.weeksRemaining !=
-          null,
-    )) {
-      shift += balance.ai.tradeTransferRequestShift;
-    }
+    final transferShift = outgoingPlayers.fold<double>(0.0, (sum, player) {
+      final scopedShift = self.eventState.modifierValue(
+        'tradeSurplusPct:${player.id}',
+      );
+      if (scopedShift != 0) return sum + scopedShift;
+      return self.eventState.transferSituationFor(player.id) == null
+          ? sum
+          : sum + balance.ai.tradeTransferRequestShift;
+    });
+    shift += transferShift;
     return shift;
   }
 

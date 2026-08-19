@@ -284,6 +284,7 @@ class PlayerEventService {
         player: nextPlayer,
         kind: 'personalSupport',
         expiryDays: 3,
+        saveSeed: saveSeed,
         payload: {'followUp': true},
       );
     }
@@ -323,7 +324,7 @@ class PlayerEventService {
       offseason: offseason,
     );
     state = _tryRecurringInjury(state, team.id, nextPlayer.id, saveSeed);
-    state = _tryPlateau(state, team.id, nextPlayer.id);
+    state = _tryPlateau(state, team.id, nextPlayer.id, saveSeed);
     return state;
   }
 
@@ -420,6 +421,7 @@ class PlayerEventService {
       player: player,
       kind: 'coldStreak',
       expiryDays: 1,
+      saveSeed: saveSeed,
       payload: {
         'form': player.state.form,
         'lowFormWeeks': eventState.counterValue('lowFormWeeks'),
@@ -465,6 +467,7 @@ class PlayerEventService {
       player: player,
       kind: 'injuryComplication',
       expiryDays: 1,
+      saveSeed: saveSeed,
       args: {'extraDays': events.injuryComplicationCautiousExtraDaysMin},
       payload: {
         'injuryId': original.id,
@@ -508,6 +511,7 @@ class PlayerEventService {
       player: player,
       kind: 'veteranMotivation',
       expiryDays: 2,
+      saveSeed: saveSeed,
       payload: {
         'determination': player.hidden.determination,
         'determinationRequired': events.veteranMentorDeterminationMin,
@@ -548,6 +552,7 @@ class PlayerEventService {
       player: player,
       kind: 'extraTraining',
       expiryDays: 1,
+      saveSeed: saveSeed,
       payload: {
         'determination': player.hidden.determination,
         'injuryRiskMultiplier': events.extraTrainingInjuryRiskMultiplier,
@@ -758,7 +763,12 @@ class PlayerEventService {
     );
   }
 
-  LeagueState _tryPlateau(LeagueState state, String teamId, String playerId) {
+  LeagueState _tryPlateau(
+    LeagueState state,
+    String teamId,
+    String playerId,
+    int saveSeed,
+  ) {
     final team = state.teamById(teamId);
     final player = team == null
         ? null
@@ -775,6 +785,7 @@ class PlayerEventService {
       player: player,
       kind: 'plateau',
       expiryDays: 2,
+      saveSeed: saveSeed,
       payload: {'plateauWeeks': eventState.counterValue('plateauWeeks')},
     );
   }
@@ -1078,22 +1089,98 @@ class PlayerEventService {
     required Player player,
     required String kind,
     required int expiryDays,
+    required int saveSeed,
     Map<String, dynamic> args = const {},
     Map<String, dynamic> payload = const {},
-  }) => _emit(
-    state,
-    teamId: teamId,
-    player: player,
-    kind: kind,
-    args: {'playerName': player.name, ...args},
-    payload: {
+  }) {
+    final completePayload = <String, dynamic>{
       'playerId': player.id,
       'teamId': teamId,
       'eventKind': kind,
       ...payload,
-    },
-    expiryDays: expiryDays,
-  );
+    };
+    final completeArgs = <String, dynamic>{'playerName': player.name, ...args};
+
+    // AI decisions are resolved synchronously. Building an in-memory message
+    // keeps all six effects on the same [resolveDecision] path as the player
+    // UI without putting an AI event into the human inbox.
+    if (state.playerTeamId != teamId) {
+      final message = GameMessage(
+        id: 'ai:playerEvent:$kind:$teamId:${player.id}:${state.currentSeason.year}:${state.currentWeek}',
+        type: MessageType.playerEvent,
+        kind: kind,
+        domain: MessageDomain.playerEvent,
+        seasonYear: state.currentSeason.year,
+        week: state.currentWeek,
+        day: state.currentDay,
+        hour: state.currentHour,
+        titleKey: 'ai.playerEvent.$kind.title',
+        bodyKey: 'ai.playerEvent.$kind.body',
+        args: completeArgs,
+        payload: completePayload,
+      );
+      return resolveDecision(
+        state,
+        message,
+        _aiDecisionOption(state, player, kind, saveSeed),
+        saveSeed: saveSeed,
+      );
+    }
+
+    return _emit(
+      state,
+      teamId: teamId,
+      player: player,
+      kind: kind,
+      args: completeArgs,
+      payload: completePayload,
+      expiryDays: expiryDays,
+    );
+  }
+
+  String _aiDecisionOption(
+    LeagueState state,
+    Player player,
+    String kind,
+    int saveSeed,
+  ) {
+    final probability = switch (kind) {
+      'plateau' => balance.events.aiPlateauAcceptChance,
+      'coldStreak' => balance.events.aiColdStreakAcceptChance,
+      'injuryComplication' => balance.events.aiInjuryComplicationCautiousChance,
+      'veteranMotivation' => balance.events.aiVeteranMentorChance,
+      'extraTraining' =>
+        state.currentSeason.phase == SeasonPhase.playoff
+            ? balance.events.aiExtraTrainingPlayoffAcceptChance
+            : balance.events.aiExtraTrainingAcceptChance,
+      'personalSupport' => balance.events.aiPersonalSupportAcceptChance,
+      _ => 0.0,
+    };
+    final roll = Random(
+      playerEventSeed(
+        saveSeed,
+        state.currentSeason.year,
+        state.currentWeek,
+        player.id,
+        'aiDecision:$kind',
+      ),
+    ).nextDouble();
+
+    return switch (kind) {
+      'plateau' => roll < probability ? 'accept' : 'decline',
+      'coldStreak' => roll < probability ? 'accept' : 'decline',
+      'injuryComplication' => roll < probability ? 'cautious' : 'full',
+      'veteranMotivation' =>
+        player.hidden.determination >=
+                    balance.events.veteranMentorDeterminationMin &&
+                roll < probability
+            ? 'mentor'
+            : 'ignore',
+      'extraTraining' => roll < probability ? 'accept' : 'decline',
+      'personalSupport' => roll < probability ? 'accept' : 'decline',
+      _ => 'decline',
+    };
+  }
 
   LeagueState _emit(
     LeagueState state, {
