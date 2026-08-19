@@ -647,6 +647,57 @@ class AppLocalizationsEn extends AppLocalizations {
   String get home_simulateUntilNextEvent => 'To next event';
 
   @override
+  String get home_nextActionTitle => 'Next action';
+
+  @override
+  String get home_nextEvent => 'event';
+
+  @override
+  String get home_readUrgent => 'Read urgent message';
+
+  @override
+  String home_simulateHour(int hour) {
+    return 'Simulate hour · $hour/10';
+  }
+
+  @override
+  String get home_simulateToNextMatch => 'Simulate to next match';
+
+  @override
+  String get home_simulateUntilEvent => 'Simulate to event';
+
+  @override
+  String home_simulateToEvent(String label) {
+    return 'Simulate to: $label';
+  }
+
+  @override
+  String get home_simulateDay => 'Simulate day';
+
+  @override
+  String get home_simulateMatch => 'Simulate match';
+
+  @override
+  String home_goToEvent(String label) {
+    return 'Go to: $label';
+  }
+
+  @override
+  String home_simulateEvent(String label) {
+    return 'Simulate: $label';
+  }
+
+  @override
+  String home_actionExecuted(String label) {
+    return 'Completed: $label';
+  }
+
+  @override
+  String home_context(int season, String phase, int week, int day) {
+    return 'Season $season · $phase · Week $week, day $day';
+  }
+
+  @override
   String get squad_noTeam => 'No player team';
 
   @override
@@ -800,6 +851,30 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get finance_title => 'Finance';
+
+  @override
+  String get finance_dashboardSubtitle =>
+      'Salary cap and available funds overview';
+
+  @override
+  String get finance_capOverview => 'Salary cap and payroll';
+
+  @override
+  String get finance_apronsOverview => 'Aprons';
+
+  @override
+  String get finance_cashOverview => 'Club cash';
+
+  @override
+  String finance_apronHeadroom(String first, String second) {
+    return 'To first apron: $first; to second: $second';
+  }
+
+  @override
+  String get finance_financialHealth => 'Financial health';
+
+  @override
+  String get finance_actions => 'Financial actions';
 
   @override
   String get finance_payroll => 'Payroll';
@@ -1100,6 +1175,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get tactics_saved => 'Tactics saved';
+
+  @override
+  String get tactics_autosaving => 'Saving tactics…';
+
+  @override
+  String get tactics_autosaved => 'Tactics saved automatically';
+
+  @override
+  String get tactics_autosaveHint => 'Changes are saved automatically';
 
   @override
   String get inbox_title => 'Inbox';

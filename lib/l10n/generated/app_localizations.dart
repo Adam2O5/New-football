@@ -1310,6 +1310,84 @@ abstract class AppLocalizations {
   /// **'Do następnego wydarzenia'**
   String get home_simulateUntilNextEvent;
 
+  /// No description provided for @home_nextActionTitle.
+  ///
+  /// In pl, this message translates to:
+  /// **'Najbliższa akcja'**
+  String get home_nextActionTitle;
+
+  /// No description provided for @home_nextEvent.
+  ///
+  /// In pl, this message translates to:
+  /// **'wydarzenia'**
+  String get home_nextEvent;
+
+  /// No description provided for @home_readUrgent.
+  ///
+  /// In pl, this message translates to:
+  /// **'Odczytaj pilną wiadomość'**
+  String get home_readUrgent;
+
+  /// No description provided for @home_simulateHour.
+  ///
+  /// In pl, this message translates to:
+  /// **'Symuluj godzinę · {hour}/10'**
+  String home_simulateHour(int hour);
+
+  /// No description provided for @home_simulateToNextMatch.
+  ///
+  /// In pl, this message translates to:
+  /// **'Symuluj do następnego meczu'**
+  String get home_simulateToNextMatch;
+
+  /// No description provided for @home_simulateUntilEvent.
+  ///
+  /// In pl, this message translates to:
+  /// **'Symuluj do wydarzenia'**
+  String get home_simulateUntilEvent;
+
+  /// No description provided for @home_simulateToEvent.
+  ///
+  /// In pl, this message translates to:
+  /// **'Symuluj do: {label}'**
+  String home_simulateToEvent(String label);
+
+  /// No description provided for @home_simulateDay.
+  ///
+  /// In pl, this message translates to:
+  /// **'Symuluj dzień'**
+  String get home_simulateDay;
+
+  /// No description provided for @home_simulateMatch.
+  ///
+  /// In pl, this message translates to:
+  /// **'Symuluj mecz'**
+  String get home_simulateMatch;
+
+  /// No description provided for @home_goToEvent.
+  ///
+  /// In pl, this message translates to:
+  /// **'Przejdź do: {label}'**
+  String home_goToEvent(String label);
+
+  /// No description provided for @home_simulateEvent.
+  ///
+  /// In pl, this message translates to:
+  /// **'Symuluj: {label}'**
+  String home_simulateEvent(String label);
+
+  /// No description provided for @home_actionExecuted.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wykonano: {label}'**
+  String home_actionExecuted(String label);
+
+  /// No description provided for @home_context.
+  ///
+  /// In pl, this message translates to:
+  /// **'Sezon {season} · {phase} · Tydzień {week}, dzień {day}'**
+  String home_context(int season, String phase, int week, int day);
+
   /// No description provided for @squad_noTeam.
   ///
   /// In pl, this message translates to:
@@ -1597,6 +1675,48 @@ abstract class AppLocalizations {
   /// In pl, this message translates to:
   /// **'Finanse'**
   String get finance_title;
+
+  /// No description provided for @finance_dashboardSubtitle.
+  ///
+  /// In pl, this message translates to:
+  /// **'Podsumowanie salary cap i dostępnych środków'**
+  String get finance_dashboardSubtitle;
+
+  /// No description provided for @finance_capOverview.
+  ///
+  /// In pl, this message translates to:
+  /// **'Salary cap i payroll'**
+  String get finance_capOverview;
+
+  /// No description provided for @finance_apronsOverview.
+  ///
+  /// In pl, this message translates to:
+  /// **'Aprony'**
+  String get finance_apronsOverview;
+
+  /// No description provided for @finance_cashOverview.
+  ///
+  /// In pl, this message translates to:
+  /// **'Gotówka klubu'**
+  String get finance_cashOverview;
+
+  /// No description provided for @finance_apronHeadroom.
+  ///
+  /// In pl, this message translates to:
+  /// **'Do pierwszego apronu: {first}; do drugiego: {second}'**
+  String finance_apronHeadroom(String first, String second);
+
+  /// No description provided for @finance_financialHealth.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kondycja finansowa'**
+  String get finance_financialHealth;
+
+  /// No description provided for @finance_actions.
+  ///
+  /// In pl, this message translates to:
+  /// **'Akcje finansowe'**
+  String get finance_actions;
 
   /// No description provided for @finance_payroll.
   ///
@@ -2131,6 +2251,24 @@ abstract class AppLocalizations {
   /// In pl, this message translates to:
   /// **'Zapisano taktykę'**
   String get tactics_saved;
+
+  /// No description provided for @tactics_autosaving.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zapisywanie taktyki…'**
+  String get tactics_autosaving;
+
+  /// No description provided for @tactics_autosaved.
+  ///
+  /// In pl, this message translates to:
+  /// **'Taktyka zapisana automatycznie'**
+  String get tactics_autosaved;
+
+  /// No description provided for @tactics_autosaveHint.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zmiany zapisują się automatycznie'**
+  String get tactics_autosaveHint;
 
   /// No description provided for @inbox_title.
   ///

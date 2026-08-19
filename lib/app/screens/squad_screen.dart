@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -38,7 +40,13 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
   PressingIntensity? pressing;
   DefensiveLine? line;
   AttackWidth? width;
-  bool tacticsDirty = false;
+  Timer? _tacticsSaveTimer;
+  Future<void> _tacticsSaveQueue = Future<void>.value();
+  TacticsSetup? _pendingTactics;
+  int _tacticsRevision = 0;
+  bool _tacticsAutosavePending = false;
+  bool _tacticsAutosaveSaved = false;
+  GameController? _gameController;
   PlayerSortMode sortMode = PlayerSortMode.assignedZone;
   final _rosterSearchController = TextEditingController();
   String _positionFilterCode = '';
@@ -57,6 +65,11 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
 
   @override
   void dispose() {
+    _tacticsSaveTimer?.cancel();
+    final pending = _pendingTactics;
+    if (pending != null) {
+      _enqueueTacticsSave(pending, _tacticsRevision);
+    }
     _rosterSearchController.dispose();
     _tabController.dispose();
     super.dispose();
@@ -70,6 +83,7 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
     if (team == null) {
       return ScreenBackground(child: Center(child: Text(l10n.squad_noTeam)));
     }
+    _gameController ??= ref.read(gameControllerProvider.notifier);
 
     formation ??= team.tactics.formation;
     tempo ??= team.tactics.tempo;
@@ -351,6 +365,64 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
     );
   }
 
+  void _onTacticsChanged(Team team, VoidCallback update) {
+    setState(() {
+      update();
+      _tacticsRevision++;
+      _tacticsAutosavePending = true;
+      _tacticsAutosaveSaved = false;
+    });
+
+    final snapshot = TacticsSetup(
+      formation: formation!,
+      tempo: tempo!,
+      pressing: pressing!,
+      defensiveLine: line!,
+      attackWidth: width!,
+      cornersAttack: team.tactics.cornersAttack,
+      cornersDefense: team.tactics.cornersDefense,
+      freeKicks: team.tactics.freeKicks,
+      penalties: team.tactics.penalties,
+    );
+    _pendingTactics = snapshot;
+    _tacticsSaveTimer?.cancel();
+    final revision = _tacticsRevision;
+    _tacticsSaveTimer = Timer(const Duration(milliseconds: 250), () {
+      _pendingTactics = null;
+      _enqueueTacticsSave(snapshot, revision);
+    });
+  }
+
+  void _enqueueTacticsSave(TacticsSetup tactics, int revision) {
+    _tacticsSaveQueue = _tacticsSaveQueue.then<void>(
+      (_) => _persistTactics(tactics, revision),
+    );
+  }
+
+  Future<void> _persistTactics(TacticsSetup tactics, int revision) async {
+    final controller = _gameController;
+    if (controller == null) return;
+
+    try {
+      await controller.updateLeague((league) {
+        final currentTeam = league.playerTeam;
+        if (currentTeam == null) return league;
+        return league.updateTeam(currentTeam.copyWith(tactics: tactics));
+      }, autosave: true);
+      if (!mounted || revision != _tacticsRevision) return;
+      setState(() {
+        _tacticsAutosavePending = false;
+        _tacticsAutosaveSaved = true;
+      });
+    } catch (_) {
+      if (!mounted || revision != _tacticsRevision) return;
+      setState(() {
+        _tacticsAutosavePending = false;
+        _tacticsAutosaveSaved = false;
+      });
+    }
+  }
+
   // -- Zakładka "Skład": pitch (tap → SubstituteSheet) + sortowalna lista.
   Widget _buildSquadTab(
     BuildContext context,
@@ -366,6 +438,7 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
     final sortedRoster = sortRoster(team, filteredRoster, sortMode);
 
     return ListView(
+      key: const ValueKey('squad-roster-scroll'),
       padding: EdgeInsets.zero,
       children: [
         Material(
@@ -428,30 +501,33 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
                     ),
-                    DropdownButton<PlayerSortMode>(
-                      value: sortMode,
-                      onChanged: (v) {
-                        if (v == null) return;
-                        setState(() => sortMode = v);
-                      },
-                      items: [
-                        DropdownMenuItem(
-                          value: PlayerSortMode.overall,
-                          child: Text(l10n.squad_sortOverall),
-                        ),
-                        DropdownMenuItem(
-                          value: PlayerSortMode.assignedZone,
-                          child: Text(l10n.squad_sortAssignedZone),
-                        ),
-                        DropdownMenuItem(
-                          value: PlayerSortMode.form,
-                          child: Text(l10n.squad_sortForm),
-                        ),
-                        DropdownMenuItem(
-                          value: PlayerSortMode.position,
-                          child: Text(l10n.squad_sortPosition),
-                        ),
-                      ],
+                    Material(
+                      color: Colors.transparent,
+                      child: DropdownButton<PlayerSortMode>(
+                        value: sortMode,
+                        onChanged: (v) {
+                          if (v == null) return;
+                          setState(() => sortMode = v);
+                        },
+                        items: [
+                          DropdownMenuItem(
+                            value: PlayerSortMode.overall,
+                            child: Text(l10n.squad_sortOverall),
+                          ),
+                          DropdownMenuItem(
+                            value: PlayerSortMode.assignedZone,
+                            child: Text(l10n.squad_sortAssignedZone),
+                          ),
+                          DropdownMenuItem(
+                            value: PlayerSortMode.form,
+                            child: Text(l10n.squad_sortForm),
+                          ),
+                          DropdownMenuItem(
+                            value: PlayerSortMode.position,
+                            child: Text(l10n.squad_sortPosition),
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 ),
@@ -497,6 +573,7 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
     final byId = {for (final p in team.roster) p.id: p};
 
     return ListView(
+      key: const ValueKey('squad-tactics-scroll'),
       padding: EdgeInsets.zero,
       children: [
         Padding(
@@ -544,10 +621,7 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
                         .toList(),
                     onChanged: (v) {
                       if (v == null) return;
-                      setState(() {
-                        formation = v;
-                        tacticsDirty = true;
-                      });
+                      _onTacticsChanged(team, () => formation = v);
                     },
                   ),
                   const SizedBox(height: 12),
@@ -564,10 +638,7 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
                         .toList(),
                     onChanged: (v) {
                       if (v == null) return;
-                      setState(() {
-                        tempo = v;
-                        tacticsDirty = true;
-                      });
+                      _onTacticsChanged(team, () => tempo = v);
                     },
                   ),
                   const SizedBox(height: 12),
@@ -586,10 +657,7 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
                         .toList(),
                     onChanged: (v) {
                       if (v == null) return;
-                      setState(() {
-                        pressing = v;
-                        tacticsDirty = true;
-                      });
+                      _onTacticsChanged(team, () => pressing = v);
                     },
                   ),
                   const SizedBox(height: 12),
@@ -608,10 +676,7 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
                         .toList(),
                     onChanged: (v) {
                       if (v == null) return;
-                      setState(() {
-                        line = v;
-                        tacticsDirty = true;
-                      });
+                      _onTacticsChanged(team, () => line = v);
                     },
                   ),
                   const SizedBox(height: 12),
@@ -630,43 +695,36 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
                         .toList(),
                     onChanged: (v) {
                       if (v == null) return;
-                      setState(() {
-                        width = v;
-                        tacticsDirty = true;
-                      });
+                      _onTacticsChanged(team, () => width = v);
                     },
                   ),
-                  const SizedBox(height: 24),
-                  FilledButton(
-                    onPressed: !tacticsDirty
-                        ? null
-                        : () async {
-                            final newTactics = TacticsSetup(
-                              formation: formation!,
-                              tempo: tempo!,
-                              pressing: pressing!,
-                              defensiveLine: line!,
-                              attackWidth: width!,
-                              cornersAttack: team.tactics.cornersAttack,
-                              cornersDefense: team.tactics.cornersDefense,
-                              freeKicks: team.tactics.freeKicks,
-                              penalties: team.tactics.penalties,
-                            );
-                            await ref
-                                .read(gameControllerProvider.notifier)
-                                .updateLeague((l) {
-                                  final t = l.playerTeam!;
-                                  return l.updateTeam(
-                                    t.copyWith(tactics: newTactics),
-                                  );
-                                });
-                            if (!context.mounted) return;
-                            setState(() => tacticsDirty = false);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text(l10n.tactics_saved)),
-                            );
-                          },
-                    child: Text(l10n.tactics_save),
+                  const SizedBox(height: 20),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Row(
+                      children: [
+                        Icon(
+                          _tacticsAutosavePending
+                              ? Icons.sync
+                              : _tacticsAutosaveSaved
+                              ? Icons.check_circle_outline
+                              : Icons.cloud_outlined,
+                          size: 18,
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            _tacticsAutosavePending
+                                ? l10n.tactics_autosaving
+                                : _tacticsAutosaveSaved
+                                ? l10n.tactics_autosaved
+                                : l10n.tactics_autosaveHint,
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),

@@ -1,37 +1,18 @@
-# TODO — V 1.0
+# TODO — V1.0
 
 ## UI i UX
-- [ ] Przebudować zakładkę `Finances`.
-- [ ] Dodać tło i poprawić ogólny styl UI.
-- [ ] Zapełnić pustą przestrzeń na `Home Screen`.
-- [ ] Przebudować listę zawodników w `Squad Screen` (tylko UI).
-- [ ] Dodać ikonę ustawień i zapisu w prawym górnym rogu oraz zaimplementować ich działanie.
-- [ ] Włączyć autozapis taktyki zamiast osobnego przycisku `Save`.
+- [ ] Dopracować `StaffScreen` oraz pełny przepływ slotów, ofert i negocjacji sztabu.
+- [ ] Dokończyć UX i weryfikację przepływu `Draft Combine`.
+- [ ] Rozszerzyć testy widgetowe o pozostałe krytyczne ścieżki UI (w szczególności matchday, inbox, trade, kontrakty, draft i walidację składu).
 
-## Ekrany i nawigacja
-- [ ] Dodać listę prospectów.
-- [ ] Przebudować sekcję `Staff`.
-- [ ] Dodać `Search Screen` z przejściem do `Trade Screen`.
-- [ ] Dodać ekran `Draft`.
-- [ ] Dodać ekran `Lottery`.
-- [ ] Dodać ekran historii draftu (`Draft History Screen`).
-- [ ] Dodać ekran rankingów: `Trade Assets`, `Power Ranking`, `Projected Finish`.
-- [ ] Dodać ekran nagród (`Rewards Screen`).
-- [ ] Dodać ekran statystyk drużyn i zawodników oraz `Team Overview`.
-- [ ] Dodać ekran rozwoju (`Development Screen`).
-- [ ] Dodać ekran wolnych agentów (`FA Screen`).
-- [ ] Dodać ekran kontraktów (`Contracts Screen`).
-- [ ] Dodać `Playoff` i `Play-In` do `Standings`.
-- [ ] Przerobić system wiadomości i ekran `Inbox`.
-- [ ] Implementacja draft combine.
+## AI i walidacja
+- [ ] Domknąć kalibrację AI na 10 sezonach: naprawić accelerated runner, uzyskać raport 17 metryk i powtórzyć smoke test full-fidelity.
+- [ ] Zweryfikować statystycznie jakość draftu bez scouta, brak walkowerów AI oraz realizację obietnic po uzyskaniu raportu kalibracyjnego.
+- [ ] Nie wykonywać tuningu AI bez raportu; jeśli raport wykaże odchylenia, stroić parametry w kolejności opisanej w Task 38.
 
-## Gameplay i systemy
-- [ ] Poprawić scouting.
-- [ ] Wprowadzić wstępny balans rozgrywki.
-- [ ] Dodać `Chemistry` i `Atmosphere`.
-- [ ] Dodać losowe wydarzenia (`Random Events`).
-- [ ] Dodać system transferów (`Trades`).
-- [ ] Dodać `Salary Cap`.
+## Lokalizacja i dokumentacja
+- [ ] Dokończyć audyt kompletności i spójności lokalizacji PL/EN oraz uzupełnić ewentualne brakujące napisy.
+- [ ] Wykonać testy strażnicze i końcowy audyt dokumentacji zgodnie z Task 42.
 
-## Lokalizacja
-- [ ] Dopiąć wszystkie napisy w dwóch językach.
+## Zasada
+- Pozycje już zrealizowane — finanse, wspólne tło i styl, Home, Squad/roster, ustawienia i zapis w Shell, autosave taktyki, draft, lottery, prospects, rankings, rewards, stats, development, FA, contracts, draft history, search, playoff/play-in w standings, chemistry/atmosphere, trades, salary cap, random events i scouting — nie są powtarzane jako TODO.

@@ -1600,21 +1600,23 @@ Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, le
 
 ---
 
-### ⬜ Task 40: Zaległości UI/UX z `TODO.md`
+### ✅ Task 40: Zaległości UI/UX z `TODO.md`
 
 **Cel:** domknięcie listy z `TODO.md` i jej aktualizacja.
 
-- [ ] Przebudować `FinanceScreen` (częściowo w Task 27 — tu wykończenie)
-- [ ] Dodać tło i poprawić ogólny styl UI
-- [ ] Zapełnić pustą przestrzeń na `HomeScreen`
-- [ ] Przebudować listę zawodników w `SquadScreen`
-- [ ] Dodać ikonę ustawień w prawym górnym rogu z działaniem
-- [ ] Dodać ikonę zapisu w prawym górnym rogu z działaniem
-- [ ] Autozapis taktyki zamiast osobnego przycisku Save
-- [ ] Przepisać `TODO.md`: usunąć pozycje już zrealizowane (draft, lottery, prospects, rankings, rewards, stats, development, FA, contracts, draft history, search, playoff w standings, chemistry/atmosphere, trades, salary cap, random events, scouting)
-- [ ] `TODO.md`: pozostawić wyłącznie faktycznie otwarte pozycje
+- [x] Przebudować `FinanceScreen` (częściowo w Task 27 — tu wykończenie)
+- [x] Dodać tło i poprawić ogólny styl UI
+- [x] Zapełnić pustą przestrzeń na `HomeScreen`
+- [x] Przebudować listę zawodników w `SquadScreen`
+- [x] Dodać ikonę ustawień w prawym górnym rogu z działaniem
+- [x] Dodać ikonę zapisu w prawym górnym rogu z działaniem
+- [x] Autozapis taktyki zamiast osobnego przycisku Save
+- [x] Dodać dedykowane testy UI Task 40 w `test/task40_ui_test.dart`
+- [x] Przepisać `TODO.md`: usunąć pozycje już zrealizowane i pozostawić wyłącznie faktycznie otwarte pozycje
 
-**Demo:** przejście przez wszystkie ekrany bez pozycji „work in progress" i bez ręcznego zapisu taktyki.
+**Testy:** `test/task40_ui_test.dart` pokrywa dashboard finansów i stan over-cap, Home, roster/filtry/taktykę Squad, autosave taktyki oraz akcje ustawień i zapisu w Shell.
+
+**Demo:** przejście przez ekrany Task 40 bez pozycji „work in progress" i bez ręcznego zapisu taktyki; pozostałe prace są jawnie wskazane w zaktualizowanym `TODO.md`.
 
 ---
 

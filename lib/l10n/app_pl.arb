@@ -257,6 +257,42 @@
   "home_noPreviousMatch": "Brak rozegranych meczów",
   "home_noNextMatch": "Brak zaplanowanych meczów",
   "home_simulateUntilNextEvent": "Do następnego wydarzenia",
+  "home_nextActionTitle": "Najbliższa akcja",
+  "home_nextEvent": "wydarzenia",
+  "home_readUrgent": "Odczytaj pilną wiadomość",
+  "home_simulateHour": "Symuluj godzinę · {hour}/10",
+  "@home_simulateHour": {
+    "placeholders": {"hour": {"type": "int"}}
+  },
+  "home_simulateToNextMatch": "Symuluj do następnego meczu",
+  "home_simulateUntilEvent": "Symuluj do wydarzenia",
+  "home_simulateToEvent": "Symuluj do: {label}",
+  "@home_simulateToEvent": {
+    "placeholders": {"label": {"type": "String"}}
+  },
+  "home_simulateDay": "Symuluj dzień",
+  "home_simulateMatch": "Symuluj mecz",
+  "home_goToEvent": "Przejdź do: {label}",
+  "@home_goToEvent": {
+    "placeholders": {"label": {"type": "String"}}
+  },
+  "home_simulateEvent": "Symuluj: {label}",
+  "@home_simulateEvent": {
+    "placeholders": {"label": {"type": "String"}}
+  },
+  "home_actionExecuted": "Wykonano: {label}",
+  "@home_actionExecuted": {
+    "placeholders": {"label": {"type": "String"}}
+  },
+  "home_context": "Sezon {season} · {phase} · Tydzień {week}, dzień {day}",
+  "@home_context": {
+    "placeholders": {
+      "season": {"type": "int"},
+      "phase": {"type": "String"},
+      "week": {"type": "int"},
+      "day": {"type": "int"}
+    }
+  },
 
   "squad_noTeam": "Brak drużyny gracza",
   "squad_sizeLabel": "Skład: {size} / {min}–{max}",
@@ -371,6 +407,19 @@
 
   "finance_noTeam": "Brak drużyny gracza",
   "finance_title": "Finanse",
+  "finance_dashboardSubtitle": "Podsumowanie salary cap i dostępnych środków",
+  "finance_capOverview": "Salary cap i payroll",
+  "finance_apronsOverview": "Aprony",
+  "finance_cashOverview": "Gotówka klubu",
+  "finance_apronHeadroom": "Do pierwszego apronu: {first}; do drugiego: {second}",
+  "@finance_apronHeadroom": {
+    "placeholders": {
+      "first": {"type": "String"},
+      "second": {"type": "String"}
+    }
+  },
+  "finance_financialHealth": "Kondycja finansowa",
+  "finance_actions": "Akcje finansowe",
   "finance_payroll": "Payroll",
   "finance_cap": "Salary cap",
   "finance_capSpace": "Wolne miejsce",
@@ -463,6 +512,9 @@
   "tactics_attackWidth": "Szerokość ataku",
   "tactics_save": "Zapisz taktykę",
   "tactics_saved": "Zapisano taktykę",
+  "tactics_autosaving": "Zapisywanie taktyki…",
+  "tactics_autosaved": "Taktyka zapisana automatycznie",
+  "tactics_autosaveHint": "Zmiany zapisują się automatycznie",
 
   "inbox_title": "Skrzynka",
   "inbox_notifications": "Powiadomienia",

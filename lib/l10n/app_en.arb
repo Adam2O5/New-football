@@ -235,6 +235,42 @@
   "home_noPreviousMatch": "No matches played yet",
   "home_noNextMatch": "No matches scheduled",
   "home_simulateUntilNextEvent": "To next event",
+  "home_nextActionTitle": "Next action",
+  "home_nextEvent": "event",
+  "home_readUrgent": "Read urgent message",
+  "home_simulateHour": "Simulate hour · {hour}/10",
+  "@home_simulateHour": {
+    "placeholders": {"hour": {"type": "int"}}
+  },
+  "home_simulateToNextMatch": "Simulate to next match",
+  "home_simulateUntilEvent": "Simulate to event",
+  "home_simulateToEvent": "Simulate to: {label}",
+  "@home_simulateToEvent": {
+    "placeholders": {"label": {"type": "String"}}
+  },
+  "home_simulateDay": "Simulate day",
+  "home_simulateMatch": "Simulate match",
+  "home_goToEvent": "Go to: {label}",
+  "@home_goToEvent": {
+    "placeholders": {"label": {"type": "String"}}
+  },
+  "home_simulateEvent": "Simulate: {label}",
+  "@home_simulateEvent": {
+    "placeholders": {"label": {"type": "String"}}
+  },
+  "home_actionExecuted": "Completed: {label}",
+  "@home_actionExecuted": {
+    "placeholders": {"label": {"type": "String"}}
+  },
+  "home_context": "Season {season} · {phase} · Week {week}, day {day}",
+  "@home_context": {
+    "placeholders": {
+      "season": {"type": "int"},
+      "phase": {"type": "String"},
+      "week": {"type": "int"},
+      "day": {"type": "int"}
+    }
+  },
 
   "squad_noTeam": "No player team",
   "squad_sizeLabel": "Squad: {size} / {min}–{max}",
@@ -326,6 +362,19 @@
 
   "finance_noTeam": "No player team",
   "finance_title": "Finance",
+  "finance_dashboardSubtitle": "Salary cap and available funds overview",
+  "finance_capOverview": "Salary cap and payroll",
+  "finance_apronsOverview": "Aprons",
+  "finance_cashOverview": "Club cash",
+  "finance_apronHeadroom": "To first apron: {first}; to second: {second}",
+  "@finance_apronHeadroom": {
+    "placeholders": {
+      "first": {"type": "String"},
+      "second": {"type": "String"}
+    }
+  },
+  "finance_financialHealth": "Financial health",
+  "finance_actions": "Financial actions",
   "finance_payroll": "Payroll",
   "finance_cap": "Salary cap",
   "finance_capSpace": "Cap space",
@@ -418,6 +467,9 @@
   "tactics_attackWidth": "Attack width",
   "tactics_save": "Save tactics",
   "tactics_saved": "Tactics saved",
+  "tactics_autosaving": "Saving tactics…",
+  "tactics_autosaved": "Tactics saved automatically",
+  "tactics_autosaveHint": "Changes are saved automatically",
 
   "inbox_title": "Inbox",
   "inbox_notifications": "Notifications",

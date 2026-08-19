@@ -39,34 +39,67 @@ class PlayerListTile extends StatelessWidget {
   }
 
   Widget _buildTile(BuildContext context) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+    final selectedColor = colors.primaryContainer.withValues(alpha: 0.72);
+    final tileColor = selected ? selectedColor : colors.surfaceContainerHighest;
+
     return Container(
-      color: selected
-          ? Theme.of(
-              context,
-            ).colorScheme.primaryContainer.withValues(alpha: 0.4)
-          : null,
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: selected
-              ? Theme.of(context).colorScheme.primary
-              : null,
-          child: Text(
-            player.position.code,
-            style: const TextStyle(fontSize: 11),
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+      decoration: BoxDecoration(
+        color: tileColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: selected
+              ? colors.primary.withValues(alpha: 0.7)
+              : colors.outlineVariant.withValues(alpha: 0.35),
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        child: ListTile(
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 12,
+            vertical: 4,
           ),
+          leading: CircleAvatar(
+            backgroundColor: selected
+                ? colors.primary
+                : colors.surfaceContainerLow,
+            foregroundColor: selected ? colors.onPrimary : colors.onSurface,
+            child: Text(
+              player.position.code,
+              style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+            ),
+          ),
+          title: Text(
+            player.name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(fontWeight: FontWeight.w600),
+          ),
+          subtitle: Text(
+            '${l10n.stat_ovr}${player.overall().round()} · '
+            '${l10n.stat_form}${player.state.form} · ${_zoneLabel(l10n)}'
+            '${player.state.injured ? ' · ${l10n.squad_injury}' : ''}',
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (player.state.injured)
+                Icon(Icons.healing_outlined, color: colors.error, size: 20),
+              IconButton(
+                tooltip: l10n.playerDetail_title,
+                icon: const Icon(Icons.info_outline),
+                onPressed: () => context.push('/game/player/${player.id}'),
+              ),
+            ],
+          ),
+          onTap: onTap,
         ),
-        title: Text(player.name),
-        subtitle: Text(
-          '${l10n.stat_ovr}${player.overall().round()} '
-          '${l10n.stat_form}${player.state.form} '
-          '${_zoneLabel(l10n)}'
-          '${player.state.injured ? ' ${l10n.squad_injury}' : ''}',
-        ),
-        trailing: IconButton(
-          icon: const Icon(Icons.info_outline),
-          onPressed: () => context.push('/game/player/${player.id}'),
-        ),
-        onTap: onTap,
       ),
     );
   }

@@ -247,7 +247,7 @@ Future<void> _simulateEvent(
       : calendarEventLabel(context, action.calendarEventId!) ?? action.id;
   ScaffoldMessenger.of(
     context,
-  ).showSnackBar(SnackBar(content: Text('Wykonano: $label')));
+  ).showSnackBar(SnackBar(content: Text(l10n.home_actionExecuted(label))));
 }
 
 /// "Symuluj mecz": dociąga kalendarz do dnia meczu gracza i otwiera
@@ -366,7 +366,7 @@ Widget _buildNextActionSection(
       child: FilledButton.icon(
         onPressed: null,
         icon: const Icon(Icons.lock_outline),
-        label: const Text('Odczytaj pilną wiadomość'),
+        label: Text(l10n.home_readUrgent),
       ),
     );
   }
@@ -378,9 +378,17 @@ Widget _buildNextActionSection(
       child: FilledButton.icon(
         onPressed: () => _advanceOneHour(context, ref, l10n),
         icon: const Icon(Icons.schedule),
-        label: Text('Symuluj godzinę · $hour/10'),
+        label: Text(l10n.home_simulateHour(hour)),
       ),
     );
+  }
+
+  String actionLabel(UpcomingAction? upcoming) {
+    if (upcoming == null) return l10n.home_nextEvent;
+    final eventId = upcoming.calendarEventId;
+    return eventId == null
+        ? upcoming.id
+        : calendarEventLabel(context, eventId) ?? upcoming.id;
   }
 
   final actionIsToday =
@@ -390,14 +398,14 @@ Widget _buildNextActionSection(
 
   if (!actionIsToday) {
     final secondaryLabel = switch (action?.kind) {
-      CalendarEventKind.match => 'Symuluj do następnego meczu',
+      CalendarEventKind.match => l10n.home_simulateToNextMatch,
       CalendarEventKind.playerAction ||
       CalendarEventKind.automatic ||
       CalendarEventKind.informational =>
         action != null
-            ? 'Symuluj do: ${calendarEventLabel(context, action.calendarEventId!) ?? action.id}'
-            : 'Symuluj do wydarzenia',
-      null => 'Symuluj do wydarzenia',
+            ? l10n.home_simulateToEvent(actionLabel(action))
+            : l10n.home_simulateUntilEvent,
+      null => l10n.home_simulateUntilEvent,
     };
 
     return Row(
@@ -406,7 +414,7 @@ Widget _buildNextActionSection(
           child: OutlinedButton.icon(
             onPressed: () => _advanceOneDay(context, ref, l10n),
             icon: const Icon(Icons.skip_next_outlined),
-            label: const Text('Symuluj dzień'),
+            label: Text(l10n.home_simulateDay),
             style: OutlinedButton.styleFrom(
               backgroundColor: Theme.of(
                 context,
@@ -435,14 +443,12 @@ Widget _buildNextActionSection(
       child: FilledButton.icon(
         onPressed: () => _simulateMatch(context, ref, l10n),
         icon: const Icon(Icons.sports_soccer),
-        label: const Text('Symuluj mecz'),
+        label: Text(l10n.home_simulateMatch),
       ),
     );
   }
 
-  final label = action.calendarEventId == null
-      ? action.id
-      : calendarEventLabel(context, action.calendarEventId!) ?? action.id;
+  final label = actionLabel(action);
   final goToOnly =
       action.calendarEventId != null &&
       _isGoToOnlyEvent(action.calendarEventId!);
@@ -456,7 +462,7 @@ Widget _buildNextActionSection(
       child: FilledButton.icon(
         onPressed: () => _goToEvent(context, ref, l10n, action),
         icon: const Icon(Icons.event_available_outlined),
-        label: Text('Przejdź do: $label'),
+        label: Text(l10n.home_goToEvent(label)),
       ),
     );
   }
@@ -467,7 +473,7 @@ Widget _buildNextActionSection(
       child: FilledButton.icon(
         onPressed: () => _simulateEvent(context, ref, l10n, action),
         icon: const Icon(Icons.fast_forward),
-        label: Text('Symuluj: $label'),
+        label: Text(l10n.home_simulateEvent(label)),
       ),
     );
   }
@@ -482,14 +488,14 @@ Widget _buildNextActionSection(
               context,
             ).colorScheme.surface.withValues(alpha: 0.85),
           ),
-          child: Text('Przejdź do: $label'),
+          child: Text(l10n.home_goToEvent(label)),
         ),
       ),
       const SizedBox(width: 12),
       Expanded(
         child: FilledButton(
           onPressed: () => _simulateEvent(context, ref, l10n, action),
-          child: Text('Symuluj: $label'),
+          child: Text(l10n.home_simulateEvent(label)),
         ),
       ),
     ],
@@ -663,13 +669,54 @@ class HomeScreen extends ConsumerWidget {
       7,
       (i) => today.add(Duration(days: i)),
     );
+    final playerTeam = league.playerTeam;
+    final teamName = playerTeam?.name ?? l10n.shell_defaultCareerName;
+    final teamInitial = teamName.trim().isEmpty
+        ? '?'
+        : teamName.trim().substring(0, 1).toUpperCase();
+    final seasonContext = l10n.home_context(
+      seasonYear,
+      seasonPhaseLabel(context, league.currentSeason.phase),
+      currentWeek,
+      currentDay,
+    );
 
     return Scaffold(
       body: ScreenBackground(
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            Card(
+              key: const ValueKey('home-dashboard-header'),
+              child: ListTile(
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                leading: CircleAvatar(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                  child: Text(teamInitial),
+                ),
+                title: Text(
+                  teamName,
+                  style: Theme.of(context).textTheme.titleLarge,
+                ),
+                subtitle: Text(seasonContext),
+                trailing: Icon(
+                  Icons.calendar_month_outlined,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              l10n.home_next7days,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
             SizedBox(
+              key: const ValueKey('home-next-seven-days'),
               height: 110,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
@@ -843,6 +890,11 @@ class HomeScreen extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 16),
+            Text(
+              l10n.home_nextActionTitle,
+              style: Theme.of(context).textTheme.titleMedium,
+            ),
+            const SizedBox(height: 8),
             _buildNextActionSection(context, ref, l10n, league, nextAction),
           ],
         ),

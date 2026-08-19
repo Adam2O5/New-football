@@ -647,6 +647,57 @@ class AppLocalizationsPl extends AppLocalizations {
   String get home_simulateUntilNextEvent => 'Do następnego wydarzenia';
 
   @override
+  String get home_nextActionTitle => 'Najbliższa akcja';
+
+  @override
+  String get home_nextEvent => 'wydarzenia';
+
+  @override
+  String get home_readUrgent => 'Odczytaj pilną wiadomość';
+
+  @override
+  String home_simulateHour(int hour) {
+    return 'Symuluj godzinę · $hour/10';
+  }
+
+  @override
+  String get home_simulateToNextMatch => 'Symuluj do następnego meczu';
+
+  @override
+  String get home_simulateUntilEvent => 'Symuluj do wydarzenia';
+
+  @override
+  String home_simulateToEvent(String label) {
+    return 'Symuluj do: $label';
+  }
+
+  @override
+  String get home_simulateDay => 'Symuluj dzień';
+
+  @override
+  String get home_simulateMatch => 'Symuluj mecz';
+
+  @override
+  String home_goToEvent(String label) {
+    return 'Przejdź do: $label';
+  }
+
+  @override
+  String home_simulateEvent(String label) {
+    return 'Symuluj: $label';
+  }
+
+  @override
+  String home_actionExecuted(String label) {
+    return 'Wykonano: $label';
+  }
+
+  @override
+  String home_context(int season, String phase, int week, int day) {
+    return 'Sezon $season · $phase · Tydzień $week, dzień $day';
+  }
+
+  @override
   String get squad_noTeam => 'Brak drużyny gracza';
 
   @override
@@ -802,6 +853,30 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get finance_title => 'Finanse';
+
+  @override
+  String get finance_dashboardSubtitle =>
+      'Podsumowanie salary cap i dostępnych środków';
+
+  @override
+  String get finance_capOverview => 'Salary cap i payroll';
+
+  @override
+  String get finance_apronsOverview => 'Aprony';
+
+  @override
+  String get finance_cashOverview => 'Gotówka klubu';
+
+  @override
+  String finance_apronHeadroom(String first, String second) {
+    return 'Do pierwszego apronu: $first; do drugiego: $second';
+  }
+
+  @override
+  String get finance_financialHealth => 'Kondycja finansowa';
+
+  @override
+  String get finance_actions => 'Akcje finansowe';
 
   @override
   String get finance_payroll => 'Payroll';
@@ -1102,6 +1177,15 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get tactics_saved => 'Zapisano taktykę';
+
+  @override
+  String get tactics_autosaving => 'Zapisywanie taktyki…';
+
+  @override
+  String get tactics_autosaved => 'Taktyka zapisana automatycznie';
+
+  @override
+  String get tactics_autosaveHint => 'Zmiany zapisują się automatycznie';
 
   @override
   String get inbox_title => 'Skrzynka';

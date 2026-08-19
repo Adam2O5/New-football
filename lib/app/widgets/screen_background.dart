@@ -9,12 +9,29 @@ class ScreenBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
     return Stack(
       fit: StackFit.expand,
       children: [
-        Image.asset(
-          'assets/images/new-football-background.png',
-          fit: BoxFit.cover,
+        ExcludeSemantics(
+          child: Image.asset(
+            'assets/images/new-football-background.png',
+            fit: BoxFit.cover,
+          ),
+        ),
+        IgnorePointer(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [
+                  colors.surface.withValues(alpha: 0.76),
+                  colors.surface.withValues(alpha: 0.9),
+                ],
+              ),
+            ),
+          ),
         ),
         child,
       ],
