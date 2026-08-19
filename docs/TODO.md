@@ -3,7 +3,7 @@
 ## UI i UX
 - [ ] Dopracować `StaffScreen` oraz pełny przepływ slotów, ofert i negocjacji sztabu.
 - [ ] Dokończyć UX i weryfikację przepływu `Draft Combine`.
-- [ ] Rozszerzyć testy widgetowe o pozostałe krytyczne ścieżki UI (w szczególności matchday, inbox, trade, kontrakty, draft i walidację składu).
+- [x] Rozszerzyć testy widgetowe o pozostałe krytyczne ścieżki UI (w szczególności matchday, inbox, trade, kontrakty, draft i walidację składu) — zrealizowano w Task 41.
 
 ## AI i walidacja
 - [ ] Domknąć kalibrację AI na 10 sezonach: naprawić accelerated runner, uzyskać raport 17 metryk i powtórzyć smoke test full-fidelity.

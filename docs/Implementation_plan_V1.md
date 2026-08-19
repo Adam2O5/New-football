@@ -1620,23 +1620,28 @@ Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, le
 
 ---
 
-### ⬜ Task 41: Testy widgetów i domknięcie luk pokrycia
+### ✅ Task 41: Testy widgetów i domknięcie luk pokrycia
 
-**Cel:** obecnie 0 testów UI przy 34 ekranach.
+**Cel:** krytyczne ścieżki UI oraz wskazane luki logiki sezonowej są pokryte testami widgetowymi i core.
 
-- [ ] `HomeScreen` — kontekstowe przyciski i obsługa stop reasons
-- [ ] `MatchdayScreen` — pauza, zmiany, symuluj do końca
-- [ ] `InboxScreen` — blokada symulacji przy `urgent`, rozstrzyganie decyzji
-- [ ] `TradeScreen` — walidacja z powodem odrzucenia
-- [ ] `ContractScreen` — rundy negocjacji, tryb godzinowy
-- [ ] `DraftScreen` — wybór prospekta, symulacja do tury
-- [ ] `SquadScreen` — walidacja składu, blokada kontuzjowanych i zawieszonych
-- [ ] Core: `CalendarEventRegistry.nextEvent` z zawinięciem roku
-- [ ] Core: `LeagueStrengthService` — histereza i rozkład tierów
-- [ ] Core: `CohesionService`
-- [ ] Core: odrzucanie niekompatybilnych zapisów
-- [ ] Core: `TradeService.assetValue` dla picków
-- [ ] Core: `MessageService` — digesty, dedup, retencja
+**Testy widgetów** (`test/task41_*.dart`)
+
+- [x] `HomeScreen` — kontekstowe przyciski i obsługa stop reasons
+- [x] `MatchdayScreen` — pauza, zmiany, symuluj do końca
+- [x] `InboxScreen` — blokada symulacji przy `urgent`, rozstrzyganie decyzji
+- [x] `TradeScreen` — walidacja z powodem odrzucenia
+- [x] `ContractScreen` — rundy negocjacji, tryb godzinowy
+- [x] `DraftScreen` — wybór prospekta, symulacja do tury
+- [x] `SquadScreen` — walidacja składu, blokada kontuzjowanych i zawieszonych
+
+**Testy core**
+
+- [x] `CalendarEventRegistry.nextEvent` z zawinięciem roku (`test/calendar_service_test.dart`)
+- [x] `LeagueStrengthService` — histereza i rozkład tierów (`test/task14_team_management_test.dart`)
+- [x] `CohesionService` (`test/task41_core_coverage_test.dart`)
+- [x] Odrzucanie niekompatybilnych zapisów (`test/save_repository_test.dart`, `test/task10_injury_test.dart`)
+- [x] `TradeService.assetValue` dla picków (`test/task41_core_coverage_test.dart`)
+- [x] `MessageService` — digesty, dedup, retencja (`test/task7_message_system_test.dart`, `test/task13_development_test.dart`)
 
 **Demo:** pełny przebieg testów pokrywający ścieżki krytyczne UI oraz logiki sezonowej.
 

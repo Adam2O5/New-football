@@ -804,16 +804,21 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
     bool entersMatchdaySquad(RosterZone zone) =>
         zone == RosterZone.xi || zone == RosterZone.bench;
 
-    if (entersMatchdaySquad(zoneB) && playerA.state.injured) {
+    String unavailableMessage(Player player) =>
+        (player.state.injury?.daysRemaining ?? 0) > 0
+        ? l10n.squad_cannotFieldInjured
+        : l10n.matchday_failurePlayerUnavailable;
+
+    if (entersMatchdaySquad(zoneB) && !playerA.isAvailable) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(l10n.squad_cannotFieldInjured)));
+      ).showSnackBar(SnackBar(content: Text(unavailableMessage(playerA))));
       return;
     }
-    if (entersMatchdaySquad(zoneA) && playerB.state.injured) {
+    if (entersMatchdaySquad(zoneA) && !playerB.isAvailable) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(l10n.squad_cannotFieldInjured)));
+      ).showSnackBar(SnackBar(content: Text(unavailableMessage(playerB))));
       return;
     }
 
