@@ -48,7 +48,11 @@ extension ProspectX on Prospect {
 
   /// Converts prospect → player after draft pick or undrafted FA sign.
   /// Rolls [DevelopmentOutcome] here (hidden while still a prospect).
-  Player toPlayer({required Contract contract, required Random rng}) {
+  Player toPlayer({
+    required Contract contract,
+    required Random rng,
+    int? draftYear,
+  }) {
     final outcome = rollDevelopmentOutcome(determination, rng);
     final player = Player(
       id: id,
@@ -59,6 +63,7 @@ extension ProspectX on Prospect {
       attributes: attributes,
       contract: contract,
       personality: personality,
+      draftYear: draftYear,
       potentialStars: potentialStars,
       heightCm: heightCm,
       optimalRole: optimalRole,
@@ -219,6 +224,7 @@ abstract class SeasonHistory with _$SeasonHistory {
     required List<ConferenceStandings> finalStandings,
     String? championTeamId,
     @Default([]) List<DraftPick> draftPicks,
+    SeasonAwards? awards,
   }) = _SeasonHistory;
 
   factory SeasonHistory.fromJson(Map<String, dynamic> json) =>

@@ -972,7 +972,9 @@ $PlayerEventStateCopyWith<$Res> get eventState {
 /// @nodoc
 mixin _$Player {
 
- String get id; String get name; Position get position; Nationality get nationality; int get age; PlayerAttributes get attributes; Contract get contract; PlayerPersonality get personality; double get potentialStars; int get heightCm; PlayerState get state; PlayerHidden get hidden; List<PlayerSeasonStats> get seasonStats; int get pointValue;/// Optymalna rola taktyczna zawodnika (`player_management.md`).
+ String get id; String get name; Position get position; Nationality get nationality; int get age; PlayerAttributes get attributes; Contract get contract; PlayerPersonality get personality; double get potentialStars; int get heightCm; PlayerState get state; PlayerHidden get hidden; List<PlayerSeasonStats> get seasonStats;/// Draft class provenance used by Rookie of the Year. The value is the
+/// draft year for both drafted and undrafted players from that class.
+ int? get draftYear; int get pointValue;/// Optymalna rola taktyczna zawodnika (`player_management.md`).
 /// Gra w tej roli daje bonus cohesion +2 i `roleFitMult` ×1.03
 /// (`squad_management.md`, `matchday_model.md`).
  AssignedRole get optimalRole;/// Previous overall rating (rounded) captured at season start.
@@ -995,16 +997,16 @@ $PlayerCopyWith<Player> get copyWith => _$PlayerCopyWithImpl<Player>(this as Pla
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Player&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.position, position) || other.position == position)&&(identical(other.nationality, nationality) || other.nationality == nationality)&&(identical(other.age, age) || other.age == age)&&(identical(other.attributes, attributes) || other.attributes == attributes)&&(identical(other.contract, contract) || other.contract == contract)&&(identical(other.personality, personality) || other.personality == personality)&&(identical(other.potentialStars, potentialStars) || other.potentialStars == potentialStars)&&(identical(other.heightCm, heightCm) || other.heightCm == heightCm)&&(identical(other.state, state) || other.state == state)&&(identical(other.hidden, hidden) || other.hidden == hidden)&&const DeepCollectionEquality().equals(other.seasonStats, seasonStats)&&(identical(other.pointValue, pointValue) || other.pointValue == pointValue)&&(identical(other.optimalRole, optimalRole) || other.optimalRole == optimalRole)&&(identical(other.previousOvr, previousOvr) || other.previousOvr == previousOvr)&&(identical(other.seasonStartOvr, seasonStartOvr) || other.seasonStartOvr == seasonStartOvr)&&(identical(other.previousPotential, previousPotential) || other.previousPotential == previousPotential));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Player&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.position, position) || other.position == position)&&(identical(other.nationality, nationality) || other.nationality == nationality)&&(identical(other.age, age) || other.age == age)&&(identical(other.attributes, attributes) || other.attributes == attributes)&&(identical(other.contract, contract) || other.contract == contract)&&(identical(other.personality, personality) || other.personality == personality)&&(identical(other.potentialStars, potentialStars) || other.potentialStars == potentialStars)&&(identical(other.heightCm, heightCm) || other.heightCm == heightCm)&&(identical(other.state, state) || other.state == state)&&(identical(other.hidden, hidden) || other.hidden == hidden)&&const DeepCollectionEquality().equals(other.seasonStats, seasonStats)&&(identical(other.draftYear, draftYear) || other.draftYear == draftYear)&&(identical(other.pointValue, pointValue) || other.pointValue == pointValue)&&(identical(other.optimalRole, optimalRole) || other.optimalRole == optimalRole)&&(identical(other.previousOvr, previousOvr) || other.previousOvr == previousOvr)&&(identical(other.seasonStartOvr, seasonStartOvr) || other.seasonStartOvr == seasonStartOvr)&&(identical(other.previousPotential, previousPotential) || other.previousPotential == previousPotential));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,position,nationality,age,attributes,contract,personality,potentialStars,heightCm,state,hidden,const DeepCollectionEquality().hash(seasonStats),pointValue,optimalRole,previousOvr,seasonStartOvr,previousPotential);
+int get hashCode => Object.hashAll([runtimeType,id,name,position,nationality,age,attributes,contract,personality,potentialStars,heightCm,state,hidden,const DeepCollectionEquality().hash(seasonStats),draftYear,pointValue,optimalRole,previousOvr,seasonStartOvr,previousPotential]);
 
 @override
 String toString() {
-  return 'Player(id: $id, name: $name, position: $position, nationality: $nationality, age: $age, attributes: $attributes, contract: $contract, personality: $personality, potentialStars: $potentialStars, heightCm: $heightCm, state: $state, hidden: $hidden, seasonStats: $seasonStats, pointValue: $pointValue, optimalRole: $optimalRole, previousOvr: $previousOvr, seasonStartOvr: $seasonStartOvr, previousPotential: $previousPotential)';
+  return 'Player(id: $id, name: $name, position: $position, nationality: $nationality, age: $age, attributes: $attributes, contract: $contract, personality: $personality, potentialStars: $potentialStars, heightCm: $heightCm, state: $state, hidden: $hidden, seasonStats: $seasonStats, draftYear: $draftYear, pointValue: $pointValue, optimalRole: $optimalRole, previousOvr: $previousOvr, seasonStartOvr: $seasonStartOvr, previousPotential: $previousPotential)';
 }
 
 
@@ -1015,7 +1017,7 @@ abstract mixin class $PlayerCopyWith<$Res>  {
   factory $PlayerCopyWith(Player value, $Res Function(Player) _then) = _$PlayerCopyWithImpl;
 @useResult
 $Res call({
- String id, String name, Position position, Nationality nationality, int age, PlayerAttributes attributes, Contract contract, PlayerPersonality personality, double potentialStars, int heightCm, PlayerState state, PlayerHidden hidden, List<PlayerSeasonStats> seasonStats, int pointValue, AssignedRole optimalRole, int? previousOvr, double? seasonStartOvr, double? previousPotential
+ String id, String name, Position position, Nationality nationality, int age, PlayerAttributes attributes, Contract contract, PlayerPersonality personality, double potentialStars, int heightCm, PlayerState state, PlayerHidden hidden, List<PlayerSeasonStats> seasonStats, int? draftYear, int pointValue, AssignedRole optimalRole, int? previousOvr, double? seasonStartOvr, double? previousPotential
 });
 
 
@@ -1032,7 +1034,7 @@ class _$PlayerCopyWithImpl<$Res>
 
 /// Create a copy of Player
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? position = null,Object? nationality = null,Object? age = null,Object? attributes = null,Object? contract = null,Object? personality = null,Object? potentialStars = null,Object? heightCm = null,Object? state = null,Object? hidden = null,Object? seasonStats = null,Object? pointValue = null,Object? optimalRole = null,Object? previousOvr = freezed,Object? seasonStartOvr = freezed,Object? previousPotential = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? position = null,Object? nationality = null,Object? age = null,Object? attributes = null,Object? contract = null,Object? personality = null,Object? potentialStars = null,Object? heightCm = null,Object? state = null,Object? hidden = null,Object? seasonStats = null,Object? draftYear = freezed,Object? pointValue = null,Object? optimalRole = null,Object? previousOvr = freezed,Object? seasonStartOvr = freezed,Object? previousPotential = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -1047,7 +1049,8 @@ as double,heightCm: null == heightCm ? _self.heightCm : heightCm // ignore: cast
 as int,state: null == state ? _self.state : state // ignore: cast_nullable_to_non_nullable
 as PlayerState,hidden: null == hidden ? _self.hidden : hidden // ignore: cast_nullable_to_non_nullable
 as PlayerHidden,seasonStats: null == seasonStats ? _self.seasonStats : seasonStats // ignore: cast_nullable_to_non_nullable
-as List<PlayerSeasonStats>,pointValue: null == pointValue ? _self.pointValue : pointValue // ignore: cast_nullable_to_non_nullable
+as List<PlayerSeasonStats>,draftYear: freezed == draftYear ? _self.draftYear : draftYear // ignore: cast_nullable_to_non_nullable
+as int?,pointValue: null == pointValue ? _self.pointValue : pointValue // ignore: cast_nullable_to_non_nullable
 as int,optimalRole: null == optimalRole ? _self.optimalRole : optimalRole // ignore: cast_nullable_to_non_nullable
 as AssignedRole,previousOvr: freezed == previousOvr ? _self.previousOvr : previousOvr // ignore: cast_nullable_to_non_nullable
 as int?,seasonStartOvr: freezed == seasonStartOvr ? _self.seasonStartOvr : seasonStartOvr // ignore: cast_nullable_to_non_nullable
@@ -1182,10 +1185,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  Position position,  Nationality nationality,  int age,  PlayerAttributes attributes,  Contract contract,  PlayerPersonality personality,  double potentialStars,  int heightCm,  PlayerState state,  PlayerHidden hidden,  List<PlayerSeasonStats> seasonStats,  int pointValue,  AssignedRole optimalRole,  int? previousOvr,  double? seasonStartOvr,  double? previousPotential)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  Position position,  Nationality nationality,  int age,  PlayerAttributes attributes,  Contract contract,  PlayerPersonality personality,  double potentialStars,  int heightCm,  PlayerState state,  PlayerHidden hidden,  List<PlayerSeasonStats> seasonStats,  int? draftYear,  int pointValue,  AssignedRole optimalRole,  int? previousOvr,  double? seasonStartOvr,  double? previousPotential)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Player() when $default != null:
-return $default(_that.id,_that.name,_that.position,_that.nationality,_that.age,_that.attributes,_that.contract,_that.personality,_that.potentialStars,_that.heightCm,_that.state,_that.hidden,_that.seasonStats,_that.pointValue,_that.optimalRole,_that.previousOvr,_that.seasonStartOvr,_that.previousPotential);case _:
+return $default(_that.id,_that.name,_that.position,_that.nationality,_that.age,_that.attributes,_that.contract,_that.personality,_that.potentialStars,_that.heightCm,_that.state,_that.hidden,_that.seasonStats,_that.draftYear,_that.pointValue,_that.optimalRole,_that.previousOvr,_that.seasonStartOvr,_that.previousPotential);case _:
   return orElse();
 
 }
@@ -1203,10 +1206,10 @@ return $default(_that.id,_that.name,_that.position,_that.nationality,_that.age,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  Position position,  Nationality nationality,  int age,  PlayerAttributes attributes,  Contract contract,  PlayerPersonality personality,  double potentialStars,  int heightCm,  PlayerState state,  PlayerHidden hidden,  List<PlayerSeasonStats> seasonStats,  int pointValue,  AssignedRole optimalRole,  int? previousOvr,  double? seasonStartOvr,  double? previousPotential)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  Position position,  Nationality nationality,  int age,  PlayerAttributes attributes,  Contract contract,  PlayerPersonality personality,  double potentialStars,  int heightCm,  PlayerState state,  PlayerHidden hidden,  List<PlayerSeasonStats> seasonStats,  int? draftYear,  int pointValue,  AssignedRole optimalRole,  int? previousOvr,  double? seasonStartOvr,  double? previousPotential)  $default,) {final _that = this;
 switch (_that) {
 case _Player():
-return $default(_that.id,_that.name,_that.position,_that.nationality,_that.age,_that.attributes,_that.contract,_that.personality,_that.potentialStars,_that.heightCm,_that.state,_that.hidden,_that.seasonStats,_that.pointValue,_that.optimalRole,_that.previousOvr,_that.seasonStartOvr,_that.previousPotential);case _:
+return $default(_that.id,_that.name,_that.position,_that.nationality,_that.age,_that.attributes,_that.contract,_that.personality,_that.potentialStars,_that.heightCm,_that.state,_that.hidden,_that.seasonStats,_that.draftYear,_that.pointValue,_that.optimalRole,_that.previousOvr,_that.seasonStartOvr,_that.previousPotential);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1223,10 +1226,10 @@ return $default(_that.id,_that.name,_that.position,_that.nationality,_that.age,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  Position position,  Nationality nationality,  int age,  PlayerAttributes attributes,  Contract contract,  PlayerPersonality personality,  double potentialStars,  int heightCm,  PlayerState state,  PlayerHidden hidden,  List<PlayerSeasonStats> seasonStats,  int pointValue,  AssignedRole optimalRole,  int? previousOvr,  double? seasonStartOvr,  double? previousPotential)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  Position position,  Nationality nationality,  int age,  PlayerAttributes attributes,  Contract contract,  PlayerPersonality personality,  double potentialStars,  int heightCm,  PlayerState state,  PlayerHidden hidden,  List<PlayerSeasonStats> seasonStats,  int? draftYear,  int pointValue,  AssignedRole optimalRole,  int? previousOvr,  double? seasonStartOvr,  double? previousPotential)?  $default,) {final _that = this;
 switch (_that) {
 case _Player() when $default != null:
-return $default(_that.id,_that.name,_that.position,_that.nationality,_that.age,_that.attributes,_that.contract,_that.personality,_that.potentialStars,_that.heightCm,_that.state,_that.hidden,_that.seasonStats,_that.pointValue,_that.optimalRole,_that.previousOvr,_that.seasonStartOvr,_that.previousPotential);case _:
+return $default(_that.id,_that.name,_that.position,_that.nationality,_that.age,_that.attributes,_that.contract,_that.personality,_that.potentialStars,_that.heightCm,_that.state,_that.hidden,_that.seasonStats,_that.draftYear,_that.pointValue,_that.optimalRole,_that.previousOvr,_that.seasonStartOvr,_that.previousPotential);case _:
   return null;
 
 }
@@ -1238,7 +1241,7 @@ return $default(_that.id,_that.name,_that.position,_that.nationality,_that.age,_
 @JsonSerializable()
 
 class _Player implements Player {
-  const _Player({required this.id, required this.name, required this.position, required this.nationality, required this.age, required this.attributes, required this.contract, required this.personality, required this.potentialStars, required this.heightCm, required this.state, required this.hidden, final  List<PlayerSeasonStats> seasonStats = const [], this.pointValue = 0, required this.optimalRole, this.previousOvr, this.seasonStartOvr, this.previousPotential}): _seasonStats = seasonStats;
+  const _Player({required this.id, required this.name, required this.position, required this.nationality, required this.age, required this.attributes, required this.contract, required this.personality, required this.potentialStars, required this.heightCm, required this.state, required this.hidden, final  List<PlayerSeasonStats> seasonStats = const [], this.draftYear, this.pointValue = 0, required this.optimalRole, this.previousOvr, this.seasonStartOvr, this.previousPotential}): _seasonStats = seasonStats;
   factory _Player.fromJson(Map<String, dynamic> json) => _$PlayerFromJson(json);
 
 @override final  String id;
@@ -1260,6 +1263,9 @@ class _Player implements Player {
   return EqualUnmodifiableListView(_seasonStats);
 }
 
+/// Draft class provenance used by Rookie of the Year. The value is the
+/// draft year for both drafted and undrafted players from that class.
+@override final  int? draftYear;
 @override@JsonKey() final  int pointValue;
 /// Optymalna rola taktyczna zawodnika (`player_management.md`).
 /// Gra w tej roli daje bonus cohesion +2 i `roleFitMult` ×1.03
@@ -1289,16 +1295,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Player&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.position, position) || other.position == position)&&(identical(other.nationality, nationality) || other.nationality == nationality)&&(identical(other.age, age) || other.age == age)&&(identical(other.attributes, attributes) || other.attributes == attributes)&&(identical(other.contract, contract) || other.contract == contract)&&(identical(other.personality, personality) || other.personality == personality)&&(identical(other.potentialStars, potentialStars) || other.potentialStars == potentialStars)&&(identical(other.heightCm, heightCm) || other.heightCm == heightCm)&&(identical(other.state, state) || other.state == state)&&(identical(other.hidden, hidden) || other.hidden == hidden)&&const DeepCollectionEquality().equals(other._seasonStats, _seasonStats)&&(identical(other.pointValue, pointValue) || other.pointValue == pointValue)&&(identical(other.optimalRole, optimalRole) || other.optimalRole == optimalRole)&&(identical(other.previousOvr, previousOvr) || other.previousOvr == previousOvr)&&(identical(other.seasonStartOvr, seasonStartOvr) || other.seasonStartOvr == seasonStartOvr)&&(identical(other.previousPotential, previousPotential) || other.previousPotential == previousPotential));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Player&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.position, position) || other.position == position)&&(identical(other.nationality, nationality) || other.nationality == nationality)&&(identical(other.age, age) || other.age == age)&&(identical(other.attributes, attributes) || other.attributes == attributes)&&(identical(other.contract, contract) || other.contract == contract)&&(identical(other.personality, personality) || other.personality == personality)&&(identical(other.potentialStars, potentialStars) || other.potentialStars == potentialStars)&&(identical(other.heightCm, heightCm) || other.heightCm == heightCm)&&(identical(other.state, state) || other.state == state)&&(identical(other.hidden, hidden) || other.hidden == hidden)&&const DeepCollectionEquality().equals(other._seasonStats, _seasonStats)&&(identical(other.draftYear, draftYear) || other.draftYear == draftYear)&&(identical(other.pointValue, pointValue) || other.pointValue == pointValue)&&(identical(other.optimalRole, optimalRole) || other.optimalRole == optimalRole)&&(identical(other.previousOvr, previousOvr) || other.previousOvr == previousOvr)&&(identical(other.seasonStartOvr, seasonStartOvr) || other.seasonStartOvr == seasonStartOvr)&&(identical(other.previousPotential, previousPotential) || other.previousPotential == previousPotential));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,position,nationality,age,attributes,contract,personality,potentialStars,heightCm,state,hidden,const DeepCollectionEquality().hash(_seasonStats),pointValue,optimalRole,previousOvr,seasonStartOvr,previousPotential);
+int get hashCode => Object.hashAll([runtimeType,id,name,position,nationality,age,attributes,contract,personality,potentialStars,heightCm,state,hidden,const DeepCollectionEquality().hash(_seasonStats),draftYear,pointValue,optimalRole,previousOvr,seasonStartOvr,previousPotential]);
 
 @override
 String toString() {
-  return 'Player(id: $id, name: $name, position: $position, nationality: $nationality, age: $age, attributes: $attributes, contract: $contract, personality: $personality, potentialStars: $potentialStars, heightCm: $heightCm, state: $state, hidden: $hidden, seasonStats: $seasonStats, pointValue: $pointValue, optimalRole: $optimalRole, previousOvr: $previousOvr, seasonStartOvr: $seasonStartOvr, previousPotential: $previousPotential)';
+  return 'Player(id: $id, name: $name, position: $position, nationality: $nationality, age: $age, attributes: $attributes, contract: $contract, personality: $personality, potentialStars: $potentialStars, heightCm: $heightCm, state: $state, hidden: $hidden, seasonStats: $seasonStats, draftYear: $draftYear, pointValue: $pointValue, optimalRole: $optimalRole, previousOvr: $previousOvr, seasonStartOvr: $seasonStartOvr, previousPotential: $previousPotential)';
 }
 
 
@@ -1309,7 +1315,7 @@ abstract mixin class _$PlayerCopyWith<$Res> implements $PlayerCopyWith<$Res> {
   factory _$PlayerCopyWith(_Player value, $Res Function(_Player) _then) = __$PlayerCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name, Position position, Nationality nationality, int age, PlayerAttributes attributes, Contract contract, PlayerPersonality personality, double potentialStars, int heightCm, PlayerState state, PlayerHidden hidden, List<PlayerSeasonStats> seasonStats, int pointValue, AssignedRole optimalRole, int? previousOvr, double? seasonStartOvr, double? previousPotential
+ String id, String name, Position position, Nationality nationality, int age, PlayerAttributes attributes, Contract contract, PlayerPersonality personality, double potentialStars, int heightCm, PlayerState state, PlayerHidden hidden, List<PlayerSeasonStats> seasonStats, int? draftYear, int pointValue, AssignedRole optimalRole, int? previousOvr, double? seasonStartOvr, double? previousPotential
 });
 
 
@@ -1326,7 +1332,7 @@ class __$PlayerCopyWithImpl<$Res>
 
 /// Create a copy of Player
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? position = null,Object? nationality = null,Object? age = null,Object? attributes = null,Object? contract = null,Object? personality = null,Object? potentialStars = null,Object? heightCm = null,Object? state = null,Object? hidden = null,Object? seasonStats = null,Object? pointValue = null,Object? optimalRole = null,Object? previousOvr = freezed,Object? seasonStartOvr = freezed,Object? previousPotential = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? position = null,Object? nationality = null,Object? age = null,Object? attributes = null,Object? contract = null,Object? personality = null,Object? potentialStars = null,Object? heightCm = null,Object? state = null,Object? hidden = null,Object? seasonStats = null,Object? draftYear = freezed,Object? pointValue = null,Object? optimalRole = null,Object? previousOvr = freezed,Object? seasonStartOvr = freezed,Object? previousPotential = freezed,}) {
   return _then(_Player(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -1341,7 +1347,8 @@ as double,heightCm: null == heightCm ? _self.heightCm : heightCm // ignore: cast
 as int,state: null == state ? _self.state : state // ignore: cast_nullable_to_non_nullable
 as PlayerState,hidden: null == hidden ? _self.hidden : hidden // ignore: cast_nullable_to_non_nullable
 as PlayerHidden,seasonStats: null == seasonStats ? _self._seasonStats : seasonStats // ignore: cast_nullable_to_non_nullable
-as List<PlayerSeasonStats>,pointValue: null == pointValue ? _self.pointValue : pointValue // ignore: cast_nullable_to_non_nullable
+as List<PlayerSeasonStats>,draftYear: freezed == draftYear ? _self.draftYear : draftYear // ignore: cast_nullable_to_non_nullable
+as int?,pointValue: null == pointValue ? _self.pointValue : pointValue // ignore: cast_nullable_to_non_nullable
 as int,optimalRole: null == optimalRole ? _self.optimalRole : optimalRole // ignore: cast_nullable_to_non_nullable
 as AssignedRole,previousOvr: freezed == previousOvr ? _self.previousOvr : previousOvr // ignore: cast_nullable_to_non_nullable
 as int?,seasonStartOvr: freezed == seasonStartOvr ? _self.seasonStartOvr : seasonStartOvr // ignore: cast_nullable_to_non_nullable

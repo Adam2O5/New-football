@@ -778,6 +778,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get standings_seriesInProgress => 'Series in progress';
 
   @override
+  String get standings_extraTime => ' (ET)';
+
+  @override
+  String standings_shootout(int home, int away) {
+    return ' (shootout $home-$away)';
+  }
+
+  @override
   String standings_seriesWinner(String team) {
     return 'Winner: $team';
   }
@@ -3043,6 +3051,94 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get msg_award_body => 'A season award was granted.';
+
+  @override
+  String get msg_award_mvp_title => 'Season MVP';
+
+  @override
+  String msg_award_mvp_body(String playerName) {
+    return '$playerName won the MVP award.';
+  }
+
+  @override
+  String get msg_award_roty_title => 'Rookie of the season';
+
+  @override
+  String msg_award_roty_body(String playerName) {
+    return '$playerName was named rookie of the season.';
+  }
+
+  @override
+  String get msg_award_dpoy_title => 'Defensive player of the season';
+
+  @override
+  String msg_award_dpoy_body(String playerName) {
+    return '$playerName won the defensive player award.';
+  }
+
+  @override
+  String get msg_award_coachOfYear_title => 'Coach of the season';
+
+  @override
+  String msg_award_coachOfYear_body(String teamName) {
+    return '$teamName has the coach of the season.';
+  }
+
+  @override
+  String get msg_award_topScorer_title => 'Top scorer';
+
+  @override
+  String msg_award_topScorer_body(String playerName) {
+    return '$playerName finished as the top scorer.';
+  }
+
+  @override
+  String get msg_award_topAssist_title => 'Top assist provider';
+
+  @override
+  String msg_award_topAssist_body(String playerName) {
+    return '$playerName finished as the top assist provider.';
+  }
+
+  @override
+  String get msg_award_bestGk_title => 'Best goalkeeper';
+
+  @override
+  String msg_award_bestGk_body(String playerName) {
+    return '$playerName was named the season\'s best goalkeeper.';
+  }
+
+  @override
+  String get msg_award_teamOfSeason_title => 'Team of the season';
+
+  @override
+  String msg_award_teamOfSeason_body(String playerName, String slot) {
+    return '$playerName was selected for the $slot position.';
+  }
+
+  @override
+  String get msg_award_champion_title => 'League champion';
+
+  @override
+  String msg_award_champion_body(String teamName) {
+    return '$teamName won the league championship.';
+  }
+
+  @override
+  String get msg_playoffSeeding_title => 'Playoff seeding';
+
+  @override
+  String msg_playoffSeeding_body(String conference) {
+    return '$conference: playoff seeding has been set.';
+  }
+
+  @override
+  String get msg_playInResult_title => 'Play-in result';
+
+  @override
+  String msg_playInResult_body(String conference) {
+    return '$conference: the play-in winners are known.';
+  }
 
   @override
   String get msg_atmosphere_title => 'Team atmosphere';

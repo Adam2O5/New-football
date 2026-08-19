@@ -183,16 +183,27 @@ class _PostseasonTab extends StatelessWidget {
       ? l10n.standings_tabEast
       : l10n.standings_tabWest;
 
-  String _resultLabel(MatchResult result) =>
-      '${_teamName(result.homeTeamId)} ${result.homeGoals}–${result.awayGoals} '
-      '${_teamName(result.awayTeamId)}';
+  String _resultLabel(AppLocalizations l10n, MatchResult result) {
+    final resolution = result.wentToShootout
+        ? l10n.standings_shootout(
+            result.shootoutHomeGoals,
+            result.shootoutAwayGoals,
+          )
+        : result.wentToExtraTime
+        ? l10n.standings_extraTime
+        : '';
+    return '${_teamName(result.homeTeamId)} ${result.homeGoals}–${result.awayGoals} '
+        '${_teamName(result.awayTeamId)}$resolution';
+  }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final season = league.currentSeason;
     final hasPostseason =
-        season.playInResults.isNotEmpty || season.playoffBrackets.isNotEmpty;
+        season.playInResults.isNotEmpty ||
+        season.playInProgress.isNotEmpty ||
+        season.playoffBrackets.isNotEmpty;
 
     if (!hasPostseason) {
       return Center(child: Text(l10n.standings_noPostseasonData));
@@ -206,12 +217,16 @@ class _PostseasonTab extends StatelessWidget {
           style: Theme.of(context).textTheme.titleMedium,
         ),
         const SizedBox(height: 8),
-        if (season.playInResults.isEmpty)
+        if (season.playInResults.isEmpty && season.playInProgress.isEmpty)
           Card(child: ListTile(title: Text(l10n.standings_notStarted)))
-        else
+        else ...[
           ...season.playInResults.map(
             (result) => _playInCard(context, l10n, result),
           ),
+          ...season.playInProgress.map(
+            (progress) => _playInProgressCard(context, l10n, progress),
+          ),
+        ],
         const SizedBox(height: 16),
         Text(
           l10n.standings_playoffs,
@@ -220,10 +235,19 @@ class _PostseasonTab extends StatelessWidget {
         const SizedBox(height: 8),
         if (season.playoffBrackets.isEmpty)
           Card(child: ListTile(title: Text(l10n.standings_notStarted)))
-        else
-          ...season.playoffBrackets.map(
-            (bracket) => _bracketCard(context, l10n, bracket),
+        else ...[
+          ...season.playoffBrackets.asMap().entries.map(
+            (entry) => _bracketCard(
+              context,
+              l10n,
+              entry.value,
+              showLeagueFinal: entry.key ==
+                  season.playoffBrackets.indexWhere(
+                    (bracket) => bracket.leagueFinal != null,
+                  ),
+            ),
           ),
+        ],
         if (season.championTeamId != null) ...[
           const SizedBox(height: 8),
           Card(
@@ -252,17 +276,49 @@ class _PostseasonTab extends StatelessWidget {
           ListTile(
             dense: true,
             title: Text(l10n.standings_match7v8),
-            subtitle: Text(_resultLabel(result.game7v8)),
+            subtitle: Text(_resultLabel(l10n, result.game7v8)),
           ),
           ListTile(
             dense: true,
             title: Text(l10n.standings_match9v10),
-            subtitle: Text(_resultLabel(result.game9v10)),
+            subtitle: Text(_resultLabel(l10n, result.game9v10)),
           ),
           ListTile(
             dense: true,
             title: Text(l10n.standings_playInFinal),
-            subtitle: Text(_resultLabel(result.gameFinal)),
+            subtitle: Text(_resultLabel(l10n, result.gameFinal)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _playInProgressCard(
+    BuildContext context,
+    AppLocalizations l10n,
+    PlayInProgress progress,
+  ) {
+    String label(MatchResult? result) =>
+        result == null ? l10n.standings_notStarted : _resultLabel(l10n, result);
+    return Card(
+      child: ExpansionTile(
+        title: Text(_conferenceName(l10n, progress.conference)),
+        subtitle: Text(l10n.standings_seriesInProgress),
+        children: [
+          ListTile(
+            dense: true,
+            title: Text(l10n.standings_match7v8),
+            subtitle: Text(label(progress.game7v8)),
+          ),
+          ListTile(
+            dense: true,
+            title: Text(l10n.standings_match9v10),
+            subtitle: Text(label(progress.game9v10)),
+          ),
+          ListTile(
+            dense: true,
+            title: Text(l10n.standings_playInFinal),
+            subtitle: Text(label(progress.gameFinal)),
           ),
         ],
       ),
@@ -272,8 +328,9 @@ class _PostseasonTab extends StatelessWidget {
   Widget _bracketCard(
     BuildContext context,
     AppLocalizations l10n,
-    PlayoffBracket bracket,
-  ) {
+    PlayoffBracket bracket, {
+    required bool showLeagueFinal,
+  }) {
     return Card(
       child: ExpansionTile(
         title: Text(_conferenceName(l10n, bracket.conference)),
@@ -285,7 +342,7 @@ class _PostseasonTab extends StatelessWidget {
             bracket.conferenceFinal,
             l10n,
           ),
-          if (bracket.leagueFinal != null)
+          if (showLeagueFinal && bracket.leagueFinal != null)
             _round(l10n.standings_leagueFinal, [bracket.leagueFinal!], l10n),
         ],
       ),

@@ -159,9 +159,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
 
   Map<String, PlayerSeasonStats> _aggregateStats(LeagueState league) {
     final accumulators = <String, _StatsAccumulator>{};
-    for (final match in league.currentSeason.schedule) {
-      final result = match.result;
-      if (result == null) continue;
+    for (final result in _allSeasonResults(league)) {
       for (final stat in result.playerStats) {
         accumulators
             .putIfAbsent(stat.playerId, _StatsAccumulator.new)
@@ -176,9 +174,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
 
   Map<String, TeamMatchStats> _aggregateTeamStats(LeagueState league) {
     final accumulators = <String, _TeamStatsAccumulator>{};
-    for (final match in league.currentSeason.schedule) {
-      final result = match.result;
-      if (result == null) continue;
+    for (final result in _allSeasonResults(league)) {
       accumulators
           .putIfAbsent(
             result.homeStats.teamId,
@@ -196,6 +192,41 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
       for (final entry in accumulators.entries)
         entry.key: entry.value.toStats(),
     };
+  }
+
+  List<MatchResult> _allSeasonResults(LeagueState league) {
+    final results = <MatchResult>[];
+    final seen = <MatchResult>{};
+    void add(MatchResult? result) {
+      if (result != null && seen.add(result)) results.add(result);
+    }
+
+    for (final match in league.currentSeason.schedule) {
+      add(match.result);
+    }
+    for (final progress in league.currentSeason.playInProgress) {
+      add(progress.game7v8);
+      add(progress.game9v10);
+      add(progress.gameFinal);
+    }
+    for (final result in league.currentSeason.playInResults) {
+      add(result.game7v8);
+      add(result.game9v10);
+      add(result.gameFinal);
+    }
+    for (final bracket in league.currentSeason.playoffBrackets) {
+      for (final series in [
+        ...bracket.quarterFinals,
+        ...bracket.semiFinals,
+        ...bracket.conferenceFinal,
+        if (bracket.leagueFinal != null) bracket.leagueFinal!,
+      ]) {
+        for (final result in series.games) {
+          add(result);
+        }
+      }
+    }
+    return results;
   }
 
   Widget _playerCard(

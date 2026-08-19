@@ -189,6 +189,11 @@ abstract class Player with _$Player {
     required PlayerState state,
     required PlayerHidden hidden,
     @Default([]) List<PlayerSeasonStats> seasonStats,
+
+    /// Draft class provenance used by Rookie of the Year. The value is the
+    /// draft year for both drafted and undrafted players from that class.
+    int? draftYear,
+
     @Default(0) int pointValue,
 
     /// Optymalna rola taktyczna zawodnika (`player_management.md`).

@@ -240,12 +240,15 @@ class SeasonService {
         ),
       );
     }
-    return state.copyWith(
-      currentSeason: state.currentSeason.copyWith(
-        phase: SeasonPhase.playIn,
-        playInResults: results,
-        playInProgress: remaining,
+    return _sendPlayInResultMessages(
+      state.copyWith(
+        currentSeason: state.currentSeason.copyWith(
+          phase: SeasonPhase.playIn,
+          playInResults: results,
+          playInProgress: remaining,
+        ),
       ),
+      results,
     );
   }
 
@@ -327,18 +330,88 @@ class SeasonService {
         ),
       );
     }
-    return _msg(
+    return _sendPlayInResultMessages(
       state.copyWith(
         currentSeason: state.currentSeason.copyWith(
           phase: SeasonPhase.playIn,
           playInResults: results,
         ),
       ),
-      MessageType.calendar,
-      'Play-in zakończony',
-      'Znamy 8 drużyn playoff z każdej konferencji.',
-      urgent: true,
+      results,
     );
+  }
+
+  LeagueState _sendPlayInResultMessages(
+    LeagueState league,
+    Iterable<PlayInResult> results,
+  ) {
+    var state = league;
+    for (final result in results) {
+      final playoffTeams = {
+        result.playoffSeed7TeamId,
+        result.playoffSeed8TeamId,
+      };
+      final ownClub = state.playerTeamId != null &&
+          playoffTeams.contains(state.playerTeamId);
+      state = _messages.send(
+        state,
+        type: MessageType.playInResult,
+        domain: MessageDomain.season,
+        args: {
+          'conference': result.conference.name,
+          'seed7': _teamName(state, result.playoffSeed7TeamId),
+          'seed8': _teamName(state, result.playoffSeed8TeamId),
+          'ownClub': ownClub,
+        },
+        payload: {
+          'conference': result.conference.name,
+          'teamId': ownClub ? state.playerTeamId : null,
+          'playoffSeed7TeamId': result.playoffSeed7TeamId,
+          'playoffSeed8TeamId': result.playoffSeed8TeamId,
+          'ownClub': ownClub,
+          'isLeagueMessage': !ownClub,
+        },
+      );
+    }
+    return state;
+  }
+
+  LeagueState _sendPlayoffSeedingMessages(
+    LeagueState league,
+    Iterable<PlayoffBracket> brackets,
+  ) {
+    var state = league;
+    for (final bracket in brackets) {
+      final seededTeams = {
+        for (final series in bracket.quarterFinals) ...[
+          series.higherSeedTeamId,
+          series.lowerSeedTeamId,
+        ],
+      };
+      final ownClub = state.playerTeamId != null &&
+          seededTeams.contains(state.playerTeamId);
+      state = _messages.send(
+        state,
+        type: MessageType.playoffSeeding,
+        domain: MessageDomain.season,
+        args: {
+          'conference': bracket.conference.name,
+          'seed7': seededTeams.isEmpty ? '—' : _teamName(state, seededTeams.first),
+          'seed8': seededTeams.length < 2
+              ? '—'
+              : _teamName(state, seededTeams.elementAt(1)),
+          'ownClub': ownClub,
+        },
+        payload: {
+          'conference': bracket.conference.name,
+          'teamId': ownClub ? state.playerTeamId : null,
+          'seededTeamIds': seededTeams.toList(),
+          'ownClub': ownClub,
+          'isLeagueMessage': !ownClub,
+        },
+      );
+    }
+    return state;
   }
 
   LeagueState setupPlayoffs(LeagueState league) {
@@ -372,11 +445,14 @@ class SeasonService {
         ),
       );
     }
-    return league.copyWith(
-      currentSeason: league.currentSeason.copyWith(
-        phase: SeasonPhase.playoff,
-        playoffBrackets: brackets,
+    return _sendPlayoffSeedingMessages(
+      league.copyWith(
+        currentSeason: league.currentSeason.copyWith(
+          phase: SeasonPhase.playoff,
+          playoffBrackets: brackets,
+        ),
       ),
+      brackets,
     );
   }
 
@@ -494,14 +570,6 @@ class SeasonService {
           );
         }
       }
-      final name = state.teamById(champion)?.name ?? champion;
-      state = _msg(
-        state,
-        MessageType.award,
-        'Mistrz ligi: $name',
-        'Sezon zakończony. Offseason rozpoczyna się w tygodniu 44.',
-        urgent: true,
-      );
       state = teamEvents.afterPlayoffs(state, saveSeed: saveSeed);
     }
     return state;
@@ -608,30 +676,44 @@ class SeasonService {
   }
 
   LeagueState runAwards(LeagueState league) {
+    if (league.currentSeason.awards != null) return league;
+
     final awards = _computeAwards(league);
     var state = league.copyWith(
       currentSeason: league.currentSeason.copyWith(awards: awards),
     );
-    return _msg(
+    state = _sendAwardMessages(state, awards);
+    return _messages.send(
       state,
-      MessageType.award,
-      'Nagrody sezonu',
-      'MVP: ${_playerName(state, awards.mvpPlayerId)}',
-      urgent: true,
+      type: MessageType.seasonSummary,
+      domain: MessageDomain.season,
+      args: {
+        'championTeam': awards.championTeamId == null
+            ? '—'
+            : _teamName(state, awards.championTeamId!),
+        'mvpPlayer': _playerName(state, awards.mvpPlayerId),
+        'playoffTeams': _playoffQualifiedTeamIds(state).length,
+      },
+      payload: {
+        'championTeamId': awards.championTeamId,
+        'mvpPlayerId': awards.mvpPlayerId,
+        'year': awards.year,
+      },
+      dedupKey: 'seasonSummary:${awards.year}',
     );
   }
 
   /// Emerytury (śr tyg. 44): wyłącznie tabela bazowa
   /// `BalanceConfig.retirement.baseChanceForAge(age)`, bez modyfikatorów.
   LeagueState runPlayerRetirements(LeagueState league, {int saveSeed = 0}) {
-    final retired = <String>[];
+    final retired = <({String id, String name, String teamId})>[];
     final teams = league.teams.map((t) {
       final keep = <Player>[];
       final retiredIds = <String>{};
       for (final p in t.roster) {
         final chance = balance.retirement.baseChanceForAge(p.age);
         if (chance > 0 && _random.nextDouble() < chance) {
-          retired.add(p.name);
+          retired.add((id: p.id, name: p.name, teamId: t.id));
           retiredIds.add(p.id);
         } else {
           keep.add(p);
@@ -650,14 +732,54 @@ class SeasonService {
       teams: teams,
       currentSeason: league.currentSeason.copyWith(playerRetirementsDone: true),
     );
-    if (retired.isNotEmpty) {
-      state = _msg(
+
+    for (final record in retired) {
+      if (record.teamId != state.playerTeamId) continue;
+      state = _messages.send(
         state,
-        MessageType.calendar,
-        'Emerytury',
-        'Kariery zakończyli: ${retired.join(', ')}.',
+        type: MessageType.retirementPlayer,
+        domain: MessageDomain.roster,
+        args: {
+          'playerName': record.name,
+          'ownClub': true,
+        },
+        payload: {
+          'playerId': record.id,
+          'teamId': record.teamId,
+          'ownClub': true,
+        },
+        dedupKey: 'retirementPlayer:${state.currentSeason.year}:${record.id}',
       );
     }
+
+    if (retired.isNotEmpty) {
+      state = _messages.send(
+        state,
+        type: MessageType.retirementLeagueDigest,
+        domain: MessageDomain.roster,
+        priority: MessagePriority.silenced,
+        titleKey: 'msg_retirementLeagueDigest_digest_title',
+        bodyKey: 'msg_retirementLeagueDigest_digest_body',
+        args: {
+          'count': retired.length,
+          'week': state.currentWeek,
+        },
+        payload: {
+          'retiredPlayers': [
+            for (final record in retired)
+              {
+                'playerId': record.id,
+                'playerName': record.name,
+                'teamId': record.teamId,
+              },
+          ],
+          'isLeagueMessage': true,
+        },
+        groupKey: 'retire:league:${state.currentWeek}',
+        dedupKey: 'retire:league:${state.currentSeason.year}',
+      );
+    }
+
     return rosterManagement.replenishAfterRetirements(
       state,
       saveSeed: saveSeed,
@@ -900,6 +1022,7 @@ class SeasonService {
               salary: balance.salaryCap.minSalary,
               yearsRemaining: 0,
             ),
+            draftYear: draft.year,
             rng: _random,
           )
           .recalculatePointValue(balance);
@@ -1179,6 +1302,7 @@ class SeasonService {
               isRookieScale: true,
               rookiePickSlot: overallPick,
             ),
+            draftYear: draft.year,
             rng: _random,
           )
           .recalculatePointValue(balance);
@@ -1307,6 +1431,7 @@ class SeasonService {
             isRookieScale: true,
             rookiePickSlot: overallPick,
           ),
+          draftYear: draft.year,
           rng: _random,
         )
         .recalculatePointValue(balance);
@@ -1543,6 +1668,7 @@ class SeasonService {
       finalStandings: league.currentSeason.standings,
       championTeamId: league.currentSeason.championTeamId,
       draftPicks: league.currentSeason.draftState?.completedPicks ?? [],
+      awards: league.currentSeason.awards,
     );
 
     final newYear = league.currentSeason.year + 1;
@@ -1771,7 +1897,7 @@ class SeasonService {
         );
       }
     }
-    final result = _sim(
+    final rawResult = _sim(
       state,
       homeId,
       awayId,
@@ -1779,6 +1905,12 @@ class SeasonService {
       matchId: matchId,
       phase: phase,
       stake: effectiveStake,
+    );
+    final result = _resolvePostseasonTiebreak(
+      rawResult,
+      saveSeed: saveSeed,
+      seasonYear: state.currentSeason.year,
+      matchId: matchId,
     );
     var postseasonState = _applyPostseasonDiscipline(
       state,
@@ -1795,8 +1927,17 @@ class SeasonService {
   }
 
   String _winnerId(MatchResult r, String homeId, String awayId) {
+    final persistedWinner = r.winnerTeamId;
+    if (persistedWinner == homeId || persistedWinner == awayId) {
+      return persistedWinner!;
+    }
+    if (r.wentToShootout &&
+        r.shootoutHomeGoals != r.shootoutAwayGoals) {
+      return r.shootoutHomeGoals > r.shootoutAwayGoals ? homeId : awayId;
+    }
     if (r.homeGoals == r.awayGoals) {
-      return _random.nextBool() ? homeId : awayId;
+      final seed = matchSeed(0, 0, 'legacy-tiebreak:$homeId:$awayId');
+      return seed.isEven ? homeId : awayId;
     }
     return r.homeGoals > r.awayGoals ? homeId : awayId;
   }
@@ -1902,6 +2043,109 @@ class SeasonService {
       stake: stake ?? _stakeForSeries(series),
     );
     return (league: played.league, series: series.recordGame(played.result));
+  }
+
+  MatchResult _resolvePostseasonTiebreak(
+    MatchResult result, {
+    required int saveSeed,
+    required int seasonYear,
+    required String matchId,
+  }) {
+    if (result.homeGoals != result.awayGoals) return result;
+
+    final random = Random(
+      matchSeed(saveSeed, seasonYear, '$matchId:tiebreak'),
+    );
+    final homeId = result.homeTeamId;
+    final awayId = result.awayTeamId;
+
+    // A tied knockout match always reaches extra time. A deterministic
+    // extra-time goal resolves most ties; the remaining ties go to a
+    // deterministic shootout. The regulation score remains separate from
+    // shootout kicks, so player/league statistics do not count penalties as
+    // goals.
+    if (random.nextDouble() < 0.55) {
+      final homeWins = random.nextBool();
+      final homeGoals = result.homeGoals + (homeWins ? 1 : 0);
+      final awayGoals = result.awayGoals + (homeWins ? 0 : 1);
+      final resolved = result.copyWith(
+        homeGoals: homeGoals,
+        awayGoals: awayGoals,
+        homeStats: result.homeStats.copyWith(goals: homeGoals),
+        awayStats: result.awayStats.copyWith(goals: awayGoals),
+        wentToExtraTime: true,
+        winnerTeamId: homeWins ? homeId : awayId,
+        matchEndMinute: 120,
+      );
+      return _attributeExtraTimeGoal(
+        resolved,
+        teamId: homeWins ? homeId : awayId,
+        random: random,
+      );
+    }
+
+    var homeShootout = 3 + random.nextInt(3);
+    var awayShootout = 3 + random.nextInt(3);
+    if (homeShootout == awayShootout) {
+      if (random.nextBool()) {
+        homeShootout++;
+      } else {
+        awayShootout++;
+      }
+    }
+    return result.copyWith(
+      wentToExtraTime: true,
+      wentToShootout: true,
+      shootoutHomeGoals: homeShootout,
+      shootoutAwayGoals: awayShootout,
+      winnerTeamId: homeShootout > awayShootout ? homeId : awayId,
+      matchEndMinute: 120,
+    );
+  }
+
+  MatchResult _attributeExtraTimeGoal(
+    MatchResult result, {
+    required String teamId,
+    required Random random,
+  }) {
+    final teamPlayerIds = teamId == result.homeTeamId
+        ? {
+            ...result.homeLineup.map((player) => player.id),
+            ...result.homeSnapshot.startingXi.map((player) => player.id),
+            ...result.homeSnapshot.bench.map((player) => player.id),
+          }
+        : {
+            ...result.awayLineup.map((player) => player.id),
+            ...result.awaySnapshot.startingXi.map((player) => player.id),
+            ...result.awaySnapshot.bench.map((player) => player.id),
+          };
+    final eligible = result.playerStats
+        .where((stats) => teamPlayerIds.contains(stats.playerId))
+        .toList();
+    if (eligible.isEmpty) return result;
+    final played = eligible.where((stats) => stats.minutes > 0).toList();
+    final scorerPool = played.isEmpty ? eligible : played;
+    final scorer = scorerPool[random.nextInt(scorerPool.length)];
+
+    return result.copyWith(
+      playerStats: [
+        for (final stats in result.playerStats)
+          if (stats.playerId == scorer.playerId)
+            stats.copyWith(goals: stats.goals + 1)
+          else
+            stats,
+      ],
+      events: [
+        ...result.events,
+        MatchEvent(
+          type: MatchEventType.goal,
+          minute: 105,
+          teamId: teamId,
+          playerId: scorer.playerId,
+          description: 'extra_time_goal',
+        ),
+      ],
+    );
   }
 
   LeagueState _applyPostseasonDiscipline(
@@ -2152,26 +2396,596 @@ class SeasonService {
   }
 
   SeasonAwards _computeAwards(LeagueState league) {
-    Player? best;
-    Player? bestYoung;
-    for (final t in league.teams) {
-      for (final p in t.roster) {
-        if (best == null || p.overall(balance) > best.overall(balance)) {
-          best = p;
-        }
-        if (p.age <= 22 &&
-            (bestYoung == null ||
-                p.overall(balance) > bestYoung.overall(balance))) {
-          bestYoung = p;
+    const possibleMinutes = 58 * 90;
+    final playersById = <String, Player>{};
+    final currentTeamByPlayerId = <String, String>{};
+    for (final team in league.teams) {
+      for (final player in team.roster) {
+        playersById[player.id] = player;
+        currentTeamByPlayerId[player.id] = team.id;
+      }
+    }
+
+    final regularResults = league.currentSeason.schedule
+        .map((match) => match.result)
+        .whereType<MatchResult>()
+        .toList();
+    final regularStats = _collectAwardStats(
+      league,
+      regularResults,
+      postseason: false,
+    );
+    final postseasonStats = _collectAwardStats(
+      league,
+      _postseasonResults(league.currentSeason),
+      postseason: true,
+    );
+
+    final candidates = <_AwardCandidate>[];
+    for (final player in playersById.values) {
+      final stats = regularResults.isEmpty
+          ? _AwardStats.fromSeasonStats(
+              player.seasonStats.firstWhere(
+                (item) => item.year == league.currentSeason.year,
+                orElse: () => PlayerSeasonStats(
+                  year: league.currentSeason.year,
+                ),
+              ),
+              player.position,
+            )
+          : (regularStats[player.id] ?? _AwardStats());
+      stats.mergePostseason(postseasonStats[player.id]);
+      candidates.add(
+        _AwardCandidate(
+          player: player,
+          teamId: currentTeamByPlayerId[player.id],
+          stats: stats,
+        ),
+      );
+    }
+
+    final mvpPool = candidates.where(
+      (candidate) => candidate.stats.minutes >= possibleMinutes * 0.40,
+    );
+    final mvp = _bestCandidate(
+      mvpPool,
+      (candidate) => _mvpScore(candidate),
+    );
+
+    final rotyPool = candidates.where(
+      (candidate) =>
+          candidate.player.draftYear == league.currentSeason.year - 1 &&
+          candidate.stats.minutes >= possibleMinutes * 0.25,
+    );
+    final roty = _bestCandidate(
+      rotyPool,
+      (candidate) => _mvpScore(candidate, rookie: true),
+    );
+
+    final dpoyPool = candidates.where(
+      (candidate) => candidate.stats.minutes >= possibleMinutes * 0.40,
+    );
+    final dpoy = _bestDefender(dpoyPool);
+
+    final topScorer = _bestStatCandidate(
+      candidates,
+      (candidate) => candidate.stats.goals,
+      (candidate) => candidate.stats.assists,
+    );
+    final topAssist = _bestStatCandidate(
+      candidates,
+      (candidate) => candidate.stats.assists,
+      (candidate) => candidate.stats.goals,
+    );
+
+    final gkPool = candidates.where(
+      (candidate) => candidate.stats.gkMinutes >= possibleMinutes * 0.40,
+    );
+    final bestGk = _bestGoalkeeper(gkPool);
+
+    final coachTeamId = _coachOfYearTeamId(league);
+    final teamOfSeason = _computeTeamOfSeason(
+      candidates,
+      possibleMinutes: possibleMinutes,
+    );
+
+    final awardedPlayerIds = <String>{
+      if (mvp != null) mvp.player.id,
+      if (roty != null) roty.player.id,
+      if (dpoy != null) dpoy.player.id,
+      if (topScorer != null) topScorer.player.id,
+      if (topAssist != null) topAssist.player.id,
+      if (bestGk != null) bestGk.player.id,
+      ...teamOfSeason.values,
+    };
+    final playerNames = <String, String>{};
+    for (final playerId in awardedPlayerIds) {
+      final player = playersById[playerId];
+      if (player != null) playerNames[playerId] = player.name;
+    }
+
+    return SeasonAwards(
+      year: league.currentSeason.year,
+      mvpPlayerId: mvp?.player.id,
+      rotyPlayerId: roty?.player.id,
+      dpoyPlayerId: dpoy?.player.id,
+      topScorerPlayerId: topScorer?.player.id,
+      topAssistPlayerId: topAssist?.player.id,
+      bestGkPlayerId: bestGk?.player.id,
+      playerNames: playerNames,
+      coachOfYearTeamId: coachTeamId,
+      teamOfSeason: teamOfSeason,
+      championTeamId: league.currentSeason.championTeamId,
+    );
+  }
+
+  LeagueState _sendAwardMessages(LeagueState league, SeasonAwards awards) {
+    var state = league;
+
+    void sendPlayerAward(String kind, String? playerId) {
+      if (playerId == null) return;
+      final teamId = _teamIdForPlayer(state, playerId);
+      state = _messages.send(
+        state,
+        type: MessageType.award,
+        kind: kind,
+        domain: MessageDomain.season,
+        args: {
+          'playerName': _playerName(state, playerId),
+          'teamName': teamId == null ? '—' : _teamName(state, teamId),
+          'ownClub': teamId != null && teamId == state.playerTeamId,
+        },
+        payload: {
+          'playerId': playerId,
+          'teamId': teamId,
+          'ownClub': teamId != null && teamId == state.playerTeamId,
+          'awardYear': awards.year,
+        },
+      );
+    }
+
+    sendPlayerAward('mvp', awards.mvpPlayerId);
+    sendPlayerAward('roty', awards.rotyPlayerId);
+    sendPlayerAward('dpoy', awards.dpoyPlayerId);
+    sendPlayerAward('topScorer', awards.topScorerPlayerId);
+    sendPlayerAward('topAssist', awards.topAssistPlayerId);
+    sendPlayerAward('bestGk', awards.bestGkPlayerId);
+
+    final coachTeamId = awards.coachOfYearTeamId;
+    if (coachTeamId != null) {
+      state = _messages.send(
+        state,
+        type: MessageType.award,
+        kind: 'coachOfYear',
+        domain: MessageDomain.season,
+        args: {
+          'teamName': _teamName(state, coachTeamId),
+          'ownClub': coachTeamId == state.playerTeamId,
+        },
+        payload: {
+          'teamId': coachTeamId,
+          'ownClub': coachTeamId == state.playerTeamId,
+          'awardYear': awards.year,
+        },
+      );
+    }
+
+    if (awards.teamOfSeason.isNotEmpty) {
+      final teamOfSeasonPlayers = awards.teamOfSeason.values.toSet();
+      final teamOfSeasonOwnClub = teamOfSeasonPlayers.any(
+        (playerId) => _teamIdForPlayer(state, playerId) == state.playerTeamId,
+      );
+      state = _messages.send(
+        state,
+        type: MessageType.award,
+        kind: 'teamOfSeason',
+        domain: MessageDomain.season,
+        args: {
+          'playerName': teamOfSeasonPlayers
+              .map((playerId) => _playerName(state, playerId))
+              .join(', '),
+          'slot': '4-3-3',
+          'ownClub': teamOfSeasonOwnClub,
+        },
+        payload: {
+          'teamOfSeason': awards.teamOfSeason,
+          'ownClub': teamOfSeasonOwnClub,
+          'awardYear': awards.year,
+        },
+      );
+    }
+
+    final championTeamId = awards.championTeamId;
+    if (championTeamId == null) return state;
+    return _messages.send(
+      state,
+      type: MessageType.award,
+      kind: 'champion',
+      domain: MessageDomain.season,
+      args: {
+        'teamName': _teamName(state, championTeamId),
+        'ownClub': championTeamId == state.playerTeamId,
+      },
+      payload: {
+        'teamId': championTeamId,
+        'ownClub': championTeamId == state.playerTeamId,
+        'awardYear': awards.year,
+      },
+    );
+  }
+
+  String? _teamIdForPlayer(LeagueState league, String? playerId) {
+    if (playerId == null) return null;
+    for (final team in league.teams) {
+      if (team.roster.any((player) => player.id == playerId)) return team.id;
+    }
+    return null;
+  }
+
+  Map<String, _AwardStats> _collectAwardStats(
+    LeagueState league,
+    Iterable<MatchResult> results, {
+    required bool postseason,
+  }) {
+    final currentPlayers = <String, Player>{};
+    final currentTeamByPlayerId = <String, String>{};
+    for (final team in league.teams) {
+      for (final player in team.roster) {
+        currentPlayers[player.id] = player;
+        currentTeamByPlayerId[player.id] = team.id;
+      }
+    }
+
+    final byPlayer = <String, _AwardStats>{};
+    for (final result in results) {
+      final playerTeamIds = <String, String>{
+        for (final player in [
+          ...result.homeLineup,
+          ...result.homeSnapshot.startingXi,
+        ])
+          player.id: result.homeTeamId,
+        for (final player in [
+          ...result.awayLineup,
+          ...result.awaySnapshot.startingXi,
+        ])
+          player.id: result.awayTeamId,
+      };
+      for (final stat in result.playerStats) {
+        final player = currentPlayers[stat.playerId];
+        if (player == null) continue;
+        final teamId =
+            playerTeamIds[stat.playerId] ?? currentTeamByPlayerId[player.id];
+        if (teamId == null) continue;
+        final isHome = teamId == result.homeTeamId;
+        final scored = isHome ? result.homeGoals : result.awayGoals;
+        final conceded = isHome ? result.awayGoals : result.homeGoals;
+        final teamPoints = scored > conceded
+            ? 3
+            : scored == conceded
+            ? 1
+            : 0;
+        final position = _positionForPlayer(result, stat.playerId, player);
+        final aggregate = byPlayer.putIfAbsent(
+          stat.playerId,
+          _AwardStats.new,
+        );
+        aggregate.addMatch(
+          stat,
+          position: position,
+          teamPoints: teamPoints,
+          conceded: conceded,
+          postseason: postseason,
+        );
+      }
+    }
+    return byPlayer;
+  }
+
+  Position _positionForPlayer(
+    MatchResult result,
+    String playerId,
+    Player player,
+  ) {
+    final homeIndex = result.homeLineup.indexWhere(
+      (candidate) => candidate.id == playerId,
+    );
+    if (homeIndex >= 0 && homeIndex < result.homeLineupPositions.length) {
+      return result.homeLineupPositions[homeIndex];
+    }
+    final awayIndex = result.awayLineup.indexWhere(
+      (candidate) => candidate.id == playerId,
+    );
+    if (awayIndex >= 0 && awayIndex < result.awayLineupPositions.length) {
+      return result.awayLineupPositions[awayIndex];
+    }
+    return player.position;
+  }
+
+  List<MatchResult> _postseasonResults(Season season) {
+    final seen = <MatchResult>{};
+    final results = <MatchResult>[];
+    void add(MatchResult? result) {
+      if (result != null && seen.add(result)) results.add(result);
+    }
+
+    for (final progress in season.playInProgress) {
+      add(progress.game7v8);
+      add(progress.game9v10);
+      add(progress.gameFinal);
+    }
+    for (final result in season.playInResults) {
+      add(result.game7v8);
+      add(result.game9v10);
+      add(result.gameFinal);
+    }
+    for (final bracket in season.playoffBrackets) {
+      for (final series in [
+        ...bracket.quarterFinals,
+        ...bracket.semiFinals,
+        ...bracket.conferenceFinal,
+        if (bracket.leagueFinal != null) bracket.leagueFinal!,
+      ]) {
+        for (final result in series.games) {
+          add(result);
         }
       }
     }
-    return SeasonAwards(
-      year: league.currentSeason.year,
-      mvpPlayerId: best?.id,
-      rotyPlayerId: bestYoung?.id,
-      championTeamId: league.currentSeason.championTeamId,
+    return results;
+  }
+
+  _AwardCandidate? _bestCandidate(
+    Iterable<_AwardCandidate> candidates,
+    double Function(_AwardCandidate) score,
+  ) {
+    _AwardCandidate? best;
+    var bestScore = double.negativeInfinity;
+    for (final candidate in candidates) {
+      final currentScore = score(candidate);
+      if (currentScore > bestScore ||
+          (currentScore == bestScore &&
+              (best == null || candidate.player.id.compareTo(best.player.id) < 0))) {
+        best = candidate;
+        bestScore = currentScore;
+      }
+    }
+    return best;
+  }
+
+  double _mvpScore(
+    _AwardCandidate candidate, {
+    bool rookie = false,
+  }) {
+    final stats = candidate.stats;
+    final teamShare = stats.teamPossiblePointsWhenOn == 0
+        ? 0.0
+        : stats.teamPointsWhenOn / stats.teamPossiblePointsWhenOn;
+    final production = stats.minutes == 0
+        ? 0.0
+        : ((stats.goals + stats.assists) * 90 / stats.minutes / 4)
+              .clamp(0.0, 1.0)
+              .toDouble();
+    final playoffBonus = stats.postseasonMinutes == 0
+        ? 0.0
+        : ((stats.postseasonGoals + stats.postseasonAssists) * 90 /
+                      stats.postseasonMinutes /
+                      4 +
+                  stats.postseasonRatingAvg / 10)
+              .clamp(0.0, 1.0)
+              .toDouble();
+    final overallNorm = ((candidate.player.overall(balance) - 50) / 49)
+        .clamp(0.0, 1.0)
+        .toDouble();
+    final playoffWeight = rookie ? 0.05 : 0.10;
+    return 0.35 * teamShare +
+        0.25 * (stats.ratingAvg / 10).clamp(0.0, 1.0).toDouble() +
+        0.20 * production +
+        playoffWeight * (rookie ? playoffBonus * 0.5 : playoffBonus) +
+        0.10 * overallNorm;
+  }
+
+  _AwardCandidate? _bestDefender(Iterable<_AwardCandidate> pool) {
+    final candidates = pool.toList();
+    if (candidates.isEmpty) return null;
+    final maxDefensiveActions = candidates.fold<int>(
+      0,
+      (max, candidate) => max > candidate.stats.tackles + candidate.stats.interceptions
+          ? max
+          : candidate.stats.tackles + candidate.stats.interceptions,
     );
+    final maxConcededRate = candidates.fold<double>(
+      0.0,
+      (max, candidate) => max > candidate.stats.concededPer90
+          ? max
+          : candidate.stats.concededPer90,
+    );
+    return _bestCandidate(candidates, (candidate) {
+      final stats = candidate.stats;
+      final cleanShare = stats.appearances == 0
+          ? 0.0
+          : stats.cleanSheets / stats.appearances;
+      final actions = maxDefensiveActions == 0
+          ? 0.0
+          : (stats.tackles + stats.interceptions) / maxDefensiveActions;
+      final conceded = maxConcededRate == 0
+          ? 1.0
+          : (1 - stats.concededPer90 / maxConcededRate)
+                .clamp(0.0, 1.0)
+                .toDouble();
+      return 0.40 * (stats.ratingAvg / 10).clamp(0.0, 1.0).toDouble() +
+          0.25 * cleanShare +
+          0.20 * actions +
+          0.15 * conceded;
+    });
+  }
+
+  _AwardCandidate? _bestStatCandidate(
+    Iterable<_AwardCandidate> candidates,
+    int Function(_AwardCandidate) primary,
+    int Function(_AwardCandidate) secondary,
+  ) {
+    final sorted = candidates.where((candidate) => primary(candidate) > 0).toList()
+      ..sort((a, b) {
+        final primaryCompare = primary(b).compareTo(primary(a));
+        if (primaryCompare != 0) return primaryCompare;
+        final minutesCompare = a.stats.minutes.compareTo(b.stats.minutes);
+        if (minutesCompare != 0) return minutesCompare;
+        final secondaryCompare = secondary(b).compareTo(secondary(a));
+        if (secondaryCompare != 0) return secondaryCompare;
+        final ratingCompare = b.stats.ratingAvg.compareTo(a.stats.ratingAvg);
+        if (ratingCompare != 0) return ratingCompare;
+        return a.player.id.compareTo(b.player.id);
+      });
+    return sorted.isEmpty ? null : sorted.first;
+  }
+
+  _AwardCandidate? _bestGoalkeeper(Iterable<_AwardCandidate> pool) {
+    final candidates = pool.toList();
+    if (candidates.isEmpty) return null;
+    final maxCleanSheets = candidates.fold<int>(
+      0,
+      (max, candidate) =>
+          max > candidate.stats.cleanSheets ? max : candidate.stats.cleanSheets,
+    );
+    final maxGoalsPrevented = candidates.fold<double>(
+      0.0,
+      (max, candidate) => max > candidate.stats.goalsPrevented
+          ? max
+          : candidate.stats.goalsPrevented.toDouble(),
+    );
+    return _bestCandidate(candidates, (candidate) {
+      final stats = candidate.stats;
+      final savePct = stats.shotsFaced == 0
+          ? 0.0
+          : stats.saves / stats.shotsFaced;
+      final cleanSheets = maxCleanSheets == 0
+          ? 0.0
+          : stats.cleanSheets / maxCleanSheets;
+      final goalsPrevented = maxGoalsPrevented == 0
+          ? 0.0
+          : stats.goalsPrevented / maxGoalsPrevented;
+      return 0.45 * savePct +
+          0.25 * cleanSheets +
+          0.20 * goalsPrevented +
+          0.10 * (stats.ratingAvg / 10).clamp(0.0, 1.0).toDouble();
+    });
+  }
+
+  Map<TeamOfSeasonSlot, String> _computeTeamOfSeason(
+    Iterable<_AwardCandidate> candidates, {
+    required int possibleMinutes,
+  }) {
+    const slotPositions = <TeamOfSeasonSlot, List<Position>>{
+      TeamOfSeasonSlot.gk: [Position.gk],
+      TeamOfSeasonSlot.lb: [Position.lb, Position.lwb],
+      TeamOfSeasonSlot.cb1: [Position.cb],
+      TeamOfSeasonSlot.cb2: [Position.cb],
+      TeamOfSeasonSlot.rb: [Position.rb, Position.rwb],
+      TeamOfSeasonSlot.mid1: [Position.cdm, Position.cm, Position.cam],
+      TeamOfSeasonSlot.mid2: [Position.cdm, Position.cm, Position.cam],
+      TeamOfSeasonSlot.mid3: [Position.cdm, Position.cm, Position.cam],
+      TeamOfSeasonSlot.lw: [Position.lw],
+      TeamOfSeasonSlot.st: [Position.st],
+      TeamOfSeasonSlot.rw: [Position.rw],
+    };
+    final options = <_TeamOfSeasonOption>[];
+    for (final slot in TeamOfSeasonSlot.values) {
+      final positions = slotPositions[slot]!;
+      for (final candidate in candidates) {
+        final minutes = positions.fold<int>(
+          0,
+          (sum, position) => sum + (candidate.stats.positionMinutes[position] ?? 0),
+        );
+        if (minutes < possibleMinutes * 0.30) continue;
+        final score = _teamOfSeasonScore(candidate, minutes);
+        options.add(
+          _TeamOfSeasonOption(
+            slot: slot,
+            playerId: candidate.player.id,
+            score: score,
+          ),
+        );
+      }
+    }
+    options.sort((a, b) {
+      final score = b.score.compareTo(a.score);
+      if (score != 0) return score;
+      final slot = a.slot.index.compareTo(b.slot.index);
+      if (slot != 0) return slot;
+      return a.playerId.compareTo(b.playerId);
+    });
+
+    final result = <TeamOfSeasonSlot, String>{};
+    final usedPlayers = <String>{};
+    for (final option in options) {
+      if (result.containsKey(option.slot) || usedPlayers.contains(option.playerId)) {
+        continue;
+      }
+      result[option.slot] = option.playerId;
+      usedPlayers.add(option.playerId);
+    }
+    return result;
+  }
+
+  double _teamOfSeasonScore(_AwardCandidate candidate, int minutes) {
+    final stats = candidate.stats;
+    final production = minutes == 0
+        ? 0.0
+        : ((stats.goals + stats.assists) * 90 / minutes / 4)
+              .clamp(0.0, 1.0)
+              .toDouble();
+    final defensive = ((stats.tackles + stats.interceptions) / 40)
+        .clamp(0.0, 1.0)
+        .toDouble();
+    return 0.60 * (stats.ratingAvg / 10).clamp(0.0, 1.0).toDouble() +
+        0.25 * production +
+        0.15 * defensive;
+  }
+
+  String? _coachOfYearTeamId(LeagueState league) {
+    final standings = [
+      for (final conference in league.currentSeason.standings)
+        ...conference.standings,
+    ]..sort((a, b) {
+      final points = b.points.compareTo(a.points);
+      if (points != 0) return points;
+      final difference = b.goalDifference.compareTo(a.goalDifference);
+      if (difference != 0) return difference;
+      final goals = b.goalsFor.compareTo(a.goalsFor);
+      if (goals != 0) return goals;
+      return a.teamId.compareTo(b.teamId);
+    });
+    final finalPositions = <String, int>{
+      for (var index = 0; index < standings.length; index++)
+        standings[index].teamId: index + 1,
+    };
+
+    String? bestTeamId;
+    var bestScore = double.negativeInfinity;
+    var bestPlace = double.negativeInfinity;
+    for (final team in league.teams) {
+      if (team.staff.headCoach == null) continue;
+      final standing = standings.firstWhere(
+        (item) => item.teamId == team.id,
+        orElse: () => Standing(teamId: team.id),
+      );
+      final entry = league.strengthTable?.entryFor(team.id);
+      final expectedRank = entry?.expectedRank ?? 15;
+      final finalPosition = finalPositions[team.id] ?? 30;
+      final placeVsSeed = expectedRank - finalPosition;
+      final winsVsProjected =
+          standing.wins - TeamManagementService.expectedWins(expectedRank);
+      final score = winsVsProjected + placeVsSeed;
+      if (score > bestScore ||
+          (score == bestScore && placeVsSeed > bestPlace) ||
+          (score == bestScore &&
+              placeVsSeed == bestPlace &&
+              (bestTeamId == null || team.id.compareTo(bestTeamId) < 0))) {
+        bestTeamId = team.id;
+        bestScore = score.toDouble();
+        bestPlace = placeVsSeed.toDouble();
+      }
+    }
+    return bestTeamId;
   }
 
   List<LotteryResult> _computeLotteryResults(LeagueState league) {
@@ -2334,4 +3148,136 @@ class SeasonService {
       args: {'_legacyTitle': title, '_legacyBody': body},
     );
   }
+}
+
+
+class _AwardCandidate {
+  const _AwardCandidate({
+    required this.player,
+    required this.teamId,
+    required this.stats,
+  });
+
+  final Player player;
+  final String? teamId;
+  final _AwardStats stats;
+}
+
+class _AwardStats {
+  _AwardStats() : positionMinutes = {};
+
+  _AwardStats.fromSeasonStats(PlayerSeasonStats stats, Position naturalPosition)
+    : minutes = stats.minutes,
+      goals = stats.goals,
+      assists = stats.assists,
+      appearances = stats.appearances,
+      tackles = stats.tackles,
+      interceptions = stats.interceptions,
+      cleanSheets = stats.cleanSheets,
+      saves = stats.saves,
+      shotsFaced = stats.shotsFaced,
+      ratingTotal = stats.ratingAvg * (stats.minutes > 0 ? stats.minutes : 1),
+      ratingWeight = stats.minutes > 0 ? stats.minutes : 1,
+      gkMinutes = naturalPosition == Position.gk ? stats.minutes : 0,
+      goalsPrevented = (stats.shotsFaced - stats.goals).clamp(0, stats.shotsFaced),
+      positionMinutes = {naturalPosition: stats.minutes};
+
+  int minutes = 0;
+  int goals = 0;
+  int assists = 0;
+  int appearances = 0;
+  int tackles = 0;
+  int interceptions = 0;
+  int cleanSheets = 0;
+  int saves = 0;
+  int shotsFaced = 0;
+  int gkMinutes = 0;
+  int goalsPrevented = 0;
+  int goalsConcededWhenOn = 0;
+  int teamPointsWhenOn = 0;
+  int teamPossiblePointsWhenOn = 0;
+  double ratingTotal = 0.0;
+  int ratingWeight = 0;
+  late final Map<Position, int> positionMinutes;
+
+  int postseasonMinutes = 0;
+  int postseasonGoals = 0;
+  int postseasonAssists = 0;
+  double postseasonRatingTotal = 0.0;
+  int postseasonRatingWeight = 0;
+
+  double get ratingAvg => ratingWeight == 0 ? 0.0 : ratingTotal / ratingWeight;
+
+  double get postseasonRatingAvg => postseasonRatingWeight == 0
+      ? 0.0
+      : postseasonRatingTotal / postseasonRatingWeight;
+
+  double get concededPer90 => minutes == 0
+      ? 0.0
+      : goalsConcededWhenOn * 90 / minutes;
+
+  void addMatch(
+    PlayerMatchStats stat, {
+    required Position position,
+    required int teamPoints,
+    required int conceded,
+    required bool postseason,
+  }) {
+    if (postseason) {
+      postseasonMinutes += stat.minutes;
+      postseasonGoals += stat.goals;
+      postseasonAssists += stat.assists;
+      if (stat.minutes > 0) {
+        postseasonRatingTotal += stat.rating * stat.minutes;
+        postseasonRatingWeight += stat.minutes;
+      }
+      return;
+    }
+
+    minutes += stat.minutes;
+    goals += stat.goals;
+    assists += stat.assists;
+    if (stat.minutes > 0) {
+      appearances++;
+      positionMinutes[position] =
+          (positionMinutes[position] ?? 0) + stat.minutes;
+      if (position == Position.gk) gkMinutes += stat.minutes;
+      teamPointsWhenOn += teamPoints;
+      teamPossiblePointsWhenOn += 3;
+      goalsConcededWhenOn += conceded;
+    }
+    tackles += stat.tackles;
+    interceptions += stat.interceptions;
+    cleanSheets +=
+        stat.cleanSheet || (stat.minutes > 0 && conceded == 0) ? 1 : 0;
+    saves += stat.saves;
+    shotsFaced += stat.shotsFaced;
+    goalsPrevented +=
+        (stat.shotsFaced - conceded).clamp(0, stat.shotsFaced);
+    if (stat.minutes > 0) {
+      ratingTotal += stat.rating * stat.minutes;
+      ratingWeight += stat.minutes;
+    }
+  }
+
+  void mergePostseason(_AwardStats? other) {
+    if (other == null) return;
+    postseasonMinutes += other.postseasonMinutes;
+    postseasonGoals += other.postseasonGoals;
+    postseasonAssists += other.postseasonAssists;
+    postseasonRatingTotal += other.postseasonRatingTotal;
+    postseasonRatingWeight += other.postseasonRatingWeight;
+  }
+}
+
+class _TeamOfSeasonOption {
+  const _TeamOfSeasonOption({
+    required this.slot,
+    required this.playerId,
+    required this.score,
+  });
+
+  final TeamOfSeasonSlot slot;
+  final String playerId;
+  final double score;
 }

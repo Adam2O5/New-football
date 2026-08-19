@@ -118,7 +118,7 @@ void main() {
       jsonDecode(jsonEncode(save.toJson())) as Map<String, dynamic>,
     );
     expect(restoredSave.leagueState.freshUndraftedPlayers, hasLength(30));
-    expect(SaveSchema.currentVersion, 21);
+    expect(SaveSchema.currentVersion, 23);
   });
 
   test('weekly deferred-rights policy signs legal AI-owned rights', () {

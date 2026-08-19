@@ -21,7 +21,16 @@ class RewardsScreen extends ConsumerWidget {
         body: Center(child: Text(l10n.rewards_noAwards)),
       );
     }
-    final awards = league.currentSeason.awards;
+    SeasonAwards? awards = league.currentSeason.awards;
+    if (awards == null) {
+      for (final history in league.history.reversed) {
+        final historicalAwards = history.awards;
+        if (historicalAwards == null) continue;
+        awards = historicalAwards;
+        break;
+      }
+    }
+    final awardYear = awards?.year ?? league.currentSeason.year;
     return Scaffold(
       appBar: _appBar(context, l10n),
       body: ScreenBackground(
@@ -29,7 +38,7 @@ class RewardsScreen extends ConsumerWidget {
           padding: const EdgeInsets.all(16),
           children: [
             Text(
-              l10n.draftHistory_season(league.currentSeason.year),
+              l10n.draftHistory_season(awardYear),
               style: Theme.of(context).textTheme.titleMedium,
             ),
             const SizedBox(height: 12),
@@ -61,9 +70,17 @@ class RewardsScreen extends ConsumerWidget {
   ) {
     String playerName(String? id) {
       if (id == null) return l10n.rewards_notAwarded;
+      final historicalName = awards.playerNames[id];
+      if (historicalName != null) return historicalName;
       for (final team in league.teams) {
         final matches = team.roster.where((player) => player.id == id);
         if (matches.isNotEmpty) return matches.first.name;
+      }
+      for (final player in league.freeAgents) {
+        if (player.id == id) return player.name;
+      }
+      for (final right in league.draftedRights) {
+        if (right.player.id == id) return right.player.name;
       }
       return id;
     }

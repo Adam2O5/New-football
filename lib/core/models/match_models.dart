@@ -126,6 +126,15 @@ abstract class MatchResult with _$MatchResult {
     @Default([]) List<MatchDiscipline> disciplines,
     String? manOfTheMatchPlayerId,
     String? inspiredPerformancePlayerId,
+
+    /// Knockout-only resolution persisted separately from regulation goals.
+    /// Shootout scores are not added to [homeGoals]/[awayGoals].
+    @Default(false) bool wentToExtraTime,
+    @Default(false) bool wentToShootout,
+    @Default(0) int shootoutHomeGoals,
+    @Default(0) int shootoutAwayGoals,
+    String? winnerTeamId,
+
     @Default(90) int matchEndMinute,
     @Default(0) int stoppageTime,
   }) = _MatchResult;
@@ -186,7 +195,12 @@ extension PlayoffSeriesX on PlayoffSeries {
   bool get isComplete => winnerTeamId != null;
 
   PlayoffSeries recordGame(MatchResult result) {
-    final higherWon = result.homeTeamId == higherSeedTeamId
+    final resolvedWinner = result.winnerTeamId;
+    final higherWon = resolvedWinner == higherSeedTeamId
+        ? true
+        : resolvedWinner == lowerSeedTeamId
+        ? false
+        : result.homeTeamId == higherSeedTeamId
         ? result.homeGoals > result.awayGoals
         : result.awayGoals > result.homeGoals;
     final newHigherWins = higherWon ? higherSeedWins + 1 : higherSeedWins;

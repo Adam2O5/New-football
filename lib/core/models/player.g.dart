@@ -148,6 +148,7 @@ _Player _$PlayerFromJson(Map<String, dynamic> json) => _Player(
           ?.map((e) => PlayerSeasonStats.fromJson(e as Map<String, dynamic>))
           .toList() ??
       const [],
+  draftYear: (json['draftYear'] as num?)?.toInt(),
   pointValue: (json['pointValue'] as num?)?.toInt() ?? 0,
   optimalRole: AssignedRole.fromJson(
     json['optimalRole'] as Map<String, dynamic>,
@@ -171,6 +172,7 @@ Map<String, dynamic> _$PlayerToJson(_Player instance) => <String, dynamic>{
   'state': instance.state,
   'hidden': instance.hidden,
   'seasonStats': instance.seasonStats,
+  'draftYear': instance.draftYear,
   'pointValue': instance.pointValue,
   'optimalRole': instance.optimalRole,
   'previousOvr': instance.previousOvr,

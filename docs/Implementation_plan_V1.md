@@ -1567,35 +1567,36 @@ Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, le
 
 ## Faza 7 — Domknięcie
 
-### ⬜ Task 39: Warstwa sezonu i nagród
+### ✅ Task 39: Warstwa sezonu i nagród
 
 **Cel:** `offseason.md`, `game_rules.md`, `messages.md` grupa K.
 
-- [ ] MVP z prawdziwych statystyk sezonu
-- [ ] ROTY z całej klasy draftowej poprzedniego roku
-- [ ] DPOY
-- [ ] Coach of the Year z `placeVsPreseasonSeed` = `expectedRank` − pozycja końcowa
-- [ ] Król strzelców
-- [ ] Król asyst
-- [ ] Najlepszy bramkarz
-- [ ] Team of the Season
-- [ ] Mistrz
-- [ ] `seasonsWithTeam` inkrementowane przy starcie offseason
-- [ ] Kara atmosfery za brak playoff wg `teamStatus` (−8 / −12 / −15)
-- [ ] Dogrywka i karne w play-in
-- [ ] Dogrywka i karne w 5. meczu serii BO5
-- [ ] Wiadomości `award` (9 kinds, eskalacja dla własnego klubu)
-- [ ] Wiadomości `playoffSeeding`, `playInResult`, `playoffMissed`, `seasonSummary`
-- [ ] `Playoff` i `Play-In` w `StandingsScreen`
-- [ ] Digest `retire:league:{week44}`
+- [x] MVP z prawdziwych statystyk sezonu
+- [x] ROTY z całej klasy draftowej poprzedniego roku
+- [x] DPOY
+- [x] Coach of the Year z `placeVsPreseasonSeed` = `expectedRank` − pozycja końcowa
+- [x] Król strzelców
+- [x] Król asyst
+- [x] Najlepszy bramkarz
+- [x] Team of the Season
+- [x] Mistrz
+- [x] `seasonsWithTeam` inkrementowane przy starcie offseason
+- [x] Kara atmosfery za brak playoff wg `teamStatus` (−8 / −12 / −15)
+- [x] Dogrywka i karne w play-in
+- [x] Dogrywka i karne w 5. meczu serii BO5
+- [x] Wiadomości `award` (9 kinds, eskalacja dla własnego klubu)
+- [x] Wiadomości `playoffSeeding`, `playInResult`, `playoffMissed`, `seasonSummary`
+- [x] `Playoff` i `Play-In` w `StandingsScreen`
+- [x] Digest `retire:league:{week44}`
 
-**Testy**
-- [ ] Pełna drabinka od play-in do finału z rolloverem
-- [ ] Nagrody zgodne z liderami statystyk
-- [ ] `rolloverSeason` zachowuje historię i inkrementuje staż
-- [ ] Coach of the Year trafia do drużyny z najlepszym `placeVsPreseasonSeed`
+**Testy** (`test/task39_season_service_test.dart`)
+- [x] Pełna datowana drabinka od play-in do jednego logicznego finału ligi
+- [x] Nagrody zgodne z liderami kontrolowanych `MatchResult.playerStats` oraz idempotencja `runAwards`
+- [x] `rolloverSeason` zachowuje historię i inkrementuje staż
+- [x] Coach of the Year trafia do drużyny z najlepszym `placeVsPreseasonSeed`
+- [x] Remisowe mecze knockout są rozstrzygane deterministycznie w dogrywce lub karnych
 
-**Demo:** przejście z sezonu N do N+1 z kompletnym podsumowaniem, wszystkimi nagrodami i drabinką w UI.
+**Demo:** implementacja przejścia z sezonu N do N+1, kompletnego podsumowania, nagród i drabinki w UI jest gotowa; dedykowane scenariusze są pokryte testami Task 39.
 
 ---
 

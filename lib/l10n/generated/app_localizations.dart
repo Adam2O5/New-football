@@ -1562,6 +1562,18 @@ abstract class AppLocalizations {
   /// **'Seria w toku'**
   String get standings_seriesInProgress;
 
+  /// No description provided for @standings_extraTime.
+  ///
+  /// In pl, this message translates to:
+  /// **' (dogrywka)'**
+  String get standings_extraTime;
+
+  /// No description provided for @standings_shootout.
+  ///
+  /// In pl, this message translates to:
+  /// **' (karne {home}-{away})'**
+  String standings_shootout(int home, int away);
+
   /// No description provided for @standings_seriesWinner.
   ///
   /// In pl, this message translates to:
@@ -5637,6 +5649,138 @@ abstract class AppLocalizations {
   /// In pl, this message translates to:
   /// **'Przyznano nagrodę sezonową.'**
   String get msg_award_body;
+
+  /// No description provided for @msg_award_mvp_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'MVP sezonu'**
+  String get msg_award_mvp_title;
+
+  /// No description provided for @msg_award_mvp_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'{playerName} otrzymał nagrodę MVP.'**
+  String msg_award_mvp_body(String playerName);
+
+  /// No description provided for @msg_award_roty_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Debiutant sezonu'**
+  String get msg_award_roty_title;
+
+  /// No description provided for @msg_award_roty_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'{playerName} został debiutantem sezonu.'**
+  String msg_award_roty_body(String playerName);
+
+  /// No description provided for @msg_award_dpoy_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Obrońca sezonu'**
+  String get msg_award_dpoy_title;
+
+  /// No description provided for @msg_award_dpoy_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'{playerName} otrzymał nagrodę dla obrońcy sezonu.'**
+  String msg_award_dpoy_body(String playerName);
+
+  /// No description provided for @msg_award_coachOfYear_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Trener sezonu'**
+  String get msg_award_coachOfYear_title;
+
+  /// No description provided for @msg_award_coachOfYear_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'{teamName} ma najlepszego trenera sezonu.'**
+  String msg_award_coachOfYear_body(String teamName);
+
+  /// No description provided for @msg_award_topScorer_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Król strzelców'**
+  String get msg_award_topScorer_title;
+
+  /// No description provided for @msg_award_topScorer_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'{playerName} został królem strzelców.'**
+  String msg_award_topScorer_body(String playerName);
+
+  /// No description provided for @msg_award_topAssist_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Król asyst'**
+  String get msg_award_topAssist_title;
+
+  /// No description provided for @msg_award_topAssist_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'{playerName} został królem asyst.'**
+  String msg_award_topAssist_body(String playerName);
+
+  /// No description provided for @msg_award_bestGk_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Najlepszy bramkarz'**
+  String get msg_award_bestGk_title;
+
+  /// No description provided for @msg_award_bestGk_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'{playerName} został najlepszym bramkarzem sezonu.'**
+  String msg_award_bestGk_body(String playerName);
+
+  /// No description provided for @msg_award_teamOfSeason_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Drużyna sezonu'**
+  String get msg_award_teamOfSeason_title;
+
+  /// No description provided for @msg_award_teamOfSeason_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'{playerName} został wybrany na pozycję {slot}.'**
+  String msg_award_teamOfSeason_body(String playerName, String slot);
+
+  /// No description provided for @msg_award_champion_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Mistrz ligi'**
+  String get msg_award_champion_title;
+
+  /// No description provided for @msg_award_champion_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'{teamName} zdobył mistrzostwo ligi.'**
+  String msg_award_champion_body(String teamName);
+
+  /// No description provided for @msg_playoffSeeding_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Rozstawienie playoff'**
+  String get msg_playoffSeeding_title;
+
+  /// No description provided for @msg_playoffSeeding_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Konferencja {conference}: rozstawienie playoff zostało ustalone.'**
+  String msg_playoffSeeding_body(String conference);
+
+  /// No description provided for @msg_playInResult_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wynik play-in'**
+  String get msg_playInResult_title;
+
+  /// No description provided for @msg_playInResult_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Konferencja {conference}: zwycięzcy play-in są znani.'**
+  String msg_playInResult_body(String conference);
 
   /// No description provided for @msg_atmosphere_title.
   ///

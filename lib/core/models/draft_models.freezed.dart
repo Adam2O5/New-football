@@ -2665,7 +2665,7 @@ $DraftStateCopyWith<$Res>? get nextDraftState {
 /// @nodoc
 mixin _$SeasonHistory {
 
- int get year; List<ConferenceStandings> get finalStandings; String? get championTeamId; List<DraftPick> get draftPicks;
+ int get year; List<ConferenceStandings> get finalStandings; String? get championTeamId; List<DraftPick> get draftPicks; SeasonAwards? get awards;
 /// Create a copy of SeasonHistory
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -2678,16 +2678,16 @@ $SeasonHistoryCopyWith<SeasonHistory> get copyWith => _$SeasonHistoryCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SeasonHistory&&(identical(other.year, year) || other.year == year)&&const DeepCollectionEquality().equals(other.finalStandings, finalStandings)&&(identical(other.championTeamId, championTeamId) || other.championTeamId == championTeamId)&&const DeepCollectionEquality().equals(other.draftPicks, draftPicks));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SeasonHistory&&(identical(other.year, year) || other.year == year)&&const DeepCollectionEquality().equals(other.finalStandings, finalStandings)&&(identical(other.championTeamId, championTeamId) || other.championTeamId == championTeamId)&&const DeepCollectionEquality().equals(other.draftPicks, draftPicks)&&(identical(other.awards, awards) || other.awards == awards));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,year,const DeepCollectionEquality().hash(finalStandings),championTeamId,const DeepCollectionEquality().hash(draftPicks));
+int get hashCode => Object.hash(runtimeType,year,const DeepCollectionEquality().hash(finalStandings),championTeamId,const DeepCollectionEquality().hash(draftPicks),awards);
 
 @override
 String toString() {
-  return 'SeasonHistory(year: $year, finalStandings: $finalStandings, championTeamId: $championTeamId, draftPicks: $draftPicks)';
+  return 'SeasonHistory(year: $year, finalStandings: $finalStandings, championTeamId: $championTeamId, draftPicks: $draftPicks, awards: $awards)';
 }
 
 
@@ -2698,11 +2698,11 @@ abstract mixin class $SeasonHistoryCopyWith<$Res>  {
   factory $SeasonHistoryCopyWith(SeasonHistory value, $Res Function(SeasonHistory) _then) = _$SeasonHistoryCopyWithImpl;
 @useResult
 $Res call({
- int year, List<ConferenceStandings> finalStandings, String? championTeamId, List<DraftPick> draftPicks
+ int year, List<ConferenceStandings> finalStandings, String? championTeamId, List<DraftPick> draftPicks, SeasonAwards? awards
 });
 
 
-
+$SeasonAwardsCopyWith<$Res>? get awards;
 
 }
 /// @nodoc
@@ -2715,16 +2715,29 @@ class _$SeasonHistoryCopyWithImpl<$Res>
 
 /// Create a copy of SeasonHistory
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? year = null,Object? finalStandings = null,Object? championTeamId = freezed,Object? draftPicks = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? year = null,Object? finalStandings = null,Object? championTeamId = freezed,Object? draftPicks = null,Object? awards = freezed,}) {
   return _then(_self.copyWith(
 year: null == year ? _self.year : year // ignore: cast_nullable_to_non_nullable
 as int,finalStandings: null == finalStandings ? _self.finalStandings : finalStandings // ignore: cast_nullable_to_non_nullable
 as List<ConferenceStandings>,championTeamId: freezed == championTeamId ? _self.championTeamId : championTeamId // ignore: cast_nullable_to_non_nullable
 as String?,draftPicks: null == draftPicks ? _self.draftPicks : draftPicks // ignore: cast_nullable_to_non_nullable
-as List<DraftPick>,
+as List<DraftPick>,awards: freezed == awards ? _self.awards : awards // ignore: cast_nullable_to_non_nullable
+as SeasonAwards?,
   ));
 }
+/// Create a copy of SeasonHistory
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$SeasonAwardsCopyWith<$Res>? get awards {
+    if (_self.awards == null) {
+    return null;
+  }
 
+  return $SeasonAwardsCopyWith<$Res>(_self.awards!, (value) {
+    return _then(_self.copyWith(awards: value));
+  });
+}
 }
 
 
@@ -2806,10 +2819,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int year,  List<ConferenceStandings> finalStandings,  String? championTeamId,  List<DraftPick> draftPicks)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int year,  List<ConferenceStandings> finalStandings,  String? championTeamId,  List<DraftPick> draftPicks,  SeasonAwards? awards)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SeasonHistory() when $default != null:
-return $default(_that.year,_that.finalStandings,_that.championTeamId,_that.draftPicks);case _:
+return $default(_that.year,_that.finalStandings,_that.championTeamId,_that.draftPicks,_that.awards);case _:
   return orElse();
 
 }
@@ -2827,10 +2840,10 @@ return $default(_that.year,_that.finalStandings,_that.championTeamId,_that.draft
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int year,  List<ConferenceStandings> finalStandings,  String? championTeamId,  List<DraftPick> draftPicks)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int year,  List<ConferenceStandings> finalStandings,  String? championTeamId,  List<DraftPick> draftPicks,  SeasonAwards? awards)  $default,) {final _that = this;
 switch (_that) {
 case _SeasonHistory():
-return $default(_that.year,_that.finalStandings,_that.championTeamId,_that.draftPicks);case _:
+return $default(_that.year,_that.finalStandings,_that.championTeamId,_that.draftPicks,_that.awards);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -2847,10 +2860,10 @@ return $default(_that.year,_that.finalStandings,_that.championTeamId,_that.draft
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int year,  List<ConferenceStandings> finalStandings,  String? championTeamId,  List<DraftPick> draftPicks)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int year,  List<ConferenceStandings> finalStandings,  String? championTeamId,  List<DraftPick> draftPicks,  SeasonAwards? awards)?  $default,) {final _that = this;
 switch (_that) {
 case _SeasonHistory() when $default != null:
-return $default(_that.year,_that.finalStandings,_that.championTeamId,_that.draftPicks);case _:
+return $default(_that.year,_that.finalStandings,_that.championTeamId,_that.draftPicks,_that.awards);case _:
   return null;
 
 }
@@ -2862,7 +2875,7 @@ return $default(_that.year,_that.finalStandings,_that.championTeamId,_that.draft
 @JsonSerializable()
 
 class _SeasonHistory implements SeasonHistory {
-  const _SeasonHistory({required this.year, required final  List<ConferenceStandings> finalStandings, this.championTeamId, final  List<DraftPick> draftPicks = const []}): _finalStandings = finalStandings,_draftPicks = draftPicks;
+  const _SeasonHistory({required this.year, required final  List<ConferenceStandings> finalStandings, this.championTeamId, final  List<DraftPick> draftPicks = const [], this.awards}): _finalStandings = finalStandings,_draftPicks = draftPicks;
   factory _SeasonHistory.fromJson(Map<String, dynamic> json) => _$SeasonHistoryFromJson(json);
 
 @override final  int year;
@@ -2881,6 +2894,7 @@ class _SeasonHistory implements SeasonHistory {
   return EqualUnmodifiableListView(_draftPicks);
 }
 
+@override final  SeasonAwards? awards;
 
 /// Create a copy of SeasonHistory
 /// with the given fields replaced by the non-null parameter values.
@@ -2895,16 +2909,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SeasonHistory&&(identical(other.year, year) || other.year == year)&&const DeepCollectionEquality().equals(other._finalStandings, _finalStandings)&&(identical(other.championTeamId, championTeamId) || other.championTeamId == championTeamId)&&const DeepCollectionEquality().equals(other._draftPicks, _draftPicks));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SeasonHistory&&(identical(other.year, year) || other.year == year)&&const DeepCollectionEquality().equals(other._finalStandings, _finalStandings)&&(identical(other.championTeamId, championTeamId) || other.championTeamId == championTeamId)&&const DeepCollectionEquality().equals(other._draftPicks, _draftPicks)&&(identical(other.awards, awards) || other.awards == awards));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,year,const DeepCollectionEquality().hash(_finalStandings),championTeamId,const DeepCollectionEquality().hash(_draftPicks));
+int get hashCode => Object.hash(runtimeType,year,const DeepCollectionEquality().hash(_finalStandings),championTeamId,const DeepCollectionEquality().hash(_draftPicks),awards);
 
 @override
 String toString() {
-  return 'SeasonHistory(year: $year, finalStandings: $finalStandings, championTeamId: $championTeamId, draftPicks: $draftPicks)';
+  return 'SeasonHistory(year: $year, finalStandings: $finalStandings, championTeamId: $championTeamId, draftPicks: $draftPicks, awards: $awards)';
 }
 
 
@@ -2915,11 +2929,11 @@ abstract mixin class _$SeasonHistoryCopyWith<$Res> implements $SeasonHistoryCopy
   factory _$SeasonHistoryCopyWith(_SeasonHistory value, $Res Function(_SeasonHistory) _then) = __$SeasonHistoryCopyWithImpl;
 @override @useResult
 $Res call({
- int year, List<ConferenceStandings> finalStandings, String? championTeamId, List<DraftPick> draftPicks
+ int year, List<ConferenceStandings> finalStandings, String? championTeamId, List<DraftPick> draftPicks, SeasonAwards? awards
 });
 
 
-
+@override $SeasonAwardsCopyWith<$Res>? get awards;
 
 }
 /// @nodoc
@@ -2932,17 +2946,30 @@ class __$SeasonHistoryCopyWithImpl<$Res>
 
 /// Create a copy of SeasonHistory
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? year = null,Object? finalStandings = null,Object? championTeamId = freezed,Object? draftPicks = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? year = null,Object? finalStandings = null,Object? championTeamId = freezed,Object? draftPicks = null,Object? awards = freezed,}) {
   return _then(_SeasonHistory(
 year: null == year ? _self.year : year // ignore: cast_nullable_to_non_nullable
 as int,finalStandings: null == finalStandings ? _self._finalStandings : finalStandings // ignore: cast_nullable_to_non_nullable
 as List<ConferenceStandings>,championTeamId: freezed == championTeamId ? _self.championTeamId : championTeamId // ignore: cast_nullable_to_non_nullable
 as String?,draftPicks: null == draftPicks ? _self._draftPicks : draftPicks // ignore: cast_nullable_to_non_nullable
-as List<DraftPick>,
+as List<DraftPick>,awards: freezed == awards ? _self.awards : awards // ignore: cast_nullable_to_non_nullable
+as SeasonAwards?,
   ));
 }
 
+/// Create a copy of SeasonHistory
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$SeasonAwardsCopyWith<$Res>? get awards {
+    if (_self.awards == null) {
+    return null;
+  }
 
+  return $SeasonAwardsCopyWith<$Res>(_self.awards!, (value) {
+    return _then(_self.copyWith(awards: value));
+  });
+}
 }
 
 // dart format on

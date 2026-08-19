@@ -14,6 +14,7 @@ abstract class SeasonAwards with _$SeasonAwards {
     String? topScorerPlayerId,
     String? topAssistPlayerId,
     String? bestGkPlayerId,
+    @Default({}) Map<String, String> playerNames,
     String? coachOfYearTeamId,
     @Default({}) Map<TeamOfSeasonSlot, String> teamOfSeason,
     String? championTeamId,

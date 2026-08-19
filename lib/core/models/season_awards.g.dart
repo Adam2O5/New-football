@@ -15,6 +15,11 @@ _SeasonAwards _$SeasonAwardsFromJson(Map<String, dynamic> json) =>
       topScorerPlayerId: json['topScorerPlayerId'] as String?,
       topAssistPlayerId: json['topAssistPlayerId'] as String?,
       bestGkPlayerId: json['bestGkPlayerId'] as String?,
+      playerNames:
+          (json['playerNames'] as Map<String, dynamic>?)?.map(
+            (k, e) => MapEntry(k, e as String),
+          ) ??
+          const {},
       coachOfYearTeamId: json['coachOfYearTeamId'] as String?,
       teamOfSeason:
           (json['teamOfSeason'] as Map<String, dynamic>?)?.map(
@@ -36,6 +41,7 @@ Map<String, dynamic> _$SeasonAwardsToJson(_SeasonAwards instance) =>
       'topScorerPlayerId': instance.topScorerPlayerId,
       'topAssistPlayerId': instance.topAssistPlayerId,
       'bestGkPlayerId': instance.bestGkPlayerId,
+      'playerNames': instance.playerNames,
       'coachOfYearTeamId': instance.coachOfYearTeamId,
       'teamOfSeason': instance.teamOfSeason.map(
         (k, e) => MapEntry(_$TeamOfSeasonSlotEnumMap[k]!, e),

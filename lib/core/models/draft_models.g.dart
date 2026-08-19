@@ -348,6 +348,9 @@ _SeasonHistory _$SeasonHistoryFromJson(Map<String, dynamic> json) =>
               ?.map((e) => DraftPick.fromJson(e as Map<String, dynamic>))
               .toList() ??
           const [],
+      awards: json['awards'] == null
+          ? null
+          : SeasonAwards.fromJson(json['awards'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$SeasonHistoryToJson(_SeasonHistory instance) =>
@@ -356,4 +359,5 @@ Map<String, dynamic> _$SeasonHistoryToJson(_SeasonHistory instance) =>
       'finalStandings': instance.finalStandings,
       'championTeamId': instance.championTeamId,
       'draftPicks': instance.draftPicks,
+      'awards': instance.awards,
     };

@@ -270,6 +270,11 @@ _MatchResult _$MatchResultFromJson(Map<String, dynamic> json) => _MatchResult(
       const [],
   manOfTheMatchPlayerId: json['manOfTheMatchPlayerId'] as String?,
   inspiredPerformancePlayerId: json['inspiredPerformancePlayerId'] as String?,
+  wentToExtraTime: json['wentToExtraTime'] as bool? ?? false,
+  wentToShootout: json['wentToShootout'] as bool? ?? false,
+  shootoutHomeGoals: (json['shootoutHomeGoals'] as num?)?.toInt() ?? 0,
+  shootoutAwayGoals: (json['shootoutAwayGoals'] as num?)?.toInt() ?? 0,
+  winnerTeamId: json['winnerTeamId'] as String?,
   matchEndMinute: (json['matchEndMinute'] as num?)?.toInt() ?? 90,
   stoppageTime: (json['stoppageTime'] as num?)?.toInt() ?? 0,
 );
@@ -307,6 +312,11 @@ Map<String, dynamic> _$MatchResultToJson(_MatchResult instance) =>
       'disciplines': instance.disciplines,
       'manOfTheMatchPlayerId': instance.manOfTheMatchPlayerId,
       'inspiredPerformancePlayerId': instance.inspiredPerformancePlayerId,
+      'wentToExtraTime': instance.wentToExtraTime,
+      'wentToShootout': instance.wentToShootout,
+      'shootoutHomeGoals': instance.shootoutHomeGoals,
+      'shootoutAwayGoals': instance.shootoutAwayGoals,
+      'winnerTeamId': instance.winnerTeamId,
       'matchEndMinute': instance.matchEndMinute,
       'stoppageTime': instance.stoppageTime,
     };

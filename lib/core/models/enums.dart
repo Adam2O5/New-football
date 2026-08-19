@@ -336,6 +336,8 @@ enum MessageType {
   teamStatusChange,
   seasonSummary,
   playoffMissed,
+  playoffSeeding,
+  playInResult,
   // System (L)
   calendar,
   system,

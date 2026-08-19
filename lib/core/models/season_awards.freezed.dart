@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SeasonAwards {
 
- int get year; String? get mvpPlayerId; String? get rotyPlayerId; String? get dpoyPlayerId; String? get topScorerPlayerId; String? get topAssistPlayerId; String? get bestGkPlayerId; String? get coachOfYearTeamId; Map<TeamOfSeasonSlot, String> get teamOfSeason; String? get championTeamId;
+ int get year; String? get mvpPlayerId; String? get rotyPlayerId; String? get dpoyPlayerId; String? get topScorerPlayerId; String? get topAssistPlayerId; String? get bestGkPlayerId; Map<String, String> get playerNames; String? get coachOfYearTeamId; Map<TeamOfSeasonSlot, String> get teamOfSeason; String? get championTeamId;
 /// Create a copy of SeasonAwards
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $SeasonAwardsCopyWith<SeasonAwards> get copyWith => _$SeasonAwardsCopyWithImpl<S
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SeasonAwards&&(identical(other.year, year) || other.year == year)&&(identical(other.mvpPlayerId, mvpPlayerId) || other.mvpPlayerId == mvpPlayerId)&&(identical(other.rotyPlayerId, rotyPlayerId) || other.rotyPlayerId == rotyPlayerId)&&(identical(other.dpoyPlayerId, dpoyPlayerId) || other.dpoyPlayerId == dpoyPlayerId)&&(identical(other.topScorerPlayerId, topScorerPlayerId) || other.topScorerPlayerId == topScorerPlayerId)&&(identical(other.topAssistPlayerId, topAssistPlayerId) || other.topAssistPlayerId == topAssistPlayerId)&&(identical(other.bestGkPlayerId, bestGkPlayerId) || other.bestGkPlayerId == bestGkPlayerId)&&(identical(other.coachOfYearTeamId, coachOfYearTeamId) || other.coachOfYearTeamId == coachOfYearTeamId)&&const DeepCollectionEquality().equals(other.teamOfSeason, teamOfSeason)&&(identical(other.championTeamId, championTeamId) || other.championTeamId == championTeamId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SeasonAwards&&(identical(other.year, year) || other.year == year)&&(identical(other.mvpPlayerId, mvpPlayerId) || other.mvpPlayerId == mvpPlayerId)&&(identical(other.rotyPlayerId, rotyPlayerId) || other.rotyPlayerId == rotyPlayerId)&&(identical(other.dpoyPlayerId, dpoyPlayerId) || other.dpoyPlayerId == dpoyPlayerId)&&(identical(other.topScorerPlayerId, topScorerPlayerId) || other.topScorerPlayerId == topScorerPlayerId)&&(identical(other.topAssistPlayerId, topAssistPlayerId) || other.topAssistPlayerId == topAssistPlayerId)&&(identical(other.bestGkPlayerId, bestGkPlayerId) || other.bestGkPlayerId == bestGkPlayerId)&&const DeepCollectionEquality().equals(other.playerNames, playerNames)&&(identical(other.coachOfYearTeamId, coachOfYearTeamId) || other.coachOfYearTeamId == coachOfYearTeamId)&&const DeepCollectionEquality().equals(other.teamOfSeason, teamOfSeason)&&(identical(other.championTeamId, championTeamId) || other.championTeamId == championTeamId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,year,mvpPlayerId,rotyPlayerId,dpoyPlayerId,topScorerPlayerId,topAssistPlayerId,bestGkPlayerId,coachOfYearTeamId,const DeepCollectionEquality().hash(teamOfSeason),championTeamId);
+int get hashCode => Object.hash(runtimeType,year,mvpPlayerId,rotyPlayerId,dpoyPlayerId,topScorerPlayerId,topAssistPlayerId,bestGkPlayerId,const DeepCollectionEquality().hash(playerNames),coachOfYearTeamId,const DeepCollectionEquality().hash(teamOfSeason),championTeamId);
 
 @override
 String toString() {
-  return 'SeasonAwards(year: $year, mvpPlayerId: $mvpPlayerId, rotyPlayerId: $rotyPlayerId, dpoyPlayerId: $dpoyPlayerId, topScorerPlayerId: $topScorerPlayerId, topAssistPlayerId: $topAssistPlayerId, bestGkPlayerId: $bestGkPlayerId, coachOfYearTeamId: $coachOfYearTeamId, teamOfSeason: $teamOfSeason, championTeamId: $championTeamId)';
+  return 'SeasonAwards(year: $year, mvpPlayerId: $mvpPlayerId, rotyPlayerId: $rotyPlayerId, dpoyPlayerId: $dpoyPlayerId, topScorerPlayerId: $topScorerPlayerId, topAssistPlayerId: $topAssistPlayerId, bestGkPlayerId: $bestGkPlayerId, playerNames: $playerNames, coachOfYearTeamId: $coachOfYearTeamId, teamOfSeason: $teamOfSeason, championTeamId: $championTeamId)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $SeasonAwardsCopyWith<$Res>  {
   factory $SeasonAwardsCopyWith(SeasonAwards value, $Res Function(SeasonAwards) _then) = _$SeasonAwardsCopyWithImpl;
 @useResult
 $Res call({
- int year, String? mvpPlayerId, String? rotyPlayerId, String? dpoyPlayerId, String? topScorerPlayerId, String? topAssistPlayerId, String? bestGkPlayerId, String? coachOfYearTeamId, Map<TeamOfSeasonSlot, String> teamOfSeason, String? championTeamId
+ int year, String? mvpPlayerId, String? rotyPlayerId, String? dpoyPlayerId, String? topScorerPlayerId, String? topAssistPlayerId, String? bestGkPlayerId, Map<String, String> playerNames, String? coachOfYearTeamId, Map<TeamOfSeasonSlot, String> teamOfSeason, String? championTeamId
 });
 
 
@@ -65,7 +65,7 @@ class _$SeasonAwardsCopyWithImpl<$Res>
 
 /// Create a copy of SeasonAwards
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? year = null,Object? mvpPlayerId = freezed,Object? rotyPlayerId = freezed,Object? dpoyPlayerId = freezed,Object? topScorerPlayerId = freezed,Object? topAssistPlayerId = freezed,Object? bestGkPlayerId = freezed,Object? coachOfYearTeamId = freezed,Object? teamOfSeason = null,Object? championTeamId = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? year = null,Object? mvpPlayerId = freezed,Object? rotyPlayerId = freezed,Object? dpoyPlayerId = freezed,Object? topScorerPlayerId = freezed,Object? topAssistPlayerId = freezed,Object? bestGkPlayerId = freezed,Object? playerNames = null,Object? coachOfYearTeamId = freezed,Object? teamOfSeason = null,Object? championTeamId = freezed,}) {
   return _then(_self.copyWith(
 year: null == year ? _self.year : year // ignore: cast_nullable_to_non_nullable
 as int,mvpPlayerId: freezed == mvpPlayerId ? _self.mvpPlayerId : mvpPlayerId // ignore: cast_nullable_to_non_nullable
@@ -74,7 +74,8 @@ as String?,dpoyPlayerId: freezed == dpoyPlayerId ? _self.dpoyPlayerId : dpoyPlay
 as String?,topScorerPlayerId: freezed == topScorerPlayerId ? _self.topScorerPlayerId : topScorerPlayerId // ignore: cast_nullable_to_non_nullable
 as String?,topAssistPlayerId: freezed == topAssistPlayerId ? _self.topAssistPlayerId : topAssistPlayerId // ignore: cast_nullable_to_non_nullable
 as String?,bestGkPlayerId: freezed == bestGkPlayerId ? _self.bestGkPlayerId : bestGkPlayerId // ignore: cast_nullable_to_non_nullable
-as String?,coachOfYearTeamId: freezed == coachOfYearTeamId ? _self.coachOfYearTeamId : coachOfYearTeamId // ignore: cast_nullable_to_non_nullable
+as String?,playerNames: null == playerNames ? _self.playerNames : playerNames // ignore: cast_nullable_to_non_nullable
+as Map<String, String>,coachOfYearTeamId: freezed == coachOfYearTeamId ? _self.coachOfYearTeamId : coachOfYearTeamId // ignore: cast_nullable_to_non_nullable
 as String?,teamOfSeason: null == teamOfSeason ? _self.teamOfSeason : teamOfSeason // ignore: cast_nullable_to_non_nullable
 as Map<TeamOfSeasonSlot, String>,championTeamId: freezed == championTeamId ? _self.championTeamId : championTeamId // ignore: cast_nullable_to_non_nullable
 as String?,
@@ -162,10 +163,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int year,  String? mvpPlayerId,  String? rotyPlayerId,  String? dpoyPlayerId,  String? topScorerPlayerId,  String? topAssistPlayerId,  String? bestGkPlayerId,  String? coachOfYearTeamId,  Map<TeamOfSeasonSlot, String> teamOfSeason,  String? championTeamId)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int year,  String? mvpPlayerId,  String? rotyPlayerId,  String? dpoyPlayerId,  String? topScorerPlayerId,  String? topAssistPlayerId,  String? bestGkPlayerId,  Map<String, String> playerNames,  String? coachOfYearTeamId,  Map<TeamOfSeasonSlot, String> teamOfSeason,  String? championTeamId)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SeasonAwards() when $default != null:
-return $default(_that.year,_that.mvpPlayerId,_that.rotyPlayerId,_that.dpoyPlayerId,_that.topScorerPlayerId,_that.topAssistPlayerId,_that.bestGkPlayerId,_that.coachOfYearTeamId,_that.teamOfSeason,_that.championTeamId);case _:
+return $default(_that.year,_that.mvpPlayerId,_that.rotyPlayerId,_that.dpoyPlayerId,_that.topScorerPlayerId,_that.topAssistPlayerId,_that.bestGkPlayerId,_that.playerNames,_that.coachOfYearTeamId,_that.teamOfSeason,_that.championTeamId);case _:
   return orElse();
 
 }
@@ -183,10 +184,10 @@ return $default(_that.year,_that.mvpPlayerId,_that.rotyPlayerId,_that.dpoyPlayer
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int year,  String? mvpPlayerId,  String? rotyPlayerId,  String? dpoyPlayerId,  String? topScorerPlayerId,  String? topAssistPlayerId,  String? bestGkPlayerId,  String? coachOfYearTeamId,  Map<TeamOfSeasonSlot, String> teamOfSeason,  String? championTeamId)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int year,  String? mvpPlayerId,  String? rotyPlayerId,  String? dpoyPlayerId,  String? topScorerPlayerId,  String? topAssistPlayerId,  String? bestGkPlayerId,  Map<String, String> playerNames,  String? coachOfYearTeamId,  Map<TeamOfSeasonSlot, String> teamOfSeason,  String? championTeamId)  $default,) {final _that = this;
 switch (_that) {
 case _SeasonAwards():
-return $default(_that.year,_that.mvpPlayerId,_that.rotyPlayerId,_that.dpoyPlayerId,_that.topScorerPlayerId,_that.topAssistPlayerId,_that.bestGkPlayerId,_that.coachOfYearTeamId,_that.teamOfSeason,_that.championTeamId);case _:
+return $default(_that.year,_that.mvpPlayerId,_that.rotyPlayerId,_that.dpoyPlayerId,_that.topScorerPlayerId,_that.topAssistPlayerId,_that.bestGkPlayerId,_that.playerNames,_that.coachOfYearTeamId,_that.teamOfSeason,_that.championTeamId);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -203,10 +204,10 @@ return $default(_that.year,_that.mvpPlayerId,_that.rotyPlayerId,_that.dpoyPlayer
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int year,  String? mvpPlayerId,  String? rotyPlayerId,  String? dpoyPlayerId,  String? topScorerPlayerId,  String? topAssistPlayerId,  String? bestGkPlayerId,  String? coachOfYearTeamId,  Map<TeamOfSeasonSlot, String> teamOfSeason,  String? championTeamId)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int year,  String? mvpPlayerId,  String? rotyPlayerId,  String? dpoyPlayerId,  String? topScorerPlayerId,  String? topAssistPlayerId,  String? bestGkPlayerId,  Map<String, String> playerNames,  String? coachOfYearTeamId,  Map<TeamOfSeasonSlot, String> teamOfSeason,  String? championTeamId)?  $default,) {final _that = this;
 switch (_that) {
 case _SeasonAwards() when $default != null:
-return $default(_that.year,_that.mvpPlayerId,_that.rotyPlayerId,_that.dpoyPlayerId,_that.topScorerPlayerId,_that.topAssistPlayerId,_that.bestGkPlayerId,_that.coachOfYearTeamId,_that.teamOfSeason,_that.championTeamId);case _:
+return $default(_that.year,_that.mvpPlayerId,_that.rotyPlayerId,_that.dpoyPlayerId,_that.topScorerPlayerId,_that.topAssistPlayerId,_that.bestGkPlayerId,_that.playerNames,_that.coachOfYearTeamId,_that.teamOfSeason,_that.championTeamId);case _:
   return null;
 
 }
@@ -218,7 +219,7 @@ return $default(_that.year,_that.mvpPlayerId,_that.rotyPlayerId,_that.dpoyPlayer
 @JsonSerializable()
 
 class _SeasonAwards implements SeasonAwards {
-  const _SeasonAwards({required this.year, this.mvpPlayerId, this.rotyPlayerId, this.dpoyPlayerId, this.topScorerPlayerId, this.topAssistPlayerId, this.bestGkPlayerId, this.coachOfYearTeamId, final  Map<TeamOfSeasonSlot, String> teamOfSeason = const {}, this.championTeamId}): _teamOfSeason = teamOfSeason;
+  const _SeasonAwards({required this.year, this.mvpPlayerId, this.rotyPlayerId, this.dpoyPlayerId, this.topScorerPlayerId, this.topAssistPlayerId, this.bestGkPlayerId, final  Map<String, String> playerNames = const {}, this.coachOfYearTeamId, final  Map<TeamOfSeasonSlot, String> teamOfSeason = const {}, this.championTeamId}): _playerNames = playerNames,_teamOfSeason = teamOfSeason;
   factory _SeasonAwards.fromJson(Map<String, dynamic> json) => _$SeasonAwardsFromJson(json);
 
 @override final  int year;
@@ -228,6 +229,13 @@ class _SeasonAwards implements SeasonAwards {
 @override final  String? topScorerPlayerId;
 @override final  String? topAssistPlayerId;
 @override final  String? bestGkPlayerId;
+ final  Map<String, String> _playerNames;
+@override@JsonKey() Map<String, String> get playerNames {
+  if (_playerNames is EqualUnmodifiableMapView) return _playerNames;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_playerNames);
+}
+
 @override final  String? coachOfYearTeamId;
  final  Map<TeamOfSeasonSlot, String> _teamOfSeason;
 @override@JsonKey() Map<TeamOfSeasonSlot, String> get teamOfSeason {
@@ -251,16 +259,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SeasonAwards&&(identical(other.year, year) || other.year == year)&&(identical(other.mvpPlayerId, mvpPlayerId) || other.mvpPlayerId == mvpPlayerId)&&(identical(other.rotyPlayerId, rotyPlayerId) || other.rotyPlayerId == rotyPlayerId)&&(identical(other.dpoyPlayerId, dpoyPlayerId) || other.dpoyPlayerId == dpoyPlayerId)&&(identical(other.topScorerPlayerId, topScorerPlayerId) || other.topScorerPlayerId == topScorerPlayerId)&&(identical(other.topAssistPlayerId, topAssistPlayerId) || other.topAssistPlayerId == topAssistPlayerId)&&(identical(other.bestGkPlayerId, bestGkPlayerId) || other.bestGkPlayerId == bestGkPlayerId)&&(identical(other.coachOfYearTeamId, coachOfYearTeamId) || other.coachOfYearTeamId == coachOfYearTeamId)&&const DeepCollectionEquality().equals(other._teamOfSeason, _teamOfSeason)&&(identical(other.championTeamId, championTeamId) || other.championTeamId == championTeamId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SeasonAwards&&(identical(other.year, year) || other.year == year)&&(identical(other.mvpPlayerId, mvpPlayerId) || other.mvpPlayerId == mvpPlayerId)&&(identical(other.rotyPlayerId, rotyPlayerId) || other.rotyPlayerId == rotyPlayerId)&&(identical(other.dpoyPlayerId, dpoyPlayerId) || other.dpoyPlayerId == dpoyPlayerId)&&(identical(other.topScorerPlayerId, topScorerPlayerId) || other.topScorerPlayerId == topScorerPlayerId)&&(identical(other.topAssistPlayerId, topAssistPlayerId) || other.topAssistPlayerId == topAssistPlayerId)&&(identical(other.bestGkPlayerId, bestGkPlayerId) || other.bestGkPlayerId == bestGkPlayerId)&&const DeepCollectionEquality().equals(other._playerNames, _playerNames)&&(identical(other.coachOfYearTeamId, coachOfYearTeamId) || other.coachOfYearTeamId == coachOfYearTeamId)&&const DeepCollectionEquality().equals(other._teamOfSeason, _teamOfSeason)&&(identical(other.championTeamId, championTeamId) || other.championTeamId == championTeamId));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,year,mvpPlayerId,rotyPlayerId,dpoyPlayerId,topScorerPlayerId,topAssistPlayerId,bestGkPlayerId,coachOfYearTeamId,const DeepCollectionEquality().hash(_teamOfSeason),championTeamId);
+int get hashCode => Object.hash(runtimeType,year,mvpPlayerId,rotyPlayerId,dpoyPlayerId,topScorerPlayerId,topAssistPlayerId,bestGkPlayerId,const DeepCollectionEquality().hash(_playerNames),coachOfYearTeamId,const DeepCollectionEquality().hash(_teamOfSeason),championTeamId);
 
 @override
 String toString() {
-  return 'SeasonAwards(year: $year, mvpPlayerId: $mvpPlayerId, rotyPlayerId: $rotyPlayerId, dpoyPlayerId: $dpoyPlayerId, topScorerPlayerId: $topScorerPlayerId, topAssistPlayerId: $topAssistPlayerId, bestGkPlayerId: $bestGkPlayerId, coachOfYearTeamId: $coachOfYearTeamId, teamOfSeason: $teamOfSeason, championTeamId: $championTeamId)';
+  return 'SeasonAwards(year: $year, mvpPlayerId: $mvpPlayerId, rotyPlayerId: $rotyPlayerId, dpoyPlayerId: $dpoyPlayerId, topScorerPlayerId: $topScorerPlayerId, topAssistPlayerId: $topAssistPlayerId, bestGkPlayerId: $bestGkPlayerId, playerNames: $playerNames, coachOfYearTeamId: $coachOfYearTeamId, teamOfSeason: $teamOfSeason, championTeamId: $championTeamId)';
 }
 
 
@@ -271,7 +279,7 @@ abstract mixin class _$SeasonAwardsCopyWith<$Res> implements $SeasonAwardsCopyWi
   factory _$SeasonAwardsCopyWith(_SeasonAwards value, $Res Function(_SeasonAwards) _then) = __$SeasonAwardsCopyWithImpl;
 @override @useResult
 $Res call({
- int year, String? mvpPlayerId, String? rotyPlayerId, String? dpoyPlayerId, String? topScorerPlayerId, String? topAssistPlayerId, String? bestGkPlayerId, String? coachOfYearTeamId, Map<TeamOfSeasonSlot, String> teamOfSeason, String? championTeamId
+ int year, String? mvpPlayerId, String? rotyPlayerId, String? dpoyPlayerId, String? topScorerPlayerId, String? topAssistPlayerId, String? bestGkPlayerId, Map<String, String> playerNames, String? coachOfYearTeamId, Map<TeamOfSeasonSlot, String> teamOfSeason, String? championTeamId
 });
 
 
@@ -288,7 +296,7 @@ class __$SeasonAwardsCopyWithImpl<$Res>
 
 /// Create a copy of SeasonAwards
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? year = null,Object? mvpPlayerId = freezed,Object? rotyPlayerId = freezed,Object? dpoyPlayerId = freezed,Object? topScorerPlayerId = freezed,Object? topAssistPlayerId = freezed,Object? bestGkPlayerId = freezed,Object? coachOfYearTeamId = freezed,Object? teamOfSeason = null,Object? championTeamId = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? year = null,Object? mvpPlayerId = freezed,Object? rotyPlayerId = freezed,Object? dpoyPlayerId = freezed,Object? topScorerPlayerId = freezed,Object? topAssistPlayerId = freezed,Object? bestGkPlayerId = freezed,Object? playerNames = null,Object? coachOfYearTeamId = freezed,Object? teamOfSeason = null,Object? championTeamId = freezed,}) {
   return _then(_SeasonAwards(
 year: null == year ? _self.year : year // ignore: cast_nullable_to_non_nullable
 as int,mvpPlayerId: freezed == mvpPlayerId ? _self.mvpPlayerId : mvpPlayerId // ignore: cast_nullable_to_non_nullable
@@ -297,7 +305,8 @@ as String?,dpoyPlayerId: freezed == dpoyPlayerId ? _self.dpoyPlayerId : dpoyPlay
 as String?,topScorerPlayerId: freezed == topScorerPlayerId ? _self.topScorerPlayerId : topScorerPlayerId // ignore: cast_nullable_to_non_nullable
 as String?,topAssistPlayerId: freezed == topAssistPlayerId ? _self.topAssistPlayerId : topAssistPlayerId // ignore: cast_nullable_to_non_nullable
 as String?,bestGkPlayerId: freezed == bestGkPlayerId ? _self.bestGkPlayerId : bestGkPlayerId // ignore: cast_nullable_to_non_nullable
-as String?,coachOfYearTeamId: freezed == coachOfYearTeamId ? _self.coachOfYearTeamId : coachOfYearTeamId // ignore: cast_nullable_to_non_nullable
+as String?,playerNames: null == playerNames ? _self._playerNames : playerNames // ignore: cast_nullable_to_non_nullable
+as Map<String, String>,coachOfYearTeamId: freezed == coachOfYearTeamId ? _self.coachOfYearTeamId : coachOfYearTeamId // ignore: cast_nullable_to_non_nullable
 as String?,teamOfSeason: null == teamOfSeason ? _self._teamOfSeason : teamOfSeason // ignore: cast_nullable_to_non_nullable
 as Map<TeamOfSeasonSlot, String>,championTeamId: freezed == championTeamId ? _self.championTeamId : championTeamId // ignore: cast_nullable_to_non_nullable
 as String?,

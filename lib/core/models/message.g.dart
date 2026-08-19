@@ -136,6 +136,8 @@ const _$MessageTypeEnumMap = {
   MessageType.teamStatusChange: 'teamStatusChange',
   MessageType.seasonSummary: 'seasonSummary',
   MessageType.playoffMissed: 'playoffMissed',
+  MessageType.playoffSeeding: 'playoffSeeding',
+  MessageType.playInResult: 'playInResult',
   MessageType.calendar: 'calendar',
   MessageType.system: 'system',
   MessageType.ovrDigest: 'ovrDigest',
