@@ -1668,6 +1668,49 @@ class AppLocalizationsPl extends AppLocalizations {
   String get staff_fire => 'Zwolnij';
 
   @override
+  String get staff_fireConfirmTitle => 'Zwolnić członka sztabu?';
+
+  @override
+  String staff_fireConfirm(String name) {
+    return 'Czy na pewno zwolnić $name?';
+  }
+
+  @override
+  String staff_fireSuccess(String name) {
+    return 'Zwolniono: $name';
+  }
+
+  @override
+  String get staff_fireFailed => 'Nie udało się zwolnić członka sztabu.';
+
+  @override
+  String staff_contractRemaining(int years) {
+    String _temp0 = intl.Intl.pluralLogic(
+      years,
+      locale: localeName,
+      other: 'Kontrakt: # lat',
+      many: 'Kontrakt: # lat',
+      few: 'Kontrakt: # lata',
+      one: 'Kontrakt: # rok',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get staff_contractExpired => 'Kontrakt wygasł';
+
+  @override
+  String staff_salaryRange(String min, String max) {
+    return 'Pensja musi mieścić się w zakresie $min–$max';
+  }
+
+  @override
+  String get staff_yearsRange => 'Długość kontraktu musi wynosić od 1 do 4 lat';
+
+  @override
+  String get staff_capExceeded => 'Oferta przekracza dostępny staff cap';
+
+  @override
   String get staff_candidatesHeader => 'Kandydaci do zatrudnienia';
 
   @override
@@ -1788,6 +1831,112 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get scouting_save => 'Zapisz';
+
+  @override
+  String get scouting_combineTitle => 'Draft Combine';
+
+  @override
+  String get scouting_combineColumn => 'Combine';
+
+  @override
+  String scouting_combineDescription(int limit) {
+    return 'Wybierz obserwowanych prospektów na Combine. Limit: $limit.';
+  }
+
+  @override
+  String scouting_combineSelected(int selected, int limit) {
+    return 'Przydzielono na Combine: $selected / $limit';
+  }
+
+  @override
+  String get scouting_combineAssign => 'Wybierz cele Combine';
+
+  @override
+  String get scouting_combineSave => 'Zapisz przydziały Combine';
+
+  @override
+  String get scouting_combineSaved => 'Przydziały Combine zapisane.';
+
+  @override
+  String get scouting_combineClosed =>
+      'Combine zakończony — wyniki są tylko do odczytu.';
+
+  @override
+  String get scouting_combineRole => 'Optymalna rola';
+
+  @override
+  String get scouting_combineOpen => 'Otwórz wybór celów Combine';
+
+  @override
+  String get scouting_combineNoWatchlist =>
+      'Najpierw dodaj prospekty do watchlisty.';
+
+  @override
+  String get scouting_role_standard => 'Standardowa';
+
+  @override
+  String get scouting_role_sweeperKeeper => 'Bramkarz-libero';
+
+  @override
+  String get scouting_role_ballPlayingDefender => 'Obrońca rozgrywający';
+
+  @override
+  String get scouting_role_noNonsenseCentreBack => 'Obrońca bezkompromisowy';
+
+  @override
+  String get scouting_role_defensiveFullBack => 'Boczny obrońca defensywny';
+
+  @override
+  String get scouting_role_attackingFullBack => 'Boczny obrońca ofensywny';
+
+  @override
+  String get scouting_role_wingBack => 'Wahadłowy';
+
+  @override
+  String get scouting_role_invertedWingBack => 'Wahadłowy schodzący do środka';
+
+  @override
+  String get scouting_role_regista => 'Regista';
+
+  @override
+  String get scouting_role_deepLyingPlaymaker =>
+      'Głęboko ustawiony rozgrywający';
+
+  @override
+  String get scouting_role_anchorMan => 'Kotwica';
+
+  @override
+  String get scouting_role_ballWinning => 'Pomocnik odbierający piłkę';
+
+  @override
+  String get scouting_role_playmaker => 'Rozgrywający';
+
+  @override
+  String get scouting_role_boxToBox => 'Pomocnik box-to-box';
+
+  @override
+  String get scouting_role_mezzala => 'Mezzala';
+
+  @override
+  String get scouting_role_shadowStriker => 'Cień napastnika';
+
+  @override
+  String get scouting_role_invertedWinger => 'Skrzydłowy schodzący do środka';
+
+  @override
+  String get scouting_role_winger => 'Skrzydłowy';
+
+  @override
+  String get scouting_role_falseNine => 'Fałszywa dziewiątka';
+
+  @override
+  String get scouting_role_deepLyingForward => 'Cofnięty napastnik';
+
+  @override
+  String get scouting_role_pressingForward => 'Napastnik pressingujący';
+
+  @override
+  String get scouting_role_completeForward => 'Napastnik kompletny';
 
   @override
   String get scouting_slot_top1 => 'Typ: TOP 1';

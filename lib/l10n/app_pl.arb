@@ -772,6 +772,30 @@
   "staffRole_cfo": "CFO",
   "staff_emptySlot": "Slot wolny",
   "staff_fire": "Zwolnij",
+  "staff_fireConfirmTitle": "Zwolnić członka sztabu?",
+  "staff_fireConfirm": "Czy na pewno zwolnić {name}?",
+  "@staff_fireConfirm": {
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "staff_fireSuccess": "Zwolniono: {name}",
+  "@staff_fireSuccess": {
+    "placeholders": {"name": {"type": "String"}}
+  },
+  "staff_fireFailed": "Nie udało się zwolnić członka sztabu.",
+  "staff_contractRemaining": "{years, plural, one {Kontrakt: # rok} few {Kontrakt: # lata} many {Kontrakt: # lat} other {Kontrakt: # lat}}",
+  "@staff_contractRemaining": {
+    "placeholders": {"years": {"type": "int"}}
+  },
+  "staff_contractExpired": "Kontrakt wygasł",
+  "staff_salaryRange": "Pensja musi mieścić się w zakresie {min}–{max}",
+  "@staff_salaryRange": {
+    "placeholders": {
+      "min": {"type": "String"},
+      "max": {"type": "String"}
+    }
+  },
+  "staff_yearsRange": "Długość kontraktu musi wynosić od 1 do 4 lat",
+  "staff_capExceeded": "Oferta przekracza dostępny staff cap",
   "staff_candidatesHeader": "Kandydaci do zatrudnienia",
   "staff_noCandidates": "Brak wolnych kandydatów na tę rolę",
   "staff_overallStars": "★ {stars}",
@@ -852,6 +876,48 @@
   },
   "scouting_cancel": "Anuluj",
   "scouting_save": "Zapisz",
+  "scouting_combineTitle": "Draft Combine",
+  "scouting_combineColumn": "Combine",
+  "scouting_combineDescription": "Wybierz obserwowanych prospektów na Combine. Limit: {limit}.",
+  "@scouting_combineDescription": {
+    "placeholders": {"limit": {"type": "int"}}
+  },
+  "scouting_combineSelected": "Przydzielono na Combine: {selected} / {limit}",
+  "@scouting_combineSelected": {
+    "placeholders": {
+      "selected": {"type": "int"},
+      "limit": {"type": "int"}
+    }
+  },
+  "scouting_combineAssign": "Wybierz cele Combine",
+  "scouting_combineSave": "Zapisz przydziały Combine",
+  "scouting_combineSaved": "Przydziały Combine zapisane.",
+  "scouting_combineClosed": "Combine zakończony — wyniki są tylko do odczytu.",
+  "scouting_combineRole": "Optymalna rola",
+  "scouting_combineOpen": "Otwórz wybór celów Combine",
+  "scouting_combineNoWatchlist": "Najpierw dodaj prospekty do watchlisty.",
+  "scouting_role_standard": "Standardowa",
+  "scouting_role_sweeperKeeper": "Bramkarz-libero",
+  "scouting_role_ballPlayingDefender": "Obrońca rozgrywający",
+  "scouting_role_noNonsenseCentreBack": "Obrońca bezkompromisowy",
+  "scouting_role_defensiveFullBack": "Boczny obrońca defensywny",
+  "scouting_role_attackingFullBack": "Boczny obrońca ofensywny",
+  "scouting_role_wingBack": "Wahadłowy",
+  "scouting_role_invertedWingBack": "Wahadłowy schodzący do środka",
+  "scouting_role_regista": "Regista",
+  "scouting_role_deepLyingPlaymaker": "Głęboko ustawiony rozgrywający",
+  "scouting_role_anchorMan": "Kotwica",
+  "scouting_role_ballWinning": "Pomocnik odbierający piłkę",
+  "scouting_role_playmaker": "Rozgrywający",
+  "scouting_role_boxToBox": "Pomocnik box-to-box",
+  "scouting_role_mezzala": "Mezzala",
+  "scouting_role_shadowStriker": "Cień napastnika",
+  "scouting_role_invertedWinger": "Skrzydłowy schodzący do środka",
+  "scouting_role_winger": "Skrzydłowy",
+  "scouting_role_falseNine": "Fałszywa dziewiątka",
+  "scouting_role_deepLyingForward": "Cofnięty napastnik",
+  "scouting_role_pressingForward": "Napastnik pressingujący",
+  "scouting_role_completeForward": "Napastnik kompletny",
   "scouting_slot_top1": "Typ: TOP 1",
   "scouting_slot_top3": "Typ: TOP 3",
   "scouting_slot_top5": "Typ: TOP 5",

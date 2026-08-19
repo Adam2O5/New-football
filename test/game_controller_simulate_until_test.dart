@@ -139,4 +139,36 @@ void main() {
     expect(result.eventId, CalendarEventId.draft);
     expect(result.daysSimulated, 0);
   });
+
+  test(
+    'scout report stops fast-forward before player Combine selection',
+    () async {
+      await controller.updateLeague(
+        (l) => l.copyWith(
+          currentWeek: 45,
+          currentDay: 1,
+          currentSeason: l.currentSeason.copyWith(
+            draftState: DraftState(
+              year: l.currentSeason.year + 1,
+              draftClass: DraftClass(year: l.currentSeason.year + 1),
+            ),
+            scoutReportDone: false,
+            combineDone: false,
+          ),
+        ),
+        autosave: false,
+      );
+
+      final result = await controller.simulateToDate(46, 1);
+
+      expect(result.stopReason, SimulationStopReason.event);
+      expect(result.eventId, CalendarEventId.scoutReport);
+      expect(result.daysSimulated, 0);
+      expect(controller.save!.leagueState.currentWeek, 45);
+      expect(
+        controller.save!.leagueState.currentSeason.scoutReportDone,
+        isFalse,
+      );
+    },
+  );
 }

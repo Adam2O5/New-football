@@ -3126,6 +3126,60 @@ abstract class AppLocalizations {
   /// **'Zwolnij'**
   String get staff_fire;
 
+  /// No description provided for @staff_fireConfirmTitle.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zwolnić członka sztabu?'**
+  String get staff_fireConfirmTitle;
+
+  /// No description provided for @staff_fireConfirm.
+  ///
+  /// In pl, this message translates to:
+  /// **'Czy na pewno zwolnić {name}?'**
+  String staff_fireConfirm(String name);
+
+  /// No description provided for @staff_fireSuccess.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zwolniono: {name}'**
+  String staff_fireSuccess(String name);
+
+  /// No description provided for @staff_fireFailed.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nie udało się zwolnić członka sztabu.'**
+  String get staff_fireFailed;
+
+  /// No description provided for @staff_contractRemaining.
+  ///
+  /// In pl, this message translates to:
+  /// **'{years, plural, one {Kontrakt: # rok} few {Kontrakt: # lata} many {Kontrakt: # lat} other {Kontrakt: # lat}}'**
+  String staff_contractRemaining(int years);
+
+  /// No description provided for @staff_contractExpired.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kontrakt wygasł'**
+  String get staff_contractExpired;
+
+  /// No description provided for @staff_salaryRange.
+  ///
+  /// In pl, this message translates to:
+  /// **'Pensja musi mieścić się w zakresie {min}–{max}'**
+  String staff_salaryRange(String min, String max);
+
+  /// No description provided for @staff_yearsRange.
+  ///
+  /// In pl, this message translates to:
+  /// **'Długość kontraktu musi wynosić od 1 do 4 lat'**
+  String get staff_yearsRange;
+
+  /// No description provided for @staff_capExceeded.
+  ///
+  /// In pl, this message translates to:
+  /// **'Oferta przekracza dostępny staff cap'**
+  String get staff_capExceeded;
+
   /// No description provided for @staff_candidatesHeader.
   ///
   /// In pl, this message translates to:
@@ -3329,6 +3383,204 @@ abstract class AppLocalizations {
   /// In pl, this message translates to:
   /// **'Zapisz'**
   String get scouting_save;
+
+  /// No description provided for @scouting_combineTitle.
+  ///
+  /// In pl, this message translates to:
+  /// **'Draft Combine'**
+  String get scouting_combineTitle;
+
+  /// No description provided for @scouting_combineColumn.
+  ///
+  /// In pl, this message translates to:
+  /// **'Combine'**
+  String get scouting_combineColumn;
+
+  /// No description provided for @scouting_combineDescription.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wybierz obserwowanych prospektów na Combine. Limit: {limit}.'**
+  String scouting_combineDescription(int limit);
+
+  /// No description provided for @scouting_combineSelected.
+  ///
+  /// In pl, this message translates to:
+  /// **'Przydzielono na Combine: {selected} / {limit}'**
+  String scouting_combineSelected(int selected, int limit);
+
+  /// No description provided for @scouting_combineAssign.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wybierz cele Combine'**
+  String get scouting_combineAssign;
+
+  /// No description provided for @scouting_combineSave.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zapisz przydziały Combine'**
+  String get scouting_combineSave;
+
+  /// No description provided for @scouting_combineSaved.
+  ///
+  /// In pl, this message translates to:
+  /// **'Przydziały Combine zapisane.'**
+  String get scouting_combineSaved;
+
+  /// No description provided for @scouting_combineClosed.
+  ///
+  /// In pl, this message translates to:
+  /// **'Combine zakończony — wyniki są tylko do odczytu.'**
+  String get scouting_combineClosed;
+
+  /// No description provided for @scouting_combineRole.
+  ///
+  /// In pl, this message translates to:
+  /// **'Optymalna rola'**
+  String get scouting_combineRole;
+
+  /// No description provided for @scouting_combineOpen.
+  ///
+  /// In pl, this message translates to:
+  /// **'Otwórz wybór celów Combine'**
+  String get scouting_combineOpen;
+
+  /// No description provided for @scouting_combineNoWatchlist.
+  ///
+  /// In pl, this message translates to:
+  /// **'Najpierw dodaj prospekty do watchlisty.'**
+  String get scouting_combineNoWatchlist;
+
+  /// No description provided for @scouting_role_standard.
+  ///
+  /// In pl, this message translates to:
+  /// **'Standardowa'**
+  String get scouting_role_standard;
+
+  /// No description provided for @scouting_role_sweeperKeeper.
+  ///
+  /// In pl, this message translates to:
+  /// **'Bramkarz-libero'**
+  String get scouting_role_sweeperKeeper;
+
+  /// No description provided for @scouting_role_ballPlayingDefender.
+  ///
+  /// In pl, this message translates to:
+  /// **'Obrońca rozgrywający'**
+  String get scouting_role_ballPlayingDefender;
+
+  /// No description provided for @scouting_role_noNonsenseCentreBack.
+  ///
+  /// In pl, this message translates to:
+  /// **'Obrońca bezkompromisowy'**
+  String get scouting_role_noNonsenseCentreBack;
+
+  /// No description provided for @scouting_role_defensiveFullBack.
+  ///
+  /// In pl, this message translates to:
+  /// **'Boczny obrońca defensywny'**
+  String get scouting_role_defensiveFullBack;
+
+  /// No description provided for @scouting_role_attackingFullBack.
+  ///
+  /// In pl, this message translates to:
+  /// **'Boczny obrońca ofensywny'**
+  String get scouting_role_attackingFullBack;
+
+  /// No description provided for @scouting_role_wingBack.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wahadłowy'**
+  String get scouting_role_wingBack;
+
+  /// No description provided for @scouting_role_invertedWingBack.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wahadłowy schodzący do środka'**
+  String get scouting_role_invertedWingBack;
+
+  /// No description provided for @scouting_role_regista.
+  ///
+  /// In pl, this message translates to:
+  /// **'Regista'**
+  String get scouting_role_regista;
+
+  /// No description provided for @scouting_role_deepLyingPlaymaker.
+  ///
+  /// In pl, this message translates to:
+  /// **'Głęboko ustawiony rozgrywający'**
+  String get scouting_role_deepLyingPlaymaker;
+
+  /// No description provided for @scouting_role_anchorMan.
+  ///
+  /// In pl, this message translates to:
+  /// **'Kotwica'**
+  String get scouting_role_anchorMan;
+
+  /// No description provided for @scouting_role_ballWinning.
+  ///
+  /// In pl, this message translates to:
+  /// **'Pomocnik odbierający piłkę'**
+  String get scouting_role_ballWinning;
+
+  /// No description provided for @scouting_role_playmaker.
+  ///
+  /// In pl, this message translates to:
+  /// **'Rozgrywający'**
+  String get scouting_role_playmaker;
+
+  /// No description provided for @scouting_role_boxToBox.
+  ///
+  /// In pl, this message translates to:
+  /// **'Pomocnik box-to-box'**
+  String get scouting_role_boxToBox;
+
+  /// No description provided for @scouting_role_mezzala.
+  ///
+  /// In pl, this message translates to:
+  /// **'Mezzala'**
+  String get scouting_role_mezzala;
+
+  /// No description provided for @scouting_role_shadowStriker.
+  ///
+  /// In pl, this message translates to:
+  /// **'Cień napastnika'**
+  String get scouting_role_shadowStriker;
+
+  /// No description provided for @scouting_role_invertedWinger.
+  ///
+  /// In pl, this message translates to:
+  /// **'Skrzydłowy schodzący do środka'**
+  String get scouting_role_invertedWinger;
+
+  /// No description provided for @scouting_role_winger.
+  ///
+  /// In pl, this message translates to:
+  /// **'Skrzydłowy'**
+  String get scouting_role_winger;
+
+  /// No description provided for @scouting_role_falseNine.
+  ///
+  /// In pl, this message translates to:
+  /// **'Fałszywa dziewiątka'**
+  String get scouting_role_falseNine;
+
+  /// No description provided for @scouting_role_deepLyingForward.
+  ///
+  /// In pl, this message translates to:
+  /// **'Cofnięty napastnik'**
+  String get scouting_role_deepLyingForward;
+
+  /// No description provided for @scouting_role_pressingForward.
+  ///
+  /// In pl, this message translates to:
+  /// **'Napastnik pressingujący'**
+  String get scouting_role_pressingForward;
+
+  /// No description provided for @scouting_role_completeForward.
+  ///
+  /// In pl, this message translates to:
+  /// **'Napastnik kompletny'**
+  String get scouting_role_completeForward;
 
   /// No description provided for @scouting_slot_top1.
   ///

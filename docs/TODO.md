@@ -1,8 +1,8 @@
 # TODO — V1.0
 
 ## UI i UX
-- [ ] Dopracować `StaffScreen` oraz pełny przepływ slotów, ofert i negocjacji sztabu.
-- [ ] Dokończyć UX i weryfikację przepływu `Draft Combine`.
+- [x] Dopracować `StaffScreen` oraz pełny przepływ slotów, ofert i negocjacji sztabu.
+- [x] Dokończyć UX i weryfikację przepływu `Draft Combine`.
 - [x] Rozszerzyć testy widgetowe o pozostałe krytyczne ścieżki UI (w szczególności matchday, inbox, trade, kontrakty, draft i walidację składu) — zrealizowano w Task 41.
 
 ## AI i walidacja

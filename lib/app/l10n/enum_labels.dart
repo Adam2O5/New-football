@@ -1,5 +1,6 @@
 import 'package:flutter/widgets.dart';
 
+import 'package:new_football/core/models/assigned_role.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/services/calendar_event_registry.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
@@ -137,6 +138,61 @@ String staffRoleLabel(BuildContext context, StaffRole role) {
     StaffRole.doctor => l10n.staffRole_doctor,
     StaffRole.cfo => l10n.staffRole_cfo,
   };
+}
+
+String assignedRoleLabel(BuildContext context, AssignedRole role) {
+  final l10n = AppLocalizations.of(context)!;
+  return role.when(
+    gk: (r) => switch (r) {
+      GkRole.standard => l10n.scouting_role_standard,
+      GkRole.sweeperKeeper => l10n.scouting_role_sweeperKeeper,
+    },
+    cb: (r) => switch (r) {
+      CbRole.standard => l10n.scouting_role_standard,
+      CbRole.ballPlayingDefender => l10n.scouting_role_ballPlayingDefender,
+      CbRole.noNonsenseCentreBack => l10n.scouting_role_noNonsenseCentreBack,
+    },
+    fullBack: (r) => switch (r) {
+      FullBackRole.standard => l10n.scouting_role_standard,
+      FullBackRole.defensiveFullBack => l10n.scouting_role_defensiveFullBack,
+      FullBackRole.attackingFullBack => l10n.scouting_role_attackingFullBack,
+    },
+    wingBack: (r) => switch (r) {
+      WingBackRole.standard => l10n.scouting_role_standard,
+      WingBackRole.wingBack => l10n.scouting_role_wingBack,
+      WingBackRole.invertedWingBack => l10n.scouting_role_invertedWingBack,
+    },
+    cdm: (r) => switch (r) {
+      CdmRole.standard => l10n.scouting_role_standard,
+      CdmRole.regista => l10n.scouting_role_regista,
+      CdmRole.deepLyingPlaymaker => l10n.scouting_role_deepLyingPlaymaker,
+      CdmRole.anchorMan => l10n.scouting_role_anchorMan,
+    },
+    cm: (r) => switch (r) {
+      CmRole.standard => l10n.scouting_role_standard,
+      CmRole.ballWinning => l10n.scouting_role_ballWinning,
+      CmRole.playmaker => l10n.scouting_role_playmaker,
+      CmRole.boxToBox => l10n.scouting_role_boxToBox,
+      CmRole.mezzala => l10n.scouting_role_mezzala,
+    },
+    cam: (r) => switch (r) {
+      CamRole.standard => l10n.scouting_role_standard,
+      CamRole.playmaker => l10n.scouting_role_playmaker,
+      CamRole.shadowStriker => l10n.scouting_role_shadowStriker,
+    },
+    winger: (r) => switch (r) {
+      WingerRole.standard => l10n.scouting_role_standard,
+      WingerRole.invertedWinger => l10n.scouting_role_invertedWinger,
+      WingerRole.winger => l10n.scouting_role_winger,
+    },
+    striker: (r) => switch (r) {
+      StrikerRole.standard => l10n.scouting_role_standard,
+      StrikerRole.falseNine => l10n.scouting_role_falseNine,
+      StrikerRole.deepLyingForward => l10n.scouting_role_deepLyingForward,
+      StrikerRole.pressingForward => l10n.scouting_role_pressingForward,
+      StrikerRole.completeForward => l10n.scouting_role_completeForward,
+    },
+  );
 }
 
 String dayName(BuildContext context, int weekday1to7) {

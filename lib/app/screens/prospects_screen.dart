@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/app/widgets/screen_background.dart';
+import 'package:new_football/app/l10n/enum_labels.dart';
 import 'package:new_football/core/models/draft_models.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
@@ -38,9 +39,14 @@ String _slotLabel(AppLocalizations l10n, EstimatedDraftSlot? slot) {
 enum _ProspectSort { name, projectedOvr, scoutGrade, potential }
 
 class ProspectsScreen extends ConsumerStatefulWidget {
-  const ProspectsScreen({super.key, this.initialWatchOnly = false});
+  const ProspectsScreen({
+    super.key,
+    this.initialWatchOnly = false,
+    this.initialCombine = false,
+  });
 
   final bool initialWatchOnly;
+  final bool initialCombine;
 
   @override
   ConsumerState<ProspectsScreen> createState() => _ProspectsScreenState();
@@ -49,15 +55,19 @@ class ProspectsScreen extends ConsumerStatefulWidget {
 class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
   final _searchController = TextEditingController();
   final Set<String> _selectedIds = {};
+  final Set<String> _combineIds = {};
   Position? _positionFilter;
   bool _watchOnly = false;
+  bool _combineMode = false;
   _ProspectSort _sort = _ProspectSort.name;
   bool _initialized = false;
+  bool _combineInitialized = false;
 
   @override
   void initState() {
     super.initState();
     _watchOnly = widget.initialWatchOnly;
+    _combineMode = widget.initialCombine;
   }
 
   @override
@@ -85,6 +95,13 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
       _selectedIds.addAll(scouting.watchlistProspectIds);
       _initialized = true;
     }
+    if (!_combineInitialized && scouting != null) {
+      _combineIds.addAll(scouting.combineAssignedProspectIds);
+      _combineInitialized = true;
+    }
+    final combineAvailable =
+        league.currentSeason.scoutReportDone &&
+        !league.currentSeason.combineDone;
 
     return Scaffold(
       appBar: _appBar(context, l10n),
@@ -97,6 +114,7 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
                 draftState.draftClass.prospects,
                 scouting,
                 league,
+                combineAvailable: combineAvailable,
               ),
       ),
     );
@@ -104,16 +122,20 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
 
   PreferredSizeWidget _appBar(BuildContext context, AppLocalizations l10n) {
     return AppBar(
-      title: Text(l10n.prospects_title),
+      title: Text(
+        _combineMode ? l10n.scouting_combineTitle : l10n.prospects_title,
+      ),
       leading: IconButton(
         icon: const Icon(Icons.arrow_back),
         onPressed: () => context.pop(),
       ),
       actions: [
         IconButton(
-          tooltip: l10n.prospects_saveWatchlist,
+          tooltip: _combineMode
+              ? l10n.scouting_combineSave
+              : l10n.prospects_saveWatchlist,
           icon: const Icon(Icons.save_outlined),
-          onPressed: _saveWatchlist,
+          onPressed: _combineMode ? _saveCombineAssignments : _saveWatchlist,
         ),
       ],
     );
@@ -124,11 +146,20 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
     AppLocalizations l10n,
     List<Prospect> prospects,
     TeamScouting? scouting,
-    LeagueState league,
-  ) {
+    LeagueState league, {
+    required bool combineAvailable,
+  }) {
     final coverage = league.playerTeam?.staff.scout?.attributes.coverage ?? 0.0;
-    final limit = ref.read(scoutingServiceProvider).maxWatched(coverage);
-    final visible = _filteredProspects(prospects, scouting);
+    final scoutingService = ref.read(scoutingServiceProvider);
+    final watchlistLimit = scoutingService.maxWatched(coverage);
+    final combineLimit = scoutingService.combineAssignLimit(coverage);
+    final visible = _filteredProspects(
+      prospects,
+      scouting,
+      forceWatchOnly: _combineMode,
+    );
+    final noCombineTargets =
+        _combineMode && (scouting?.watchlistProspectIds.isEmpty ?? true);
 
     return Container(
       margin: const EdgeInsets.all(8),
@@ -208,33 +239,90 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
                         if (value != null) setState(() => _sort = value);
                       },
                     ),
-                    FilterChip(
-                      label: Text(l10n.prospects_watchOnly),
-                      selected: _watchOnly,
-                      onSelected: (value) => setState(() => _watchOnly = value),
-                    ),
+                    if (!_combineMode)
+                      FilterChip(
+                        label: Text(l10n.prospects_watchOnly),
+                        selected: _watchOnly,
+                        onSelected: (value) =>
+                            setState(() => _watchOnly = value),
+                      ),
                   ],
                 ),
-                const SizedBox(height: 4),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    l10n.prospects_coverage(
-                      coverage.toStringAsFixed(1),
-                      _selectedIds.length,
-                      limit,
+                if (_combineMode) ...[
+                  Card(
+                    margin: const EdgeInsets.only(top: 8),
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.scouting_combineDescription(combineLimit),
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            l10n.scouting_combineSelected(
+                              _combineIds.length,
+                              combineLimit,
+                            ),
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                          if (!combineAvailable) ...[
+                            const SizedBox(height: 4),
+                            Text(l10n.scouting_combineClosed),
+                          ],
+                        ],
+                      ),
                     ),
-                    style: Theme.of(context).textTheme.bodySmall,
                   ),
-                ),
+                ] else ...[
+                  const SizedBox(height: 4),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      l10n.prospects_coverage(
+                        coverage.toStringAsFixed(1),
+                        _selectedIds.length,
+                        watchlistLimit,
+                      ),
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ),
+                  if (combineAvailable) ...[
+                    const SizedBox(height: 8),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: FilledButton.icon(
+                        onPressed: _openCombineMode,
+                        icon: const Icon(Icons.science_outlined),
+                        label: Text(l10n.scouting_combineOpen),
+                      ),
+                    ),
+                  ],
+                ],
               ],
             ),
           ),
           const Divider(height: 1),
           Expanded(
             child: visible.isEmpty
-                ? Center(child: Text(l10n.prospects_empty))
-                : _buildProspectsTable(context, l10n, visible, scouting, limit),
+                ? Center(
+                    child: Text(
+                      noCombineTargets
+                          ? l10n.scouting_combineNoWatchlist
+                          : l10n.prospects_empty,
+                    ),
+                  )
+                : _buildProspectsTable(
+                    context,
+                    l10n,
+                    visible,
+                    scouting,
+                    watchlistLimit,
+                    combineLimit,
+                    combineAvailable,
+                  ),
           ),
         ],
       ),
@@ -243,8 +331,9 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
 
   List<Prospect> _filteredProspects(
     List<Prospect> prospects,
-    TeamScouting? scouting,
-  ) {
+    TeamScouting? scouting, {
+    bool forceWatchOnly = false,
+  }) {
     final query = _searchController.text.trim().toLowerCase();
     final filtered = prospects.where((prospect) {
       if (query.isNotEmpty && !prospect.name.toLowerCase().contains(query)) {
@@ -253,7 +342,10 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
       if (_positionFilter != null && prospect.position != _positionFilter) {
         return false;
       }
-      if (_watchOnly && !_selectedIds.contains(prospect.id)) return false;
+      if ((_watchOnly || forceWatchOnly) &&
+          !_selectedIds.contains(prospect.id)) {
+        return false;
+      }
       return true;
     }).toList();
 
@@ -275,7 +367,9 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
     AppLocalizations l10n,
     List<Prospect> prospects,
     TeamScouting? scouting,
-    int limit,
+    int watchlistLimit,
+    int combineLimit,
+    bool combineAvailable,
   ) {
     return SingleChildScrollView(
       child: SingleChildScrollView(
@@ -283,7 +377,13 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
         child: DataTable(
           showCheckboxColumn: false,
           columns: [
-            DataColumn(label: Text(l10n.prospects_watchlist)),
+            DataColumn(
+              label: Text(
+                _combineMode
+                    ? l10n.scouting_combineColumn
+                    : l10n.prospects_watchlist,
+              ),
+            ),
             DataColumn(label: Text(l10n.prospects_name)),
             DataColumn(label: Text(l10n.prospects_nationality)),
             DataColumn(label: Text(l10n.prospects_age)),
@@ -294,19 +394,34 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
             DataColumn(label: Text(l10n.prospects_injuryShort)),
             DataColumn(label: Text(l10n.prospects_determinationShort)),
             DataColumn(label: Text(l10n.prospects_slot)),
+            if (_combineIds.isNotEmpty)
+              DataColumn(label: Text(l10n.scouting_combineRole)),
           ],
           rows: prospects.map((prospect) {
             final knowledge = scouting?.forProspect(prospect.id);
             final watched = _selectedIds.contains(prospect.id);
-            final canSelect = watched || _selectedIds.length < limit;
+            final assigned = _combineIds.contains(prospect.id);
+            final canSelect = _combineMode
+                ? assigned || _combineIds.length < combineLimit
+                : watched || _selectedIds.length < watchlistLimit;
+            final showCombinedRole = !combineAvailable && assigned;
             return DataRow(
-              onSelectChanged: (_) =>
-                  _showProspectDetail(context, l10n, prospect, scouting),
+              onSelectChanged: (_) => _showProspectDetail(
+                context,
+                l10n,
+                prospect,
+                scouting,
+                showOptimalRole: showCombinedRole,
+              ),
               cells: [
                 DataCell(
                   Checkbox(
-                    value: watched,
-                    onChanged: canSelect
+                    value: _combineMode ? assigned : watched,
+                    onChanged: _combineMode
+                        ? (!combineAvailable || !canSelect)
+                              ? null
+                              : (value) => _toggleCombine(prospect.id, value)
+                        : canSelect
                         ? (value) => _toggleWatchlist(prospect.id, value)
                         : null,
                   ),
@@ -363,6 +478,14 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
                   ),
                 ),
                 DataCell(Text(_slotLabel(l10n, knowledge?.estimatedSlot))),
+                if (_combineIds.isNotEmpty)
+                  DataCell(
+                    Text(
+                      showCombinedRole
+                          ? assignedRoleLabel(context, prospect.optimalRole)
+                          : '—',
+                    ),
+                  ),
               ],
             );
           }).toList(),
@@ -381,13 +504,100 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
     });
   }
 
+  void _toggleCombine(String id, bool? selected) {
+    setState(() {
+      if (selected == true) {
+        _combineIds.add(id);
+      } else {
+        _combineIds.remove(id);
+      }
+    });
+  }
+
+  Future<void> _openCombineMode() async {
+    await ref
+        .read(gameControllerProvider.notifier)
+        .setScoutWatchlist(_selectedIds.toList());
+    if (!mounted) return;
+    final savedWatchlist =
+        ref
+            .read(activeLeagueProvider)
+            ?.playerTeam
+            ?.scouting
+            .watchlistProspectIds ??
+        const <String>[];
+    setState(() {
+      _selectedIds
+        ..clear()
+        ..addAll(savedWatchlist);
+      _combineIds.retainAll(savedWatchlist);
+      _combineMode = true;
+      _watchOnly = true;
+    });
+  }
+
   Future<void> _saveWatchlist() async {
     await ref
         .read(gameControllerProvider.notifier)
         .setScoutWatchlist(_selectedIds.toList());
     if (!mounted) return;
+    final savedWatchlist =
+        ref
+            .read(activeLeagueProvider)
+            ?.playerTeam
+            ?.scouting
+            .watchlistProspectIds ??
+        const <String>[];
+    setState(() {
+      _selectedIds
+        ..clear()
+        ..addAll(savedWatchlist);
+      _combineIds.retainAll(savedWatchlist);
+    });
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(AppLocalizations.of(context)!.common_save)),
+    );
+  }
+
+  Future<void> _saveCombineAssignments() async {
+    final savedWatchlist =
+        ref
+            .read(activeLeagueProvider)
+            ?.playerTeam
+            ?.scouting
+            .watchlistProspectIds ??
+        const <String>[];
+    final l10n = AppLocalizations.of(context)!;
+    if (savedWatchlist.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.scouting_combineNoWatchlist)));
+      return;
+    }
+    final ok = await ref
+        .read(gameControllerProvider.notifier)
+        .setCombineAssignments(_combineIds.toList());
+    if (!mounted) return;
+    if (ok) {
+      final savedAssignments =
+          ref
+              .read(activeLeagueProvider)
+              ?.playerTeam
+              ?.scouting
+              .combineAssignedProspectIds ??
+          const <String>[];
+      setState(() {
+        _combineIds
+          ..clear()
+          ..addAll(savedAssignments);
+      });
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          ok ? l10n.scouting_combineSaved : l10n.scouting_combineClosed,
+        ),
+      ),
     );
   }
 
@@ -395,8 +605,9 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
     BuildContext context,
     AppLocalizations l10n,
     Prospect prospect,
-    TeamScouting? scouting,
-  ) {
+    TeamScouting? scouting, {
+    required bool showOptimalRole,
+  }) {
     final knowledge = scouting?.forProspect(prospect.id);
     showModalBottomSheet(
       context: context,
@@ -411,6 +622,7 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
           prospect: prospect,
           knowledge: knowledge,
           scrollController: scrollController,
+          showOptimalRole: showOptimalRole,
         ),
       ),
     );
@@ -423,12 +635,14 @@ class _ProspectDetailContent extends StatelessWidget {
     required this.prospect,
     required this.knowledge,
     required this.scrollController,
+    required this.showOptimalRole,
   });
 
   final AppLocalizations l10n;
   final Prospect prospect;
   final ScoutingKnowledge? knowledge;
   final ScrollController scrollController;
+  final bool showOptimalRole;
 
   @override
   Widget build(BuildContext context) {
@@ -516,6 +730,11 @@ class _ProspectDetailContent extends StatelessWidget {
               l10n.prospects_estimatedSlot,
               _slotLabel(l10n, knowledge?.estimatedSlot),
             ),
+            if (showOptimalRole)
+              _detailRow(
+                l10n.scouting_combineRole,
+                assignedRoleLabel(context, prospect.optimalRole),
+              ),
           ],
         ],
       ),

@@ -351,7 +351,8 @@ class SeasonService {
         result.playoffSeed7TeamId,
         result.playoffSeed8TeamId,
       };
-      final ownClub = state.playerTeamId != null &&
+      final ownClub =
+          state.playerTeamId != null &&
           playoffTeams.contains(state.playerTeamId);
       state = _messages.send(
         state,
@@ -388,7 +389,8 @@ class SeasonService {
           series.lowerSeedTeamId,
         ],
       };
-      final ownClub = state.playerTeamId != null &&
+      final ownClub =
+          state.playerTeamId != null &&
           seededTeams.contains(state.playerTeamId);
       state = _messages.send(
         state,
@@ -396,7 +398,9 @@ class SeasonService {
         domain: MessageDomain.season,
         args: {
           'conference': bracket.conference.name,
-          'seed7': seededTeams.isEmpty ? '—' : _teamName(state, seededTeams.first),
+          'seed7': seededTeams.isEmpty
+              ? '—'
+              : _teamName(state, seededTeams.first),
           'seed8': seededTeams.length < 2
               ? '—'
               : _teamName(state, seededTeams.elementAt(1)),
@@ -739,10 +743,7 @@ class SeasonService {
         state,
         type: MessageType.retirementPlayer,
         domain: MessageDomain.roster,
-        args: {
-          'playerName': record.name,
-          'ownClub': true,
-        },
+        args: {'playerName': record.name, 'ownClub': true},
         payload: {
           'playerId': record.id,
           'teamId': record.teamId,
@@ -760,10 +761,7 @@ class SeasonService {
         priority: MessagePriority.silenced,
         titleKey: 'msg_retirementLeagueDigest_digest_title',
         bodyKey: 'msg_retirementLeagueDigest_digest_body',
-        args: {
-          'count': retired.length,
-          'week': state.currentWeek,
-        },
+        args: {'count': retired.length, 'week': state.currentWeek},
         payload: {
           'retiredPlayers': [
             for (final record in retired)
@@ -908,14 +906,18 @@ class SeasonService {
           week: league.currentWeek,
           teamId: team.id,
         );
+        scouting = scoutingService.runScoutReport(
+          scouting,
+          coverage,
+          prospects: draftClass.prospects,
+          rankedProspects: ranked,
+          seed: saveSeed,
+        );
+      } else {
+        // The player receives the report but chooses Combine targets in the
+        // Prospects screen instead of inheriting the AI assignment.
+        scouting = scouting.copyWith(combineAssignedProspectIds: const []);
       }
-      scouting = scoutingService.runScoutReport(
-        scouting,
-        coverage,
-        prospects: draftClass.prospects,
-        rankedProspects: ranked,
-        seed: saveSeed,
-      );
       return team.copyWith(scouting: scouting);
     }).toList();
     return _msg(
@@ -1931,8 +1933,7 @@ class SeasonService {
     if (persistedWinner == homeId || persistedWinner == awayId) {
       return persistedWinner!;
     }
-    if (r.wentToShootout &&
-        r.shootoutHomeGoals != r.shootoutAwayGoals) {
+    if (r.wentToShootout && r.shootoutHomeGoals != r.shootoutAwayGoals) {
       return r.shootoutHomeGoals > r.shootoutAwayGoals ? homeId : awayId;
     }
     if (r.homeGoals == r.awayGoals) {
@@ -2053,9 +2054,7 @@ class SeasonService {
   }) {
     if (result.homeGoals != result.awayGoals) return result;
 
-    final random = Random(
-      matchSeed(saveSeed, seasonYear, '$matchId:tiebreak'),
-    );
+    final random = Random(matchSeed(saveSeed, seasonYear, '$matchId:tiebreak'));
     final homeId = result.homeTeamId;
     final awayId = result.awayTeamId;
 
@@ -2427,9 +2426,8 @@ class SeasonService {
           ? _AwardStats.fromSeasonStats(
               player.seasonStats.firstWhere(
                 (item) => item.year == league.currentSeason.year,
-                orElse: () => PlayerSeasonStats(
-                  year: league.currentSeason.year,
-                ),
+                orElse: () =>
+                    PlayerSeasonStats(year: league.currentSeason.year),
               ),
               player.position,
             )
@@ -2447,10 +2445,7 @@ class SeasonService {
     final mvpPool = candidates.where(
       (candidate) => candidate.stats.minutes >= possibleMinutes * 0.40,
     );
-    final mvp = _bestCandidate(
-      mvpPool,
-      (candidate) => _mvpScore(candidate),
-    );
+    final mvp = _bestCandidate(mvpPool, (candidate) => _mvpScore(candidate));
 
     final rotyPool = candidates.where(
       (candidate) =>
@@ -2665,10 +2660,7 @@ class SeasonService {
             ? 1
             : 0;
         final position = _positionForPlayer(result, stat.playerId, player);
-        final aggregate = byPlayer.putIfAbsent(
-          stat.playerId,
-          _AwardStats.new,
-        );
+        final aggregate = byPlayer.putIfAbsent(stat.playerId, _AwardStats.new);
         aggregate.addMatch(
           stat,
           position: position,
@@ -2743,7 +2735,8 @@ class SeasonService {
       final currentScore = score(candidate);
       if (currentScore > bestScore ||
           (currentScore == bestScore &&
-              (best == null || candidate.player.id.compareTo(best.player.id) < 0))) {
+              (best == null ||
+                  candidate.player.id.compareTo(best.player.id) < 0))) {
         best = candidate;
         bestScore = currentScore;
       }
@@ -2751,10 +2744,7 @@ class SeasonService {
     return best;
   }
 
-  double _mvpScore(
-    _AwardCandidate candidate, {
-    bool rookie = false,
-  }) {
+  double _mvpScore(_AwardCandidate candidate, {bool rookie = false}) {
     final stats = candidate.stats;
     final teamShare = stats.teamPossiblePointsWhenOn == 0
         ? 0.0
@@ -2766,7 +2756,8 @@ class SeasonService {
               .toDouble();
     final playoffBonus = stats.postseasonMinutes == 0
         ? 0.0
-        : ((stats.postseasonGoals + stats.postseasonAssists) * 90 /
+        : ((stats.postseasonGoals + stats.postseasonAssists) *
+                      90 /
                       stats.postseasonMinutes /
                       4 +
                   stats.postseasonRatingAvg / 10)
@@ -2788,7 +2779,8 @@ class SeasonService {
     if (candidates.isEmpty) return null;
     final maxDefensiveActions = candidates.fold<int>(
       0,
-      (max, candidate) => max > candidate.stats.tackles + candidate.stats.interceptions
+      (max, candidate) =>
+          max > candidate.stats.tackles + candidate.stats.interceptions
           ? max
           : candidate.stats.tackles + candidate.stats.interceptions,
     );
@@ -2823,18 +2815,21 @@ class SeasonService {
     int Function(_AwardCandidate) primary,
     int Function(_AwardCandidate) secondary,
   ) {
-    final sorted = candidates.where((candidate) => primary(candidate) > 0).toList()
-      ..sort((a, b) {
-        final primaryCompare = primary(b).compareTo(primary(a));
-        if (primaryCompare != 0) return primaryCompare;
-        final minutesCompare = a.stats.minutes.compareTo(b.stats.minutes);
-        if (minutesCompare != 0) return minutesCompare;
-        final secondaryCompare = secondary(b).compareTo(secondary(a));
-        if (secondaryCompare != 0) return secondaryCompare;
-        final ratingCompare = b.stats.ratingAvg.compareTo(a.stats.ratingAvg);
-        if (ratingCompare != 0) return ratingCompare;
-        return a.player.id.compareTo(b.player.id);
-      });
+    final sorted =
+        candidates.where((candidate) => primary(candidate) > 0).toList()..sort((
+          a,
+          b,
+        ) {
+          final primaryCompare = primary(b).compareTo(primary(a));
+          if (primaryCompare != 0) return primaryCompare;
+          final minutesCompare = a.stats.minutes.compareTo(b.stats.minutes);
+          if (minutesCompare != 0) return minutesCompare;
+          final secondaryCompare = secondary(b).compareTo(secondary(a));
+          if (secondaryCompare != 0) return secondaryCompare;
+          final ratingCompare = b.stats.ratingAvg.compareTo(a.stats.ratingAvg);
+          if (ratingCompare != 0) return ratingCompare;
+          return a.player.id.compareTo(b.player.id);
+        });
     return sorted.isEmpty ? null : sorted.first;
   }
 
@@ -2893,7 +2888,8 @@ class SeasonService {
       for (final candidate in candidates) {
         final minutes = positions.fold<int>(
           0,
-          (sum, position) => sum + (candidate.stats.positionMinutes[position] ?? 0),
+          (sum, position) =>
+              sum + (candidate.stats.positionMinutes[position] ?? 0),
         );
         if (minutes < possibleMinutes * 0.30) continue;
         final score = _teamOfSeasonScore(candidate, minutes);
@@ -2917,7 +2913,8 @@ class SeasonService {
     final result = <TeamOfSeasonSlot, String>{};
     final usedPlayers = <String>{};
     for (final option in options) {
-      if (result.containsKey(option.slot) || usedPlayers.contains(option.playerId)) {
+      if (result.containsKey(option.slot) ||
+          usedPlayers.contains(option.playerId)) {
         continue;
       }
       result[option.slot] = option.playerId;
@@ -2942,18 +2939,19 @@ class SeasonService {
   }
 
   String? _coachOfYearTeamId(LeagueState league) {
-    final standings = [
-      for (final conference in league.currentSeason.standings)
-        ...conference.standings,
-    ]..sort((a, b) {
-      final points = b.points.compareTo(a.points);
-      if (points != 0) return points;
-      final difference = b.goalDifference.compareTo(a.goalDifference);
-      if (difference != 0) return difference;
-      final goals = b.goalsFor.compareTo(a.goalsFor);
-      if (goals != 0) return goals;
-      return a.teamId.compareTo(b.teamId);
-    });
+    final standings =
+        [
+          for (final conference in league.currentSeason.standings)
+            ...conference.standings,
+        ]..sort((a, b) {
+          final points = b.points.compareTo(a.points);
+          if (points != 0) return points;
+          final difference = b.goalDifference.compareTo(a.goalDifference);
+          if (difference != 0) return difference;
+          final goals = b.goalsFor.compareTo(a.goalsFor);
+          if (goals != 0) return goals;
+          return a.teamId.compareTo(b.teamId);
+        });
     final finalPositions = <String, int>{
       for (var index = 0; index < standings.length; index++)
         standings[index].teamId: index + 1,
@@ -3150,7 +3148,6 @@ class SeasonService {
   }
 }
 
-
 class _AwardCandidate {
   const _AwardCandidate({
     required this.player,
@@ -3179,7 +3176,10 @@ class _AwardStats {
       ratingTotal = stats.ratingAvg * (stats.minutes > 0 ? stats.minutes : 1),
       ratingWeight = stats.minutes > 0 ? stats.minutes : 1,
       gkMinutes = naturalPosition == Position.gk ? stats.minutes : 0,
-      goalsPrevented = (stats.shotsFaced - stats.goals).clamp(0, stats.shotsFaced),
+      goalsPrevented = (stats.shotsFaced - stats.goals).clamp(
+        0,
+        stats.shotsFaced,
+      ),
       positionMinutes = {naturalPosition: stats.minutes};
 
   int minutes = 0;
@@ -3212,9 +3212,8 @@ class _AwardStats {
       ? 0.0
       : postseasonRatingTotal / postseasonRatingWeight;
 
-  double get concededPer90 => minutes == 0
-      ? 0.0
-      : goalsConcededWhenOn * 90 / minutes;
+  double get concededPer90 =>
+      minutes == 0 ? 0.0 : goalsConcededWhenOn * 90 / minutes;
 
   void addMatch(
     PlayerMatchStats stat, {
@@ -3248,12 +3247,12 @@ class _AwardStats {
     }
     tackles += stat.tackles;
     interceptions += stat.interceptions;
-    cleanSheets +=
-        stat.cleanSheet || (stat.minutes > 0 && conceded == 0) ? 1 : 0;
+    cleanSheets += stat.cleanSheet || (stat.minutes > 0 && conceded == 0)
+        ? 1
+        : 0;
     saves += stat.saves;
     shotsFaced += stat.shotsFaced;
-    goalsPrevented +=
-        (stat.shotsFaced - conceded).clamp(0, stat.shotsFaced);
+    goalsPrevented += (stat.shotsFaced - conceded).clamp(0, stat.shotsFaced);
     if (stat.minutes > 0) {
       ratingTotal += stat.rating * stat.minutes;
       ratingWeight += stat.minutes;

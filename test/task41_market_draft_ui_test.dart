@@ -4,10 +4,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/app/screens/contract_screen.dart';
 import 'package:new_football/app/screens/draft_screen.dart';
+import 'package:new_football/app/screens/prospects_screen.dart';
+import 'package:new_football/app/screens/staff_screen.dart';
 import 'package:new_football/app/screens/trade_screen.dart';
 import 'package:new_football/core/models/draft_models.dart';
 import 'package:new_football/core/models/draft_pick.dart';
+import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
+import 'package:new_football/core/models/scouting.dart';
+import 'package:new_football/core/models/staff.dart';
 import 'package:new_football/core/models/trade_models.dart';
 import 'package:new_football/core/models/seed_data_generator.dart';
 
@@ -178,6 +183,143 @@ void main() {
       1,
     );
   });
+
+  testWidgets(
+    'StaffScreen potwierdza i wykonuje zwolnienie wygasłego kontraktu',
+    (tester) async {
+      late GameController controller;
+      final base = task41Game(seed: 4113);
+      final league = base.leagueState;
+      const expiredStaff = StaffMember(
+        id: 'task41-expired-staff',
+        name: 'Task 41 Expired Staff',
+        nationality: Nationality.poland,
+        age: 58,
+        role: StaffRole.scout,
+        attributes: StaffAttributes(coverage: 3, evaluation: 3),
+        contract: StaffContract(salary: 1000000, yearsRemaining: 0),
+      );
+      final playerTeam = league.playerTeam!.copyWith(
+        staff: league.playerTeam!.staff.copyWith(scout: expiredStaff),
+      );
+      final game = base.copyWith(
+        leagueState: league.copyWith(
+          teams: [
+            for (final team in league.teams)
+              team.id == playerTeam.id ? playerTeam : team,
+          ],
+        ),
+      );
+
+      await tester.pumpWidget(
+        task41App(
+          const StaffScreen(),
+          game,
+          onController: (value) => controller = value,
+        ),
+      );
+      await tester.pumpAndSettle();
+      final fireButton = find.widgetWithText(TextButton, 'Zwolnij');
+      await tester.ensureVisible(fireButton);
+      await tester.pumpAndSettle();
+      await tester.tap(fireButton);
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Czy na pewno zwolnić Task 41 Expired Staff?'),
+        findsOneWidget,
+      );
+      await tester.tap(find.widgetWithText(FilledButton, 'Zwolnij'));
+      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.text('Zwolniono: Task 41 Expired Staff'),
+        500,
+        scrollable: _verticalScrollable(),
+      );
+
+      expect(find.text('Zwolniono: Task 41 Expired Staff'), findsOneWidget);
+      expect(controller.save!.leagueState.playerTeam!.staff.scout, isNull);
+    },
+  );
+
+  testWidgets(
+    'Prospects pozwala wybrać cele Draft Combine w limicie Coverage',
+    (tester) async {
+      late GameController controller;
+      final base = task41Game(seed: 4112);
+      final league = base.leagueState;
+      final draftClass = SeedDataGenerator().generateDraftClass(
+        year: league.currentSeason.year + 1,
+        prospectCount: 3,
+      );
+      final prospectIds = draftClass.prospects
+          .map((prospect) => prospect.id)
+          .toList();
+      const scout = StaffMember(
+        id: 'task41-combine-scout',
+        name: 'Task 41 Scout',
+        nationality: Nationality.poland,
+        age: 40,
+        role: StaffRole.scout,
+        attributes: StaffAttributes(coverage: 5, evaluation: 5),
+      );
+      final playerTeam = league.playerTeam!.copyWith(
+        staff: league.playerTeam!.staff.copyWith(scout: scout),
+        scouting: TeamScouting(
+          watchlistProspectIds: prospectIds,
+          knowledge: [
+            for (final id in prospectIds) ScoutingKnowledge(prospectId: id),
+          ],
+        ),
+      );
+      final draft = DraftState(year: draftClass.year, draftClass: draftClass);
+      final game = base.copyWith(
+        leagueState: league.copyWith(
+          currentWeek: 45,
+          currentDay: 1,
+          teams: [
+            for (final team in league.teams)
+              team.id == playerTeam.id ? playerTeam : team,
+          ],
+          currentSeason: league.currentSeason.copyWith(
+            draftState: draft,
+            scoutReportDone: true,
+            combineDone: false,
+          ),
+        ),
+      );
+
+      await tester.pumpWidget(
+        task41App(
+          const ProspectsScreen(initialCombine: true),
+          game,
+          onController: (value) => controller = value,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Draft Combine'), findsOneWidget);
+      expect(find.text('Przydzielono na Combine: 0 / 2'), findsOneWidget);
+      final firstCheckbox = find.byType(Checkbox).first;
+      await tester.tap(firstCheckbox);
+      await tester.pump();
+      expect(find.text('Przydzielono na Combine: 1 / 2'), findsOneWidget);
+
+      await tester.tap(find.byTooltip('Zapisz przydziały Combine'));
+      await tester.pumpAndSettle();
+
+      expect(
+        controller
+            .save!
+            .leagueState
+            .playerTeam!
+            .scouting
+            .combineAssignedProspectIds,
+        hasLength(1),
+      );
+      expect(find.text('Przydziały Combine zapisane.'), findsOneWidget);
+    },
+  );
 }
 
 class GameFactoryDraftFixture {

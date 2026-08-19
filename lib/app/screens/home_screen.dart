@@ -71,7 +71,7 @@ void _refreshCalendarCursor(WidgetRef ref) {
 String? _routeForEvent(CalendarEventId id) => switch (id) {
   CalendarEventId.lottery => '/game/lottery',
   CalendarEventId.draft => '/game/draft',
-  CalendarEventId.scoutReport => '/game/draft',
+  CalendarEventId.scoutReport => '/game/prospects?watchlist=true&combine=true',
   CalendarEventId.nextClassGeneration => '/game/draft',
   CalendarEventId.freeAgencyOpen => '/game/contracts',
   _ => null,
@@ -178,6 +178,15 @@ Future<void> _goToEvent(
   }
 
   if (result.stopReason == SimulationStopReason.playerMatch) {
+    return;
+  }
+
+  if (action.calendarEventId == CalendarEventId.scoutReport) {
+    await ref
+        .read(gameControllerProvider.notifier)
+        .runEventAtCurrentDay(CalendarEventId.scoutReport);
+    if (!context.mounted) return;
+    context.push('/game/prospects?watchlist=true&combine=true');
     return;
   }
 

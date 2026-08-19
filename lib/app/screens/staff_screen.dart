@@ -216,11 +216,19 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
                 contentPadding: EdgeInsets.zero,
                 title: Text(member.name),
                 subtitle: Text(
-                  l10n.staff_memberSubtitle(
-                    member.age,
-                    member.overall.toStringAsFixed(1),
-                    formatMoney(context, member.contract?.salary ?? 0),
-                  ),
+                  [
+                    l10n.staff_memberSubtitle(
+                      member.age,
+                      member.overall.toStringAsFixed(1),
+                      formatMoney(context, member.contract?.salary ?? 0),
+                    ),
+                    member.contract == null ||
+                            member.contract!.yearsRemaining <= 0
+                        ? l10n.staff_contractExpired
+                        : l10n.staff_contractRemaining(
+                            member.contract!.yearsRemaining,
+                          ),
+                  ].join(' · '),
                 ),
                 onTap: () => _selectStaff(league, team, member, true),
                 trailing: Wrap(
@@ -266,12 +274,21 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
               else
                 ...candidates.map((candidate) {
                   final offer = _defaultOffer(league, candidate);
-                  final canHire = _canSubmitStaffOffer(
-                    league,
-                    team,
-                    candidate,
-                    isExtension: false,
-                  );
+                  final canHire =
+                      _canSubmitStaffOffer(
+                        league,
+                        team,
+                        candidate,
+                        isExtension: false,
+                      ) &&
+                      _offerValidationError(
+                            l10n,
+                            team,
+                            candidate,
+                            offer,
+                            isExtension: false,
+                          ) ==
+                          null;
                   return ListTile(
                     contentPadding: EdgeInsets.zero,
                     title: Text(candidate.name),
@@ -332,12 +349,23 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
             currentTeamStatus: status,
             cfo: team.staff.cfo,
           );
-    final canSubmit = _canSubmitStaffOffer(
-      league,
+    final validationError = _offerValidationError(
+      l10n,
       team,
       member,
+      StaffOffer(salary: salary ?? 0, years: years ?? 0),
       isExtension: _selectedExtension,
+      salary: salary,
+      years: years,
     );
+    final canSubmit =
+        validationError == null &&
+        _canSubmitStaffOffer(
+          league,
+          team,
+          member,
+          isExtension: _selectedExtension,
+        );
     final attributes = _attributes(l10n, member);
 
     return Card(
@@ -407,7 +435,13 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
                 ),
               ),
             ),
-            if (!canSubmit) ...[
+            if (validationError != null) ...[
+              const SizedBox(height: 6),
+              Text(
+                validationError,
+                style: TextStyle(color: Theme.of(context).colorScheme.error),
+              ),
+            ] else if (!canSubmit) ...[
               const SizedBox(height: 6),
               Text(l10n.market_noWindow),
             ],
@@ -630,8 +664,17 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
   ) async {
     final salary = int.tryParse(_salaryController.text.trim());
     final years = int.tryParse(_yearsController.text.trim());
-    if (salary == null || years == null || years < 1 || years > 4) {
-      setState(() => _status = l10n.contract_invalidOffer);
+    final validationError = _offerValidationError(
+      l10n,
+      team,
+      member,
+      StaffOffer(salary: salary ?? 0, years: years ?? 0),
+      isExtension: _selectedExtension,
+      salary: salary,
+      years: years,
+    );
+    if (validationError != null) {
+      setState(() => _status = validationError);
       return;
     }
     await _submitStaffOffer(
@@ -640,7 +683,7 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
       team,
       member,
       _selectedExtension,
-      StaffOffer(salary: salary, years: years),
+      StaffOffer(salary: salary!, years: years!),
     );
   }
 
@@ -673,16 +716,15 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
       if (mounted) setState(() => _status = l10n.market_noWindow);
       return;
     }
-    final replacingSalary = isExtension
-        ? team.staff.member(member.role)?.contract?.salary ?? 0
-        : 0;
-    final reason = _staffService.hireValidationReason(
+    final validationError = _offerValidationError(
+      l10n,
       team,
-      offer.salary,
-      replacingSalary: replacingSalary,
+      member,
+      offer,
+      isExtension: isExtension,
     );
-    if (reason != null) {
-      if (mounted) setState(() => _status = l10n.staff_hireRejected);
+    if (validationError != null) {
+      if (mounted) setState(() => _status = validationError);
       return;
     }
     final reaction = await ref
@@ -895,6 +937,40 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
     );
   }
 
+  String? _offerValidationError(
+    AppLocalizations l10n,
+    Team team,
+    StaffMember member,
+    StaffOffer offer, {
+    required bool isExtension,
+    int? salary,
+    int? years,
+  }) {
+    final parsedSalary = salary ?? offer.salary;
+    final parsedYears = years ?? offer.years;
+    if ((salary == null) != (years == null)) {
+      return l10n.contract_invalidOffer;
+    }
+    if (!_staffService.isSalaryInRange(parsedSalary)) {
+      return l10n.staff_salaryRange(
+        formatMoney(context, _staffService.balance.staff.minSalary),
+        formatMoney(context, _staffService.balance.staff.maxSalary),
+      );
+    }
+    if (parsedYears < 1 || parsedYears > 4) return l10n.staff_yearsRange;
+    final replacingSalary = isExtension
+        ? team.staff.member(member.role)?.contract?.salary ?? 0
+        : 0;
+    if (!_staffService.canHire(
+      team,
+      parsedSalary,
+      replacingSalary: replacingSalary,
+    )) {
+      return l10n.staff_capExceeded;
+    }
+    return null;
+  }
+
   bool _canSubmitStaffOffer(
     LeagueState league,
     Team team,
@@ -923,9 +999,36 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
       member.contract == null || member.contract!.yearsRemaining <= 0;
 
   Future<void> _fire(AppLocalizations l10n, StaffRole role) async {
-    await ref.read(gameControllerProvider.notifier).fireStaff(role);
+    final league = ref.read(activeLeagueProvider);
+    final member = league?.playerTeam?.staff.member(role);
+    if (member == null) return;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.staff_fireConfirmTitle),
+        content: Text(l10n.staff_fireConfirm(member.name)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(l10n.common_cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(l10n.staff_fire),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    final removed = await ref
+        .read(gameControllerProvider.notifier)
+        .fireStaff(role);
     if (!mounted) return;
-    setState(() => _status = l10n.staff_fire);
+    setState(
+      () => _status = removed
+          ? l10n.staff_fireSuccess(member.name)
+          : l10n.staff_fireFailed,
+    );
   }
 
   List<MapEntry<String, double>> _attributes(
@@ -937,7 +1040,6 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
       StaffRole.headCoach => [
         MapEntry(l10n.staff_attrTactics, attributes.tactics),
         MapEntry(l10n.staff_attrMotivation, attributes.motivation),
-        MapEntry(l10n.staff_attrDevelopment, attributes.development),
       ],
       StaffRole.youthCoach => [
         MapEntry(l10n.staff_attrDevelopment, attributes.development),

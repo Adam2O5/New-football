@@ -1665,6 +1665,48 @@ class AppLocalizationsEn extends AppLocalizations {
   String get staff_fire => 'Fire';
 
   @override
+  String get staff_fireConfirmTitle => 'Fire staff member?';
+
+  @override
+  String staff_fireConfirm(String name) {
+    return 'Are you sure you want to fire $name?';
+  }
+
+  @override
+  String staff_fireSuccess(String name) {
+    return 'Fired: $name';
+  }
+
+  @override
+  String get staff_fireFailed => 'The staff member could not be fired.';
+
+  @override
+  String staff_contractRemaining(int years) {
+    String _temp0 = intl.Intl.pluralLogic(
+      years,
+      locale: localeName,
+      other: 'Contract: # years',
+      one: 'Contract: 1 year',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get staff_contractExpired => 'Contract expired';
+
+  @override
+  String staff_salaryRange(String min, String max) {
+    return 'Salary must be between $min and $max';
+  }
+
+  @override
+  String get staff_yearsRange =>
+      'Contract length must be between 1 and 4 years';
+
+  @override
+  String get staff_capExceeded => 'The offer exceeds the available staff cap';
+
+  @override
   String get staff_candidatesHeader => 'Hiring candidates';
 
   @override
@@ -1784,6 +1826,111 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get scouting_save => 'Save';
+
+  @override
+  String get scouting_combineTitle => 'Draft Combine';
+
+  @override
+  String get scouting_combineColumn => 'Combine';
+
+  @override
+  String scouting_combineDescription(int limit) {
+    return 'Choose watched prospects for the Combine. Limit: $limit.';
+  }
+
+  @override
+  String scouting_combineSelected(int selected, int limit) {
+    return 'Assigned to Combine: $selected / $limit';
+  }
+
+  @override
+  String get scouting_combineAssign => 'Choose Combine targets';
+
+  @override
+  String get scouting_combineSave => 'Save Combine assignments';
+
+  @override
+  String get scouting_combineSaved => 'Combine assignments saved.';
+
+  @override
+  String get scouting_combineClosed =>
+      'The Combine is complete — results are read-only.';
+
+  @override
+  String get scouting_combineRole => 'Optimal role';
+
+  @override
+  String get scouting_combineOpen => 'Open Combine target selection';
+
+  @override
+  String get scouting_combineNoWatchlist =>
+      'Add prospects to the watchlist first.';
+
+  @override
+  String get scouting_role_standard => 'Standard';
+
+  @override
+  String get scouting_role_sweeperKeeper => 'Sweeper keeper';
+
+  @override
+  String get scouting_role_ballPlayingDefender => 'Ball-playing defender';
+
+  @override
+  String get scouting_role_noNonsenseCentreBack => 'No-nonsense centre-back';
+
+  @override
+  String get scouting_role_defensiveFullBack => 'Defensive full-back';
+
+  @override
+  String get scouting_role_attackingFullBack => 'Attacking full-back';
+
+  @override
+  String get scouting_role_wingBack => 'Wing-back';
+
+  @override
+  String get scouting_role_invertedWingBack => 'Inverted wing-back';
+
+  @override
+  String get scouting_role_regista => 'Regista';
+
+  @override
+  String get scouting_role_deepLyingPlaymaker => 'Deep-lying playmaker';
+
+  @override
+  String get scouting_role_anchorMan => 'Anchor man';
+
+  @override
+  String get scouting_role_ballWinning => 'Ball-winning midfielder';
+
+  @override
+  String get scouting_role_playmaker => 'Playmaker';
+
+  @override
+  String get scouting_role_boxToBox => 'Box-to-box midfielder';
+
+  @override
+  String get scouting_role_mezzala => 'Mezzala';
+
+  @override
+  String get scouting_role_shadowStriker => 'Shadow striker';
+
+  @override
+  String get scouting_role_invertedWinger => 'Inverted winger';
+
+  @override
+  String get scouting_role_winger => 'Winger';
+
+  @override
+  String get scouting_role_falseNine => 'False nine';
+
+  @override
+  String get scouting_role_deepLyingForward => 'Deep-lying forward';
+
+  @override
+  String get scouting_role_pressingForward => 'Pressing forward';
+
+  @override
+  String get scouting_role_completeForward => 'Complete forward';
 
   @override
   String get scouting_slot_top1 => 'Proj: TOP 1';

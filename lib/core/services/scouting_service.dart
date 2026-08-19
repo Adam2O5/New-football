@@ -43,6 +43,33 @@ class ScoutingService {
     );
   }
 
+  int combineAssignLimit(double coverageStars) =>
+      balance.staff.combineAssignLimit(coverageStars);
+
+  /// Stores player-selected Combine targets while enforcing the watchlist,
+  /// draft-class membership and the Coverage-based limit in one place.
+  TeamScouting setCombineAssignments(
+    TeamScouting scouting,
+    List<String> prospectIds, {
+    required double coverageStars,
+    Iterable<String>? availableProspectIds,
+  }) {
+    final available = availableProspectIds?.toSet();
+    final allowed = scouting.watchlistProspectIds.where(
+      (id) => available == null || available.contains(id),
+    );
+    final allowedSet = allowed.toSet();
+    final limit = combineAssignLimit(coverageStars);
+    final selected = <String>[];
+    for (final id in prospectIds) {
+      if (selected.length >= limit) break;
+      if (allowedSet.contains(id) && !selected.contains(id)) {
+        selected.add(id);
+      }
+    }
+    return scouting.copyWith(combineAssignedProspectIds: selected);
+  }
+
   /// Cotygodniowy progres tieru dla obserwowanych prospectów, ∝ Evaluation.
   TeamScouting tickKnowledge(
     TeamScouting scouting,
@@ -158,12 +185,13 @@ class ScoutingService {
         prospectId: knowledge.prospectId,
       );
       final prospect = byId[knowledge.prospectId];
+      final targetTier = knowledge.tier.index < ScoutingTier.tier4.index
+          ? ScoutingTier.tier4
+          : knowledge.tier;
       final upgraded = _evidenceForTier(
-        knowledge,
+        knowledge.copyWith(tier: targetTier),
         prospect,
-        knowledge.tier.index < ScoutingTier.tier4.index
-            ? ScoutingTier.tier4
-            : knowledge.tier,
+        targetTier,
       );
       final injuryKnown =
           upgraded.injuryProneKnown || random.nextDouble() < bonusChance;

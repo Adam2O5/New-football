@@ -125,6 +125,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         path: '/game/prospects',
         builder: (context, state) => ProspectsScreen(
           initialWatchOnly: state.uri.queryParameters['watchlist'] == 'true',
+          initialCombine: state.uri.queryParameters['combine'] == 'true',
         ),
       ),
       GoRoute(

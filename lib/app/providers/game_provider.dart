@@ -522,10 +522,14 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   }
 
   /// Returns true if the calendar event due today is a `playerAction` that
-  /// the batch must stop for (currently only the draft, when it's the
-  /// player's turn to pick, or the lottery which requires interactive UI).
+  /// the batch must stop for (for example the Scout Report/Combine target
+  /// selection, lottery, or the player's turn to pick in the draft).
   bool _isBlockingPlayerEvent(LeagueState league, CalendarEventId eventId) {
     if (eventId == CalendarEventId.lottery) return true;
+    if (eventId == CalendarEventId.scoutReport) {
+      return league.playerTeam != null &&
+          league.currentSeason.draftState?.draftClass != null;
+    }
     if (eventId != CalendarEventId.draft) return false;
     final draft = league.currentSeason.draftState;
     if (draft == null) return false;
@@ -1231,12 +1235,14 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     return reaction == StaffReaction.accept;
   }
 
-  Future<void> fireStaff(StaffRole role) async {
-    await updateLeague((l) {
-      final team = l.playerTeam;
-      if (team == null) return l;
-      return l.updateTeam(_staff.fire(team, role));
-    });
+  Future<bool> fireStaff(StaffRole role) async {
+    final current = save;
+    final team = current?.leagueState.playerTeam;
+    if (current == null || team == null) return false;
+    final updatedTeam = _staff.fire(team, role);
+    if (updatedTeam == team) return false;
+    await updateLeague((league) => league.updateTeam(updatedTeam));
+    return true;
   }
 
   ScoutingService get _scouting => _ref.read(scoutingServiceProvider);
@@ -1254,6 +1260,35 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
       );
       return l.updateTeam(team.copyWith(scouting: scouting));
     });
+  }
+
+  /// Saves player-selected Combine targets only after Scout Report and before
+  /// the automatic Combine event.
+  Future<bool> setCombineAssignments(List<String> prospectIds) async {
+    final current = save;
+    final league = current?.leagueState;
+    final team = league?.playerTeam;
+    final draftClass = league?.currentSeason.draftState?.draftClass;
+    if (current == null ||
+        league == null ||
+        team == null ||
+        draftClass == null) {
+      return false;
+    }
+    final season = league.currentSeason;
+    if (!season.scoutReportDone || season.combineDone) return false;
+    if (team.scouting.watchlistProspectIds.isEmpty) return false;
+    final coverage = team.staff.scout?.attributes.coverage ?? 0.0;
+    final scouting = _scouting.setCombineAssignments(
+      team.scouting,
+      prospectIds,
+      coverageStars: coverage,
+      availableProspectIds: draftClass.prospects.map((prospect) => prospect.id),
+    );
+    await updateLeague(
+      (state) => state.updateTeam(team.copyWith(scouting: scouting)),
+    );
+    return true;
   }
 
   void clear() {

@@ -22,29 +22,86 @@ void main() {
     expect(scouting.knowledge.length, scouting.watchlistProspectIds.length);
   });
 
+  test('setCombineAssignments keeps watched ids and enforces the limit', () {
+    final svc = ScoutingService();
+    const scouting = TeamScouting(
+      watchlistProspectIds: ['a', 'b', 'c'],
+      combineAssignedProspectIds: ['c'],
+    );
+
+    final updated = svc.setCombineAssignments(
+      scouting,
+      ['not-watched', 'b', 'b', 'a', 'c'],
+      coverageStars: 5.0,
+      availableProspectIds: const ['a', 'b', 'c'],
+    );
+
+    expect(updated.combineAssignedProspectIds, ['b', 'a']);
+  });
+
+  test('runCombine upgrades only assigned prospects', () {
+    final draftClass = SeedDataGenerator().generateDraftClass(
+      year: 2030,
+      prospectCount: 2,
+    );
+    final first = draftClass.prospects[0];
+    final second = draftClass.prospects[1];
+    final scouting = TeamScouting(
+      watchlistProspectIds: [first.id, second.id],
+      knowledge: [
+        ScoutingKnowledge(prospectId: first.id),
+        ScoutingKnowledge(prospectId: second.id),
+      ],
+      combineAssignedProspectIds: [first.id],
+    );
+
+    final updated = ScoutingService().runCombine(
+      scouting,
+      5.0,
+      prospects: draftClass.prospects,
+      seed: 42,
+      seasonYear: 2030,
+      week: 45,
+      teamId: 'player-team',
+    );
+
+    expect(
+      updated.forProspect(first.id)!.tier.index,
+      greaterThanOrEqualTo(ScoutingTier.tier4.index),
+    );
+    expect(updated.forProspect(second.id)!.tier, ScoutingTier.tier1);
+  });
+
   test('tickKnowledge eventually advances tiers with high evaluation', () {
     var scouting = const TeamScouting(
       watchlistProspectIds: ['p1'],
       knowledge: [ScoutingKnowledge(prospectId: 'p1')],
     );
     final svc = ScoutingService(random: Random(1));
-    for (var i = 0; i < 30 && scouting.forProspect('p1')!.tier != ScoutingTier.tier5; i++) {
+    for (
+      var i = 0;
+      i < 30 && scouting.forProspect('p1')!.tier != ScoutingTier.tier5;
+      i++
+    ) {
       scouting = svc.tickKnowledge(scouting, 5.0);
     }
     expect(scouting.forProspect('p1')!.tier, ScoutingTier.tier5);
   });
 
-  test('runScoutReport assigns at most combineAssignLimit(coverage) targets', () {
-    final svc = ScoutingService();
-    final scouting = const TeamScouting(
-      watchlistProspectIds: ['a', 'b', 'c', 'd', 'e'],
-    );
-    final updated = svc.runScoutReport(scouting, 5.0);
-    expect(
-      updated.combineAssignedProspectIds.length,
-      lessThanOrEqualTo(balance.staff.combineAssignLimit(5.0)),
-    );
-  });
+  test(
+    'runScoutReport assigns at most combineAssignLimit(coverage) targets',
+    () {
+      final svc = ScoutingService();
+      final scouting = const TeamScouting(
+        watchlistProspectIds: ['a', 'b', 'c', 'd', 'e'],
+      );
+      final updated = svc.runScoutReport(scouting, 5.0);
+      expect(
+        updated.combineAssignedProspectIds.length,
+        lessThanOrEqualTo(balance.staff.combineAssignLimit(5.0)),
+      );
+    },
+  );
 
   test('runFinalMock assigns top1 slot to the true best prospect', () {
     final draftClass = SeedDataGenerator().generateDraftClass(year: 2030);

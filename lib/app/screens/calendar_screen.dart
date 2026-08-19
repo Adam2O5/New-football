@@ -527,6 +527,14 @@ Future<void> _runBatch(
     return;
   }
   if (result.stopReason == SimulationStopReason.event) {
+    if (result.eventId == CalendarEventId.scoutReport) {
+      await ref
+          .read(gameControllerProvider.notifier)
+          .runEventAtCurrentDay(CalendarEventId.scoutReport);
+      if (!context.mounted) return;
+      context.push('/game/prospects?watchlist=true&combine=true');
+      return;
+    }
     if (result.eventId == CalendarEventId.draft) {
       context.push('/game/draft');
       return;

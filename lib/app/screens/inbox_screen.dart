@@ -370,7 +370,7 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
       MessageType.trade || MessageType.tradeOffer => '/game/trade',
       MessageType.contractOffer ||
       MessageType.contractSigned => '/game/contracts',
-      MessageType.scoutReport => '/game/prospects?watchlist=true',
+      MessageType.scoutReport => '/game/prospects?watchlist=true&combine=true',
       MessageType.staffGrowth ||
       MessageType.staffHired ||
       MessageType.staffFired => '/game/staff',
