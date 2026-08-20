@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
+import 'package:new_football/app/models/calendar_simulation_feedback.dart';
+import 'package:new_football/app/services/calendar_simulation_pacer.dart';
 import 'package:new_football/core/simulation/match_engine.dart';
 import 'package:new_football/core/ai/ai_matchday_service.dart';
 import 'package:new_football/core/ai/ai_roster_management_service.dart';
@@ -241,17 +243,49 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     if (autosave && !_batchSimulationActive) await _repo.save(next);
   }
 
-  bool _batchSimulationActive = false;
-  bool _cancelRequested = false;
+  bool get _batchSimulationActive => _activeSimulationSession != null;
+  _SimulationSession? _activeSimulationSession;
+  int _nextSimulationRunId = 0;
+
+  _SimulationSession _startSimulationSession() {
+    // A second request invalidates the old session rather than resetting a
+    // shared flag. The old loop will observe that it is no longer current
+    // after its next await and cannot publish stale feedback or clear the new
+    // session in its finally block.
+    _activeSimulationSession?.cancelRequested = true;
+    final session = _SimulationSession(_nextSimulationRunId++);
+    _activeSimulationSession = session;
+    return session;
+  }
+
+  bool _isCurrentSimulationSession(_SimulationSession session) =>
+      identical(_activeSimulationSession, session);
 
   /// Requests that an in-progress batch stop as soon as possible (checked
   /// between simulated days).
   void cancelSimulation() {
-    _cancelRequested = true;
+    _activeSimulationSession?.cancelRequested = true;
   }
 
   bool _hasPendingUrgent(LeagueState league) =>
       league.inbox.pendingUrgent.isNotEmpty;
+
+  bool _hasScheduledUrgentDue(LeagueState league) {
+    final hour = league.currentHour;
+    return league.inbox.scheduled.any((message) {
+      final beforeDate =
+          message.week < league.currentWeek ||
+          (message.week == league.currentWeek &&
+              message.day < league.currentDay);
+      final sameDate =
+          message.week == league.currentWeek &&
+          message.day == league.currentDay;
+      final hourDue =
+          message.hour == null || hour == null || message.hour! <= hour;
+      return message.priority == MessagePriority.urgent &&
+          (beforeDate || (sameDate && hourDue));
+    });
+  }
 
   LeagueState _deliverStartOfDay(
     LeagueState league, {
@@ -629,23 +663,217 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     return result;
   }
 
+  Future<bool> _publishCompletedCalendarDay({
+    required _SimulationSession session,
+    required int sequence,
+    required int week,
+    required int day,
+    required LeagueState league,
+    required DaySimulationResult result,
+    CalendarDaySimulationObserver? observer,
+    CalendarSimulationPacer? pacer,
+  }) async {
+    if (!_isCurrentSimulationSession(session)) return false;
+
+    if (observer != null) {
+      observer(
+        CalendarDaySimulationFeedback(
+          runId: session.runId,
+          sequence: sequence,
+          week: week,
+          day: day,
+          results: _calendarFeedbackResults(
+            league: league,
+            week: week,
+            day: day,
+            results: result.simulatedResults,
+          ),
+        ),
+      );
+    }
+
+    // An observer may synchronously start a newer run. In that case this
+    // session must not wait on or reset the newer run's pacer.
+    if (!_isCurrentSimulationSession(session)) return false;
+
+    if (pacer != null) {
+      await pacer.completeDay();
+      if (!_isCurrentSimulationSession(session)) return false;
+    }
+    return true;
+  }
+
+  List<MatchResult> _mergeCalendarSimulationResults({
+    required LeagueState league,
+    required int week,
+    required int day,
+    required List<MatchResult> simulatedResults,
+    required MatchResult autoResult,
+  }) {
+    final merged = <MatchResult>[...simulatedResults];
+    final autoResultAlreadyPresent = merged.any(
+      (candidate) =>
+          candidate.homeTeamId == autoResult.homeTeamId &&
+          candidate.awayTeamId == autoResult.awayTeamId,
+    );
+    if (!autoResultAlreadyPresent) merged.add(autoResult);
+
+    final daySchedule = _scheduledMatchesForCalendarDay(league, week, day);
+    final rows =
+        <({MatchResult result, int schedulePosition, int inputOrder})>[];
+
+    for (var inputOrder = 0; inputOrder < merged.length; inputOrder++) {
+      final result = merged[inputOrder];
+      var schedulePosition = daySchedule.length + inputOrder;
+      for (var index = 0; index < daySchedule.length; index++) {
+        final scheduledMatch = daySchedule[index];
+        if (scheduledMatch.homeTeamId == result.homeTeamId &&
+            scheduledMatch.awayTeamId == result.awayTeamId) {
+          schedulePosition = index;
+          break;
+        }
+      }
+      rows.add((
+        result: result,
+        schedulePosition: schedulePosition,
+        inputOrder: inputOrder,
+      ));
+    }
+
+    rows.sort((a, b) {
+      final position = a.schedulePosition.compareTo(b.schedulePosition);
+      return position == 0 ? a.inputOrder.compareTo(b.inputOrder) : position;
+    });
+    return [for (final row in rows) row.result];
+  }
+
+  List<CalendarMatchFeedback> _calendarFeedbackResults({
+    required LeagueState league,
+    required int week,
+    required int day,
+    required List<MatchResult> results,
+  }) {
+    final daySchedule = _scheduledMatchesForCalendarDay(league, week, day);
+    final schedule = league.currentSeason.schedule;
+    final rows = <({CalendarMatchFeedback feedback, int inputOrder})>[];
+
+    for (var inputOrder = 0; inputOrder < results.length; inputOrder++) {
+      final result = results[inputOrder];
+      ScheduledMatch? scheduledMatch;
+
+      for (final candidate in daySchedule) {
+        if (candidate.result == result ||
+            (candidate.homeTeamId == result.homeTeamId &&
+                candidate.awayTeamId == result.awayTeamId &&
+                candidate.result != null)) {
+          scheduledMatch = candidate;
+          break;
+        }
+      }
+      if (scheduledMatch == null) {
+        for (final candidate in schedule) {
+          if (candidate.result == result ||
+              (candidate.homeTeamId == result.homeTeamId &&
+                  candidate.awayTeamId == result.awayTeamId &&
+                  candidate.result != null)) {
+            scheduledMatch = candidate;
+            break;
+          }
+        }
+      }
+
+      var daySchedulePosition = -1;
+      if (scheduledMatch != null) {
+        for (var index = 0; index < daySchedule.length; index++) {
+          if (daySchedule[index] == scheduledMatch) {
+            daySchedulePosition = index;
+            break;
+          }
+        }
+      }
+      final dayPosition = daySchedulePosition >= 0
+          ? daySchedulePosition
+          : inputOrder;
+      final matchId =
+          scheduledMatch?.id ??
+          'calendar_${week}_${day}_${result.homeTeamId}_'
+              '${result.awayTeamId}_$inputOrder';
+      final homeName =
+          league.teamById(result.homeTeamId)?.name ?? result.homeTeamId;
+      final awayName =
+          league.teamById(result.awayTeamId)?.name ?? result.awayTeamId;
+
+      rows.add((
+        feedback: CalendarMatchFeedback(
+          matchId: matchId,
+          homeTeamId: result.homeTeamId,
+          homeTeamName: homeName,
+          awayTeamId: result.awayTeamId,
+          awayTeamName: awayName,
+          homeGoals: result.homeGoals,
+          awayGoals: result.awayGoals,
+          schedulePosition: dayPosition,
+          status: result.status.name,
+          reasonCode: result.reasonCode,
+        ),
+        inputOrder: inputOrder,
+      ));
+    }
+
+    rows.sort((a, b) {
+      final position = a.feedback.schedulePosition.compareTo(
+        b.feedback.schedulePosition,
+      );
+      return position == 0 ? a.inputOrder.compareTo(b.inputOrder) : position;
+    });
+    return [for (final row in rows) row.feedback];
+  }
+
+  List<ScheduledMatch> _scheduledMatchesForCalendarDay(
+    LeagueState league,
+    int week,
+    int day,
+  ) {
+    final slot = _calendar.regularSeasonSlotForDay(day);
+    if (slot == null || !_calendar.isActualMatchDay(week, day)) {
+      return const [];
+    }
+    final round = scheduleRoundForWeekSlot(week, slot);
+    return league.currentSeason.schedule
+        .where((match) => match.round == round)
+        .toList();
+  }
+
   Future<BatchSimulationResult> _simulateUntil(
     bool Function(LeagueState league) reachedTarget, {
     bool autoResolveEvents = false,
     bool autoSimulatePlayerMatch = false,
     int maxDays = 400,
+    CalendarDaySimulationObserver? observer,
+    CalendarSimulationPacer? pacer,
   }) async {
-    _batchSimulationActive = true;
+    final session = _startSimulationSession();
+    // A pacer can be reused by a resumed calendar run. Do not let an
+    // incomplete cycle from an older run affect the new run's first day.
+    pacer?.skipDay();
     try {
       return await _simulateUntilInternal(
         reachedTarget,
         autoResolveEvents: autoResolveEvents,
         autoSimulatePlayerMatch: autoSimulatePlayerMatch,
         maxDays: maxDays,
+        session: session,
+        observer: observer,
+        pacer: pacer,
       );
     } finally {
-      _batchSimulationActive = false;
-      await persist();
+      // Only the session that still owns the controller may clear the active
+      // marker or persist. A stale batch must not reset a newer batch's state.
+      if (identical(_activeSimulationSession, session)) {
+        pacer?.skipDay();
+        _activeSimulationSession = null;
+        await persist();
+      }
     }
   }
 
@@ -670,12 +898,27 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     bool autoResolveEvents = false,
     bool autoSimulatePlayerMatch = false,
     int maxDays = 400,
+    required _SimulationSession session,
+    CalendarDaySimulationObserver? observer,
+    CalendarSimulationPacer? pacer,
   }) async {
-    _cancelRequested = false;
+    final calendarPresentation = observer != null || pacer != null;
     var daysSimulated = 0;
+    var feedbackSequence = 0;
     DaySimulationResult? lastResult;
 
     while (true) {
+      // A replaced session is cancelled even if its old cancellation flag was
+      // set while it was suspended in an await. The active session alone may
+      // continue publishing state and presentation feedback.
+      if (!_isCurrentSimulationSession(session)) {
+        return BatchSimulationResult(
+          stopReason: SimulationStopReason.cancelled,
+          daysSimulated: daysSimulated,
+          lastResult: lastResult,
+        );
+      }
+
       final current = save;
       if (current == null) {
         return BatchSimulationResult(
@@ -684,7 +927,7 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
           lastResult: lastResult,
         );
       }
-      if (_cancelRequested) {
+      if (session.cancelRequested) {
         return BatchSimulationResult(
           stopReason: SimulationStopReason.cancelled,
           daysSimulated: daysSimulated,
@@ -708,6 +951,33 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
       }
 
       if (reachedTarget(league)) {
+        // A calendar target can be the first date on which a scheduled urgent
+        // message is delivered. Surface that message before stopping at the
+        // target, but do not simulate the target day or publish incomplete
+        // feedback for it.
+        if (calendarPresentation && _hasScheduledUrgentDue(league)) {
+          final delivered = _deliverStartOfDay(
+            league,
+            hour: league.currentHour,
+            saveSeed: current.saveSeed,
+            resolveExpired: false,
+          );
+          await updateLeague((_) => delivered);
+          if (!_isCurrentSimulationSession(session)) {
+            return BatchSimulationResult(
+              stopReason: SimulationStopReason.cancelled,
+              daysSimulated: daysSimulated,
+              lastResult: lastResult,
+            );
+          }
+          if (_hasPendingUrgent(delivered)) {
+            return BatchSimulationResult(
+              stopReason: SimulationStopReason.urgent,
+              daysSimulated: daysSimulated,
+              lastResult: lastResult,
+            );
+          }
+        }
         return BatchSimulationResult(
           stopReason: SimulationStopReason.reachedTarget,
           daysSimulated: daysSimulated,
@@ -725,6 +995,20 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
           );
         }
         await runEventAtCurrentDay(dueEventId);
+        if (!_isCurrentSimulationSession(session)) {
+          return BatchSimulationResult(
+            stopReason: SimulationStopReason.cancelled,
+            daysSimulated: daysSimulated,
+            lastResult: lastResult,
+          );
+        }
+        if (session.cancelRequested) {
+          return BatchSimulationResult(
+            stopReason: SimulationStopReason.cancelled,
+            daysSimulated: daysSimulated,
+            lastResult: lastResult,
+          );
+        }
       }
 
       if (daysSimulated >= maxDays) {
@@ -735,17 +1019,37 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
         );
       }
 
-      final wasHourlyEnd =
-          _calendar.isHourlyContractMode(
-            league.currentWeek,
-            league.currentDay,
-          ) &&
-          (league.currentHour ?? 1) >= 10;
-      final result =
-          _calendar.isHourlyContractMode(league.currentWeek, league.currentDay)
-          ? await advanceOneHour()
-          : await advanceOneDay();
+      final startWeek = league.currentWeek;
+      final startDay = league.currentDay;
+      final isHourly = _calendar.isHourlyContractMode(startWeek, startDay);
+      final wasHourlyEnd = isHourly && (league.currentHour ?? 1) >= 10;
+      if (pacer != null && (!isHourly || !pacer.hasActiveDay)) {
+        pacer.startDay();
+      }
+
+      final result = isHourly ? await advanceOneHour() : await advanceOneDay();
+      if (!_isCurrentSimulationSession(session)) {
+        return BatchSimulationResult(
+          stopReason: SimulationStopReason.cancelled,
+          daysSimulated: daysSimulated,
+          lastResult: lastResult,
+        );
+      }
       if (result == null) {
+        pacer?.skipDay();
+        // A start-of-day urgent message makes the raw day primitive return
+        // null after preserving the active save. Distinguish that stop from
+        // a genuinely unavailable save so the calendar path keeps its
+        // existing urgent lifecycle without publishing an incomplete day.
+        final currentAfterNullStep = save;
+        if (currentAfterNullStep != null &&
+            _hasPendingUrgent(currentAfterNullStep.leagueState)) {
+          return BatchSimulationResult(
+            stopReason: SimulationStopReason.urgent,
+            daysSimulated: daysSimulated,
+            lastResult: lastResult,
+          );
+        }
         return BatchSimulationResult(
           stopReason: SimulationStopReason.noSave,
           daysSimulated: daysSimulated,
@@ -753,14 +1057,16 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
         );
       }
       lastResult = result;
-      if (!wasHourlyEnd &&
-          !_calendar.isHourlyContractMode(
-            league.currentWeek,
-            league.currentDay,
-          )) {
-        daysSimulated++;
-      } else if (wasHourlyEnd) {
-        daysSimulated++;
+
+      // Keep the old count semantics for HomeScreen/day-by-day callers. The
+      // calendar observer path counts only a date transition, so an hourly
+      // slot or an incomplete player-match day cannot emit a false day.
+      if (!calendarPresentation) {
+        if (!wasHourlyEnd && !isHourly) {
+          daysSimulated++;
+        } else if (wasHourlyEnd) {
+          daysSimulated++;
+        }
       }
 
       if (result.playerMatch != null) {
@@ -768,14 +1074,60 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
           final autoResult = await _autoSimulatePlayerMatch(
             result.playerMatch!,
           );
+          if (!_isCurrentSimulationSession(session)) {
+            return BatchSimulationResult(
+              stopReason: SimulationStopReason.cancelled,
+              daysSimulated: daysSimulated,
+              lastResult: lastResult,
+            );
+          }
           if (autoResult != null) {
             final leagueAfter = save!.leagueState;
+            final mergedResults = _mergeCalendarSimulationResults(
+              league: leagueAfter,
+              week: startWeek,
+              day: startDay,
+              simulatedResults: result.simulatedResults,
+              autoResult: autoResult,
+            );
             lastResult = DaySimulationResult(
               league: leagueAfter,
               pauseForUrgent: leagueAfter.inbox.pendingUrgent.isNotEmpty,
-              simulatedResults: [autoResult],
+              simulatedResults: mergedResults,
               eventId: null,
             );
+
+            if (calendarPresentation) {
+              final completed = _dateAdvanced(
+                leagueAfter,
+                startWeek: startWeek,
+                startDay: startDay,
+              );
+              if (completed) {
+                daysSimulated++;
+                final published = await _publishCompletedCalendarDay(
+                  session: session,
+                  sequence: feedbackSequence,
+                  week: startWeek,
+                  day: startDay,
+                  league: leagueAfter,
+                  result: lastResult,
+                  observer: observer,
+                  pacer: pacer,
+                );
+                if (!published) {
+                  return BatchSimulationResult(
+                    stopReason: SimulationStopReason.cancelled,
+                    daysSimulated: daysSimulated,
+                    lastResult: lastResult,
+                  );
+                }
+                feedbackSequence++;
+              } else {
+                pacer?.skipDay();
+              }
+            }
+
             if (leagueAfter.inbox.pendingUrgent.isNotEmpty) {
               return BatchSimulationResult(
                 stopReason: SimulationStopReason.urgent,
@@ -786,13 +1138,66 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
             continue;
           }
         }
+        // A player match that could not be auto-resolved did not complete a
+        // calendar day. Do not publish feedback for it.
+        pacer?.skipDay();
         return BatchSimulationResult(
           stopReason: SimulationStopReason.playerMatch,
           daysSimulated: daysSimulated,
           lastResult: lastResult,
         );
       }
-      if (result.pauseForUrgent) {
+
+      if (calendarPresentation) {
+        final leagueAfter = save?.leagueState;
+        final completed =
+            leagueAfter != null &&
+            _dateAdvanced(
+              leagueAfter,
+              startWeek: startWeek,
+              startDay: startDay,
+            );
+        if (completed) {
+          daysSimulated++;
+          final published = await _publishCompletedCalendarDay(
+            session: session,
+            sequence: feedbackSequence,
+            week: startWeek,
+            day: startDay,
+            league: leagueAfter,
+            result: result,
+            observer: observer,
+            pacer: pacer,
+          );
+          if (!published) {
+            return BatchSimulationResult(
+              stopReason: SimulationStopReason.cancelled,
+              daysSimulated: daysSimulated,
+              lastResult: lastResult,
+            );
+          }
+          feedbackSequence++;
+        } else if (!isHourly) {
+          pacer?.skipDay();
+        }
+
+        // Preserve the existing urgent stop priority after the completed-day
+        // presentation cycle has been given a chance to finish.
+        if (result.pauseForUrgent) {
+          return BatchSimulationResult(
+            stopReason: SimulationStopReason.urgent,
+            daysSimulated: daysSimulated,
+            lastResult: lastResult,
+          );
+        }
+        if (session.cancelRequested) {
+          return BatchSimulationResult(
+            stopReason: SimulationStopReason.cancelled,
+            daysSimulated: daysSimulated,
+            lastResult: lastResult,
+          );
+        }
+      } else if (result.pauseForUrgent) {
         return BatchSimulationResult(
           stopReason: SimulationStopReason.urgent,
           daysSimulated: daysSimulated,
@@ -801,6 +1206,12 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
       }
     }
   }
+
+  bool _dateAdvanced(
+    LeagueState league, {
+    required int startWeek,
+    required int startDay,
+  }) => league.currentWeek != startWeek || league.currentDay != startDay;
 
   /// Simulates day by day until the next unresolved calendar event or the
   /// player's match comes up — whichever happens first. Nic nie jest
@@ -820,7 +1231,41 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   /// Zatrzymuje się wyłącznie na: pilnej wiadomości w skrzynce lub
   /// `playerAction` evencie, na który wymagana jest realna decyzja gracza
   /// (obecnie tylko tura draftu gracza).
-  Future<BatchSimulationResult> simulateToDate(int targetWeek, int targetDay) {
+  Future<BatchSimulationResult> simulateToDate(
+    int targetWeek,
+    int targetDay, {
+    CalendarDaySimulationObserver? observer,
+    CalendarSimulationPacer? pacer,
+  }) {
+    // A direct simulateToDate call is itself the calendar fast-forward path.
+    // Keep feedback opt-in through [observer], but use the production pacing
+    // boundary when the caller does not inject a test/route pacer. Other
+    // flows call _simulateUntil directly and therefore retain their original
+    // unpaced behavior.
+    final effectivePacer = pacer ?? CalendarSimulationPacer();
+    return _simulateUntil(
+      (league) => _calendar.isAtOrAfter(
+        league.currentWeek,
+        league.currentDay,
+        targetWeek,
+        targetDay,
+      ),
+      autoResolveEvents: true,
+      autoSimulatePlayerMatch: true,
+      observer: observer,
+      pacer: effectivePacer,
+    );
+  }
+
+  /// Simulates through the last day of [phase] (inclusive), stopping at the
+  /// first day of whatever comes next. Ta sama semantyka co `simulateToDate`
+  /// (auto-resolve eventów i meczów gracza).
+  Future<BatchSimulationResult> simulateUntilPhaseEnd(SeasonPhase phase) {
+    final (endWeek, endDay) = _calendar.endOfPhase(phase);
+    final (targetWeek, targetDay) = _calendar.advanceDay(endWeek, endDay);
+    // Phase-end simulation is a non-calendar presentation flow. Keep its
+    // historical pacing and stop behavior instead of routing it through the
+    // calendar-only default pacer.
     return _simulateUntil(
       (league) => _calendar.isAtOrAfter(
         league.currentWeek,
@@ -831,15 +1276,6 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
       autoResolveEvents: true,
       autoSimulatePlayerMatch: true,
     );
-  }
-
-  /// Simulates through the last day of [phase] (inclusive), stopping at the
-  /// first day of whatever comes next. Ta sama semantyka co `simulateToDate`
-  /// (auto-resolve eventów i meczów gracza).
-  Future<BatchSimulationResult> simulateUntilPhaseEnd(SeasonPhase phase) {
-    final (endWeek, endDay) = _calendar.endOfPhase(phase);
-    final (targetWeek, targetDay) = _calendar.advanceDay(endWeek, endDay);
-    return simulateToDate(targetWeek, targetDay);
   }
 
   Future<void> applyPlayerMatch(
@@ -1294,6 +1730,13 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   void clear() {
     state = const AsyncValue.data(null);
   }
+}
+
+final class _SimulationSession {
+  _SimulationSession(this.runId);
+
+  final int runId;
+  bool cancelRequested = false;
 }
 
 final gameControllerProvider =

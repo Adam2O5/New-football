@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:new_football/app/providers/game_provider.dart';
+import 'package:new_football/app/screens/calendar_screen.dart';
 import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/core/services/game_factory.dart';
 import 'package:new_football/data/save_repository.dart';
@@ -27,17 +28,29 @@ Widget task41App(
   Widget screen,
   GameSave game, {
   void Function(GameController controller)? onController,
+  DateTime? selectedCalendarDay,
+  SaveRepository? saveRepository,
+  List<NavigatorObserver> navigatorObservers = const [],
 }) {
+  final overrides = [
+    saveRepositoryProvider.overrideWithValue(
+      saveRepository ?? Task41NoopSaveRepository(),
+    ),
+    gameControllerProvider.overrideWith((ref) {
+      final controller = GameController(ref);
+      controller.state = AsyncValue.data(game);
+      onController?.call(controller);
+      return controller;
+    }),
+  ];
+  if (selectedCalendarDay != null) {
+    overrides.add(
+      calendarSelectedDayProvider.overrideWith((ref) => selectedCalendarDay),
+    );
+  }
+
   return ProviderScope(
-    overrides: [
-      saveRepositoryProvider.overrideWithValue(Task41NoopSaveRepository()),
-      gameControllerProvider.overrideWith((ref) {
-        final controller = GameController(ref);
-        controller.state = AsyncValue.data(game);
-        onController?.call(controller);
-        return controller;
-      }),
-    ],
+    overrides: overrides,
     child: MaterialApp(
       locale: const Locale('pl'),
       localizationsDelegates: const [
@@ -47,6 +60,7 @@ Widget task41App(
         GlobalCupertinoLocalizations.delegate,
       ],
       supportedLocales: AppLocalizations.supportedLocales,
+      navigatorObservers: navigatorObservers,
       home: screen,
     ),
   );

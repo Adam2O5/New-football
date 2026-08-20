@@ -695,6 +695,22 @@
   "@calendar_selectedDay_offseasonEvent": {
     "placeholders": { "name": {"type": "String"} }
   },
+  "calendar_simulationResults_title": "Wyniki meczów · tydzień {week}, dzień {day}",
+  "@calendar_simulationResults_title": {
+    "placeholders": {
+      "week": {"type": "int"},
+      "day": {"type": "int"}
+    }
+  },
+  "calendar_simulationResults_match": "{home} {homeGoals}:{awayGoals} {away}",
+  "@calendar_simulationResults_match": {
+    "placeholders": {
+      "home": {"type": "String"},
+      "away": {"type": "String"},
+      "homeGoals": {"type": "int"},
+      "awayGoals": {"type": "int"}
+    }
+  },
 
   "trade_title": "Wymiana",
   "trade_noTeam": "Brak drużyny",

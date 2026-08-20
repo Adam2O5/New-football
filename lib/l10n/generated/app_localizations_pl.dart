@@ -1508,6 +1508,21 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
+  String calendar_simulationResults_title(int week, int day) {
+    return 'Wyniki meczów · tydzień $week, dzień $day';
+  }
+
+  @override
+  String calendar_simulationResults_match(
+    String home,
+    String away,
+    int homeGoals,
+    int awayGoals,
+  ) {
+    return '$home $homeGoals:$awayGoals $away';
+  }
+
+  @override
   String get trade_title => 'Wymiana';
 
   @override

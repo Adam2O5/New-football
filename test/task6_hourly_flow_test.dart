@@ -87,10 +87,21 @@ void main() {
   test('ten hourly clicks advance exactly one calendar day', () async {
     await setDate(46, 2, hour: 1);
 
-    for (var i = 0; i < 10; i++) {
+    for (var i = 0; i < 9; i++) {
       final result = await controller.advanceOneHour();
       expect(result, isNotNull);
+
+      final league = controller.save!.leagueState;
+      expect(league.currentWeek, 46);
+      expect(league.currentDay, 2);
+      expect(league.currentHour, i + 2);
     }
+
+    // The tenth slot is the only hourly step that crosses the calendar
+    // boundary. This is the non-calendar baseline: no intermediate hour
+    // changes the logical date, and one completed day is produced at the end.
+    final endOfDay = await controller.advanceOneHour();
+    expect(endOfDay, isNotNull);
 
     final league = controller.save!.leagueState;
     expect(league.currentWeek, 46);

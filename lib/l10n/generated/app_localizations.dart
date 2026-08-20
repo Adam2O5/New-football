@@ -2833,6 +2833,23 @@ abstract class AppLocalizations {
   /// **'Wydarzenie: {name}'**
   String calendar_selectedDay_offseasonEvent(String name);
 
+  /// No description provided for @calendar_simulationResults_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wyniki meczów · tydzień {week}, dzień {day}'**
+  String calendar_simulationResults_title(int week, int day);
+
+  /// No description provided for @calendar_simulationResults_match.
+  ///
+  /// In pl, this message translates to:
+  /// **'{home} {homeGoals}:{awayGoals} {away}'**
+  String calendar_simulationResults_match(
+    String home,
+    String away,
+    int homeGoals,
+    int awayGoals,
+  );
+
   /// No description provided for @trade_title.
   ///
   /// In pl, this message translates to:

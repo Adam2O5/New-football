@@ -5,6 +5,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:new_football/app/models/calendar_simulation_feedback.dart';
+import 'package:new_football/app/services/calendar_simulation_pacer.dart';
+import 'package:new_football/app/widgets/calendar_day_result_popup.dart';
+import 'package:new_football/app/widgets/calendar_day_tile.dart';
 import 'package:new_football/app/widgets/screen_background.dart';
 import 'package:new_football/app/l10n/enum_labels.dart';
 import 'package:new_football/app/providers/game_provider.dart';
@@ -59,11 +63,283 @@ DateTime _monthForInGame(LeagueState league) {
   return DateTime(d.year, d.month);
 }
 
-class CalendarScreen extends ConsumerWidget {
+/// Returns a stable logical extent for each calendar row.
+///
+/// The width-derived value preserves the old visual ratio, while the
+/// height-derived cap keeps a short logical viewport from handing a tile an
+/// extent that cannot fit its available row space. MediaQuery and
+/// BoxConstraints are both logical Flutter units; physical pixel ratio is
+/// deliberately not part of this calculation.
+double _calendarTileExtent({
+  required double logicalWidth,
+  required double logicalHeight,
+  required int rowCount,
+}) {
+  final safeWidth = logicalWidth.isFinite && logicalWidth > 0
+      ? logicalWidth
+      : 48.0 * 7;
+  final tileWidth = safeWidth / 7;
+  var extent = tileWidth / 0.85;
+
+  if (logicalHeight.isFinite && logicalHeight > 0 && rowCount > 0) {
+    final heightBasedExtent = logicalHeight / rowCount;
+    if (heightBasedExtent < extent) extent = heightBasedExtent;
+  }
+
+  return extent.clamp(1.0, double.infinity).toDouble();
+}
+
+class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<CalendarScreen> createState() => _CalendarScreenState();
+}
+
+class _CalendarScreenState extends ConsumerState<CalendarScreen> {
+  static const _progressOverlayKey = ValueKey<String>(
+    'calendar-batch-progress-overlay',
+  );
+  static const _cancelButtonKey = ValueKey<String>('calendar-batch-cancel');
+  static const _feedbackHostKey = ValueKey<String>(
+    'calendar-day-result-feedback-host',
+  );
+  static const _feedbackDuration = Duration(milliseconds: 500);
+
+  CalendarDaySimulationFeedback? _feedback;
+  Timer? _feedbackDismissTimer;
+  Completer<void>? _feedbackDismissalCompleter;
+  GameController? _activeController;
+  var _runId = 0;
+  var _feedbackGeneration = 0;
+  var _isSimulating = false;
+
+  @override
+  void dispose() {
+    _cancelFeedbackTimer();
+    if (_isSimulating) {
+      _activeController?.cancelSimulation();
+    }
+    _activeController = null;
+    super.dispose();
+  }
+
+  void _cancelFeedbackTimer() {
+    _feedbackDismissTimer?.cancel();
+    _feedbackDismissTimer = null;
+    final dismissal = _feedbackDismissalCompleter;
+    _feedbackDismissalCompleter = null;
+    if (dismissal != null && !dismissal.isCompleted) dismissal.complete();
+    _feedbackGeneration++;
+  }
+
+  int _beginCalendarRun() {
+    // The button is disabled while a run is active, but explicitly invalidating
+    // the old controller session here also protects programmatic restarts.
+    if (_isSimulating) _activeController?.cancelSimulation();
+    _cancelFeedbackTimer();
+    final runId = ++_runId;
+    if (mounted) {
+      setState(() {
+        _feedback = null;
+        _isSimulating = true;
+      });
+    }
+    return runId;
+  }
+
+  bool _isCurrentRun(int runId) => mounted && runId == _runId;
+
+  void _publishCalendarFeedback(
+    int runId,
+    CalendarDaySimulationFeedback feedback,
+  ) {
+    if (!_isCurrentRun(runId)) return;
+
+    _cancelFeedbackTimer();
+    if (feedback.results.isEmpty) {
+      if (_feedback != null) {
+        setState(() => _feedback = null);
+      }
+      return;
+    }
+
+    final generation = _feedbackGeneration;
+    final dismissal = Completer<void>();
+    _feedbackDismissalCompleter = dismissal;
+    setState(() => _feedback = feedback);
+    _feedbackDismissTimer = Timer(_feedbackDuration, () {
+      if (!_isCurrentRun(runId) || generation != _feedbackGeneration) return;
+      _feedbackDismissTimer = null;
+      if (_feedback != null) setState(() => _feedback = null);
+      if (identical(_feedbackDismissalCompleter, dismissal)) {
+        _feedbackDismissalCompleter = null;
+      }
+      if (!dismissal.isCompleted) dismissal.complete();
+    });
+  }
+
+  void _clearTransientUi({required int runId}) {
+    if (!_isCurrentRun(runId)) return;
+    _cancelFeedbackTimer();
+    setState(() {
+      _feedback = null;
+      _isSimulating = false;
+    });
+  }
+
+  Future<void> _simulateToDate(int targetWeek, int targetDay) async {
+    final runId = _beginCalendarRun();
+    final result = await _runBatch(
+      runId,
+      targetWeek: targetWeek,
+      targetDay: targetDay,
+    );
+    if (!_isCurrentRun(runId) || result == null) return;
+
+    // Keep the existing cursor refresh after the controller has committed its
+    // final state, including target, cancellation, and stop-at-event results.
+    final nextLeague = ref.read(activeLeagueProvider);
+    if (nextLeague == null) return;
+    ref.read(calendarCursorMonthProvider.notifier).state = _monthForInGame(
+      nextLeague,
+    );
+  }
+
+  Future<BatchSimulationResult?> _runBatch(
+    int runId, {
+    required int targetWeek,
+    required int targetDay,
+  }) async {
+    if (!_isCurrentRun(runId)) return null;
+
+    final controller = ref.read(gameControllerProvider.notifier);
+    _activeController = controller;
+    final pacer = CalendarSimulationPacer();
+    final pacingCyclesBeforeRun = pacer.completedCycles;
+    int? controllerRunId;
+    int? lastSequence;
+    ({int week, int day})? lastDate;
+
+    void observe(CalendarDaySimulationFeedback feedback) {
+      if (!_isCurrentRun(runId)) return;
+      controllerRunId ??= feedback.runId;
+      if (feedback.runId != controllerRunId) return;
+      if (lastSequence != null && feedback.sequence <= lastSequence!) return;
+      if (lastDate != null &&
+          feedback.week == lastDate!.week &&
+          feedback.day == lastDate!.day) {
+        return;
+      }
+      lastSequence = feedback.sequence;
+      lastDate = (week: feedback.week, day: feedback.day);
+      _publishCalendarFeedback(runId, feedback);
+    }
+
+    try {
+      final result = await controller.simulateToDate(
+        targetWeek,
+        targetDay,
+        observer: observe,
+        pacer: pacer,
+      );
+      if (!_isCurrentRun(runId)) return null;
+
+      // The controller pacer targets the interval between day starts, while
+      // this route owns the popup's visual dismissal cycle. If the domain step
+      // itself consumed the full interval, the controller can return while
+      // the popup timer is still active. Keep the popup visible until that
+      // real cycle closes, but do not wait for test doubles that never call
+      // the injected pacer.
+      final dismissal = _feedbackDismissalCompleter;
+      if (pacer.completedCycles > pacingCyclesBeforeRun &&
+          _feedback?.results.isNotEmpty == true &&
+          dismissal != null) {
+        await dismissal.future;
+        if (!_isCurrentRun(runId)) return null;
+      }
+
+      // The result/popup host is route-owned. Clear it before removing the
+      // progress layer and before any snackbar or navigation can run.
+      _clearTransientUi(runId: runId);
+      _activeController = null;
+      await _handleBatchResult(runId, result);
+      return result;
+    } catch (error, stackTrace) {
+      if (_isCurrentRun(runId)) _clearTransientUi(runId: runId);
+      if (identical(_activeController, controller)) _activeController = null;
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: error,
+          stack: stackTrace,
+          library: 'calendar_screen',
+          context: ErrorDescription('while running calendar simulation'),
+        ),
+      );
+      return null;
+    } finally {
+      if (identical(_activeController, controller)) _activeController = null;
+    }
+  }
+
+  Future<void> _handleBatchResult(
+    int runId,
+    BatchSimulationResult result,
+  ) async {
+    if (!_isCurrentRun(runId)) return;
+    final context = this.context;
+    if (!context.mounted) return;
+    final l10n = AppLocalizations.of(context)!;
+
+    if (result.lastResult?.playerMatch != null) {
+      context.push('/game/match', extra: result.lastResult!.playerMatch);
+      return;
+    }
+    if (result.stopReason == SimulationStopReason.urgent) {
+      // Tabs: Home(0) Calendar(1) Squad(2) Standings(3) Other(4) Inbox(5).
+      ref.read(shellTabIndexProvider.notifier).state = 5;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(l10n.calendar_urgentMessage)));
+      return;
+    }
+    if (result.stopReason == SimulationStopReason.event) {
+      if (result.eventId == CalendarEventId.scoutReport) {
+        await ref
+            .read(gameControllerProvider.notifier)
+            .runEventAtCurrentDay(CalendarEventId.scoutReport);
+        if (!_isCurrentRun(runId) || !context.mounted) return;
+        context.push('/game/prospects?watchlist=true&combine=true');
+        return;
+      }
+      if (result.eventId == CalendarEventId.draft) {
+        context.push('/game/draft');
+        return;
+      }
+      // Other informational/automatic events should not reach this path, but
+      // retain the existing fallback snackbar for an unexpected stop.
+    }
+    final reasonLabel = switch (result.stopReason) {
+      SimulationStopReason.reachedTarget =>
+        l10n.calendar_stopReason_reachedTarget,
+      SimulationStopReason.cancelled => l10n.calendar_stopReason_cancelled,
+      SimulationStopReason.noSave => l10n.calendar_stopReason_noSave,
+      SimulationStopReason.playerMatch =>
+        l10n.calendar_stopReason_reachedTarget,
+      SimulationStopReason.urgent => l10n.calendar_stopReason_reachedTarget,
+      SimulationStopReason.event => l10n.calendar_stopReason_draftPick,
+    };
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          '$reasonLabel · ${l10n.calendar_daysSimulated(result.daysSimulated)}',
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final league = ref.watch(activeLeagueProvider);
     if (league == null) {
@@ -160,7 +436,7 @@ class CalendarScreen extends ConsumerWidget {
       for (final e in calendar.eventsOn(w, d)) {
         if (e.id == CalendarEventId.draft) {
           final draft = league.currentSeason.draftState;
-          if (draft != null) {
+          if (draft != null && draft.order.isNotEmpty) {
             final total = draft.order.length;
             final currentPick = (draft.currentPickIndex + 1).clamp(1, total);
             eventLabels.add(
@@ -184,23 +460,6 @@ class CalendarScreen extends ConsumerWidget {
         playerMatchLabel: playerMatchLabel,
         playerMatch: pm,
         eventLabels: eventLabels,
-      );
-    }
-
-    Future<void> simulateToDate(int targetWeek, int targetDay) async {
-      await _runBatch(
-        context,
-        ref,
-        l10n,
-        () => ref
-            .read(gameControllerProvider.notifier)
-            .simulateToDate(targetWeek, targetDay),
-      );
-      if (!context.mounted) return;
-      final nextLeague = ref.read(activeLeagueProvider);
-      if (nextLeague == null) return;
-      ref.read(calendarCursorMonthProvider.notifier).state = _monthForInGame(
-        nextLeague,
       );
     }
 
@@ -239,324 +498,233 @@ class CalendarScreen extends ConsumerWidget {
     final canSimulateSelectedDay = selectedInfo != null && !selectedInfo.isPast;
 
     return Scaffold(
-      body: ScreenBackground(
-        child: ListView(
-          padding: const EdgeInsets.all(16),
-          children: [
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+      body: Stack(
+        children: [
+          ScreenBackground(
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        IconButton(
-                          onPressed: month.isAfter(minMonth)
-                              ? () {
-                                  ref
-                                      .read(
-                                        calendarCursorMonthProvider.notifier,
-                                      )
-                                      .state = DateTime(
-                                    month.year,
-                                    month.month - 1,
-                                    1,
-                                  );
-                                }
-                              : null,
-                          icon: const Icon(Icons.chevron_left),
+                        Row(
+                          children: [
+                            IconButton(
+                              onPressed: month.isAfter(minMonth)
+                                  ? () {
+                                      ref
+                                          .read(
+                                            calendarCursorMonthProvider
+                                                .notifier,
+                                          )
+                                          .state = DateTime(
+                                        month.year,
+                                        month.month - 1,
+                                        1,
+                                      );
+                                    }
+                                  : null,
+                              icon: const Icon(Icons.chevron_left),
+                            ),
+                            Expanded(
+                              child: Text(
+                                MaterialLocalizations.of(
+                                  context,
+                                ).formatMonthYear(month),
+                                style: Theme.of(context).textTheme.titleLarge,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: month.isBefore(maxMonth)
+                                  ? () {
+                                      ref
+                                          .read(
+                                            calendarCursorMonthProvider
+                                                .notifier,
+                                          )
+                                          .state = DateTime(
+                                        month.year,
+                                        month.month + 1,
+                                        1,
+                                      );
+                                    }
+                                  : null,
+                              icon: const Icon(Icons.chevron_right),
+                            ),
+                          ],
                         ),
-                        Expanded(
-                          child: Text(
-                            MaterialLocalizations.of(
-                              context,
-                            ).formatMonthYear(month),
-                            style: Theme.of(context).textTheme.titleLarge,
-                            textAlign: TextAlign.center,
+                        const SizedBox(height: 12),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Theme.of(context)
+                                .colorScheme
+                                .surfaceContainerHighest
+                                .withValues(alpha: 0.4),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                '${l10n.calendar_selectedDay_title} · ${dayName(context, selectedDay.weekday)} ${selectedDay.day}.${selectedDay.month.toString().padLeft(2, '0')}',
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                selectedDayBody,
+                                style: Theme.of(context).textTheme.bodyMedium,
+                              ),
+                            ],
                           ),
                         ),
-                        IconButton(
-                          onPressed: month.isBefore(maxMonth)
-                              ? () {
-                                  ref
-                                      .read(
-                                        calendarCursorMonthProvider.notifier,
-                                      )
-                                      .state = DateTime(
-                                    month.year,
-                                    month.month + 1,
-                                    1,
-                                  );
-                                }
-                              : null,
-                          icon: const Icon(Icons.chevron_right),
+                        const SizedBox(height: 12),
+                        LayoutBuilder(
+                          builder: (context, gridConstraints) {
+                            // Grid dimensions are logical Flutter constraints. Do
+                            // not use devicePixelRatio here: the seven-column
+                            // geometry must be identical at every pixel density.
+                            final logicalWidth = gridConstraints.hasBoundedWidth
+                                ? gridConstraints.maxWidth
+                                : MediaQuery.sizeOf(context).width;
+                            final logicalHeight =
+                                gridConstraints.hasBoundedHeight
+                                ? gridConstraints.maxHeight
+                                : MediaQuery.sizeOf(context).height;
+                            final rowCount = (totalCells + 6) ~/ 7;
+                            final tileExtent = _calendarTileExtent(
+                              logicalWidth: logicalWidth,
+                              logicalHeight: logicalHeight,
+                              rowCount: rowCount,
+                            );
+
+                            return GridView.builder(
+                              itemCount: totalCells,
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              gridDelegate:
+                                  SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 7,
+                                    mainAxisExtent: tileExtent,
+                                  ),
+                              itemBuilder: (context, i) {
+                                final date = gridStart.add(Duration(days: i));
+                                final info = dayInfo(date);
+                                final isInMonth = date.month == month.month;
+                                final isEnabled =
+                                    info != null && !info.isPast && isInMonth;
+                                final isToday =
+                                    info != null &&
+                                    info.week == currentWeek &&
+                                    info.day == currentDay;
+                                final isSelected =
+                                    info != null &&
+                                    date.year == selectedDay.year &&
+                                    date.month == selectedDay.month &&
+                                    date.day == selectedDay.day;
+
+                                return CalendarDayTile(
+                                  key: ValueKey<DateTime>(date),
+                                  date: date,
+                                  isInMonth: isInMonth,
+                                  isEnabled: isEnabled,
+                                  isToday: isToday,
+                                  isSelected: isSelected,
+                                  matchCount: info?.matchCount ?? 0,
+                                  playerMatchLabel: info?.playerMatchLabel,
+                                  eventLabels: info?.eventLabels ?? const [],
+                                  onTap: info != null
+                                      ? () {
+                                          ref
+                                                  .read(
+                                                    calendarSelectedDayProvider
+                                                        .notifier,
+                                                  )
+                                                  .state =
+                                              date;
+                                        }
+                                      : null,
+                                );
+                              },
+                            );
+                          },
+                        ),
+                        const SizedBox(height: 12),
+                        SizedBox(
+                          width: double.infinity,
+                          child: FilledButton.icon(
+                            onPressed: canSimulateSelectedDay && !_isSimulating
+                                ? () => _simulateToDate(
+                                    selectedInfo.week,
+                                    selectedInfo.day,
+                                  )
+                                : null,
+                            icon: const Icon(Icons.fast_forward),
+                            label: Text(l10n.calendar_simulateUntilDate),
+                          ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .surfaceContainerHighest
-                            .withValues(alpha: 0.4),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '${l10n.calendar_selectedDay_title} · ${dayName(context, selectedDay.weekday)} ${selectedDay.day}.${selectedDay.month.toString().padLeft(2, '0')}',
-                            style: Theme.of(context).textTheme.titleMedium,
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            selectedDayBody,
-                            style: Theme.of(context).textTheme.bodyMedium,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    GridView.builder(
-                      itemCount: totalCells,
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 7,
-                            childAspectRatio: 0.85,
-                          ),
-                      itemBuilder: (context, i) {
-                        final date = gridStart.add(Duration(days: i));
-                        final info = dayInfo(date);
-                        final isInMonth = date.month == month.month;
-                        final isEnabled =
-                            info != null && !info.isPast && isInMonth;
-                        final isToday =
-                            info != null &&
-                            info.week == currentWeek &&
-                            info.day == currentDay;
-                        final isSelected =
-                            info != null &&
-                            date.year == selectedDay.year &&
-                            date.month == selectedDay.month &&
-                            date.day == selectedDay.day;
-
-                        return Opacity(
-                          opacity: isInMonth ? 1.0 : 0.35,
-                          child: InkWell(
-                            onTap: info != null
-                                ? () {
-                                    ref
-                                            .read(
-                                              calendarSelectedDayProvider
-                                                  .notifier,
-                                            )
-                                            .state =
-                                        date;
-                                  }
-                                : null,
-                            borderRadius: BorderRadius.circular(8),
-                            child: Container(
-                              margin: const EdgeInsets.all(3),
-                              padding: const EdgeInsets.all(6),
-                              decoration: BoxDecoration(
-                                color: isToday
-                                    ? Theme.of(context)
-                                          .colorScheme
-                                          .primaryContainer
-                                          .withValues(alpha: 0.45)
-                                    : null,
-                                borderRadius: BorderRadius.circular(8),
-                                border: isSelected && !isToday
-                                    ? Border.all(
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.primary,
-                                        width: 1.5,
-                                      )
-                                    : null,
-                              ),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    '${date.day}',
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .labelSmall
-                                        ?.copyWith(
-                                          color: isEnabled
-                                              ? null
-                                              : Theme.of(context).disabledColor,
-                                          fontWeight: isToday
-                                              ? FontWeight.bold
-                                              : null,
-                                        ),
-                                  ),
-                                  if (info != null) ...[
-                                    const SizedBox(height: 2),
-                                    Row(
-                                      mainAxisSize: MainAxisSize.min,
-                                      children: [
-                                        if (info.playerMatchLabel != null)
-                                          Tooltip(
-                                            message: info.playerMatchLabel!,
-                                            child: const Icon(
-                                              Icons.sports_soccer,
-                                              size: 12,
-                                              color: Colors.greenAccent,
-                                            ),
-                                          )
-                                        else if (info.matchCount > 0)
-                                          Tooltip(
-                                            message:
-                                                '${info.matchCount} matches',
-                                            child: const Icon(
-                                              Icons.sports_soccer,
-                                              size: 12,
-                                              color: Colors.white70,
-                                            ),
-                                          ),
-                                        if (info.eventLabels.isNotEmpty) ...[
-                                          if (info.playerMatchLabel != null ||
-                                              info.matchCount > 0)
-                                            const SizedBox(width: 2),
-                                          Tooltip(
-                                            message: info.eventLabels.join(
-                                              '\n',
-                                            ),
-                                            child: const Icon(
-                                              Icons.event_available_outlined,
-                                              size: 12,
-                                              color: Colors.amber,
-                                            ),
-                                          ),
-                                        ],
-                                      ],
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    SizedBox(
-                      width: double.infinity,
-                      child: FilledButton.icon(
-                        onPressed: canSimulateSelectedDay
-                            ? () => simulateToDate(
-                                selectedInfo.week,
-                                selectedInfo.day,
-                              )
-                            : null,
-                        icon: const Icon(Icons.fast_forward),
-                        label: Text(l10n.calendar_simulateUntilDate),
-                      ),
-                    ),
-                  ],
+                  ),
                 ),
+              ],
+            ),
+          ),
+          // The progress host is inserted before the feedback host. The
+          // feedback is intentionally above the dimming layer, while
+          // IgnorePointer keeps it non-blocking and leaves Cancel usable.
+          if (_isSimulating)
+            Positioned.fill(
+              key: _progressOverlayKey,
+              child: Stack(
+                children: [
+                  const ModalBarrier(dismissible: false, color: Colors.black54),
+                  Center(
+                    child: Card(
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 360),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const SizedBox(
+                                width: 24,
+                                height: 24,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 3,
+                                ),
+                              ),
+                              const SizedBox(width: 16),
+                              Flexible(child: Text(l10n.calendar_simulating)),
+                              const SizedBox(width: 8),
+                              TextButton(
+                                key: _cancelButtonKey,
+                                onPressed: _activeController?.cancelSimulation,
+                                child: Text(l10n.calendar_cancel),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ],
-        ),
+          if (_feedback != null && _feedback!.results.isNotEmpty)
+            Positioned.fill(
+              key: _feedbackHostKey,
+              child: IgnorePointer(
+                child: CalendarDayResultPopup(feedback: _feedback!),
+              ),
+            ),
+        ],
       ),
     );
   }
-}
-
-// Legacy fast-forward sheet/dialog removed:
-// simulation to dates is handled via the "simulate to date" button below
-// the calendar grid, using the currently selected day.
-
-Future<void> _runBatch(
-  BuildContext context,
-  WidgetRef ref,
-  AppLocalizations l10n,
-  Future Function() run,
-) async {
-  final controller = ref.read(gameControllerProvider.notifier);
-  unawaited(
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (dialogContext) => AlertDialog(
-        content: Row(
-          children: [
-            const SizedBox(
-              width: 24,
-              height: 24,
-              child: CircularProgressIndicator(strokeWidth: 3),
-            ),
-            const SizedBox(width: 16),
-            Expanded(child: Text(l10n.calendar_simulating)),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: controller.cancelSimulation,
-            child: Text(l10n.calendar_cancel),
-          ),
-        ],
-      ),
-    ),
-  );
-
-  final result = await run();
-
-  if (!context.mounted) return;
-  Navigator.of(context, rootNavigator: true).pop();
-
-  if (result.lastResult?.playerMatch != null) {
-    context.push('/game/match', extra: result.lastResult!.playerMatch);
-    return;
-  }
-  if (result.stopReason == SimulationStopReason.urgent) {
-    // Tabs: Home(0) Calendar(1) Squad(2) Standings(3) Other(4) Inbox(5).
-    ref.read(shellTabIndexProvider.notifier).state = 5;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(l10n.calendar_urgentMessage)));
-    return;
-  }
-  if (result.stopReason == SimulationStopReason.event) {
-    if (result.eventId == CalendarEventId.scoutReport) {
-      await ref
-          .read(gameControllerProvider.notifier)
-          .runEventAtCurrentDay(CalendarEventId.scoutReport);
-      if (!context.mounted) return;
-      context.push('/game/prospects?watchlist=true&combine=true');
-      return;
-    }
-    if (result.eventId == CalendarEventId.draft) {
-      context.push('/game/draft');
-      return;
-    }
-    // Inne eventy informacyjne/automatyczne nie powinny tu trafić, bo
-    // simulateToEvent()/simulateToDate() same je rozróżniają — ale
-    // zachowujemy fallback na wypadek nieoczekiwanego stopu.
-  }
-  final reasonLabel = switch (result.stopReason as SimulationStopReason) {
-    SimulationStopReason.reachedTarget =>
-      l10n.calendar_stopReason_reachedTarget,
-    SimulationStopReason.cancelled => l10n.calendar_stopReason_cancelled,
-    SimulationStopReason.noSave => l10n.calendar_stopReason_noSave,
-    SimulationStopReason.playerMatch => l10n.calendar_stopReason_reachedTarget,
-    SimulationStopReason.urgent => l10n.calendar_stopReason_reachedTarget,
-    SimulationStopReason.event => l10n.calendar_stopReason_draftPick,
-  };
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(
-        '$reasonLabel · ${l10n.calendar_daysSimulated(result.daysSimulated)}',
-      ),
-    ),
-  );
 }
