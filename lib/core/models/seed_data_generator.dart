@@ -17,6 +17,7 @@ import 'package:new_football/core/models/staff.dart';
 import 'package:new_football/core/models/standing.dart';
 import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/services/salary_cap_service.dart';
+import 'package:new_football/core/tactics/tactics_setup.dart';
 import 'package:new_football/core/tactics/formation_layout.dart';
 
 class SeedDataGenerator {
@@ -119,10 +120,13 @@ class SeedDataGenerator {
     required int seasonYear,
   }) {
     final teamId = 'team_${conference.name}_$index';
+    final strengthBase = 55 + rng.nextInt(20);
+    final formation = Formation.values[rng.nextInt(Formation.values.length)];
     final roster = _generateRoster(
       teamId,
       rng,
-      strengthBase: 55 + rng.nextInt(20),
+      formation: formation,
+      strengthBase: strengthBase,
     );
 
     final payroll = roster.fold<int>(0, (s, p) => s + p.contract.salary);
@@ -134,6 +138,7 @@ class SeedDataGenerator {
       conference: conference,
       roster: roster,
       finance: TeamFinance(totalPayroll: payroll),
+      tactics: TacticsSetup(formation: formation),
       lineupPlayerIds: roster.take(11).map((p) => p.id).toList(),
       benchPlayerIds: roster.skip(11).take(7).map((p) => p.id).toList(),
       ownedPicks: _generateOwnedPicks(teamId, seasonYear),
@@ -165,9 +170,9 @@ class SeedDataGenerator {
   List<Player> _generateRoster(
     String teamId,
     Random rng, {
+    required Formation formation,
     required int strengthBase,
   }) {
-    final formation = Formation.values[rng.nextInt(Formation.values.length)];
     final positions = _buildRosterPositions(formation);
 
     return positions.asMap().entries.map((entry) {
@@ -409,10 +414,12 @@ class SeedDataGenerator {
     }
 
     final attrs = switch (role) {
+      // `docs/staff.md` §5: the head coach is rated by Tactics and Motivation
+      // only. Legacy saves may still carry a `development` value, but the
+      // generator must never produce a new one for this role.
       StaffRole.headCoach => StaffAttributes(
         tactics: star(),
         motivation: star(),
-        development: star(),
       ),
       StaffRole.youthCoach => StaffAttributes(
         development: star(),

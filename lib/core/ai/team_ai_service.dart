@@ -9,6 +9,7 @@ import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/random/seeds.dart';
 import 'package:new_football/core/services/contract_service.dart';
 import 'package:new_football/core/services/trade_service.dart';
+import 'package:new_football/core/tactics/formation_layout.dart';
 import 'package:new_football/core/tactics/tactics_setup.dart';
 
 /// AI decision helpers (`docs/AI_behaviour.md`).
@@ -98,25 +99,39 @@ class TeamAiService {
     );
   }
 
-  /// Pick best available GK + top outfielders by overall for lineup.
+  /// Pick the highest-ranked available player for each formation slot.
   Team autoSelectLineup(Team team) {
     final available = team.availablePlayers.toList()
-      ..sort((a, b) => b.overall(balance).compareTo(a.overall(balance)));
-    final gk = available.where((p) => p.position == Position.gk).toList();
-    final outfield = available.where((p) => p.position != Position.gk).toList();
+      ..sort((a, b) {
+        final overallComparison = b
+            .overall(balance)
+            .compareTo(a.overall(balance));
+        return overallComparison == 0
+            ? a.id.compareTo(b.id)
+            : overallComparison;
+      });
 
-    final xi = <Player>[];
-    if (gk.isNotEmpty) xi.add(gk.first);
-    xi.addAll(outfield.take(10));
-    while (xi.length < 11 && outfield.length + gk.length > xi.length) {
-      final rest = available.where((p) => !xi.contains(p)).toList();
-      if (rest.isEmpty) break;
-      xi.add(rest.first);
+    // Keep one candidate per ID so malformed rosters cannot create duplicate
+    // lineup or bench IDs while preserving the ranked available-player pool.
+    final remaining = <Player>[];
+    final seenIds = <String>{};
+    for (final player in available) {
+      if (seenIds.add(player.id)) remaining.add(player);
     }
 
-    final used = xi.map((p) => p.id).toSet();
-    final bench = available
-        .where((p) => !used.contains(p.id))
+    final xi = <Player>[];
+    for (final slot in FormationLayout.of(team.tactics.formation).slots) {
+      final exactIndex = remaining.indexWhere(
+        (player) => player.position == slot.position,
+      );
+      // A malformed or later team may lack the requested position. In that
+      // case retain the previous safe behavior and use the best unused player.
+      final selectedIndex = exactIndex >= 0 ? exactIndex : 0;
+      if (remaining.isEmpty) break;
+      xi.add(remaining.removeAt(selectedIndex));
+    }
+
+    final bench = remaining
         .take(balance.roster.benchSize)
         .map((p) => p.id)
         .toList();
