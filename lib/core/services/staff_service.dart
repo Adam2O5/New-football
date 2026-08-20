@@ -32,8 +32,45 @@ class StaffService {
   final Random _random;
   final MessageService _messages;
 
+  /// Returns the canonical, unrounded role-specific rating for contract work.
+  ///
+  /// Contract formulas must consume [StaffRatingSystem.rawOverall] directly;
+  /// [DisplayedRating] belongs to the presentation layer and must never enter
+  /// salary or negotiation calculations. The final guard keeps malformed
+  /// legacy numeric values finite without introducing another role mapping.
+  double _rawOverall(StaffMember member) => _finiteClampRating(
+    StaffRatingSystem.rawOverall(member.attributes, member.role),
+  );
+
+  /// Normalizes the separate CFO input used by negotiation rules.
+  ///
+  /// A subject's rating and the offering team's assisting CFO are independent
+  /// inputs. The CFO input is therefore always projected as the canonical
+  /// single-field `cfo` rating, regardless of the assisting member's role.
+  double? _cfoNegotiationValue({StaffMember? cfo, double? negotiation}) {
+    final raw =
+        negotiation ??
+        (cfo == null
+            ? null
+            : StaffRatingSystem.rawOverall(cfo.attributes, StaffRole.cfo));
+    return raw == null ? null : _finiteClampRating(raw);
+  }
+
+  /// Clamps a rating while converting malformed non-finite values to a safe
+  /// finite value. NaN is treated as the neutral lower-bound rating; infinities
+  /// retain the direction implied by the documented 0–5 scale.
+  double _finiteClampRating(double value) {
+    if (value.isNaN || value == double.negativeInfinity) {
+      return StaffRatingSystem.minRating;
+    }
+    if (value == double.infinity) return StaffRatingSystem.maxRating;
+    return value
+        .clamp(StaffRatingSystem.minRating, StaffRatingSystem.maxRating)
+        .toDouble();
+  }
+
   double marketSalary(StaffMember member) =>
-      balance.staff.salaryFor(member.role, member.overall);
+      balance.staff.salaryFor(member.role, _rawOverall(member));
 
   /// Contractual demand score from 0 to 100 (`contracts.md` §7).
   double staffWant(
@@ -41,7 +78,7 @@ class StaffService {
     TeamStatus currentTeamStatus = TeamStatus.pretender,
   }) {
     final raw =
-        member.overall * 20 +
+        _rawOverall(member) * 20 +
         NegotiationRules.teamStatusBonus(currentTeamStatus);
     return raw.clamp(0.0, 100.0).toDouble();
   }
@@ -76,7 +113,9 @@ class StaffService {
   }
 
   double cfoDiscount({StaffMember? cfo, double? negotiation}) =>
-      NegotiationRules.cfoDiscount(negotiation ?? cfo?.attributes.negotiation);
+      NegotiationRules.cfoDiscount(
+        _cfoNegotiationValue(cfo: cfo, negotiation: negotiation),
+      );
 
   OfferScoreBreakdown staffOfferBreakdown(
     StaffMember member,
@@ -98,7 +137,10 @@ class StaffService {
         currentTeamStatus: currentTeamStatus,
       ),
       offeringTeamStatus: offeringTeamStatus,
-      cfoNegotiation: cfoNegotiation ?? cfo?.attributes.negotiation,
+      cfoNegotiation: _cfoNegotiationValue(
+        cfo: cfo,
+        negotiation: cfoNegotiation,
+      ),
       balance: balance.contracts,
     );
   }
@@ -277,7 +319,7 @@ class StaffService {
     required StaffMember member,
     required StaffOffer offer,
   }) {
-    final existing = team.staff.member(member.role);
+    final existing = team.staff.canonicalMember(member.role);
     if (existing != null && existing.id != member.id) return null;
     final replacingSalary = existing?.contract?.salary ?? 0;
     if (!canHire(team, offer.salary, replacingSalary: replacingSalary)) {
@@ -300,14 +342,14 @@ class StaffService {
     required StaffMember member,
     required StaffOffer offer,
   }) {
-    if (team.staff.member(member.role) != null) return null;
+    if (team.staff.canonicalMember(member.role) != null) return null;
     return sign(team: team, member: member, offer: offer);
   }
 
   /// V1 does not allow terminating an active staff contract. Retirement or
   /// expiry paths remove staff elsewhere in the season pipeline.
   Team fire(Team team, StaffRole role) {
-    final member = team.staff.member(role);
+    final member = team.staff.canonicalMember(role);
     if (member?.contract != null && member!.contract!.yearsRemaining > 0) {
       return team;
     }
@@ -322,7 +364,7 @@ class StaffService {
       var staff = team.staff;
       var changed = false;
       for (final role in StaffRole.values) {
-        final member = staff.member(role);
+        final member = staff.canonicalMember(role);
         if (member == null) continue;
 
         final baseline = member.copyWith(previousAttributes: member.attributes);
@@ -373,11 +415,12 @@ class StaffService {
       balance.staff.starMax,
     );
     return switch (role) {
-      StaffRole.headCoach => switch (_random.nextInt(3)) {
-        0 => a.copyWith(tactics: up(a.tactics)),
-        1 => a.copyWith(motivation: up(a.motivation)),
-        _ => a.copyWith(development: up(a.development)),
-      },
+      // `docs/staff.md` §5: only Tactics and Motivation are role-relevant for
+      // the head coach, so growth never touches the legacy `development` field.
+      StaffRole.headCoach =>
+        _random.nextBool()
+            ? a.copyWith(tactics: up(a.tactics))
+            : a.copyWith(motivation: up(a.motivation)),
       StaffRole.youthCoach =>
         _random.nextBool()
             ? a.copyWith(development: up(a.development))

@@ -2,10 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/core/models/development_snapshot.dart';
-import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/player.dart';
-import 'package:new_football/core/models/staff.dart';
 import 'package:new_football/core/models/team.dart';
 
 /// A single player row in the Development screen's Players tab.
@@ -32,29 +30,10 @@ class PlayerDevEntry {
 }
 
 /// A single staff role entry in the Development screen's Staff tab.
-class StaffDevEntry {
-  const StaffDevEntry({
-    required this.role,
-    required this.member,
-    required this.attributeNames,
-    required this.currentValues,
-    required this.deltas,
-  });
-
-  final StaffRole role;
-
-  /// Null when the slot is vacant.
-  final StaffMember? member;
-
-  /// Attribute names relevant for this role.
-  final List<String> attributeNames;
-
-  /// Current attribute values (same order as [attributeNames]).
-  final List<double> currentValues;
-
-  /// Growth deltas (same order). Null means no previous data available.
-  final List<double?> deltas;
-}
+///
+/// Alias of the core [StaffDevelopmentSnapshot] so the screen keeps one name
+/// while names, values and deltas stay derived from the canonical role map.
+typedef StaffDevEntry = StaffDevelopmentSnapshot;
 
 /// Aggregated data for the Development screen, computed on-demand.
 class DevelopmentData {
@@ -105,47 +84,5 @@ List<PlayerDevEntry> _buildPlayerEntries(Team team) {
   }).toList();
 }
 
-List<StaffDevEntry> _buildStaffEntries(Team team) {
-  const roles = [
-    StaffRole.headCoach,
-    StaffRole.youthCoach,
-    StaffRole.scout,
-    StaffRole.physio,
-    StaffRole.doctor,
-    StaffRole.cfo,
-  ];
-
-  return roles.map((role) {
-    final member = team.staff.member(role);
-    final attrNames = attributesForRole(role);
-
-    if (member == null) {
-      return StaffDevEntry(
-        role: role,
-        member: null,
-        attributeNames: attrNames,
-        currentValues: List.filled(attrNames.length, 0.0),
-        deltas: List.filled(attrNames.length, null),
-      );
-    }
-
-    final currentValues = attrNames
-        .map((name) => staffAttributeValue(member.attributes, name))
-        .toList();
-
-    final deltas = attrNames.map((name) {
-      final prev = member.previousAttributes;
-      if (prev == null) return null;
-      return staffAttributeValue(member.attributes, name) -
-          staffAttributeValue(prev, name);
-    }).toList();
-
-    return StaffDevEntry(
-      role: role,
-      member: member,
-      attributeNames: attrNames,
-      currentValues: currentValues,
-      deltas: deltas,
-    );
-  }).toList();
-}
+List<StaffDevEntry> _buildStaffEntries(Team team) =>
+    StaffDevelopmentSnapshot.forTeamStaff(team.staff);

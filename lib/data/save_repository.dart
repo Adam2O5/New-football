@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
 import 'package:new_football/core/models/game_save.dart';
+import 'package:new_football/data/staff_data_compatibility.dart';
 
 class SaveRepositoryException implements Exception {
   SaveRepositoryException(this.message, {this.cause});
@@ -68,6 +69,15 @@ class SaveRepository {
   static const currentSchemaVersion = SaveSchema.currentVersion;
   static const _indexFileName = 'saves_index.json';
 
+  List<StaffDataDiagnostic> _lastStaffDiagnostics = const [];
+
+  /// Recoverable staff-data issues found during the most recent load.
+  ///
+  /// The list is immutable and is replaced per load attempt. Schema errors and
+  /// filesystem errors still throw as before; staff records that can be
+  /// excluded safely are reported here while the valid save continues loading.
+  List<StaffDataDiagnostic> get lastStaffDiagnostics => _lastStaffDiagnostics;
+
   Future<Directory> _savesDir() async {
     if (_overrideDirectory != null) {
       final dir = _overrideDirectory;
@@ -128,6 +138,7 @@ class SaveRepository {
   }
 
   Future<GameSave> load(String id) async {
+    _lastStaffDiagnostics = const [];
     final file = await _saveFile(id);
     if (!await file.exists()) {
       throw SaveRepositoryException('Save not found: $id');
@@ -145,7 +156,13 @@ class SaveRepository {
           : SaveSchema.unknownVersion;
       _assertCompatible(metaVersion);
 
-      return GameSave.fromJson(json);
+      // Generated StaffMember decoders use enum decoding for role. Normalize
+      // only the staff subtrees after schema validation and before any
+      // generated model decoder is invoked. The player/save transaction flow
+      // remains untouched, and valid non-staff JSON is copied verbatim.
+      final staffResult = StaffDataCompatibility.sanitizeGameSaveJson(json);
+      _lastStaffDiagnostics = staffResult.diagnostics;
+      return GameSave.fromJson(staffResult.sanitizedJson);
     } catch (e) {
       if (e is SaveRepositoryException) rethrow;
       throw SaveRepositoryException('Failed to load save $id', cause: e);

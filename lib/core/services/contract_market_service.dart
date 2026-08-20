@@ -333,11 +333,8 @@ class ContractMarketService {
     if (team == null) return null;
     final isExtension = phase == NegotiationPhase.contractExtension;
     final resolvedCandidate = isExtension
-        ? team.staff.members.cast<StaffMember?>().firstWhere(
-            (member) => member?.id == candidate.id,
-            orElse: () => null,
-          )
-        : league.staffFreeAgents.cast<StaffMember?>().firstWhere(
+        ? _staffMemberForTeam(team, candidate.id)
+        : league.canonicalStaffFreeAgents.cast<StaffMember?>().firstWhere(
             (member) => member?.id == candidate.id,
             orElse: () => null,
           );
@@ -348,7 +345,8 @@ class ContractMarketService {
             actualCandidate.contract!.yearsRemaining > 1)) {
       return null;
     }
-    if (!isExtension && team.staff.member(actualCandidate.role) != null) {
+    if (!isExtension &&
+        team.staff.canonicalMember(actualCandidate.role) != null) {
       return null;
     }
     if (phase == NegotiationPhase.freeAgencyPhaseI &&
@@ -391,7 +389,7 @@ class ContractMarketService {
     if (sameDayNegotiation) return null;
     if (negotiations.isBlocked(
       league: league,
-      subjectId: candidate.id,
+      subjectId: actualCandidate.id,
       subjectKind: NegotiationSubjectKind.staff,
       teamId: team.id,
       seasonYear: league.currentSeason.year,
@@ -414,27 +412,27 @@ class ContractMarketService {
           !item.isTerminal,
     );
     final reaction = staff.evaluateOffer(
-      candidate,
+      actualCandidate,
       offer,
       phase: phase,
       offeringTeamStatus: status,
       currentTeamStatus: status,
-      cfo: team.staff.cfo,
+      cfo: actualCandidate.role == StaffRole.cfo ? null : team.staff.cfo,
       competingOffers: competingOffers,
       belowExpectation:
           offer.salary <
-          staff.expectedSalary(candidate, currentTeamStatus: status),
+          staff.expectedSalary(actualCandidate, currentTeamStatus: status),
       random: Random(
         _stableSeed(
-          '$saveSeed:${league.currentSeason.year}:${league.currentWeek}:${league.currentDay}:$hour:${team.id}:${candidate.id}:submit:${phase.name}',
+          '$saveSeed:${league.currentSeason.year}:${league.currentWeek}:${league.currentDay}:$hour:${team.id}:${actualCandidate.id}:submit:${phase.name}',
         ),
       ),
     );
     final id =
-        'staff:${candidate.id}:${team.id}:${league.currentSeason.year}:${league.currentWeek}:${league.currentDay}:$hour';
+        'staff:${actualCandidate.id}:${team.id}:${league.currentSeason.year}:${league.currentWeek}:${league.currentDay}:$hour';
     final initial = negotiations.start(
       id: id,
-      subjectId: candidate.id,
+      subjectId: actualCandidate.id,
       subjectKind: NegotiationSubjectKind.staff,
       teamId: team.id,
       phase: phase,
@@ -444,21 +442,21 @@ class ContractMarketService {
       day: league.currentDay,
       hour: hour,
       offerScore: staff.staffOfferScore(
-        candidate,
+        actualCandidate,
         offer,
         offeringTeamStatus: status,
         currentTeamStatus: status,
-        cfo: team.staff.cfo,
+        cfo: actualCandidate.role == StaffRole.cfo ? null : team.staff.cfo,
       ),
     );
     final counter = reaction == StaffReaction.counter
         ? staff.counterOfferForRound(
-            candidate,
+            actualCandidate,
             offer,
             round: 1,
             offeringTeamStatus: status,
             currentTeamStatus: status,
-            cfo: team.staff.cfo,
+            cfo: actualCandidate.role == StaffRole.cfo ? null : team.staff.cfo,
           )
         : null;
     final decision = switch (reaction) {
@@ -485,7 +483,7 @@ class ContractMarketService {
         state,
         record,
         block: negotiations.blockFor(
-          subjectId: candidate.id,
+          subjectId: actualCandidate.id,
           subjectKind: NegotiationSubjectKind.staff,
           teamId: team.id,
           seasonYear: league.currentSeason.year,
@@ -505,7 +503,7 @@ class ContractMarketService {
       domain: MessageDomain.staff,
       hour: hour,
       args: {
-        'staffName': candidate.name,
+        'staffName': actualCandidate.name,
         'salary': record.lastOffer.salary,
         'years': record.lastOffer.years,
         'score': record.offerScore,
@@ -513,7 +511,7 @@ class ContractMarketService {
       },
       payload: {
         'negotiationId': record.id,
-        'staffId': candidate.id,
+        'staffId': actualCandidate.id,
         'teamId': team.id,
         'counterSalary': record.counterOffer?.salary,
         'counterYears': record.counterOffer?.years,
@@ -601,7 +599,7 @@ class ContractMarketService {
       );
     }
 
-    final member = _findStaff(league, negotiation.subjectId);
+    final member = _findStaffForNegotiation(league, negotiation);
     if (member == null) return null;
     final hired = staff.sign(
       team: team,
@@ -615,7 +613,7 @@ class ContractMarketService {
     var state = league
         .updateTeam(hired)
         .copyWith(
-          staffFreeAgents: league.staffFreeAgents
+          staffFreeAgents: league.canonicalStaffFreeAgents
               .where((item) => item.id != member.id)
               .toList(),
         )
@@ -774,10 +772,13 @@ class ContractMarketService {
           );
     }
 
-    final member = _findStaff(league, current.subjectId);
+    final member = _findStaffForNegotiation(league, current);
     if (member == null) return null;
-    final currentMember = team.staff.member(member.role);
-    if (currentMember != null && currentMember.id != member.id) return null;
+    final currentMember = team.staff.canonicalMember(member.role);
+    if (currentMember != null &&
+        (currentMember.id != member.id || currentMember.role != member.role)) {
+      return null;
+    }
     final offer =
         staffOffer ??
         StaffOffer(
@@ -878,7 +879,10 @@ class ContractMarketService {
             saveSeed: saveSeed,
             includeAi: true,
           );
-          if (state.freeAgents.isEmpty && state.staffFreeAgents.isEmpty) break;
+          if (state.freeAgents.isEmpty &&
+              state.canonicalStaffFreeAgents.isEmpty) {
+            break;
+          }
         }
         return state.copyWith(
           currentHour: balance.contracts.hoursPerDay,
@@ -2081,7 +2085,7 @@ class ContractMarketService {
             negotiation.subjectKind == NegotiationSubjectKind.player
             ? _findPlayer(state, negotiation.subjectId)?.name ??
                   negotiation.subjectId
-            : _findStaff(state, negotiation.subjectId)?.name ??
+            : _findStaffForNegotiation(state, negotiation)?.name ??
                   negotiation.subjectId;
         state = messages.send(
           state,
@@ -2182,6 +2186,7 @@ class ContractMarketService {
           state = signed;
           winner = candidate.copyWith(
             status: NegotiationStatus.completed,
+            requiresFinalization: false,
             rivalFinalized: true,
           );
           state = state.upsertNegotiation(winner);
@@ -2207,7 +2212,8 @@ class ContractMarketService {
           final subjectName =
               current.subjectKind == NegotiationSubjectKind.player
               ? _findPlayer(state, current.subjectId)?.name ?? current.subjectId
-              : _findStaff(state, current.subjectId)?.name ?? current.subjectId;
+              : _findStaffForNegotiation(state, current)?.name ??
+                    current.subjectId;
           final rivalName =
               state.teamById(winner.teamId)?.name ?? winner.teamId;
           state = messages.send(
@@ -2286,7 +2292,7 @@ class ContractMarketService {
       );
     }
 
-    final member = _findStaff(league, negotiation.subjectId);
+    final member = _findStaffForNegotiation(league, negotiation);
     if (member == null) return null;
     final hired = staff.sign(
       team: team,
@@ -2300,7 +2306,7 @@ class ContractMarketService {
     var state = league
         .updateTeam(hired)
         .copyWith(
-          staffFreeAgents: league.staffFreeAgents
+          staffFreeAgents: league.canonicalStaffFreeAgents
               .where((item) => item.id != member.id)
               .toList(),
         );
@@ -2340,12 +2346,20 @@ class ContractMarketService {
               rookiePickSlot: counter.rookiePickSlot,
             );
     }
-    final member = _findStaff(league, negotiation.subjectId);
+    final member = _findStaffForNegotiation(league, negotiation);
     if (member == null) return null;
+    final team = league.teamById(negotiation.teamId);
+    if (team == null) return null;
+    final status =
+        league.strengthTable?.entryFor(team.id)?.teamStatus ??
+        TeamStatus.pretender;
     final counter = staff.counterOfferForRound(
       member,
       StaffOffer(salary: offer.salary, years: offer.years),
       round: negotiation.round,
+      offeringTeamStatus: status,
+      currentTeamStatus: status,
+      cfo: member.role == StaffRole.cfo ? null : team.staff.cfo,
     );
     return counter == null
         ? null
@@ -2353,13 +2367,15 @@ class ContractMarketService {
   }
 
   double _scoreFor(LeagueState league, ContractNegotiation negotiation) {
-    if (negotiation.offerScore > 0) return negotiation.offerScore;
     final team = league.teamById(negotiation.teamId);
     if (team == null) return negotiation.offerScore;
     final status =
         league.strengthTable?.entryFor(team.id)?.teamStatus ??
         TeamStatus.pretender;
     if (negotiation.subjectKind == NegotiationSubjectKind.player) {
+      // Preserve the existing player-market score lifecycle. Staff scores are
+      // deliberately recomputed below from the current verified member.
+      if (negotiation.offerScore > 0) return negotiation.offerScore;
       final player = _findPlayer(league, negotiation.subjectId);
       if (player == null) return 0;
       return contracts.playerOfferScore(
@@ -2375,7 +2391,7 @@ class ContractMarketService {
         cfo: team.staff.cfo,
       );
     }
-    final member = _findStaff(league, negotiation.subjectId);
+    final member = _findStaffForNegotiation(league, negotiation);
     if (member == null) return 0;
     return staff.staffOfferScore(
       member,
@@ -2385,7 +2401,7 @@ class ContractMarketService {
       ),
       offeringTeamStatus: status,
       currentTeamStatus: status,
-      cfo: team.staff.cfo,
+      cfo: member.role == StaffRole.cfo ? null : team.staff.cfo,
     );
   }
 
@@ -2450,14 +2466,33 @@ class ContractMarketService {
     return null;
   }
 
-  StaffMember? _findStaff(LeagueState league, String staffId) {
-    for (final member in league.staffFreeAgents) {
-      if (member.id == staffId) return member;
+  /// Returns a member only when its declared role matches the occupied slot.
+  /// A typed [TeamStaff] can still contain legacy/mismatched slot data, and a
+  /// negotiation must never migrate that record into another role.
+  StaffMember? _staffMemberForTeam(Team team, String staffId) {
+    for (final role in StaffRole.values) {
+      final member = team.staff.canonicalMember(role);
+      if (member?.id == staffId && member?.role == role) return member;
     }
-    for (final team in league.teams) {
-      for (final member in team.staff.members) {
-        if (member.id == staffId) return member;
-      }
+    return null;
+  }
+
+  /// Resolves a staff negotiation from the collection that owns its subject.
+  /// Extensions belong to the offering team's matching slot; both free-agent
+  /// phases belong to [LeagueState.staffFreeAgents]. This prevents stale UI
+  /// records, duplicate IDs in another team, and mismatched slots from
+  /// entering scoring, counters, or signing.
+  StaffMember? _findStaffForNegotiation(
+    LeagueState league,
+    ContractNegotiation negotiation,
+  ) {
+    final team = league.teamById(negotiation.teamId);
+    if (team == null) return null;
+    if (negotiation.phase == NegotiationPhase.contractExtension) {
+      return _staffMemberForTeam(team, negotiation.subjectId);
+    }
+    for (final member in league.canonicalStaffFreeAgents) {
+      if (member.id == negotiation.subjectId) return member;
     }
     return null;
   }

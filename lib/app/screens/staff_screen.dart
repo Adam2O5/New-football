@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'package:new_football/app/l10n/enum_labels.dart';
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/app/utils/formatters.dart';
+import 'package:new_football/app/utils/staff_presentation.dart';
 import 'package:new_football/app/widgets/screen_background.dart';
+import 'package:new_football/app/widgets/staff_rating_stars.dart';
 import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/contract_negotiation.dart';
 import 'package:new_football/core/models/enums.dart';
@@ -190,12 +192,18 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
     StaffRole role,
   ) {
     final member = team.staff.member(role);
-    final candidates =
-        league.staffFreeAgents.where((staff) => staff.role == role).toList()
-          ..sort((a, b) => b.overall.compareTo(a.overall));
+    final memberView = StaffPresentation.viewForSlot(member, role);
+    final candidates = StaffPresentation.sortStaffCandidates(
+      league.canonicalStaffFreeAgents,
+      role,
+    );
+    final memberIsOccupied = memberView.isOccupied;
     final memberCanExtend =
-        member != null && (member.contract?.yearsRemaining ?? 99) <= 1;
-    final memberCanFire = member != null && _canFire(member);
+        memberIsOccupied &&
+        member != null &&
+        (member.contract?.yearsRemaining ?? 99) <= 1;
+    final memberCanFire =
+        memberIsOccupied && member != null && _canFire(member);
 
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
@@ -210,25 +218,53 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
             ),
             const SizedBox(height: 6),
             if (member == null)
-              Text(l10n.staff_emptySlot)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(l10n.staff_emptySlot),
+                  StaffRatingStars(
+                    key: ValueKey<String>('staff-slot-rating-${role.name}'),
+                    slot: memberView,
+                    keyPrefix: 'staff-slot-rating-${role.name}',
+                  ),
+                ],
+              )
+            else if (!memberIsOccupied)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text('—'),
+                  StaffRatingStars(
+                    key: ValueKey<String>('staff-slot-rating-${role.name}'),
+                    slot: memberView,
+                    keyPrefix: 'staff-slot-rating-${role.name}',
+                  ),
+                ],
+              )
             else
               ListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text(member.name),
-                subtitle: Text(
-                  [
-                    l10n.staff_memberSubtitle(
-                      member.age,
-                      member.overall.toStringAsFixed(1),
-                      formatMoney(context, member.contract?.salary ?? 0),
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${member.age} · ${formatMoney(context, member.contract?.salary ?? 0)}',
                     ),
-                    member.contract == null ||
-                            member.contract!.yearsRemaining <= 0
-                        ? l10n.staff_contractExpired
-                        : l10n.staff_contractRemaining(
-                            member.contract!.yearsRemaining,
-                          ),
-                  ].join(' · '),
+                    StaffRatingStars(
+                      key: ValueKey<String>('staff-member-rating-${member.id}'),
+                      slot: memberView,
+                      keyPrefix: 'staff-member-rating-${member.id}',
+                    ),
+                    Text(
+                      member.contract == null ||
+                              member.contract!.yearsRemaining <= 0
+                          ? l10n.staff_contractExpired
+                          : l10n.staff_contractRemaining(
+                              member.contract!.yearsRemaining,
+                            ),
+                    ),
+                  ],
                 ),
                 onTap: () => _selectStaff(league, team, member, true),
                 trailing: Wrap(
@@ -274,6 +310,9 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
               else
                 ...candidates.map((candidate) {
                   final offer = _defaultOffer(league, candidate);
+                  final candidateView = StaffPresentation.viewForMember(
+                    candidate,
+                  );
                   final canHire =
                       _canSubmitStaffOffer(
                         league,
@@ -292,12 +331,20 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
                   return ListTile(
                     contentPadding: EdgeInsets.zero,
                     title: Text(candidate.name),
-                    subtitle: Text(
-                      l10n.staff_memberSubtitle(
-                        candidate.age,
-                        candidate.overall.toStringAsFixed(1),
-                        formatMoney(context, offer.salary),
-                      ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          '${candidate.age} · ${formatMoney(context, offer.salary)}',
+                        ),
+                        StaffRatingStars(
+                          key: ValueKey<String>(
+                            'staff-candidate-rating-${candidate.id}',
+                          ),
+                          slot: candidateView,
+                          keyPrefix: 'staff-candidate-rating-${candidate.id}',
+                        ),
+                      ],
                     ),
                     onTap: () => _selectStaff(league, team, candidate, false),
                     trailing: FilledButton.tonal(
@@ -366,7 +413,8 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
           member,
           isExtension: _selectedExtension,
         );
-    final attributes = _attributes(l10n, member);
+    final staffView = StaffPresentation.viewForMember(member);
+    final attributes = _attributes(staffView);
 
     return Card(
       color: Theme.of(context).colorScheme.surfaceContainerHigh,
@@ -392,11 +440,29 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
               l10n.staff_attributes,
               style: Theme.of(context).textTheme.labelLarge,
             ),
-            ...attributes.map(
-              (attribute) => Text(
-                '${attribute.key}: ${attribute.value.toStringAsFixed(1)}',
-              ),
-            ),
+            if (staffView.isOccupied)
+              ...attributes.map(
+                (attribute) => Padding(
+                  padding: const EdgeInsets.only(bottom: 4),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(_attributeLabel(l10n, attribute.key)),
+                      ),
+                      StaffAttributeStars(
+                        key: ValueKey<String>(
+                          'staff-attribute-${member.id}-${attribute.key.name}',
+                        ),
+                        view: attribute,
+                        keyPrefix:
+                            'staff-attribute-${member.id}-${attribute.key.name}',
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            else
+              const Text('—'),
             const SizedBox(height: 6),
             Text(
               l10n.staff_expectedSalary(formatMoney(context, expectedSalary)),
@@ -905,14 +971,14 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
     for (final member in team.staff.members) {
       if (member.id == _selectedStaffId) return member;
     }
-    for (final member in league.staffFreeAgents) {
+    for (final member in league.canonicalStaffFreeAgents) {
       if (member.id == _selectedStaffId) return member;
     }
     return null;
   }
 
   StaffMember? _staffById(LeagueState league, String id) {
-    for (final member in league.staffFreeAgents) {
+    for (final member in league.canonicalStaffFreeAgents) {
       if (member.id == id) return member;
     }
     for (final team in league.teams) {
@@ -959,7 +1025,7 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
     }
     if (parsedYears < 1 || parsedYears > 4) return l10n.staff_yearsRange;
     final replacingSalary = isExtension
-        ? team.staff.member(member.role)?.contract?.salary ?? 0
+        ? team.staff.canonicalMember(member.role)?.contract?.salary ?? 0
         : 0;
     if (!_staffService.canHire(
       team,
@@ -980,15 +1046,15 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
     final phase = _marketService.phaseAt(league);
     if (isExtension) {
       return phase == NegotiationPhase.contractExtension &&
-          team.staff.member(member.role)?.id == member.id &&
+          team.staff.canonicalMember(member.role)?.id == member.id &&
           (member.contract?.yearsRemaining ?? 99) <= 1;
     }
     if (phase != NegotiationPhase.freeAgencyPhaseI &&
         phase != NegotiationPhase.freeAgencyPhaseII) {
       return false;
     }
-    if (team.staff.member(member.role) != null) return false;
-    if (!league.staffFreeAgents.any((item) => item.id == member.id)) {
+    if (team.staff.canonicalMember(member.role) != null) return false;
+    if (!league.canonicalStaffFreeAgents.any((item) => item.id == member.id)) {
       return false;
     }
     return phase != NegotiationPhase.freeAgencyPhaseI ||
@@ -1000,7 +1066,7 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
 
   Future<void> _fire(AppLocalizations l10n, StaffRole role) async {
     final league = ref.read(activeLeagueProvider);
-    final member = league?.playerTeam?.staff.member(role);
+    final member = league?.playerTeam?.staff.canonicalMember(role);
     if (member == null) return;
     final confirmed = await showDialog<bool>(
       context: context,
@@ -1031,37 +1097,23 @@ class _StaffScreenState extends ConsumerState<StaffScreen> {
     );
   }
 
-  List<MapEntry<String, double>> _attributes(
-    AppLocalizations l10n,
-    StaffMember member,
-  ) {
-    final attributes = member.attributes;
-    return switch (member.role) {
-      StaffRole.headCoach => [
-        MapEntry(l10n.staff_attrTactics, attributes.tactics),
-        MapEntry(l10n.staff_attrMotivation, attributes.motivation),
-      ],
-      StaffRole.youthCoach => [
-        MapEntry(l10n.staff_attrDevelopment, attributes.development),
-        MapEntry(l10n.staff_attrMentoring, attributes.mentoring),
-      ],
-      StaffRole.scout => [
-        MapEntry(l10n.staff_attrCoverage, attributes.coverage),
-        MapEntry(l10n.staff_attrEvaluation, attributes.evaluation),
-      ],
-      StaffRole.physio => [
-        MapEntry(l10n.staff_attrRehabilitation, attributes.rehabilitation),
-        MapEntry(l10n.staff_attrRegeneration, attributes.regenaration),
-      ],
-      StaffRole.doctor => [
-        MapEntry(l10n.staff_attrPrevention, attributes.prevention),
-        MapEntry(l10n.staff_attrCare, attributes.care),
-      ],
-      StaffRole.cfo => [
-        MapEntry(l10n.staff_attrNegotiation, attributes.negotiation),
-      ],
-    };
-  }
+  List<StaffAttributeView> _attributes(StaffSlotView view) =>
+      view.relevantAttributes;
+
+  String _attributeLabel(AppLocalizations l10n, StaffAttributeKey key) =>
+      switch (key) {
+        StaffAttributeKey.tactics => l10n.staff_attrTactics,
+        StaffAttributeKey.motivation => l10n.staff_attrMotivation,
+        StaffAttributeKey.development => l10n.staff_attrDevelopment,
+        StaffAttributeKey.mentoring => l10n.staff_attrMentoring,
+        StaffAttributeKey.coverage => l10n.staff_attrCoverage,
+        StaffAttributeKey.evaluation => l10n.staff_attrEvaluation,
+        StaffAttributeKey.rehabilitation => l10n.staff_attrRehabilitation,
+        StaffAttributeKey.regenaration => l10n.staff_attrRegeneration,
+        StaffAttributeKey.prevention => l10n.staff_attrPrevention,
+        StaffAttributeKey.care => l10n.staff_attrCare,
+        StaffAttributeKey.negotiation => l10n.staff_attrNegotiation,
+      };
 
   String _subjectName(LeagueState league, String id) =>
       _staffById(league, id)?.name ?? id;

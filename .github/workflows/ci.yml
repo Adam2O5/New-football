@@ -29,5 +29,5 @@ jobs:
       - name: Build runner
         run: dart run build_runner build --delete-conflicting-outputs --verbose
         timeout-minutes: 10
-      - run: flutter test
       - run: flutter analyze --no-fatal-infos
+      - run: flutter test

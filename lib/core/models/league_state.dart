@@ -101,6 +101,15 @@ extension LeagueStateX on LeagueState {
   List<Team> teamsInConference(Conference conference) =>
       teams.where((t) => t.conference == conference).toList();
 
+  /// Defensive in-memory view of the staff free-agent pool.
+  ///
+  /// JSON sanitization normally removes unknown/malformed records before this
+  /// model is built. The projection is still applied at consumer boundaries
+  /// because tests, old providers or migration code can construct a typed
+  /// [LeagueState] directly with duplicate IDs or mismatched legacy records.
+  List<StaffMember> get canonicalStaffFreeAgents =>
+      staffFreeAgents.canonicalStaffMembers();
+
   LeagueState updateTeam(Team team) {
     return copyWith(
       teams: teams.map((t) => t.id == team.id ? team : t).toList(),

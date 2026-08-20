@@ -1478,7 +1478,9 @@ class SeasonService {
   /// without duplicating free-agent entries.
   LeagueState expireContracts(LeagueState league) {
     final freeAgents = List<Player>.from(league.freeAgents);
-    final staffFreeAgents = List<StaffMember>.from(league.staffFreeAgents);
+    final staffFreeAgents = List<StaffMember>.from(
+      league.canonicalStaffFreeAgents,
+    );
     var state = league;
     final playerTeamId = league.playerTeamId;
     final teams = league.teams.map((t) {
@@ -1535,7 +1537,7 @@ class SeasonService {
 
       var staff = t.staff;
       for (final role in StaffRole.values) {
-        final member = staff.member(role);
+        final member = staff.canonicalMember(role);
         final memberId = member?.id;
         final contract = member?.contract;
         if (member == null || memberId == null || contract == null) {
@@ -1705,7 +1707,7 @@ class SeasonService {
 
       var staff = t.staff;
       for (final role in StaffRole.values) {
-        final member = staff.member(role);
+        final member = staff.canonicalMember(role);
         final contract = member?.contract;
         if (member == null || contract == null) continue;
         staff = staff.withMember(
@@ -2338,7 +2340,7 @@ class SeasonService {
             'rating': stat?.rating ?? 0.0,
             'manOfTheMatch': true,
           },
-          dedupKey: 'inspired:${matchId ?? result.homeTeamId}:${inspiredId}',
+          dedupKey: 'inspired:${matchId ?? result.homeTeamId}:$inspiredId',
         );
       }
     }

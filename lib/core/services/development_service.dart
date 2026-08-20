@@ -46,7 +46,9 @@ class DevelopmentService {
   Team developTeam(Team team) => developTeamWithReport(team).team;
 
   DevelopmentTickResult developTeamWithReport(Team team) {
-    final headCoachStars = team.staff.headCoach?.attributes.development ?? 0.0;
+    // `docs/staff.md` §6: player development comes from the development
+    // (youth) coach only. A legacy `headCoach.development` value may still be
+    // present in old saves, but it is inert for the growth tick.
     final youthCoachStars =
         team.staff.youthCoach?.attributes.development ?? 0.0;
     final youthMentoring = team.staff.youthCoach?.attributes.mentoring;
@@ -55,7 +57,6 @@ class DevelopmentService {
     final roster = team.roster.map((player) {
       final result = developPlayerWithContext(
         player,
-        headCoachStars: headCoachStars,
         youthCoachStars: youthCoachStars,
         youthMentoring: youthMentoring,
         atmosphere: team.atmosphere,
@@ -85,7 +86,6 @@ class DevelopmentService {
 
   ({Player player, DevelopmentChange change}) developPlayerWithContext(
     Player player, {
-    double? headCoachStars,
     double? youthCoachStars,
     double? youthMentoring,
     required int atmosphere,
@@ -93,7 +93,6 @@ class DevelopmentService {
     final oldOverall = player.overall(balance);
     final rate = calculateGrowthRate(
       player,
-      headCoachStars: headCoachStars,
       youthCoachStars: youthCoachStars,
       youthMentoring: youthMentoring,
       atmosphere: atmosphere,
@@ -152,7 +151,6 @@ class DevelopmentService {
 
   double calculateGrowthRate(
     Player player, {
-    double? headCoachStars,
     double? youthCoachStars,
     double? youthMentoring,
     required int atmosphere,
@@ -163,10 +161,9 @@ class DevelopmentService {
     rate += b.ageBonusFor(player.age);
     rate += player.state.minutesThisWeek * 0.01;
 
-    final staffStars = player.age <= b.developmentAgeMax
-        ? (youthCoachStars ?? headCoachStars ?? 0.0)
-        : (headCoachStars ?? 0.0);
-    rate += b.staffDevelopmentBonusFor(staffStars);
+    // `docs/staff.md` §6: Development is the development coach's growth-rate
+    // bonus for every player; there is no head-coach fallback.
+    rate += b.staffDevelopmentBonusFor(youthCoachStars ?? 0.0);
     rate += b.atmosphereBonusFor(atmosphere);
 
     if (player.age <= b.developmentAgeMax && youthMentoring != null) {

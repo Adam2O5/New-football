@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/app/utils/formatters.dart';
+import 'package:new_football/app/utils/staff_presentation.dart';
 import 'package:new_football/app/widgets/screen_background.dart';
+import 'package:new_football/app/widgets/staff_rating_stars.dart';
 import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/contract_market_models.dart';
 import 'package:new_football/core/models/contract_negotiation.dart';
@@ -258,11 +260,15 @@ class _FreeAgencyScreenState extends ConsumerState<FreeAgencyScreen> {
     LeagueState league,
     Team team,
   ) {
-    final candidates = [...league.staffFreeAgents]
-      ..sort((a, b) {
-        final roleOrder = a.role.index.compareTo(b.role.index);
-        return roleOrder == 0 ? b.overall.compareTo(a.overall) : roleOrder;
-      });
+    // Keep the existing role order, while delegating ordering inside each role
+    // to the shared raw-rating sorter. This also filters unsupported records.
+    final candidates = <StaffMember>[
+      for (final role in StaffRole.values)
+        ...StaffPresentation.sortStaffCandidates(
+          league.canonicalStaffFreeAgents,
+          role,
+        ),
+    ];
     final canOffer = _canSubmitStaffOffer(league, team);
     return Card(
       child: Padding(
@@ -277,23 +283,42 @@ class _FreeAgencyScreenState extends ConsumerState<FreeAgencyScreen> {
             if (candidates.isEmpty)
               Text(l10n.staff_noCandidates)
             else
-              ...candidates.map(
-                (candidate) => ListTile(
+              ...candidates.map((candidate) {
+                final candidateView = StaffPresentation.viewForMember(
+                  candidate,
+                );
+                final slotView = StaffPresentation.viewForSlot(
+                  team.staff.member(candidate.role),
+                  candidate.role,
+                );
+                final expectedSalary = _staffService.expectedSalary(candidate);
+                return ListTile(
                   contentPadding: EdgeInsets.zero,
                   title: Text(candidate.name),
-                  subtitle: Text(
-                    '${candidate.role.name} · ${candidate.overall.toStringAsFixed(1)} · '
-                    '${formatMoney(context, _staffService.expectedSalary(candidate))}',
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${candidate.role.name} · '
+                        '${formatMoney(context, expectedSalary)}',
+                      ),
+                      StaffRatingStars(
+                        key: ValueKey<String>(
+                          'staff-candidate-rating-${candidate.id}',
+                        ),
+                        slot: candidateView,
+                        keyPrefix: 'staff-candidate-rating-${candidate.id}',
+                      ),
+                    ],
                   ),
                   trailing: FilledButton.tonal(
-                    onPressed:
-                        team.staff.member(candidate.role) == null && canOffer
+                    onPressed: slotView.isEmpty && canOffer
                         ? () => _submitStaffMarketOffer(l10n, league, candidate)
                         : null,
                     child: Text(l10n.market_staffOffer),
                   ),
-                ),
-              ),
+                );
+              }),
             if (!canOffer &&
                 _marketService.phaseAt(league) ==
                     NegotiationPhase.freeAgencyPhaseI &&

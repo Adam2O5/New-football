@@ -504,13 +504,11 @@ class AiContractMarketService {
     final order = staffRolePriority(context.teamStatus);
     for (var index = 0; index < order.length; index++) {
       final role = order[index];
-      if (team.staff.member(role) != null) continue;
-      final candidates =
-          league.staffFreeAgents.where((member) => member.role == role).toList()
-            ..sort((a, b) {
-              final score = b.overall.compareTo(a.overall);
-              return score != 0 ? score : a.id.compareTo(b.id);
-            });
+      if (team.staff.canonicalMember(role) != null) continue;
+      final candidates = _staffCandidatesForRole(
+        league.canonicalStaffFreeAgents,
+        role,
+      );
       for (final member in candidates) {
         final offer = _buildStaffOffer(
           team: team,
@@ -546,16 +544,20 @@ class AiContractMarketService {
     );
     final order = staffRolePriority(context.teamStatus);
     for (final role in order) {
-      final member = team.staff.member(role);
-      final contract = member?.contract;
-      if (member == null || contract == null || contract.yearsRemaining > 1) {
+      final member = team.staff.canonicalMember(role);
+      if (member == null || !_isCanonicalStaffMember(member, role)) {
         continue;
       }
+      final contract = member.contract;
+      if (contract == null || contract.yearsRemaining > 1) {
+        continue;
+      }
+      final rawOverall = _staffRawOverall(member);
       final probability =
-          member.overall >= balance.ai.staffRenewalQualityHigh &&
+          rawOverall >= balance.ai.staffRenewalQualityHigh &&
               member.age <= balance.ai.staffRenewalMaxAge
           ? balance.ai.staffRenewalHighProbability
-          : member.overall < balance.ai.staffRenewalQualityLow
+          : rawOverall < balance.ai.staffRenewalQualityLow
           ? balance.ai.staffRenewalLowProbability
           : 0.50;
       if (!_roll(
@@ -744,6 +746,53 @@ class AiContractMarketService {
     return best;
   }
 
+  bool _isCanonicalStaffMember(StaffMember member, StaffRole role) {
+    final keys = StaffRatingSystem.roleRelevantAttributes[member.role];
+    return member.role == role && keys != null && keys.isNotEmpty;
+  }
+
+  double _staffRawOverall(StaffMember member) {
+    final raw = StaffRatingSystem.rawOverall(member.attributes, member.role);
+    if (raw.isNaN || raw == double.negativeInfinity) {
+      return StaffRatingSystem.minRating;
+    }
+    if (raw == double.infinity) return StaffRatingSystem.maxRating;
+    return raw
+        .clamp(StaffRatingSystem.minRating, StaffRatingSystem.maxRating)
+        .toDouble();
+  }
+
+  /// Returns only canonical records for [role], ordered by unrounded quality.
+  ///
+  /// AI deliberately keeps this helper in the domain layer instead of using
+  /// the presentation sorter: DisplayedRating must never influence a market
+  /// decision, and the role mapping must come from StaffRatingSystem.
+  List<StaffMember> _staffCandidatesForRole(
+    Iterable<StaffMember> candidates,
+    StaffRole role,
+  ) {
+    if (StaffRatingSystem.roleRelevantAttributes[role]?.isNotEmpty != true) {
+      return const <StaffMember>[];
+    }
+
+    final sortable = <_IndexedStaffCandidate>[];
+    final canonical = candidates.canonicalStaffMembers(role: role);
+    for (var sourceIndex = 0; sourceIndex < canonical.length; sourceIndex++) {
+      sortable.add(_IndexedStaffCandidate(canonical[sourceIndex], sourceIndex));
+    }
+    sortable.sort((a, b) {
+      final rawOrder = _staffRawOverall(
+        b.member,
+      ).compareTo(_staffRawOverall(a.member));
+      if (rawOrder != 0) return rawOrder;
+
+      final idOrder = a.member.id.compareTo(b.member.id);
+      if (idOrder != 0) return idOrder;
+      return a.sourceIndex.compareTo(b.sourceIndex);
+    });
+    return sortable.map((entry) => entry.member).toList(growable: false);
+  }
+
   _ScoredStaffOffer? _buildStaffOffer({
     required Team team,
     required StaffMember member,
@@ -761,12 +810,17 @@ class AiContractMarketService {
         : roleIndex <= 2
         ? min(balance.staff.maxSalary, balance.ai.staffPriorityRoleMaxSalary)
         : min(balance.staff.maxSalary, balance.ai.staffOtherRoleMaxSalary);
+    final expectedSalary = staff.expectedSalary(
+      member,
+      currentTeamStatus: currentTeamStatus,
+    );
+    final expectedLength = staff.expectedLength(
+      member,
+      currentTeamStatus: currentTeamStatus,
+    );
     final years = member.age >= balance.ai.staffAge60MaxAge
         ? balance.ai.staffAge60MaxYears
-        : staff
-              .expectedLength(member, currentTeamStatus: currentTeamStatus)
-              .clamp(1, 4)
-              .toInt();
+        : expectedLength.clamp(1, 4).toInt();
     _ScoredStaffOffer? best;
     for (var index = 0; index <= 60; index++) {
       final salary = lower + (((upper - lower) * index) / 60.0).round();
@@ -784,13 +838,23 @@ class AiContractMarketService {
         offer,
         offeringTeamStatus: currentTeamStatus,
         currentTeamStatus: currentTeamStatus,
-        cfo: team.staff.cfo,
+        // A CFO subject is not an assisting CFO for its own negotiation.
+        cfo: member.role == StaffRole.cfo ? null : team.staff.cfo,
       );
       if (score > balance.ai.staffMaxOfferScore) continue;
       final candidate = _ScoredStaffOffer(offer: offer, score: score);
+      final targetDistance = (score - balance.ai.staffTargetOfferScore).abs();
+      final bestTargetDistance = best == null
+          ? double.infinity
+          : (best.score - balance.ai.staffTargetOfferScore).abs();
+      final expectedSalaryDistance = (salary - expectedSalary).abs();
+      final bestExpectedSalaryDistance = best == null
+          ? double.infinity
+          : (best.offer.salary - expectedSalary).abs();
       if (best == null ||
-          (score - balance.ai.staffTargetOfferScore).abs() <
-              (best.score - balance.ai.staffTargetOfferScore).abs()) {
+          targetDistance < bestTargetDistance ||
+          (targetDistance == bestTargetDistance &&
+              expectedSalaryDistance < bestExpectedSalaryDistance)) {
         best = candidate;
       }
     }
@@ -877,6 +941,13 @@ class _ScoredPlayerOffer {
 
   final ContractOffer offer;
   final double score;
+}
+
+class _IndexedStaffCandidate {
+  const _IndexedStaffCandidate(this.member, this.sourceIndex);
+
+  final StaffMember member;
+  final int sourceIndex;
 }
 
 class _ScoredStaffOffer {
