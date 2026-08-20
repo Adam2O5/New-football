@@ -507,6 +507,12 @@
   "inbox_decisionOptions": "Choose an option",
   "inbox_actions": "Actions",
   "inbox_acknowledge": "Acknowledge",
+  "inbox_operationSaving": "Saving confirmation…",
+  "inbox_confirmationError": "We couldn't acknowledge this message. Try again.",
+  "inbox_markReadError": "We couldn't open this message. Try again.",
+  "inbox_actionError": "We couldn't complete this action. Try again.",
+  "inbox_retry": "Try again",
+  "inbox_saveUncertain": "The save result could not be confirmed. Try again.",
   "inbox_close": "Close",
   "inbox_digestMembers": "Included messages ({count})",
   "@inbox_digestMembers": {

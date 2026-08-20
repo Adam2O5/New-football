@@ -1258,6 +1258,28 @@ class AppLocalizationsPl extends AppLocalizations {
   String get inbox_acknowledge => 'Potwierdź';
 
   @override
+  String get inbox_operationSaving => 'Zapisywanie potwierdzenia…';
+
+  @override
+  String get inbox_confirmationError =>
+      'Nie udało się potwierdzić wiadomości. Spróbuj ponownie.';
+
+  @override
+  String get inbox_markReadError =>
+      'Nie udało się otworzyć wiadomości. Spróbuj ponownie.';
+
+  @override
+  String get inbox_actionError =>
+      'Nie udało się wykonać akcji. Spróbuj ponownie.';
+
+  @override
+  String get inbox_retry => 'Spróbuj ponownie';
+
+  @override
+  String get inbox_saveUncertain =>
+      'Nie można potwierdzić wyniku zapisu. Spróbuj ponownie.';
+
+  @override
   String get inbox_close => 'Zamknij';
 
   @override

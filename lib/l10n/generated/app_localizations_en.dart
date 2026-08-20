@@ -1256,6 +1256,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get inbox_acknowledge => 'Acknowledge';
 
   @override
+  String get inbox_operationSaving => 'Saving confirmation…';
+
+  @override
+  String get inbox_confirmationError =>
+      'We couldn\'t acknowledge this message. Try again.';
+
+  @override
+  String get inbox_markReadError =>
+      'We couldn\'t open this message. Try again.';
+
+  @override
+  String get inbox_actionError =>
+      'We couldn\'t complete this action. Try again.';
+
+  @override
+  String get inbox_retry => 'Try again';
+
+  @override
+  String get inbox_saveUncertain =>
+      'The save result could not be confirmed. Try again.';
+
+  @override
   String get inbox_close => 'Close';
 
   @override

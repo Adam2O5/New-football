@@ -187,6 +187,24 @@ class UpcomingAction {
   final int day;
 }
 
+enum _MessageOperationKind { markRead, acknowledge, decision }
+
+class _MessageOperationKey {
+  const _MessageOperationKey(this.messageId, this.kind);
+
+  final String messageId;
+  final _MessageOperationKind kind;
+
+  @override
+  bool operator ==(Object other) =>
+      other is _MessageOperationKey &&
+      other.messageId == messageId &&
+      other.kind == kind;
+
+  @override
+  int get hashCode => Object.hash(messageId, kind);
+}
+
 class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   GameController(this._ref) : super(const AsyncValue.data(null));
 
@@ -201,9 +219,71 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   ContractMarketService get _market => _ref.read(contractMarketServiceProvider);
   DraftTradeService get _draftTrades => _ref.read(draftTradeServiceProvider);
 
+  /// Every state mutation and persistence operation is appended to this
+  /// future. Errors are returned to the operation that caused them, while the
+  /// tail itself always completes successfully so a failed save cannot poison
+  /// later mutations.
+  Future<void> _mutationQueue = Future<void>.value();
+
+  /// Invalidates callbacks that belong to a save which has been cleared or
+  /// replaced while an asynchronous repository operation was pending.
+  int _saveGeneration = 0;
+
+  /// Message operations are keyed by message id and logical operation kind.
+  /// A duplicate input receives the original future instead of entering the
+  /// mutation queue a second time.
+  final Map<_MessageOperationKey, Future<void>> _inFlightMessageOperations = {};
+
   GameSave? get save => state.value;
 
+  Future<T> _enqueueMutation<T>(Future<T> Function() operation) {
+    final queued = _mutationQueue.then<T>((_) => operation());
+    _mutationQueue = queued.then<void>(
+      (_) {},
+      onError: (Object error, StackTrace stackTrace) {},
+    );
+    return queued;
+  }
+
+  Future<void> _runMessageOperation(
+    String messageId,
+    _MessageOperationKind kind,
+    Future<void> Function() operation,
+  ) {
+    final key = _MessageOperationKey(messageId, kind);
+    final existing = _inFlightMessageOperations[key];
+    if (existing != null) return existing;
+
+    final future = _enqueueMutation(operation);
+    _inFlightMessageOperations[key] = future;
+    future.then<void>(
+      (_) => _removeMessageOperation(key, future),
+      onError: (Object error, StackTrace stackTrace) {
+        _removeMessageOperation(key, future);
+      },
+    );
+    return future;
+  }
+
+  void _removeMessageOperation(
+    _MessageOperationKey key,
+    Future<void> operation,
+  ) {
+    if (identical(_inFlightMessageOperations[key], operation)) {
+      _inFlightMessageOperations.remove(key);
+    }
+  }
+
+  GameMessage? _messageById(LeagueState league, String id) {
+    for (final message in league.inbox.messages) {
+      if (message.id == id) return message;
+    }
+    return null;
+  }
+
   Future<void> createNewGame(NewGameRequest request) async {
+    _saveGeneration++;
+    _inFlightMessageOperations.clear();
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final game = _ref.read(gameFactoryProvider).create(request);
@@ -213,23 +293,47 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   }
 
   Future<void> loadGame(String id) async {
+    _saveGeneration++;
+    _inFlightMessageOperations.clear();
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async => _repo.load(id));
   }
 
-  Future<void> persist() async {
-    final current = save;
-    if (current == null) return;
-    await _repo.save(current);
+  Future<void> persist() {
+    final generation = _saveGeneration;
+    return _enqueueMutation(() async {
+      if (generation != _saveGeneration) return;
+      final current = save;
+      if (current == null) return;
+      await _repo.save(current);
+    });
   }
 
   Future<void> updateLeague(
     LeagueState Function(LeagueState) transform, {
     bool autosave = true,
+  }) {
+    final generation = _saveGeneration;
+    return _enqueueMutation(
+      () => _updateLeagueInQueue(
+        transform,
+        generation: generation,
+        autosave: autosave,
+      ),
+    );
+  }
+
+  Future<void> _updateLeagueInQueue(
+    LeagueState Function(LeagueState) transform, {
+    required int generation,
+    bool autosave = true,
+    bool skipIfUnchanged = false,
   }) async {
+    if (generation != _saveGeneration) return;
     final current = save;
     if (current == null) return;
     final league = transform(current.leagueState);
+    if (skipIfUnchanged && league == current.leagueState) return;
     final next = current.copyWith(
       leagueState: league,
       meta: current.meta.copyWith(
@@ -239,8 +343,18 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
         playerTeamName: league.playerTeam?.name,
       ),
     );
-    state = AsyncValue.data(next);
-    if (autosave && !_batchSimulationActive) await _repo.save(next);
+
+    // Batch simulation deliberately publishes working state without saving
+    // each intermediate day. All autosaved mutations, including message
+    // operations, commit to the repository before exposing their result.
+    final shouldPersist = autosave && !_batchSimulationActive;
+    if (shouldPersist) {
+      await _repo.save(next);
+      if (generation != _saveGeneration) return;
+    }
+    if (generation == _saveGeneration) {
+      state = AsyncValue.data(next);
+    }
   }
 
   bool get _batchSimulationActive => _activeSimulationSession != null;
@@ -1293,13 +1407,39 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   }
 
   /// Marks a message as read without acknowledging an urgent pause.
-  Future<void> markMessageRead(String id) async {
-    await updateLeague((l) => l.copyWith(inbox: l.inbox.markRead(id)));
+  Future<void> markMessageRead(String id) {
+    final generation = _saveGeneration;
+    return _runMessageOperation(
+      id,
+      _MessageOperationKind.markRead,
+      () => _updateLeagueInQueue(
+        (league) {
+          final message = _messageById(league, id);
+          if (message == null || message.read) return league;
+          return league.copyWith(inbox: league.inbox.markRead(id));
+        },
+        generation: generation,
+        skipIfUnchanged: true,
+      ),
+    );
   }
 
   /// Acknowledges an urgent message and releases its simulation pause.
-  Future<void> acknowledgeMessage(String id) async {
-    await updateLeague((l) => l.copyWith(inbox: l.inbox.acknowledge(id)));
+  Future<void> acknowledgeMessage(String id) {
+    final generation = _saveGeneration;
+    return _runMessageOperation(
+      id,
+      _MessageOperationKind.acknowledge,
+      () => _updateLeagueInQueue(
+        (league) {
+          final message = _messageById(league, id);
+          if (message == null || message.acknowledged) return league;
+          return league.copyWith(inbox: league.inbox.acknowledge(id));
+        },
+        generation: generation,
+        skipIfUnchanged: true,
+      ),
+    );
   }
 
   Future<TradeOfferResult?> acceptTradeOffer(String offerId) async {
@@ -1386,71 +1526,93 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     String id,
     String optionId, {
     MessageDecisionHandler? onDecision,
-  }) async {
-    final saveSeed = save?.saveSeed ?? 0;
-    final dispatcher =
-        onDecision ??
-        (LeagueState league, GameMessage message, String option) {
-          if (message.type == MessageType.teamEvent) {
-            return _teamEvents.resolveDecision(
-              league,
-              message,
-              option,
-              saveSeed: saveSeed,
-            );
+  }) {
+    final generation = _saveGeneration;
+    return _runMessageOperation(
+      id,
+      _MessageOperationKind.decision,
+      () => _updateLeagueInQueue(
+        (league) {
+          final message = _messageById(league, id);
+          if (message == null || message.acknowledged) return league;
+          final decision = message.decision;
+          if (decision == null ||
+              !decision.options.any((option) => option.id == optionId)) {
+            return league;
           }
-          if (message.type == MessageType.tradeOffer ||
-              (message.type == MessageType.trade &&
-                  message.kind == 'counter')) {
-            final offerId = message.payload['tradeOfferId']?.toString();
-            final actingTeamId = league.playerTeamId;
-            if (offerId == null || actingTeamId == null) return league;
-            final draftService = _ref.read(draftTradeServiceProvider);
-            final service = _ref.read(tradeServiceProvider);
-            final result = switch (option) {
-              'accept' =>
-                draftService.isDraftOffer(league, offerId)
-                    ? draftService.acceptOffer(
-                        league,
-                        offerId,
-                        actingTeamId: actingTeamId,
-                      )
-                    : service.acceptOffer(
-                        league,
-                        offerId,
-                        actingTeamId: actingTeamId,
-                      ),
-              'reject' =>
-                draftService.isDraftOffer(league, offerId)
-                    ? draftService.rejectOffer(
-                        league,
-                        offerId,
-                        actingTeamId: actingTeamId,
-                      )
-                    : service.rejectOffer(
-                        league,
-                        offerId,
-                        actingTeamId: actingTeamId,
-                      ),
-              _ => null,
-            };
-            return result?.league ?? league;
-          }
-          return _playerEvents.resolveDecision(
+
+          // The seed and dispatcher are resolved while the queued snapshot is
+          // active. A concurrent mutation therefore cannot make this
+          // operation dispatch against a stale save.
+          final saveSeed = save?.saveSeed ?? 0;
+          final dispatcher =
+              onDecision ?? _defaultMessageDecisionDispatcher(saveSeed);
+          return MessageService().resolveDecision(
             league,
-            message,
-            option,
-            saveSeed: saveSeed,
+            id,
+            optionId,
+            onDecision: dispatcher,
           );
-        };
-    await updateLeague(
-      (league) => MessageService().resolveDecision(
-        league,
-        id,
-        optionId,
-        onDecision: dispatcher,
+        },
+        generation: generation,
+        skipIfUnchanged: true,
       ),
     );
+  }
+
+  MessageDecisionHandler _defaultMessageDecisionDispatcher(int saveSeed) {
+    return (LeagueState league, GameMessage message, String option) {
+      if (message.type == MessageType.teamEvent) {
+        return _teamEvents.resolveDecision(
+          league,
+          message,
+          option,
+          saveSeed: saveSeed,
+        );
+      }
+      if (message.type == MessageType.tradeOffer ||
+          (message.type == MessageType.trade && message.kind == 'counter')) {
+        final offerId = message.payload['tradeOfferId']?.toString();
+        final actingTeamId = league.playerTeamId;
+        if (offerId == null || actingTeamId == null) return league;
+        final draftService = _ref.read(draftTradeServiceProvider);
+        final service = _ref.read(tradeServiceProvider);
+        final result = switch (option) {
+          'accept' =>
+            draftService.isDraftOffer(league, offerId)
+                ? draftService.acceptOffer(
+                    league,
+                    offerId,
+                    actingTeamId: actingTeamId,
+                  )
+                : service.acceptOffer(
+                    league,
+                    offerId,
+                    actingTeamId: actingTeamId,
+                  ),
+          'reject' =>
+            draftService.isDraftOffer(league, offerId)
+                ? draftService.rejectOffer(
+                    league,
+                    offerId,
+                    actingTeamId: actingTeamId,
+                  )
+                : service.rejectOffer(
+                    league,
+                    offerId,
+                    actingTeamId: actingTeamId,
+                  ),
+          _ => null,
+        };
+        return result?.league ?? league;
+      }
+      return _playerEvents.resolveDecision(
+        league,
+        message,
+        option,
+        saveSeed: saveSeed,
+      );
+    };
   }
 
   Future<void> makeDraftPick(String prospectId) async {
@@ -1727,8 +1889,15 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     return true;
   }
 
+  /// Clears the active save immediately, then leaves a marker in the mutation
+  /// queue so mutations requested after the clear cannot overtake earlier
+  /// repository work. The generation check in those mutations prevents a late
+  /// completion from publishing the cleared save again.
   void clear() {
+    _saveGeneration++;
+    _inFlightMessageOperations.clear();
     state = const AsyncValue.data(null);
+    _enqueueMutation<void>(() async {});
   }
 }
 

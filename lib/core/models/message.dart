@@ -180,17 +180,29 @@ extension InboxX on Inbox {
     return result;
   }
 
-  Inbox markRead(String id) => copyWith(
-    messages: messages
-        .map((m) => m.id == id ? m.copyWith(read: true) : m)
-        .toList(),
-  );
+  Inbox markRead(String id) {
+    final index = messages.indexWhere((message) => message.id == id);
+    if (index < 0 || messages[index].read) return this;
+    return copyWith(
+      messages: messages
+          .map((m) => m.id == id ? m.copyWith(read: true) : m)
+          .toList(),
+    );
+  }
 
-  Inbox acknowledge(String id) => copyWith(
-    messages: messages
-        .map((m) => m.id == id ? m.copyWith(read: true, acknowledged: true) : m)
-        .toList(),
-  );
+  Inbox acknowledge(String id) {
+    final index = messages.indexWhere((message) => message.id == id);
+    if (index < 0 || (messages[index].read && messages[index].acknowledged)) {
+      return this;
+    }
+    return copyWith(
+      messages: messages
+          .map(
+            (m) => m.id == id ? m.copyWith(read: true, acknowledged: true) : m,
+          )
+          .toList(),
+    );
+  }
 
   /// Moves messages older than the active plus previous season to archive.
   Inbox retainSeasons(

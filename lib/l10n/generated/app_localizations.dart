@@ -2390,6 +2390,42 @@ abstract class AppLocalizations {
   /// **'Potwierdź'**
   String get inbox_acknowledge;
 
+  /// Lokalny stan oczekiwania podczas zapisu potwierdzenia; nie oznacza jeszcze zakończonej operacji.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zapisywanie potwierdzenia…'**
+  String get inbox_operationSaving;
+
+  /// Błąd potwierdzenia wiadomości po rozpoczęciu operacji; nie komunikuje sukcesu.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nie udało się potwierdzić wiadomości. Spróbuj ponownie.'**
+  String get inbox_confirmationError;
+
+  /// Błąd oznaczenia wiadomości jako przeczytanej przed otwarciem szczegółów.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nie udało się otworzyć wiadomości. Spróbuj ponownie.'**
+  String get inbox_markReadError;
+
+  /// Błąd akcji wiadomości wykonywanej w lokalnym lifecycle sheeta.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nie udało się wykonać akcji. Spróbuj ponownie.'**
+  String get inbox_actionError;
+
+  /// Przycisk ponowienia nieudanej operacji wiadomości.
+  ///
+  /// In pl, this message translates to:
+  /// **'Spróbuj ponownie'**
+  String get inbox_retry;
+
+  /// Komunikat dla niejednoznacznego zapisu wymagającego weryfikacji lub reconciliation; nie sugeruje sukcesu.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nie można potwierdzić wyniku zapisu. Spróbuj ponownie.'**
+  String get inbox_saveUncertain;
+
   /// No description provided for @inbox_close.
   ///
   /// In pl, this message translates to:

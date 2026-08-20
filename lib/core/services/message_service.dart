@@ -138,7 +138,9 @@ class MessageService {
         break;
       }
     }
-    if (message == null || message.decision == null) return league;
+    if (message == null || message.acknowledged || message.decision == null) {
+      return league;
+    }
     if (!message.decision!.options.any((option) => option.id == optionId)) {
       return league;
     }

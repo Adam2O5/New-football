@@ -165,18 +165,24 @@ void main() {
         ),
       );
       var effectApplied = false;
+      var dispatchCount = 0;
+      bool? acknowledgedDuringEffect;
 
       final resolved = MessageService().resolveDecision(
         league,
         'decision',
         'accept',
         onDecision: (state, _, optionId) {
+          dispatchCount++;
           effectApplied = optionId == 'accept';
+          acknowledgedDuringEffect = state.inbox.messages.single.acknowledged;
           return state.copyWith(currentDay: 2);
         },
       );
 
       expect(effectApplied, isTrue);
+      expect(dispatchCount, 1);
+      expect(acknowledgedDuringEffect, isFalse);
       expect(resolved.currentDay, 2);
       expect(resolved.inbox.pendingUrgent, isEmpty);
     },

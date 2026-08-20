@@ -693,6 +693,13 @@ void main() {
       expect(feedback, isEmpty);
       expect(controller.save!.leagueState.currentWeek, 1);
       expect(controller.save!.leagueState.currentDay, 1);
+      expect(
+        controller.save!.leagueState.inbox.pendingUrgent.map(
+          (message) => message.id,
+        ),
+        ['task38-pending-urgent'],
+        reason: 'autosave=false setup must preserve the pending urgent stop',
+      );
     },
   );
 

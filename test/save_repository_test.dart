@@ -6,6 +6,8 @@ import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/core/services/game_factory.dart';
 import 'package:new_football/data/save_repository.dart';
 
+import 'helpers/controlled_save_repository.dart';
+
 void main() {
   late Directory tempDir;
   late SaveRepository repo;
@@ -38,6 +40,161 @@ void main() {
     expect(loaded.leagueState.playerTeamId, 'team_europe_0');
     expect(loaded.saveSeed, 99);
     expect(loaded.schemaVersion, SaveRepository.currentSchemaVersion);
+  });
+
+  test('commits one stamped snapshot to the game file and index', () async {
+    final game = GameFactory().create(
+      const NewGameRequest(
+        saveName: 'Consistent',
+        playerTeamId: 'team_europe_0',
+        seed: 103,
+      ),
+    );
+
+    await repo.save(game);
+
+    final gameJson =
+        jsonDecode(
+              await File('${tempDir.path}/${game.meta.id}.json').readAsString(),
+            )
+            as Map<String, dynamic>;
+    final indexJson =
+        jsonDecode(
+              await File('${tempDir.path}/saves_index.json').readAsString(),
+            )
+            as List<dynamic>;
+    final indexedMeta =
+        indexJson.singleWhere(
+              (entry) => (entry as Map<String, dynamic>)['id'] == game.meta.id,
+            )
+            as Map<String, dynamic>;
+
+    expect(gameJson['schemaVersion'], SaveRepository.currentSchemaVersion);
+    expect(
+      (gameJson['meta'] as Map<String, dynamic>)['schemaVersion'],
+      SaveRepository.currentSchemaVersion,
+    );
+    expect(indexedMeta, equals(gameJson['meta']));
+
+    final loaded = await repo.load(game.meta.id);
+    expect(loaded.meta.schemaVersion, SaveRepository.currentSchemaVersion);
+    expect(loaded.schemaVersion, SaveRepository.currentSchemaVersion);
+  });
+
+  test('controlled repository supports zero and delayed gated saves', () async {
+    final game = GameFactory().create(
+      const NewGameRequest(
+        saveName: 'Controlled',
+        playerTeamId: 'team_europe_0',
+        seed: 104,
+      ),
+    );
+
+    for (final delay in const [Duration.zero, Duration(milliseconds: 300)]) {
+      final controlled = ControlledSaveRepository(
+        overrideDirectory: tempDir,
+        delay: delay,
+        waitForRelease: true,
+      );
+      final saveFuture = controlled.save(game);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(controlled.saveCount, 1);
+      controlled.release();
+      await saveFuture;
+      expect(controlled.completedSaves, hasLength(1));
+      expect(controlled.saveStarted, hasLength(1));
+      expect(controlled.maxConcurrentSaves, 1);
+
+      final loaded = await repo.load(game.meta.id);
+      expect(loaded.meta.id, game.meta.id);
+      expect(loaded.saveSeed, game.saveSeed);
+      expect(loaded.leagueState, game.leagueState);
+      expect(loaded.schemaVersion, SaveRepository.currentSchemaVersion);
+      expect(loaded.meta.schemaVersion, SaveRepository.currentSchemaVersion);
+
+      final index = await repo.listSaves();
+      expect(index, hasLength(1));
+      expect(index.single.id, loaded.meta.id);
+      expect(index.single.schemaVersion, loaded.meta.schemaVersion);
+    }
+  });
+
+  test('failure before write leaves the previous snapshot untouched', () async {
+    final game = GameFactory().create(
+      const NewGameRequest(
+        saveName: 'Before failure',
+        playerTeamId: 'team_europe_0',
+        seed: 105,
+      ),
+    );
+    await repo.save(game);
+    final gameFile = File('${tempDir.path}/${game.meta.id}.json');
+    final indexFile = File('${tempDir.path}/saves_index.json');
+    final gameBefore = await gameFile.readAsString();
+    final indexBefore = await indexFile.readAsString();
+
+    final failing = ControlledSaveRepository(
+      overrideDirectory: tempDir,
+      failure: ControlledSaveFailure.beforeWrite,
+    );
+    final changed = game.copyWith(
+      meta: game.meta.copyWith(name: 'Should not commit'),
+    );
+
+    await expectLater(
+      failing.save(changed),
+      throwsA(isA<SaveRepositoryException>()),
+    );
+
+    expect(await gameFile.readAsString(), gameBefore);
+    expect(await indexFile.readAsString(), indexBefore);
+    expect(failing.completedSaves, isEmpty);
+    expect((await repo.load(game.meta.id)).meta.name, 'Before failure');
+  });
+
+  test('failure after game publication rolls both files back', () async {
+    final game = GameFactory().create(
+      const NewGameRequest(
+        saveName: 'Partial failure',
+        playerTeamId: 'team_europe_0',
+        seed: 106,
+      ),
+    );
+    await repo.save(game);
+    final gameFile = File('${tempDir.path}/${game.meta.id}.json');
+    final indexFile = File('${tempDir.path}/saves_index.json');
+    final gameBefore = await gameFile.readAsString();
+    final indexBefore = await indexFile.readAsString();
+
+    final failing = ControlledSaveRepository(
+      overrideDirectory: tempDir,
+      failure: ControlledSaveFailure.afterPartialWrite,
+    );
+    final changed = game.copyWith(
+      meta: game.meta.copyWith(name: 'Should roll back'),
+    );
+
+    await expectLater(
+      failing.save(changed),
+      throwsA(isA<SaveRepositoryException>()),
+    );
+
+    expect(await gameFile.readAsString(), gameBefore);
+    expect(await indexFile.readAsString(), indexBefore);
+    expect(failing.completedSaves, isEmpty);
+    expect(jsonDecode(await gameFile.readAsString()), isA<Map>());
+    expect(jsonDecode(await indexFile.readAsString()), isA<List>());
+    expect((await repo.load(game.meta.id)).meta.name, 'Partial failure');
+    expect(
+      tempDir.listSync().where(
+        (entity) =>
+            entity.path.contains('.tmp-') ||
+            entity.path.contains('.bak-') ||
+            entity.path.contains('.old-'),
+      ),
+      isEmpty,
+    );
   });
 
   test('rejects a save with an older schema version', () async {

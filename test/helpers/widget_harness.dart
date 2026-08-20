@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart';
 
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/app/screens/calendar_screen.dart';
@@ -31,8 +32,10 @@ Widget task41App(
   DateTime? selectedCalendarDay,
   SaveRepository? saveRepository,
   List<NavigatorObserver> navigatorObservers = const [],
+  List<Override> extraOverrides = const [],
 }) {
-  final overrides = [
+  final overrides = <Override>[
+    ...extraOverrides,
     saveRepositoryProvider.overrideWithValue(
       saveRepository ?? Task41NoopSaveRepository(),
     ),

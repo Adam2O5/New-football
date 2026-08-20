@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:new_football/core/balance/message_catalog.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/game_save.dart';
+import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/message.dart';
 import 'package:new_football/core/services/game_factory.dart';
 import 'package:new_football/core/services/message_service.dart';
@@ -85,6 +86,127 @@ void main() {
       expect(selected, 'decline');
       expect(resolved.inbox.pendingUrgent, isEmpty);
       expect(resolved.inbox.messages.single.acknowledged, isTrue);
+    },
+  );
+
+  test('confirmed decisions do not dispatch a second domain effect', () {
+    final decision = const DecisionSpec(
+      options: [
+        MessageAction(id: 'accept', labelKey: 'accept'),
+        MessageAction(id: 'decline', labelKey: 'decline'),
+      ],
+      defaultOnExpiry: 'decline',
+    );
+    final league = GameFactory()
+        .create(
+          const NewGameRequest(
+            saveName: 'Task 7 confirmed decision',
+            playerTeamId: 'team_europe_0',
+            seed: 71,
+          ),
+        )
+        .leagueState
+        .copyWith(
+          inbox: Inbox(
+            messages: [
+              message(
+                id: 'confirmed',
+                priority: MessagePriority.urgent,
+                decision: decision,
+              ).copyWith(read: true, acknowledged: true),
+            ],
+          ),
+        );
+    var dispatchCount = 0;
+
+    final resolved = MessageService().resolveDecision(
+      league,
+      'confirmed',
+      'accept',
+      onDecision: (state, _message, _option) {
+        dispatchCount++;
+        return state;
+      },
+    );
+
+    expect(dispatchCount, 0);
+    expect(resolved, same(league));
+  });
+
+  test('invalid and missing decisions are no-ops without dispatch', () {
+    final decision = const DecisionSpec(
+      options: [MessageAction(id: 'accept', labelKey: 'accept')],
+      defaultOnExpiry: 'accept',
+    );
+    final league = GameFactory()
+        .create(
+          const NewGameRequest(
+            saveName: 'Task 7 invalid decision',
+            playerTeamId: 'team_europe_0',
+            seed: 72,
+          ),
+        )
+        .leagueState
+        .copyWith(
+          inbox: Inbox(
+            messages: [
+              message(
+                id: 'invalid',
+                priority: MessagePriority.urgent,
+                decision: decision,
+              ),
+            ],
+          ),
+        );
+    var dispatchCount = 0;
+    LeagueState handler(
+      LeagueState state,
+      GameMessage _message,
+      String _option,
+    ) {
+      dispatchCount++;
+      return state;
+    }
+
+    expect(
+      MessageService().resolveDecision(
+        league,
+        'invalid',
+        'not-an-option',
+        onDecision: handler,
+      ),
+      same(league),
+    );
+    expect(
+      MessageService().resolveDecision(
+        league,
+        'missing',
+        'accept',
+        onDecision: handler,
+      ),
+      same(league),
+    );
+    expect(dispatchCount, 0);
+  });
+
+  test(
+    'Inbox acknowledgement is idempotent and clears pending urgent once',
+    () {
+      final urgent = message(
+        id: 'ack-idempotent',
+        priority: MessagePriority.urgent,
+      );
+      final inbox = Inbox(messages: [urgent]);
+
+      final acknowledged = inbox.acknowledge(urgent.id);
+      final repeated = acknowledged.acknowledge(urgent.id);
+      final missing = repeated.acknowledge('missing');
+
+      expect(acknowledged.messages.single.read, isTrue);
+      expect(acknowledged.messages.single.acknowledged, isTrue);
+      expect(acknowledged.pendingUrgent, isEmpty);
+      expect(repeated, same(acknowledged));
+      expect(missing, same(acknowledged));
     },
   );
 

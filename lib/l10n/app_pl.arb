@@ -558,6 +558,30 @@
   "inbox_decisionOptions": "Wybierz opcję",
   "inbox_actions": "Akcje",
   "inbox_acknowledge": "Potwierdź",
+  "inbox_operationSaving": "Zapisywanie potwierdzenia…",
+  "@inbox_operationSaving": {
+    "description": "Lokalny stan oczekiwania podczas zapisu potwierdzenia; nie oznacza jeszcze zakończonej operacji."
+  },
+  "inbox_confirmationError": "Nie udało się potwierdzić wiadomości. Spróbuj ponownie.",
+  "@inbox_confirmationError": {
+    "description": "Błąd potwierdzenia wiadomości po rozpoczęciu operacji; nie komunikuje sukcesu."
+  },
+  "inbox_markReadError": "Nie udało się otworzyć wiadomości. Spróbuj ponownie.",
+  "@inbox_markReadError": {
+    "description": "Błąd oznaczenia wiadomości jako przeczytanej przed otwarciem szczegółów."
+  },
+  "inbox_actionError": "Nie udało się wykonać akcji. Spróbuj ponownie.",
+  "@inbox_actionError": {
+    "description": "Błąd akcji wiadomości wykonywanej w lokalnym lifecycle sheeta."
+  },
+  "inbox_retry": "Spróbuj ponownie",
+  "@inbox_retry": {
+    "description": "Przycisk ponowienia nieudanej operacji wiadomości."
+  },
+  "inbox_saveUncertain": "Nie można potwierdzić wyniku zapisu. Spróbuj ponownie.",
+  "@inbox_saveUncertain": {
+    "description": "Komunikat dla niejednoznacznego zapisu wymagającego weryfikacji lub reconciliation; nie sugeruje sukcesu."
+  },
   "inbox_close": "Zamknij",
   "inbox_digestMembers": "Wiadomości składowe ({count})",
   "@inbox_digestMembers": {
