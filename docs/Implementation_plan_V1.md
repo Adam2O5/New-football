@@ -815,7 +815,7 @@ Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, le
 - [x] Żółta, druga żółta, direct red oraz rozkład severity 1–3.
 - [x] Formuła kontuzji, mapa `injuryProne`, katalog Task 10 i duel `×2,5`.
 - [x] Ratingi jednostek i zużycie staminy dla 10/9 graczy.
-- [x] Integracja eventów, `MatchDiscipline`, `MatchInjury`, `TeamMatchStats.fouls`, czerwonej kartki, rekonfiguracji XI, wymuszonej zmiany i braku ławki/GK w `test/task20_incidents_test.dart`.
+- [x] Integracja eventów, `MatchDiscipline`, `MatchInjury`, `TeamMatchStats.fouls`, czerwonej kartki, rekonfiguracji XI, wymuszonej zmiany i braku ławki/GK w `test/match/task20_incidents_test.dart`.
 
 **Kalibracja:** średnie meczowe (~11 fauli, ~1,9 żółtej, ~0,06 czerwonej i ~0,18 kontuzji na drużynę) pozostają pomiarem harnessu 10 000 meczów z Task 24; test Task 20 weryfikuje mechanikę i wzory deterministycznie.
 
@@ -863,7 +863,7 @@ Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, le
 - [x] `heavyRain`, `wind` i temperatura wpływają na efekty pogody, błąd GK, xG, wagę `longBall` i stamina
 - [x] Derby, crowd i stake zmieniają kontekst oraz lambdę
 - [x] Doliczony czas jest deterministyczny, mieści się w 1–8 minutach, a pierwsza połowa używa `floor(stoppage / 3)`
-- [x] Pokrycie mechaniki znajduje się w `test/task21_momentum_context_test.dart`
+- [x] Pokrycie mechaniki znajduje się w `test/match/task21_momentum_context_test.dart`
 
 **Demo:** ten sam runtime potrafi deterministycznie odtworzyć mecz derbowy w ulewie z innymi błędami GK, jakością podań, wagą `longBall`, zmęczeniem i lambdą niż mecz w pogodzie `clear`, bez zmiany save schema.
 
@@ -906,7 +906,7 @@ Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, le
 - [x] `StatsScreen` prezentuje rozwijany pełny box score sezonu zawodników i drużyn, w tym xG
 
 **Testy**
-- [x] `test/task22_match_result_test.dart`: realne statystyki z trace/eventów, rating 1,0–10,0, MotM, JSON round-trip, stamina, `seasonStats` i `growthRate`
+- [x] `test/match/task22_match_result_test.dart`: realne statystyki z trace/eventów, rating 1,0–10,0, MotM, JSON round-trip, stamina, `seasonStats` i `growthRate`
 - [x] Obserwacja minutowa i symulacja headless na tym samym seedzie dają identyczny trace oraz `MatchResult`
 - [x] Regresja Task 10–21 oraz testy przepływu Task 6–7: 142 testy zakończone powodzeniem
 - [x] Wyszukiwanie kodu i dokumentacji nie znajduje importu usuniętej ścieżki legacy engine
@@ -1254,7 +1254,7 @@ Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, le
 - [x] Przebudowa `StaffScreen` wg `TODO.md`
 - [x] Usunąć `_showWorkInProgress` z `OtherScreen`
 
-**Testy widgetów** (`test/task31_market_ui_test.dart`, 6 przypadków)
+**Testy widgetów** (`test/market/task31_market_ui_test.dart`, 6 przypadków)
 - [x] Historia wymian: sortowanie, filtr wyniku, `ExpansionTile`, powód odrzucenia i aktywa
 - [x] `ContractScreen`: licznik godzin, preview oczekiwań, status rundy i deadline negocjacji
 - [x] `FreeAgencyScreen`: rozróżnienie FA I/FA II i obecność zegara tylko w FA I
@@ -1298,7 +1298,7 @@ Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, le
 - [x] `projectedFinish`/projektowany slot jest domknięty w kanonicznym evaluatorze picków
 - [x] AI nie ma dostępu do ukrytych danych innych klubów — audyt dostępu przez brak odczytu `PlayerHidden`
 
-**Testy** (`test/task32_ai_evaluation_test.dart`, 9 przypadków)
+**Testy** (`test/ai/task32_ai_evaluation_test.dart`, 9 przypadków)
 - [x] 22-latek ma wyższy `assetValue` dla `rebuild`, 30-latek dla `elite`
 - [x] Pick najsłabszej drużyny nie jest wyceniany jak gwarantowana „jedynka"
 - [x] `needScore` przy braku GK przekracza próg krytyczny
@@ -1339,7 +1339,7 @@ Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, le
 
 **Integracja:** `AiMatchdayService` współdzieli kanoniczny `SimulationMatchEngine` z symulacją headless i `MatchdayScreen`; plan jest nakładany na kopię `Team`, a przypisania slotów są przekazywane jako mapy `playerId → Position`. `DaySimulator` i `SeasonService` budują historię formacji z publicznych `ScheduledMatch.result`, bez zmian schematu zapisu. Losowania decyzji AI używają fixture-scoped `matchAiSeed`, niezależnego od RNG fizyki meczu.
 
-**Testy** (`test/task33_ai_matchday_test.dart`, 5 przypadków)
+**Testy** (`test/ai/task33_ai_matchday_test.dart`, 5 przypadków)
 - [x] 1000 deterministycznych planów nie wystawia bramkarza z pola w slocie GK
 - [x] Cztery pasma readiness mają wartości 1,00 / 0,94 / 0,82 / 0,60
 - [x] Kontr-formacja jest stosowana ze średnią około 65% po spełnieniu minimum 2 meczów
@@ -1433,7 +1433,7 @@ Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, le
 - [x] Sztab: wiek 60 → kontrakt max 1 rok
 
 **Testy**
-- [x] Jakość FA zamiast wolumenowego UFA-rate: benchmark wrażliwości na popyt w `test/task35_ai_contract_market_benchmark_test.dart`; przy zdrowym rosterze i pozycji na maksimum najwyżej 10% planów FA-I (polityka P = 5%), a każdy plan przechodzi legalne limity pensji i długości kontraktu; przy rosterze <20 FA-II tworzy awaryjny plan na `minPlayerSalary` i 1 rok
+- [x] Jakość FA zamiast wolumenowego UFA-rate: benchmark wrażliwości na popyt w `test/ai/task35_ai_contract_market_benchmark_test.dart`; przy zdrowym rosterze i pozycji na maksimum najwyżej 10% planów FA-I (polityka P = 5%), a każdy plan przechodzi legalne limity pensji i długości kontraktu; przy rosterze <20 FA-II tworzy awaryjny plan na `minPlayerSalary` i 1 rok
 - [x] Obsada sztabu: 8 stałych seedów, pełne okno FA I/II, wszystkie drużyny AI i dwóch kandydatów na slot; raw oraz cap-aware fill rate = 96,11%
 - [x] Payroll zawodników AI: średnia = 73,41% capu, maksimum = 100,58%; egzekwowany jest tylko górny guardrail ≤108%, a dolne 88% pozostaje metryką diagnostyczną, nie celem wymuszającym zbędne wydatki
 - [x] AI nigdy nie podpisuje 33+ na >2 lata
@@ -1538,7 +1538,7 @@ Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, le
 
 **Wykonano — infrastruktura i rozdzielenie profili**
 
-- [x] Dodano deterministyczny, ciągły harness in-memory w `test/task38_ai_season_calibration_test.dart`, z pasywnym klubem gracza i raportem per sezon oraz agregatami.
+- [x] Dodano deterministyczny, ciągły harness in-memory w `test/ai/task38_ai_season_calibration_test.dart`, z pasywnym klubem gracza i raportem per sezon oraz agregatami.
 - [x] Zachowano obecny zakres 17 metryk Task 38: mistrzowie, playoff streak, walkowery, legalność rosterów, trade’y AI, oferty AI → gracz, FA, sztab, payroll, aprony, Stepien, korelacja rankingu, wiek, odbudowa, toksyczne kontrakty, dumpy kontraktowe i odmowy NTC.
 - [x] Profil **accelerated** jest domyślny i został skonfigurowany na 10 sezonów. Przesuwa pełny zegar logiczny, zachowując krytyczne ticki kalendarza, recovery, tygodniowe AI, FA phase II, historię, draft oraz wygaszanie ofert.
 - [x] Profil **full-fidelity** wykonuje pełne ticki z `simulatePlayerMatch: true`; zachowano osobny smoke test jednego sezonu.
@@ -1591,7 +1591,7 @@ Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, le
 - [x] `Playoff` i `Play-In` w `StandingsScreen`
 - [x] Digest `retire:league:{week44}`
 
-**Testy** (`test/task39_season_service_test.dart`)
+**Testy** (`test/calendar/task39_season_service_test.dart`)
 - [x] Pełna datowana drabinka od play-in do jednego logicznego finału ligi
 - [x] Nagrody zgodne z liderami kontrolowanych `MatchResult.playerStats` oraz idempotencja `runAwards`
 - [x] `rolloverSeason` zachowuje historię i inkrementuje staż
@@ -1613,10 +1613,10 @@ Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, le
 - [x] Dodać ikonę ustawień w prawym górnym rogu z działaniem
 - [x] Dodać ikonę zapisu w prawym górnym rogu z działaniem
 - [x] Autozapis taktyki zamiast osobnego przycisku Save
-- [x] Dodać dedykowane testy UI Task 40 w `test/task40_ui_test.dart`
+- [x] Dodać dedykowane testy UI Task 40 w `test/ui/task40_ui_test.dart`
 - [x] Przepisać `TODO.md`: usunąć pozycje już zrealizowane i pozostawić wyłącznie faktycznie otwarte pozycje
 
-**Testy:** `test/task40_ui_test.dart` pokrywa dashboard finansów i stan over-cap, Home, roster/filtry/taktykę Squad, autosave taktyki oraz akcje ustawień i zapisu w Shell.
+**Testy:** `test/ui/task40_ui_test.dart` pokrywa dashboard finansów i stan over-cap, Home, roster/filtry/taktykę Squad, autosave taktyki oraz akcje ustawień i zapisu w Shell.
 
 **Demo:** przejście przez ekrany Task 40 bez pozycji „work in progress" i bez ręcznego zapisu taktyki; pozostałe prace są jawnie wskazane w zaktualizowanym `TODO.md`.
 
@@ -1638,12 +1638,12 @@ Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, le
 
 **Testy core**
 
-- [x] `CalendarEventRegistry.nextEvent` z zawinięciem roku (`test/calendar_service_test.dart`)
-- [x] `LeagueStrengthService` — histereza i rozkład tierów (`test/task14_team_management_test.dart`)
-- [x] `CohesionService` (`test/task41_core_coverage_test.dart`)
-- [x] Odrzucanie niekompatybilnych zapisów (`test/save_repository_test.dart`, `test/task10_injury_test.dart`)
-- [x] `TradeService.assetValue` dla picków (`test/task41_core_coverage_test.dart`)
-- [x] `MessageService` — digesty, dedup, retencja (`test/task7_message_system_test.dart`, `test/task13_development_test.dart`)
+- [x] `CalendarEventRegistry.nextEvent` z zawinięciem roku (`test/calendar/calendar_service_test.dart`)
+- [x] `LeagueStrengthService` — histereza i rozkład tierów (`test/match/task14_team_management_test.dart`)
+- [x] `CohesionService` (`test/match/task41_core_coverage_test.dart`)
+- [x] Odrzucanie niekompatybilnych zapisów (`test/data/save_repository_test.dart`, `test/match/task10_injury_test.dart`)
+- [x] `TradeService.assetValue` dla picków (`test/match/task41_core_coverage_test.dart`)
+- [x] `MessageService` — digesty, dedup, retencja (`test/messages/task7_message_system_test.dart`, `test/match/task13_development_test.dart`)
 
 **Demo:** pełny przebieg testów pokrywający ścieżki krytyczne UI oraz logiki sezonowej.
 
@@ -1653,7 +1653,7 @@ Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, le
 
 **Cel:** ostatnia brama jakościowa.
 
-**Guard:** `test/task42_audit_test.dart` porównuje pełne, znormalizowane zestawy kluczy ARB oraz placeholdery, a także skanuje produkcyjne teksty i nazwane stałe liczbowe. Istniejące odstępstwa legacy są jawnie zinwentaryzowane w manifestach testu; nowe trafienia poza tym manifestem powodują failure zamiast cichego regresu.
+**Guard:** `test/data/task42_audit_test.dart` porównuje pełne, znormalizowane zestawy kluczy ARB oraz placeholdery, a także skanuje produkcyjne teksty i nazwane stałe liczbowe. Istniejące odstępstwa legacy są jawnie zinwentaryzowane w manifestach testu; nowe trafienia poza tym manifestem powodują failure zamiast cichego regresu.
 
 - [x] Test strażniczy wykrywający literały tekstowe w warstwie logiki
 - [x] Test strażniczy wykrywający literały tekstowe w widgetach
@@ -1663,7 +1663,7 @@ Nie zmieniono `MatchState`, `MatchResult`, modeli serializowanych, providera, le
 - [x] Aktualizacja tabeli „Znane sprzeczności" — wszystkie pozycje na ✅
 - [x] Przegląd docs pod kątem rozbieżności powstałych w trakcie prac; stan początkowy planu został oznaczony jako historyczny
 
-**Demo:** testy `test/task42_audit_test.dart` przechodzą, a docs opisują zarówno centralizację reguł, jak i jawny legacy baseline wymagający dalszej migracji.
+**Demo:** testy `test/data/task42_audit_test.dart` przechodzą, a docs opisują zarówno centralizację reguł, jak i jawny legacy baseline wymagający dalszej migracji.
 
 ---
 

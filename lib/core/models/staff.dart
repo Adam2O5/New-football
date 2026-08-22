@@ -119,10 +119,10 @@ abstract final class StaffRatingSystem {
   /// star step.
   static double rawOverall(StaffAttributes attributes, StaffRole role) {
     final keys = keysForRole(role);
-    var sum = 0.0;
-    for (final key in keys) {
-      sum += clampToScale(attributeValue(attributes, key));
-    }
+    final sum = keys.fold<double>(
+      0,
+      (total, key) => total + clampToScale(attributeValue(attributes, key)),
+    );
     return clampToScale(sum / keys.length);
   }
 

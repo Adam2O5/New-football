@@ -21,13 +21,10 @@ jobs:
           dart --disable-analytics
       - run: flutter pub get
       - name: Verify core has no Flutter imports
-        run: |
-          if grep -r "package:flutter" lib/core/ 2>/dev/null; then
-            echo "ERROR: lib/core must not import Flutter"
-            exit 1
-          fi
+        run: bash ./scripts/check_core_no_flutter.sh
       - name: Build runner
         run: dart run build_runner build --delete-conflicting-outputs --verbose
         timeout-minutes: 10
       - run: flutter analyze --no-fatal-infos
-      - run: flutter test
+      - name: Run tests
+        run: pwsh -NoProfile -NonInteractive -File ./scripts/test.ps1

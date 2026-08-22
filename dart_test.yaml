@@ -1,0 +1,13 @@
+# Deklaracje tagów używanych przez pliki testowe (adnotacja @Tags na poziomie pliku).
+# Brak deklaracji powoduje ostrzeżenie "Warning: Unknown tag" przy uruchomieniu testów.
+tags:
+  slow:        # przebieg pojedynczego pliku > ~10 s
+  ui:          # test widgetowy (testWidgets)
+  property:    # test własnościowy / generatorowy
+  integration: # przepływ end-to-end przez realne ekrany i serwisy
+  benchmark:   # pomiar metryk, nie asercja funkcjonalna
+  ai:          # dotyczy core/ai/*
+
+presets:
+  fast:
+    exclude_tags: "slow || benchmark"
