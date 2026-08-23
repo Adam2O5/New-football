@@ -37,3 +37,4 @@ flutter:
   generate: true
   assets:
     - assets/images/new-football-background.png
+    - assets/images/Syrenka FC.jpg

@@ -106,6 +106,18 @@
   "newGame_difficultyHard": "Hard",
   "newGame_chooseTeam": "Choose your team",
   "newGame_start": "Start career",
+  "newGame_teamSelected": "Selected",
+  "newGame_teamNotSelected": "Not selected",
+  "newGame_teamSemantics": "{name}, {city}, {conference}, {state}",
+  "@newGame_teamSemantics": {
+    "description": "Full accessibility label for a team row.",
+    "placeholders": {
+      "name": {"type": "String"},
+      "city": {"type": "String"},
+      "conference": {"type": "String"},
+      "state": {"type": "String"}
+    }
+  },
 
   "loadGame_title": "Load game",
   "loadGame_error": "Error: {error}",

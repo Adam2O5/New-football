@@ -116,6 +116,18 @@
   "newGame_difficultyHard": "Trudna",
   "newGame_chooseTeam": "Wybierz drużynę",
   "newGame_start": "Rozpocznij karierę",
+  "newGame_teamSelected": "Zaznaczona",
+  "newGame_teamNotSelected": "Niezaznaczona",
+  "newGame_teamSemantics": "{name}, {city}, {conference}, {state}",
+  "@newGame_teamSemantics": {
+    "description": "Pełna etykieta dostępności wiersza drużyny.",
+    "placeholders": {
+      "name": {"type": "String"},
+      "city": {"type": "String"},
+      "conference": {"type": "String"},
+      "state": {"type": "String"}
+    }
+  },
 
   "loadGame_title": "Wczytaj grę",
   "loadGame_error": "Błąd: {error}",

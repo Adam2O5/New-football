@@ -638,6 +638,29 @@ abstract class AppLocalizations {
   /// **'Rozpocznij karierę'**
   String get newGame_start;
 
+  /// No description provided for @newGame_teamSelected.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zaznaczona'**
+  String get newGame_teamSelected;
+
+  /// No description provided for @newGame_teamNotSelected.
+  ///
+  /// In pl, this message translates to:
+  /// **'Niezaznaczona'**
+  String get newGame_teamNotSelected;
+
+  /// Pełna etykieta dostępności wiersza drużyny.
+  ///
+  /// In pl, this message translates to:
+  /// **'{name}, {city}, {conference}, {state}'**
+  String newGame_teamSemantics(
+    String name,
+    String city,
+    String conference,
+    String state,
+  );
+
   /// No description provided for @loadGame_title.
   ///
   /// In pl, this message translates to:

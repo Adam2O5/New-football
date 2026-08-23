@@ -283,6 +283,22 @@ class AppLocalizationsPl extends AppLocalizations {
   String get newGame_start => 'Rozpocznij karierę';
 
   @override
+  String get newGame_teamSelected => 'Zaznaczona';
+
+  @override
+  String get newGame_teamNotSelected => 'Niezaznaczona';
+
+  @override
+  String newGame_teamSemantics(
+    String name,
+    String city,
+    String conference,
+    String state,
+  ) {
+    return '$name, $city, $conference, $state';
+  }
+
+  @override
   String get loadGame_title => 'Wczytaj grę';
 
   @override
