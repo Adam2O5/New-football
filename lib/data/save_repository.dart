@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:path_provider/path_provider.dart';
 import 'package:new_football/core/models/game_save.dart';
+import 'package:new_football/core/models/save_record.dart';
 import 'package:new_football/data/staff_data_compatibility.dart';
 
 class SaveRepositoryException implements Exception {
@@ -53,6 +54,30 @@ class SaveSchemaMismatchException extends SaveRepositoryException {
   bool get isNewer => foundVersion > supportedVersion;
 }
 
+/// Raised when a canonical save file is required but is not present.
+///
+/// This is intentionally separate from [SaveRepositoryException] instances
+/// for malformed serialized data so management callers can report an
+/// unavailable source without treating it as a corrupt source.
+class SaveFileNotFoundException extends SaveRepositoryException {
+  SaveFileNotFoundException({required this.saveId})
+    : super('Save file not found: $saveId');
+
+  final String saveId;
+}
+
+/// Raised when a canonical save file cannot be parsed or has an invalid raw
+/// object shape or identity.
+class InvalidSerializedSaveException extends SaveRepositoryException {
+  InvalidSerializedSaveException({
+    required this.saveId,
+    required String reason,
+    Object? cause,
+  }) : super('Invalid serialized save $saveId: $reason', cause: cause);
+
+  final String saveId;
+}
+
 class SaveRepository {
   SaveRepository({
     Directory? overrideDirectory,
@@ -98,6 +123,299 @@ class SaveRepository {
   Future<File> _saveFile(String id) async {
     final dir = await _savesDir();
     return File('${dir.path}/$id.json');
+  }
+
+  /// Inspects only the canonical save file for [id].
+  ///
+  /// A missing canonical file is represented by [SaveFileInfo.missing]. If
+  /// the file exists but its length cannot be read, the result preserves that
+  /// distinction with [SaveFileInfo.sizeUnavailable] rather than reporting a
+  /// misleading zero-byte file. Temporary, backup, and displaced files are
+  /// never considered by this method.
+  Future<SaveFileInfo> inspectFile(String id) async {
+    final file = await _saveFile(id);
+    if (!await file.exists()) return const SaveFileInfo.missing();
+
+    try {
+      return SaveFileInfo.available(await file.length());
+    } catch (_) {
+      return const SaveFileInfo.sizeUnavailable();
+    }
+  }
+
+  /// Returns whether [id] is absent from the current index and from the
+  /// canonical `{id}.json` path on disk.
+  ///
+  /// [listSaves] is deliberately called for every invocation so a caller
+  /// cannot make an availability decision from a stale index snapshot.
+  Future<bool> isSaveIdAvailable(String id) async {
+    final indexed = (await listSaves()).any((meta) => meta.id == id);
+    if (indexed) return false;
+
+    final canonicalFile = await _saveFile(id);
+    return !(await canonicalFile.exists());
+  }
+
+  /// Reads and validates the canonical raw JSON for [sourceId].
+  ///
+  /// This is a management-only raw read: it does not decode a [GameSave],
+  /// so callers can inspect older or newer schemas without changing the
+  /// existing [load] compatibility contract.
+  Future<Map<String, dynamic>> readRawSave(String sourceId) {
+    return _readRawSaveJson(sourceId);
+  }
+
+  /// Creates a duplicate from the canonical raw snapshot for [sourceId].
+  ///
+  /// This operation deliberately does not decode [GameSave]. The source may
+  /// use an older or newer schema, and management must be able to copy its
+  /// payload and unknown metadata verbatim. Only the four duplicate-owned
+  /// metadata fields are replaced; all other raw fields remain unchanged.
+  /// The game file and index are committed through the same two-file
+  /// transaction used by [save], and success is returned only after the raw
+  /// snapshot and exact-one index entry have been verified.
+  Future<GameSaveMeta> duplicateRaw({
+    required String sourceId,
+    required GameSaveMeta duplicateMeta,
+  }) async {
+    // Read the source before doing any writes, and read it from the canonical
+    // path only. This keeps a pending/old transaction artifact from becoming
+    // the source and preserves the distinct missing-vs-invalid exceptions.
+    final sourceJson = await _readRawSaveJson(sourceId);
+    final sourceMeta = Map<String, dynamic>.from(sourceJson['meta'] as Map);
+    final duplicateMetaJson = duplicateMeta.toJson();
+    final duplicateRawMeta = Map<String, dynamic>.from(sourceMeta);
+    for (final key in const ['id', 'name', 'createdAt', 'updatedAt']) {
+      duplicateRawMeta[key] = duplicateMetaJson[key];
+    }
+    final duplicateJson = <String, dynamic>{
+      ...sourceJson,
+      'meta': duplicateRawMeta,
+    };
+
+    final currentMetas = await listSaves();
+    if (duplicateMeta.id == sourceId ||
+        currentMetas.any((meta) => meta.id == duplicateMeta.id)) {
+      throw SaveRepositoryException(
+        'Duplicate save id is already in use: ${duplicateMeta.id}',
+      );
+    }
+
+    final duplicateFile = await _saveFile(duplicateMeta.id);
+    if (await duplicateFile.exists()) {
+      throw SaveRepositoryException(
+        'Duplicate save file already exists: ${duplicateMeta.id}',
+      );
+    }
+
+    final transaction = _prepareTwoFileTransaction(
+      saveId: duplicateMeta.id,
+      gameFile: duplicateFile,
+      indexFile: await _indexFile(),
+    );
+    final gameTemporary = transaction.gameFile.temporary;
+    final indexTemporary = transaction.indexFile.temporary;
+
+    try {
+      final indexJson = const JsonEncoder.withIndent('  ').convert(
+        [...currentMetas, duplicateMeta].map((m) => m.toJson()).toList(),
+      );
+      final gameJson = const JsonEncoder.withIndent(
+        '  ',
+      ).convert(duplicateJson);
+
+      await _writeTemporary(gameTemporary, gameJson);
+      await _writeTemporary(indexTemporary, indexJson);
+      await _commitPreparedFiles(
+        transaction,
+        verify: () => _verifyRawCommit(
+          transaction,
+          expectedGameJson: duplicateJson,
+          expectedIndexMeta: duplicateMetaJson,
+        ),
+      );
+      return duplicateMeta;
+    } catch (e) {
+      if (e is SaveRepositoryException) rethrow;
+      throw SaveRepositoryException(
+        'Failed to duplicate save ${duplicateMeta.id}',
+        cause: e,
+      );
+    } finally {
+      await _deleteIfExists(gameTemporary);
+      await _deleteIfExists(indexTemporary);
+    }
+  }
+
+  /// Renames a canonical raw save without decoding its game payload.
+  ///
+  /// Only the raw `meta.name` field is changed. The source may use an older or
+  /// newer schema, and unknown top-level and metadata fields are retained
+  /// because the operation copies the decoded raw object and changes that one
+  /// field. The index is rebuilt from its current entries with all entries for
+  /// [id] replaced by exactly one renamed entry.
+  ///
+  /// The file and index are committed by the same two-file transaction used by
+  /// [save] and [duplicateRaw]. Verification compares the complete raw file,
+  /// the exact target index metadata, and the target ID before success is
+  /// returned. Any publication failure therefore restores the previous name
+  /// in both artifacts, or propagates [SaveAmbiguousWriteException] when that
+  /// restoration cannot be completed.
+  Future<GameSaveMeta> renameRaw({
+    required String id,
+    required String newName,
+  }) async {
+    // Read only the canonical file at operation time. This intentionally
+    // avoids GameSave.fromJson so older/newer schemas remain manageable.
+    final sourceJson = await _readRawSaveJson(id);
+    final sourceMeta = Map<String, dynamic>.from(sourceJson['meta'] as Map);
+    final previousName = sourceMeta['name'];
+    if (previousName is! String) {
+      throw InvalidSerializedSaveException(
+        saveId: id,
+        reason: 'metadata name is missing or invalid',
+      );
+    }
+
+    final currentMetas = await listSaves();
+    final indexedMetas = currentMetas.where((meta) => meta.id == id).toList();
+    if (indexedMetas.isEmpty) {
+      throw SaveRepositoryException(
+        'Save index does not contain save $id',
+      );
+    }
+    if (indexedMetas.any((meta) => meta.name != previousName)) {
+      throw SaveRepositoryException(
+        'Serialized save $id and save index have different names',
+      );
+    }
+
+    // Replacing all existing entries for the ID both preserves the existing
+    // index and guarantees that a malformed duplicate ID cannot result in a
+    // second matching entry after rename.
+    final renamedMeta = indexedMetas.first.copyWith(name: newName);
+    final renamedIndex = <GameSaveMeta>[
+      ...currentMetas.where((meta) => meta.id != id),
+      renamedMeta,
+    ];
+    final renamedRawMeta = Map<String, dynamic>.from(sourceMeta)
+      ..['name'] = newName;
+    final renamedJson = <String, dynamic>{
+      ...sourceJson,
+      'meta': renamedRawMeta,
+    };
+
+    final transaction = _prepareTwoFileTransaction(
+      saveId: id,
+      gameFile: await _saveFile(id),
+      indexFile: await _indexFile(),
+    );
+    final gameTemporary = transaction.gameFile.temporary;
+    final indexTemporary = transaction.indexFile.temporary;
+
+    try {
+      final gameJson = const JsonEncoder.withIndent(
+        '  ',
+      ).convert(renamedJson);
+      final indexJson = const JsonEncoder.withIndent(
+        '  ',
+      ).convert(renamedIndex.map((meta) => meta.toJson()).toList());
+
+      await _writeTemporary(gameTemporary, gameJson);
+      await _writeTemporary(indexTemporary, indexJson);
+      await _commitPreparedFiles(
+        transaction,
+        verify: () => _verifyRawCommit(
+          transaction,
+          expectedGameJson: renamedJson,
+          expectedIndexMeta: renamedMeta.toJson(),
+        ),
+      );
+      return renamedMeta;
+    } catch (e) {
+      if (e is SaveRepositoryException) rethrow;
+      throw SaveRepositoryException(
+        'Failed to rename save $id',
+        cause: e,
+      );
+    } finally {
+      await _deleteIfExists(gameTemporary);
+      await _deleteIfExists(indexTemporary);
+    }
+  }
+
+  /// Reads and validates the canonical raw JSON for [sourceId].
+  ///
+  /// This helper is intentionally raw and does not call [GameSave.fromJson],
+  /// allowing management operations to handle saves from older or newer
+  /// schemas. It never searches the directory, so `.tmp-*`, `.bak-*`, and
+  /// `.old-*` transaction artifacts cannot become a source accidentally.
+  Future<Map<String, dynamic>> _readRawSaveJson(String sourceId) async {
+    final file = await _saveFile(sourceId);
+    if (!await file.exists()) {
+      throw SaveFileNotFoundException(saveId: sourceId);
+    }
+
+    late final String contents;
+    try {
+      contents = await file.readAsString();
+    } catch (e) {
+      throw InvalidSerializedSaveException(
+        saveId: sourceId,
+        reason: 'file could not be read',
+        cause: e,
+      );
+    }
+
+    late final Object? decoded;
+    try {
+      decoded = jsonDecode(contents);
+    } catch (e) {
+      throw InvalidSerializedSaveException(
+        saveId: sourceId,
+        reason: 'JSON could not be decoded',
+        cause: e,
+      );
+    }
+
+    return _validateRawSaveJson(decoded, sourceId: sourceId);
+  }
+
+  /// Validates the minimum raw snapshot contract needed by management.
+  ///
+  /// Schema compatibility is intentionally not checked here. Management must
+  /// be able to copy or rename an older/newer snapshot, but it must not accept
+  /// a non-object, missing metadata, or a metadata object belonging to a
+  /// different source ID.
+  Map<String, dynamic> _validateRawSaveJson(
+    Object? decoded, {
+    required String sourceId,
+  }) {
+    if (decoded is! Map) {
+      throw InvalidSerializedSaveException(
+        saveId: sourceId,
+        reason: 'root JSON value is not an object',
+      );
+    }
+
+    final json = Map<String, dynamic>.from(decoded);
+    final rawMeta = json['meta'];
+    if (rawMeta is! Map) {
+      throw InvalidSerializedSaveException(
+        saveId: sourceId,
+        reason: 'metadata object is missing',
+      );
+    }
+
+    final meta = Map<String, dynamic>.from(rawMeta);
+    if (meta['id'] != sourceId) {
+      throw InvalidSerializedSaveException(
+        saveId: sourceId,
+        reason: 'metadata id does not match the source id',
+      );
+    }
+
+    return json;
   }
 
   Future<List<GameSaveMeta>> listSaves() async {
@@ -177,27 +495,13 @@ class SaveRepository {
         updatedAt: DateTime.now(),
       ),
     );
-    final gameFile = await _saveFile(stamped.meta.id);
-    final indexFile = await _indexFile();
-    final transactionId =
-        '${DateTime.now().microsecondsSinceEpoch}-'
-        '${_transactionSequence++}';
-    final gameTemporary = File('${gameFile.path}.tmp-$transactionId-game');
-    final indexTemporary = File('${indexFile.path}.tmp-$transactionId-index');
-    final files = [
-      _PreparedSaveFile(
-        destination: gameFile,
-        temporary: gameTemporary,
-        backup: File('${gameFile.path}.bak-$transactionId-game'),
-        stage: SaveRepositoryWriteStage.gameFile,
-      ),
-      _PreparedSaveFile(
-        destination: indexFile,
-        temporary: indexTemporary,
-        backup: File('${indexFile.path}.bak-$transactionId-index'),
-        stage: SaveRepositoryWriteStage.indexFile,
-      ),
-    ];
+    final transaction = _prepareTwoFileTransaction(
+      saveId: stamped.meta.id,
+      gameFile: await _saveFile(stamped.meta.id),
+      indexFile: await _indexFile(),
+    );
+    final gameTemporary = transaction.gameFile.temporary;
+    final indexTemporary = transaction.indexFile.temporary;
 
     try {
       final metas = await listSaves();
@@ -211,7 +515,10 @@ class SaveRepository {
 
       await _writeTemporary(gameTemporary, gameJson);
       await _writeTemporary(indexTemporary, indexJson);
-      await _commitPreparedFiles(files, stamped);
+      await _commitPreparedFiles(
+        transaction,
+        verify: () => _verifyTypedCommit(transaction, stamped),
+      );
     } catch (e) {
       if (e is SaveRepositoryException) rethrow;
       throw SaveRepositoryException(
@@ -224,18 +531,47 @@ class SaveRepository {
     }
   }
 
+  _PreparedSaveTransaction _prepareTwoFileTransaction({
+    required String saveId,
+    required File gameFile,
+    required File indexFile,
+  }) {
+    final transactionId =
+        '${DateTime.now().microsecondsSinceEpoch}-'
+        '${_transactionSequence++}';
+    return _PreparedSaveTransaction(
+      saveId: saveId,
+      gameFile: _PreparedSaveFile(
+        destination: gameFile,
+        temporary: File('${gameFile.path}.tmp-$transactionId-game'),
+        backup: File('${gameFile.path}.bak-$transactionId-game'),
+        stage: SaveRepositoryWriteStage.gameFile,
+      ),
+      indexFile: _PreparedSaveFile(
+        destination: indexFile,
+        temporary: File('${indexFile.path}.tmp-$transactionId-index'),
+        backup: File('${indexFile.path}.bak-$transactionId-index'),
+        stage: SaveRepositoryWriteStage.indexFile,
+      ),
+    );
+  }
+
   Future<void> _writeTemporary(File file, String contents) async {
     await file.writeAsString(contents, flush: true);
   }
 
   Future<void> _commitPreparedFiles(
-    List<_PreparedSaveFile> files,
-    GameSave stamped,
-  ) async {
+    _PreparedSaveTransaction transaction, {
+    required Future<void> Function() verify,
+  }) async {
+    final files = transaction.files;
     var committed = false;
     var rolledBack = false;
 
     try {
+      // The order is part of the transaction contract: publish the game file
+      // first and the index second. The index is never allowed to advertise a
+      // snapshot whose game file has not been published and verified.
       for (final file in files) {
         if (await file.destination.exists()) {
           await file.destination.copy(file.backup.path);
@@ -246,7 +582,7 @@ class SaveRepository {
         await _publish(file);
       }
 
-      await _verifyCommit(files, stamped);
+      await verify();
       committed = true;
     } catch (e) {
       try {
@@ -254,7 +590,7 @@ class SaveRepository {
         rolledBack = true;
       } catch (rollbackError) {
         throw SaveAmbiguousWriteException(
-          saveId: stamped.meta.id,
+          saveId: transaction.saveId,
           cause: SaveRepositoryException(
             'Save failed and rollback failed',
             cause: rollbackError,
@@ -305,30 +641,78 @@ class SaveRepository {
     }
   }
 
-  Future<void> _verifyCommit(
-    List<_PreparedSaveFile> files,
+  Future<_CommittedSaveJson> _readCommittedJson(
+    _PreparedSaveTransaction transaction,
+  ) async {
+    final gameJson =
+        jsonDecode(await transaction.gameFile.destination.readAsString())
+            as Map<String, dynamic>;
+    final indexJson =
+        jsonDecode(await transaction.indexFile.destination.readAsString())
+            as List<dynamic>;
+    return _CommittedSaveJson(gameJson: gameJson, indexJson: indexJson);
+  }
+
+  /// Verifies the shape and identity of a committed raw snapshot without
+  /// decoding it through [GameSave.fromJson]. Management operations use the
+  /// optional expected maps to validate older and newer schemas verbatim.
+  Future<_CommittedSaveJson> _verifyRawCommit(
+    _PreparedSaveTransaction transaction, {
+    Map<String, dynamic>? expectedGameJson,
+    Map<String, dynamic>? expectedIndexMeta,
+  }) async {
+    final committed = await _readCommittedJson(transaction);
+    final metaJson = committed.gameJson['meta'];
+    if (metaJson is! Map<String, dynamic> ||
+        metaJson['id'] != transaction.saveId) {
+      throw SaveRepositoryException(
+        'Serialized save ${transaction.saveId} has invalid metadata',
+      );
+    }
+
+    final matchingMeta = committed.indexJson
+        .whereType<Map<String, dynamic>>()
+        .where((meta) => meta['id'] == transaction.saveId)
+        .toList();
+    if (matchingMeta.length != 1) {
+      throw SaveRepositoryException(
+        'Save index does not contain exactly one save '
+        '${transaction.saveId}',
+      );
+    }
+
+    if (expectedGameJson != null &&
+        !_jsonValuesEqual(committed.gameJson, expectedGameJson)) {
+      throw SaveRepositoryException(
+        'Serialized save ${transaction.saveId} does not match the '
+        'expected raw snapshot',
+      );
+    }
+    if (expectedIndexMeta != null &&
+        (expectedIndexMeta['id'] != transaction.saveId ||
+            !_jsonValuesEqual(matchingMeta.single, expectedIndexMeta))) {
+      throw SaveRepositoryException(
+        'Save index does not match the expected raw metadata for '
+        '${transaction.saveId}',
+      );
+    }
+
+    return committed;
+  }
+
+  Future<void> _verifyTypedCommit(
+    _PreparedSaveTransaction transaction,
     GameSave stamped,
   ) async {
-    final gameFile = files.firstWhere(
-      (file) => file.stage == SaveRepositoryWriteStage.gameFile,
-    );
-    final indexFile = files.firstWhere(
-      (file) => file.stage == SaveRepositoryWriteStage.indexFile,
-    );
-
-    final gameJson =
-        jsonDecode(await gameFile.destination.readAsString())
-            as Map<String, dynamic>;
-    final persistedGame = GameSave.fromJson(gameJson);
+    final committed = await _verifyRawCommit(transaction);
+    final persistedGame = GameSave.fromJson(committed.gameJson);
     if (persistedGame != stamped) {
       throw SaveRepositoryException(
         'Game save ${stamped.meta.id} does not match the committed snapshot',
       );
     }
 
-    final indexJson =
-        jsonDecode(await indexFile.destination.readAsString()) as List<dynamic>;
-    final matchingMeta = indexJson
+    final matchingMeta = committed.indexJson
         .whereType<Map<String, dynamic>>()
         .where((meta) => meta['id'] == stamped.meta.id)
         .map(GameSaveMeta.fromJson)
@@ -338,6 +722,27 @@ class SaveRepository {
         'Save index does not match save ${stamped.meta.id}',
       );
     }
+  }
+
+  bool _jsonValuesEqual(Object? left, Object? right) {
+    if (left is Map && right is Map) {
+      if (left.length != right.length) return false;
+      for (final key in left.keys) {
+        if (!right.containsKey(key) ||
+            !_jsonValuesEqual(left[key], right[key])) {
+          return false;
+        }
+      }
+      return true;
+    }
+    if (left is List && right is List) {
+      if (left.length != right.length) return false;
+      for (var index = 0; index < left.length; index++) {
+        if (!_jsonValuesEqual(left[index], right[index])) return false;
+      }
+      return true;
+    }
+    return left == right;
   }
 
   Future<void> _rollback(List<_PreparedSaveFile> files) async {
@@ -382,6 +787,27 @@ class SaveRepository {
     final metas = await listSaves();
     await _writeIndex(metas.where((m) => m.id != id).toList());
   }
+}
+
+class _CommittedSaveJson {
+  const _CommittedSaveJson({required this.gameJson, required this.indexJson});
+
+  final Map<String, dynamic> gameJson;
+  final List<dynamic> indexJson;
+}
+
+class _PreparedSaveTransaction {
+  _PreparedSaveTransaction({
+    required this.saveId,
+    required this.gameFile,
+    required this.indexFile,
+  });
+
+  final String saveId;
+  final _PreparedSaveFile gameFile;
+  final _PreparedSaveFile indexFile;
+
+  List<_PreparedSaveFile> get files => [gameFile, indexFile];
 }
 
 class _PreparedSaveFile {

@@ -704,6 +704,216 @@ abstract class AppLocalizations {
   /// **'Nie udało się usunąć zapisu'**
   String get loadGame_deleteFailed;
 
+  /// No description provided for @loadGame_load.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wczytaj'**
+  String get loadGame_load;
+
+  /// No description provided for @loadGame_loadTooltip.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wczytaj zapis'**
+  String get loadGame_loadTooltip;
+
+  /// No description provided for @loadGame_deleteTooltip.
+  ///
+  /// In pl, this message translates to:
+  /// **'Usuń zapis'**
+  String get loadGame_deleteTooltip;
+
+  /// No description provided for @loadGame_duplicate.
+  ///
+  /// In pl, this message translates to:
+  /// **'Duplikuj'**
+  String get loadGame_duplicate;
+
+  /// No description provided for @loadGame_duplicateTooltip.
+  ///
+  /// In pl, this message translates to:
+  /// **'Utwórz kopię zapisu'**
+  String get loadGame_duplicateTooltip;
+
+  /// No description provided for @loadGame_rename.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zmień nazwę'**
+  String get loadGame_rename;
+
+  /// No description provided for @loadGame_renameTooltip.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zmień nazwę zapisu'**
+  String get loadGame_renameTooltip;
+
+  /// No description provided for @loadGame_renameTitle.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zmień nazwę zapisu'**
+  String get loadGame_renameTitle;
+
+  /// Treść dialogu zmiany nazwy zapisu.
+  ///
+  /// In pl, this message translates to:
+  /// **'Podaj nową nazwę zapisu „{name}”.'**
+  String loadGame_renameMessage(String name);
+
+  /// No description provided for @loadGame_renameLabel.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nazwa zapisu'**
+  String get loadGame_renameLabel;
+
+  /// No description provided for @loadGame_renameHint.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wpisz nazwę'**
+  String get loadGame_renameHint;
+
+  /// No description provided for @loadGame_renameConfirm.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zmień nazwę'**
+  String get loadGame_renameConfirm;
+
+  /// No description provided for @loadGame_nameEmpty.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nazwa zapisu nie może być pusta.'**
+  String get loadGame_nameEmpty;
+
+  /// No description provided for @loadGame_nameTaken.
+  ///
+  /// In pl, this message translates to:
+  /// **'Ta nazwa jest już zajęta.'**
+  String get loadGame_nameTaken;
+
+  /// No description provided for @loadGame_nameSame.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wybierz inną nazwę niż obecna.'**
+  String get loadGame_nameSame;
+
+  /// Komunikat po pomyślnym utworzeniu kopii zapisu.
+  ///
+  /// In pl, this message translates to:
+  /// **'Utworzono kopię zapisu „{name}”.'**
+  String loadGame_duplicateSuccess(String name);
+
+  /// Komunikat po pomyślnej zmianie nazwy zapisu.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zmieniono nazwę zapisu na „{name}”.'**
+  String loadGame_renameSuccess(String name);
+
+  /// No description provided for @loadGame_duplicateFailed.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nie udało się utworzyć kopii zapisu.'**
+  String get loadGame_duplicateFailed;
+
+  /// No description provided for @loadGame_renameFailed.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nie udało się zmienić nazwy zapisu.'**
+  String get loadGame_renameFailed;
+
+  /// No description provided for @loadGame_readFailed.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nie udało się odczytać zapisów. Spróbuj ponownie.'**
+  String get loadGame_readFailed;
+
+  /// No description provided for @loadGame_indexReadFailed.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nie udało się odczytać listy zapisów. Spróbuj ponownie.'**
+  String get loadGame_indexReadFailed;
+
+  /// No description provided for @loadGame_sourceUnavailable.
+  ///
+  /// In pl, this message translates to:
+  /// **'Plik zapisu jest niedostępny.'**
+  String get loadGame_sourceUnavailable;
+
+  /// No description provided for @loadGame_invalidSerializedSave.
+  ///
+  /// In pl, this message translates to:
+  /// **'Plik zapisu jest nieprawidłowy.'**
+  String get loadGame_invalidSerializedSave;
+
+  /// No description provided for @loadGame_writeFailed.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nie udało się zapisać zmian.'**
+  String get loadGame_writeFailed;
+
+  /// No description provided for @loadGame_sizeUnavailable.
+  ///
+  /// In pl, this message translates to:
+  /// **'Rozmiar niedostępny'**
+  String get loadGame_sizeUnavailable;
+
+  /// No description provided for @loadGame_ambiguousWrite.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nie można potwierdzić wyniku operacji. Sprawdź listę zapisów i spróbuj ponownie.'**
+  String get loadGame_ambiguousWrite;
+
+  /// No description provided for @loadGame_lastSaveDate.
+  ///
+  /// In pl, this message translates to:
+  /// **'Ostatni zapis'**
+  String get loadGame_lastSaveDate;
+
+  /// No description provided for @loadGame_saveSize.
+  ///
+  /// In pl, this message translates to:
+  /// **'Rozmiar zapisu'**
+  String get loadGame_saveSize;
+
+  /// No description provided for @loadGame_schemaCompatible.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zgodny ze schematem'**
+  String get loadGame_schemaCompatible;
+
+  /// No description provided for @loadGame_schemaOlder.
+  ///
+  /// In pl, this message translates to:
+  /// **'Starsza wersja schematu'**
+  String get loadGame_schemaOlder;
+
+  /// No description provided for @loadGame_schemaNewer.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nowsza wersja schematu'**
+  String get loadGame_schemaNewer;
+
+  /// Unikalny opis dostępności akcji wczytywania dla czytnika ekranu.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wczytaj zapis „{name}”'**
+  String loadGame_loadSemantics(String name);
+
+  /// Unikalny opis dostępności akcji usuwania dla czytnika ekranu.
+  ///
+  /// In pl, this message translates to:
+  /// **'Usuń zapis „{name}”'**
+  String loadGame_deleteSemantics(String name);
+
+  /// Unikalny opis dostępności akcji duplikowania dla czytnika ekranu.
+  ///
+  /// In pl, this message translates to:
+  /// **'Utwórz kopię zapisu „{name}”'**
+  String loadGame_duplicateSemantics(String name);
+
+  /// Unikalny opis dostępności akcji zmiany nazwy dla czytnika ekranu.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zmień nazwę zapisu „{name}”'**
+  String loadGame_renameSemantics(String name);
+
   /// No description provided for @shell_noActiveGame.
   ///
   /// In pl, this message translates to:

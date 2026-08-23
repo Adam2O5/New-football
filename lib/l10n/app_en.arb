@@ -123,6 +123,83 @@
     }
   },
   "loadGame_deleteFailed": "Failed to delete save",
+  "loadGame_load": "Load",
+  "loadGame_loadTooltip": "Load save",
+  "loadGame_deleteTooltip": "Delete save",
+  "loadGame_duplicate": "Duplicate",
+  "loadGame_duplicateTooltip": "Create a copy of this save",
+  "loadGame_rename": "Rename",
+  "loadGame_renameTooltip": "Rename save",
+  "loadGame_renameTitle": "Rename save",
+  "loadGame_renameMessage": "Enter a new name for the save \"{name}\".",
+  "@loadGame_renameMessage": {
+    "description": "Message shown in the save rename dialog.",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "loadGame_renameLabel": "Save name",
+  "loadGame_renameHint": "Enter a name",
+  "loadGame_renameConfirm": "Rename",
+  "loadGame_nameEmpty": "The save name cannot be empty.",
+  "loadGame_nameTaken": "That save name is already in use.",
+  "loadGame_nameSame": "Choose a different name from the current one.",
+  "loadGame_duplicateSuccess": "Save copy \"{name}\" created.",
+  "@loadGame_duplicateSuccess": {
+    "description": "Message shown after a save copy is created successfully.",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "loadGame_renameSuccess": "Save renamed to \"{name}\".",
+  "@loadGame_renameSuccess": {
+    "description": "Message shown after a save is renamed successfully.",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "loadGame_duplicateFailed": "Could not create a copy of the save.",
+  "loadGame_renameFailed": "Could not rename the save.",
+  "loadGame_readFailed": "Could not read the saves. Try again.",
+  "loadGame_indexReadFailed": "Could not read the save list. Try again.",
+  "loadGame_sourceUnavailable": "The save file is unavailable.",
+  "loadGame_invalidSerializedSave": "The save file is invalid.",
+  "loadGame_writeFailed": "Could not save the changes.",
+  "loadGame_sizeUnavailable": "Size unavailable",
+  "loadGame_ambiguousWrite": "The operation result could not be confirmed. Check the save list and try again.",
+  "loadGame_lastSaveDate": "Last saved",
+  "loadGame_saveSize": "Save size",
+  "loadGame_schemaCompatible": "Compatible schema",
+  "loadGame_schemaOlder": "Older schema version",
+  "loadGame_schemaNewer": "Newer schema version",
+  "loadGame_loadSemantics": "Load save \"{name}\"",
+  "@loadGame_loadSemantics": {
+    "description": "Unique accessibility description for the load action.",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "loadGame_deleteSemantics": "Delete save \"{name}\"",
+  "@loadGame_deleteSemantics": {
+    "description": "Unique accessibility description for the delete action.",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "loadGame_duplicateSemantics": "Create a copy of save \"{name}\"",
+  "@loadGame_duplicateSemantics": {
+    "description": "Unique accessibility description for the duplicate action.",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "loadGame_renameSemantics": "Rename save \"{name}\"",
+  "@loadGame_renameSemantics": {
+    "description": "Unique accessibility description for the rename action.",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
 
   "shell_noActiveGame": "No active game",
   "shell_mainMenu": "Main menu",

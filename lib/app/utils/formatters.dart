@@ -2,6 +2,8 @@ import 'package:flutter/widgets.dart';
 
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
+export 'save_formatters.dart';
+
 String formatMoney(BuildContext context, int amount) {
   final l10n = AppLocalizations.of(context)!;
   final abs = amount.abs();

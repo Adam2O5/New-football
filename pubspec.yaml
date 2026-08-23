@@ -30,6 +30,7 @@ dev_dependencies:
   freezed: ^3.2.5
   json_serializable: ^6.9.5
   mocktail: ^1.0.4
+  glados: 1.1.7
 
 flutter:
   uses-material-design: true

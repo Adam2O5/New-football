@@ -145,6 +145,83 @@
     }
   },
   "loadGame_deleteFailed": "Nie udało się usunąć zapisu",
+  "loadGame_load": "Wczytaj",
+  "loadGame_loadTooltip": "Wczytaj zapis",
+  "loadGame_deleteTooltip": "Usuń zapis",
+  "loadGame_duplicate": "Duplikuj",
+  "loadGame_duplicateTooltip": "Utwórz kopię zapisu",
+  "loadGame_rename": "Zmień nazwę",
+  "loadGame_renameTooltip": "Zmień nazwę zapisu",
+  "loadGame_renameTitle": "Zmień nazwę zapisu",
+  "loadGame_renameMessage": "Podaj nową nazwę zapisu „{name}”.",
+  "@loadGame_renameMessage": {
+    "description": "Treść dialogu zmiany nazwy zapisu.",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "loadGame_renameLabel": "Nazwa zapisu",
+  "loadGame_renameHint": "Wpisz nazwę",
+  "loadGame_renameConfirm": "Zmień nazwę",
+  "loadGame_nameEmpty": "Nazwa zapisu nie może być pusta.",
+  "loadGame_nameTaken": "Ta nazwa jest już zajęta.",
+  "loadGame_nameSame": "Wybierz inną nazwę niż obecna.",
+  "loadGame_duplicateSuccess": "Utworzono kopię zapisu „{name}”.",
+  "@loadGame_duplicateSuccess": {
+    "description": "Komunikat po pomyślnym utworzeniu kopii zapisu.",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "loadGame_renameSuccess": "Zmieniono nazwę zapisu na „{name}”.",
+  "@loadGame_renameSuccess": {
+    "description": "Komunikat po pomyślnej zmianie nazwy zapisu.",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "loadGame_duplicateFailed": "Nie udało się utworzyć kopii zapisu.",
+  "loadGame_renameFailed": "Nie udało się zmienić nazwy zapisu.",
+  "loadGame_readFailed": "Nie udało się odczytać zapisów. Spróbuj ponownie.",
+  "loadGame_indexReadFailed": "Nie udało się odczytać listy zapisów. Spróbuj ponownie.",
+  "loadGame_sourceUnavailable": "Plik zapisu jest niedostępny.",
+  "loadGame_invalidSerializedSave": "Plik zapisu jest nieprawidłowy.",
+  "loadGame_writeFailed": "Nie udało się zapisać zmian.",
+  "loadGame_sizeUnavailable": "Rozmiar niedostępny",
+  "loadGame_ambiguousWrite": "Nie można potwierdzić wyniku operacji. Sprawdź listę zapisów i spróbuj ponownie.",
+  "loadGame_lastSaveDate": "Ostatni zapis",
+  "loadGame_saveSize": "Rozmiar zapisu",
+  "loadGame_schemaCompatible": "Zgodny ze schematem",
+  "loadGame_schemaOlder": "Starsza wersja schematu",
+  "loadGame_schemaNewer": "Nowsza wersja schematu",
+  "loadGame_loadSemantics": "Wczytaj zapis „{name}”",
+  "@loadGame_loadSemantics": {
+    "description": "Unikalny opis dostępności akcji wczytywania dla czytnika ekranu.",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "loadGame_deleteSemantics": "Usuń zapis „{name}”",
+  "@loadGame_deleteSemantics": {
+    "description": "Unikalny opis dostępności akcji usuwania dla czytnika ekranu.",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "loadGame_duplicateSemantics": "Utwórz kopię zapisu „{name}”",
+  "@loadGame_duplicateSemantics": {
+    "description": "Unikalny opis dostępności akcji duplikowania dla czytnika ekranu.",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
+  "loadGame_renameSemantics": "Zmień nazwę zapisu „{name}”",
+  "@loadGame_renameSemantics": {
+    "description": "Unikalny opis dostępności akcji zmiany nazwy dla czytnika ekranu.",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
 
   "shell_noActiveGame": "Brak aktywnej gry",
   "shell_mainMenu": "Menu główne",

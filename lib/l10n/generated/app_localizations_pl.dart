@@ -326,6 +326,129 @@ class AppLocalizationsPl extends AppLocalizations {
   String get loadGame_deleteFailed => 'Nie udało się usunąć zapisu';
 
   @override
+  String get loadGame_load => 'Wczytaj';
+
+  @override
+  String get loadGame_loadTooltip => 'Wczytaj zapis';
+
+  @override
+  String get loadGame_deleteTooltip => 'Usuń zapis';
+
+  @override
+  String get loadGame_duplicate => 'Duplikuj';
+
+  @override
+  String get loadGame_duplicateTooltip => 'Utwórz kopię zapisu';
+
+  @override
+  String get loadGame_rename => 'Zmień nazwę';
+
+  @override
+  String get loadGame_renameTooltip => 'Zmień nazwę zapisu';
+
+  @override
+  String get loadGame_renameTitle => 'Zmień nazwę zapisu';
+
+  @override
+  String loadGame_renameMessage(String name) {
+    return 'Podaj nową nazwę zapisu „$name”.';
+  }
+
+  @override
+  String get loadGame_renameLabel => 'Nazwa zapisu';
+
+  @override
+  String get loadGame_renameHint => 'Wpisz nazwę';
+
+  @override
+  String get loadGame_renameConfirm => 'Zmień nazwę';
+
+  @override
+  String get loadGame_nameEmpty => 'Nazwa zapisu nie może być pusta.';
+
+  @override
+  String get loadGame_nameTaken => 'Ta nazwa jest już zajęta.';
+
+  @override
+  String get loadGame_nameSame => 'Wybierz inną nazwę niż obecna.';
+
+  @override
+  String loadGame_duplicateSuccess(String name) {
+    return 'Utworzono kopię zapisu „$name”.';
+  }
+
+  @override
+  String loadGame_renameSuccess(String name) {
+    return 'Zmieniono nazwę zapisu na „$name”.';
+  }
+
+  @override
+  String get loadGame_duplicateFailed => 'Nie udało się utworzyć kopii zapisu.';
+
+  @override
+  String get loadGame_renameFailed => 'Nie udało się zmienić nazwy zapisu.';
+
+  @override
+  String get loadGame_readFailed =>
+      'Nie udało się odczytać zapisów. Spróbuj ponownie.';
+
+  @override
+  String get loadGame_indexReadFailed =>
+      'Nie udało się odczytać listy zapisów. Spróbuj ponownie.';
+
+  @override
+  String get loadGame_sourceUnavailable => 'Plik zapisu jest niedostępny.';
+
+  @override
+  String get loadGame_invalidSerializedSave =>
+      'Plik zapisu jest nieprawidłowy.';
+
+  @override
+  String get loadGame_writeFailed => 'Nie udało się zapisać zmian.';
+
+  @override
+  String get loadGame_sizeUnavailable => 'Rozmiar niedostępny';
+
+  @override
+  String get loadGame_ambiguousWrite =>
+      'Nie można potwierdzić wyniku operacji. Sprawdź listę zapisów i spróbuj ponownie.';
+
+  @override
+  String get loadGame_lastSaveDate => 'Ostatni zapis';
+
+  @override
+  String get loadGame_saveSize => 'Rozmiar zapisu';
+
+  @override
+  String get loadGame_schemaCompatible => 'Zgodny ze schematem';
+
+  @override
+  String get loadGame_schemaOlder => 'Starsza wersja schematu';
+
+  @override
+  String get loadGame_schemaNewer => 'Nowsza wersja schematu';
+
+  @override
+  String loadGame_loadSemantics(String name) {
+    return 'Wczytaj zapis „$name”';
+  }
+
+  @override
+  String loadGame_deleteSemantics(String name) {
+    return 'Usuń zapis „$name”';
+  }
+
+  @override
+  String loadGame_duplicateSemantics(String name) {
+    return 'Utwórz kopię zapisu „$name”';
+  }
+
+  @override
+  String loadGame_renameSemantics(String name) {
+    return 'Zmień nazwę zapisu „$name”';
+  }
+
+  @override
   String get shell_noActiveGame => 'Brak aktywnej gry';
 
   @override

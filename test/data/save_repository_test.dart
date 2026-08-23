@@ -298,6 +298,12 @@ void main() {
     );
     expect(
       saves
+          .firstWhere((save) => save.id == game.meta.id)
+          .compatibilityWith(SaveRepository.currentSchemaVersion),
+      SaveCompatibility.compatible,
+    );
+    expect(
+      saves
           .firstWhere((save) => save.id == 'older-id')
           .compatibilityWith(SaveRepository.currentSchemaVersion),
       SaveCompatibility.older,
@@ -308,5 +314,143 @@ void main() {
           .compatibilityWith(SaveRepository.currentSchemaVersion),
       SaveCompatibility.newer,
     );
+  });
+
+  test('deletes the canonical save and removes its index entry', () async {
+    final game = GameFactory().create(
+      const NewGameRequest(
+        saveName: 'Delete me',
+        playerTeamId: 'team_europe_0',
+        seed: 107,
+      ),
+    );
+    await repo.save(game);
+
+    final gameFile = File('${tempDir.path}/${game.meta.id}.json');
+    final indexFile = File('${tempDir.path}/saves_index.json');
+    expect(await gameFile.exists(), isTrue);
+    expect(
+      (await repo.listSaves()).map((meta) => meta.id),
+      contains(game.meta.id),
+    );
+
+    await repo.delete(game.meta.id);
+
+    expect(await gameFile.exists(), isFalse);
+    expect(
+      (await repo.listSaves()).where((meta) => meta.id == game.meta.id),
+      isEmpty,
+    );
+    expect(jsonDecode(await indexFile.readAsString()), isEmpty);
+  });
+
+  test('keeps exact index entries and lists saves by descending updatedAt',
+      () async {
+    final first = GameFactory().create(
+      const NewGameRequest(
+        saveName: 'Sort first',
+        playerTeamId: 'team_europe_0',
+        seed: 108,
+      ),
+    );
+    await repo.save(first);
+    await Future<void>.delayed(const Duration(milliseconds: 20));
+    final second = first.copyWith(
+      meta: first.meta.copyWith(id: 'sort-second', name: 'Sort second'),
+    );
+    await repo.save(second);
+
+    final indexJson =
+        jsonDecode(
+              await File('${tempDir.path}/saves_index.json').readAsString(),
+            )
+            as List<dynamic>;
+    final expectedMetas = <String, Map<String, dynamic>>{};
+    for (final id in <String>[first.meta.id, second.meta.id]) {
+      final saveJson =
+          jsonDecode(
+                await File('${tempDir.path}/$id.json').readAsString(),
+              )
+              as Map<String, dynamic>;
+      expectedMetas[id] = Map<String, dynamic>.from(
+        saveJson['meta'] as Map,
+      );
+    }
+
+    expect(indexJson, hasLength(expectedMetas.length));
+    final indexIds = <String>[];
+    for (final rawEntry in indexJson) {
+      final entry = Map<String, dynamic>.from(rawEntry as Map);
+      final id = entry['id'];
+      expect(id, isA<String>());
+      expect(expectedMetas.containsKey(id), isTrue);
+      indexIds.add(id as String);
+      expect(entry, equals(expectedMetas[id]));
+    }
+    expect(indexIds.toSet(), equals(expectedMetas.keys.toSet()));
+    expect(indexIds, hasLength(expectedMetas.length));
+
+    final listed = await repo.listSaves();
+    expect(listed, hasLength(2));
+    expect(
+      listed.map((meta) => meta.id).toSet(),
+      equals(expectedMetas.keys.toSet()),
+    );
+    expect(listed.first.id, second.meta.id);
+    expect(
+      listed.first.updatedAt.isAfter(listed.last.updatedAt),
+      isTrue,
+    );
+  });
+
+  test('retains recovery artifacts for an ambiguous rollback', () async {
+    final game = GameFactory().create(
+      const NewGameRequest(
+        saveName: 'Ambiguous before',
+        playerTeamId: 'team_europe_0',
+        seed: 109,
+      ),
+    );
+    await repo.save(game);
+
+    final gameFile = File('${tempDir.path}/${game.meta.id}.json');
+    final indexFile = File('${tempDir.path}/saves_index.json');
+    final indexBefore = await indexFile.readAsString();
+    final failing = SaveRepository(
+      overrideDirectory: tempDir,
+      beforePublish: (stage) async {
+        if (stage != SaveRepositoryWriteStage.indexFile) return;
+        await gameFile.delete();
+        await Directory(gameFile.path).create();
+        throw SaveRepositoryException(
+          'Controlled failure that prevents rollback',
+        );
+      },
+    );
+
+    final changed = game.copyWith(
+      meta: game.meta.copyWith(name: 'Ambiguous after'),
+    );
+    await expectLater(
+      failing.save(changed),
+      throwsA(
+        isA<SaveAmbiguousWriteException>().having(
+          (exception) => exception.saveId,
+          'saveId',
+          game.meta.id,
+        ),
+      ),
+    );
+
+    expect(await indexFile.readAsString(), indexBefore);
+    expect(await Directory(gameFile.path).exists(), isTrue);
+    final recoveryArtifacts = tempDir
+        .listSync()
+        .where(
+          (entity) =>
+              entity.path.contains('.bak-') || entity.path.contains('.old-'),
+        )
+        .toList();
+    expect(recoveryArtifacts, isNotEmpty);
   });
 }

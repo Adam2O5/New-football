@@ -229,6 +229,12 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   /// replaced while an asynchronous repository operation was pending.
   int _saveGeneration = 0;
 
+  /// Generation captured by the management operation currently executing in
+  /// [_mutationQueue]. It lets [applyManagedMeta] reject a result that was
+  /// produced for a save which was cleared or replaced while repository I/O
+  /// was pending.
+  int? _saveManagementGeneration;
+
   /// Message operations are keyed by message id and logical operation kind.
   /// A duplicate input receives the original future instead of entering the
   /// mutation queue a second time.
@@ -243,6 +249,49 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
       onError: (Object error, StackTrace stackTrace) {},
     );
     return queued;
+  }
+
+  /// Enqueues save-management work on the same queue as all state mutations
+  /// and persistence operations.
+  ///
+  /// The generation is captured when the operation is requested rather than
+  /// when it reaches the queue. This prevents a late management result from
+  /// updating a newly loaded or newly created save after the original active
+  /// save was cleared or replaced while the operation was waiting or doing
+  /// repository I/O.
+  Future<T> enqueueSaveManagement<T>(Future<T> Function() operation) {
+    final generation = _saveGeneration;
+    return _enqueueMutation(() async {
+      final previousGeneration = _saveManagementGeneration;
+      _saveManagementGeneration = generation;
+      try {
+        return await operation();
+      } finally {
+        _saveManagementGeneration = previousGeneration;
+      }
+    });
+  }
+
+  /// Applies metadata returned by a completed management transaction to the
+  /// active in-memory save, without changing its payload.
+  ///
+  /// Call this from the operation passed to [enqueueSaveManagement]. The
+  /// active ID and the generation captured at enqueue time are checked again
+  /// after repository I/O, so a late rename cannot publish metadata to a
+  /// cleared, replaced, or otherwise different active save. The supplied
+  /// metadata must carry the same ID as [saveId].
+  bool applyManagedMeta(String saveId, GameSaveMeta meta) {
+    final generation = _saveManagementGeneration;
+    if (generation != null && generation != _saveGeneration) return false;
+    if (meta.id != saveId) return false;
+
+    final current = save;
+    if (current == null || current.meta.id != saveId) return false;
+
+    // copyWith replaces only the metadata object; leagueState and saveSeed
+    // remain the exact payload instances from the active save.
+    state = AsyncValue.data(current.copyWith(meta: meta));
+    return true;
   }
 
   Future<void> _runMessageOperation(

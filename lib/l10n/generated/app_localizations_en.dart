@@ -326,6 +326,128 @@ class AppLocalizationsEn extends AppLocalizations {
   String get loadGame_deleteFailed => 'Failed to delete save';
 
   @override
+  String get loadGame_load => 'Load';
+
+  @override
+  String get loadGame_loadTooltip => 'Load save';
+
+  @override
+  String get loadGame_deleteTooltip => 'Delete save';
+
+  @override
+  String get loadGame_duplicate => 'Duplicate';
+
+  @override
+  String get loadGame_duplicateTooltip => 'Create a copy of this save';
+
+  @override
+  String get loadGame_rename => 'Rename';
+
+  @override
+  String get loadGame_renameTooltip => 'Rename save';
+
+  @override
+  String get loadGame_renameTitle => 'Rename save';
+
+  @override
+  String loadGame_renameMessage(String name) {
+    return 'Enter a new name for the save \"$name\".';
+  }
+
+  @override
+  String get loadGame_renameLabel => 'Save name';
+
+  @override
+  String get loadGame_renameHint => 'Enter a name';
+
+  @override
+  String get loadGame_renameConfirm => 'Rename';
+
+  @override
+  String get loadGame_nameEmpty => 'The save name cannot be empty.';
+
+  @override
+  String get loadGame_nameTaken => 'That save name is already in use.';
+
+  @override
+  String get loadGame_nameSame =>
+      'Choose a different name from the current one.';
+
+  @override
+  String loadGame_duplicateSuccess(String name) {
+    return 'Save copy \"$name\" created.';
+  }
+
+  @override
+  String loadGame_renameSuccess(String name) {
+    return 'Save renamed to \"$name\".';
+  }
+
+  @override
+  String get loadGame_duplicateFailed => 'Could not create a copy of the save.';
+
+  @override
+  String get loadGame_renameFailed => 'Could not rename the save.';
+
+  @override
+  String get loadGame_readFailed => 'Could not read the saves. Try again.';
+
+  @override
+  String get loadGame_indexReadFailed =>
+      'Could not read the save list. Try again.';
+
+  @override
+  String get loadGame_sourceUnavailable => 'The save file is unavailable.';
+
+  @override
+  String get loadGame_invalidSerializedSave => 'The save file is invalid.';
+
+  @override
+  String get loadGame_writeFailed => 'Could not save the changes.';
+
+  @override
+  String get loadGame_sizeUnavailable => 'Size unavailable';
+
+  @override
+  String get loadGame_ambiguousWrite =>
+      'The operation result could not be confirmed. Check the save list and try again.';
+
+  @override
+  String get loadGame_lastSaveDate => 'Last saved';
+
+  @override
+  String get loadGame_saveSize => 'Save size';
+
+  @override
+  String get loadGame_schemaCompatible => 'Compatible schema';
+
+  @override
+  String get loadGame_schemaOlder => 'Older schema version';
+
+  @override
+  String get loadGame_schemaNewer => 'Newer schema version';
+
+  @override
+  String loadGame_loadSemantics(String name) {
+    return 'Load save \"$name\"';
+  }
+
+  @override
+  String loadGame_deleteSemantics(String name) {
+    return 'Delete save \"$name\"';
+  }
+
+  @override
+  String loadGame_duplicateSemantics(String name) {
+    return 'Create a copy of save \"$name\"';
+  }
+
+  @override
+  String loadGame_renameSemantics(String name) {
+    return 'Rename save \"$name\"';
+  }
+
+  @override
   String get shell_noActiveGame => 'No active game';
 
   @override
