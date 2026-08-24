@@ -844,6 +844,94 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String squad_rosterCount(int count) {
+    return 'Roster count: $count';
+  }
+
+  @override
+  String squad_rosterMinimum(int minimum) {
+    return 'Minimum: $minimum';
+  }
+
+  @override
+  String squad_rosterMaximum(int maximum) {
+    return 'Maximum: $maximum';
+  }
+
+  @override
+  String get squad_rosterStateInRange => 'In range';
+
+  @override
+  String get squad_rosterStateOutOfRange => 'Out of range';
+
+  @override
+  String squad_rosterSizeSemantics(
+    int count,
+    int minimum,
+    int maximum,
+    String state,
+  ) {
+    return 'Roster count: $count; minimum: $minimum; maximum: $maximum; state: $state.';
+  }
+
+  @override
+  String get squad_emptyRoster => 'No players in the roster.';
+
+  @override
+  String get squad_statusInjury => 'Active injury';
+
+  @override
+  String get squad_statusSuspension => 'Active suspension';
+
+  @override
+  String get squad_positionMismatch => 'Position mismatch';
+
+  @override
+  String squad_playerRowSemantics(
+    String name,
+    String position,
+    int ovr,
+    String form,
+    String zone,
+  ) {
+    return '$name, position $position, OVR $ovr, form $form out of 10, zone $zone';
+  }
+
+  @override
+  String squad_playerMarkerSemantics(
+    String name,
+    String position,
+    String status,
+  ) {
+    return '$name, position $position. $status';
+  }
+
+  @override
+  String squad_zoneFrameSemantics(String zone) {
+    return 'Zone: $zone';
+  }
+
+  @override
+  String squad_positionBadgeSemantics(String position) {
+    return 'Position: $position';
+  }
+
+  @override
+  String squad_ovrBadgeSemantics(int ovr) {
+    return 'OVR: $ovr';
+  }
+
+  @override
+  String squad_formIndicatorSemantics(String form) {
+    return 'Form: $form out of 10';
+  }
+
+  @override
+  String squad_profileAction(String name) {
+    return 'Open player profile for $name';
+  }
+
+  @override
   String get squad_injury => 'INJURY';
 
   @override

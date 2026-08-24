@@ -13,17 +13,17 @@ import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/models/league_state.dart';
+import 'package:new_football/app/utils/color_interpolation.dart';
+import 'package:new_football/app/utils/squad_presentation.dart';
 import 'package:new_football/app/widgets/tactics/pitch_field.dart';
 import 'package:new_football/app/widgets/tactics/player_list_tile.dart';
+import 'package:new_football/app/widgets/squad/roster_size_indicator.dart';
+import 'package:new_football/core/tactics/formation_layout.dart';
 import 'package:new_football/core/tactics/player_sort.dart';
 import 'package:new_football/app/widgets/tactics/role_picker_sheet.dart';
 import 'package:new_football/app/widgets/tactics/substitute_sheet.dart';
 import 'package:new_football/core/tactics/tactics_setup.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
-
-enum _RosterAvailabilityFilter { all, available, injured }
-
-enum _RosterZoneFilter { all, xi, bench, reserve }
 
 class SquadScreen extends ConsumerStatefulWidget {
   const SquadScreen({super.key});
@@ -48,12 +48,6 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
   bool _tacticsAutosaveSaved = false;
   GameController? _gameController;
   PlayerSortMode sortMode = PlayerSortMode.assignedZone;
-  final _rosterSearchController = TextEditingController();
-  String _positionFilterCode = '';
-  _RosterZoneFilter _zoneFilter = _RosterZoneFilter.all;
-  _RosterAvailabilityFilter _availabilityFilter = _RosterAvailabilityFilter.all;
-  int _minimumOvr = 0;
-  int _minimumForm = 0;
 
   late final TabController _tabController;
 
@@ -70,7 +64,6 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
     if (pending != null) {
       _enqueueTacticsSave(pending, _tacticsRevision);
     }
-    _rosterSearchController.dispose();
     _tabController.dispose();
     super.dispose();
   }
@@ -114,253 +107,6 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
             ),
           ),
         ],
-      ),
-    );
-  }
-
-  List<Player> _filteredRoster(Team team) {
-    final query = _rosterSearchController.text.trim().toLowerCase();
-    return team.roster.where((player) {
-      if (query.isNotEmpty && !player.name.toLowerCase().contains(query)) {
-        return false;
-      }
-      if (_positionFilterCode.isNotEmpty &&
-          player.position.code != _positionFilterCode) {
-        return false;
-      }
-      final zone = rosterZoneOf(team, player.id);
-      if (_zoneFilter != _RosterZoneFilter.all &&
-          ((_zoneFilter == _RosterZoneFilter.xi && zone != RosterZone.xi) ||
-              (_zoneFilter == _RosterZoneFilter.bench &&
-                  zone != RosterZone.bench) ||
-              (_zoneFilter == _RosterZoneFilter.reserve &&
-                  zone != RosterZone.reserve))) {
-        return false;
-      }
-      if (_availabilityFilter == _RosterAvailabilityFilter.available &&
-          !player.isAvailable) {
-        return false;
-      }
-      if (_availabilityFilter == _RosterAvailabilityFilter.injured &&
-          player.isAvailable) {
-        return false;
-      }
-      if (player.overall().round() < _minimumOvr ||
-          player.state.form < _minimumForm) {
-        return false;
-      }
-      return true;
-    }).toList();
-  }
-
-  Widget _buildRosterFilters(BuildContext context, AppLocalizations l10n) {
-    return Card(
-      margin: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  l10n.squad_filters,
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-                TextButton(
-                  onPressed: () {
-                    _rosterSearchController.clear();
-                    setState(() {
-                      _positionFilterCode = '';
-                      _zoneFilter = _RosterZoneFilter.all;
-                      _availabilityFilter = _RosterAvailabilityFilter.all;
-                      _minimumOvr = 0;
-                      _minimumForm = 0;
-                    });
-                  },
-                  child: Text(l10n.squad_clearFilters),
-                ),
-              ],
-            ),
-            TextField(
-              controller: _rosterSearchController,
-              decoration: InputDecoration(
-                labelText: l10n.squad_search,
-                prefixIcon: const Icon(Icons.search),
-              ),
-              onChanged: (_) => setState(() {}),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 12,
-              runSpacing: 8,
-              children: [
-                DropdownButton<String>(
-                  value: _positionFilterCode,
-                  hint: Text(l10n.squad_position),
-                  items: [
-                    DropdownMenuItem(
-                      value: '',
-                      child: Text(l10n.squad_allPositions),
-                    ),
-                    ...Position.values.map(
-                      (position) => DropdownMenuItem(
-                        value: position.code,
-                        child: Text(position.code),
-                      ),
-                    ),
-                  ],
-                  onChanged: (value) {
-                    if (value != null) {
-                      setState(() => _positionFilterCode = value);
-                    }
-                  },
-                ),
-                DropdownButton<_RosterZoneFilter>(
-                  value: _zoneFilter,
-                  hint: Text(l10n.squad_zone),
-                  items: [
-                    DropdownMenuItem(
-                      value: _RosterZoneFilter.all,
-                      child: Text(l10n.squad_allZones),
-                    ),
-                    DropdownMenuItem(
-                      value: _RosterZoneFilter.xi,
-                      child: Text(l10n.squad_zoneXi),
-                    ),
-                    DropdownMenuItem(
-                      value: _RosterZoneFilter.bench,
-                      child: Text(l10n.squad_zoneBench),
-                    ),
-                    DropdownMenuItem(
-                      value: _RosterZoneFilter.reserve,
-                      child: Text(l10n.squad_zoneReserves),
-                    ),
-                  ],
-                  onChanged: (value) {
-                    if (value != null) setState(() => _zoneFilter = value);
-                  },
-                ),
-                DropdownButton<_RosterAvailabilityFilter>(
-                  value: _availabilityFilter,
-                  hint: Text(l10n.squad_availability),
-                  items: [
-                    DropdownMenuItem(
-                      value: _RosterAvailabilityFilter.all,
-                      child: Text(l10n.squad_allPlayers),
-                    ),
-                    DropdownMenuItem(
-                      value: _RosterAvailabilityFilter.available,
-                      child: Text(l10n.squad_available),
-                    ),
-                    DropdownMenuItem(
-                      value: _RosterAvailabilityFilter.injured,
-                      child: Text(l10n.squad_injuredOnly),
-                    ),
-                  ],
-                  onChanged: (value) {
-                    if (value != null) {
-                      setState(() => _availabilityFilter = value);
-                    }
-                  },
-                ),
-                DropdownButton<int>(
-                  value: _minimumOvr,
-                  hint: Text(l10n.squad_minOvr),
-                  items: [0, 60, 70, 80, 90]
-                      .map(
-                        (value) => DropdownMenuItem(
-                          value: value,
-                          child: Text(
-                            value == 0
-                                ? '${l10n.squad_minOvr}: ${l10n.squad_any}'
-                                : '${l10n.squad_minOvr}: $value',
-                          ),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: (value) {
-                    if (value != null) setState(() => _minimumOvr = value);
-                  },
-                ),
-                DropdownButton<int>(
-                  value: _minimumForm,
-                  hint: Text(l10n.squad_minForm),
-                  items: [0, 4, 6, 8, 10]
-                      .map(
-                        (value) => DropdownMenuItem(
-                          value: value,
-                          child: Text(
-                            value == 0
-                                ? '${l10n.squad_minForm}: ${l10n.squad_any}'
-                                : '${l10n.squad_minForm}: $value',
-                          ),
-                        ),
-                      )
-                      .toList(),
-                  onChanged: (value) {
-                    if (value != null) setState(() => _minimumForm = value);
-                  },
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildMatchdaySummary(
-    BuildContext context,
-    AppLocalizations l10n,
-    Team team,
-  ) {
-    final healthy = team.availablePlayers.length;
-    final belowXi = healthy < 11;
-    return Card(
-      margin: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-      color: belowXi
-          ? Theme.of(context).colorScheme.errorContainer
-          : Theme.of(context).colorScheme.surfaceContainerHigh,
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.squad_matchday,
-              style: Theme.of(context).textTheme.titleSmall,
-            ),
-            const SizedBox(height: 6),
-            Wrap(
-              spacing: 16,
-              runSpacing: 6,
-              children: [
-                Text(l10n.squad_xiCount(team.lineupPlayerIds.length)),
-                Text(l10n.squad_benchCount(team.benchPlayerIds.length)),
-                Text(
-                  l10n.squad_reserveCount(
-                    team.roster.length -
-                        team.lineupPlayerIds.length -
-                        team.benchPlayerIds.length,
-                  ),
-                ),
-                Text(l10n.squad_healthy(healthy)),
-              ],
-            ),
-            if (belowXi) ...[
-              const SizedBox(height: 6),
-              Row(
-                children: [
-                  const Icon(Icons.warning_amber, size: 18),
-                  const SizedBox(width: 6),
-                  Expanded(child: Text(l10n.squad_belowXi)),
-                ],
-              ),
-            ],
-          ],
-        ),
       ),
     );
   }
@@ -431,52 +177,72 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
   ) {
     final min = BalanceConfig.defaults.roster.minSize;
     final max = BalanceConfig.defaults.roster.maxSize;
-    final size = team.roster.length;
-    final sizeOk = size >= min && size <= max;
-    final byId = {for (final p in team.roster) p.id: p};
-    final filteredRoster = _filteredRoster(team);
-    final sortedRoster = sortRoster(team, filteredRoster, sortMode);
+    final playersById = <String, Player>{
+      for (final player in team.roster) player.id: player,
+    };
+    final formationLayout = FormationLayout.of(formation!);
+    final placements = placePlayersOnSlots(
+      slots: formationLayout.slots,
+      lineupPlayerIds: team.lineupPlayerIds,
+      playersById: playersById,
+    );
+    final assignmentIndex = PositionAssignmentIndex.fromPlacements(placements);
+    final sortedRoster = sortRoster(team, team.roster, sortMode);
 
     return ListView(
       key: const ValueKey('squad-roster-scroll'),
       padding: EdgeInsets.zero,
       children: [
-        Material(
-          color: sizeOk
-              ? Theme.of(context).colorScheme.surfaceContainerHigh
-              : Theme.of(context).colorScheme.errorContainer,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            child: Row(
-              children: [
-                Icon(sizeOk ? Icons.check_circle_outline : Icons.warning_amber),
-                const SizedBox(width: 8),
-                Expanded(child: Text(l10n.squad_sizeLabel(size, min, max))),
-              ],
-            ),
-          ),
-        ),
-        _buildMatchdaySummary(context, l10n, team),
-        _buildRosterFilters(context, l10n),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-          child: Text(
-            l10n.squad_selectHint,
-            style: Theme.of(context).textTheme.bodySmall,
+          padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+          child: RosterSizeIndicator(
+            l10n: l10n,
+            count: team.roster.length,
+            min: min,
+            max: max,
           ),
         ),
         SizedBox(
-          height: 340,
+          height: MediaQuery.sizeOf(context).height < 500
+              ? (MediaQuery.sizeOf(context).height * 0.45)
+                    .clamp(160.0, 220.0)
+                    .toDouble()
+              : 340,
           child: PitchField(
+            key: const ValueKey('squad-pitch-field'),
             formation: formation!,
             lineupPlayerIds: team.lineupPlayerIds,
-            playersById: byId,
+            playersById: playersById,
+            precomputedPlacements: placements,
             selectedId: selectedId,
             enableDragDrop: true,
             onAcceptDrop: (draggedId, targetId) =>
                 _trySwap(context, team, draggedId, targetId),
             onTap: (p) => _openSubstituteSheet(context, l10n, team, p),
             onLongPress: (p) => context.push('/game/player/${p.id}'),
+            markerStyleBuilder: (context, placement) {
+              final player = placement.player!;
+              final status = statusFor(player, placement.slot);
+              final statusLabels = <String>[
+                if (status.hasActiveInjury) l10n.squad_statusInjury,
+                if (status.hasActiveSuspension) l10n.squad_statusSuspension,
+                if (status.hasPositionMismatch) l10n.squad_positionMismatch,
+              ];
+              final statusLabel = statusLabels.join(', ');
+
+              return PitchMarkerStyle(
+                backgroundColor: status.color,
+                foregroundColor: foregroundForContrast(status.color),
+                selectedRingColor: Theme.of(context).colorScheme.primary,
+                selectedRingWidth: 2,
+                semanticLabel: l10n.squad_playerMarkerSemantics(
+                  player.name,
+                  player.position.code,
+                  statusLabel,
+                ),
+                statusLabel: statusLabel.isEmpty ? null : statusLabel,
+              );
+            },
           ),
         ),
         Container(
@@ -491,54 +257,77 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Align(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final textScale = MediaQuery.textScalerOf(context).scale(1);
+                    final compact =
+                        constraints.maxWidth < 430 || textScale > 1.15;
+                    final sortControl = SizedBox(
+                      width: compact
+                          ? constraints.maxWidth
+                          : constraints.maxWidth.clamp(0.0, 260.0),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: DropdownButton<PlayerSortMode>(
+                          isExpanded: true,
+                          value: sortMode,
+                          onChanged: (v) {
+                            if (v == null) return;
+                            setState(() => sortMode = v);
+                          },
+                          items: [
+                            DropdownMenuItem(
+                              value: PlayerSortMode.overall,
+                              child: Text(l10n.squad_sortOverall),
+                            ),
+                            DropdownMenuItem(
+                              value: PlayerSortMode.assignedZone,
+                              child: Text(l10n.squad_sortAssignedZone),
+                            ),
+                            DropdownMenuItem(
+                              value: PlayerSortMode.form,
+                              child: Text(l10n.squad_sortForm),
+                            ),
+                            DropdownMenuItem(
+                              value: PlayerSortMode.position,
+                              child: Text(l10n.squad_sortPosition),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                    final title = Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
                         l10n.squad_rosterTitle,
                         style: Theme.of(context).textTheme.titleMedium,
                       ),
-                    ),
-                    Material(
-                      color: Colors.transparent,
-                      child: DropdownButton<PlayerSortMode>(
-                        value: sortMode,
-                        onChanged: (v) {
-                          if (v == null) return;
-                          setState(() => sortMode = v);
-                        },
-                        items: [
-                          DropdownMenuItem(
-                            value: PlayerSortMode.overall,
-                            child: Text(l10n.squad_sortOverall),
-                          ),
-                          DropdownMenuItem(
-                            value: PlayerSortMode.assignedZone,
-                            child: Text(l10n.squad_sortAssignedZone),
-                          ),
-                          DropdownMenuItem(
-                            value: PlayerSortMode.form,
-                            child: Text(l10n.squad_sortForm),
-                          ),
-                          DropdownMenuItem(
-                            value: PlayerSortMode.position,
-                            child: Text(l10n.squad_sortPosition),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
+                    );
+
+                    if (compact) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [title, sortControl],
+                      );
+                    }
+                    return Row(
+                      children: [
+                        Expanded(child: title),
+                        const SizedBox(width: 12),
+                        sortControl,
+                      ],
+                    );
+                  },
                 ),
               ),
-              if (sortedRoster.isEmpty)
+              if (team.roster.isEmpty)
                 Padding(
                   padding: const EdgeInsets.all(16),
-                  child: Text(l10n.squad_noPlayers),
+                  child: Text(l10n.squad_emptyRoster),
                 )
               else
                 ListView.builder(
+                  key: const ValueKey('squad-roster-list'),
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   itemCount: sortedRoster.length,
@@ -548,10 +337,12 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
                       l10n: l10n,
                       player: p,
                       zone: rosterZoneOf(team, p.id),
+                      positionAssignment: assignmentIndex[p.id],
                       selected: selectedId == p.id,
                       enableDragDrop: true,
                       onAcceptDrop: (draggedId) =>
                           _trySwap(context, team, draggedId, p.id),
+                      onInfo: () => context.push('/game/player/${p.id}'),
                       onTap: () => _onTapPlayer(context, team, p),
                     );
                   },

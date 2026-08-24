@@ -11,6 +11,65 @@ class PlacedPlayer {
   final Player? player;
 }
 
+/// Builds the presentation style for one populated formation placement.
+///
+/// The complete [PlacedPlayer] is supplied so callers can use the exact slot
+/// assignment used by the pitch. Interaction callbacks remain owned by
+/// [PitchField] and are intentionally not part of this contract.
+typedef PitchMarkerStyleBuilder =
+    PitchMarkerStyle Function(BuildContext context, PlacedPlayer placement);
+
+/// Visual and accessibility configuration for a pitch player marker.
+///
+/// [backgroundColor] is independent from the selected ring, allowing callers
+/// to keep a status color visible while still showing selection. The default
+/// values are only used for the optional styled path; omitting
+/// [PitchField.markerStyleBuilder] keeps the original [_PitchChip] path.
+@immutable
+class PitchMarkerStyle {
+  const PitchMarkerStyle({
+    this.backgroundColor = Colors.white,
+    this.foregroundColor = Colors.black87,
+    this.selectedRingColor = Colors.amber,
+    this.selectedRingWidth = 2,
+    this.semanticLabel,
+    this.statusLabel,
+    this.selectedBorderColor,
+    this.selectedBorderWidth,
+    this.semanticsLabel,
+    this.status,
+  });
+
+  final Color backgroundColor;
+  final Color foregroundColor;
+  final Color? selectedRingColor;
+  final double selectedRingWidth;
+  final String? semanticLabel;
+  final String? statusLabel;
+
+  /// Alias for callers that describe the selection indicator as a border.
+  final Color? selectedBorderColor;
+
+  /// Alias for [selectedRingWidth].
+  final double? selectedBorderWidth;
+
+  /// Alias for [semanticLabel].
+  final String? semanticsLabel;
+
+  /// Alias for [statusLabel].
+  final String? status;
+
+  Color? get resolvedSelectedRingColor =>
+      selectedBorderColor ?? selectedRingColor;
+
+  double get resolvedSelectedRingWidth =>
+      selectedBorderWidth ?? selectedRingWidth;
+
+  String? get resolvedSemanticLabel => semanticLabel ?? semanticsLabel;
+
+  String? get resolvedStatusLabel => statusLabel ?? status;
+}
+
 /// Przypisuje graczy z listy [lineupPlayerIds] (kolejność = priorytet) do slotów
 /// formacji. Dopasowanie: najpierw dokładna [Position], potem [PositionGroup],
 /// w kolejności występowania graczy na liście. Nie modyfikuje [lineupPlayerIds]
@@ -66,6 +125,8 @@ class PitchField extends StatelessWidget {
     this.onLongPress,
     this.enableDragDrop = false,
     this.onAcceptDrop,
+    this.precomputedPlacements,
+    this.markerStyleBuilder,
   });
 
   final Formation formation;
@@ -81,14 +142,26 @@ class PitchField extends StatelessWidget {
   final void Function(String draggedPlayerId, String targetPlayerId)?
   onAcceptDrop;
 
+  /// Optional placement results calculated by the caller.
+  ///
+  /// When omitted, [PitchField] calculates placements using the existing
+  /// [placePlayersOnSlots] algorithm. A supplied iterable is rendered as-is,
+  /// including an intentionally empty iterable.
+  final Iterable<PlacedPlayer>? precomputedPlacements;
+
+  /// Optional squad-specific marker presentation. When omitted, the original
+  /// tactics marker presentation is used without custom semantics or colors.
+  final PitchMarkerStyleBuilder? markerStyleBuilder;
+
   @override
   Widget build(BuildContext context) {
-    final layout = FormationLayout.of(formation);
-    final placements = placePlayersOnSlots(
-      slots: layout.slots,
-      lineupPlayerIds: lineupPlayerIds,
-      playersById: playersById,
-    );
+    final placements =
+        precomputedPlacements ??
+        placePlayersOnSlots(
+          slots: FormationLayout.of(formation).slots,
+          lineupPlayerIds: lineupPlayerIds,
+          playersById: playersById,
+        );
 
     return Container(
       margin: const EdgeInsets.all(8),
@@ -110,7 +183,7 @@ class PitchField extends StatelessWidget {
                         left: placement.slot.x * constraints.maxWidth - 24,
                         top:
                             (1 - placement.slot.y) * constraints.maxHeight - 24,
-                        child: _buildChip(context, placement.player!),
+                        child: _buildChip(context, placement),
                       ),
                 ],
               );
@@ -121,12 +194,15 @@ class PitchField extends StatelessWidget {
     );
   }
 
-  Widget _buildChip(BuildContext context, Player player) {
+  Widget _buildChip(BuildContext context, PlacedPlayer placement) {
+    final player = placement.player!;
+    final style = markerStyleBuilder?.call(context, placement);
     final chip = _PitchChip(
       player: player,
       selected: player.id == selectedId,
       onTap: () => onTap(player),
       onLongPress: onLongPress == null ? null : () => onLongPress!(player),
+      style: style,
     );
 
     if (!enableDragDrop) return chip;
@@ -169,50 +245,118 @@ class _PitchChip extends StatelessWidget {
     required this.selected,
     required this.onTap,
     this.onLongPress,
+    this.style,
   });
 
   final Player player;
   final bool selected;
   final VoidCallback onTap;
   final VoidCallback? onLongPress;
+  final PitchMarkerStyle? style;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      onLongPress: onLongPress,
-      child: SizedBox(
-        width: 68,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircleAvatar(
-              radius: 20,
-              backgroundColor: selected
-                  ? Colors.amber
-                  : (player.state.injured ? Colors.red.shade200 : Colors.white),
-              child: Text(
-                player.position.code,
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+    final markerStyle = style;
+    if (markerStyle == null) {
+      return GestureDetector(
+        onTap: onTap,
+        onLongPress: onLongPress,
+        child: SizedBox(
+          width: 68,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircleAvatar(
+                radius: 20,
+                backgroundColor: selected
+                    ? Colors.amber
+                    : (player.state.injured
+                          ? Colors.red.shade200
+                          : Colors.white),
+                child: Text(
+                  player.position.code,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              player.name,
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                fontSize: 10,
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
+              const SizedBox(height: 2),
+              Text(
+                player.name,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 10,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
+        ),
+      );
+    }
+
+    Widget avatar = CircleAvatar(
+      radius: 20,
+      backgroundColor: markerStyle.backgroundColor,
+      child: Text(
+        player.position.code,
+        style: TextStyle(
+          fontSize: 11,
+          fontWeight: FontWeight.bold,
+          color: markerStyle.foregroundColor,
+        ),
+      ),
+    );
+
+    final selectedRingColor = markerStyle.resolvedSelectedRingColor;
+    if (selected && selectedRingColor != null) {
+      avatar = DecoratedBox(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: selectedRingColor,
+            width: markerStyle.resolvedSelectedRingWidth,
+          ),
+        ),
+        child: avatar,
+      );
+    }
+
+    return Semantics(
+      container: true,
+      button: true,
+      label: markerStyle.resolvedSemanticLabel,
+      value: markerStyle.resolvedStatusLabel,
+      onTap: onTap,
+      onLongPress: onLongPress,
+      child: GestureDetector(
+        onTap: onTap,
+        onLongPress: onLongPress,
+        child: SizedBox(
+          width: 68,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              avatar,
+              const SizedBox(height: 2),
+              Text(
+                player.name,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 10,
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

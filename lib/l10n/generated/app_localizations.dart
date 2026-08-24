@@ -1633,6 +1633,123 @@ abstract class AppLocalizations {
   /// **'Skład: {size} / {min}–{max}'**
   String squad_sizeLabel(int size, int min, int max);
 
+  /// Bieżąca liczba zawodników wyświetlana osobno na wskaźniku liczebności składu.
+  ///
+  /// In pl, this message translates to:
+  /// **'Liczba zawodników: {count}'**
+  String squad_rosterCount(int count);
+
+  /// Dolna granica dopuszczalnej liczebności składu.
+  ///
+  /// In pl, this message translates to:
+  /// **'Minimum: {minimum}'**
+  String squad_rosterMinimum(int minimum);
+
+  /// Górna granica dopuszczalnej liczebności składu.
+  ///
+  /// In pl, this message translates to:
+  /// **'Maksimum: {maximum}'**
+  String squad_rosterMaximum(int maximum);
+
+  /// Stan wskaźnika liczebności, gdy liczba zawodników mieści się w zakresie.
+  ///
+  /// In pl, this message translates to:
+  /// **'W zakresie'**
+  String get squad_rosterStateInRange;
+
+  /// Stan wskaźnika liczebności, gdy liczba zawodników jest poza zakresem.
+  ///
+  /// In pl, this message translates to:
+  /// **'Poza zakresem'**
+  String get squad_rosterStateOutOfRange;
+
+  /// Pełny opis dostępności wskaźnika liczebności składu.
+  ///
+  /// In pl, this message translates to:
+  /// **'Liczba zawodników: {count}; minimum: {minimum}; maksimum: {maximum}; stan: {state}.'**
+  String squad_rosterSizeSemantics(
+    int count,
+    int minimum,
+    int maximum,
+    String state,
+  );
+
+  /// Komunikat wyświetlany, gdy skład nie zawiera żadnego zawodnika; nie odwołuje się do filtrów.
+  ///
+  /// In pl, this message translates to:
+  /// **'Brak zawodników w składzie.'**
+  String get squad_emptyRoster;
+
+  /// Dostępnościowy opis aktywnej kontuzji zawodnika.
+  ///
+  /// In pl, this message translates to:
+  /// **'Aktywna kontuzja'**
+  String get squad_statusInjury;
+
+  /// Dostępnościowy opis aktywnego zawieszenia zawodnika.
+  ///
+  /// In pl, this message translates to:
+  /// **'Aktywne zawieszenie'**
+  String get squad_statusSuspension;
+
+  /// Dostępnościowy opis przypisania zawodnika poza jego dokładną pozycją.
+  ///
+  /// In pl, this message translates to:
+  /// **'Niezgodność pozycji'**
+  String get squad_positionMismatch;
+
+  /// Pełna etykieta dostępności wiersza zawodnika; aktywne statusy są dołączane osobno.
+  ///
+  /// In pl, this message translates to:
+  /// **'{name}, pozycja {position}, OVR {ovr}, forma {form} na 10, strefa {zone}'**
+  String squad_playerRowSemantics(
+    String name,
+    String position,
+    int ovr,
+    String form,
+    String zone,
+  );
+
+  /// Etykieta dostępności znacznika zawodnika na boisku; status zawiera aktywne kontuzje, zawieszenia i niedopasowanie pozycji.
+  ///
+  /// In pl, this message translates to:
+  /// **'{name}, pozycja {position}. {status}'**
+  String squad_playerMarkerSemantics(
+    String name,
+    String position,
+    String status,
+  );
+
+  /// Niezależna od koloru ramki etykieta dostępności strefy zawodnika.
+  ///
+  /// In pl, this message translates to:
+  /// **'Strefa: {zone}'**
+  String squad_zoneFrameSemantics(String zone);
+
+  /// Etykieta dostępności znacznika pozycji zawodnika.
+  ///
+  /// In pl, this message translates to:
+  /// **'Pozycja: {position}'**
+  String squad_positionBadgeSemantics(String position);
+
+  /// Etykieta dostępności wartości OVR wyświetlanej na znaczniku.
+  ///
+  /// In pl, this message translates to:
+  /// **'OVR: {ovr}'**
+  String squad_ovrBadgeSemantics(int ovr);
+
+  /// Etykieta dostępności clamped wartości formy na poziomej skali 0–10.
+  ///
+  /// In pl, this message translates to:
+  /// **'Forma: {form} na 10'**
+  String squad_formIndicatorSemantics(String form);
+
+  /// Niezależna etykieta akcji otwierającej profil reprezentowanego zawodnika.
+  ///
+  /// In pl, this message translates to:
+  /// **'Otwórz profil zawodnika {name}'**
+  String squad_profileAction(String name);
+
   /// No description provided for @squad_injury.
   ///
   /// In pl, this message translates to:

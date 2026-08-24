@@ -392,6 +392,116 @@
       "max": {"type": "int"}
     }
   },
+  "squad_rosterCount": "Liczba zawodników: {count}",
+  "@squad_rosterCount": {
+    "description": "Bieżąca liczba zawodników wyświetlana osobno na wskaźniku liczebności składu.",
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "squad_rosterMinimum": "Minimum: {minimum}",
+  "@squad_rosterMinimum": {
+    "description": "Dolna granica dopuszczalnej liczebności składu.",
+    "placeholders": {
+      "minimum": {"type": "int"}
+    }
+  },
+  "squad_rosterMaximum": "Maksimum: {maximum}",
+  "@squad_rosterMaximum": {
+    "description": "Górna granica dopuszczalnej liczebności składu.",
+    "placeholders": {
+      "maximum": {"type": "int"}
+    }
+  },
+  "squad_rosterStateInRange": "W zakresie",
+  "@squad_rosterStateInRange": {
+    "description": "Stan wskaźnika liczebności, gdy liczba zawodników mieści się w zakresie."
+  },
+  "squad_rosterStateOutOfRange": "Poza zakresem",
+  "@squad_rosterStateOutOfRange": {
+    "description": "Stan wskaźnika liczebności, gdy liczba zawodników jest poza zakresem."
+  },
+  "squad_rosterSizeSemantics": "Liczba zawodników: {count}; minimum: {minimum}; maksimum: {maximum}; stan: {state}.",
+  "@squad_rosterSizeSemantics": {
+    "description": "Pełny opis dostępności wskaźnika liczebności składu.",
+    "placeholders": {
+      "count": {"type": "int"},
+      "minimum": {"type": "int"},
+      "maximum": {"type": "int"},
+      "state": {"type": "String"}
+    }
+  },
+  "squad_emptyRoster": "Brak zawodników w składzie.",
+  "@squad_emptyRoster": {
+    "description": "Komunikat wyświetlany, gdy skład nie zawiera żadnego zawodnika; nie odwołuje się do filtrów."
+  },
+  "squad_statusInjury": "Aktywna kontuzja",
+  "@squad_statusInjury": {
+    "description": "Dostępnościowy opis aktywnej kontuzji zawodnika."
+  },
+  "squad_statusSuspension": "Aktywne zawieszenie",
+  "@squad_statusSuspension": {
+    "description": "Dostępnościowy opis aktywnego zawieszenia zawodnika."
+  },
+  "squad_positionMismatch": "Niezgodność pozycji",
+  "@squad_positionMismatch": {
+    "description": "Dostępnościowy opis przypisania zawodnika poza jego dokładną pozycją."
+  },
+  "squad_playerRowSemantics": "{name}, pozycja {position}, OVR {ovr}, forma {form} na 10, strefa {zone}",
+  "@squad_playerRowSemantics": {
+    "description": "Pełna etykieta dostępności wiersza zawodnika; aktywne statusy są dołączane osobno.",
+    "placeholders": {
+      "name": {"type": "String"},
+      "position": {"type": "String"},
+      "ovr": {"type": "int"},
+      "form": {"type": "String"},
+      "zone": {"type": "String"}
+    }
+  },
+  "squad_playerMarkerSemantics": "{name}, pozycja {position}. {status}",
+  "@squad_playerMarkerSemantics": {
+    "description": "Etykieta dostępności znacznika zawodnika na boisku; status zawiera aktywne kontuzje, zawieszenia i niedopasowanie pozycji.",
+    "placeholders": {
+      "name": {"type": "String"},
+      "position": {"type": "String"},
+      "status": {"type": "String"}
+    }
+  },
+  "squad_zoneFrameSemantics": "Strefa: {zone}",
+  "@squad_zoneFrameSemantics": {
+    "description": "Niezależna od koloru ramki etykieta dostępności strefy zawodnika.",
+    "placeholders": {
+      "zone": {"type": "String"}
+    }
+  },
+  "squad_positionBadgeSemantics": "Pozycja: {position}",
+  "@squad_positionBadgeSemantics": {
+    "description": "Etykieta dostępności znacznika pozycji zawodnika.",
+    "placeholders": {
+      "position": {"type": "String"}
+    }
+  },
+  "squad_ovrBadgeSemantics": "OVR: {ovr}",
+  "@squad_ovrBadgeSemantics": {
+    "description": "Etykieta dostępności wartości OVR wyświetlanej na znaczniku.",
+    "placeholders": {
+      "ovr": {"type": "int"}
+    }
+  },
+  "squad_formIndicatorSemantics": "Forma: {form} na 10",
+  "@squad_formIndicatorSemantics": {
+    "description": "Etykieta dostępności clamped wartości formy na poziomej skali 0–10.",
+    "placeholders": {
+      "form": {"type": "String"}
+    }
+  },
+  "squad_profileAction": "Otwórz profil zawodnika {name}",
+  "@squad_profileAction": {
+    "description": "Niezależna etykieta akcji otwierającej profil reprezentowanego zawodnika.",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
   "squad_injury": "KONTUZJA",
   "squad_xiBadge": "XI",
   "squad_bench": "Ławka",

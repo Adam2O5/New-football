@@ -363,6 +363,116 @@
 
   "squad_noTeam": "No player team",
   "squad_sizeLabel": "Squad: {size} / {min}–{max}",
+  "squad_rosterCount": "Roster count: {count}",
+  "@squad_rosterCount": {
+    "description": "Current player count shown separately in the roster size indicator.",
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "squad_rosterMinimum": "Minimum: {minimum}",
+  "@squad_rosterMinimum": {
+    "description": "Lower bound of the allowed roster size range.",
+    "placeholders": {
+      "minimum": {"type": "int"}
+    }
+  },
+  "squad_rosterMaximum": "Maximum: {maximum}",
+  "@squad_rosterMaximum": {
+    "description": "Upper bound of the allowed roster size range.",
+    "placeholders": {
+      "maximum": {"type": "int"}
+    }
+  },
+  "squad_rosterStateInRange": "In range",
+  "@squad_rosterStateInRange": {
+    "description": "Roster size indicator state when the player count is within the allowed range."
+  },
+  "squad_rosterStateOutOfRange": "Out of range",
+  "@squad_rosterStateOutOfRange": {
+    "description": "Roster size indicator state when the player count is outside the allowed range."
+  },
+  "squad_rosterSizeSemantics": "Roster count: {count}; minimum: {minimum}; maximum: {maximum}; state: {state}.",
+  "@squad_rosterSizeSemantics": {
+    "description": "Full accessibility label for the roster size indicator.",
+    "placeholders": {
+      "count": {"type": "int"},
+      "minimum": {"type": "int"},
+      "maximum": {"type": "int"},
+      "state": {"type": "String"}
+    }
+  },
+  "squad_emptyRoster": "No players in the roster.",
+  "@squad_emptyRoster": {
+    "description": "Message shown when the roster has no players; it does not refer to filters."
+  },
+  "squad_statusInjury": "Active injury",
+  "@squad_statusInjury": {
+    "description": "Accessibility description for an active player injury."
+  },
+  "squad_statusSuspension": "Active suspension",
+  "@squad_statusSuspension": {
+    "description": "Accessibility description for an active player suspension."
+  },
+  "squad_positionMismatch": "Position mismatch",
+  "@squad_positionMismatch": {
+    "description": "Accessibility description for a player assigned outside the exact position."
+  },
+  "squad_playerRowSemantics": "{name}, position {position}, OVR {ovr}, form {form} out of 10, zone {zone}",
+  "@squad_playerRowSemantics": {
+    "description": "Full accessibility label for a player row; active statuses are appended separately.",
+    "placeholders": {
+      "name": {"type": "String"},
+      "position": {"type": "String"},
+      "ovr": {"type": "int"},
+      "form": {"type": "String"},
+      "zone": {"type": "String"}
+    }
+  },
+  "squad_playerMarkerSemantics": "{name}, position {position}. {status}",
+  "@squad_playerMarkerSemantics": {
+    "description": "Accessibility label for a player marker on the pitch; status contains active injury, suspension and position mismatch information.",
+    "placeholders": {
+      "name": {"type": "String"},
+      "position": {"type": "String"},
+      "status": {"type": "String"}
+    }
+  },
+  "squad_zoneFrameSemantics": "Zone: {zone}",
+  "@squad_zoneFrameSemantics": {
+    "description": "Zone accessibility label independent of the frame color.",
+    "placeholders": {
+      "zone": {"type": "String"}
+    }
+  },
+  "squad_positionBadgeSemantics": "Position: {position}",
+  "@squad_positionBadgeSemantics": {
+    "description": "Accessibility label for the player's position badge.",
+    "placeholders": {
+      "position": {"type": "String"}
+    }
+  },
+  "squad_ovrBadgeSemantics": "OVR: {ovr}",
+  "@squad_ovrBadgeSemantics": {
+    "description": "Accessibility label for the OVR value shown in the badge.",
+    "placeholders": {
+      "ovr": {"type": "int"}
+    }
+  },
+  "squad_formIndicatorSemantics": "Form: {form} out of 10",
+  "@squad_formIndicatorSemantics": {
+    "description": "Accessibility label for the clamped form value on the horizontal 0–10 scale.",
+    "placeholders": {
+      "form": {"type": "String"}
+    }
+  },
+  "squad_profileAction": "Open player profile for {name}",
+  "@squad_profileAction": {
+    "description": "Independent action label for opening the represented player's profile.",
+    "placeholders": {
+      "name": {"type": "String"}
+    }
+  },
   "squad_injury": "INJURY",
   "squad_xiBadge": "XI",
   "squad_bench": "Bench",

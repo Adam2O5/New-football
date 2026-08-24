@@ -845,6 +845,94 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
+  String squad_rosterCount(int count) {
+    return 'Liczba zawodników: $count';
+  }
+
+  @override
+  String squad_rosterMinimum(int minimum) {
+    return 'Minimum: $minimum';
+  }
+
+  @override
+  String squad_rosterMaximum(int maximum) {
+    return 'Maksimum: $maximum';
+  }
+
+  @override
+  String get squad_rosterStateInRange => 'W zakresie';
+
+  @override
+  String get squad_rosterStateOutOfRange => 'Poza zakresem';
+
+  @override
+  String squad_rosterSizeSemantics(
+    int count,
+    int minimum,
+    int maximum,
+    String state,
+  ) {
+    return 'Liczba zawodników: $count; minimum: $minimum; maksimum: $maximum; stan: $state.';
+  }
+
+  @override
+  String get squad_emptyRoster => 'Brak zawodników w składzie.';
+
+  @override
+  String get squad_statusInjury => 'Aktywna kontuzja';
+
+  @override
+  String get squad_statusSuspension => 'Aktywne zawieszenie';
+
+  @override
+  String get squad_positionMismatch => 'Niezgodność pozycji';
+
+  @override
+  String squad_playerRowSemantics(
+    String name,
+    String position,
+    int ovr,
+    String form,
+    String zone,
+  ) {
+    return '$name, pozycja $position, OVR $ovr, forma $form na 10, strefa $zone';
+  }
+
+  @override
+  String squad_playerMarkerSemantics(
+    String name,
+    String position,
+    String status,
+  ) {
+    return '$name, pozycja $position. $status';
+  }
+
+  @override
+  String squad_zoneFrameSemantics(String zone) {
+    return 'Strefa: $zone';
+  }
+
+  @override
+  String squad_positionBadgeSemantics(String position) {
+    return 'Pozycja: $position';
+  }
+
+  @override
+  String squad_ovrBadgeSemantics(int ovr) {
+    return 'OVR: $ovr';
+  }
+
+  @override
+  String squad_formIndicatorSemantics(String form) {
+    return 'Forma: $form na 10';
+  }
+
+  @override
+  String squad_profileAction(String name) {
+    return 'Otwórz profil zawodnika $name';
+  }
+
+  @override
   String get squad_injury => 'KONTUZJA';
 
   @override
