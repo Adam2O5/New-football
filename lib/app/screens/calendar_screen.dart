@@ -150,10 +150,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
 
   bool _isCurrentRun(int runId) => mounted && runId == _runId;
 
-  void _publishCalendarFeedback(
+  Future<void> _publishCalendarFeedback(
     int runId,
     CalendarDaySimulationFeedback feedback,
-  ) {
+  ) async {
     if (!_isCurrentRun(runId)) return;
 
     _cancelFeedbackTimer();
@@ -177,6 +177,8 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       }
       if (!dismissal.isCompleted) dismissal.complete();
     });
+
+    await dismissal.future;
   }
 
   void _clearTransientUi({required int runId}) {
@@ -221,7 +223,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     int? lastSequence;
     ({int week, int day})? lastDate;
 
-    void observe(CalendarDaySimulationFeedback feedback) {
+    Future<void> observe(CalendarDaySimulationFeedback feedback) async {
       if (!_isCurrentRun(runId)) return;
       controllerRunId ??= feedback.runId;
       if (feedback.runId != controllerRunId) return;
@@ -233,7 +235,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       }
       lastSequence = feedback.sequence;
       lastDate = (week: feedback.week, day: feedback.day);
-      _publishCalendarFeedback(runId, feedback);
+      await _publishCalendarFeedback(runId, feedback);
     }
 
     try {

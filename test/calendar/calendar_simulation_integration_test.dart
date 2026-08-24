@@ -831,9 +831,9 @@ final class _IntegrationGameController extends GameController {
     // cadence deterministic for a testWidgets fake-async environment.
     final wrappedObserver = observer == null
         ? null
-        : (CalendarDaySimulationFeedback feedback) {
+        : (CalendarDaySimulationFeedback feedback) async {
             publishedFeedback.add(feedback);
-            observer(feedback);
+            await observer(feedback);
           };
     final future = super.simulateToDate(
       targetWeek,

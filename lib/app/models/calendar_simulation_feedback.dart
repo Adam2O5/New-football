@@ -1,4 +1,6 @@
 // Presentation-only data emitted after a calendar simulation day commits.
+import 'dart:async';
+
 //
 // These types deliberately do not reference Flutter widgets, BuildContext, or
 // mutable domain objects. The controller should construct them from the
@@ -209,4 +211,4 @@ final class CalendarDaySimulationFeedback {
 /// The callback receives a fully immutable snapshot and must not need a
 /// [BuildContext] or read mutable controller state to render it.
 typedef CalendarDaySimulationObserver =
-    void Function(CalendarDaySimulationFeedback feedback);
+    FutureOr<void> Function(CalendarDaySimulationFeedback feedback);

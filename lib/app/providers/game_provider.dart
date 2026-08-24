@@ -839,7 +839,7 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     if (!_isCurrentSimulationSession(session)) return false;
 
     if (observer != null) {
-      observer(
+      await observer(
         CalendarDaySimulationFeedback(
           runId: session.runId,
           sequence: sequence,
@@ -855,8 +855,8 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
       );
     }
 
-    // An observer may synchronously start a newer run. In that case this
-    // session must not wait on or reset the newer run's pacer.
+    // An observer may start a newer run while this session is suspended. In
+    // that case this session must not wait on or reset the newer run's pacer.
     if (!_isCurrentSimulationSession(session)) return false;
 
     if (pacer != null) {
