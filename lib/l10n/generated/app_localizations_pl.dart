@@ -837,6 +837,21 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
+  String home_seasonLine(int year) {
+    return 'Sezon $year';
+  }
+
+  @override
+  String home_phaseLine(String phase) {
+    return 'Faza: $phase';
+  }
+
+  @override
+  String home_weekDayLine(int week, int day) {
+    return 'Tydzień $week, dzień $day';
+  }
+
+  @override
   String get squad_noTeam => 'Brak drużyny gracza';
 
   @override

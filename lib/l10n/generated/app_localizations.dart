@@ -1621,6 +1621,24 @@ abstract class AppLocalizations {
   /// **'Sezon {season} · {phase} · Tydzień {week}, dzień {day}'**
   String home_context(int season, String phase, int week, int day);
 
+  /// Pierwsza linia kontekstu sezonu na ekranie głównym.
+  ///
+  /// In pl, this message translates to:
+  /// **'Sezon {year}'**
+  String home_seasonLine(int year);
+
+  /// Druga linia kontekstu sezonu na ekranie głównym.
+  ///
+  /// In pl, this message translates to:
+  /// **'Faza: {phase}'**
+  String home_phaseLine(String phase);
+
+  /// Trzecia linia kontekstu sezonu na ekranie głównym.
+  ///
+  /// In pl, this message translates to:
+  /// **'Tydzień {week}, dzień {day}'**
+  String home_weekDayLine(int week, int day);
+
   /// No description provided for @squad_noTeam.
   ///
   /// In pl, this message translates to:

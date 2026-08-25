@@ -37,4 +37,33 @@ flutter:
   generate: true
   assets:
     - assets/images/new-football-background.png
-    - assets/images/Syrenka FC.jpg
+    - assets/images/Syrenka_FC.png
+    - assets/images/Eiffel_Town.png
+    - assets/images/Marseille_FC.png
+    - assets/images/Madrid_Royals.png
+    - assets/images/Gaudi_Athletic.png
+    - assets/images/London_Rovers.png
+    - assets/images/Manchester_Wanderers.png
+    - assets/images/Mersey_United.png
+    - assets/images/Berlin_Bears.png
+    - assets/images/Brussels_City.png
+    - assets/images/Amsterdam_Club.png
+    - assets/images/Lisbon_FC.png
+    - assets/images/Rome_Eagles.png
+    - assets/images/Lombardy_Milan.png
+    - assets/images/Neapol_Athletic.png
+    - assets/images/Sao_Paulo_FC.png
+    - assets/images/Joga_Bonito_FC.png
+    - assets/images/Buenos_Aires_Wanderers.png
+    - assets/images/Tokyo_Emperors.png
+    - assets/images/Liberty_New_York.png
+    - assets/images/Hollywood_FC.png
+    - assets/images/Chicago_Aces.png
+    - assets/images/Philadelphia_Warriors.png
+    - assets/images/Kyoto_Samurais.png
+    - assets/images/Shanghai_Dragons.png
+    - assets/images/Imperial_Beijing.png
+    - assets/images/Mexico_City_SC.png
+    - assets/images/Dynamo_Casablanca.png
+    - assets/images/Cairo_United.png
+    - assets/images/Lagos_Rovers.png

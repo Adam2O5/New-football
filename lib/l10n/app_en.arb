@@ -360,6 +360,24 @@
       "day": {"type": "int"}
     }
   },
+  "home_seasonLine": "Season {year}",
+  "@home_seasonLine": {
+    "description": "First season-context line on the home screen.",
+    "placeholders": {"year": {"type": "int"}}
+  },
+  "home_phaseLine": "Phase: {phase}",
+  "@home_phaseLine": {
+    "description": "Second season-context line on the home screen.",
+    "placeholders": {"phase": {"type": "String"}}
+  },
+  "home_weekDayLine": "Week {week}, day {day}",
+  "@home_weekDayLine": {
+    "description": "Third season-context line on the home screen.",
+    "placeholders": {
+      "week": {"type": "int"},
+      "day": {"type": "int"}
+    }
+  },
 
   "squad_noTeam": "No player team",
   "squad_sizeLabel": "Squad: {size} / {min}–{max}",

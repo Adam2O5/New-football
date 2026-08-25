@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:new_football/app/providers/club_branding_provider.dart';
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/app/screens/calendar_screen.dart';
 import 'package:new_football/app/screens/home_screen.dart';
@@ -75,11 +76,23 @@ class _ShellScreenState extends ConsumerState<ShellScreen> {
     }
 
     final index = ref.watch(shellTabIndexProvider).clamp(0, _tabs.length - 1);
-    final teamName = league.playerTeam?.name ?? l10n.shell_defaultCareerName;
+    final activeTeamId = league.playerTeamId;
+    final activeTeam = activeTeamId == null
+        ? null
+        : league.teamById(activeTeamId);
+    final teamName = activeTeam?.name ?? l10n.shell_defaultCareerName;
+    final branding = ref
+        .watch(clubBrandingProvider)
+        .resolve(activeTeamId ?? '');
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(teamName),
+        centerTitle: false,
+        title: _ShellTeamTitle(
+          teamName: teamName,
+          primaryColor: branding.primaryColor,
+          secondaryColor: branding.secondaryColor,
+        ),
         actions: [
           IconButton(
             tooltip: l10n.shell_settingsTooltip,
@@ -154,6 +167,52 @@ class _ShellScreenState extends ConsumerState<ShellScreen> {
               icon: Icons.mail,
             ),
             label: l10n.shell_tab_inbox,
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ShellTeamTitle extends StatelessWidget {
+  const _ShellTeamTitle({
+    required this.teamName,
+    required this.primaryColor,
+    required this.secondaryColor,
+  });
+
+  final String teamName;
+  final Color primaryColor;
+  final Color secondaryColor;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      height: kToolbarHeight,
+      child: Stack(
+        key: const ValueKey<String>('shell-team-title'),
+        fit: StackFit.expand,
+        children: [
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Text(teamName, maxLines: 1, overflow: TextOverflow.ellipsis),
+          ),
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: 3,
+            child: ExcludeSemantics(
+              child: IgnorePointer(
+                child: Row(
+                  children: [
+                    Expanded(flex: 2, child: ColoredBox(color: primaryColor)),
+                    Expanded(child: ColoredBox(color: secondaryColor)),
+                  ],
+                ),
+              ),
+            ),
           ),
         ],
       ),

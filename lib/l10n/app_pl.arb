@@ -382,6 +382,24 @@
       "day": {"type": "int"}
     }
   },
+  "home_seasonLine": "Sezon {year}",
+  "@home_seasonLine": {
+    "description": "Pierwsza linia kontekstu sezonu na ekranie głównym.",
+    "placeholders": {"year": {"type": "int"}}
+  },
+  "home_phaseLine": "Faza: {phase}",
+  "@home_phaseLine": {
+    "description": "Druga linia kontekstu sezonu na ekranie głównym.",
+    "placeholders": {"phase": {"type": "String"}}
+  },
+  "home_weekDayLine": "Tydzień {week}, dzień {day}",
+  "@home_weekDayLine": {
+    "description": "Trzecia linia kontekstu sezonu na ekranie głównym.",
+    "placeholders": {
+      "week": {"type": "int"},
+      "day": {"type": "int"}
+    }
+  },
 
   "squad_noTeam": "Brak drużyny gracza",
   "squad_sizeLabel": "Skład: {size} / {min}–{max}",

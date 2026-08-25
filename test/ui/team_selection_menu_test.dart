@@ -12,6 +12,7 @@ import 'package:flutter_riverpod/misc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:new_football/app/branding/club_branding_registry.dart';
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/app/screens/new_game_screen.dart';
 import 'package:new_football/app/widgets/team_selection/team_row.dart';
@@ -27,8 +28,8 @@ import 'package:new_football/l10n/generated/app_localizations.dart';
 /// The double records both attempted and completed saves. Tests can assign
 /// [saveRelease] before activation to keep the controller in its loading state
 /// and can assign [saveFailure] to exercise the existing error path.
-class _TeamSelectionSaveRepository extends SaveRepository {
-  _TeamSelectionSaveRepository();
+class TeamSelectionSaveRepository extends SaveRepository {
+  TeamSelectionSaveRepository();
 
   final _firstSaveStarted = Completer<GameSave>();
   final attemptedSaves = <GameSave>[];
@@ -66,21 +67,21 @@ class _TeamSelectionSaveRepository extends SaveRepository {
 /// production deterministic 30-team data set. Only the factory, repository,
 /// and controller providers are overridden; production routing and domain
 /// objects are not changed.
-class _TeamSelectionHarness {
-  _TeamSelectionHarness({
+class TeamSelectionHarness {
+  TeamSelectionHarness({
     this.locale = const Locale('pl'),
     this.viewport = const Size(390, 844),
     this.textScale = 1.0,
     GameFactory? gameFactory,
-    _TeamSelectionSaveRepository? repository,
+    TeamSelectionSaveRepository? repository,
   }) : gameFactory = gameFactory ?? GameFactory(),
-       repository = repository ?? _TeamSelectionSaveRepository();
+       repository = repository ?? TeamSelectionSaveRepository();
 
   Locale locale;
   final Size viewport;
   final double textScale;
   final GameFactory gameFactory;
-  final _TeamSelectionSaveRepository repository;
+  final TeamSelectionSaveRepository repository;
   final destinationUris = <Uri>[];
 
   late final GoRouter router = _createRouter();
@@ -162,7 +163,7 @@ void main() {
   testWidgets('mounts the reusable team-selection router harness', (
     tester,
   ) async {
-    final harness = _TeamSelectionHarness(
+    final harness = TeamSelectionHarness(
       locale: const Locale('en'),
       viewport: const Size(390, 844),
       textScale: 1.0,
@@ -187,10 +188,11 @@ void main() {
   testWidgets('renders all preview teams in source order with shared logo', (
     tester,
   ) async {
-    final harness = _TeamSelectionHarness();
+    final harness = TeamSelectionHarness();
     addTearDown(() => harness.dispose(tester));
 
     await harness.pump(tester);
+    final l10n = await AppLocalizations.delegate.load(harness.locale);
 
     final expectedTeams = harness.gameFactory.previewTeams();
     expect(expectedTeams, hasLength(30));
@@ -221,10 +223,17 @@ void main() {
       expect(rowFinder, findsOneWidget);
 
       final row = tester.widget<TeamRow>(rowFinder);
+      final branding = ClubBrandingRegistry.production.resolve(team.id);
+      final conferenceLabel = _conferenceLabel(l10n, team.conference);
       expect(row.teamId, team.id);
       expect(row.name, team.name);
       expect(row.city, team.city);
-      expect(row.conferenceLabel, team.conference.label);
+      expect(row.conferenceLabel, conferenceLabel);
+      expect(row.branding, isNotNull);
+      expect(row.branding!.teamId, team.id);
+      expect(row.branding!.logoAsset, branding.logoAsset);
+      expect(row.branding!.primaryColor, branding.primaryColor);
+      expect(row.branding!.secondaryColor, branding.secondaryColor);
       expect(
         find.descendant(of: rowFinder, matching: find.text(team.name)),
         findsOneWidget,
@@ -232,7 +241,7 @@ void main() {
       expect(
         find.descendant(
           of: rowFinder,
-          matching: find.text('${team.city} · ${team.conference.label}'),
+          matching: find.text('${team.city} · $conferenceLabel'),
         ),
         findsOneWidget,
       );
@@ -244,9 +253,10 @@ void main() {
       expect(imageFinder, findsOneWidget);
       final image = tester.widget<Image>(imageFinder);
       expect(image.image, isA<AssetImage>());
+      expect((image.image as AssetImage).assetName, branding.logoAsset);
       expect(
-        (image.image as AssetImage).assetName,
-        TeamSelectionAssets.placeholderAsset,
+        find.byKey(ValueKey<String>('team-row-secondary-${team.id}')),
+        findsOneWidget,
       );
 
       expect(find.byKey(rowKey), findsOneWidget);
@@ -282,7 +292,7 @@ void main() {
   testWidgets(
     'keeps one bounded team scroll region and a stable fixed action',
     (tester) async {
-      final harness = _TeamSelectionHarness(
+      final harness = TeamSelectionHarness(
         viewport: const Size(320, 568),
         textScale: 1.0,
       );
@@ -452,7 +462,7 @@ void main() {
   testWidgets('replaces the first selection and keeps selection exclusive', (
     tester,
   ) async {
-    final harness = _TeamSelectionHarness();
+    final harness = TeamSelectionHarness();
     addTearDown(() => harness.dispose(tester));
 
     await harness.pump(tester);
@@ -492,7 +502,7 @@ void main() {
       ];
 
       for (final testCase in cases) {
-        final harness = _TeamSelectionHarness();
+        final harness = TeamSelectionHarness();
         try {
           await harness.pump(tester);
           final l10n = await AppLocalizations.delegate.load(harness.locale);
@@ -530,7 +540,7 @@ void main() {
   testWidgets('creates a save for the selected team and navigates to game', (
     tester,
   ) async {
-    final harness = _TeamSelectionHarness();
+    final harness = TeamSelectionHarness();
     addTearDown(() => harness.dispose(tester));
 
     await harness.pump(tester);
@@ -560,9 +570,9 @@ void main() {
   testWidgets(
     'disables start and shows the fixed progress indicator while saving',
     (tester) async {
-      final repository = _TeamSelectionSaveRepository()
+      final repository = TeamSelectionSaveRepository()
         ..saveRelease = Completer<void>();
-      final harness = _TeamSelectionHarness(repository: repository);
+      final harness = TeamSelectionHarness(repository: repository);
       addTearDown(() => harness.dispose(tester));
 
       await harness.pump(tester);
@@ -600,9 +610,9 @@ void main() {
   testWidgets('reports repository failure and preserves name and selection', (
     tester,
   ) async {
-    final repository = _TeamSelectionSaveRepository()
+    final repository = TeamSelectionSaveRepository()
       ..saveFailure = SaveRepositoryException('controlled create failure');
-    final harness = _TeamSelectionHarness(repository: repository);
+    final harness = TeamSelectionHarness(repository: repository);
     addTearDown(() => harness.dispose(tester));
 
     await harness.pump(tester);
@@ -641,7 +651,7 @@ void main() {
     'exposes localized row semantics and orders every row before start',
     (tester) async {
       for (final locale in const [Locale('pl'), Locale('en')]) {
-        final harness = _TeamSelectionHarness(locale: locale);
+        final harness = TeamSelectionHarness(locale: locale);
         SemanticsHandle? semanticsHandle;
         try {
           await harness.pump(tester);
@@ -683,7 +693,7 @@ void main() {
               teamId: team.id,
               name: team.name,
               city: team.city,
-              conferenceLabel: team.conference.label,
+              conferenceLabel: _conferenceLabel(l10n, team.conference),
               selected: false,
             );
             _expectSemanticsPrecedes(rowNode, startNode);
@@ -717,7 +727,7 @@ void main() {
             teamId: selectedTeam.id,
             name: selectedTeam.name,
             city: selectedTeam.city,
-            conferenceLabel: selectedTeam.conference.label,
+            conferenceLabel: _conferenceLabel(l10n, selectedTeam.conference),
             selected: true,
           );
           _expectSemanticsPrecedes(selectedNode, startNode);
@@ -731,7 +741,7 @@ void main() {
             teamId: secondTeam.id,
             name: secondTeam.name,
             city: secondTeam.city,
-            conferenceLabel: secondTeam.conference.label,
+            conferenceLabel: _conferenceLabel(l10n, secondTeam.conference),
             selected: false,
           );
           _performSemanticsTap(secondNode);
@@ -748,7 +758,7 @@ void main() {
             teamId: selectedTeam.id,
             name: selectedTeam.name,
             city: selectedTeam.city,
-            conferenceLabel: selectedTeam.conference.label,
+            conferenceLabel: _conferenceLabel(l10n, selectedTeam.conference),
             selected: false,
           );
           _expectTeamRowSemantics(
@@ -757,7 +767,7 @@ void main() {
             teamId: secondTeam.id,
             name: secondTeam.name,
             city: secondTeam.city,
-            conferenceLabel: secondTeam.conference.label,
+            conferenceLabel: _conferenceLabel(l10n, secondTeam.conference),
             selected: true,
           );
         } finally {
@@ -774,7 +784,7 @@ void main() {
     final targetTeam = GameFactory().previewTeams().first;
 
     for (final locale in const [Locale('pl'), Locale('en')]) {
-      final tapHarness = _TeamSelectionHarness(locale: locale);
+      final tapHarness = TeamSelectionHarness(locale: locale);
       try {
         await tapHarness.pump(tester);
         await _activateTeam(tester, targetTeam.id);
@@ -786,7 +796,7 @@ void main() {
         await tapHarness.dispose(tester);
       }
 
-      final semanticHarness = _TeamSelectionHarness(locale: locale);
+      final semanticHarness = TeamSelectionHarness(locale: locale);
       SemanticsHandle? semanticsHandle;
       try {
         await semanticHarness.pump(tester);
@@ -799,7 +809,7 @@ void main() {
           teamId: targetTeam.id,
           name: targetTeam.name,
           city: targetTeam.city,
-          conferenceLabel: targetTeam.conference.label,
+          conferenceLabel: _conferenceLabel(l10n, targetTeam.conference),
           selected: false,
         );
         _performSemanticsTap(rowNode);
@@ -820,7 +830,7 @@ void main() {
     tester,
   ) async {
     for (final locale in const [Locale('pl'), Locale('en')]) {
-      final missingFieldsHarness = _TeamSelectionHarness(locale: locale);
+      final missingFieldsHarness = TeamSelectionHarness(locale: locale);
       try {
         await missingFieldsHarness.pump(tester);
         final l10n = await AppLocalizations.delegate.load(locale);
@@ -838,9 +848,9 @@ void main() {
         await missingFieldsHarness.dispose(tester);
       }
 
-      final failureRepository = _TeamSelectionSaveRepository()
+      final failureRepository = TeamSelectionSaveRepository()
         ..saveFailure = SaveRepositoryException('localized failure');
-      final failureHarness = _TeamSelectionHarness(
+      final failureHarness = TeamSelectionHarness(
         locale: locale,
         repository: failureRepository,
       );
@@ -868,7 +878,7 @@ void main() {
   testWidgets('preserves selection while rebuilding into another locale', (
     tester,
   ) async {
-    final harness = _TeamSelectionHarness(locale: const Locale('pl'));
+    final harness = TeamSelectionHarness(locale: const Locale('pl'));
     SemanticsHandle? semanticsHandle;
     try {
       await harness.pump(tester);
@@ -894,7 +904,7 @@ void main() {
       final expectedLabel = l10n.newGame_teamSemantics(
         selectedTeam.name,
         selectedTeam.city,
-        selectedTeam.conference.label,
+        _conferenceLabel(l10n, selectedTeam.conference),
         l10n.newGame_teamSelected,
       );
       expect(find.bySemanticsLabel(expectedLabel), findsOneWidget);
@@ -917,7 +927,7 @@ void main() {
 
       for (final viewport in viewports) {
         for (final textScale in textScales) {
-          final harness = _TeamSelectionHarness(
+          final harness = TeamSelectionHarness(
             viewport: viewport,
             textScale: textScale,
           );
@@ -970,7 +980,7 @@ void main() {
   testWidgets(
     'retains the selected team when resizing from portrait to landscape',
     (tester) async {
-      final harness = _TeamSelectionHarness(
+      final harness = TeamSelectionHarness(
         viewport: const Size(390, 844),
         textScale: 1.0,
       );
@@ -1306,7 +1316,9 @@ Future<void> _expectScaleTwoRowsRemainComplete(
     final name = find.descendant(of: row, matching: find.text(team.name));
     final details = find.descendant(
       of: row,
-      matching: find.text('${team.city} · ${team.conference.label}'),
+      matching: find.text(
+        '${team.city} · ${_conferenceLabel(l10n, team.conference)}',
+      ),
     );
     final image = find.descendant(of: row, matching: find.byType(Image));
     expect(name, findsOneWidget, reason: '$scenario: name was not wrapped');
@@ -1326,7 +1338,7 @@ Future<void> _expectScaleTwoRowsRemainComplete(
       teamId: team.id,
       name: team.name,
       city: team.city,
-      conferenceLabel: team.conference.label,
+      conferenceLabel: _conferenceLabel(l10n, team.conference),
       selected: false,
     );
   }
@@ -1424,6 +1436,12 @@ void _expectLocalizedNewGameChrome(WidgetTester tester, AppLocalizations l10n) {
     isNotNull,
   );
 }
+
+String _conferenceLabel(AppLocalizations l10n, Conference conference) =>
+    switch (conference) {
+      Conference.europe => l10n.teamOverview_conferenceEurope,
+      Conference.restOfTheWorld => l10n.teamOverview_conferenceRestOfWorld,
+    };
 
 SemanticsNode _expectTeamRowSemantics(
   WidgetTester tester,

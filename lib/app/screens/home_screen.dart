@@ -1,14 +1,19 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/semantics.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:new_football/app/widgets/screen_background.dart';
+import 'package:new_football/app/formatters/season_context_lines.dart';
 import 'package:new_football/app/l10n/enum_labels.dart';
+import 'package:new_football/app/providers/club_branding_provider.dart';
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/app/screens/calendar_screen.dart';
 import 'package:new_football/app/screens/shell_screen.dart';
+import 'package:new_football/app/widgets/branding/club_logo.dart';
+import 'package:new_football/app/widgets/home/season_context.dart';
+import 'package:new_football/app/widgets/screen_background.dart';
 import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
@@ -511,22 +516,114 @@ Widget _buildNextActionSection(
   );
 }
 
+class _HomeDashboardHeader extends StatelessWidget {
+  const _HomeDashboardHeader({
+    required this.teamName,
+    required this.logoAsset,
+    required this.fallbackLogoAsset,
+    this.seasonLines,
+  });
+
+  final String teamName;
+  final String logoAsset;
+  final String fallbackLogoAsset;
+  final SeasonContextLines? seasonLines;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final lines = seasonLines;
+
+    return Card(
+      key: const ValueKey('home-dashboard-header'),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Semantics(
+          container: true,
+          explicitChildNodes: true,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Expanded(
+                child: Semantics(
+                  container: true,
+                  excludeSemantics: true,
+                  label: teamName,
+                  sortKey: const OrdinalSortKey(0),
+                  child: Text(
+                    teamName,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.titleLarge,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Semantics(
+                container: true,
+                excludeSemantics: true,
+                sortKey: const OrdinalSortKey(1),
+                child: ClubLogo(
+                  assetPath: logoAsset,
+                  fallbackAssetPath: fallbackLogoAsset,
+                ),
+              ),
+              if (lines != null) ...[
+                const SizedBox(width: 12),
+                Expanded(
+                  child: SeasonContext(
+                    lines: lines,
+                    sortKey: const OrdinalSortKey(2),
+                    textStyle: theme.textTheme.bodyMedium,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
+    final brandingRegistry = ref.watch(clubBrandingProvider);
     final league = ref.watch(activeLeagueProvider);
+    final activeTeamId = league?.playerTeamId;
+    final activeTeam = league?.teamById(activeTeamId ?? '');
+    final teamName = activeTeam?.name ?? l10n.shell_defaultCareerName;
+    final branding = brandingRegistry.resolve(activeTeamId ?? '');
+    final fallbackLogoAsset = brandingRegistry.assets.fallbackLogoAsset;
+
     if (league == null) {
-      return Center(child: Text(l10n.calendar_noLeague));
+      return Scaffold(
+        body: ScreenBackground(
+          child: ListView(
+            padding: const EdgeInsets.all(16),
+            children: [
+              _HomeDashboardHeader(
+                teamName: teamName,
+                logoAsset: branding.logoAsset,
+                fallbackLogoAsset: fallbackLogoAsset,
+              ),
+              const SizedBox(height: 16),
+              Center(child: Text(l10n.calendar_noLeague)),
+            ],
+          ),
+        ),
+      );
     }
 
     final nextAction = ref.watch(nextGameEventProvider);
     final currentWeek = league.currentWeek;
     final currentDay = league.currentDay;
     final seasonYear = league.currentSeason.year;
-    final playerId = league.playerTeamId;
+    final playerId = activeTeamId;
 
     final teamNameById = {for (final t in league.teams) t.id: t.name};
     final matchesByRound = <int, List<ScheduledMatch>>{};
@@ -607,8 +704,8 @@ class HomeScreen extends ConsumerWidget {
       for (final m in playerFixtures) {
         if (m.result != null) {
           lastPlayed = m;
-        } else if (nextUpcoming == null) {
-          nextUpcoming = m;
+        } else {
+          nextUpcoming ??= m;
         }
       }
     }
@@ -678,45 +775,18 @@ class HomeScreen extends ConsumerWidget {
       7,
       (i) => today.add(Duration(days: i)),
     );
-    final playerTeam = league.playerTeam;
-    final teamName = playerTeam?.name ?? l10n.shell_defaultCareerName;
-    final teamInitial = teamName.trim().isEmpty
-        ? '?'
-        : teamName.trim().substring(0, 1).toUpperCase();
-    final seasonContext = l10n.home_context(
-      seasonYear,
-      seasonPhaseLabel(context, league.currentSeason.phase),
-      currentWeek,
-      currentDay,
-    );
+    final seasonContextLines = SeasonContextLines.fromLeague(context, league);
 
     return Scaffold(
       body: ScreenBackground(
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
-            Card(
-              key: const ValueKey('home-dashboard-header'),
-              child: ListTile(
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                leading: CircleAvatar(
-                  backgroundColor: Theme.of(context).colorScheme.primary,
-                  foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                  child: Text(teamInitial),
-                ),
-                title: Text(
-                  teamName,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                subtitle: Text(seasonContext),
-                trailing: Icon(
-                  Icons.calendar_month_outlined,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
+            _HomeDashboardHeader(
+              teamName: teamName,
+              logoAsset: branding.logoAsset,
+              fallbackLogoAsset: fallbackLogoAsset,
+              seasonLines: seasonContextLines,
             ),
             const SizedBox(height: 16),
             Text(
@@ -745,35 +815,47 @@ class HomeScreen extends ConsumerWidget {
                       padding: const EdgeInsets.all(12),
                       child: SizedBox(
                         width: 150,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              dayName(context, date.weekday),
-                              style: Theme.of(context).textTheme.labelLarge,
+                        height: 78,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          alignment: Alignment.topLeft,
+                          child: SizedBox(
+                            width: 150,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  dayName(context, date.weekday),
+                                  style: Theme.of(context).textTheme.labelLarge,
+                                ),
+                                Text(
+                                  '${date.day}.${date.month.toString().padLeft(2, '0')}',
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                                const SizedBox(height: 8),
+                                if (info?.playerMatchLabel != null)
+                                  Text(
+                                    info!.playerMatchLabel!,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.bodySmall,
+                                  )
+                                else if (info != null &&
+                                    info.eventLabels.isNotEmpty)
+                                  Text(
+                                    info.eventLabels.first,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.bodySmall,
+                                  ),
+                              ],
                             ),
-                            Text(
-                              '${date.day}.${date.month.toString().padLeft(2, '0')}',
-                              style: Theme.of(context).textTheme.bodySmall,
-                            ),
-                            const SizedBox(height: 8),
-                            if (info?.playerMatchLabel != null)
-                              Text(
-                                info!.playerMatchLabel!,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.bodySmall,
-                              )
-                            else if (info != null &&
-                                info.eventLabels.isNotEmpty)
-                              Text(
-                                info.eventLabels.first,
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                          ],
+                          ),
                         ),
                       ),
                     ),

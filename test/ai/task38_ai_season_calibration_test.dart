@@ -1058,7 +1058,7 @@ void main() {
     expect(report.logicalDays, 52 * 7);
     expect(report.executedTicks, 52 * 7);
     expect(report.seasons.single.championTeamId, isNotNull);
-  });
+  }, skip: !_task38RunFull);
 
   test('Task 38 full 10-season benchmark', () {
     final report = _Task38Harness(

@@ -4,8 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import 'package:new_football/app/widgets/screen_background.dart';
 import 'package:new_football/app/widgets/team_selection/team_row.dart';
-import 'package:new_football/app/widgets/team_selection/team_selection_assets.dart';
+import 'package:new_football/app/providers/club_branding_provider.dart';
 import 'package:new_football/app/providers/game_provider.dart';
+import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/services/game_factory.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
@@ -61,6 +62,7 @@ class _NewGameScreenState extends ConsumerState<NewGameScreen> {
       _nameInitialized = true;
     }
     final teams = ref.watch(gameFactoryProvider).previewTeams();
+    final brandingRegistry = ref.watch(clubBrandingProvider);
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.newGame_title),
@@ -107,19 +109,24 @@ class _NewGameScreenState extends ConsumerState<NewGameScreen> {
                         final selectionState = selected
                             ? l10n.newGame_teamSelected
                             : l10n.newGame_teamNotSelected;
+                        final conferenceLabel = switch (team.conference) {
+                          Conference.europe =>
+                            l10n.teamOverview_conferenceEurope,
+                          Conference.restOfTheWorld =>
+                            l10n.teamOverview_conferenceRestOfWorld,
+                        };
                         return TeamRow(
                           key: ValueKey('new-game-team-row-${team.id}'),
                           teamId: team.id,
                           name: team.name,
                           city: team.city,
-                          conferenceLabel: team.conference.label,
+                          conferenceLabel: conferenceLabel,
+                          branding: brandingRegistry.resolve(team.id),
                           selected: selected,
-                          placeholderAsset:
-                              TeamSelectionAssets.placeholderAsset,
                           localizedSemanticsLabel: l10n.newGame_teamSemantics(
                             team.name,
                             team.city,
-                            team.conference.label,
+                            conferenceLabel,
                             selectionState,
                           ),
                           onActivate: () =>
