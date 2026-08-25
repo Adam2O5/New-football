@@ -21,6 +21,7 @@ import 'package:new_football/core/models/match_models.dart';
 import 'package:new_football/core/models/message.dart';
 import 'package:new_football/core/models/standing.dart';
 import 'package:new_football/core/services/calendar_event_registry.dart';
+import 'package:new_football/core/services/day_simulator.dart';
 import 'package:new_football/core/services/schedule_generator.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
@@ -123,25 +124,86 @@ Future<BatchSimulationResult> _runBatchDialog(
   return result;
 }
 
-void _showBatchSnack(
+/// Presents a Home batch result without changing message lifecycle state.
+///
+/// The caller remains responsible for route-specific actions. This keeps a
+/// player match or a dedicated event screen visible even when a pending urgent
+/// message is left behind by a batch. The pending check deliberately reads the
+/// final controller state, never the live simulation-setting preference.
+void _presentHomeBatchResult(
   BuildContext context,
-  AppLocalizations l10n,
-  BatchSimulationResult result,
-) {
-  final reasonLabel = switch (result.stopReason) {
-    SimulationStopReason.reachedTarget =>
-      l10n.calendar_stopReason_reachedTarget,
-    SimulationStopReason.cancelled => l10n.calendar_stopReason_cancelled,
-    SimulationStopReason.noSave => l10n.calendar_stopReason_noSave,
-    SimulationStopReason.playerMatch => l10n.calendar_stopReason_reachedTarget,
-    SimulationStopReason.urgent => l10n.calendar_stopReason_reachedTarget,
-    SimulationStopReason.event => l10n.calendar_stopReason_reachedTarget,
-  };
+  WidgetRef ref,
+  AppLocalizations l10n, {
+  BatchSimulationResult? batchResult,
+  DaySimulationResult? dayResult,
+  String? message,
+  bool showBatchResult = true,
+  bool playerMatchTakesPriority = false,
+}) {
+  final playerMatch =
+      dayResult?.playerMatch ?? batchResult?.lastResult?.playerMatch;
+  final stoppedForUrgent =
+      batchResult?.stopReason == SimulationStopReason.urgent ||
+      (dayResult?.pauseForUrgent ?? false);
+  if (stoppedForUrgent && !(playerMatchTakesPriority && playerMatch != null)) {
+    ref.read(shellTabIndexProvider.notifier).state = 5;
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(l10n.calendar_urgentMessage)));
+    return;
+  }
+
+  final hasPendingUrgent =
+      ref.read(activeLeagueProvider)?.inbox.pendingUrgent.isNotEmpty == true;
+  final resultMessage =
+      message ??
+      (showBatchResult && batchResult != null
+          ? switch (batchResult.stopReason) {
+              SimulationStopReason.reachedTarget =>
+                '${l10n.calendar_stopReason_reachedTarget} · ${l10n.calendar_daysSimulated(batchResult.daysSimulated)}',
+              SimulationStopReason.cancelled =>
+                '${l10n.calendar_stopReason_cancelled} · ${l10n.calendar_daysSimulated(batchResult.daysSimulated)}',
+              SimulationStopReason.noSave =>
+                '${l10n.calendar_stopReason_noSave} · ${l10n.calendar_daysSimulated(batchResult.daysSimulated)}',
+              SimulationStopReason.playerMatch =>
+                '${l10n.calendar_stopReason_reachedTarget} · ${l10n.calendar_daysSimulated(batchResult.daysSimulated)}',
+              SimulationStopReason.urgent =>
+                '${l10n.calendar_stopReason_reachedTarget} · ${l10n.calendar_daysSimulated(batchResult.daysSimulated)}',
+              SimulationStopReason.event =>
+                '${l10n.calendar_stopReason_reachedTarget} · ${l10n.calendar_daysSimulated(batchResult.daysSimulated)}',
+            }
+          : null);
+  if (resultMessage == null && !hasPendingUrgent) return;
+
+  void openInbox() {
+    if (!context.mounted) return;
+    ref.read(shellTabIndexProvider.notifier).state = 5;
+    final router = GoRouter.maybeOf(context);
+    if (router != null && router.state.matchedLocation != '/game') {
+      router.go('/game', extra: 5);
+    }
+  }
+
+  final content = <Widget>[
+    if (resultMessage != null) Text(resultMessage),
+    if (hasPendingUrgent) ...[
+      if (resultMessage != null) const SizedBox(height: 4),
+      Text(l10n.simulation_pendingUrgentNotice),
+    ],
+  ];
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(
-      content: Text(
-        '$reasonLabel · ${l10n.calendar_daysSimulated(result.daysSimulated)}',
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: content,
       ),
+      action: hasPendingUrgent
+          ? SnackBarAction(
+              label: l10n.simulation_openInbox,
+              onPressed: openInbox,
+            )
+          : null,
     ),
   );
 }
@@ -164,29 +226,35 @@ Future<void> _goToEvent(
   if (!context.mounted) return;
   _refreshCalendarCursor(ref);
 
-  if (result.stopReason == SimulationStopReason.urgent) {
-    ref.read(shellTabIndexProvider.notifier).state = 5;
-    ScaffoldMessenger.of(
+  final canOpenEventResult =
+      result.stopReason == SimulationStopReason.event ||
+      result.stopReason == SimulationStopReason.playerMatch;
+  if (!canOpenEventResult) {
+    _presentHomeBatchResult(context, ref, l10n, batchResult: result);
+    return;
+  }
+
+  // "Go to" intentionally does not open a player match. It still presents a
+  // pending urgent CTA when the batch reached an ordinary result.
+  if (!openRoute || result.stopReason == SimulationStopReason.playerMatch) {
+    _presentHomeBatchResult(
       context,
-    ).showSnackBar(SnackBar(content: Text(l10n.calendar_urgentMessage)));
-    return;
-  }
-
-  if (result.stopReason != SimulationStopReason.event &&
-      result.stopReason != SimulationStopReason.playerMatch) {
-    _showBatchSnack(context, l10n, result);
-    return;
-  }
-
-  if (!openRoute) {
-    return;
-  }
-
-  if (result.stopReason == SimulationStopReason.playerMatch) {
+      ref,
+      l10n,
+      batchResult: result,
+      showBatchResult: false,
+    );
     return;
   }
 
   if (action.calendarEventId == CalendarEventId.scoutReport) {
+    _presentHomeBatchResult(
+      context,
+      ref,
+      l10n,
+      batchResult: result,
+      showBatchResult: false,
+    );
     await ref
         .read(gameControllerProvider.notifier)
         .runEventAtCurrentDay(CalendarEventId.scoutReport);
@@ -197,11 +265,18 @@ Future<void> _goToEvent(
 
   final route = _routeForEvent(action.calendarEventId!);
   if (route != null) {
+    _presentHomeBatchResult(
+      context,
+      ref,
+      l10n,
+      batchResult: result,
+      showBatchResult: false,
+    );
     context.push(route);
     return;
   }
 
-  _showBatchSnack(context, l10n, result);
+  _presentHomeBatchResult(context, ref, l10n, batchResult: result);
 }
 
 /// "Symuluj {event}": dociąga kalendarz do dnia eventu, wykonuje go
@@ -226,15 +301,8 @@ Future<void> _simulateEvent(
   if (!context.mounted) return;
   _refreshCalendarCursor(ref);
 
-  if (result.stopReason == SimulationStopReason.urgent) {
-    ref.read(shellTabIndexProvider.notifier).state = 5;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text(l10n.calendar_urgentMessage)));
-    return;
-  }
   if (result.stopReason != SimulationStopReason.event) {
-    _showBatchSnack(context, l10n, result);
+    _presentHomeBatchResult(context, ref, l10n, batchResult: result);
     return;
   }
 
@@ -245,23 +313,31 @@ Future<void> _simulateEvent(
   _refreshCalendarCursor(ref);
 
   if (dayResult?.playerMatch != null) {
-    context.push('/game/match', extra: dayResult!.playerMatch);
-    return;
-  }
-  if (dayResult?.pauseForUrgent ?? false) {
-    ref.read(shellTabIndexProvider.notifier).state = 5;
-    ScaffoldMessenger.of(
+    _presentHomeBatchResult(
       context,
-    ).showSnackBar(SnackBar(content: Text(l10n.calendar_urgentMessage)));
+      ref,
+      l10n,
+      batchResult: result,
+      dayResult: dayResult,
+      showBatchResult: false,
+      playerMatchTakesPriority: true,
+    );
+    context.push('/game/match', extra: dayResult!.playerMatch);
     return;
   }
 
   final label = action.calendarEventId == null
       ? action.id
       : calendarEventLabel(context, action.calendarEventId!) ?? action.id;
-  ScaffoldMessenger.of(
+  _presentHomeBatchResult(
     context,
-  ).showSnackBar(SnackBar(content: Text(l10n.home_actionExecuted(label))));
+    ref,
+    l10n,
+    batchResult: result,
+    dayResult: dayResult,
+    message: l10n.home_actionExecuted(label),
+    showBatchResult: false,
+  );
 }
 
 /// "Symuluj mecz": dociąga kalendarz do dnia meczu gracza i otwiera
@@ -280,18 +356,20 @@ Future<void> _simulateMatch(
   if (!context.mounted) return;
   _refreshCalendarCursor(ref);
 
-  if (result.lastResult?.playerMatch != null) {
-    context.push('/game/match', extra: result.lastResult!.playerMatch);
-    return;
-  }
-  if (result.stopReason == SimulationStopReason.urgent) {
-    ref.read(shellTabIndexProvider.notifier).state = 5;
-    ScaffoldMessenger.of(
+  final playerMatch = result.lastResult?.playerMatch;
+  if (playerMatch != null) {
+    _presentHomeBatchResult(
       context,
-    ).showSnackBar(SnackBar(content: Text(l10n.calendar_urgentMessage)));
+      ref,
+      l10n,
+      batchResult: result,
+      showBatchResult: false,
+      playerMatchTakesPriority: true,
+    );
+    context.push('/game/match', extra: playerMatch);
     return;
   }
-  _showBatchSnack(context, l10n, result);
+  _presentHomeBatchResult(context, ref, l10n, batchResult: result);
 }
 
 bool _isGoToOnlyEvent(CalendarEventId id) {

@@ -105,6 +105,38 @@
   "settings_language": "Język",
   "settings_language_polish": "Polski",
   "settings_language_english": "English",
+  "settings_urgentInterruptionTitle": "Przerywanie symulacji przez pilne wiadomości",
+  "@settings_urgentInterruptionTitle": {
+    "description": "Tytuł ustawienia określającego, czy pilna wiadomość przerywa symulację."
+  },
+  "settings_urgentInterruptionEnabledDescription": "Pilna wiadomość zatrzymuje symulację, aby można było od razu ją obsłużyć.",
+  "@settings_urgentInterruptionEnabledDescription": {
+    "description": "Opis skutku włączonego ustawienia przerywania symulacji."
+  },
+  "settings_urgentInterruptionDisabledDescription": "Symulacja trwa dalej, a pilna wiadomość pozostaje w skrzynce do ręcznego potwierdzenia.",
+  "@settings_urgentInterruptionDisabledDescription": {
+    "description": "Opis skutku wyłączonego ustawienia przerywania symulacji."
+  },
+  "settings_urgentInterruptionEnabledLabel": "Włączone",
+  "@settings_urgentInterruptionEnabledLabel": {
+    "description": "Etykieta stanu włączonego ustawienia przerywania symulacji."
+  },
+  "settings_urgentInterruptionDisabledLabel": "Wyłączone",
+  "@settings_urgentInterruptionDisabledLabel": {
+    "description": "Etykieta stanu wyłączonego ustawienia przerywania symulacji."
+  },
+  "settings_urgentInterruptionWriteError": "Nie udało się zapisać ustawienia przerywania symulacji.",
+  "@settings_urgentInterruptionWriteError": {
+    "description": "Komunikat o błędzie zapisu ustawienia przerywania symulacji."
+  },
+  "simulation_pendingUrgentNotice": "Pilna wiadomość czeka w skrzynce odbiorczej.",
+  "@simulation_pendingUrgentNotice": {
+    "description": "Informacja o pilnej wiadomości pozostawionej w skrzynce po symulacji."
+  },
+  "simulation_openInbox": "Otwórz skrzynkę odbiorczą",
+  "@simulation_openInbox": {
+    "description": "Etykieta akcji otwierającej skrzynkę odbiorczą po symulacji."
+  },
 
   "newGame_title": "Nowa gra",
   "newGame_defaultSaveName": "Moja kariera",

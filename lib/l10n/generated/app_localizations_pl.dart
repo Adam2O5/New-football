@@ -253,6 +253,35 @@ class AppLocalizationsPl extends AppLocalizations {
   String get settings_language_english => 'English';
 
   @override
+  String get settings_urgentInterruptionTitle =>
+      'Przerywanie symulacji przez pilne wiadomości';
+
+  @override
+  String get settings_urgentInterruptionEnabledDescription =>
+      'Pilna wiadomość zatrzymuje symulację, aby można było od razu ją obsłużyć.';
+
+  @override
+  String get settings_urgentInterruptionDisabledDescription =>
+      'Symulacja trwa dalej, a pilna wiadomość pozostaje w skrzynce do ręcznego potwierdzenia.';
+
+  @override
+  String get settings_urgentInterruptionEnabledLabel => 'Włączone';
+
+  @override
+  String get settings_urgentInterruptionDisabledLabel => 'Wyłączone';
+
+  @override
+  String get settings_urgentInterruptionWriteError =>
+      'Nie udało się zapisać ustawienia przerywania symulacji.';
+
+  @override
+  String get simulation_pendingUrgentNotice =>
+      'Pilna wiadomość czeka w skrzynce odbiorczej.';
+
+  @override
+  String get simulation_openInbox => 'Otwórz skrzynkę odbiorczą';
+
+  @override
   String get newGame_title => 'Nowa gra';
 
   @override

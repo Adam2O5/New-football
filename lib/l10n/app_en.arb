@@ -95,6 +95,38 @@
   "settings_language": "Language",
   "settings_language_polish": "Polski",
   "settings_language_english": "English",
+  "settings_urgentInterruptionTitle": "Interrupt simulation for urgent messages",
+  "@settings_urgentInterruptionTitle": {
+    "description": "Title of the setting that controls whether urgent messages interrupt simulation."
+  },
+  "settings_urgentInterruptionEnabledDescription": "An urgent message pauses the simulation so you can handle it immediately.",
+  "@settings_urgentInterruptionEnabledDescription": {
+    "description": "Effect description for the enabled simulation-interruption setting."
+  },
+  "settings_urgentInterruptionDisabledDescription": "Simulation continues, and urgent messages remain in the inbox until you acknowledge them.",
+  "@settings_urgentInterruptionDisabledDescription": {
+    "description": "Effect description for the disabled simulation-interruption setting."
+  },
+  "settings_urgentInterruptionEnabledLabel": "On",
+  "@settings_urgentInterruptionEnabledLabel": {
+    "description": "Label for the enabled simulation-interruption setting."
+  },
+  "settings_urgentInterruptionDisabledLabel": "Off",
+  "@settings_urgentInterruptionDisabledLabel": {
+    "description": "Label for the disabled simulation-interruption setting."
+  },
+  "settings_urgentInterruptionWriteError": "Could not save the urgent-message simulation setting.",
+  "@settings_urgentInterruptionWriteError": {
+    "description": "Error message shown when the simulation-interruption setting cannot be saved."
+  },
+  "simulation_pendingUrgentNotice": "An urgent message is waiting in your inbox.",
+  "@simulation_pendingUrgentNotice": {
+    "description": "Information about an urgent message left in the inbox after simulation."
+  },
+  "simulation_openInbox": "Open Inbox",
+  "@simulation_openInbox": {
+    "description": "Action label for opening the Inbox after simulation."
+  },
 
   "newGame_title": "New game",
   "newGame_defaultSaveName": "My career",

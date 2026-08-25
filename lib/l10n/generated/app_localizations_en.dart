@@ -253,6 +253,35 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_language_english => 'English';
 
   @override
+  String get settings_urgentInterruptionTitle =>
+      'Interrupt simulation for urgent messages';
+
+  @override
+  String get settings_urgentInterruptionEnabledDescription =>
+      'An urgent message pauses the simulation so you can handle it immediately.';
+
+  @override
+  String get settings_urgentInterruptionDisabledDescription =>
+      'Simulation continues, and urgent messages remain in the inbox until you acknowledge them.';
+
+  @override
+  String get settings_urgentInterruptionEnabledLabel => 'On';
+
+  @override
+  String get settings_urgentInterruptionDisabledLabel => 'Off';
+
+  @override
+  String get settings_urgentInterruptionWriteError =>
+      'Could not save the urgent-message simulation setting.';
+
+  @override
+  String get simulation_pendingUrgentNotice =>
+      'An urgent message is waiting in your inbox.';
+
+  @override
+  String get simulation_openInbox => 'Open Inbox';
+
+  @override
   String get newGame_title => 'New game';
 
   @override

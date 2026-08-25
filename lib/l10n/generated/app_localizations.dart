@@ -578,6 +578,54 @@ abstract class AppLocalizations {
   /// **'English'**
   String get settings_language_english;
 
+  /// Tytuł ustawienia określającego, czy pilna wiadomość przerywa symulację.
+  ///
+  /// In pl, this message translates to:
+  /// **'Przerywanie symulacji przez pilne wiadomości'**
+  String get settings_urgentInterruptionTitle;
+
+  /// Opis skutku włączonego ustawienia przerywania symulacji.
+  ///
+  /// In pl, this message translates to:
+  /// **'Pilna wiadomość zatrzymuje symulację, aby można było od razu ją obsłużyć.'**
+  String get settings_urgentInterruptionEnabledDescription;
+
+  /// Opis skutku wyłączonego ustawienia przerywania symulacji.
+  ///
+  /// In pl, this message translates to:
+  /// **'Symulacja trwa dalej, a pilna wiadomość pozostaje w skrzynce do ręcznego potwierdzenia.'**
+  String get settings_urgentInterruptionDisabledDescription;
+
+  /// Etykieta stanu włączonego ustawienia przerywania symulacji.
+  ///
+  /// In pl, this message translates to:
+  /// **'Włączone'**
+  String get settings_urgentInterruptionEnabledLabel;
+
+  /// Etykieta stanu wyłączonego ustawienia przerywania symulacji.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wyłączone'**
+  String get settings_urgentInterruptionDisabledLabel;
+
+  /// Komunikat o błędzie zapisu ustawienia przerywania symulacji.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nie udało się zapisać ustawienia przerywania symulacji.'**
+  String get settings_urgentInterruptionWriteError;
+
+  /// Informacja o pilnej wiadomości pozostawionej w skrzynce po symulacji.
+  ///
+  /// In pl, this message translates to:
+  /// **'Pilna wiadomość czeka w skrzynce odbiorczej.'**
+  String get simulation_pendingUrgentNotice;
+
+  /// Etykieta akcji otwierającej skrzynkę odbiorczą po symulacji.
+  ///
+  /// In pl, this message translates to:
+  /// **'Otwórz skrzynkę odbiorczą'**
+  String get simulation_openInbox;
+
   /// No description provided for @newGame_title.
   ///
   /// In pl, this message translates to:

@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
 import 'package:new_football/app/models/calendar_simulation_feedback.dart';
+import 'package:new_football/app/providers/settings_provider.dart';
 import 'package:new_football/app/services/calendar_simulation_pacer.dart';
 import 'package:new_football/core/simulation/match_engine.dart';
 import 'package:new_football/core/ai/ai_matchday_service.dart';
@@ -410,13 +411,18 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   _SimulationSession? _activeSimulationSession;
   int _nextSimulationRunId = 0;
 
-  _SimulationSession _startSimulationSession() {
+  _SimulationSession _startSimulationSession({
+    required bool urgentInterruptionEnabled,
+  }) {
     // A second request invalidates the old session rather than resetting a
     // shared flag. The old loop will observe that it is no longer current
     // after its next await and cannot publish stale feedback or clear the new
     // session in its finally block.
     _activeSimulationSession?.cancelRequested = true;
-    final session = _SimulationSession(_nextSimulationRunId++);
+    final session = _SimulationSession(
+      _nextSimulationRunId++,
+      urgentInterruptionEnabled: urgentInterruptionEnabled,
+    );
     _activeSimulationSession = session;
     return session;
   }
@@ -432,6 +438,9 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
 
   bool _hasPendingUrgent(LeagueState league) =>
       league.inbox.pendingUrgent.isNotEmpty;
+
+  bool _shouldStopForUrgent(_SimulationSession session, LeagueState league) =>
+      session.urgentInterruptionEnabled && _hasPendingUrgent(league);
 
   bool _hasScheduledUrgentDue(LeagueState league) {
     final hour = league.currentHour;
@@ -497,6 +506,16 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   Future<DaySimulationResult?> advanceOneDay({
     bool resolveContractMarket = true,
   }) async {
+    return _advanceOneDay(
+      resolveContractMarket: resolveContractMarket,
+      blockOnPendingUrgent: true,
+    );
+  }
+
+  Future<DaySimulationResult?> _advanceOneDay({
+    required bool blockOnPendingUrgent,
+    bool resolveContractMarket = true,
+  }) async {
     final current = save;
     if (current == null) return null;
 
@@ -505,7 +524,7 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
       hour: current.leagueState.currentHour,
       saveSeed: current.saveSeed,
     );
-    if (_hasPendingUrgent(league)) {
+    if (blockOnPendingUrgent && _hasPendingUrgent(league)) {
       await updateLeague((_) => league);
       return null;
     }
@@ -580,6 +599,12 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   /// delegates to the regular end-of-day pipeline, so matches and events are
   /// still resolved exactly once at the end of the calendar day.
   Future<DaySimulationResult?> advanceOneHour() async {
+    return _advanceOneHour(blockOnPendingUrgent: true);
+  }
+
+  Future<DaySimulationResult?> _advanceOneHour({
+    required bool blockOnPendingUrgent,
+  }) async {
     final current = save;
     if (current == null) return null;
 
@@ -594,7 +619,7 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     )) {
       return null;
     }
-    if (_hasPendingUrgent(league)) {
+    if (blockOnPendingUrgent && _hasPendingUrgent(league)) {
       await updateLeague((_) => league);
       return null;
     }
@@ -612,7 +637,10 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
         ),
         autosave: true,
       );
-      return advanceOneDay(resolveContractMarket: false);
+      return _advanceOneDay(
+        resolveContractMarket: false,
+        blockOnPendingUrgent: blockOnPendingUrgent,
+      );
     }
 
     final next = resolved.copyWith(
@@ -1015,7 +1043,9 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     CalendarDaySimulationObserver? observer,
     CalendarSimulationPacer? pacer,
   }) async {
-    final session = _startSimulationSession();
+    final session = _startSimulationSession(
+      urgentInterruptionEnabled: _ref.read(urgentInterruptionSettingProvider),
+    );
     // A pacer can be reused by a resumed calendar run. Do not let an
     // incomplete cycle from an older run affect the new run's first day.
     pacer?.skipDay();
@@ -1133,7 +1163,7 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
               lastResult: lastResult,
             );
           }
-          if (_hasPendingUrgent(delivered)) {
+          if (_shouldStopForUrgent(session, delivered)) {
             return BatchSimulationResult(
               stopReason: SimulationStopReason.urgent,
               daysSimulated: daysSimulated,
@@ -1190,7 +1220,13 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
         pacer.startDay();
       }
 
-      final result = isHourly ? await advanceOneHour() : await advanceOneDay();
+      final result = isHourly
+          ? await _advanceOneHour(
+              blockOnPendingUrgent: session.urgentInterruptionEnabled,
+            )
+          : await _advanceOneDay(
+              blockOnPendingUrgent: session.urgentInterruptionEnabled,
+            );
       if (!_isCurrentSimulationSession(session)) {
         return BatchSimulationResult(
           stopReason: SimulationStopReason.cancelled,
@@ -1206,7 +1242,7 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
         // existing urgent lifecycle without publishing an incomplete day.
         final currentAfterNullStep = save;
         if (currentAfterNullStep != null &&
-            _hasPendingUrgent(currentAfterNullStep.leagueState)) {
+            _shouldStopForUrgent(session, currentAfterNullStep.leagueState)) {
           return BatchSimulationResult(
             stopReason: SimulationStopReason.urgent,
             daysSimulated: daysSimulated,
@@ -1291,7 +1327,7 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
               }
             }
 
-            if (leagueAfter.inbox.pendingUrgent.isNotEmpty) {
+            if (_shouldStopForUrgent(session, leagueAfter)) {
               return BatchSimulationResult(
                 stopReason: SimulationStopReason.urgent,
                 daysSimulated: daysSimulated,
@@ -1346,7 +1382,8 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
 
         // Preserve the existing urgent stop priority after the completed-day
         // presentation cycle has been given a chance to finish.
-        if (result.pauseForUrgent) {
+        if (result.pauseForUrgent &&
+            _shouldStopForUrgent(session, result.league)) {
           return BatchSimulationResult(
             stopReason: SimulationStopReason.urgent,
             daysSimulated: daysSimulated,
@@ -1360,7 +1397,8 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
             lastResult: lastResult,
           );
         }
-      } else if (result.pauseForUrgent) {
+      } else if (result.pauseForUrgent &&
+          _shouldStopForUrgent(session, result.league)) {
         return BatchSimulationResult(
           stopReason: SimulationStopReason.urgent,
           daysSimulated: daysSimulated,
@@ -1951,9 +1989,10 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
 }
 
 final class _SimulationSession {
-  _SimulationSession(this.runId);
+  _SimulationSession(this.runId, {required this.urgentInterruptionEnabled});
 
   final int runId;
+  final bool urgentInterruptionEnabled;
   bool cancelRequested = false;
 }
 

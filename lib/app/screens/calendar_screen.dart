@@ -16,6 +16,7 @@ import 'package:new_football/app/screens/shell_screen.dart';
 import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/match_models.dart';
+import 'package:new_football/core/models/message.dart';
 import 'package:new_football/core/services/calendar_event_registry.dart';
 import 'package:new_football/core/services/schedule_generator.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
@@ -190,6 +191,32 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     });
   }
 
+  void _openInbox() {
+    if (!mounted) return;
+    ref.read(shellTabIndexProvider.notifier).state = 5;
+
+    // CalendarScreen normally lives inside ShellScreen, where changing the
+    // tab is sufficient. If a result action is still visible after a pushed
+    // game route, return to the shell so the selected Inbox is actually
+    // visible instead of only updating the background tab.
+    final router = GoRouter.maybeOf(context);
+    if (router != null && router.state.matchedLocation != '/game') {
+      router.go('/game', extra: 5);
+    }
+  }
+
+  void _showPendingUrgentSnackBar(BuildContext context, AppLocalizations l10n) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(l10n.simulation_pendingUrgentNotice),
+        action: SnackBarAction(
+          label: l10n.simulation_openInbox,
+          onPressed: _openInbox,
+        ),
+      ),
+    );
+  }
+
   Future<void> _simulateToDate(int targetWeek, int targetDay) async {
     final runId = _beginCalendarRun();
     final result = await _runBatch(
@@ -292,21 +319,27 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     final context = this.context;
     if (!context.mounted) return;
     final l10n = AppLocalizations.of(context)!;
+    final hasPendingUrgent =
+        ref.read(activeLeagueProvider)?.inbox.pendingUrgent.isNotEmpty == true;
 
     if (result.lastResult?.playerMatch != null) {
+      if (hasPendingUrgent) {
+        _showPendingUrgentSnackBar(context, l10n);
+      }
       context.push('/game/match', extra: result.lastResult!.playerMatch);
       return;
     }
     if (result.stopReason == SimulationStopReason.urgent) {
       // Tabs: Home(0) Calendar(1) Squad(2) Standings(3) Other(4) Inbox(5).
-      ref.read(shellTabIndexProvider.notifier).state = 5;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(l10n.calendar_urgentMessage)));
+      _openInbox();
+      _showPendingUrgentSnackBar(context, l10n);
       return;
     }
     if (result.stopReason == SimulationStopReason.event) {
       if (result.eventId == CalendarEventId.scoutReport) {
+        if (hasPendingUrgent) {
+          _showPendingUrgentSnackBar(context, l10n);
+        }
         await ref
             .read(gameControllerProvider.notifier)
             .runEventAtCurrentDay(CalendarEventId.scoutReport);
@@ -315,6 +348,9 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         return;
       }
       if (result.eventId == CalendarEventId.draft) {
+        if (hasPendingUrgent) {
+          _showPendingUrgentSnackBar(context, l10n);
+        }
         context.push('/game/draft');
         return;
       }
@@ -331,11 +367,28 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       SimulationStopReason.urgent => l10n.calendar_stopReason_reachedTarget,
       SimulationStopReason.event => l10n.calendar_stopReason_draftPick,
     };
+    final ordinaryResultMessage =
+        '$reasonLabel · ${l10n.calendar_daysSimulated(result.daysSimulated)}';
+    final content = hasPendingUrgent
+        ? Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(ordinaryResultMessage),
+              const SizedBox(height: 4),
+              Text(l10n.simulation_pendingUrgentNotice),
+            ],
+          )
+        : Text(ordinaryResultMessage);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text(
-          '$reasonLabel · ${l10n.calendar_daysSimulated(result.daysSimulated)}',
-        ),
+        content: content,
+        action: hasPendingUrgent
+            ? SnackBarAction(
+                label: l10n.simulation_openInbox,
+                onPressed: _openInbox,
+              )
+            : null,
       ),
     );
   }

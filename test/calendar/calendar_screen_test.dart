@@ -11,14 +11,22 @@ import 'package:go_router/go_router.dart';
 
 import 'package:new_football/app/models/calendar_simulation_feedback.dart';
 import 'package:new_football/app/providers/game_provider.dart';
+import 'package:new_football/app/providers/settings_provider.dart';
 import 'package:new_football/app/screens/calendar_screen.dart';
+import 'package:new_football/app/screens/inbox_screen.dart';
+import 'package:new_football/app/screens/shell_screen.dart';
 import 'package:new_football/app/services/calendar_simulation_pacer.dart';
 import 'package:new_football/app/widgets/calendar_day_result_popup.dart';
+import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/game_save.dart';
+import 'package:new_football/core/models/message.dart';
 import 'package:new_football/core/services/calendar_event_registry.dart';
+import 'package:new_football/core/services/day_simulator.dart';
 import 'package:new_football/core/services/game_factory.dart';
 import 'package:new_football/data/save_repository.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
+
+import '../helpers/preferences_test_double.dart';
 
 void main() {
   testWidgets('owns progress and cancellation in the route state', (
@@ -369,10 +377,194 @@ void main() {
     );
     expect(tester.takeException(), isNull);
   });
+
+  testWidgets(
+    'target result clears progress and shows one localized Inbox CTA',
+    (tester) async {
+      late _FakeCalendarController controller;
+      final game = _withPendingUrgent(_fixtureGame());
+      await tester.pumpWidget(
+        _calendarShellApp(
+          selectedDay: _futureCalendarDay,
+          game: game,
+          locale: const Locale('en'),
+          onController: (value) => controller = value,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await _tapSimulate(tester, locale: const Locale('en'));
+      await tester.pump();
+      expect(find.byKey(_progressKey), findsOneWidget);
+      controller.runs.single.complete(
+        const BatchSimulationResult(
+          stopReason: SimulationStopReason.reachedTarget,
+          daysSimulated: 2,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(_progressKey), findsNothing);
+      expect(find.byType(CalendarDayResultPopup), findsNothing);
+      expect(
+        find.text('An urgent message is waiting in your inbox.'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Open Inbox'),
+        findsOneWidget,
+        reason: 'The pending CTA must not be duplicated.',
+      );
+      expect(find.byType(SnackBar), findsOneWidget);
+      expect(
+        game.leagueState.inbox.messages.single.read,
+        isFalse,
+        reason: 'A result CTA must not mark the pending message as read.',
+      );
+      expect(game.leagueState.inbox.messages.single.acknowledged, isFalse);
+      await tester.tap(find.text('Open Inbox'));
+      await tester.pumpAndSettle();
+      expect(find.byType(InboxScreen), findsOneWidget);
+      expect(controller.save!.leagueState.inbox.pendingUrgent, hasLength(1));
+      expect(
+        controller.save!.leagueState.inbox.messages.single.acknowledged,
+        isFalse,
+      );
+    },
+  );
+
+  testWidgets(
+    'urgent result selects Inbox directly and preserves the pending lifecycle',
+    (tester) async {
+      late _FakeCalendarController controller;
+      final game = _withPendingUrgent(_fixtureGame());
+      await tester.pumpWidget(
+        _calendarShellApp(
+          selectedDay: _futureCalendarDay,
+          game: game,
+          onController: (value) => controller = value,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await _tapSimulate(tester);
+      controller.runs.single.complete(
+        const BatchSimulationResult(
+          stopReason: SimulationStopReason.urgent,
+          daysSimulated: 1,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(InboxScreen), findsOneWidget);
+      expect(find.byType(SnackBar), findsOneWidget);
+      expect(find.text('Otwórz skrzynkę odbiorczą'), findsOneWidget);
+      expect(controller.save!.leagueState.inbox.pendingUrgent, hasLength(1));
+      expect(
+        controller.save!.leagueState.inbox.messages.single,
+        isA<GameMessage>()
+            .having((message) => message.read, 'read', isFalse)
+            .having((message) => message.acknowledged, 'acknowledged', isFalse),
+      );
+    },
+  );
+
+  testWidgets(
+    'player match result keeps match navigation and adds one Inbox CTA',
+    (tester) async {
+      late _FakeCalendarController controller;
+      final game = _withPendingUrgent(_fixtureGame());
+      final playerMatch = game.leagueState.currentSeason.schedule.firstWhere(
+        (match) =>
+            match.homeTeamId == game.leagueState.playerTeamId ||
+            match.awayTeamId == game.leagueState.playerTeamId,
+      );
+      await tester.pumpWidget(
+        _calendarShellApp(
+          selectedDay: _futureCalendarDay,
+          game: game,
+          onController: (value) => controller = value,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await _tapSimulate(tester);
+      controller.runs.single.complete(
+        BatchSimulationResult(
+          stopReason: SimulationStopReason.playerMatch,
+          daysSimulated: 1,
+          lastResult: DaySimulationResult(
+            league: game.leagueState,
+            pauseForUrgent: true,
+            playerMatch: playerMatch,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('calendar match destination'), findsOneWidget);
+      expect(find.byKey(_progressKey), findsNothing);
+      expect(
+        find.text('Pilna wiadomość czeka w skrzynce odbiorczej.'),
+        findsOneWidget,
+      );
+      expect(find.text('Otwórz skrzynkę odbiorczą'), findsOneWidget);
+      expect(controller.save!.leagueState.inbox.pendingUrgent, hasLength(1));
+
+      await tester.tap(find.text('Otwórz skrzynkę odbiorczą'));
+      await tester.pumpAndSettle();
+      expect(find.byType(InboxScreen), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'ordinary event result keeps event navigation and pending Inbox action',
+    (tester) async {
+      late _FakeCalendarController controller;
+      final game = _withPendingUrgent(_fixtureGame());
+      await tester.pumpWidget(
+        _calendarShellApp(
+          selectedDay: _futureCalendarDay,
+          game: game,
+          onController: (value) => controller = value,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await _tapSimulate(tester);
+      controller.runs.single.complete(
+        const BatchSimulationResult(
+          stopReason: SimulationStopReason.event,
+          eventId: CalendarEventId.draft,
+          daysSimulated: 1,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('calendar draft destination'), findsOneWidget);
+      expect(find.byKey(_progressKey), findsNothing);
+      expect(
+        find.text('Pilna wiadomość czeka w skrzynce odbiorczej.'),
+        findsOneWidget,
+      );
+      expect(find.text('Otwórz skrzynkę odbiorczą'), findsOneWidget);
+      expect(controller.save!.leagueState.inbox.pendingUrgent, hasLength(1));
+
+      await tester.tap(find.text('Otwórz skrzynkę odbiorczą'));
+      await tester.pumpAndSettle();
+      expect(find.byType(InboxScreen), findsOneWidget);
+    },
+  );
 }
 
-Future<void> _tapSimulate(WidgetTester tester) async {
-  final button = find.widgetWithText(FilledButton, 'Do wybranej daty');
+Future<void> _tapSimulate(
+  WidgetTester tester, {
+  Locale locale = const Locale('pl'),
+}) async {
+  final label = locale.languageCode == 'en'
+      ? 'To chosen date'
+      : 'Do wybranej daty';
+  final button = find.widgetWithText(FilledButton, label);
   await tester.ensureVisible(button);
   await tester.pump();
   await tester.tap(button);
@@ -483,6 +675,80 @@ Widget _calendarApp({
         routerConfig: router,
       ),
     ),
+  );
+}
+
+Widget _calendarShellApp({
+  required DateTime selectedDay,
+  required GameSave game,
+  required void Function(_FakeCalendarController controller) onController,
+  Locale locale = const Locale('pl'),
+}) {
+  final router = GoRouter(
+    initialLocation: '/game',
+    routes: [
+      GoRoute(
+        path: '/game',
+        builder: (context, state) => ShellScreen(
+          initialTab: state.extra is int ? state.extra as int : 1,
+        ),
+      ),
+      GoRoute(
+        path: '/game/match',
+        builder: (context, state) =>
+            const Scaffold(body: Text('calendar match destination')),
+      ),
+      GoRoute(
+        path: '/game/draft',
+        builder: (context, state) =>
+            const Scaffold(body: Text('calendar draft destination')),
+      ),
+    ],
+  );
+  final preferences = PreferencesTestDouble(
+    initialValues: <String, Object?>{urgentInterruptionSettingKey: false},
+  );
+
+  return ProviderScope(
+    overrides: [
+      sharedPreferencesProvider.overrideWithValue(preferences),
+      saveRepositoryProvider.overrideWithValue(_NoopSaveRepository()),
+      gameControllerProvider.overrideWith((ref) {
+        final controller = _FakeCalendarController(ref, game);
+        onController(controller);
+        return controller;
+      }),
+      calendarSelectedDayProvider.overrideWith((ref) => selectedDay),
+    ],
+    child: MaterialApp.router(
+      locale: locale,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
+      routerConfig: router,
+    ),
+  );
+}
+
+GameSave _withPendingUrgent(GameSave game, {String id = 'calendar-ui-urgent'}) {
+  final league = game.leagueState;
+  final message = GameMessage(
+    id: id,
+    type: MessageType.tradeWindowEvent,
+    domain: MessageDomain.trades,
+    priority: MessagePriority.urgent,
+    seasonYear: league.currentSeason.year,
+    week: league.currentWeek,
+    day: league.currentDay,
+    titleKey: 'calendar.ui.urgent.title',
+    bodyKey: 'calendar.ui.urgent.body',
+  );
+  return game.copyWith(
+    leagueState: league.copyWith(inbox: Inbox(messages: [message])),
   );
 }
 
