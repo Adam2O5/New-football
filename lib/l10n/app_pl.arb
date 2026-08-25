@@ -461,6 +461,9 @@
   "@squad_statusSuspension": {
     "description": "Dostępnościowy opis aktywnego zawieszenia zawodnika."
   },
+  "squad_statusSlotEmpty": "Brak aktywnego statusu",
+  "squad_playerSelected": "Zaznaczony",
+  "squad_playerNotSelected": "Niezaznaczony",
   "squad_positionMismatch": "Niezgodność pozycji",
   "@squad_positionMismatch": {
     "description": "Dostępnościowy opis przypisania zawodnika poza jego dokładną pozycją."

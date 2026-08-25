@@ -13,7 +13,9 @@ import 'package:new_football/app/screens/squad_screen.dart';
 import 'package:new_football/app/widgets/tactics/pitch_field.dart';
 import 'package:new_football/app/widgets/tactics/player_list_tile.dart';
 import 'package:new_football/app/widgets/tactics/substitute_sheet.dart';
+import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/game_save.dart';
+import 'package:new_football/core/models/injury.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/tactics/player_sort.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
@@ -29,21 +31,34 @@ const _responsiveViewports = <Size>[
 
 const _responsiveTextScales = <double>[1.0, 1.3, 2.0];
 const _geometryTolerance = 1.0;
+const _responsiveLongName =
+    'Responsive Player With An Exceptionally Long Name For Layout';
+const _responsiveLongNameFirstLine = 'Responsive';
+const _responsiveLongNameSecondLine =
+    'Player With An Exceptionally Long Name For Layout';
 
 void main() {
+  // Feature: squad-row-polish, Property 6: Responsive row invariants hold across the supported matrix
   testWidgets(
-    'keeps the squad redesign bounded and actionable across the responsive matrix',
+    'Feature: squad-row-polish, Property 6: Responsive row invariants hold across the supported matrix',
     (tester) async {
       final frameworkErrors = <FlutterErrorDetails>[];
       final previousErrorHandler = FlutterError.onError;
       FlutterError.onError = (details) => frameworkErrors.add(details);
+      var completedScenarios = 0;
+      expect(
+        _responsiveViewports.length * _responsiveTextScales.length,
+        12,
+        reason:
+            'Property 6 must cover all 4×3 viewport/text-scale combinations',
+      );
 
       try {
         for (final viewport in _responsiveViewports) {
           for (final textScale in _responsiveTextScales) {
             final scenario = _scenarioName(viewport, textScale);
             final harness = _ResponsiveSquadHarness(
-              game: task41Game(seed: 9707),
+              game: _responsiveFixtureGame(),
               viewport: viewport,
               textScale: textScale,
             );
@@ -54,6 +69,7 @@ void main() {
 
               _expectSquadSurfaceGeometry(tester, scenario: scenario);
               _expectRowGeometry(tester, scenario: scenario);
+              _expectResponsiveStressRow(tester, scenario: scenario);
 
               final selectedId = _selectFirstRenderedPlayer(tester);
               await tester.pump();
@@ -89,12 +105,18 @@ void main() {
                 scenario: '$scenario after final-row scroll',
                 requireFinalRowInViewport: true,
               );
+              _expectResponsiveStressRow(
+                tester,
+                scenario: '$scenario after final-row scroll',
+              );
 
               final finalRow = _finalRenderedRowFinder(tester);
               await _activateProfileAction(tester, harness, finalRow, scenario);
               _expectNoFlutterErrors(tester, frameworkErrors, scenario);
 
               final beforeRelayout = _teamSnapshot(harness.controller.save!);
+              final selectedBeforeRelayout = _selectedPlayerIds(tester);
+              final sortBeforeRelayout = _currentSortMode(tester);
               final oppositeOrientation = viewport.width < viewport.height
                   ? const Size(844, 390)
                   : const Size(390, 844);
@@ -113,14 +135,23 @@ void main() {
                 allowScrolledContent: true,
                 requireRosterContent: false,
               );
+              _expectRowGeometry(
+                tester,
+                scenario: '$scenario after orientation relayout',
+                requireFinalRowInViewport: true,
+              );
+              _expectResponsiveStressRow(
+                tester,
+                scenario: '$scenario after orientation relayout',
+              );
               expect(
                 _currentSortMode(tester),
-                PlayerSortMode.form,
+                sortBeforeRelayout,
                 reason: '$scenario: sort mode was not retained after relayout',
               );
               expect(
                 _selectedPlayerIds(tester),
-                [selectedId],
+                selectedBeforeRelayout,
                 reason: '$scenario: selectedId was not retained after relayout',
               );
               final afterRelayout = _teamSnapshot(harness.controller.save!);
@@ -142,12 +173,18 @@ void main() {
                 reason:
                     '$scenario: bench assignments changed during orientation relayout',
               );
+              completedScenarios++;
             } finally {
               await harness.dispose(tester);
               frameworkErrors.clear();
             }
           }
         }
+        expect(
+          completedScenarios,
+          12,
+          reason: 'Property 6 did not execute the complete responsive matrix',
+        );
       } finally {
         FlutterError.onError = previousErrorHandler;
       }
@@ -291,6 +328,7 @@ void _expectRowGeometry(
   final rosterListRect = tester.getRect(rosterList);
   final rows = tester.widgetList<PlayerListTile>(find.byType(PlayerListTile));
   expect(rows, isNotEmpty, reason: '$scenario: no player rows rendered');
+  final statusWidths = <double>[];
 
   for (final tile in rows) {
     final playerId = tile.player.id;
@@ -343,6 +381,7 @@ void _expectRowGeometry(
     final formRect = tester.getRect(form);
     final statusRect = tester.getRect(status);
     final profileRect = tester.getRect(profile);
+    statusWidths.add(statusRect.width);
 
     expect(rowRect.width, greaterThan(0), reason: '$scenario: zero-width row');
     expect(
@@ -359,6 +398,31 @@ void _expectRowGeometry(
       rowRect,
       frameRect,
       reason: '$scenario: frame $playerId exceeds row bounds',
+    );
+    _expectRectInside(
+      frameRect,
+      positionRect,
+      reason: '$scenario: position badge $playerId exceeds frame bounds',
+    );
+    _expectRectInside(
+      frameRect,
+      ovrRect,
+      reason: '$scenario: OVR badge $playerId exceeds frame bounds',
+    );
+    _expectRectInside(
+      frameRect,
+      formRect,
+      reason: '$scenario: form indicator $playerId exceeds frame bounds',
+    );
+    _expectRectInside(
+      frameRect,
+      statusRect,
+      reason: '$scenario: status area $playerId exceeds frame bounds',
+    );
+    _expectRectInside(
+      frameRect,
+      profileRect,
+      reason: '$scenario: profile action $playerId exceeds frame bounds',
     );
     _expectRectInside(
       rowRect,
@@ -385,10 +449,17 @@ void _expectRowGeometry(
       profileRect,
       reason: '$scenario: profile action $playerId exceeds row bounds',
     );
+
     expect(
       formRect.width,
-      greaterThan(0),
-      reason: '$scenario: form indicator $playerId lost its horizontal track',
+      allOf(greaterThanOrEqualTo(32.0), lessThanOrEqualTo(36.0)),
+      reason: '$scenario: form indicator $playerId is outside 32..36 pixels',
+    );
+    expect(
+      formRect.width,
+      closeTo(positionRect.width, _geometryTolerance),
+      reason:
+          '$scenario: form indicator width differs from position badge for $playerId',
     );
 
     final positionBadgeWidget = tester.widget<PositionBadge>(positionBadge);
@@ -406,16 +477,148 @@ void _expectRowGeometry(
     );
   }
 
+  final reservedStatusWidth = statusWidths.first;
+  expect(
+    reservedStatusWidth,
+    closeTo(25.0, _geometryTolerance),
+    reason: '$scenario: status slot did not reserve one fixed symbol cell',
+  );
+  for (final statusWidth in statusWidths) {
+    expect(
+      statusWidth,
+      closeTo(reservedStatusWidth, _geometryTolerance),
+      reason: '$scenario: status slot width changed between row states',
+    );
+  }
+
   if (requireFinalRowInViewport) {
     final finalRow = _finalRenderedRowFinder(tester);
+    final finalFrame = find.descendant(
+      of: finalRow,
+      matching: find.byType(ZoneFrame),
+    );
+    final finalProfile = find.descendant(
+      of: finalRow,
+      matching: find.byType(IconButton),
+    );
     final outerViewport = tester.getRect(
       find.byKey(const ValueKey<String>('squad-roster-scroll')),
+    );
+    expect(
+      finalFrame,
+      findsOneWidget,
+      reason: '$scenario: missing final frame',
+    );
+    expect(
+      finalProfile,
+      findsOneWidget,
+      reason: '$scenario: missing final profile action',
     );
     _expectRectInside(
       outerViewport,
       tester.getRect(finalRow),
       reason:
           '$scenario: final row is not fully reachable in the scroll viewport',
+    );
+    _expectRectInside(
+      outerViewport,
+      tester.getRect(finalFrame),
+      reason:
+          '$scenario: final row frame is not fully reachable in the scroll viewport',
+    );
+    _expectRectInside(
+      outerViewport,
+      tester.getRect(finalProfile),
+      reason:
+          '$scenario: final profile action is not fully reachable in the scroll viewport',
+    );
+  }
+}
+
+void _expectResponsiveStressRow(
+  WidgetTester tester, {
+  required String scenario,
+}) {
+  final tile = tester
+      .widgetList<PlayerListTile>(find.byType(PlayerListTile))
+      .firstWhere((candidate) => candidate.player.name == _responsiveLongName);
+  final row = find.byKey(
+    ValueKey<String>('squad-player-row-${tile.player.id}'),
+  );
+  final ovrBadge = find.descendant(of: row, matching: find.byType(OvrBadge));
+  final form = find.descendant(
+    of: row,
+    matching: find.byKey(const ValueKey<String>('squad-form-indicator')),
+  );
+  final status = find.descendant(of: row, matching: find.byType(StatusIcons));
+
+  expect(tile.player.state.injury?.isActive, isTrue);
+  expect(tile.player.state.suspensionGamesRemaining, greaterThan(0));
+  expect(status, findsOneWidget, reason: '$scenario: missing dual-status slot');
+  final statusWidget = tester.widget<StatusIcons>(status);
+  expect(statusWidget.hasActiveInjury, isTrue);
+  expect(statusWidget.hasActiveSuspension, isTrue);
+  final visualSymbols = find.descendant(
+    of: status,
+    matching: find.byType(Icon),
+  );
+  expect(
+    visualSymbols,
+    findsOneWidget,
+    reason: '$scenario: both statuses rendered more than one visual symbol',
+  );
+  expect(
+    tester.widget<Icon>(visualSymbols).icon,
+    Icons.healing_outlined,
+    reason:
+        '$scenario: dual-status slot did not use the injury priority symbol',
+  );
+
+  final rowRect = tester.getRect(row);
+  final ovrRect = tester.getRect(ovrBadge);
+  final formRect = tester.getRect(form);
+  final nameArea = Rect.fromLTRB(
+    ovrRect.right,
+    rowRect.top,
+    formRect.left,
+    rowRect.bottom,
+  );
+  expect(
+    nameArea.width,
+    greaterThan(0),
+    reason: '$scenario: long-name area has no available width',
+  );
+
+  for (final line in const [
+    _responsiveLongNameFirstLine,
+    _responsiveLongNameSecondLine,
+  ]) {
+    final textFinder = find.descendant(
+      of: row,
+      matching: find.byWidgetPredicate(
+        (widget) => widget is Text && widget.data == line,
+      ),
+    );
+    expect(
+      textFinder,
+      findsOneWidget,
+      reason: '$scenario: missing long-name line "$line"',
+    );
+    final text = tester.widget<Text>(textFinder);
+    expect(
+      text.maxLines,
+      1,
+      reason: '$scenario: long-name line "$line" is not bounded to one line',
+    );
+    expect(
+      text.overflow,
+      TextOverflow.ellipsis,
+      reason: '$scenario: long-name line "$line" has no ellipsis policy',
+    );
+    _expectRectInside(
+      nameArea,
+      tester.getRect(textFinder),
+      reason: '$scenario: long-name line "$line" escaped the name area',
     );
   }
 }
@@ -554,6 +757,37 @@ _TeamSnapshot _teamSnapshot(GameSave game) {
     roster: team.roster.map((player) => player.id).toList(growable: false),
     lineup: List<String>.unmodifiable(team.lineupPlayerIds),
     bench: List<String>.unmodifiable(team.benchPlayerIds),
+  );
+}
+
+GameSave _responsiveFixtureGame() {
+  final base = task41Game(seed: 9707);
+  final team = base.leagueState.playerTeam!;
+  final assignedIds = <String>{...team.lineupPlayerIds, ...team.benchPlayerIds};
+  final source = team.roster.firstWhere(
+    (player) => !assignedIds.contains(player.id),
+  );
+  final responsivePlayer = source.copyWith(
+    name: _responsiveLongName,
+    state: source.state.copyWith(
+      injury: const Injury(
+        id: 'responsive-both-status-injury',
+        group: InjuryGroup.legMuscles,
+        type: InjuryType.minor,
+        daysTotal: 5,
+        daysRemaining: 3,
+      ),
+      suspensionGamesRemaining: 2,
+    ),
+  );
+  final responsiveTeam = team.copyWith(
+    roster: [
+      for (final player in team.roster)
+        player.id == source.id ? responsivePlayer : player,
+    ],
+  );
+  return base.copyWith(
+    leagueState: base.leagueState.updateTeam(responsiveTeam),
   );
 }
 

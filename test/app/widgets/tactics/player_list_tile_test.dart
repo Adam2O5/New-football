@@ -1,6 +1,8 @@
 @Tags(['ui'])
 library;
 
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -60,6 +62,338 @@ void main() {
         tester.widget<PositionBadge>(positionFinder).size,
         tester.widget<OvrBadge>(ovrFinder).size,
       );
+    },
+  );
+
+  testWidgets(
+    'renders one bordered form indicator at badge width and orders the right status area',
+    (tester) async {
+      final game = _fixtureGame(seed: 4220);
+      final player = _copyPlayer(
+        game,
+        id: 'form-layout-player',
+        name: 'Form Layout Player',
+        form: 6.5,
+        position: Position.cm,
+      );
+
+      for (final scenario in const <({double width, double badgeSize})>[
+        (width: 360, badgeSize: 32),
+        (width: 400, badgeSize: 36),
+      ]) {
+        await tester.pumpWidget(
+          _tileApp(game, player: player, width: scenario.width, onTap: () {}),
+        );
+        await tester.pumpAndSettle();
+
+        final positionFinder = find.byType(PositionBadge);
+        final formFinder = find.byType(FormIndicator);
+        final statusFinder = find.byType(StatusIcons);
+        final profileFinder = find.byType(IconButton);
+        expect(positionFinder, findsOneWidget);
+        expect(formFinder, findsOneWidget);
+        expect(statusFinder, findsOneWidget);
+        expect(profileFinder, findsOneWidget);
+
+        final positionBadge = tester.widget<PositionBadge>(positionFinder);
+        final formIndicator = tester.widget<FormIndicator>(formFinder);
+        expect(positionBadge.size, scenario.badgeSize);
+        expect(formIndicator.width, scenario.badgeSize);
+
+        final positionRect = tester.getRect(positionFinder);
+        final formRect = tester.getRect(formFinder);
+        final statusRect = tester.getRect(statusFinder);
+        final profileRect = tester.getRect(profileFinder);
+        expect(formRect.width, closeTo(positionRect.width, 0.001));
+        expect(formRect.width, inInclusiveRange(32.0, 36.0));
+        expect(formRect.right, lessThanOrEqualTo(statusRect.left));
+        expect(statusRect.right, lessThanOrEqualTo(profileRect.left));
+
+        final trackFinder = find.descendant(
+          of: formFinder,
+          matching: find.byType(Container),
+        );
+        expect(trackFinder, findsOneWidget);
+        final track = tester.widget<Container>(trackFinder);
+        final decoration = track.decoration! as BoxDecoration;
+        final border = decoration.border! as Border;
+        for (final side in [
+          border.top,
+          border.right,
+          border.bottom,
+          border.left,
+        ]) {
+          expect(side.style, BorderStyle.solid);
+          expect(side.width, closeTo(1, 0.001));
+        }
+      }
+    },
+  );
+
+  testWidgets(
+    'keeps one fixed status slot, one visual symbol, and stable right-side bounds',
+    (tester) async {
+      final game = _fixtureGame(seed: 4221);
+      const scenarios = <({bool injury, bool suspension, double form})>[
+        (injury: false, suspension: false, form: 2),
+        (injury: true, suspension: false, form: 4),
+        (injury: false, suspension: true, form: 7),
+        (injury: true, suspension: true, form: 9.5),
+      ];
+      Rect? previousFormRect;
+      Rect? previousStatusRect;
+      Rect? previousProfileRect;
+
+      for (final scenario in scenarios) {
+        final player = _copyPlayer(
+          game,
+          id: 'status-slot-player',
+          name: 'Status Slot Player',
+          position: Position.cm,
+          form: scenario.form,
+          activeInjury: scenario.injury,
+          activeSuspension: scenario.suspension,
+        );
+        await tester.pumpWidget(
+          _tileApp(game, player: player, width: 400, onTap: () {}),
+        );
+        await tester.pumpAndSettle();
+
+        final l10n = _tileLocalizations(tester);
+        final statusFinder = find.byType(StatusIcons);
+        final formFinder = find.byType(FormIndicator);
+        final profileFinder = find.byType(IconButton);
+        expect(statusFinder, findsOneWidget);
+        expect(formFinder, findsOneWidget);
+        expect(profileFinder, findsOneWidget);
+
+        final formRect = tester.getRect(formFinder);
+        final statusRect = tester.getRect(statusFinder);
+        final profileRect = tester.getRect(profileFinder);
+        expect(statusRect.width, closeTo(25, 0.001));
+        expect(statusRect.height, closeTo(32, 0.001));
+        expect(formRect.right, lessThanOrEqualTo(statusRect.left));
+        expect(statusRect.right, lessThanOrEqualTo(profileRect.left));
+        if (previousFormRect != null) {
+          _expectSameRect(formRect, previousFormRect);
+          _expectSameRect(statusRect, previousStatusRect!);
+          _expectSameRect(profileRect, previousProfileRect!);
+        }
+        previousFormRect = formRect;
+        previousStatusRect = statusRect;
+        previousProfileRect = profileRect;
+
+        final expectedStatusLabels = <String>[
+          if (scenario.injury) l10n.squad_statusInjury,
+          if (scenario.suspension) l10n.squad_statusSuspension,
+        ];
+        final tooltipMessage = expectedStatusLabels.isEmpty
+            ? l10n.squad_statusSlotEmpty
+            : expectedStatusLabels.join('. ');
+        expect(find.byTooltip(tooltipMessage), findsOneWidget);
+
+        final visualIcons = tester.widgetList<Icon>(
+          find.descendant(of: statusFinder, matching: find.byType(Icon)),
+        );
+        expect(
+          visualIcons,
+          scenario.injury || scenario.suspension ? hasLength(1) : isEmpty,
+        );
+        expect(
+          find.descendant(
+            of: statusFinder,
+            matching: find.byIcon(Icons.healing_outlined),
+          ),
+          scenario.injury ? findsOneWidget : findsNothing,
+        );
+        expect(
+          find.descendant(
+            of: statusFinder,
+            matching: find.byIcon(Icons.gavel_outlined),
+          ),
+          !scenario.injury && scenario.suspension
+              ? findsOneWidget
+              : findsNothing,
+        );
+
+        final statusLabels = [
+          l10n.squad_statusInjury,
+          l10n.squad_statusSuspension,
+        ];
+        final expectedSemanticsLabels = expectedStatusLabels.isEmpty
+            ? [l10n.squad_statusSlotEmpty]
+            : expectedStatusLabels;
+        for (final label in expectedSemanticsLabels) {
+          expect(
+            find.descendant(
+              of: statusFinder,
+              matching: find.bySemanticsLabel(label),
+            ),
+            findsOneWidget,
+          );
+        }
+        for (final label in statusLabels) {
+          if (!expectedStatusLabels.contains(label)) {
+            expect(
+              find.descendant(
+                of: statusFinder,
+                matching: find.bySemanticsLabel(label),
+              ),
+              findsNothing,
+            );
+          }
+        }
+      }
+    },
+  );
+
+  testWidgets(
+    'renders the selected surface around the full zone frame with selected semantics',
+    (tester) async {
+      final game = _fixtureGame(seed: 4222);
+      final player = _copyPlayer(
+        game,
+        id: 'selected-surface-player',
+        name: 'Selected Surface Player',
+        position: Position.cm,
+        form: 8.5,
+        activeInjury: true,
+        activeSuspension: true,
+      );
+      final assignment = _slot('selected-surface-slot', Position.cm);
+      final semanticsHandle = tester.ensureSemantics();
+
+      try {
+        await tester.pumpWidget(
+          _tileApp(
+            game,
+            player: player,
+            zone: RosterZone.bench,
+            selected: true,
+            positionAssignment: assignment,
+            width: 400,
+            onTap: () {},
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final rowFinder = find.byKey(ValueKey('squad-player-row-${player.id}'));
+        final frameFinder = find.descendant(
+          of: rowFinder,
+          matching: find.byType(ZoneFrame),
+        );
+        expect(rowFinder, findsOneWidget);
+        expect(frameFinder, findsOneWidget);
+        expect(
+          find.text(_zoneLabel(_tileLocalizations(tester), RosterZone.bench)),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(of: rowFinder, matching: find.byType(FormIndicator)),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: rowFinder,
+            matching: find.byIcon(Icons.healing_outlined),
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.descendant(
+            of: rowFinder,
+            matching: find.byIcon(Icons.gavel_outlined),
+          ),
+          findsNothing,
+        );
+        expect(
+          find.descendant(of: rowFinder, matching: find.byType(IconButton)),
+          findsOneWidget,
+        );
+
+        final selectedDecorations = tester
+            .widgetList<DecoratedBox>(
+              find.descendant(
+                of: rowFinder,
+                matching: find.byType(DecoratedBox),
+              ),
+            )
+            .where((decoratedBox) {
+              final decoration = decoratedBox.decoration;
+              if (decoration is! BoxDecoration ||
+                  decoration.border == null ||
+                  decoration.color == null) {
+                return false;
+              }
+              return (decoration.color!.a - 0.12).abs() < 0.0001;
+            })
+            .toList();
+        expect(selectedDecorations, hasLength(1));
+        final selectedDecoration =
+            selectedDecorations.single.decoration as BoxDecoration;
+        final selectedBorder = selectedDecoration.border! as Border;
+        final primary = Theme.of(
+          tester.element(find.byType(PlayerListTile)),
+        ).colorScheme.primary;
+        expect(selectedDecoration.color!.a, closeTo(0.12, 0.0001));
+        expect(
+          selectedDecoration.color!.toARGB32(),
+          primary.withValues(alpha: 0.12).toARGB32(),
+        );
+        for (final side in [
+          selectedBorder.top,
+          selectedBorder.right,
+          selectedBorder.bottom,
+          selectedBorder.left,
+        ]) {
+          expect(side.width, inInclusiveRange(1.0, 2.0));
+          expect(side.color.toARGB32(), primary.toARGB32());
+        }
+
+        final selectedFinder = find.byWidget(selectedDecorations.single);
+        final selectedRect = tester.getRect(selectedFinder);
+        final frameRect = tester.getRect(frameFinder);
+        expect(selectedRect.left, closeTo(frameRect.left, 0.001));
+        expect(selectedRect.top, closeTo(frameRect.top, 0.001));
+        expect(selectedRect.right, closeTo(frameRect.right, 0.001));
+        expect(selectedRect.bottom, closeTo(frameRect.bottom, 0.001));
+
+        final frameContainer = _zoneBorderContainer(tester);
+        final frameDecoration = frameContainer.decoration! as BoxDecoration;
+        final frameBorder = frameDecoration.border! as Border;
+        expect(
+          _hasZoneColorFamily(frameBorder.top.color, RosterZone.bench),
+          isTrue,
+        );
+        for (final finder in <Finder>[
+          find.byType(PositionBadge),
+          find.byType(OvrBadge),
+          find.byType(FormIndicator),
+          find.byType(StatusIcons),
+          find.byType(IconButton),
+        ]) {
+          _expectInside(tester.getRect(finder), frameRect);
+        }
+
+        final l10n = _tileLocalizations(tester);
+        final status = statusFor(player, assignment);
+        final rowLabel = _rowSemanticsLabel(
+          l10n,
+          player,
+          status,
+          RosterZone.bench,
+        );
+        final selectedSemantics = tester.getSemantics(
+          find.bySemanticsLabel(rowLabel),
+        );
+        expect(
+          selectedSemantics.flagsCollection.isSelected,
+          ui.Tristate.isTrue,
+        );
+        expect(selectedSemantics.value, l10n.squad_playerSelected);
+      } finally {
+        semanticsHandle.dispose();
+      }
     },
   );
 
@@ -760,4 +1094,12 @@ void _expectInside(Rect inner, Rect outer) {
   expect(inner.top, greaterThanOrEqualTo(outer.top - tolerance));
   expect(inner.right, lessThanOrEqualTo(outer.right + tolerance));
   expect(inner.bottom, lessThanOrEqualTo(outer.bottom + tolerance));
+}
+
+void _expectSameRect(Rect actual, Rect expected) {
+  const tolerance = 0.001;
+  expect(actual.left, closeTo(expected.left, tolerance));
+  expect(actual.top, closeTo(expected.top, tolerance));
+  expect(actual.right, closeTo(expected.right, tolerance));
+  expect(actual.bottom, closeTo(expected.bottom, tolerance));
 }

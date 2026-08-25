@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:new_football/app/utils/color_interpolation.dart';
@@ -448,6 +450,183 @@ void main() {
       expect(benchIds, benchBefore);
       expect(playersById.keys, mapKeysBefore);
       expect(stops.map((stop) => stop.value), stopValuesBefore);
+    });
+  });
+
+  group('squad row follow-up projections', () {
+    test('projects all four status combinations and semantic meanings', () {
+      const combinations =
+          <(bool, bool, StatusVisualKind, List<StatusVisualKind>)>[
+            (false, false, StatusVisualKind.none, <StatusVisualKind>[]),
+            (
+              true,
+              false,
+              StatusVisualKind.injury,
+              <StatusVisualKind>[StatusVisualKind.injury],
+            ),
+            (
+              false,
+              true,
+              StatusVisualKind.suspension,
+              <StatusVisualKind>[StatusVisualKind.suspension],
+            ),
+            (
+              true,
+              true,
+              StatusVisualKind.injury,
+              <StatusVisualKind>[
+                StatusVisualKind.injury,
+                StatusVisualKind.suspension,
+              ],
+            ),
+          ];
+
+      expect(combinations, hasLength(4));
+      for (final combination in combinations) {
+        final source = SquadStatus(
+          hasActiveInjury: combination.$1,
+          hasActiveSuspension: combination.$2,
+        );
+        final projection = statusSlotPresentation(source);
+
+        expect(projection.visual, combination.$3);
+        expect(projection.hasActiveInjury, combination.$1);
+        expect(projection.hasActiveSuspension, combination.$2);
+        expect(projection.semanticStatuses, combination.$4);
+      }
+    });
+
+    test('gives injury visual priority while retaining both meanings', () {
+      const source = SquadStatus(
+        hasActiveInjury: true,
+        hasActiveSuspension: true,
+      );
+      final projection = statusSlotPresentation(source);
+
+      expect(projection.visual, StatusVisualKind.injury);
+      expect(projection.semanticStatuses, const [
+        StatusVisualKind.injury,
+        StatusVisualKind.suspension,
+      ]);
+      expect(projection.hasActiveInjury, isTrue);
+      expect(projection.hasActiveSuspension, isTrue);
+    });
+
+    test(
+      'keeps the semantic status list immutable and is not serializable',
+      () {
+        const projection = StatusSlotPresentation(
+          visual: StatusVisualKind.injury,
+          hasActiveInjury: true,
+          hasActiveSuspension: true,
+        );
+        const equivalentProjection = StatusSlotPresentation(
+          visual: StatusVisualKind.injury,
+          hasActiveInjury: true,
+          hasActiveSuspension: true,
+        );
+
+        // The const constructor and final projection values provide a stable,
+        // immutable value; the derived list must reject caller mutation too.
+        expect(identical(projection, equivalentProjection), isTrue);
+        expect(
+          () => projection.semanticStatuses.add(StatusVisualKind.none),
+          throwsUnsupportedError,
+        );
+        expect(
+          () => jsonEncode(projection),
+          throwsA(isA<JsonUnsupportedObjectError>()),
+        );
+      },
+    );
+
+    test('handles invalid and non-finite form values safely', () {
+      const cases = <(double, double, double, Color)>[
+        (double.nan, 0, 0, Colors.red),
+        (double.negativeInfinity, 0, 0, Colors.red),
+        (-3, 0, 0, Colors.red),
+        (5, 5, 0.5, Colors.yellow),
+        (14, 10, 1, Colors.blue),
+        (double.infinity, 10, 1, Colors.blue),
+      ];
+
+      for (final testCase in cases) {
+        final clamped = clampedFormValue(testCase.$1);
+        final fill = formFillForValue(testCase.$1);
+        final color = formColorForClampedValue(testCase.$1);
+
+        expect(clamped, testCase.$2);
+        expect(clamped.isFinite, isTrue);
+        expect(fill, testCase.$3);
+        expect(fill.isFinite, isTrue);
+        expect(fill, inInclusiveRange(0.0, 1.0));
+        _expectColor(color, testCase.$4);
+      }
+    });
+
+    test('keeps semantic zone labels and color families independent', () {
+      const expected = <RosterZone, (String, Color)>{
+        RosterZone.xi: ('XI', Colors.green),
+        RosterZone.bench: ('Bench', Colors.blue),
+        RosterZone.reserve: ('Reserves', Colors.yellow),
+      };
+      final labelsBefore = RosterZone.values.map(rosterZoneLabel).toList();
+      final colorsBefore = RosterZone.values.map(rosterZoneColor).toList();
+
+      for (final zone in RosterZone.values) {
+        final presentation = rosterZonePresentation(zone);
+        final expectedValue = expected[zone]!;
+
+        expect(presentation.zone, zone);
+        expect(presentation.label, expectedValue.$1);
+        expect(presentation.accessibilityLabel, expectedValue.$1);
+        expect(presentation.color, expectedValue.$2);
+        expect(rosterZoneLabel(zone), expectedValue.$1);
+        expect(rosterZoneColor(zone), expectedValue.$2);
+      }
+
+      expect(RosterZone.values.map(rosterZoneLabel).toList(), labelsBefore);
+      expect(RosterZone.values.map(rosterZoneColor).toList(), colorsBefore);
+    });
+
+    test('does not mutate status, roster, or assignment inputs', () {
+      const sourceStatus = SquadStatus(
+        hasActiveInjury: true,
+        hasActiveSuspension: true,
+      );
+      final playerA = _fixturePlayer(id: 'projection-input-a');
+      final playerB = _fixturePlayer(id: 'projection-input-b');
+      final roster = <Player>[playerA, playerB];
+      final lineupPlayerIds = <String>[playerA.id];
+      final benchPlayerIds = <String>[playerB.id];
+      final team = _teamFor(
+        playerA,
+        lineupPlayerIds: lineupPlayerIds,
+        benchPlayerIds: benchPlayerIds,
+      ).copyWith(roster: roster);
+      final statusBefore = (
+        sourceStatus.hasActiveInjury,
+        sourceStatus.hasActiveSuspension,
+        sourceStatus.hasPositionMismatch,
+      );
+      final rosterBefore = roster.map((player) => player.id).toList();
+      final lineupBefore = List<String>.from(lineupPlayerIds);
+      final benchBefore = List<String>.from(benchPlayerIds);
+
+      statusSlotPresentation(sourceStatus);
+      playerPresentationsForRoster(team);
+
+      expect((
+        sourceStatus.hasActiveInjury,
+        sourceStatus.hasActiveSuspension,
+        sourceStatus.hasPositionMismatch,
+      ), statusBefore);
+      expect(roster.map((player) => player.id).toList(), rosterBefore);
+      expect(lineupPlayerIds, lineupBefore);
+      expect(benchPlayerIds, benchBefore);
+      expect(team.roster.map((player) => player.id).toList(), rosterBefore);
+      expect(team.lineupPlayerIds, lineupBefore);
+      expect(team.benchPlayerIds, benchBefore);
     });
   });
 }

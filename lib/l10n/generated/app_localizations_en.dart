@@ -899,6 +899,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get squad_statusSuspension => 'Active suspension';
 
   @override
+  String get squad_statusSlotEmpty => 'No active status';
+
+  @override
+  String get squad_playerSelected => 'Selected';
+
+  @override
+  String get squad_playerNotSelected => 'Not selected';
+
+  @override
   String get squad_positionMismatch => 'Position mismatch';
 
   @override

@@ -209,6 +209,51 @@ class SquadStatus {
       _statusFor(player, assignment);
 }
 
+/// The single visual status that a roster-row status slot can display.
+enum StatusVisualKind { none, injury, suspension }
+
+/// An immutable, locale-neutral projection of a player's status-slot state.
+@immutable
+class StatusSlotPresentation {
+  const StatusSlotPresentation({
+    required this.visual,
+    required this.hasActiveInjury,
+    required this.hasActiveSuspension,
+  });
+
+  /// The prioritized visual status for the slot.
+  final StatusVisualKind visual;
+
+  /// Preserves whether an active injury is present in the source status.
+  final bool hasActiveInjury;
+
+  /// Preserves whether an active suspension is present in the source status.
+  final bool hasActiveSuspension;
+
+  /// All active meanings, retained in the stable injury-then-suspension order.
+  List<StatusVisualKind> get semanticStatuses =>
+      List<StatusVisualKind>.unmodifiable([
+        if (hasActiveInjury) StatusVisualKind.injury,
+        if (hasActiveSuspension) StatusVisualKind.suspension,
+      ]);
+}
+
+/// Projects [SquadStatus] into the prioritized visual status and all active
+/// semantic meanings without mutating or serializing the source state.
+StatusSlotPresentation statusSlotPresentation(SquadStatus status) {
+  final visual = status.hasActiveInjury
+      ? StatusVisualKind.injury
+      : status.hasActiveSuspension
+      ? StatusVisualKind.suspension
+      : StatusVisualKind.none;
+
+  return StatusSlotPresentation(
+    visual: visual,
+    hasActiveInjury: status.hasActiveInjury,
+    hasActiveSuspension: status.hasActiveSuspension,
+  );
+}
+
 /// Resolves injury, suspension and exact-position mismatch independently.
 SquadStatus statusFor(Player player, [AssignedSlot? assignment]) =>
     _statusFor(player, assignment);

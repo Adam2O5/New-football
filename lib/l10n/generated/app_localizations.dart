@@ -1710,6 +1710,24 @@ abstract class AppLocalizations {
   /// **'Aktywne zawieszenie'**
   String get squad_statusSuspension;
 
+  /// No description provided for @squad_statusSlotEmpty.
+  ///
+  /// In pl, this message translates to:
+  /// **'Brak aktywnego statusu'**
+  String get squad_statusSlotEmpty;
+
+  /// No description provided for @squad_playerSelected.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zaznaczony'**
+  String get squad_playerSelected;
+
+  /// No description provided for @squad_playerNotSelected.
+  ///
+  /// In pl, this message translates to:
+  /// **'Niezaznaczony'**
+  String get squad_playerNotSelected;
+
   /// Dostępnościowy opis przypisania zawodnika poza jego dokładną pozycją.
   ///
   /// In pl, this message translates to:

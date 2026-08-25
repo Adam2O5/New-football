@@ -432,6 +432,9 @@
   "@squad_statusSuspension": {
     "description": "Accessibility description for an active player suspension."
   },
+  "squad_statusSlotEmpty": "No active status",
+  "squad_playerSelected": "Selected",
+  "squad_playerNotSelected": "Not selected",
   "squad_positionMismatch": "Position mismatch",
   "@squad_positionMismatch": {
     "description": "Accessibility description for a player assigned outside the exact position."

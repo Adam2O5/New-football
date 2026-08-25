@@ -900,6 +900,15 @@ class AppLocalizationsPl extends AppLocalizations {
   String get squad_statusSuspension => 'Aktywne zawieszenie';
 
   @override
+  String get squad_statusSlotEmpty => 'Brak aktywnego statusu';
+
+  @override
+  String get squad_playerSelected => 'Zaznaczony';
+
+  @override
+  String get squad_playerNotSelected => 'Niezaznaczony';
+
+  @override
   String get squad_positionMismatch => 'Niezgodność pozycji';
 
   @override

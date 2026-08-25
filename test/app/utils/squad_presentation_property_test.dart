@@ -30,6 +30,1276 @@ const _propertySevenSeed = 8208;
 const _propertyNineSeed = 8210;
 
 void main() {
+  const propertyOneSeed = 8201;
+  final propertyOneTemplateTeam = GameFactory()
+      .create(
+        const NewGameRequest(
+          saveName: 'Squad presentation Property 1',
+          playerTeamId: 'team_europe_0',
+          seed: propertyOneSeed,
+        ),
+      )
+      .leagueState
+      .teams
+      .firstWhere((team) => team.id == 'team_europe_0');
+
+  double propertyOneRawForm(Random random, int size) {
+    switch (size % 10) {
+      case 0:
+        return -1000.0 - random.nextInt(1001);
+      case 1:
+        return 0.0;
+      case 2:
+        return random.nextInt(1001) / 100.0;
+      case 3:
+        return 10.0;
+      case 4:
+        return 10.5 + random.nextInt(1001);
+      case 5:
+        return -random.nextInt(1001) / 100.0;
+      case 6:
+        return 0.01 + random.nextInt(999) / 100.0;
+      case 7:
+        return 5.0 + random.nextInt(501) / 100.0;
+      case 8:
+        return 9.0 + random.nextInt(101) / 100.0;
+      default:
+        return 1.0 + random.nextInt(401) / 100.0;
+    }
+  }
+
+  double propertyOneChangedForm(double rawForm) {
+    if (rawForm < 0.0 || rawForm > 10.0) return 5.0;
+    return rawForm <= 5.0 ? 10.0 : 0.0;
+  }
+
+  AssignedSlot? propertyOneAssignment({
+    required Position playerPosition,
+    required int size,
+    required int token,
+  }) {
+    if (size % 3 == 0) return null;
+    final assignmentPosition = size.isEven
+        ? playerPosition
+        : Position.values[(playerPosition.index + 1) % Position.values.length];
+    return AssignedSlot(
+      key: 'p1-slot-$size-$token',
+      position: assignmentPosition,
+      group: positionGroupOf(assignmentPosition),
+      x: 0.5,
+      y: 0.5,
+    );
+  }
+
+  final generatedPropertyOneCases = any
+      .simple<
+        ({
+          double rawForm,
+          double changedForm,
+          Player player,
+          Team team,
+          AssignedSlot? assignment,
+          int generationSize,
+          String scenario,
+          bool shrunk,
+        })
+      >(
+        generate: (random, size) {
+          final scenario = size % 10;
+          final rawForm = propertyOneRawForm(random, size);
+          final changedForm = propertyOneChangedForm(rawForm);
+          final token = random.nextInt(1 << 30);
+          final templatePlayer = propertyOneTemplateTeam
+              .roster[random.nextInt(propertyOneTemplateTeam.roster.length)];
+          final hasActiveInjury = size.isOdd;
+          final hasActiveSuspension = (size ~/ 2).isOdd;
+          final playerId = 'p1-$size-$token';
+          final player = templatePlayer.copyWith(
+            id: playerId,
+            name: 'Property 1 $playerId',
+            state: templatePlayer.state.copyWith(
+              form: rawForm,
+              injury: hasActiveInjury
+                  ? const Injury(
+                      id: 'squad-property-one-injury',
+                      group: InjuryGroup.legMuscles,
+                      type: InjuryType.minor,
+                      daysTotal: 5,
+                      daysRemaining: 2,
+                    )
+                  : null,
+              suspensionGamesRemaining: hasActiveSuspension ? 2 : 0,
+            ),
+          );
+          final zone =
+              RosterZone.values[(size +
+                      random.nextInt(RosterZone.values.length)) %
+                  RosterZone.values.length];
+          final team = propertyOneTemplateTeam.copyWith(
+            roster: [player],
+            lineupPlayerIds: zone == RosterZone.xi
+                ? [player.id]
+                : const <String>[],
+            benchPlayerIds: zone == RosterZone.bench
+                ? [player.id]
+                : const <String>[],
+          );
+
+          return (
+            rawForm: rawForm,
+            changedForm: changedForm,
+            player: player,
+            team: team,
+            assignment: propertyOneAssignment(
+              playerPosition: player.position,
+              size: size,
+              token: token,
+            ),
+            generationSize: size,
+            scenario: 'form-scenario=$scenario zone=${zone.name}',
+            shrunk: false,
+          );
+        },
+        shrink: (input) sync* {
+          if (input.shrunk) return;
+          final player = input.player.copyWith(
+            id: 'p1-shrunk',
+            name: 'Property 1 shrunk',
+            state: input.player.state.copyWith(form: -1.0),
+          );
+          final team = input.team.copyWith(
+            roster: [player],
+            lineupPlayerIds: const <String>[],
+            benchPlayerIds: const <String>[],
+          );
+          yield (
+            rawForm: -1.0,
+            changedForm: 5.0,
+            player: player,
+            team: team,
+            assignment: null,
+            generationSize: 0,
+            scenario: 'shrunk-below-zero',
+            shrunk: true,
+          );
+        },
+      );
+
+  // Feature: squad-row-polish, Property 1: Form projection remains bounded and value-stable
+  // **Validates: Requirements 1.5, 6.2**
+  Glados<
+        ({
+          double rawForm,
+          double changedForm,
+          Player player,
+          Team team,
+          AssignedSlot? assignment,
+          int generationSize,
+          String scenario,
+          bool shrunk,
+        })
+      >(
+        generatedPropertyOneCases,
+        ExploreConfig(
+          numRuns: _propertyRuns,
+          initialSize: 8,
+          speed: 1,
+          random: Random(propertyOneSeed),
+        ),
+      )
+      .test(
+        'Feature: squad-row-polish, Property 1: Form projection remains bounded and value-stable',
+        (input) {
+          final reason =
+              'seed=$propertyOneSeed generationSize=${input.generationSize} '
+              'scenario=${input.scenario} rawForm=${input.rawForm} '
+              'changedForm=${input.changedForm}';
+          final expectedClamped = input.rawForm.clamp(0.0, 10.0).toDouble();
+          final expectedChangedClamped = input.changedForm
+              .clamp(0.0, 10.0)
+              .toDouble();
+          final beforePlayer = input.player;
+          final beforeTeam = input.team;
+          final rosterBefore = List<Player>.from(beforeTeam.roster);
+          final lineupBefore = List<String>.from(beforeTeam.lineupPlayerIds);
+          final benchBefore = List<String>.from(beforeTeam.benchPlayerIds);
+          final before = playerPresentation(
+            player: beforePlayer,
+            team: beforeTeam,
+            assignment: input.assignment,
+          );
+          final changedPlayer = beforePlayer.copyWith(
+            state: beforePlayer.state.copyWith(form: input.changedForm),
+          );
+          final after = playerPresentation(
+            player: changedPlayer,
+            team: beforeTeam,
+            assignment: input.assignment,
+          );
+
+          expect(input.rawForm.isFinite, isTrue, reason: reason);
+          expect(input.changedForm.isFinite, isTrue, reason: reason);
+          expect(
+            before.clampedForm,
+            allOf(
+              greaterThanOrEqualTo(0.0),
+              lessThanOrEqualTo(10.0),
+              isA<double>(),
+            ),
+            reason: reason,
+          );
+          expect(before.clampedForm, expectedClamped, reason: reason);
+          expect(
+            formFillForValue(input.rawForm),
+            closeTo(expectedClamped / 10.0, 0.000000000001),
+            reason: reason,
+          );
+          expect(
+            formFillForValue(input.rawForm),
+            allOf(greaterThanOrEqualTo(0.0), lessThanOrEqualTo(1.0)),
+            reason: reason,
+          );
+          final expectedColor = _expectedFormColorForPropertySix(
+            expectedClamped,
+          );
+          final actualColor = formColorForClampedValue(input.rawForm);
+          expect(actualColor.a, expectedColor.a, reason: reason);
+          expect(actualColor.r, expectedColor.r, reason: reason);
+          expect(actualColor.g, expectedColor.g, reason: reason);
+          expect(actualColor.b, expectedColor.b, reason: reason);
+
+          // The pure numeric form value is the payload from which the widget
+          // builds its localized semantics; no rendered semantics are used.
+          expect(
+            before.semanticSnapshot.clampedForm,
+            isA<double>(),
+            reason: reason,
+          );
+          expect(
+            before.semanticSnapshot.clampedForm,
+            expectedClamped,
+            reason: reason,
+          );
+
+          expect(after.clampedForm, expectedChangedClamped, reason: reason);
+          expect(
+            formFillForValue(input.changedForm),
+            closeTo(expectedChangedClamped / 10.0, 0.000000000001),
+            reason: reason,
+          );
+          final changedExpectedColor = _expectedFormColorForPropertySix(
+            expectedChangedClamped,
+          );
+          final changedActualColor = formColorForClampedValue(
+            input.changedForm,
+          );
+          expect(changedActualColor.a, changedExpectedColor.a, reason: reason);
+          expect(changedActualColor.r, changedExpectedColor.r, reason: reason);
+          expect(changedActualColor.g, changedExpectedColor.g, reason: reason);
+          expect(changedActualColor.b, changedExpectedColor.b, reason: reason);
+          expect(
+            after.semanticSnapshot.clampedForm,
+            expectedChangedClamped,
+            reason: reason,
+          );
+
+          // Changing only form must not alter the rest of the pure row
+          // projection or any domain-owned input.
+          expect(after.zone, before.zone, reason: reason);
+          expect(after.assignment, same(before.assignment), reason: reason);
+          expect(
+            after.status.hasActiveInjury,
+            before.status.hasActiveInjury,
+            reason: reason,
+          );
+          expect(
+            after.status.hasActiveSuspension,
+            before.status.hasActiveSuspension,
+            reason: reason,
+          );
+          expect(
+            after.status.hasPositionMismatch,
+            before.status.hasPositionMismatch,
+            reason: reason,
+          );
+          expect(after.roundedOvr, before.roundedOvr, reason: reason);
+          expect(
+            after.nameParts.firstLine,
+            before.nameParts.firstLine,
+            reason: reason,
+          );
+          expect(
+            after.nameParts.secondLine,
+            before.nameParts.secondLine,
+            reason: reason,
+          );
+          expect(
+            after.nameParts.original,
+            before.nameParts.original,
+            reason: reason,
+          );
+          expect(after.zoneLabel, before.zoneLabel, reason: reason);
+
+          final beforeSemantic = before.semanticSnapshot;
+          final afterSemantic = after.semanticSnapshot;
+          expect(
+            afterSemantic.playerId,
+            beforeSemantic.playerId,
+            reason: reason,
+          );
+          expect(
+            afterSemantic.playerName,
+            beforeSemantic.playerName,
+            reason: reason,
+          );
+          expect(
+            afterSemantic.position,
+            beforeSemantic.position,
+            reason: reason,
+          );
+          expect(
+            afterSemantic.roundedOvr,
+            beforeSemantic.roundedOvr,
+            reason: reason,
+          );
+          expect(afterSemantic.zone, beforeSemantic.zone, reason: reason);
+          expect(
+            afterSemantic.zoneLabel,
+            beforeSemantic.zoneLabel,
+            reason: reason,
+          );
+          expect(
+            afterSemantic.hasActiveInjury,
+            beforeSemantic.hasActiveInjury,
+            reason: reason,
+          );
+          expect(
+            afterSemantic.hasActiveSuspension,
+            beforeSemantic.hasActiveSuspension,
+            reason: reason,
+          );
+          expect(
+            afterSemantic.hasPositionMismatch,
+            beforeSemantic.hasPositionMismatch,
+            reason: reason,
+          );
+
+          expect(
+            after.player.copyWith(
+              state: after.player.state.copyWith(
+                form: before.player.state.form,
+              ),
+            ),
+            before.player,
+            reason: '$reason only Player.state.form may change',
+          );
+          expect(input.player, same(beforePlayer), reason: reason);
+          expect(input.team, same(beforeTeam), reason: reason);
+          expect(beforeTeam.roster, rosterBefore, reason: reason);
+          expect(beforeTeam.lineupPlayerIds, lineupBefore, reason: reason);
+          expect(beforeTeam.benchPlayerIds, benchBefore, reason: reason);
+        },
+      );
+
+  const squadRowPropertyTwoSeed = 8211;
+  final generatedSquadRowPropertyTwoCases = any
+      .simple<
+        ({
+          SquadStatus source,
+          bool hasActiveInjury,
+          bool hasActiveSuspension,
+          int generationSize,
+          String scenario,
+          bool shrunk,
+        })
+      >(
+        generate: (_, size) {
+          final scenario = size % 4;
+          final hasActiveInjury = scenario == 1 || scenario == 3;
+          final hasActiveSuspension = scenario == 2 || scenario == 3;
+          return (
+            source: SquadStatus(
+              hasActiveInjury: hasActiveInjury,
+              hasActiveSuspension: hasActiveSuspension,
+            ),
+            hasActiveInjury: hasActiveInjury,
+            hasActiveSuspension: hasActiveSuspension,
+            generationSize: size,
+            scenario: switch (scenario) {
+              0 => 'none',
+              1 => 'injury-only',
+              2 => 'suspension-only',
+              _ => 'both-active',
+            },
+            shrunk: false,
+          );
+        },
+        shrink: (input) sync* {
+          if (input.shrunk) return;
+          yield (
+            source: const SquadStatus(),
+            hasActiveInjury: false,
+            hasActiveSuspension: false,
+            generationSize: 0,
+            scenario: 'shrunk-none-active',
+            shrunk: true,
+          );
+        },
+      );
+
+  // Feature: squad-row-polish, Property 2: Status projection preserves visual priority and semantic state
+  // **Validates: Requirements 2.2, 2.3, 2.4, 2.5, 2.6, 2.7**
+  Glados<
+        ({
+          SquadStatus source,
+          bool hasActiveInjury,
+          bool hasActiveSuspension,
+          int generationSize,
+          String scenario,
+          bool shrunk,
+        })
+      >(
+        generatedSquadRowPropertyTwoCases,
+        ExploreConfig(
+          numRuns: _propertyRuns,
+          initialSize: 8,
+          speed: 1,
+          random: Random(squadRowPropertyTwoSeed),
+        ),
+      )
+      .test(
+        'Feature: squad-row-polish, Property 2: Status projection preserves visual priority and semantic state',
+        (input) {
+          final reason =
+              'seed=$squadRowPropertyTwoSeed '
+              'generationSize=${input.generationSize} '
+              'scenario=${input.scenario}';
+          final source = input.source;
+          final sourceInjuryBefore = source.hasActiveInjury;
+          final sourceSuspensionBefore = source.hasActiveSuspension;
+          final projection = statusSlotPresentation(source);
+          final expectedVisual = input.hasActiveInjury
+              ? StatusVisualKind.injury
+              : input.hasActiveSuspension
+              ? StatusVisualKind.suspension
+              : StatusVisualKind.none;
+          final expectedSemanticStatuses = <StatusVisualKind>[
+            if (input.hasActiveInjury) StatusVisualKind.injury,
+            if (input.hasActiveSuspension) StatusVisualKind.suspension,
+          ];
+
+          // The projection keeps both independent source flags visible.
+          expect(source.hasActiveInjury, input.hasActiveInjury, reason: reason);
+          expect(
+            source.hasActiveSuspension,
+            input.hasActiveSuspension,
+            reason: reason,
+          );
+          expect(
+            projection.hasActiveInjury,
+            input.hasActiveInjury,
+            reason: reason,
+          );
+          expect(
+            projection.hasActiveSuspension,
+            input.hasActiveSuspension,
+            reason: reason,
+          );
+
+          // Injury has visual priority, while semantic meanings retain their
+          // complete stable injury-then-suspension order.
+          expect(projection.visual, expectedVisual, reason: reason);
+          expect(
+            projection.semanticStatuses,
+            orderedEquals(expectedSemanticStatuses),
+            reason: reason,
+          );
+
+          // Resolving the projection must not mutate the source status.
+          expect(source.hasActiveInjury, sourceInjuryBefore, reason: reason);
+          expect(
+            source.hasActiveSuspension,
+            sourceSuspensionBefore,
+            reason: reason,
+          );
+        },
+      );
+
+  const squadRowPropertyThreeSeed = 8212;
+  final propertyThreeTemplateTeam = GameFactory()
+      .create(
+        const NewGameRequest(
+          saveName: 'Squad presentation Property 3',
+          playerTeamId: 'team_europe_0',
+          seed: squadRowPropertyThreeSeed,
+        ),
+      )
+      .leagueState
+      .teams
+      .firstWhere((team) => team.id == 'team_europe_0');
+  final propertyThreeTemplatePlayer = propertyThreeTemplateTeam.roster
+      .firstWhere((player) => player.position != Position.gk);
+  const propertyThreeZoneOracle =
+      <RosterZone, ({String key, String label, Color color})>{
+        RosterZone.xi: (key: 'xi', label: 'XI', color: Colors.green),
+        RosterZone.bench: (key: 'bench', label: 'Bench', color: Colors.blue),
+        RosterZone.reserve: (
+          key: 'reserve',
+          label: 'Reserves',
+          color: Colors.yellow,
+        ),
+      };
+  final generatedSquadRowPropertyThreeCases = any
+      .simple<
+        ({
+          RosterZone fromZone,
+          RosterZone toZone,
+          Player player,
+          AssignedSlot assignment,
+          String? selectionId,
+          bool hasActiveInjury,
+          bool hasActiveSuspension,
+          bool hasPositionMismatch,
+          int generationSize,
+          int token,
+          String scenario,
+          bool shrunk,
+        })
+      >(
+        generate: (random, size) {
+          final statusScenario = size % 8;
+          final hasActiveInjury = (statusScenario & 1) != 0;
+          final hasActiveSuspension = (statusScenario & 2) != 0;
+          final hasPositionMismatch = (statusScenario & 4) != 0;
+          final token = random.nextInt(1 << 30);
+          final playerId = 'p3-zone-$size-$token';
+          final player = propertyThreeTemplatePlayer.copyWith(
+            id: playerId,
+            name: 'Property 3 $playerId',
+            state: propertyThreeTemplatePlayer.state.copyWith(
+              form: random.nextInt(1001) / 100.0,
+              injury: hasActiveInjury
+                  ? const Injury(
+                      id: 'squad-property-three-zone-injury',
+                      group: InjuryGroup.legMuscles,
+                      type: InjuryType.minor,
+                      daysTotal: 5,
+                      daysRemaining: 2,
+                    )
+                  : null,
+              suspensionGamesRemaining: hasActiveSuspension ? 2 : 0,
+            ),
+          );
+          final assignmentPosition = hasPositionMismatch
+              ? Position.values[(player.position.index + 1) %
+                    Position.values.length]
+              : player.position;
+          final assignment = AssignedSlot(
+            key: 'p3-zone-slot-$size-$token',
+            position: assignmentPosition,
+            group: positionGroupOf(assignmentPosition),
+            x: 0.5,
+            y: 0.5,
+          );
+          final fromZone =
+              RosterZone.values[(size +
+                      random.nextInt(RosterZone.values.length)) %
+                  RosterZone.values.length];
+          final zoneStep = 1 + ((size ~/ RosterZone.values.length) % 2);
+          final toZone = RosterZone
+              .values[(fromZone.index + zoneStep) % RosterZone.values.length];
+          final selectionId = size % 3 == 0 ? null : playerId;
+
+          return (
+            fromZone: fromZone,
+            toZone: toZone,
+            player: player,
+            assignment: assignment,
+            selectionId: selectionId,
+            hasActiveInjury: hasActiveInjury,
+            hasActiveSuspension: hasActiveSuspension,
+            hasPositionMismatch: hasPositionMismatch,
+            generationSize: size,
+            token: token,
+            scenario:
+                'from=${fromZone.name} to=${toZone.name} '
+                'status=$statusScenario selected=${selectionId != null}',
+            shrunk: false,
+          );
+        },
+        shrink: (input) sync* {
+          if (input.shrunk) return;
+
+          final player = propertyThreeTemplatePlayer.copyWith(
+            id: 'p3-zone-shrunk',
+            name: 'Property 3 zone shrunk',
+            state: propertyThreeTemplatePlayer.state.copyWith(
+              form: 5.0,
+              injury: const Injury(
+                id: 'squad-property-three-zone-shrunk-injury',
+                group: InjuryGroup.legMuscles,
+                type: InjuryType.minor,
+                daysTotal: 5,
+                daysRemaining: 2,
+              ),
+              suspensionGamesRemaining: 2,
+            ),
+          );
+          final assignment = AssignedSlot(
+            key: 'p3-zone-shrunk-slot',
+            position: Position.cdm,
+            group: positionGroupOf(Position.cdm),
+            x: 0.5,
+            y: 0.5,
+          );
+          yield (
+            fromZone: RosterZone.xi,
+            toZone: RosterZone.bench,
+            player: player,
+            assignment: assignment,
+            selectionId: player.id,
+            hasActiveInjury: true,
+            hasActiveSuspension: true,
+            hasPositionMismatch: true,
+            generationSize: 0,
+            token: 0,
+            scenario: 'shrunk-XI-to-Bench-both-statuses-selected',
+            shrunk: true,
+          );
+        },
+      );
+
+  // Feature: squad-row-polish, Property 3: Zone presentation is semantic and independent
+  // **Validates: Requirements 3.1, 3.2, 3.3, 3.6, 3.7, 6.6**
+  Glados<
+        ({
+          RosterZone fromZone,
+          RosterZone toZone,
+          Player player,
+          AssignedSlot assignment,
+          String? selectionId,
+          bool hasActiveInjury,
+          bool hasActiveSuspension,
+          bool hasPositionMismatch,
+          int generationSize,
+          int token,
+          String scenario,
+          bool shrunk,
+        })
+      >(
+        generatedSquadRowPropertyThreeCases,
+        ExploreConfig(
+          numRuns: _propertyRuns,
+          initialSize: 8,
+          speed: 1,
+          random: Random(squadRowPropertyThreeSeed),
+        ),
+      )
+      .test(
+        'Feature: squad-row-polish, Property 3: Zone presentation is semantic and independent',
+        (input) {
+          final reason =
+              'seed=$squadRowPropertyThreeSeed '
+              'generationSize=${input.generationSize} '
+              'scenario=${input.scenario} token=${input.token}';
+          final beforeZone = rosterZonePresentation(input.fromZone);
+          final afterZone = rosterZonePresentation(input.toZone);
+          final expectedBefore = propertyThreeZoneOracle[input.fromZone]!;
+          final expectedAfter = propertyThreeZoneOracle[input.toZone]!;
+
+          expect(input.fromZone, isNot(input.toZone), reason: reason);
+          expect(input.player.id, isNotEmpty, reason: reason);
+          expect(input.assignment.key, isNotEmpty, reason: reason);
+          expect(
+            input.assignment.group,
+            positionGroupOf(input.assignment.position),
+            reason: reason,
+          );
+          expect(
+            input.selectionId,
+            anyOf(isNull, input.player.id),
+            reason: reason,
+          );
+
+          // This independent oracle deliberately does not call the tested
+          // zone resolver or use Flutter context.
+          for (final zone in RosterZone.values) {
+            final expected = propertyThreeZoneOracle[zone]!;
+            final projection = rosterZonePresentation(zone);
+
+            expect(zone.name, expected.key, reason: reason);
+            expect(zone.name, isNotEmpty, reason: reason);
+            expect(projection.zone, zone, reason: reason);
+            expect(projection.label, expected.label, reason: reason);
+            expect(projection.label, isNotEmpty, reason: reason);
+            expect(projection.color, expected.color, reason: reason);
+          }
+          expect(
+            propertyThreeZoneOracle.values.map((value) => value.label).toSet(),
+            hasLength(RosterZone.values.length),
+            reason: '$reason zone labels must identify one zone each',
+          );
+
+          expect(beforeZone.zone, input.fromZone, reason: reason);
+          expect(afterZone.zone, input.toZone, reason: reason);
+          expect(beforeZone.label, expectedBefore.label, reason: reason);
+          expect(afterZone.label, expectedAfter.label, reason: reason);
+          expect(beforeZone.color, expectedBefore.color, reason: reason);
+          expect(afterZone.color, expectedAfter.color, reason: reason);
+          expect(beforeZone.zone, isNot(afterZone.zone), reason: reason);
+          expect(beforeZone.label, isNot(afterZone.label), reason: reason);
+          expect(beforeZone.color, isNot(afterZone.color), reason: reason);
+
+          final formBefore = clampedFormValue(input.player.state.form);
+          final formAfter = clampedFormValue(input.player.state.form);
+          final statusBefore = statusFor(input.player, input.assignment);
+          final statusAfter = statusFor(input.player, input.assignment);
+          final statusSlotBefore = statusSlotPresentation(statusBefore);
+          final statusSlotAfter = statusSlotPresentation(statusAfter);
+          final playerBefore = input.player;
+          final assignmentBefore = input.assignment;
+          final selectionBefore = input.selectionId;
+
+          // Only the zone projection changes; form, status meanings,
+          // selection identity and domain-owned inputs remain independent.
+          expect(formAfter, formBefore, reason: reason);
+          expect(
+            statusBefore.hasActiveInjury,
+            input.hasActiveInjury,
+            reason: reason,
+          );
+          expect(
+            statusBefore.hasActiveSuspension,
+            input.hasActiveSuspension,
+            reason: reason,
+          );
+          expect(
+            statusBefore.hasPositionMismatch,
+            input.hasPositionMismatch,
+            reason: reason,
+          );
+          expect(
+            statusAfter.hasActiveInjury,
+            statusBefore.hasActiveInjury,
+            reason: reason,
+          );
+          expect(
+            statusAfter.hasActiveSuspension,
+            statusBefore.hasActiveSuspension,
+            reason: reason,
+          );
+          expect(
+            statusAfter.hasPositionMismatch,
+            statusBefore.hasPositionMismatch,
+            reason: reason,
+          );
+          expect(
+            statusSlotAfter.visual,
+            statusSlotBefore.visual,
+            reason: reason,
+          );
+          expect(
+            statusSlotAfter.hasActiveInjury,
+            statusSlotBefore.hasActiveInjury,
+            reason: reason,
+          );
+          expect(
+            statusSlotAfter.hasActiveSuspension,
+            statusSlotBefore.hasActiveSuspension,
+            reason: reason,
+          );
+          expect(
+            statusSlotAfter.semanticStatuses,
+            orderedEquals(statusSlotBefore.semanticStatuses),
+            reason: reason,
+          );
+          expect(selectionBefore, input.selectionId, reason: reason);
+          expect(input.player, same(playerBefore), reason: reason);
+          expect(input.assignment, same(assignmentBefore), reason: reason);
+          expect(input.player.state.form, isNotNaN, reason: reason);
+          expect(input.player.state.form.isFinite, isTrue, reason: reason);
+        },
+      );
+
+  const squadRowPropertyFourSeed = 8213;
+  final propertyFourTemplateTeam = GameFactory()
+      .create(
+        const NewGameRequest(
+          saveName: 'Squad presentation Property 4',
+          playerTeamId: 'team_europe_0',
+          seed: squadRowPropertyFourSeed,
+        ),
+      )
+      .leagueState
+      .teams
+      .firstWhere((team) => team.id == 'team_europe_0');
+
+  RosterZone propertyFourZoneOracle(Team team, String playerId) {
+    if (team.lineupPlayerIds.contains(playerId)) return RosterZone.xi;
+    if (team.benchPlayerIds.contains(playerId)) return RosterZone.bench;
+    return RosterZone.reserve;
+  }
+
+  int propertyFourZoneRank(Team team, String playerId) =>
+      switch (propertyFourZoneOracle(team, playerId)) {
+        RosterZone.xi => 0,
+        RosterZone.bench => 1,
+        RosterZone.reserve => 2,
+      };
+
+  int propertyFourRoundOvr(double rawOvr) {
+    if (!rawOvr.isFinite) return rawOvr == double.infinity ? 99 : 50;
+    if (rawOvr >= 0) {
+      final lower = rawOvr.floor();
+      return rawOvr - lower >= 0.5 ? lower + 1 : lower;
+    }
+    final upper = rawOvr.ceil();
+    return upper - rawOvr >= 0.5 ? upper - 1 : upper;
+  }
+
+  double propertyFourFormValue(double rawForm) {
+    if (rawForm.isNaN || rawForm == double.negativeInfinity) return 0.0;
+    if (rawForm == double.infinity) return 10.0;
+    return rawForm < 0.0
+        ? 0.0
+        : rawForm > 10.0
+        ? 10.0
+        : rawForm;
+  }
+
+  int propertyFourCompare(
+    Team team,
+    Player left,
+    Player right,
+    PlayerSortMode mode,
+  ) => switch (mode) {
+    PlayerSortMode.overall => right.overall().compareTo(left.overall()),
+    PlayerSortMode.assignedZone =>
+      propertyFourZoneRank(team, left.id) !=
+              propertyFourZoneRank(team, right.id)
+          ? propertyFourZoneRank(
+              team,
+              left.id,
+            ).compareTo(propertyFourZoneRank(team, right.id))
+          : Position.values
+                .indexOf(left.position)
+                .compareTo(Position.values.indexOf(right.position)),
+    PlayerSortMode.form => right.state.form.compareTo(left.state.form),
+    PlayerSortMode.position =>
+      Position.values
+          .indexOf(left.position)
+          .compareTo(Position.values.indexOf(right.position)),
+  };
+
+  List<Player> propertyFourOrderingOracle(
+    Team team,
+    Iterable<Player> players,
+    PlayerSortMode mode,
+  ) {
+    final ordered = [...players];
+    ordered.sort((left, right) {
+      return propertyFourCompare(team, left, right, mode);
+    });
+    return ordered;
+  }
+
+  List<num> propertyFourOrderingSignature(
+    Team team,
+    Player player,
+    PlayerSortMode mode,
+  ) => switch (mode) {
+    PlayerSortMode.overall => [player.overall()],
+    PlayerSortMode.assignedZone => [
+      propertyFourZoneRank(team, player.id),
+      Position.values.indexOf(player.position),
+    ],
+    PlayerSortMode.form => [player.state.form],
+    PlayerSortMode.position => [Position.values.indexOf(player.position)],
+  };
+
+  final generatedSquadRowPropertyFourCases = any
+      .simple<
+        ({
+          Team team,
+          PlayerSortMode mode,
+          PositionAssignmentIndex assignmentIndex,
+          Map<String, AssignedSlot> assignments,
+          List<PlacedPlayer> placements,
+          Formation formation,
+          int generationSize,
+          String scenario,
+          String diagnostics,
+        })
+      >(
+        generate: (random, size) {
+          final maxRosterSize = propertyFourTemplateTeam.roster.length;
+          final minimumRosterSize = min(3, maxRosterSize);
+          final rosterSize = minimumRosterSize == maxRosterSize
+              ? maxRosterSize
+              : minimumRosterSize +
+                    random.nextInt(maxRosterSize - minimumRosterSize + 1);
+          final token = random.nextInt(1 << 30);
+          final templates = [...propertyFourTemplateTeam.roster]
+            ..shuffle(random);
+          final roster = <Player>[
+            for (var index = 0; index < rosterSize; index++)
+              templates[index].copyWith(
+                id: 'p4-$size-$token-$index',
+                name: 'Property 4 p4-$size-$token-$index',
+                state: templates[index].state.copyWith(
+                  // Keep generated forms finite and distinct where possible,
+                  // while retaining the domain's valid 0–10 presentation range.
+                  form: rosterSize == 0
+                      ? 5.0
+                      : ((index + 1) * 10.0) / (rosterSize + 1),
+                ),
+              ),
+          ];
+          roster.shuffle(random);
+
+          final membershipOrder = [...roster]..shuffle(random);
+          final membershipScenario = size % 6;
+          final maxLineupCount = min(11, roster.length);
+          final lineupCount = maxLineupCount == 0
+              ? 0
+              : switch (membershipScenario) {
+                  0 => 0,
+                  1 => maxLineupCount,
+                  2 => 1,
+                  3 => min(maxLineupCount, 2 + size % maxLineupCount),
+                  4 => random.nextInt(maxLineupCount + 1),
+                  _ => maxLineupCount,
+                };
+          final remainingPlayers = membershipOrder.skip(lineupCount).toList();
+          final maxBenchCount = min(7, remainingPlayers.length);
+          final benchScenario = (size ~/ 6) % 4;
+          final benchCount = maxBenchCount == 0
+              ? 0
+              : switch (benchScenario) {
+                  0 => 0,
+                  1 => maxBenchCount,
+                  2 => 1,
+                  _ => random.nextInt(maxBenchCount + 1),
+                };
+          final lineupPlayers = membershipOrder.take(lineupCount).toList()
+            ..shuffle(random);
+          final benchPlayers = remainingPlayers.take(benchCount).toList()
+            ..shuffle(random);
+          final lineupPlayerIds = [
+            for (final player in lineupPlayers) player.id,
+          ];
+          final benchPlayerIds = [for (final player in benchPlayers) player.id];
+
+          final formation =
+              Formation.values[(size +
+                      random.nextInt(Formation.values.length)) %
+                  Formation.values.length];
+          final team = propertyFourTemplateTeam.copyWith(
+            roster: roster,
+            tactics: propertyFourTemplateTeam.tactics.copyWith(
+              formation: formation,
+            ),
+            lineupPlayerIds: lineupPlayerIds,
+            benchPlayerIds: benchPlayerIds,
+          );
+
+          final slotPool = [...FormationLayout.of(formation).slots]
+            ..shuffle(random);
+          final assignmentPlayers = [...lineupPlayers]..shuffle(random);
+          final assignmentCount = min(
+            slotPool.length,
+            assignmentPlayers.length,
+          );
+          final placements = <PlacedPlayer>[
+            for (var index = 0; index < assignmentCount; index++)
+              PlacedPlayer(
+                slot: slotPool[index],
+                player: assignmentPlayers[index],
+              ),
+          ];
+          final immutablePlacements = List<PlacedPlayer>.unmodifiable(
+            placements,
+          );
+          final assignmentValues = <String, AssignedSlot>{
+            for (final placement in immutablePlacements)
+              if (placement.player != null)
+                placement.player!.id: placement.slot,
+          };
+          final immutableAssignments = Map<String, AssignedSlot>.unmodifiable(
+            assignmentValues,
+          );
+          final assignmentIndex = positionAssignmentIndexFromPlacements(
+            immutablePlacements,
+          );
+          final rosterSummary = roster
+              .map(
+                (player) =>
+                    '${player.id}:${player.position.code}:form=${player.state.form}:ovr=${player.overall()}',
+              )
+              .join('|');
+
+          return (
+            team: team,
+            mode: PlayerSortMode.values[size % PlayerSortMode.values.length],
+            assignmentIndex: assignmentIndex,
+            assignments: immutableAssignments,
+            placements: immutablePlacements,
+            formation: formation,
+            generationSize: size,
+            scenario:
+                'mode=${PlayerSortMode.values[size % PlayerSortMode.values.length].name} '
+                'rosterSize=$rosterSize membership=$membershipScenario/$benchScenario',
+            diagnostics:
+                'seed=$squadRowPropertyFourSeed generationSize=$size '
+                'mode=${PlayerSortMode.values[size % PlayerSortMode.values.length].name} '
+                'formation=${formation.name} roster=$rosterSummary '
+                'lineup=${lineupPlayerIds.join(',')} '
+                'bench=${benchPlayerIds.join(',')}',
+          );
+        },
+        shrink: (input) sync* {
+          if (input.team.roster.length <= 1) return;
+          final player = input.team.roster.first.copyWith(
+            id: 'p4-shrunk',
+            name: 'Property 4 shrunk reserve',
+            state: input.team.roster.first.state.copyWith(form: 5.0),
+          );
+          final team = input.team.copyWith(
+            roster: [player],
+            lineupPlayerIds: const <String>[],
+            benchPlayerIds: const <String>[],
+          );
+          const placements = <PlacedPlayer>[];
+          yield (
+            team: team,
+            mode: input.mode,
+            assignmentIndex: positionAssignmentIndexFromPlacements(placements),
+            assignments: const <String, AssignedSlot>{},
+            placements: placements,
+            formation: input.formation,
+            generationSize: 0,
+            scenario: 'shrunk-single-reserve',
+            diagnostics:
+                'seed=$squadRowPropertyFourSeed generationSize=0 '
+                'scenario=shrunk-single-reserve mode=${input.mode.name}',
+          );
+        },
+      );
+
+  // Feature: squad-row-polish, Property 4: Full roster projection preserves membership, order rules and domain inputs
+  // **Validates: Requirements 7.3, 7.7**
+  Glados<
+        ({
+          Team team,
+          PlayerSortMode mode,
+          PositionAssignmentIndex assignmentIndex,
+          Map<String, AssignedSlot> assignments,
+          List<PlacedPlayer> placements,
+          Formation formation,
+          int generationSize,
+          String scenario,
+          String diagnostics,
+        })
+      >(
+        generatedSquadRowPropertyFourCases,
+        ExploreConfig(
+          numRuns: _propertyRuns,
+          initialSize: 8,
+          speed: 1,
+          random: Random(squadRowPropertyFourSeed),
+        ),
+      )
+      .test(
+        'Feature: squad-row-polish, Property 4: Full roster projection preserves membership, order rules and domain inputs',
+        (input) {
+          final reason = '${input.diagnostics} scenario=${input.scenario}';
+          final teamBefore = input.team;
+          final rosterBefore = List<Player>.from(teamBefore.roster);
+          final rosterIdsBefore = rosterBefore
+              .map((player) => player.id)
+              .toList();
+          final lineupBefore = List<String>.from(teamBefore.lineupPlayerIds);
+          final benchBefore = List<String>.from(teamBefore.benchPlayerIds);
+          final tacticsBefore = teamBefore.tactics;
+          final placementsBefore = List<PlacedPlayer>.from(input.placements);
+          final assignmentsBefore = Map<String, AssignedSlot>.from(
+            input.assignments,
+          );
+          final indexedAssignmentsBefore = Map<String, AssignedSlot>.from(
+            input.assignmentIndex.assignmentsByPlayerId,
+          );
+
+          final projection = playerPresentationsForRoster(
+            input.team,
+            assignmentIndex: input.assignmentIndex,
+          );
+          final projectionIds = projection
+              .map((presentation) => presentation.player.id)
+              .toList();
+
+          expect(projection, hasLength(rosterBefore.length), reason: reason);
+          expect(projectionIds, rosterIdsBefore, reason: reason);
+          expect(
+            projectionIds.toSet(),
+            hasLength(rosterIdsBefore.length),
+            reason: '$reason projected IDs must be unique',
+          );
+          expect(
+            projectionIds,
+            unorderedEquals(rosterIdsBefore),
+            reason: '$reason projection must contain exactly the full roster',
+          );
+          for (final rosterId in rosterIdsBefore) {
+            expect(
+              projectionIds.where((id) => id == rosterId),
+              hasLength(1),
+              reason: '$reason roster ID $rosterId must appear once',
+            );
+          }
+
+          for (final player in rosterBefore) {
+            final presentation = projection.singleWhere(
+              (candidate) => candidate.player.id == player.id,
+            );
+            final expectedAssignment = input.assignments[player.id];
+            final expectedZone = propertyFourZoneOracle(teamBefore, player.id);
+            final expectedForm = propertyFourFormValue(player.state.form);
+            final expectedInjury = player.state.injury?.isActive ?? false;
+            final expectedSuspension =
+                player.state.suspensionGamesRemaining > 0;
+            final expectedMismatch =
+                expectedAssignment != null &&
+                player.position != expectedAssignment.position;
+
+            // The row projection keeps the exact domain Player and assignment
+            // objects while deriving each display value from independent data.
+            expect(presentation.player, same(player), reason: reason);
+            expect(
+              presentation.assignment,
+              same(expectedAssignment),
+              reason: '$reason assignment for ${player.id}',
+            );
+            expect(presentation.zone, expectedZone, reason: reason);
+            expect(
+              presentation.roundedOvr,
+              propertyFourRoundOvr(player.overall()),
+              reason: '$reason OVR for ${player.id}',
+            );
+            expect(
+              presentation.clampedForm,
+              expectedForm,
+              reason: '$reason form for ${player.id}',
+            );
+            expect(
+              presentation.player.position,
+              player.position,
+              reason: '$reason position for ${player.id}',
+            );
+            expect(
+              presentation.status.hasActiveInjury,
+              expectedInjury,
+              reason: '$reason injury state for ${player.id}',
+            );
+            expect(
+              presentation.status.hasActiveSuspension,
+              expectedSuspension,
+              reason: '$reason suspension state for ${player.id}',
+            );
+            expect(
+              presentation.status.hasPositionMismatch,
+              expectedMismatch,
+              reason: '$reason assignment mismatch for ${player.id}',
+            );
+          }
+
+          final sortedRoster = sortRoster(
+            teamBefore,
+            teamBefore.roster,
+            input.mode,
+          );
+          final oracleRoster = propertyFourOrderingOracle(
+            teamBefore,
+            rosterBefore,
+            input.mode,
+          );
+          expect(
+            sortedRoster
+                .map(
+                  (player) => propertyFourOrderingSignature(
+                    teamBefore,
+                    player,
+                    input.mode,
+                  ),
+                )
+                .toList(),
+            oracleRoster
+                .map(
+                  (player) => propertyFourOrderingSignature(
+                    teamBefore,
+                    player,
+                    input.mode,
+                  ),
+                )
+                .toList(),
+            reason: '$reason independent ordering oracle',
+          );
+          final sortedIds = sortedRoster.map((player) => player.id).toList();
+          expect(
+            sortedIds.toSet(),
+            equals(rosterIdsBefore.toSet()),
+            reason: reason,
+          );
+          expect(sortedIds, hasLength(rosterIdsBefore.length), reason: reason);
+
+          // The complete projection preserves whichever pure roster order the
+          // caller supplies after applying the independent sort oracle.
+          final sortedTeam = teamBefore.copyWith(roster: sortedRoster);
+          final sortedProjection = playerPresentationsForRoster(
+            sortedTeam,
+            assignmentIndex: input.assignmentIndex,
+          );
+          expect(
+            sortedProjection.map((presentation) => presentation.player.id),
+            sortedIds,
+            reason: '$reason sorted projection order',
+          );
+
+          expect(input.team, same(teamBefore), reason: '$reason Team identity');
+          expect(
+            teamBefore.roster,
+            rosterBefore,
+            reason: '$reason Team.roster',
+          );
+          expect(
+            teamBefore.lineupPlayerIds,
+            lineupBefore,
+            reason: '$reason Team.lineupPlayerIds',
+          );
+          expect(
+            teamBefore.benchPlayerIds,
+            benchBefore,
+            reason: '$reason Team.benchPlayerIds',
+          );
+          expect(teamBefore.tactics, tacticsBefore, reason: '$reason tactics');
+          expect(
+            input.placements,
+            placementsBefore,
+            reason: '$reason placements',
+          );
+          expect(
+            input.assignments,
+            assignmentsBefore,
+            reason: '$reason assignments',
+          );
+          expect(
+            input.assignmentIndex.assignmentsByPlayerId,
+            indexedAssignmentsBefore,
+            reason: '$reason indexed assignments',
+          );
+          expect(input.formation, teamBefore.tactics.formation, reason: reason);
+        },
+      );
+
   // Feature: squad-screen-redesign, Property 1: Roster size projection is bounded and state-consistent
   // **Validates: Requirements 2.3, 2.4, 2.5, 2.6, 2.7, 2.9, 11.2**
   Glados<_GeneratedRosterSize>(

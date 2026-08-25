@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:new_football/app/utils/color_interpolation.dart';
@@ -101,13 +103,9 @@ class PlayerListTile extends StatelessWidget {
             SizedBox(width: badgeGap),
             OvrBadge(ovr: roundedOvr, size: badgeSize, l10n: l10n),
             SizedBox(width: badgeGap),
-            Expanded(
-              child: _NameAndForm(
-                nameParts: nameParts,
-                form: clampedForm,
-                l10n: l10n,
-              ),
-            ),
+            Expanded(child: _NameAndForm(nameParts: nameParts)),
+            const SizedBox(width: 2),
+            FormIndicator(form: clampedForm, l10n: l10n, width: badgeSize),
             const SizedBox(width: 2),
             StatusIcons(
               hasActiveInjury: status.hasActiveInjury,
@@ -139,62 +137,90 @@ class PlayerListTile extends StatelessWidget {
       },
     );
 
+    final zoneFrame = ZoneFrame(
+      key: ValueKey('squad-zone-frame-${player.id}'),
+      l10n: l10n,
+      zone: zone,
+      child: row,
+    );
+    final selectionAccent = Theme.of(context).colorScheme.primary;
+    final selectionSurface = selected
+        ? Stack(
+            fit: StackFit.passthrough,
+            children: [
+              zoneFrame,
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: selectionAccent.withValues(alpha: 0.12),
+                      border: Border.all(color: selectionAccent, width: 1.5),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          )
+        : zoneFrame;
+
     return Semantics(
       container: true,
       explicitChildNodes: true,
       label: rowSemantics,
+      selected: selected,
+      value: selected
+          ? l10n.squad_playerSelected
+          : l10n.squad_playerNotSelected,
       onTap: onTap,
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
-        child: ZoneFrame(
-          key: ValueKey('squad-zone-frame-${player.id}'),
-          l10n: l10n,
-          zone: zone,
-          child: row,
-        ),
+        child: selectionSurface,
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final tile = KeyedSubtree(
-      key: ValueKey('squad-player-row-${player.id}'),
-      child: _buildPresentationTile(context),
-    );
-    if (!enableDragDrop) return tile;
+    final row = _buildPresentationTile(context);
+    final interactiveRow = enableDragDrop
+        ? DragTarget<String>(
+            onWillAcceptWithDetails: (details) => details.data != player.id,
+            onAcceptWithDetails: (details) => onAcceptDrop?.call(details.data),
+            builder: (context, candidateData, rejectedData) {
+              final hovered = candidateData.isNotEmpty;
+              return AnimatedContainer(
+                duration: const Duration(milliseconds: 120),
+                decoration: BoxDecoration(
+                  border: hovered
+                      ? Border.all(
+                          color: Theme.of(context).colorScheme.primary,
+                          width: 2,
+                        )
+                      : null,
+                ),
+                child: LongPressDraggable<String>(
+                  data: player.id,
+                  feedback: Material(
+                    elevation: 4,
+                    borderRadius: BorderRadius.circular(12),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 320),
+                      child: row,
+                    ),
+                  ),
+                  childWhenDragging: Opacity(opacity: 0.35, child: row),
+                  child: row,
+                ),
+              );
+            },
+          )
+        : row;
 
-    return DragTarget<String>(
-      onWillAcceptWithDetails: (details) => details.data != player.id,
-      onAcceptWithDetails: (details) => onAcceptDrop?.call(details.data),
-      builder: (context, candidateData, rejectedData) {
-        final hovered = candidateData.isNotEmpty;
-        return AnimatedContainer(
-          duration: const Duration(milliseconds: 120),
-          decoration: BoxDecoration(
-            border: hovered
-                ? Border.all(
-                    color: Theme.of(context).colorScheme.primary,
-                    width: 2,
-                  )
-                : null,
-          ),
-          child: LongPressDraggable<String>(
-            data: player.id,
-            feedback: Material(
-              elevation: 4,
-              borderRadius: BorderRadius.circular(12),
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 320),
-                child: tile,
-              ),
-            ),
-            childWhenDragging: Opacity(opacity: 0.35, child: tile),
-            child: tile,
-          ),
-        );
-      },
+    return KeyedSubtree(
+      key: ValueKey('squad-player-row-${player.id}'),
+      child: interactiveRow,
     );
   }
 }
@@ -379,30 +405,43 @@ class OvrBadge extends StatelessWidget {
   }
 }
 
-/// A clamped, horizontal form track with no visible numeric form value.
+/// A clamped, horizontal form track with a compact visible border.
 class FormIndicator extends StatelessWidget {
-  const FormIndicator({super.key, required this.form, required this.l10n});
+  const FormIndicator({
+    super.key,
+    required this.form,
+    required this.l10n,
+    this.width = 34.0,
+  });
 
   final double form;
   final AppLocalizations l10n;
+  final double width;
 
   @override
   Widget build(BuildContext context) {
     final clampedForm = clampedFormValue(form);
     final fill = formFillForValue(clampedForm);
     final fillColor = formColorForClampedValue(clampedForm);
-    final trackColor = Theme.of(context).colorScheme.surfaceContainerLow;
+    final colors = Theme.of(context).colorScheme;
+    final trackColor = colors.surfaceContainerLow;
+    final indicatorWidth = width.clamp(32.0, 36.0).toDouble();
 
     return Semantics(
       container: true,
       label: l10n.squad_formIndicatorSemantics(_formatForm(clampedForm)),
       child: ExcludeSemantics(
-        child: SizedBox(
+        child: Container(
           key: const ValueKey('squad-form-indicator'),
-          height: 7,
-          width: double.infinity,
-          child: ClipRRect(
+          width: indicatorWidth,
+          height: 10,
+          padding: const EdgeInsets.all(1),
+          decoration: BoxDecoration(
+            border: Border.all(color: colors.outline, width: 1),
             borderRadius: BorderRadius.circular(4),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(2),
             child: Stack(
               fit: StackFit.expand,
               children: [
@@ -421,7 +460,7 @@ class FormIndicator extends StatelessWidget {
   }
 }
 
-/// Independent injury and suspension indicators.
+/// A single reserved status slot for injury and suspension meanings.
 class StatusIcons extends StatelessWidget {
   const StatusIcons({
     super.key,
@@ -439,38 +478,78 @@ class StatusIcons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (hasActiveInjury)
-          _StatusIcon(
-            icon: Icons.healing_outlined,
-            color: colors.error,
-            label: l10n.squad_statusInjury,
-            size: iconSize,
-          ),
-        if (hasActiveSuspension)
-          _StatusIcon(
-            icon: Icons.gavel_outlined,
-            color: colors.tertiary,
-            label: l10n.squad_statusSuspension,
-            size: iconSize,
-          ),
-      ],
+    final presentation = statusSlotPresentation(
+      SquadStatus(
+        hasActiveInjury: hasActiveInjury,
+        hasActiveSuspension: hasActiveSuspension,
+      ),
     );
+    final semanticLabels = presentation.semanticStatuses
+        .map(_localizedStatusLabel)
+        .toList(growable: false);
+    final labelsForSlot = semanticLabels.isEmpty
+        ? <String>[l10n.squad_statusSlotEmpty]
+        : semanticLabels;
+    final tooltipMessage = labelsForSlot.join('. ');
+    final slotWidth = math.max(25.0, iconSize + 5.0).toDouble();
+
+    IconData? icon;
+    Color? color;
+    switch (presentation.visual) {
+      case StatusVisualKind.none:
+        break;
+      case StatusVisualKind.injury:
+        icon = Icons.healing_outlined;
+        color = colors.error;
+      case StatusVisualKind.suspension:
+        icon = Icons.gavel_outlined;
+        color = colors.tertiary;
+    }
+
+    return Tooltip(
+      message: tooltipMessage,
+      child: Semantics(
+        container: true,
+        explicitChildNodes: true,
+        child: SizedBox(
+          width: slotWidth,
+          height: 32,
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              for (final label in labelsForSlot)
+                Semantics(
+                  container: true,
+                  label: label,
+                  child: const SizedBox.expand(),
+                ),
+              if (icon != null)
+                ExcludeSemantics(
+                  child: Icon(icon, color: color, size: iconSize),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _localizedStatusLabel(StatusVisualKind status) {
+    switch (status) {
+      case StatusVisualKind.none:
+        return l10n.squad_statusSlotEmpty;
+      case StatusVisualKind.injury:
+        return l10n.squad_statusInjury;
+      case StatusVisualKind.suspension:
+        return l10n.squad_statusSuspension;
+    }
   }
 }
 
 class _NameAndForm extends StatelessWidget {
-  const _NameAndForm({
-    required this.nameParts,
-    required this.form,
-    required this.l10n,
-  });
+  const _NameAndForm({required this.nameParts});
 
   final NameParts nameParts;
-  final double form;
-  final AppLocalizations l10n;
 
   @override
   Widget build(BuildContext context) {
@@ -492,41 +571,7 @@ class _NameAndForm extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
             style: textTheme.bodySmall,
           ),
-        const SizedBox(height: 4),
-        FormIndicator(form: form, l10n: l10n),
       ],
-    );
-  }
-}
-
-class _StatusIcon extends StatelessWidget {
-  const _StatusIcon({
-    required this.icon,
-    required this.color,
-    required this.label,
-    required this.size,
-  });
-
-  final IconData icon;
-  final Color color;
-  final String label;
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    return Tooltip(
-      message: label,
-      child: Semantics(
-        container: true,
-        label: label,
-        child: ExcludeSemantics(
-          child: SizedBox(
-            width: size + 5,
-            height: 32,
-            child: Icon(icon, color: color, size: size),
-          ),
-        ),
-      ),
     );
   }
 }
