@@ -31,12 +31,14 @@ dev_dependencies:
   json_serializable: ^6.9.5
   mocktail: ^1.0.4
   glados: 1.1.7
+  flutter_launcher_icons: ^0.14.4
 
 flutter:
   uses-material-design: true
   generate: true
   assets:
     - assets/images/new-football-background.png
+    - assets/images/New-Football-Logo-bg-removed.png
     - assets/images/Syrenka_FC.png
     - assets/images/Eiffel_Town.png
     - assets/images/Marseille_FC.png
@@ -67,3 +69,13 @@ flutter:
     - assets/images/Dynamo_Casablanca.png
     - assets/images/Cairo_United.png
     - assets/images/Lagos_Rovers.png
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: assets/images/app_icon.png
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: assets/images/app_icon_foreground.png
+  adaptive_icon_foreground_inset: 18
+  remove_alpha_ios: true
+  background_color_ios: "#FFFFFF"

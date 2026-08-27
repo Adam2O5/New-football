@@ -85,7 +85,6 @@ class MessageService {
       seasonYear: league.currentSeason.year,
       week: targetWeek,
       day: targetDay,
-      hour: targetHour,
       titleKey: titleKey ?? template.titleKey,
       bodyKey: bodyKey ?? template.bodyKey,
       args: expandedArgs,

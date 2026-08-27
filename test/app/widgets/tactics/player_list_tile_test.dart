@@ -1033,8 +1033,7 @@ Container _zoneBorderContainer(WidgetTester tester) {
   final containers = tester.widgetList<Container>(find.byType(Container)).where(
     (container) {
       final decoration = container.decoration;
-      return decoration is BoxDecoration &&
-          (decoration as BoxDecoration).border != null;
+      return decoration is BoxDecoration && decoration.border != null;
     },
   ).toList();
   expect(containers, isNotEmpty);

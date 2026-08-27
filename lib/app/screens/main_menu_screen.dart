@@ -21,6 +21,14 @@ class MainMenuScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const Spacer(flex: 2),
+                ExcludeSemantics(
+                  child: Image.asset(
+                    'assets/images/New-Football-Logo-bg-removed.png',
+                    height: 148,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+                const SizedBox(height: 12),
                 Text(
                   l10n.appTitle,
                   textAlign: TextAlign.center,
@@ -31,56 +39,50 @@ class MainMenuScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 8),
-                Text(
-                  l10n.mainMenu_subtitle,
-                  textAlign: TextAlign.center,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurfaceVariant,
-                  ),
-                ),
                 const Spacer(),
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.surface.withValues(alpha: 0.85),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      FilledButton(
-                        onPressed: () => context.push('/new-game'),
-                        child: Text(l10n.mainMenu_newGame),
-                      ),
-                      const SizedBox(height: 12),
-                      OutlinedButton(
-                        onPressed: () => context.push('/load-game'),
-                        style: OutlinedButton.styleFrom(
-                          backgroundColor: theme.colorScheme.surface
-                              .withValues(alpha: 0.85),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    OutlinedButton(
+                      onPressed: () => context.push('/new-game'),
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: theme.colorScheme.surface.withValues(
+                          alpha: 0.85,
                         ),
-                        child: Text(l10n.mainMenu_loadGame),
                       ),
-                      const SizedBox(height: 12),
-                      OutlinedButton(
-                        onPressed: () => context.push('/settings'),
-                        style: OutlinedButton.styleFrom(
-                          backgroundColor: theme.colorScheme.surface
-                              .withValues(alpha: 0.85),
+                      child: Text(l10n.mainMenu_newGame),
+                    ),
+                    const SizedBox(height: 12),
+                    OutlinedButton(
+                      onPressed: () => context.push('/load-game'),
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: theme.colorScheme.surface.withValues(
+                          alpha: 0.85,
                         ),
-                        child: Text(l10n.mainMenu_settings),
                       ),
-                      const SizedBox(height: 12),
-                      OutlinedButton(
-                        onPressed: () => SystemNavigator.pop(),
-                        style: OutlinedButton.styleFrom(
-                          backgroundColor: theme.colorScheme.surface
-                              .withValues(alpha: 0.85),
+                      child: Text(l10n.mainMenu_loadGame),
+                    ),
+                    const SizedBox(height: 12),
+                    OutlinedButton(
+                      onPressed: () => context.push('/settings'),
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: theme.colorScheme.surface.withValues(
+                          alpha: 0.85,
                         ),
-                        child: Text(l10n.mainMenu_exitGame),
                       ),
-                    ],
-                  ),
+                      child: Text(l10n.mainMenu_settings),
+                    ),
+                    const SizedBox(height: 12),
+                    OutlinedButton(
+                      onPressed: () => SystemNavigator.pop(),
+                      style: OutlinedButton.styleFrom(
+                        backgroundColor: theme.colorScheme.surface.withValues(
+                          alpha: 0.85,
+                        ),
+                      ),
+                      child: Text(l10n.mainMenu_exitGame),
+                    ),
+                  ],
                 ),
                 const Spacer(flex: 2),
               ],

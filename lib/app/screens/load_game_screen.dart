@@ -2,11 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:new_football/app/branding/club_asset_registry.dart';
+import 'package:new_football/app/branding/club_branding_registry.dart';
+import 'package:new_football/app/branding/club_color_tokens.dart';
 import 'package:new_football/app/l10n/enum_labels.dart';
+import 'package:new_football/app/providers/club_branding_provider.dart';
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/app/providers/save_management_provider.dart';
 import 'package:new_football/app/utils/formatters.dart';
+import 'package:new_football/app/widgets/branding/club_logo.dart';
 import 'package:new_football/app/widgets/screen_background.dart';
+import 'package:new_football/app/widgets/team_selection/team_selection_assets.dart';
 import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/core/models/save_record.dart';
 import 'package:new_football/core/services/save_management_service.dart';
@@ -27,6 +33,8 @@ class _LoadGameScreenState extends ConsumerState<LoadGameScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final saves = ref.watch(saveRecordsProvider);
+    final brandingRegistry = ref.watch(clubBrandingProvider);
+    final previewTeams = ref.watch(gameFactoryProvider).previewTeams();
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.loadGame_title),
@@ -44,6 +52,9 @@ class _LoadGameScreenState extends ConsumerState<LoadGameScreen> {
             if (records.isEmpty) {
               return Center(child: Text(l10n.loadGame_empty));
             }
+            final teamIdByName = {
+              for (final team in previewTeams) team.name: team.id,
+            };
             return Container(
               margin: const EdgeInsets.all(8),
               decoration: BoxDecoration(
@@ -57,7 +68,14 @@ class _LoadGameScreenState extends ConsumerState<LoadGameScreen> {
                 itemCount: records.length,
                 separatorBuilder: (_, _) => const SizedBox(height: 8),
                 itemBuilder: (context, index) {
-                  return _buildSaveRow(context, l10n, records[index], records);
+                  return _buildSaveRow(
+                    context,
+                    l10n,
+                    records[index],
+                    records,
+                    brandingRegistry,
+                    teamIdByName,
+                  );
                 },
               ),
             );
@@ -72,6 +90,8 @@ class _LoadGameScreenState extends ConsumerState<LoadGameScreen> {
     AppLocalizations l10n,
     SaveRecord record,
     List<SaveRecord> records,
+    ClubBrandingRegistry brandingRegistry,
+    Map<String, String> teamIdByName,
   ) {
     final meta = record.meta;
     final canLoad = record.compatibility == SaveCompatibility.compatible;
@@ -97,45 +117,98 @@ class _LoadGameScreenState extends ConsumerState<LoadGameScreen> {
       meta,
       record.compatibility,
     );
+    final showSchemaStatus =
+        record.compatibility != SaveCompatibility.compatible;
+
+    final colorScheme = Theme.of(context).colorScheme;
+    final teamId = teamIdByName[meta.playerTeamName];
+    final branding = teamId == null ? null : brandingRegistry.resolve(teamId);
+    final isBranded = branding != null;
+    final primaryColor = branding?.primaryColor ?? colorScheme.surface;
+    final secondaryColor =
+        branding?.secondaryColor ?? colorScheme.outlineVariant;
+    final foregroundColor = branding == null
+        ? colorScheme.onSurface
+        : foregroundFor(primaryColor);
+    final logoAsset =
+        branding?.logoAsset ?? ClubAssetRegistry.production.fallbackLogoAsset;
+    final fallbackLogoAsset = ClubAssetRegistry.production.fallbackLogoAsset;
+    final textTheme = Theme.of(context).textTheme;
+    final titleStyle = textTheme.titleMedium?.copyWith(
+      color: foregroundColor,
+      fontWeight: FontWeight.w700,
+    );
+    final bodyStyle = textTheme.bodyMedium?.copyWith(color: foregroundColor);
 
     return Card(
       key: ValueKey<String>('save-row-${meta.id}'),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(8, 4, 8, 8),
+      color: isBranded ? primaryColor : null,
+      surfaceTintColor: Colors.transparent,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: isBranded ? secondaryColor : Colors.transparent,
+        ),
+      ),
+      child: InkWell(
+        onTap: canLoad ? () => _loadSave(context, meta.id, l10n) : null,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            ListTile(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-              title: Text(meta.name),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(12, 12, 12, 4),
+              child: Column(
                 children: [
+                  ClubLogo(
+                    assetPath: logoAsset,
+                    fallbackAssetPath: fallbackLogoAsset,
+                    size: TeamSelectionAssets.iconSize,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    meta.name,
+                    textAlign: TextAlign.center,
+                    style: titleStyle,
+                  ),
+                  const SizedBox(height: 4),
                   Text(
                     l10n.loadGame_subtitle(
                       meta.playerTeamName ?? '—',
                       meta.seasonYear,
                       seasonPhaseLabel(context, meta.phase),
                     ),
+                    textAlign: TextAlign.center,
+                    style: bodyStyle,
                   ),
-                  Text('${l10n.loadGame_lastSaveDate}: $updatedAt'),
-                  Text('${l10n.loadGame_saveSize}: $size'),
-                  Semantics(
-                    key: ValueKey<String>('save-schema-status-${meta.id}'),
-                    container: true,
-                    excludeSemantics: true,
-                    label: compatibilityLabel,
-                    child: Text(
-                      compatibilityLabel,
-                      style: TextStyle(
-                        color: _compatibilityColor(
-                          context,
-                          record.compatibility,
+                  Text(
+                    '${l10n.loadGame_lastSaveDate}: $updatedAt',
+                    textAlign: TextAlign.center,
+                    style: bodyStyle,
+                  ),
+                  Text(
+                    '${l10n.loadGame_saveSize}: $size',
+                    textAlign: TextAlign.center,
+                    style: bodyStyle,
+                  ),
+                  if (showSchemaStatus)
+                    Semantics(
+                      key: ValueKey<String>('save-schema-status-${meta.id}'),
+                      container: true,
+                      excludeSemantics: true,
+                      label: compatibilityLabel,
+                      child: Text(
+                        compatibilityLabel,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: _compatibilityColor(
+                            context,
+                            record.compatibility,
+                          ),
+                          fontWeight: FontWeight.w600,
                         ),
-                        fontWeight: FontWeight.w600,
                       ),
                     ),
-                  ),
                   if (incompatibilityReason != null)
                     Semantics(
                       key: ValueKey<String>('save-schema-reason-${meta.id}'),
@@ -144,64 +217,75 @@ class _LoadGameScreenState extends ConsumerState<LoadGameScreen> {
                       label: incompatibilityReason,
                       child: Text(
                         incompatibilityReason,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.error,
-                        ),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: colorScheme.error),
                       ),
                     ),
                 ],
               ),
-              onTap: canLoad ? () => _loadSave(context, meta.id, l10n) : null,
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: Align(
                 alignment: AlignmentDirectional.centerEnd,
-                child: Wrap(
-                  alignment: WrapAlignment.end,
-                  spacing: 4,
-                  runSpacing: 4,
-                  children: [
-                    _actionButton(
-                      keyValue: 'save-load-${meta.id}',
-                      icon: Icons.file_open_outlined,
-                      tooltip: l10n.loadGame_loadTooltip,
-                      semanticsLabel: l10n.loadGame_loadSemantics(meta.name),
-                      onPressed: canLoad
-                          ? () => _loadSave(context, meta.id, l10n)
-                          : null,
-                    ),
-                    _actionButton(
-                      keyValue: 'save-delete-${meta.id}',
-                      icon: Icons.delete_outline,
-                      tooltip: l10n.loadGame_deleteTooltip,
-                      semanticsLabel: l10n.loadGame_deleteSemantics(meta.name),
-                      onPressed: () => _confirmDeleteSave(context, record),
-                    ),
-                    _actionButton(
-                      keyValue: 'save-duplicate-${meta.id}',
-                      icon: Icons.content_copy_outlined,
-                      tooltip: l10n.loadGame_duplicateTooltip,
-                      semanticsLabel: l10n.loadGame_duplicateSemantics(
-                        meta.name,
+                child: IconTheme(
+                  data: IconThemeData(color: foregroundColor),
+                  child: Wrap(
+                    alignment: WrapAlignment.end,
+                    spacing: 4,
+                    runSpacing: 4,
+                    children: [
+                      _actionButton(
+                        keyValue: 'save-load-${meta.id}',
+                        icon: Icons.file_open_outlined,
+                        tooltip: l10n.loadGame_loadTooltip,
+                        semanticsLabel: l10n.loadGame_loadSemantics(meta.name),
+                        onPressed: canLoad
+                            ? () => _loadSave(context, meta.id, l10n)
+                            : null,
                       ),
-                      onPressed: canManage && !duplicateInFlight
-                          ? () => _duplicateSave(context, record)
-                          : null,
-                    ),
-                    _actionButton(
-                      keyValue: 'save-rename-${meta.id}',
-                      icon: Icons.edit_outlined,
-                      tooltip: l10n.loadGame_renameTooltip,
-                      semanticsLabel: l10n.loadGame_renameSemantics(meta.name),
-                      onPressed: canManage && !renameInFlight
-                          ? () => _requestRename(context, record, records)
-                          : null,
-                    ),
-                  ],
+                      _actionButton(
+                        keyValue: 'save-delete-${meta.id}',
+                        icon: Icons.delete_outline,
+                        tooltip: l10n.loadGame_deleteTooltip,
+                        semanticsLabel: l10n.loadGame_deleteSemantics(
+                          meta.name,
+                        ),
+                        onPressed: () => _confirmDeleteSave(context, record),
+                      ),
+                      _actionButton(
+                        keyValue: 'save-duplicate-${meta.id}',
+                        icon: Icons.content_copy_outlined,
+                        tooltip: l10n.loadGame_duplicateTooltip,
+                        semanticsLabel: l10n.loadGame_duplicateSemantics(
+                          meta.name,
+                        ),
+                        onPressed: canManage && !duplicateInFlight
+                            ? () => _duplicateSave(context, record)
+                            : null,
+                      ),
+                      _actionButton(
+                        keyValue: 'save-rename-${meta.id}',
+                        icon: Icons.edit_outlined,
+                        tooltip: l10n.loadGame_renameTooltip,
+                        semanticsLabel: l10n.loadGame_renameSemantics(
+                          meta.name,
+                        ),
+                        onPressed: canManage && !renameInFlight
+                            ? () => _requestRename(context, record, records)
+                            : null,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
+            if (isBranded)
+              SizedBox(
+                width: double.infinity,
+                height: 4,
+                child: ColoredBox(color: secondaryColor),
+              ),
           ],
         ),
       ),

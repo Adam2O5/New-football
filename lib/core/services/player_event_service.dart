@@ -1113,7 +1113,6 @@ class PlayerEventService {
         seasonYear: state.currentSeason.year,
         week: state.currentWeek,
         day: state.currentDay,
-        hour: state.currentHour,
         titleKey: 'ai.playerEvent.$kind.title',
         bodyKey: 'ai.playerEvent.$kind.body',
         args: completeArgs,

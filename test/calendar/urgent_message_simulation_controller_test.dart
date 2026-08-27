@@ -384,7 +384,6 @@ GameSave _scheduleUrgent(
     seasonYear: league.currentSeason.year,
     week: week,
     day: day,
-    hour: hour,
     titleKey: 'urgent.simulation.$id.title',
     bodyKey: 'urgent.simulation.$id.body',
   );

@@ -98,30 +98,30 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               SwitchListTile(
                 key: const ValueKey<String>('settings-urgent-interruption'),
                 title: Text(l10n.settings_urgentInterruptionTitle),
-                subtitle: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(urgentInterruptionDescription),
-                    const SizedBox(height: 4),
-                    Text(
-                      urgentInterruptionState,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+                subtitle: AnimatedSize(
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeInOut,
+                  alignment: Alignment.topLeft,
+                  child: Column(
+                    key: ValueKey<bool>(urgentInterruptionEnabled),
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(urgentInterruptionDescription),
+                      const SizedBox(height: 4),
+                    ],
+                  ),
                 ),
                 value: urgentInterruptionEnabled,
                 onChanged: _isSavingUrgentInterruption
                     ? null
                     : _setUrgentInterruption,
-                secondary: _isSavingUrgentInterruption
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : null,
+                secondary: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: _isSavingUrgentInterruption
+                      ? const CircularProgressIndicator(strokeWidth: 2)
+                      : null,
+                ),
               ),
             ],
           ),
