@@ -325,8 +325,8 @@ void _expectRenderedSetting(
   final settings = find.byType(SettingsScreen);
   final control = find.byKey(_urgentControlKey);
   expect(settings, findsOneWidget, reason: reason);
-  expect(find.byType(SwitchListTile), findsOneWidget, reason: reason);
-  expect(find.byType(Switch), findsOneWidget, reason: reason);
+  expect(find.byType(SwitchListTile), findsAtLeastNWidgets(1), reason: reason);
+  expect(find.byType(Switch), findsAtLeastNWidgets(1), reason: reason);
   expect(control, findsOneWidget, reason: reason);
 
   final container = ProviderScope.containerOf(tester.element(settings));

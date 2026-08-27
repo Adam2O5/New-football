@@ -119,6 +119,22 @@
   "@settings_urgentInterruptionWriteError": {
     "description": "Error message shown when the simulation-interruption setting cannot be saved."
   },
+  "settings_legacyColorThemeTitle": "Legacy color theme",
+  "@settings_legacyColorThemeTitle": {
+    "description": "Title of the setting that restores the original green-black-white UI colors."
+  },
+  "settings_legacyColorThemeEnabledDescription": "The interface uses the original green, black and white colors.",
+  "@settings_legacyColorThemeEnabledDescription": {
+    "description": "Effect description when the legacy color theme is enabled."
+  },
+  "settings_legacyColorThemeDisabledDescription": "The interface uses each club's colors in the career shell.",
+  "@settings_legacyColorThemeDisabledDescription": {
+    "description": "Effect description when the legacy color theme is disabled."
+  },
+  "settings_legacyColorThemeWriteError": "Could not save the legacy color theme setting.",
+  "@settings_legacyColorThemeWriteError": {
+    "description": "Error message shown when the legacy color theme setting cannot be saved."
+  },
   "simulation_pendingUrgentNotice": "An urgent message is waiting in your inbox.",
   "@simulation_pendingUrgentNotice": {
     "description": "Information about an urgent message left in the inbox after simulation."

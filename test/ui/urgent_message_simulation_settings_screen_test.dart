@@ -44,8 +44,9 @@ void main() {
               : l10n.settings_urgentInterruptionEnabledLabel;
 
           expect(find.byType(SettingsScreen), findsOneWidget);
-          expect(find.byType(SwitchListTile), findsOneWidget);
-          expect(find.byType(Switch), findsOneWidget);
+          expect(find.byKey(_urgentControlKey), findsOneWidget);
+          expect(find.byType(SwitchListTile), findsAtLeastNWidgets(1));
+          expect(find.byType(Switch), findsAtLeastNWidgets(1));
           expect(control, findsOneWidget);
           expect(tile.value, enabled);
           expect(tile.onChanged, isNotNull);

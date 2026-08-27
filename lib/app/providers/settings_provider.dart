@@ -5,7 +5,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 const _localeKey = 'app_locale';
 const urgentInterruptionSettingKey = 'urgent_interruption_setting';
+const legacyColorThemeSettingKey = 'legacy_color_theme_setting';
 const defaultUrgentInterruptionSetting = true;
+const defaultLegacyColorThemeSetting = false;
 const defaultLocale = Locale('pl');
 const supportedAppLocales = [Locale('pl'), Locale('en')];
 
@@ -96,6 +98,80 @@ final urgentInterruptionSettingProvider =
       return UrgentInterruptionSettingController(
         ref.watch(sharedPreferencesProvider),
       );
+    });
+
+class LegacyColorThemeSettingWriteException implements Exception {
+  LegacyColorThemeSettingWriteException({
+    required this.value,
+    this.cause,
+    this.stackTrace,
+  });
+
+  final bool value;
+  final Object? cause;
+  final StackTrace? stackTrace;
+
+  @override
+  String toString() =>
+      'LegacyColorThemeSettingWriteException: failed to persist '
+      'legacy color theme setting=$value'
+      '${cause == null ? '' : ' ($cause)'}';
+}
+
+class LegacyColorThemeSettingController extends StateNotifier<bool> {
+  LegacyColorThemeSettingController(this._prefs)
+    : super(_readInitialSetting(_prefs));
+
+  final SharedPreferences? _prefs;
+
+  static bool _readInitialSetting(SharedPreferences? prefs) {
+    if (prefs == null) return defaultLegacyColorThemeSetting;
+    try {
+      final rawValue = prefs.get(legacyColorThemeSettingKey);
+      return rawValue is bool ? rawValue : defaultLegacyColorThemeSetting;
+    } catch (_) {
+      return defaultLegacyColorThemeSetting;
+    }
+  }
+
+  Future<void> setLegacyColorTheme(bool value) async {
+    if (_prefs == null) {
+      state = value;
+      return;
+    }
+
+    late final bool didWrite;
+    try {
+      didWrite = await _prefs.setBool(legacyColorThemeSettingKey, value);
+    } catch (error, stackTrace) {
+      throw LegacyColorThemeSettingWriteException(
+        value: value,
+        cause: error,
+        stackTrace: stackTrace,
+      );
+    }
+
+    if (!didWrite) {
+      throw LegacyColorThemeSettingWriteException(
+        value: value,
+        cause: StateError('SharedPreferences.setBool returned false'),
+        stackTrace: StackTrace.current,
+      );
+    }
+
+    state = value;
+  }
+}
+
+final legacyColorThemeSettingProvider =
+    StateNotifierProvider<LegacyColorThemeSettingController, bool>((ref) {
+      SharedPreferences? prefs;
+      try {
+        prefs = ref.read(sharedPreferencesProvider);
+      } catch (_) {
+        prefs = null;
+      }
+      return LegacyColorThemeSettingController(prefs);
     });
 
 class LocaleController extends StateNotifier<Locale> {

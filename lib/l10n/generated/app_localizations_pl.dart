@@ -275,6 +275,21 @@ class AppLocalizationsPl extends AppLocalizations {
       'Nie udało się zapisać ustawienia przerywania symulacji.';
 
   @override
+  String get settings_legacyColorThemeTitle => 'Klasyczny motyw kolorów';
+
+  @override
+  String get settings_legacyColorThemeEnabledDescription =>
+      'Interfejs używa oryginalnych kolorów: zielonego, czarnego i białego.';
+
+  @override
+  String get settings_legacyColorThemeDisabledDescription =>
+      'Interfejs w karierze używa barw wybranego klubu.';
+
+  @override
+  String get settings_legacyColorThemeWriteError =>
+      'Nie udało się zapisać ustawienia klasycznego motywu kolorów.';
+
+  @override
   String get simulation_pendingUrgentNotice =>
       'Pilna wiadomość czeka w skrzynce odbiorczej.';
 

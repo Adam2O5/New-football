@@ -1,21 +1,82 @@
 import 'package:flutter/material.dart';
 
+import 'package:new_football/app/branding/club_color_tokens.dart';
+
 class AppTheme {
   const AppTheme._();
 
   static ThemeData get dark {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: Colors.green.shade800,
+    return _fromScheme(
+      ColorScheme.fromSeed(
+        seedColor: Colors.green.shade800,
+        brightness: Brightness.dark,
+      ),
+    );
+  }
+
+  /// Dark Material theme seeded with a club's exact primary and secondary.
+  static ThemeData forClub({
+    required Color primary,
+    required Color secondary,
+  }) {
+    final generated = ColorScheme.fromSeed(
+      seedColor: primary,
       brightness: Brightness.dark,
     );
+    final onPrimary = foregroundFor(primary);
+    final onSecondary = foregroundFor(secondary);
+    final scheme = generated.copyWith(
+      primary: primary,
+      onPrimary: onPrimary,
+      secondary: secondary,
+      onSecondary: onSecondary,
+      primaryContainer: Color.alphaBlend(
+        primary.withValues(alpha: 0.32),
+        generated.surfaceContainerHigh,
+      ),
+      onPrimaryContainer: onPrimary,
+      secondaryContainer: Color.alphaBlend(
+        secondary.withValues(alpha: 0.28),
+        generated.surfaceContainerHigh,
+      ),
+      onSecondaryContainer: onSecondary,
+    );
+    return _fromScheme(
+      scheme,
+      appBarBackground: primary,
+      appBarForeground: onPrimary,
+      navigationBackground: Color.alphaBlend(
+        primary.withValues(alpha: 0.22),
+        scheme.surfaceContainerHighest,
+      ),
+      navigationIndicator: Color.alphaBlend(
+        secondary.withValues(alpha: 0.55),
+        scheme.surfaceContainerHighest,
+      ),
+    );
+  }
+
+  static ThemeData _fromScheme(
+    ColorScheme scheme, {
+    Color? appBarBackground,
+    Color? appBarForeground,
+    Color? navigationBackground,
+    Color? navigationIndicator,
+  }) {
+    final barBackground =
+        appBarBackground ?? scheme.surfaceContainerHighest;
+    final barForeground = appBarForeground ?? scheme.onSurface;
+    final navBackground =
+        navigationBackground ?? scheme.surfaceContainerHighest;
+    final navIndicator = navigationIndicator ?? scheme.primaryContainer;
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
       colorScheme: scheme,
       scaffoldBackgroundColor: const Color(0xFF0E1510),
       appBarTheme: AppBarTheme(
-        backgroundColor: scheme.surfaceContainerHighest,
-        foregroundColor: scheme.onSurface,
+        backgroundColor: barBackground,
+        foregroundColor: barForeground,
         centerTitle: true,
         elevation: 0,
         scrolledUnderElevation: 0,
@@ -43,8 +104,18 @@ class AppTheme {
         unselectedLabelColor: scheme.onSurfaceVariant,
       ),
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: scheme.surfaceContainerHighest,
-        indicatorColor: scheme.primaryContainer,
+        backgroundColor: navBackground,
+        indicatorColor: navIndicator,
+        iconTheme: navigationIndicator == null
+            ? null
+            : WidgetStateProperty.resolveWith((states) {
+                final selected = states.contains(WidgetState.selected);
+                return IconThemeData(
+                  color: selected
+                      ? foregroundFor(navIndicator)
+                      : scheme.onSurfaceVariant,
+                );
+              }),
         labelTextStyle: WidgetStatePropertyAll(
           TextStyle(fontSize: 11, color: scheme.onSurface),
         ),

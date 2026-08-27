@@ -614,6 +614,30 @@ abstract class AppLocalizations {
   /// **'Nie udało się zapisać ustawienia przerywania symulacji.'**
   String get settings_urgentInterruptionWriteError;
 
+  /// Tytuł ustawienia przywracającego oryginalne zielono-czarno-białe kolory UI.
+  ///
+  /// In pl, this message translates to:
+  /// **'Klasyczny motyw kolorów'**
+  String get settings_legacyColorThemeTitle;
+
+  /// Opis skutku włączonego klasycznego motywu kolorów.
+  ///
+  /// In pl, this message translates to:
+  /// **'Interfejs używa oryginalnych kolorów: zielonego, czarnego i białego.'**
+  String get settings_legacyColorThemeEnabledDescription;
+
+  /// Opis skutku wyłączonego klasycznego motywu kolorów.
+  ///
+  /// In pl, this message translates to:
+  /// **'Interfejs w karierze używa barw wybranego klubu.'**
+  String get settings_legacyColorThemeDisabledDescription;
+
+  /// Komunikat o błędzie zapisu ustawienia klasycznego motywu kolorów.
+  ///
+  /// In pl, this message translates to:
+  /// **'Nie udało się zapisać ustawienia klasycznego motywu kolorów.'**
+  String get settings_legacyColorThemeWriteError;
+
   /// Informacja o pilnej wiadomości pozostawionej w skrzynce po symulacji.
   ///
   /// In pl, this message translates to:

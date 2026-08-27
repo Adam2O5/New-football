@@ -129,6 +129,22 @@
   "@settings_urgentInterruptionWriteError": {
     "description": "Komunikat o błędzie zapisu ustawienia przerywania symulacji."
   },
+  "settings_legacyColorThemeTitle": "Klasyczny motyw kolorów",
+  "@settings_legacyColorThemeTitle": {
+    "description": "Tytuł ustawienia przywracającego oryginalne zielono-czarno-białe kolory UI."
+  },
+  "settings_legacyColorThemeEnabledDescription": "Interfejs używa oryginalnych kolorów: zielonego, czarnego i białego.",
+  "@settings_legacyColorThemeEnabledDescription": {
+    "description": "Opis skutku włączonego klasycznego motywu kolorów."
+  },
+  "settings_legacyColorThemeDisabledDescription": "Interfejs w karierze używa barw wybranego klubu.",
+  "@settings_legacyColorThemeDisabledDescription": {
+    "description": "Opis skutku wyłączonego klasycznego motywu kolorów."
+  },
+  "settings_legacyColorThemeWriteError": "Nie udało się zapisać ustawienia klasycznego motywu kolorów.",
+  "@settings_legacyColorThemeWriteError": {
+    "description": "Komunikat o błędzie zapisu ustawienia klasycznego motywu kolorów."
+  },
   "simulation_pendingUrgentNotice": "Pilna wiadomość czeka w skrzynce odbiorczej.",
   "@simulation_pendingUrgentNotice": {
     "description": "Informacja o pilnej wiadomości pozostawionej w skrzynce po symulacji."

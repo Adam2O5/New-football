@@ -120,7 +120,10 @@ void main() {
 
         // SwitchListTile deliberately excludes its inner Switch from focus;
         // the enclosing ListTile is the real keyboard activation target.
-        final switchFinder = find.byType(Switch);
+        final switchFinder = find.descendant(
+          of: find.byKey(_urgentControlKey),
+          matching: find.byType(Switch),
+        );
         expect(switchFinder, findsOneWidget, reason: caseLabel);
         final focusableSwitchFinder = find.descendant(
           of: find.byKey(_urgentControlKey),
@@ -213,8 +216,8 @@ void _expectLocalizedSettingSurface(
 
   final control = find.byKey(_urgentControlKey);
   expect(control, findsOneWidget, reason: caseLabel);
-  expect(find.byType(SwitchListTile), findsOneWidget, reason: caseLabel);
-  expect(find.byType(Switch), findsOneWidget, reason: caseLabel);
+  expect(find.byType(SwitchListTile), findsAtLeastNWidgets(1), reason: caseLabel);
+  expect(find.byType(Switch), findsAtLeastNWidgets(1), reason: caseLabel);
   expect(
     tester.widget<SwitchListTile>(control).title,
     isA<Text>(),
@@ -311,15 +314,14 @@ SemanticsNode _expectSwitchSemantics(
     reason: '$caseLabel: switch row semantics must expose the localized title',
   );
   final rowNode = tester.getSemantics(rowFinder);
-  final root = _semanticsRoot(rowNode);
-  final toggledNodes = _semanticsSubtree(root)
+  final toggledNodes = _semanticsSubtree(rowNode)
       .where((node) => node.flagsCollection.isToggled != ui.Tristate.none)
       .toList(growable: false);
 
   expect(
     toggledNodes,
     hasLength(1),
-    reason: '$caseLabel: SettingsScreen must expose exactly one switch node',
+    reason: '$caseLabel: urgent setting must expose exactly one switch node',
   );
   final toggleNode = toggledNodes.single;
   expect(rowNode.label, contains(title), reason: caseLabel);

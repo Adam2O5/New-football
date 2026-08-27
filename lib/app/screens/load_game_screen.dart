@@ -57,12 +57,6 @@ class _LoadGameScreenState extends ConsumerState<LoadGameScreen> {
             };
             return Container(
               margin: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Theme.of(
-                  context,
-                ).colorScheme.surface.withValues(alpha: 0.85),
-                borderRadius: BorderRadius.circular(12),
-              ),
               child: ListView.separated(
                 padding: const EdgeInsets.all(12),
                 itemCount: records.length,
@@ -227,7 +221,7 @@ class _LoadGameScreenState extends ConsumerState<LoadGameScreen> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: Align(
-                alignment: AlignmentDirectional.centerEnd,
+                alignment: AlignmentDirectional.center,
                 child: IconTheme(
                   data: IconThemeData(color: foregroundColor),
                   child: Wrap(

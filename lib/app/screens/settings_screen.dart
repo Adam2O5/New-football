@@ -15,6 +15,7 @@ class SettingsScreen extends ConsumerStatefulWidget {
 
 class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   bool _isSavingUrgentInterruption = false;
+  bool _isSavingLegacyColorTheme = false;
 
   Future<void> _setUrgentInterruption(bool value) async {
     if (_isSavingUrgentInterruption) return;
@@ -39,6 +40,29 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     }
   }
 
+  Future<void> _setLegacyColorTheme(bool value) async {
+    if (_isSavingLegacyColorTheme) return;
+
+    setState(() => _isSavingLegacyColorTheme = true);
+    try {
+      await ref
+          .read(legacyColorThemeSettingProvider.notifier)
+          .setLegacyColorTheme(value);
+    } catch (_) {
+      if (!mounted) return;
+      final l10n = AppLocalizations.of(context)!;
+      ScaffoldMessenger.of(context)
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(content: Text(l10n.settings_legacyColorThemeWriteError)),
+        );
+    } finally {
+      if (mounted) {
+        setState(() => _isSavingLegacyColorTheme = false);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -46,12 +70,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     final urgentInterruptionEnabled = ref.watch(
       urgentInterruptionSettingProvider,
     );
+    final legacyColorThemeEnabled = ref.watch(legacyColorThemeSettingProvider);
     final urgentInterruptionDescription = urgentInterruptionEnabled
         ? l10n.settings_urgentInterruptionEnabledDescription
         : l10n.settings_urgentInterruptionDisabledDescription;
     final urgentInterruptionState = urgentInterruptionEnabled
         ? l10n.settings_urgentInterruptionEnabledLabel
         : l10n.settings_urgentInterruptionDisabledLabel;
+    final legacyColorThemeDescription = legacyColorThemeEnabled
+        ? l10n.settings_legacyColorThemeEnabledDescription
+        : l10n.settings_legacyColorThemeDisabledDescription;
 
     return Scaffold(
       appBar: AppBar(
@@ -108,6 +136,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     children: [
                       Text(urgentInterruptionDescription),
                       const SizedBox(height: 4),
+                      Text(urgentInterruptionState),
                     ],
                   ),
                 ),
@@ -119,6 +148,35 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   width: 20,
                   height: 20,
                   child: _isSavingUrgentInterruption
+                      ? const CircularProgressIndicator(strokeWidth: 2)
+                      : null,
+                ),
+              ),
+              const SizedBox(height: 8),
+              SwitchListTile(
+                key: const ValueKey<String>('settings-legacy-color-theme'),
+                title: Text(l10n.settings_legacyColorThemeTitle),
+                subtitle: AnimatedSize(
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeInOut,
+                  alignment: Alignment.topLeft,
+                  child: Column(
+                    key: ValueKey<bool>(legacyColorThemeEnabled),
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(legacyColorThemeDescription),
+                      const SizedBox(height: 4),
+                    ],
+                  ),
+                ),
+                value: legacyColorThemeEnabled,
+                onChanged: _isSavingLegacyColorTheme
+                    ? null
+                    : _setLegacyColorTheme,
+                secondary: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: _isSavingLegacyColorTheme
                       ? const CircularProgressIndicator(strokeWidth: 2)
                       : null,
                 ),

@@ -275,6 +275,21 @@ class AppLocalizationsEn extends AppLocalizations {
       'Could not save the urgent-message simulation setting.';
 
   @override
+  String get settings_legacyColorThemeTitle => 'Legacy color theme';
+
+  @override
+  String get settings_legacyColorThemeEnabledDescription =>
+      'The interface uses the original green, black and white colors.';
+
+  @override
+  String get settings_legacyColorThemeDisabledDescription =>
+      'The interface uses each club\'s colors in the career shell.';
+
+  @override
+  String get settings_legacyColorThemeWriteError =>
+      'Could not save the legacy color theme setting.';
+
+  @override
   String get simulation_pendingUrgentNotice =>
       'An urgent message is waiting in your inbox.';
 
