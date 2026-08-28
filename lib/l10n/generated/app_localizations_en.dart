@@ -1061,6 +1061,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get squad_sortPosition => 'Position';
 
   @override
+  String get squad_formLabel => 'Form';
+
+  @override
+  String get squad_staminaLabel => 'Stamina';
+
+  @override
+  String squad_staminaIndicatorSemantics(String stamina) {
+    return 'Stamina: $stamina';
+  }
+
+  @override
   String substitute_sheetTitle(String name) {
     return 'Substitute for $name';
   }

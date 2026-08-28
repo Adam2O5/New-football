@@ -60,13 +60,18 @@ class PlayerListTile extends StatelessWidget {
     context.push('/game/player/${player.id}');
   }
 
-  String _rowSemantics(SquadStatus status, int roundedOvr, double form) {
+  String _rowSemantics(
+    SquadStatus status,
+    int roundedOvr,
+    double form,
+    double stamina,
+  ) {
     final label = l10n.squad_playerRowSemantics(
       player.name,
       player.position.code,
       roundedOvr,
       _formatForm(form),
-      _zoneLabel(l10n, zone),
+      _formatStamina(stamina),
     );
     final statuses = <String>[
       if (status.hasActiveInjury) l10n.squad_statusInjury,
@@ -81,8 +86,14 @@ class PlayerListTile extends StatelessWidget {
     final status = statusFor(player, _resolvedAssignment);
     final roundedOvr = roundedOvrForDisplay(player.overall());
     final clampedForm = clampedFormValue(player.state.form);
+    final clampedStamina = clampedStaminaValue(player.state.stamina.toDouble());
     final nameParts = splitPlayerName(player.name);
-    final rowSemantics = _rowSemantics(status, roundedOvr, clampedForm);
+    final rowSemantics = _rowSemantics(
+      status,
+      roundedOvr,
+      clampedForm,
+      clampedStamina,
+    );
 
     final row = LayoutBuilder(
       builder: (context, constraints) {
@@ -105,7 +116,23 @@ class PlayerListTile extends StatelessWidget {
             SizedBox(width: badgeGap),
             Expanded(child: _NameAndForm(nameParts: nameParts)),
             const SizedBox(width: 2),
-            FormIndicator(form: clampedForm, l10n: l10n, width: badgeSize),
+            _MetricBarCaption(
+              label: l10n.squad_staminaLabel,
+              bar: StaminaIndicator(
+                stamina: clampedStamina,
+                l10n: l10n,
+                width: badgeSize,
+              ),
+            ),
+            const SizedBox(width: 4),
+            _MetricBarCaption(
+              label: l10n.squad_formLabel,
+              bar: FormIndicator(
+                form: clampedForm,
+                l10n: l10n,
+                width: badgeSize,
+              ),
+            ),
             const SizedBox(width: 2),
             StatusIcons(
               hasActiveInjury: status.hasActiveInjury,
@@ -460,6 +487,101 @@ class FormIndicator extends StatelessWidget {
   }
 }
 
+/// A clamped, horizontal stamina track with a compact visible border.
+///
+/// Mirrors [FormIndicator]'s structure but reads the 0–100 stamina gradient
+/// (no blue endpoint) instead of the 0–10 form gradient.
+class StaminaIndicator extends StatelessWidget {
+  const StaminaIndicator({
+    super.key,
+    required this.stamina,
+    required this.l10n,
+    this.width = 34.0,
+  });
+
+  final double stamina;
+  final AppLocalizations l10n;
+  final double width;
+
+  @override
+  Widget build(BuildContext context) {
+    final clampedStamina = clampedStaminaValue(stamina);
+    final fill = staminaFillForValue(clampedStamina);
+    final fillColor = staminaColorForClampedValue(clampedStamina);
+    final colors = Theme.of(context).colorScheme;
+    final trackColor = colors.surfaceContainerLow;
+    final indicatorWidth = width.clamp(32.0, 36.0).toDouble();
+
+    return Semantics(
+      container: true,
+      label: l10n.squad_staminaIndicatorSemantics(
+        _formatStamina(clampedStamina),
+      ),
+      child: ExcludeSemantics(
+        child: Container(
+          key: const ValueKey('squad-stamina-indicator'),
+          width: indicatorWidth,
+          height: 10,
+          padding: const EdgeInsets.all(1),
+          decoration: BoxDecoration(
+            border: Border.all(color: colors.outline, width: 1),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(2),
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                ColoredBox(color: trackColor),
+                FractionallySizedBox(
+                  alignment: Alignment.centerLeft,
+                  widthFactor: fill,
+                  child: ColoredBox(color: fillColor),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A small text caption placed under a metric bar (form/stamina) so both
+/// tracks are identifiable at a glance. Purely visual: the bar underneath
+/// already carries its own [Semantics] label, so the caption is excluded
+/// from the accessibility tree to avoid announcing the value twice.
+class _MetricBarCaption extends StatelessWidget {
+  const _MetricBarCaption({required this.label, required this.bar});
+
+  final String label;
+  final Widget bar;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ExcludeSemantics(
+          child: Text(
+            label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontSize: 8,
+              fontWeight: FontWeight.w600,
+              color: colors.onSurfaceVariant,
+            ),
+          ),
+        ),
+        const SizedBox(height: 2),
+        bar,
+      ],
+    );
+  }
+}
+
 /// A single reserved status slot for injury and suspension meanings.
 class StatusIcons extends StatelessWidget {
   const StatusIcons({
@@ -588,6 +710,11 @@ String _zoneLabel(AppLocalizations l10n, RosterZone zone) {
 }
 
 String _formatForm(double value) {
+  if (value == value.roundToDouble()) return value.toInt().toString();
+  return value.toString();
+}
+
+String _formatStamina(double value) {
   if (value == value.roundToDouble()) return value.toInt().toString();
   return value.toString();
 }

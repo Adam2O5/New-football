@@ -591,6 +591,25 @@
   "squad_sortPosition": "Position",
   "@squad_sortPosition": { "description": "Roster sort option: by position only, ignoring zone." },  
 
+  "squad_formLabel": "Form",
+  
+  "@squad_formLabel": {
+    "description": "Short caption shown above the form bar in the squad list row."
+  },
+  "squad_staminaLabel": "Stamina",
+  "@squad_staminaLabel": {
+    "description": "Short caption shown above the stamina bar in the squad list row."
+  },
+  "squad_staminaIndicatorSemantics": "Stamina: {stamina}",
+  "@squad_staminaIndicatorSemantics": {
+    "description": "Accessibility label for the stamina bar.",
+    "placeholders": {
+      "stamina": {
+        "type": "String"
+      }
+    }
+  },
+
   "substitute_sheetTitle": "Substitute for {name}",
   "@substitute_sheetTitle": {
     "description": "Title of the bottom sheet opened when tapping a slot on the pitch, showing the name of the player being substituted.",

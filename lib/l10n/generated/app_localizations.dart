@@ -1978,6 +1978,24 @@ abstract class AppLocalizations {
   /// **'Pozycja'**
   String get squad_sortPosition;
 
+  /// Krótki podpis nad paskiem formy w wierszu składu.
+  ///
+  /// In pl, this message translates to:
+  /// **'Forma'**
+  String get squad_formLabel;
+
+  /// Krótki podpis nad paskiem staminy w wierszu składu.
+  ///
+  /// In pl, this message translates to:
+  /// **'Stamina'**
+  String get squad_staminaLabel;
+
+  /// Etykieta dostępności dla paska staminy.
+  ///
+  /// In pl, this message translates to:
+  /// **'Stamina: {stamina}'**
+  String squad_staminaIndicatorSemantics(String stamina);
+
   /// Title of the bottom sheet opened when tapping a slot on the pitch, showing the name of the player being substituted.
   ///
   /// In pl, this message translates to:

@@ -68,10 +68,28 @@ const List<ColorStop> percentGradientStops = <ColorStop>[
   ColorStop(value: 100, color: Colors.blue),
 ];
 
+/// The lower and upper values represented by [staminaGradientStops].
+const double minStaminaGradientValue = 0;
+const double maxStaminaGradientValue = 100;
+
+/// The semantic 0–100 gradient used by the stamina indicator.
+///
+/// Same progression as [percentGradientStops] but without the blue endpoint:
+/// the original 0–90 stops are proportionally rescaled onto 0–100 so the top
+/// of the track is the dark-green "full stamina" colour instead of blue.
+const List<ColorStop> staminaGradientStops = <ColorStop>[
+  ColorStop(value: 0, color: Colors.red),
+  ColorStop(value: 33, color: Colors.orange),
+  ColorStop(value: 56, color: Colors.yellow),
+  ColorStop(value: 78, color: Colors.lightGreen),
+  ColorStop(value: 100, color: Color(0xFF2E7D32)),
+];
+
 /// Aliases that make the gradient purpose explicit at call sites.
 const List<ColorStop> ovrColorStops = ovrGradientStops;
 const List<ColorStop> formColorStops = formGradientStops;
 const List<ColorStop> percentColorStops = percentGradientStops;
+const List<ColorStop> staminaColorStops = staminaGradientStops;
 
 /// Linearly interpolates colour channels between [stops] at [value].
 ///
@@ -156,6 +174,22 @@ double clampedPercentValue(double value) => _clampPercent(value);
 /// Returns the filled fraction for a raw value on a 0–100 track.
 double percentFillForValue(double value) =>
     (_clampPercent(value) / maxPercentGradientValue).clamp(0.0, 1.0).toDouble();
+
+/// Returns the stamina background colour for a 0–100 value after clamping.
+///
+/// Values at or below 0 use the red endpoint; values at or above 100 use the
+/// dark-green endpoint (no blue tier, unlike [percentColorForClampedValue]).
+/// `NaN` is treated as the safe lower endpoint and infinities are clamped to
+/// the corresponding finite endpoint.
+Color staminaColorForClampedValue(double value) =>
+    interpolateStops(_clampStamina(value), staminaGradientStops);
+
+/// Clamps a raw value to the inclusive 0–100 stamina presentation scale.
+double clampedStaminaValue(double value) => _clampStamina(value);
+
+/// Returns the filled fraction for a raw stamina value on a 0–100 track.
+double staminaFillForValue(double value) =>
+    (_clampStamina(value) / maxStaminaGradientValue).clamp(0.0, 1.0).toDouble();
 
 /// Rounds a finite numeric value to the nearest integer using half-up ties.
 ///
@@ -267,6 +301,16 @@ double _clampPercent(double value) {
   if (value == double.infinity) return maxPercentGradientValue;
   return value
       .clamp(minPercentGradientValue, maxPercentGradientValue)
+      .toDouble();
+}
+
+double _clampStamina(double value) {
+  if (value.isNaN || value == double.negativeInfinity) {
+    return minStaminaGradientValue;
+  }
+  if (value == double.infinity) return maxStaminaGradientValue;
+  return value
+      .clamp(minStaminaGradientValue, maxStaminaGradientValue)
       .toDouble();
 }
 

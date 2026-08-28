@@ -636,6 +636,24 @@
   "@squad_sortPosition": {
     "description": "Opcja sortowania składu: wyłącznie po pozycji, z pominięciem strefy przypisania."
   },
+  "squad_formLabel": "Forma",
+  
+  "@squad_formLabel": {
+    "description": "Krótki podpis nad paskiem formy w wierszu składu."
+  },
+  "squad_staminaLabel": "Stamina",
+  "@squad_staminaLabel": {
+    "description": "Krótki podpis nad paskiem staminy w wierszu składu."
+  },
+  "squad_staminaIndicatorSemantics": "Stamina: {stamina}",
+  "@squad_staminaIndicatorSemantics": {
+    "description": "Etykieta dostępności dla paska staminy.",
+    "placeholders": {
+      "stamina": {
+        "type": "String"
+      }
+    }
+  },
 
   "substitute_sheetTitle": "Zmiana za {name}",
   "@substitute_sheetTitle": {
