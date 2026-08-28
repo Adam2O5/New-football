@@ -17,7 +17,8 @@ import 'package:new_football/app/utils/color_interpolation.dart';
 import 'package:new_football/app/utils/squad_presentation.dart';
 import 'package:new_football/app/widgets/tactics/pitch_field.dart';
 import 'package:new_football/app/widgets/tactics/player_list_tile.dart';
-import 'package:new_football/app/widgets/squad/roster_size_indicator.dart';
+import 'package:new_football/app/widgets/squad/squad_indicators.dart';
+import 'package:new_football/core/services/cohesion_service.dart';
 import 'package:new_football/core/tactics/formation_layout.dart';
 import 'package:new_football/core/tactics/player_sort.dart';
 import 'package:new_football/app/widgets/tactics/role_picker_sheet.dart';
@@ -180,6 +181,13 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
     final playersById = <String, Player>{
       for (final player in team.roster) player.id: player,
     };
+    final lineupPlayers = team.lineupPlayerIds
+        .map((id) => playersById[id])
+        .whereType<Player>()
+        .toList();
+    final lineupCohesion = const CohesionService().computeCohesion(
+      lineupPlayers,
+    );
     final formationLayout = FormationLayout.of(formation!);
     final placements = placePlayersOnSlots(
       slots: formationLayout.slots,
@@ -195,11 +203,49 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-          child: RosterSizeIndicator(
-            l10n: l10n,
-            count: team.roster.length,
-            min: min,
-            max: max,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: RosterSizeIndicator(
+                      l10n: l10n,
+                      count: team.roster.length,
+                      min: min,
+                      max: max,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: SquadValueBar(
+                      label: l10n.squad_lineupCohesionLabel,
+                      value: lineupCohesion,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: SquadValueBar(
+                      label: l10n.squad_chemistryLabel,
+                      value: team.chemistry,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: SquadValueBar(
+                      label: l10n.squad_atmosphereLabel,
+                      value: team.atmosphere,
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
         ),
         SizedBox(

@@ -85,9 +85,6 @@ class RosterSizePresentation {
   /// True when the range indicator should use its warning state.
   bool get isOutOfRange => !isInRange;
 
-  /// A stable, locale-neutral state token for semantic snapshots.
-  String get semanticState => isInRange ? 'in-range' : 'out-of-range';
-
   /// The semantic track color for the current state.
   Color get trackColor => isInRange ? Colors.green : Colors.red;
 

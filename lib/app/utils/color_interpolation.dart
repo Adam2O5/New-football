@@ -29,6 +29,10 @@ const int maxOvrGradientValue = 99;
 const double minFormGradientValue = 0;
 const double maxFormGradientValue = 10;
 
+/// The lower and upper values represented by [percentGradientStops].
+const double minPercentGradientValue = 0;
+const double maxPercentGradientValue = 100;
+
 /// The semantic OVR gradient used by the squad presentation.
 ///
 /// The dark-green token is deliberately darker than the light-green token so
@@ -53,9 +57,21 @@ const List<ColorStop> formGradientStops = <ColorStop>[
   ColorStop(value: 10, color: Colors.blue),
 ];
 
+/// The semantic 0–100 gradient used by the squad metric bars (lineup
+/// cohesion, chemistry, atmosphere).
+const List<ColorStop> percentGradientStops = <ColorStop>[
+  ColorStop(value: 0, color: Colors.red),
+  ColorStop(value: 30, color: Colors.orange),
+  ColorStop(value: 50, color: Colors.yellow),
+  ColorStop(value: 70, color: Colors.lightGreen),
+  ColorStop(value: 90, color: Color(0xFF2E7D32)),
+  ColorStop(value: 100, color: Colors.blue),
+];
+
 /// Aliases that make the gradient purpose explicit at call sites.
 const List<ColorStop> ovrColorStops = ovrGradientStops;
 const List<ColorStop> formColorStops = formGradientStops;
+const List<ColorStop> percentColorStops = percentGradientStops;
 
 /// Linearly interpolates colour channels between [stops] at [value].
 ///
@@ -125,6 +141,21 @@ double clampedFormValue(double form) => _clampForm(form);
 /// Returns the filled fraction for a raw form value on a 0–10 track.
 double formFillForValue(double form) =>
     (_clampForm(form) / maxFormGradientValue).clamp(0.0, 1.0).toDouble();
+
+/// Returns the background colour for a 0–100 metric value after clamping.
+///
+/// Values at or below 0 use the red endpoint; values at or above 100 use the
+/// blue endpoint. `NaN` is treated as the safe lower endpoint and infinities
+/// are clamped to the corresponding finite endpoint.
+Color percentColorForClampedValue(double value) =>
+    interpolateStops(_clampPercent(value), percentGradientStops);
+
+/// Clamps a raw value to the inclusive 0–100 presentation scale.
+double clampedPercentValue(double value) => _clampPercent(value);
+
+/// Returns the filled fraction for a raw value on a 0–100 track.
+double percentFillForValue(double value) =>
+    (_clampPercent(value) / maxPercentGradientValue).clamp(0.0, 1.0).toDouble();
 
 /// Rounds a finite numeric value to the nearest integer using half-up ties.
 ///
@@ -227,6 +258,16 @@ double _clampForm(double value) {
   }
   if (value == double.infinity) return maxFormGradientValue;
   return value.clamp(minFormGradientValue, maxFormGradientValue).toDouble();
+}
+
+double _clampPercent(double value) {
+  if (value.isNaN || value == double.negativeInfinity) {
+    return minPercentGradientValue;
+  }
+  if (value == double.infinity) return maxPercentGradientValue;
+  return value
+      .clamp(minPercentGradientValue, maxPercentGradientValue)
+      .toDouble();
 }
 
 double _relativeLuminance(Color color) {

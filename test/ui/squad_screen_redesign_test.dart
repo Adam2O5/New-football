@@ -17,7 +17,7 @@ import 'package:new_football/app/utils/squad_presentation.dart';
 import 'package:new_football/app/widgets/tactics/pitch_field.dart';
 import 'package:new_football/app/widgets/tactics/player_list_tile.dart';
 import 'package:new_football/app/widgets/tactics/substitute_sheet.dart';
-import 'package:new_football/app/widgets/squad/roster_size_indicator.dart';
+import 'package:new_football/app/widgets/squad/squad_indicators.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/core/models/injury.dart';

@@ -1906,6 +1906,30 @@ abstract class AppLocalizations {
   /// **'Zamieniono miejsca zawodników'**
   String get squad_swappedPlaces;
 
+  /// Krótka etykieta pokazywana obok ikony stanu we wskaźniku wielkości składu.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zawodnicy'**
+  String get squad_rosterSizeLabel;
+
+  /// Etykieta paska metryki zgrania wyjściowego składu na ekranie drużyny.
+  ///
+  /// In pl, this message translates to:
+  /// **'Spójność składu'**
+  String get squad_lineupCohesionLabel;
+
+  /// Etykieta paska metryki chemii drużyny na ekranie składu.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zgranie'**
+  String get squad_chemistryLabel;
+
+  /// Etykieta paska metryki atmosfery drużyny na ekranie składu.
+  ///
+  /// In pl, this message translates to:
+  /// **'Atmosfera'**
+  String get squad_atmosphereLabel;
+
   /// Tytuł sekcji z pełną listą zawodników na ekranie składu.
   ///
   /// In pl, this message translates to:

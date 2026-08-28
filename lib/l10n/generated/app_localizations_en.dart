@@ -1025,6 +1025,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get squad_swappedPlaces => 'Swapped player places';
 
   @override
+  String get squad_rosterSizeLabel => 'Squad size';
+
+  @override
+  String get squad_lineupCohesionLabel => 'Lineup cohesion';
+
+  @override
+  String get squad_chemistryLabel => 'Chemistry';
+
+  @override
+  String get squad_atmosphereLabel => 'Atmosphere';
+
+  @override
   String get squad_rosterTitle => 'Roster';
 
   @override

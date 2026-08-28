@@ -58,7 +58,6 @@ void main() {
 
         expect(middle.clampedProgress, closeTo(0.5, 0.000001));
         expect(middle.isWithinRange, isTrue);
-        expect(middle.semanticState, 'in-range');
 
         expect(maximum.clampedProgress, 1);
         expect(maximum.isInRange, isTrue);
@@ -68,7 +67,6 @@ void main() {
         expect(above.isOutOfRange, isTrue);
         expect(above.state, RosterSizeState.outOfRange);
         expect(above.iconState, RosterSizeIconState.x);
-        expect(above.semanticState, 'out-of-range');
       },
     );
 

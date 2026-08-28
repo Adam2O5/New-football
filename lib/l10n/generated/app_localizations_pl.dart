@@ -1027,6 +1027,18 @@ class AppLocalizationsPl extends AppLocalizations {
   String get squad_swappedPlaces => 'Zamieniono miejsca zawodników';
 
   @override
+  String get squad_rosterSizeLabel => 'Zawodnicy';
+
+  @override
+  String get squad_lineupCohesionLabel => 'Spójność składu';
+
+  @override
+  String get squad_chemistryLabel => 'Zgranie';
+
+  @override
+  String get squad_atmosphereLabel => 'Atmosfera';
+
+  @override
   String get squad_rosterTitle => 'Skład';
 
   @override

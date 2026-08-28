@@ -551,6 +551,22 @@
   "squad_cannotFieldInjured": "An injured player can't be fielded",
   "squad_swappedPlaces": "Swapped player places",
   
+  "squad_rosterSizeLabel": "Squad size",
+  "@squad_rosterSizeLabel": {
+    "description": "Short label shown next to the state icon in the roster size indicator."
+  },
+  "squad_lineupCohesionLabel": "Lineup cohesion",
+  "@squad_lineupCohesionLabel": {
+    "description": "Label for the lineup cohesion metric bar on the squad screen."
+  },
+  "squad_chemistryLabel": "Chemistry",
+  "@squad_chemistryLabel": {
+    "description": "Label for the team chemistry metric bar on the squad screen."
+  },
+  "squad_atmosphereLabel": "Atmosphere",
+  "@squad_atmosphereLabel": {
+    "description": "Label for the team atmosphere metric bar on the squad screen."
+  },
   "squad_rosterTitle": "Roster",
   "@squad_rosterTitle": { "description": "Section title for the full roster list on the squad screen." },
 

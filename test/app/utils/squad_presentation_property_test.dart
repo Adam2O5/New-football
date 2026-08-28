@@ -1349,13 +1349,11 @@ void main() {
 
       if (expectedInRange) {
         expect(projection.state, RosterSizeState.inRange, reason: reason);
-        expect(projection.semanticState, 'in-range', reason: reason);
         expect(projection.trackColor, Colors.green, reason: reason);
         expect(projection.iconState, RosterSizeIconState.check, reason: reason);
         expect(projection.iconToken, 'check', reason: reason);
       } else {
         expect(projection.state, RosterSizeState.outOfRange, reason: reason);
-        expect(projection.semanticState, 'out-of-range', reason: reason);
         expect(projection.trackColor, Colors.red, reason: reason);
         expect(projection.iconState, RosterSizeIconState.x, reason: reason);
         expect(projection.iconToken, 'x', reason: reason);

@@ -580,6 +580,23 @@
   "squad_cannotFieldInjured": "Kontuzjowany zawodnik nie może wejść do składu meczowego",
   "squad_swappedPlaces": "Zamieniono miejsca zawodników",
 
+  "squad_rosterSizeLabel": "Zawodnicy",
+  "@squad_rosterSizeLabel": {
+    "description": "Krótka etykieta pokazywana obok ikony stanu we wskaźniku wielkości składu."
+  },
+  "squad_lineupCohesionLabel": "Spójność składu",
+  "@squad_lineupCohesionLabel": {
+    "description": "Etykieta paska metryki zgrania wyjściowego składu na ekranie drużyny."
+  },
+  "squad_chemistryLabel": "Zgranie",
+  "@squad_chemistryLabel": {
+    "description": "Etykieta paska metryki chemii drużyny na ekranie składu."
+  },
+  "squad_atmosphereLabel": "Atmosfera",
+  "@squad_atmosphereLabel": {
+    "description": "Etykieta paska metryki atmosfery drużyny na ekranie składu."
+  },
+
   "squad_rosterTitle": "Skład",
   "@squad_rosterTitle": {
     "description": "Tytuł sekcji z pełną listą zawodników na ekranie składu."

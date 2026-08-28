@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:new_football/app/widgets/squad/roster_size_indicator.dart';
+import 'package:new_football/app/widgets/squad/squad_indicators.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
 const _countKey = ValueKey<String>('squad-size-indicator-count');
