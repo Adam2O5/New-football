@@ -629,12 +629,7 @@ void main() {
             .first
             .games
             .single;
-        final preview = updated.inbox.messages
-            .where((message) => message.type == MessageType.matchPreview)
-            .single;
-
         expect(result.context.stake, MatchStake.playoffElimination);
-        expect(preview.payload['stake'], MatchStake.playoffElimination.name);
       },
     );
 
@@ -671,12 +666,7 @@ void main() {
       );
       final result =
           updated.currentSeason.playoffBrackets.first.leagueFinal!.games.single;
-      final preview = updated.inbox.messages
-          .where((message) => message.type == MessageType.matchPreview)
-          .single;
-
       expect(result.context.stake, MatchStake.leagueFinal);
-      expect(preview.payload['stake'], MatchStake.leagueFinal.name);
     });
 
     test('snapshot i MatchResult przechodzą JSON round-trip', () {
@@ -744,11 +734,10 @@ void main() {
           report: report,
         );
 
-        expect(withWarnings.inbox.messages, hasLength(3));
+        expect(withWarnings.inbox.messages, hasLength(2));
         expect(
           withWarnings.inbox.messages.map((message) => message.type),
           containsAll(<MessageType>[
-            MessageType.matchPreview,
             MessageType.lineupNoGk,
             MessageType.benchIncomplete,
           ]),
@@ -792,12 +781,6 @@ void main() {
         );
 
         expect(walkoverMessage.priority, MessagePriority.urgent);
-        expect(
-          walkover.inbox.messages.where(
-            (message) => message.type == MessageType.matchResult,
-          ),
-          isEmpty,
-        );
       },
     );
 

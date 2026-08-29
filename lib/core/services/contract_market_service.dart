@@ -299,7 +299,12 @@ class ContractMarketService {
       kind: reaction.name,
       domain: MessageDomain.contracts,
       hour: hour,
+      // TODO(subjectName-migration): kind == reject needs {reason} and
+      // kind == counter needs {extraTerms}; neither is tracked on
+      // ContractNegotiation yet, so resolve() still throws for those two
+      // kinds. See chat decision.
       args: {
+        'subjectName': player.name,
         'playerName': player.name,
         'salary': record.lastOffer.salary,
         'years': record.lastOffer.years,
@@ -502,7 +507,11 @@ class ContractMarketService {
       kind: reaction.name,
       domain: MessageDomain.staff,
       hour: hour,
+      // TODO(subjectName-migration): kind == reject needs {reason} and
+      // kind == counter needs {extraTerms}; see chat decision (same gap as
+      // contractOfferResponse above).
       args: {
+        'subjectName': actualCandidate.name,
         'staffName': actualCandidate.name,
         'salary': record.lastOffer.salary,
         'years': record.lastOffer.years,
@@ -590,7 +599,13 @@ class ContractMarketService {
         state,
         type: MessageType.contractSigned,
         domain: MessageDomain.contracts,
-        args: {'playerName': player.name, 'teamName': team.name},
+        args: {
+          'subjectName': player.name,
+          'playerName': player.name,
+          'teamName': team.name,
+          'salary': negotiation.lastOffer.salary,
+          'years': negotiation.lastOffer.years,
+        },
         payload: {
           'playerId': player.id,
           'teamId': team.id,
@@ -627,7 +642,12 @@ class ContractMarketService {
       state,
       type: MessageType.staffSigned,
       domain: MessageDomain.staff,
-      args: {'staffName': member.name, 'teamName': team.name},
+      args: {
+        'subjectName': member.name,
+        'staffName': member.name,
+        'teamName': team.name,
+        'staffRole': member.role.name,
+      },
       payload: {
         'staffId': member.id,
         'teamId': team.id,
@@ -699,6 +719,7 @@ class ContractMarketService {
           domain: MessageDomain.contracts,
           hour: hour,
           args: {
+            'subjectName': player.name,
             'playerName': player.name,
             'salary': current.lastOffer.salary,
             'years': current.lastOffer.years,
@@ -1194,7 +1215,14 @@ class ContractMarketService {
       type: MessageType.contractOffer,
       kind: 'rfaQualifyingOffer',
       domain: MessageDomain.contracts,
-      args: {'playerName': player.name, 'salary': amount, 'years': years},
+      args: {
+        'subjectName': player.name,
+        'playerName': player.name,
+        'salary': amount,
+        'years': years,
+        // TODO(subjectName-migration): {extensionWindowEnd} still unresolved -
+        // no deadline is computed at this call site yet. See chat decision.
+      },
       payload: {
         'playerId': player.id,
         'teamId': ownerTeamId,
@@ -1289,7 +1317,9 @@ class ContractMarketService {
       type: MessageType.rfaOfferSheet,
       domain: MessageDomain.contracts,
       args: {
+        'subjectName': player.name,
         'playerName': player.name,
+        'rivalTeamName': offeringTeam.name,
         'salary': offer.salary,
         'years': offer.years,
       },
@@ -1360,7 +1390,13 @@ class ContractMarketService {
       state,
       type: MessageType.contractSigned,
       domain: MessageDomain.contracts,
-      args: {'playerName': player.name, 'teamName': team.name},
+      args: {
+        'subjectName': player.name,
+        'playerName': player.name,
+        'teamName': team.name,
+        'salary': sheet.salary,
+        'years': sheet.years,
+      },
       payload: {
         'playerId': player.id,
         'teamId': team.id,
@@ -1523,7 +1559,13 @@ class ContractMarketService {
       state,
       type: MessageType.contractSigned,
       domain: MessageDomain.contracts,
-      args: {'playerName': right.player.name, 'teamName': team.name},
+      args: {
+        'subjectName': right.player.name,
+        'playerName': right.player.name,
+        'teamName': team.name,
+        'salary': offer.salary,
+        'years': offer.years,
+      },
       payload: {
         'playerId': right.player.id,
         'teamId': team.id,
@@ -2097,7 +2139,11 @@ class ContractMarketService {
               ? MessageDomain.contracts
               : MessageDomain.staff,
           hour: hour,
+          // TODO(subjectName-migration): kind == reject needs {reason} and
+          // kind == counter needs {extraTerms}; see chat decision (same gap
+          // as the two call sites above).
           args: {
+            'subjectName': subjectName,
             negotiation.subjectKind == NegotiationSubjectKind.player
                     ? 'playerName'
                     : 'staffName':
@@ -2229,6 +2275,7 @@ class ContractMarketService {
               'subjectName': subjectName,
               'playerName': subjectName,
               'staffName': subjectName,
+              'winnerTeamName': rivalName,
               'rivalTeam': rivalName,
               'winnerTeam': rivalName,
             },
@@ -2287,7 +2334,13 @@ class ContractMarketService {
         state,
         type: MessageType.contractSigned,
         domain: MessageDomain.contracts,
-        args: {'playerName': player.name, 'teamName': team.name},
+        args: {
+          'subjectName': player.name,
+          'playerName': player.name,
+          'teamName': team.name,
+          'salary': negotiation.lastOffer.salary,
+          'years': negotiation.lastOffer.years,
+        },
         payload: {'playerId': player.id, 'teamId': team.id},
       );
     }
@@ -2314,7 +2367,12 @@ class ContractMarketService {
       state,
       type: MessageType.staffSigned,
       domain: MessageDomain.staff,
-      args: {'staffName': member.name, 'teamName': team.name},
+      args: {
+        'subjectName': member.name,
+        'staffName': member.name,
+        'teamName': team.name,
+        'staffRole': member.role.name,
+      },
       payload: {'staffId': member.id, 'teamId': team.id},
     );
   }

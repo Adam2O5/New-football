@@ -163,9 +163,7 @@ extension InboxX on Inbox {
       final dateBefore =
           message.week < week || (message.week == week && message.day < day);
       final sameDate = message.week == week && message.day == day;
-      final hourDue =
-          message.hour == null || hour == null || message.hour! <= hour;
-      if (dateBefore || (sameDate && hourDue)) {
+      if (dateBefore || sameDate) {
         due.add(message);
       } else {
         waiting.add(message);

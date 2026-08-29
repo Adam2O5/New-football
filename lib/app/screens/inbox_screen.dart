@@ -9,6 +9,7 @@ import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/core/balance/message_catalog.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/message.dart';
+import 'package:new_football/core/services/message_text_service.dart';
 import 'package:new_football/data/save_repository.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 import 'package:new_football/l10n/generated/app_localizations_en.dart';
@@ -46,8 +47,7 @@ List<GameMessage> sortInboxMessages(Iterable<GameMessage> messages) {
     final week = b.week.compareTo(a.week);
     if (week != 0) return week;
     final day = b.day.compareTo(a.day);
-    if (day != 0) return day;
-    return (b.hour ?? 0).compareTo(a.hour ?? 0);
+    return day;
   });
   return sorted;
 }
@@ -297,9 +297,31 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
     );
   }
 
+  /// Resolves catalog text via [MessageTextService] for the active locale.
+  /// Returns null (instead of throwing) so callers can fall back gracefully
+  /// if the catalog has no entry, or an expected arg is missing — a bad
+  /// catalog entry or caller bug must not crash the inbox for the player.
+  ({String title, String body})? _resolvedMessageText(
+    BuildContext context,
+    GameMessage message,
+  ) {
+    final languageCode = Localizations.localeOf(context).languageCode;
+    try {
+      return MessageTextService.resolve(message, languageCode: languageCode);
+    } catch (error, stackTrace) {
+      debugPrint(
+        'MessageTextService.resolve failed for message ${message.id} '
+        '(titleKey: ${message.titleKey}): $error\n$stackTrace',
+      );
+      return null;
+    }
+  }
+
   String _messageTitle(BuildContext context, GameMessage message) {
     final legacy = message.args['_legacyTitle'];
     if (legacy is String && legacy.isNotEmpty) return legacy;
+    final resolved = _resolvedMessageText(context, message);
+    if (resolved != null) return resolved.title;
     return messageTypeLabel(context, message.type);
   }
 
@@ -307,6 +329,8 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
     final l10n = _inboxLocalizations(context);
     final legacy = message.args['_legacyBody'];
     if (legacy is String && legacy.isNotEmpty) return legacy;
+    final resolved = _resolvedMessageText(context, message);
+    if (resolved != null) return resolved.body;
     final inline = message.args['message'];
     if (inline != null) return inline.toString();
     return l10n.inbox_bodyFallback(messageTypeLabel(context, message.type));

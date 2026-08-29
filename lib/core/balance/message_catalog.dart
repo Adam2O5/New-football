@@ -264,8 +264,6 @@ class MessageCatalog {
   );
 
   static const Map<MessageType, MessageDomain> _domains = {
-    MessageType.matchPreview: MessageDomain.matchday,
-    MessageType.matchResult: MessageDomain.matchday,
     MessageType.walkover: MessageDomain.matchday,
     MessageType.lineupNoGk: MessageDomain.matchday,
     MessageType.benchIncomplete: MessageDomain.matchday,
@@ -355,8 +353,6 @@ class MessageCatalog {
       };
 
   static const Map<MessageType, MessagePriority> _priorities = {
-    MessageType.matchPreview: MessagePriority.normal,
-    MessageType.matchResult: MessagePriority.normal,
     MessageType.walkover: MessagePriority.urgent,
     MessageType.lineupNoGk: MessagePriority.urgent,
     MessageType.benchIncomplete: MessagePriority.normal,

@@ -42,7 +42,6 @@ _GameMessage _$GameMessageFromJson(Map<String, dynamic> json) => _GameMessage(
   seasonYear: (json['seasonYear'] as num).toInt(),
   week: (json['week'] as num).toInt(),
   day: (json['day'] as num?)?.toInt() ?? 1,
-  hour: (json['hour'] as num?)?.toInt(),
   titleKey: json['titleKey'] as String,
   bodyKey: json['bodyKey'] as String,
   args: json['args'] as Map<String, dynamic>? ?? const {},
@@ -72,7 +71,6 @@ Map<String, dynamic> _$GameMessageToJson(_GameMessage instance) =>
       'seasonYear': instance.seasonYear,
       'week': instance.week,
       'day': instance.day,
-      'hour': instance.hour,
       'titleKey': instance.titleKey,
       'bodyKey': instance.bodyKey,
       'args': instance.args,
@@ -87,8 +85,6 @@ Map<String, dynamic> _$GameMessageToJson(_GameMessage instance) =>
     };
 
 const _$MessageTypeEnumMap = {
-  MessageType.matchPreview: 'matchPreview',
-  MessageType.matchResult: 'matchResult',
   MessageType.walkover: 'walkover',
   MessageType.lineupNoGk: 'lineupNoGk',
   MessageType.benchIncomplete: 'benchIncomplete',

@@ -553,7 +553,7 @@ as String,
 /// @nodoc
 mixin _$GameMessage {
 
- String get id; MessageType get type; String? get kind; MessageDomain get domain; MessagePriority get priority; int get seasonYear; int get week; int get day; int? get hour; String get titleKey; String get bodyKey; Map<String, dynamic> get args; Map<String, dynamic> get payload; List<MessageAction> get actions; DecisionSpec? get decision; String? get expiresAt; String? get groupKey; String? get dedupKey; bool get read; bool get acknowledged;
+ String get id; MessageType get type; String? get kind; MessageDomain get domain; MessagePriority get priority; int get seasonYear; int get week; int get day; String get titleKey; String get bodyKey; Map<String, dynamic> get args; Map<String, dynamic> get payload; List<MessageAction> get actions; DecisionSpec? get decision; String? get expiresAt; String? get groupKey; String? get dedupKey; bool get read; bool get acknowledged;
 /// Create a copy of GameMessage
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -566,16 +566,16 @@ $GameMessageCopyWith<GameMessage> get copyWith => _$GameMessageCopyWithImpl<Game
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is GameMessage&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.domain, domain) || other.domain == domain)&&(identical(other.priority, priority) || other.priority == priority)&&(identical(other.seasonYear, seasonYear) || other.seasonYear == seasonYear)&&(identical(other.week, week) || other.week == week)&&(identical(other.day, day) || other.day == day)&&(identical(other.hour, hour) || other.hour == hour)&&(identical(other.titleKey, titleKey) || other.titleKey == titleKey)&&(identical(other.bodyKey, bodyKey) || other.bodyKey == bodyKey)&&const DeepCollectionEquality().equals(other.args, args)&&const DeepCollectionEquality().equals(other.payload, payload)&&const DeepCollectionEquality().equals(other.actions, actions)&&(identical(other.decision, decision) || other.decision == decision)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt)&&(identical(other.groupKey, groupKey) || other.groupKey == groupKey)&&(identical(other.dedupKey, dedupKey) || other.dedupKey == dedupKey)&&(identical(other.read, read) || other.read == read)&&(identical(other.acknowledged, acknowledged) || other.acknowledged == acknowledged));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is GameMessage&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.domain, domain) || other.domain == domain)&&(identical(other.priority, priority) || other.priority == priority)&&(identical(other.seasonYear, seasonYear) || other.seasonYear == seasonYear)&&(identical(other.week, week) || other.week == week)&&(identical(other.day, day) || other.day == day)&&(identical(other.titleKey, titleKey) || other.titleKey == titleKey)&&(identical(other.bodyKey, bodyKey) || other.bodyKey == bodyKey)&&const DeepCollectionEquality().equals(other.args, args)&&const DeepCollectionEquality().equals(other.payload, payload)&&const DeepCollectionEquality().equals(other.actions, actions)&&(identical(other.decision, decision) || other.decision == decision)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt)&&(identical(other.groupKey, groupKey) || other.groupKey == groupKey)&&(identical(other.dedupKey, dedupKey) || other.dedupKey == dedupKey)&&(identical(other.read, read) || other.read == read)&&(identical(other.acknowledged, acknowledged) || other.acknowledged == acknowledged));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,id,type,kind,domain,priority,seasonYear,week,day,hour,titleKey,bodyKey,const DeepCollectionEquality().hash(args),const DeepCollectionEquality().hash(payload),const DeepCollectionEquality().hash(actions),decision,expiresAt,groupKey,dedupKey,read,acknowledged]);
+int get hashCode => Object.hashAll([runtimeType,id,type,kind,domain,priority,seasonYear,week,day,titleKey,bodyKey,const DeepCollectionEquality().hash(args),const DeepCollectionEquality().hash(payload),const DeepCollectionEquality().hash(actions),decision,expiresAt,groupKey,dedupKey,read,acknowledged]);
 
 @override
 String toString() {
-  return 'GameMessage(id: $id, type: $type, kind: $kind, domain: $domain, priority: $priority, seasonYear: $seasonYear, week: $week, day: $day, hour: $hour, titleKey: $titleKey, bodyKey: $bodyKey, args: $args, payload: $payload, actions: $actions, decision: $decision, expiresAt: $expiresAt, groupKey: $groupKey, dedupKey: $dedupKey, read: $read, acknowledged: $acknowledged)';
+  return 'GameMessage(id: $id, type: $type, kind: $kind, domain: $domain, priority: $priority, seasonYear: $seasonYear, week: $week, day: $day, titleKey: $titleKey, bodyKey: $bodyKey, args: $args, payload: $payload, actions: $actions, decision: $decision, expiresAt: $expiresAt, groupKey: $groupKey, dedupKey: $dedupKey, read: $read, acknowledged: $acknowledged)';
 }
 
 
@@ -586,7 +586,7 @@ abstract mixin class $GameMessageCopyWith<$Res>  {
   factory $GameMessageCopyWith(GameMessage value, $Res Function(GameMessage) _then) = _$GameMessageCopyWithImpl;
 @useResult
 $Res call({
- String id, MessageType type, String? kind, MessageDomain domain, MessagePriority priority, int seasonYear, int week, int day, int? hour, String titleKey, String bodyKey, Map<String, dynamic> args, Map<String, dynamic> payload, List<MessageAction> actions, DecisionSpec? decision, String? expiresAt, String? groupKey, String? dedupKey, bool read, bool acknowledged
+ String id, MessageType type, String? kind, MessageDomain domain, MessagePriority priority, int seasonYear, int week, int day, String titleKey, String bodyKey, Map<String, dynamic> args, Map<String, dynamic> payload, List<MessageAction> actions, DecisionSpec? decision, String? expiresAt, String? groupKey, String? dedupKey, bool read, bool acknowledged
 });
 
 
@@ -603,7 +603,7 @@ class _$GameMessageCopyWithImpl<$Res>
 
 /// Create a copy of GameMessage
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? type = null,Object? kind = freezed,Object? domain = null,Object? priority = null,Object? seasonYear = null,Object? week = null,Object? day = null,Object? hour = freezed,Object? titleKey = null,Object? bodyKey = null,Object? args = null,Object? payload = null,Object? actions = null,Object? decision = freezed,Object? expiresAt = freezed,Object? groupKey = freezed,Object? dedupKey = freezed,Object? read = null,Object? acknowledged = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? type = null,Object? kind = freezed,Object? domain = null,Object? priority = null,Object? seasonYear = null,Object? week = null,Object? day = null,Object? titleKey = null,Object? bodyKey = null,Object? args = null,Object? payload = null,Object? actions = null,Object? decision = freezed,Object? expiresAt = freezed,Object? groupKey = freezed,Object? dedupKey = freezed,Object? read = null,Object? acknowledged = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
@@ -613,8 +613,7 @@ as MessageDomain,priority: null == priority ? _self.priority : priority // ignor
 as MessagePriority,seasonYear: null == seasonYear ? _self.seasonYear : seasonYear // ignore: cast_nullable_to_non_nullable
 as int,week: null == week ? _self.week : week // ignore: cast_nullable_to_non_nullable
 as int,day: null == day ? _self.day : day // ignore: cast_nullable_to_non_nullable
-as int,hour: freezed == hour ? _self.hour : hour // ignore: cast_nullable_to_non_nullable
-as int?,titleKey: null == titleKey ? _self.titleKey : titleKey // ignore: cast_nullable_to_non_nullable
+as int,titleKey: null == titleKey ? _self.titleKey : titleKey // ignore: cast_nullable_to_non_nullable
 as String,bodyKey: null == bodyKey ? _self.bodyKey : bodyKey // ignore: cast_nullable_to_non_nullable
 as String,args: null == args ? _self.args : args // ignore: cast_nullable_to_non_nullable
 as Map<String, dynamic>,payload: null == payload ? _self.payload : payload // ignore: cast_nullable_to_non_nullable
@@ -722,10 +721,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  MessageType type,  String? kind,  MessageDomain domain,  MessagePriority priority,  int seasonYear,  int week,  int day,  int? hour,  String titleKey,  String bodyKey,  Map<String, dynamic> args,  Map<String, dynamic> payload,  List<MessageAction> actions,  DecisionSpec? decision,  String? expiresAt,  String? groupKey,  String? dedupKey,  bool read,  bool acknowledged)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  MessageType type,  String? kind,  MessageDomain domain,  MessagePriority priority,  int seasonYear,  int week,  int day,  String titleKey,  String bodyKey,  Map<String, dynamic> args,  Map<String, dynamic> payload,  List<MessageAction> actions,  DecisionSpec? decision,  String? expiresAt,  String? groupKey,  String? dedupKey,  bool read,  bool acknowledged)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _GameMessage() when $default != null:
-return $default(_that.id,_that.type,_that.kind,_that.domain,_that.priority,_that.seasonYear,_that.week,_that.day,_that.hour,_that.titleKey,_that.bodyKey,_that.args,_that.payload,_that.actions,_that.decision,_that.expiresAt,_that.groupKey,_that.dedupKey,_that.read,_that.acknowledged);case _:
+return $default(_that.id,_that.type,_that.kind,_that.domain,_that.priority,_that.seasonYear,_that.week,_that.day,_that.titleKey,_that.bodyKey,_that.args,_that.payload,_that.actions,_that.decision,_that.expiresAt,_that.groupKey,_that.dedupKey,_that.read,_that.acknowledged);case _:
   return orElse();
 
 }
@@ -743,10 +742,10 @@ return $default(_that.id,_that.type,_that.kind,_that.domain,_that.priority,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  MessageType type,  String? kind,  MessageDomain domain,  MessagePriority priority,  int seasonYear,  int week,  int day,  int? hour,  String titleKey,  String bodyKey,  Map<String, dynamic> args,  Map<String, dynamic> payload,  List<MessageAction> actions,  DecisionSpec? decision,  String? expiresAt,  String? groupKey,  String? dedupKey,  bool read,  bool acknowledged)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  MessageType type,  String? kind,  MessageDomain domain,  MessagePriority priority,  int seasonYear,  int week,  int day,  String titleKey,  String bodyKey,  Map<String, dynamic> args,  Map<String, dynamic> payload,  List<MessageAction> actions,  DecisionSpec? decision,  String? expiresAt,  String? groupKey,  String? dedupKey,  bool read,  bool acknowledged)  $default,) {final _that = this;
 switch (_that) {
 case _GameMessage():
-return $default(_that.id,_that.type,_that.kind,_that.domain,_that.priority,_that.seasonYear,_that.week,_that.day,_that.hour,_that.titleKey,_that.bodyKey,_that.args,_that.payload,_that.actions,_that.decision,_that.expiresAt,_that.groupKey,_that.dedupKey,_that.read,_that.acknowledged);case _:
+return $default(_that.id,_that.type,_that.kind,_that.domain,_that.priority,_that.seasonYear,_that.week,_that.day,_that.titleKey,_that.bodyKey,_that.args,_that.payload,_that.actions,_that.decision,_that.expiresAt,_that.groupKey,_that.dedupKey,_that.read,_that.acknowledged);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -763,10 +762,10 @@ return $default(_that.id,_that.type,_that.kind,_that.domain,_that.priority,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  MessageType type,  String? kind,  MessageDomain domain,  MessagePriority priority,  int seasonYear,  int week,  int day,  int? hour,  String titleKey,  String bodyKey,  Map<String, dynamic> args,  Map<String, dynamic> payload,  List<MessageAction> actions,  DecisionSpec? decision,  String? expiresAt,  String? groupKey,  String? dedupKey,  bool read,  bool acknowledged)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  MessageType type,  String? kind,  MessageDomain domain,  MessagePriority priority,  int seasonYear,  int week,  int day,  String titleKey,  String bodyKey,  Map<String, dynamic> args,  Map<String, dynamic> payload,  List<MessageAction> actions,  DecisionSpec? decision,  String? expiresAt,  String? groupKey,  String? dedupKey,  bool read,  bool acknowledged)?  $default,) {final _that = this;
 switch (_that) {
 case _GameMessage() when $default != null:
-return $default(_that.id,_that.type,_that.kind,_that.domain,_that.priority,_that.seasonYear,_that.week,_that.day,_that.hour,_that.titleKey,_that.bodyKey,_that.args,_that.payload,_that.actions,_that.decision,_that.expiresAt,_that.groupKey,_that.dedupKey,_that.read,_that.acknowledged);case _:
+return $default(_that.id,_that.type,_that.kind,_that.domain,_that.priority,_that.seasonYear,_that.week,_that.day,_that.titleKey,_that.bodyKey,_that.args,_that.payload,_that.actions,_that.decision,_that.expiresAt,_that.groupKey,_that.dedupKey,_that.read,_that.acknowledged);case _:
   return null;
 
 }
@@ -778,7 +777,7 @@ return $default(_that.id,_that.type,_that.kind,_that.domain,_that.priority,_that
 @JsonSerializable()
 
 class _GameMessage implements GameMessage {
-  const _GameMessage({required this.id, required this.type, this.kind, this.domain = MessageDomain.system, this.priority = MessagePriority.normal, required this.seasonYear, required this.week, this.day = 1, this.hour, required this.titleKey, required this.bodyKey, final  Map<String, dynamic> args = const {}, final  Map<String, dynamic> payload = const {}, final  List<MessageAction> actions = const [], this.decision, this.expiresAt, this.groupKey, this.dedupKey, this.read = false, this.acknowledged = false}): _args = args,_payload = payload,_actions = actions;
+  const _GameMessage({required this.id, required this.type, this.kind, this.domain = MessageDomain.system, this.priority = MessagePriority.normal, required this.seasonYear, required this.week, this.day = 1, required this.titleKey, required this.bodyKey, final  Map<String, dynamic> args = const {}, final  Map<String, dynamic> payload = const {}, final  List<MessageAction> actions = const [], this.decision, this.expiresAt, this.groupKey, this.dedupKey, this.read = false, this.acknowledged = false}): _args = args,_payload = payload,_actions = actions;
   factory _GameMessage.fromJson(Map<String, dynamic> json) => _$GameMessageFromJson(json);
 
 @override final  String id;
@@ -789,7 +788,6 @@ class _GameMessage implements GameMessage {
 @override final  int seasonYear;
 @override final  int week;
 @override@JsonKey() final  int day;
-@override final  int? hour;
 @override final  String titleKey;
 @override final  String bodyKey;
  final  Map<String, dynamic> _args;
@@ -833,16 +831,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _GameMessage&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.domain, domain) || other.domain == domain)&&(identical(other.priority, priority) || other.priority == priority)&&(identical(other.seasonYear, seasonYear) || other.seasonYear == seasonYear)&&(identical(other.week, week) || other.week == week)&&(identical(other.day, day) || other.day == day)&&(identical(other.hour, hour) || other.hour == hour)&&(identical(other.titleKey, titleKey) || other.titleKey == titleKey)&&(identical(other.bodyKey, bodyKey) || other.bodyKey == bodyKey)&&const DeepCollectionEquality().equals(other._args, _args)&&const DeepCollectionEquality().equals(other._payload, _payload)&&const DeepCollectionEquality().equals(other._actions, _actions)&&(identical(other.decision, decision) || other.decision == decision)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt)&&(identical(other.groupKey, groupKey) || other.groupKey == groupKey)&&(identical(other.dedupKey, dedupKey) || other.dedupKey == dedupKey)&&(identical(other.read, read) || other.read == read)&&(identical(other.acknowledged, acknowledged) || other.acknowledged == acknowledged));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _GameMessage&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.domain, domain) || other.domain == domain)&&(identical(other.priority, priority) || other.priority == priority)&&(identical(other.seasonYear, seasonYear) || other.seasonYear == seasonYear)&&(identical(other.week, week) || other.week == week)&&(identical(other.day, day) || other.day == day)&&(identical(other.titleKey, titleKey) || other.titleKey == titleKey)&&(identical(other.bodyKey, bodyKey) || other.bodyKey == bodyKey)&&const DeepCollectionEquality().equals(other._args, _args)&&const DeepCollectionEquality().equals(other._payload, _payload)&&const DeepCollectionEquality().equals(other._actions, _actions)&&(identical(other.decision, decision) || other.decision == decision)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt)&&(identical(other.groupKey, groupKey) || other.groupKey == groupKey)&&(identical(other.dedupKey, dedupKey) || other.dedupKey == dedupKey)&&(identical(other.read, read) || other.read == read)&&(identical(other.acknowledged, acknowledged) || other.acknowledged == acknowledged));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,id,type,kind,domain,priority,seasonYear,week,day,hour,titleKey,bodyKey,const DeepCollectionEquality().hash(_args),const DeepCollectionEquality().hash(_payload),const DeepCollectionEquality().hash(_actions),decision,expiresAt,groupKey,dedupKey,read,acknowledged]);
+int get hashCode => Object.hashAll([runtimeType,id,type,kind,domain,priority,seasonYear,week,day,titleKey,bodyKey,const DeepCollectionEquality().hash(_args),const DeepCollectionEquality().hash(_payload),const DeepCollectionEquality().hash(_actions),decision,expiresAt,groupKey,dedupKey,read,acknowledged]);
 
 @override
 String toString() {
-  return 'GameMessage(id: $id, type: $type, kind: $kind, domain: $domain, priority: $priority, seasonYear: $seasonYear, week: $week, day: $day, hour: $hour, titleKey: $titleKey, bodyKey: $bodyKey, args: $args, payload: $payload, actions: $actions, decision: $decision, expiresAt: $expiresAt, groupKey: $groupKey, dedupKey: $dedupKey, read: $read, acknowledged: $acknowledged)';
+  return 'GameMessage(id: $id, type: $type, kind: $kind, domain: $domain, priority: $priority, seasonYear: $seasonYear, week: $week, day: $day, titleKey: $titleKey, bodyKey: $bodyKey, args: $args, payload: $payload, actions: $actions, decision: $decision, expiresAt: $expiresAt, groupKey: $groupKey, dedupKey: $dedupKey, read: $read, acknowledged: $acknowledged)';
 }
 
 
@@ -853,7 +851,7 @@ abstract mixin class _$GameMessageCopyWith<$Res> implements $GameMessageCopyWith
   factory _$GameMessageCopyWith(_GameMessage value, $Res Function(_GameMessage) _then) = __$GameMessageCopyWithImpl;
 @override @useResult
 $Res call({
- String id, MessageType type, String? kind, MessageDomain domain, MessagePriority priority, int seasonYear, int week, int day, int? hour, String titleKey, String bodyKey, Map<String, dynamic> args, Map<String, dynamic> payload, List<MessageAction> actions, DecisionSpec? decision, String? expiresAt, String? groupKey, String? dedupKey, bool read, bool acknowledged
+ String id, MessageType type, String? kind, MessageDomain domain, MessagePriority priority, int seasonYear, int week, int day, String titleKey, String bodyKey, Map<String, dynamic> args, Map<String, dynamic> payload, List<MessageAction> actions, DecisionSpec? decision, String? expiresAt, String? groupKey, String? dedupKey, bool read, bool acknowledged
 });
 
 
@@ -870,7 +868,7 @@ class __$GameMessageCopyWithImpl<$Res>
 
 /// Create a copy of GameMessage
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? type = null,Object? kind = freezed,Object? domain = null,Object? priority = null,Object? seasonYear = null,Object? week = null,Object? day = null,Object? hour = freezed,Object? titleKey = null,Object? bodyKey = null,Object? args = null,Object? payload = null,Object? actions = null,Object? decision = freezed,Object? expiresAt = freezed,Object? groupKey = freezed,Object? dedupKey = freezed,Object? read = null,Object? acknowledged = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? type = null,Object? kind = freezed,Object? domain = null,Object? priority = null,Object? seasonYear = null,Object? week = null,Object? day = null,Object? titleKey = null,Object? bodyKey = null,Object? args = null,Object? payload = null,Object? actions = null,Object? decision = freezed,Object? expiresAt = freezed,Object? groupKey = freezed,Object? dedupKey = freezed,Object? read = null,Object? acknowledged = null,}) {
   return _then(_GameMessage(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
@@ -880,8 +878,7 @@ as MessageDomain,priority: null == priority ? _self.priority : priority // ignor
 as MessagePriority,seasonYear: null == seasonYear ? _self.seasonYear : seasonYear // ignore: cast_nullable_to_non_nullable
 as int,week: null == week ? _self.week : week // ignore: cast_nullable_to_non_nullable
 as int,day: null == day ? _self.day : day // ignore: cast_nullable_to_non_nullable
-as int,hour: freezed == hour ? _self.hour : hour // ignore: cast_nullable_to_non_nullable
-as int?,titleKey: null == titleKey ? _self.titleKey : titleKey // ignore: cast_nullable_to_non_nullable
+as int,titleKey: null == titleKey ? _self.titleKey : titleKey // ignore: cast_nullable_to_non_nullable
 as String,bodyKey: null == bodyKey ? _self.bodyKey : bodyKey // ignore: cast_nullable_to_non_nullable
 as String,args: null == args ? _self._args : args // ignore: cast_nullable_to_non_nullable
 as Map<String, dynamic>,payload: null == payload ? _self._payload : payload // ignore: cast_nullable_to_non_nullable

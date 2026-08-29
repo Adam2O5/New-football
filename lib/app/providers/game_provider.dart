@@ -443,7 +443,6 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
       session.urgentInterruptionEnabled && _hasPendingUrgent(league);
 
   bool _hasScheduledUrgentDue(LeagueState league) {
-    final hour = league.currentHour;
     return league.inbox.scheduled.any((message) {
       final beforeDate =
           message.week < league.currentWeek ||
@@ -452,10 +451,8 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
       final sameDate =
           message.week == league.currentWeek &&
           message.day == league.currentDay;
-      final hourDue =
-          message.hour == null || hour == null || message.hour! <= hour;
       return message.priority == MessagePriority.urgent &&
-          (beforeDate || (sameDate && hourDue));
+          (beforeDate || sameDate);
     });
   }
 

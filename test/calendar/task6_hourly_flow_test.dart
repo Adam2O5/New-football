@@ -136,14 +136,9 @@ void main() {
       rngSeed: 7,
     );
     final next = DaySimulator().applyPlayerMatchResult(league, match, result);
-    final message = next.inbox.messages.firstWhere(
-      (item) => item.type == MessageType.matchResult,
-    );
 
     expect(next.currentWeek, 1);
     expect(next.currentDay, 2);
-    expect(message.week, 1);
-    expect(message.day, 2);
   });
 
   test('an urgent message blocks both day and hour transitions', () async {

@@ -431,7 +431,7 @@ class DaySimulator {
       state,
       excludedTeamIds: TeamManagementService.walkoverTeamIds(result),
     );
-    return _notifyMatchResult(state, result, matchId: match.id);
+    return _notifyWalkover(state, result, matchId: match.id);
   }
 
   ({LeagueState league, List<MatchResult> results, ScheduledMatch? playerMatch})
@@ -982,67 +982,39 @@ class DaySimulator {
     );
   }
 
-  LeagueState _notifyMatchResult(
+  LeagueState _notifyWalkover(
     LeagueState league,
     MatchResult result, {
     String? matchId,
   }) {
-    final administrative = TeamManagementService.isWalkoverResult(result);
-    final type = administrative
-        ? MessageType.walkover
-        : MessageType.matchResult;
+    if (!TeamManagementService.isWalkoverResult(result)) {
+      return league;
+    }
+
     final responsibleTeamId = result.violatingTeamIds.isEmpty
         ? result.homeTeamId
         : result.violatingTeamIds.first;
-    String? motm;
-    final motmId = result.manOfTheMatchPlayerId;
-    if (motmId != null) {
-      for (final team in league.teams) {
-        for (final player in team.roster) {
-          if (player.id == motmId) {
-            motm = player.name;
-            break;
-          }
-        }
-        if (motm != null) break;
-      }
-    }
+
     return messages.send(
       league,
-      type: type,
-      priority: administrative
-          ? MessagePriority.urgent
-          : MessagePriority.normal,
+      type: MessageType.walkover,
+      priority: MessagePriority.urgent,
       args: {
         'homeTeam':
             league.teamById(result.homeTeamId)?.name ?? result.homeTeamId,
         'awayTeam':
             league.teamById(result.awayTeamId)?.name ?? result.awayTeamId,
-        'homeGoals': result.homeGoals,
-        'awayGoals': result.awayGoals,
         'team': league.teamById(responsibleTeamId)?.name ?? responsibleTeamId,
         'reason': result.reasonCode ?? 'administrative_result',
-        'posA': result.homeStats.possession,
-        'posB': result.awayStats.possession,
-        'xgA': result.homeStats.xg,
-        'xgB': result.awayStats.xg,
-        'motm': motm ?? '—',
       },
       payload: {
         'matchId': matchId,
         'homeTeamId': result.homeTeamId,
         'awayTeamId': result.awayTeamId,
-        'homeGoals': result.homeGoals,
-        'awayGoals': result.awayGoals,
-        'status': result.status.name,
         'reasonCode': result.reasonCode,
         'violatingTeamIds': result.violatingTeamIds,
-        'homeStats': result.homeStats.toJson(),
-        'awayStats': result.awayStats.toJson(),
-        'manOfTheMatchPlayerId': result.manOfTheMatchPlayerId,
-        'inspiredPerformancePlayerId': result.inspiredPerformancePlayerId,
       },
-      dedupKey: matchId == null ? null : '${type.name}:result:$matchId',
+      dedupKey: matchId == null ? null : 'walkover:result:$matchId',
     );
   }
 }

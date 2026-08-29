@@ -4,6 +4,7 @@ import 'package:new_football/core/balance/message_catalog.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/message.dart';
+import 'package:new_football/core/services/message_text_service.dart';
 
 /// Applies a player's choice to a message and returns the updated game state.
 typedef MessageDecisionHandler =
@@ -95,6 +96,15 @@ class MessageService {
       groupKey: _expand(groupKey ?? template.groupKey, expansionValues),
       dedupKey: _expand(dedupKey ?? template.dedupKey, expansionValues),
     );
+
+    // Debug-only: fail loudly, right here, if this message's titleKey/args
+    // won't actually resolve to display text in either language. Stripped
+    // in release builds; see message_text_service.dart for the thrown error.
+    assert(() {
+      MessageTextService.resolve(msg, languageCode: 'pl');
+      MessageTextService.resolve(msg, languageCode: 'en');
+      return true;
+    }());
 
     final isFuture =
         targetWeek > league.currentWeek ||

@@ -277,8 +277,6 @@ enum StaffRole { headCoach, youthCoach, scout, physio, doctor, cfo }
 
 enum MessageType {
   // Matchday (A)
-  matchPreview,
-  matchResult,
   walkover,
   lineupNoGk,
   benchIncomplete,

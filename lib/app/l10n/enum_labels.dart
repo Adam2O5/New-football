@@ -72,8 +72,6 @@ String messageTypeLabel(BuildContext context, MessageType type) {
     MessageType.contractSigned => l10n.messageType_contractSigned,
     MessageType.trade => l10n.messageType_trade,
     MessageType.walkover => l10n.messageType_walkover,
-    MessageType.matchPreview => l10n.messageType_matchPreview,
-    MessageType.matchResult => l10n.messageType_matchResult,
     MessageType.atmosphere => l10n.messageType_atmosphere,
     MessageType.calendar => l10n.messageType_calendar,
     MessageType.system => l10n.messageType_system,

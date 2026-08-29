@@ -2348,49 +2348,32 @@ class SeasonService {
     final playerTeamId = state.playerTeamId;
     if (playerTeamId == result.homeTeamId ||
         playerTeamId == result.awayTeamId) {
-      final administrative = TeamManagementService.isWalkoverResult(result);
-      final type = administrative
-          ? MessageType.walkover
-          : MessageType.matchResult;
+      if (!TeamManagementService.isWalkoverResult(result)) {
+        return state;
+      }
       final responsibleTeamId = result.violatingTeamIds.isEmpty
           ? result.homeTeamId
           : result.violatingTeamIds.first;
-      final motm = result.manOfTheMatchPlayerId == null
-          ? null
-          : _playerName(state, result.manOfTheMatchPlayerId);
       state = _messages.send(
         state,
-        type: type,
-        priority: administrative
-            ? MessagePriority.urgent
-            : MessagePriority.normal,
+        type: MessageType.walkover,
         args: {
-          'homeTeam': _teamName(state, result.homeTeamId),
-          'awayTeam': _teamName(state, result.awayTeamId),
-          'homeGoals': result.homeGoals,
-          'awayGoals': result.awayGoals,
-          'team': _teamName(state, responsibleTeamId),
+          'homeTeam':
+              league.teamById(result.homeTeamId)?.name ?? result.homeTeamId,
+          'awayTeam':
+              league.teamById(result.awayTeamId)?.name ?? result.awayTeamId,
+          'team': league.teamById(responsibleTeamId)?.name ?? responsibleTeamId,
           'reason': result.reasonCode ?? 'administrative_result',
-          'posA': result.homeStats.possession,
-          'posB': result.awayStats.possession,
-          'xgA': result.homeStats.xg,
-          'xgB': result.awayStats.xg,
-          'motm': motm ?? '—',
         },
         payload: {
           'matchId': matchId,
           'homeTeamId': result.homeTeamId,
           'awayTeamId': result.awayTeamId,
-          'homeGoals': result.homeGoals,
-          'awayGoals': result.awayGoals,
-          'status': result.status.name,
+          'teamId': responsibleTeamId,
           'reasonCode': result.reasonCode,
           'violatingTeamIds': result.violatingTeamIds,
-          'homeStats': result.homeStats.toJson(),
-          'awayStats': result.awayStats.toJson(),
-          'manOfTheMatchPlayerId': result.manOfTheMatchPlayerId,
         },
-        dedupKey: matchId == null ? null : '${type.name}:result:$matchId',
+        dedupKey: matchId == null ? null : 'walkover:$matchId',
       );
     }
     return state;

@@ -36,7 +36,9 @@ void main() {
         ],
       );
 
-      await tester.pumpWidget(_app(CalendarDayResultPopup(feedback: feedback)));
+      await tester.pumpWidget(
+        _app(CalendarDayResultPopup(feedback: feedback, teamId: 'team-1')),
+      );
       await tester.pump();
 
       final popupKey = const ValueKey<String>('calendar-day-result-popup-7-3');
@@ -79,7 +81,9 @@ void main() {
   ) async {
     final feedback = _day(runId: 1, sequence: 0, results: const []);
 
-    await tester.pumpWidget(_app(CalendarDayResultPopup(feedback: feedback)));
+    await tester.pumpWidget(
+      _app(CalendarDayResultPopup(feedback: feedback, teamId: 'team-1')),
+    );
     await tester.pump();
 
     expect(find.byType(Card), findsNothing);
@@ -113,7 +117,9 @@ void main() {
         ],
       );
 
-      await tester.pumpWidget(_app(CalendarDayResultPopup(feedback: feedback)));
+      await tester.pumpWidget(
+        _app(CalendarDayResultPopup(feedback: feedback, teamId: 'team-1')),
+      );
       await tester.pump();
 
       final popup = find.byKey(
@@ -180,7 +186,7 @@ void main() {
 
     await tester.pumpWidget(
       _app(
-        CalendarDayResultPopup(feedback: feedback),
+        CalendarDayResultPopup(feedback: feedback, teamId: 'team-1'),
         locale: const Locale('pl'),
       ),
     );

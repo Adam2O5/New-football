@@ -264,15 +264,15 @@ void main() {
     );
     final league = factoryLeague.leagueState.copyWith(
       messageSettings: const MessageSettings(
-        overrides: {MessageType.matchResult: NotificationLevel.muted},
+        overrides: {MessageType.walkover: NotificationLevel.muted},
       ),
     );
 
     final result = MessageService().send(
       league,
-      type: MessageType.matchResult,
-      titleKey: 'msg_matchResult_title',
-      bodyKey: 'msg_matchResult_body',
+      type: MessageType.walkover,
+      titleKey: 'msg_walkover_title',
+      bodyKey: 'msg_walkover_body',
     );
 
     expect(result.inbox.messages, isEmpty);

@@ -27,29 +27,7 @@ class MatchMessageEmitter {
       return league;
     }
 
-    final homeName = league.teamById(homeTeamId)?.name ?? homeTeamId;
-    final awayName = league.teamById(awayTeamId)?.name ?? awayTeamId;
-    var state = _messages.send(
-      league,
-      type: MessageType.matchPreview,
-      domain: MessageDomain.matchday,
-      args: {
-        'homeTeam': homeName,
-        'awayTeam': awayName,
-        'weather': context.weather.name,
-        'temperatureC': context.temperatureC,
-        'crowdIntensity': context.crowdIntensity,
-      },
-      payload: {
-        'matchId': matchId,
-        'homeTeamId': homeTeamId,
-        'awayTeamId': awayTeamId,
-        'weather': context.weather.name,
-        'temperatureC': context.temperatureC,
-        'stake': context.stake.name,
-      },
-      dedupKey: 'matchPreview:$matchId',
-    );
+    var state = league;
 
     if (report.isAdministrative &&
         report.violatingTeamIds.contains(playerTeamId)) {
@@ -64,9 +42,11 @@ class MatchMessageEmitter {
         },
         payload: {
           'matchId': matchId,
+          'homeTeamId': homeTeamId,
+          'awayTeamId': awayTeamId,
           'teamId': playerTeamId,
           'reasonCode': report.reasonCode,
-          'status': report.status.name,
+          'violatingTeamIds': report.violatingTeamIds,
         },
         dedupKey: 'walkover:$matchId',
       );
