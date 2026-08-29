@@ -775,7 +775,10 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
             Positioned.fill(
               key: _feedbackHostKey,
               child: IgnorePointer(
-                child: CalendarDayResultPopup(feedback: _feedback!),
+                child: CalendarDayResultPopup(
+                  feedback: _feedback!,
+                  teamId: playerId,
+                ),
               ),
             ),
         ],

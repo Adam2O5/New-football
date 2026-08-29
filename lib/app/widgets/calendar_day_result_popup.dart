@@ -5,42 +5,59 @@ import 'package:flutter/material.dart';
 import 'package:new_football/app/models/calendar_simulation_feedback.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
-/// A bounded, non-modal presentation of all match results from one completed
-/// calendar day.
+/// A bounded, non-modal presentation of the player's own match result from
+/// one completed calendar day.
 ///
 /// The owner of the calendar screen controls when this widget is inserted and
 /// removed. This widget deliberately has no timer, delay, or asynchronous
-/// work of its own: all rows are rendered in one scrollable surface so one
-/// result cannot race or replace another.
+/// work of its own. It only ever shows the single result belonging to
+/// [teamId]; other matches completed the same day are not displayed.
 class CalendarDayResultPopup extends StatelessWidget {
-  const CalendarDayResultPopup({super.key, required this.feedback});
+  const CalendarDayResultPopup({
+    super.key,
+    required this.feedback,
+    required this.teamId,
+  });
 
   static const _maxWidth = 560.0;
   static const _maxHeight = 360.0;
   static const _baseHeight = 104.0;
   static const _rowHeight = 64.0;
-  static const _maxRowsHeight = 256.0;
 
   /// The immutable snapshot for one fully completed calendar day.
   final CalendarDaySimulationFeedback feedback;
 
+  /// The player's own team id. Only the match involving this team, if any,
+  /// is shown. `null` means the player has no team yet, so nothing is shown.
+  final String? teamId;
+
   @override
   Widget build(BuildContext context) {
-    // A completed day without a persisted result still produces controller
-    // feedback so the host can clear stale UI, but it does not need a result
-    // popup of its own.
-    if (feedback.results.isEmpty) return const SizedBox.shrink();
+    // No team yet (e.g. career not started), or a completed day without a
+    // result for the player's own team: neither needs a result popup.
+    final teamId = this.teamId;
+    if (teamId == null) return const SizedBox.shrink();
+    final ownMatch = _ownMatch(feedback.results, teamId);
+    if (ownMatch == null) return const SizedBox.shrink();
 
     final l10n = AppLocalizations.of(context)!;
     final title = l10n.calendar_simulationResults_title(
       feedback.week,
       feedback.day,
     );
+    final borderColor = _resultBorderColor(ownMatch, teamId);
+    final cardShape = Theme.of(context).cardTheme.shape;
+    final shape = cardShape is RoundedRectangleBorder
+        ? cardShape.copyWith(side: BorderSide(color: borderColor, width: 2))
+        : RoundedRectangleBorder(
+            side: BorderSide(color: borderColor, width: 2),
+            borderRadius: BorderRadius.circular(12),
+          );
 
     return SafeArea(
       minimum: const EdgeInsets.all(12),
       child: Align(
-        alignment: Alignment.topCenter,
+        alignment: Alignment.center,
         child: LayoutBuilder(
           builder: (context, constraints) {
             final availableWidth = constraints.maxWidth.isFinite
@@ -50,9 +67,7 @@ class CalendarDayResultPopup extends StatelessWidget {
                 ? constraints.maxHeight
                 : _maxHeight;
             final width = math.min(_maxWidth, math.max(0.0, availableWidth));
-            final desiredHeight =
-                _baseHeight +
-                math.min(_maxRowsHeight, feedback.results.length * _rowHeight);
+            final desiredHeight = _baseHeight + _rowHeight;
             final height = math.min(
               math.min(_maxHeight, desiredHeight),
               math.max(0.0, availableHeight),
@@ -67,6 +82,7 @@ class CalendarDayResultPopup extends StatelessWidget {
                   '${feedback.runId}-${feedback.sequence}',
                 ),
                 margin: EdgeInsets.zero,
+                shape: shape,
                 child: SingleChildScrollView(
                   key: ValueKey<String>(
                     'calendar-day-result-scroll-'
@@ -87,21 +103,13 @@ class CalendarDayResultPopup extends StatelessWidget {
                       const SizedBox(height: 8),
                       const Divider(height: 1),
                       const SizedBox(height: 4),
-                      for (
-                        var index = 0;
-                        index < feedback.results.length;
-                        index++
-                      ) ...[
-                        _CalendarMatchResultRow(
-                          key: ValueKey<String>(
-                            'calendar-day-result-row-'
-                            '${feedback.runId}-${feedback.sequence}-$index',
-                          ),
-                          feedback: feedback.results[index],
+                      _CalendarMatchResultRow(
+                        key: ValueKey<String>(
+                          'calendar-day-result-row-'
+                          '${feedback.runId}-${feedback.sequence}',
                         ),
-                        if (index < feedback.results.length - 1)
-                          const Divider(height: 1),
-                      ],
+                        feedback: ownMatch,
+                      ),
                     ],
                   ),
                 ),
@@ -112,6 +120,30 @@ class CalendarDayResultPopup extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Returns the result belonging to [teamId] from [results], or `null` if
+/// that team did not play on this calendar day.
+CalendarMatchFeedback? _ownMatch(
+  List<CalendarMatchFeedback> results,
+  String teamId,
+) {
+  for (final result in results) {
+    if (result.homeTeamId == teamId || result.awayTeamId == teamId) {
+      return result;
+    }
+  }
+  return null;
+}
+
+/// Win/draw/loss border colour for [match] from [teamId]'s perspective.
+Color _resultBorderColor(CalendarMatchFeedback match, String teamId) {
+  final isHome = match.homeTeamId == teamId;
+  final ownGoals = isHome ? match.homeGoals : match.awayGoals;
+  final opponentGoals = isHome ? match.awayGoals : match.homeGoals;
+  if (ownGoals > opponentGoals) return Colors.green;
+  if (ownGoals < opponentGoals) return Colors.red;
+  return Colors.yellow;
 }
 
 class _CalendarMatchResultRow extends StatelessWidget {
