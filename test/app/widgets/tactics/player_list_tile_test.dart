@@ -9,7 +9,9 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:new_football/app/utils/color_interpolation.dart';
 import 'package:new_football/app/utils/squad_presentation.dart';
+import 'package:new_football/app/utils/squad_tile_metrics.dart';
 import 'package:new_football/app/widgets/tactics/player_list_tile.dart';
+import 'package:new_football/core/models/assigned_role.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/core/models/injury.dart';
@@ -896,6 +898,84 @@ void main() {
     );
     expect(draggable.data, player.id);
   });
+
+  testWidgets(
+    'shows stamina bars, gold or faded potential stars, and the optimal role',
+    (tester) async {
+      final game = _fixtureGame(seed: 4290);
+      final young = _copyPlayer(
+        game,
+        id: 'metric-young',
+        name: 'Young Star',
+        form: 6,
+        position: Position.cm,
+      ).copyWith(age: 22, potentialStars: 3.5);
+      final veteran = young.copyWith(
+        id: 'metric-veteran',
+        name: 'Veteran Star',
+        age: 30,
+      );
+
+      await tester.pumpWidget(
+        _tileApp(
+          game,
+          player: young,
+          onTap: () {},
+          positionAssignment: _slot('cm-slot', Position.cm),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(FormIndicator), findsOneWidget);
+      expect(find.byType(StaminaIndicator), findsOneWidget);
+
+      await tester.pumpWidget(
+        _tileApp(
+          game,
+          player: young,
+          onTap: () {},
+          positionAssignment: _slot('cm-slot', Position.cm),
+          metricMode: SquadTileMetricMode.potential,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(find.byType(FormIndicator), findsNothing);
+      final youngStars = tester.widget<PotentialStars>(
+        find.byType(PotentialStars),
+      );
+      expect(youngStars.stars, 3.5);
+      expect(youngStars.color, const Color(0xFFFFC107));
+
+      await tester.pumpWidget(
+        _tileApp(
+          game,
+          player: veteran,
+          onTap: () {},
+          positionAssignment: _slot('cm-slot', Position.cm),
+          metricMode: SquadTileMetricMode.potential,
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(
+        tester.widget<PotentialStars>(find.byType(PotentialStars)).color,
+        const Color(0xFFB8A98A),
+      );
+
+      await tester.pumpWidget(
+        _tileApp(
+          game,
+          player: young,
+          onTap: () {},
+          positionAssignment: _slot('cm-slot', Position.cm),
+          metricMode: SquadTileMetricMode.optimalRole,
+        ),
+      );
+      await tester.pumpAndSettle();
+      final expected = compactRoleLabel(
+        roleDisplayInfo(young.optimalRole).label,
+      );
+      expect(find.text(expected), findsOneWidget);
+    },
+  );
 }
 
 Widget _tileApp(
@@ -912,6 +992,7 @@ Widget _tileApp(
   void Function(String draggedPlayerId)? onAcceptDrop,
   double width = 360,
   double textScale = 1.0,
+  SquadTileMetricMode metricMode = SquadTileMetricMode.staminaForm,
 }) {
   return _localizedApp((context) {
     final mediaQuery = MediaQuery.of(context);
@@ -931,6 +1012,7 @@ Widget _tileApp(
           onProfile: onProfile,
           enableDragDrop: enableDragDrop,
           onAcceptDrop: onAcceptDrop,
+          metricMode: metricMode,
         ),
       ),
     );

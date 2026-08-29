@@ -1063,6 +1063,25 @@ class AppLocalizationsPl extends AppLocalizations {
   String get squad_sortPosition => 'Pozycja';
 
   @override
+  String get squad_metricStaminaForm => 'Stamina i forma';
+
+  @override
+  String get squad_metricPotential => 'Potencjał';
+
+  @override
+  String get squad_metricOptimalRole => 'Optymalna rola';
+
+  @override
+  String squad_potentialStarsSemantics(String stars) {
+    return 'Potencjał: $stars';
+  }
+
+  @override
+  String squad_optimalRoleSemantics(String role) {
+    return 'Optymalna rola: $role';
+  }
+
+  @override
   String get squad_formLabel => 'Forma';
 
   @override

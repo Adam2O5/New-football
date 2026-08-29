@@ -1061,6 +1061,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get squad_sortPosition => 'Position';
 
   @override
+  String get squad_metricStaminaForm => 'Stamina & form';
+
+  @override
+  String get squad_metricPotential => 'Potential';
+
+  @override
+  String get squad_metricOptimalRole => 'Optimal role';
+
+  @override
+  String squad_potentialStarsSemantics(String stars) {
+    return 'Potential: $stars';
+  }
+
+  @override
+  String squad_optimalRoleSemantics(String role) {
+    return 'Optimal role: $role';
+  }
+
+  @override
   String get squad_formLabel => 'Form';
 
   @override

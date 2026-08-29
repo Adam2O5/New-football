@@ -636,6 +636,32 @@
   "@squad_sortPosition": {
     "description": "Opcja sortowania składu: wyłącznie po pozycji, z pominięciem strefy przypisania."
   },
+  "squad_metricStaminaForm": "Stamina i forma",
+  "@squad_metricStaminaForm": {
+    "description": "Tryb kafelka składu pokazujący paski staminy i formy."
+  },
+  "squad_metricPotential": "Potencjał",
+  "@squad_metricPotential": {
+    "description": "Tryb kafelka składu pokazujący gwiazdki potencjału."
+  },
+  "squad_metricOptimalRole": "Optymalna rola",
+  "@squad_metricOptimalRole": {
+    "description": "Tryb kafelka składu pokazujący optymalną rolę zawodnika."
+  },
+  "squad_potentialStarsSemantics": "Potencjał: {stars}",
+  "@squad_potentialStarsSemantics": {
+    "description": "Etykieta dostępności dla gwiazdek potencjału w wierszu składu.",
+    "placeholders": {
+      "stars": { "type": "String" }
+    }
+  },
+  "squad_optimalRoleSemantics": "Optymalna rola: {role}",
+  "@squad_optimalRoleSemantics": {
+    "description": "Etykieta dostępności dla optymalnej roli w wierszu składu.",
+    "placeholders": {
+      "role": { "type": "String" }
+    }
+  },
   "squad_formLabel": "Forma",
   
   "@squad_formLabel": {

@@ -589,7 +589,34 @@
   "@squad_sortForm": { "description": "Roster sort option: by current form, descending." },
 
   "squad_sortPosition": "Position",
-  "@squad_sortPosition": { "description": "Roster sort option: by position only, ignoring zone." },  
+  "@squad_sortPosition": { "description": "Roster sort option: by position only, ignoring zone." },
+
+  "squad_metricStaminaForm": "Stamina & form",
+  "@squad_metricStaminaForm": {
+    "description": "Roster tile metric mode showing stamina and form bars."
+  },
+  "squad_metricPotential": "Potential",
+  "@squad_metricPotential": {
+    "description": "Roster tile metric mode showing potential stars."
+  },
+  "squad_metricOptimalRole": "Optimal role",
+  "@squad_metricOptimalRole": {
+    "description": "Roster tile metric mode showing each player's optimal role."
+  },
+  "squad_potentialStarsSemantics": "Potential: {stars}",
+  "@squad_potentialStarsSemantics": {
+    "description": "Accessibility label for potential stars on a squad row.",
+    "placeholders": {
+      "stars": { "type": "String" }
+    }
+  },
+  "squad_optimalRoleSemantics": "Optimal role: {role}",
+  "@squad_optimalRoleSemantics": {
+    "description": "Accessibility label for the optimal role on a squad row.",
+    "placeholders": {
+      "role": { "type": "String" }
+    }
+  },  
 
   "squad_formLabel": "Form",
   

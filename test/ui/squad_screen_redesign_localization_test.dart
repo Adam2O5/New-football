@@ -640,10 +640,9 @@ void _expectLocalizedSquadSurface(
     l10n.squad_formIndicatorSemantics(formText),
     l10n.squad_profileAction(fixture.player.name),
     l10n.squad_rosterTitle,
-    l10n.squad_sortOverall,
-    l10n.squad_sortAssignedZone,
-    l10n.squad_sortForm,
-    l10n.squad_sortPosition,
+    l10n.squad_metricStaminaForm,
+    l10n.squad_metricPotential,
+    l10n.squad_metricOptimalRole,
     l10n.squad_zoneXi,
     l10n.squad_zoneBench,
     l10n.squad_zoneReserves,
@@ -659,11 +658,7 @@ void _expectLocalizedSquadSurface(
     findsOneWidget,
   );
   expect(
-    find.byKey(const ValueKey('squad-size-indicator-minimum')),
-    findsOneWidget,
-  );
-  expect(
-    find.byKey(const ValueKey('squad-size-indicator-maximum')),
+    find.byKey(const ValueKey('squad-size-indicator-range-track')),
     findsOneWidget,
   );
 

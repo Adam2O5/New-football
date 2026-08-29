@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:new_football/app/utils/color_interpolation.dart';
 import 'package:new_football/app/utils/squad_presentation.dart';
+import 'package:new_football/app/utils/squad_tile_metrics.dart';
+import 'package:new_football/app/utils/staff_presentation.dart';
+import 'package:new_football/core/models/assigned_role.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/tactics/formation_layout.dart';
 import 'package:new_football/core/tactics/player_sort.dart';
@@ -24,6 +27,7 @@ class PlayerListTile extends StatelessWidget {
     this.onProfile,
     this.enableDragDrop = false,
     this.onAcceptDrop,
+    this.metricMode = SquadTileMetricMode.staminaForm,
   });
 
   final AppLocalizations l10n;
@@ -48,6 +52,7 @@ class PlayerListTile extends StatelessWidget {
   /// (`onAcceptDrop`) — caller reużywa `_trySwap` do wykonania zamiany.
   final bool enableDragDrop;
   final void Function(String draggedPlayerId)? onAcceptDrop;
+  final SquadTileMetricMode metricMode;
 
   AssignedSlot? get _resolvedAssignment => positionAssignment ?? assignment;
 
@@ -60,18 +65,13 @@ class PlayerListTile extends StatelessWidget {
     context.push('/game/player/${player.id}');
   }
 
-  String _rowSemantics(
-    SquadStatus status,
-    int roundedOvr,
-    double form,
-    double stamina,
-  ) {
+  String _rowSemantics(SquadStatus status, int roundedOvr, double form) {
     final label = l10n.squad_playerRowSemantics(
       player.name,
       player.position.code,
       roundedOvr,
       _formatForm(form),
-      _formatStamina(stamina),
+      _zoneLabel(l10n, zone),
     );
     final statuses = <String>[
       if (status.hasActiveInjury) l10n.squad_statusInjury,
@@ -82,18 +82,64 @@ class PlayerListTile extends StatelessWidget {
     return '$label. ${statuses.join('. ')}.';
   }
 
+  Widget _tileMetric(
+    BuildContext context,
+    bool compact,
+    double badgeSize,
+    double clampedForm,
+    double clampedStamina,
+  ) {
+    switch (metricMode) {
+      case SquadTileMetricMode.staminaForm:
+        return Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _MetricBarCaption(
+              label: l10n.squad_staminaLabel,
+              width: badgeSize,
+              bar: StaminaIndicator(
+                stamina: clampedStamina,
+                l10n: l10n,
+                width: badgeSize,
+              ),
+            ),
+            const SizedBox(width: 4),
+            _MetricBarCaption(
+              label: l10n.squad_formLabel,
+              width: badgeSize,
+              bar: FormIndicator(
+                form: clampedForm,
+                l10n: l10n,
+                width: badgeSize,
+              ),
+            ),
+          ],
+        );
+      case SquadTileMetricMode.potential:
+        return PotentialStars(
+          playerId: player.id,
+          stars: displayedPotentialStars(player.potentialStars),
+          color: potentialStarColor(player.age),
+          l10n: l10n,
+          iconSize: compact ? 11 : 13,
+        );
+      case SquadTileMetricMode.optimalRole:
+        return OptimalRoleLabel(
+          playerId: player.id,
+          label: roleDisplayInfo(player.optimalRole).label,
+          l10n: l10n,
+          compact: compact,
+        );
+    }
+  }
+
   Widget _buildPresentationTile(BuildContext context) {
     final status = statusFor(player, _resolvedAssignment);
     final roundedOvr = roundedOvrForDisplay(player.overall());
     final clampedForm = clampedFormValue(player.state.form);
     final clampedStamina = clampedStaminaValue(player.state.stamina.toDouble());
     final nameParts = splitPlayerName(player.name);
-    final rowSemantics = _rowSemantics(
-      status,
-      roundedOvr,
-      clampedForm,
-      clampedStamina,
-    );
+    final rowSemantics = _rowSemantics(status, roundedOvr, clampedForm);
 
     final row = LayoutBuilder(
       builder: (context, constraints) {
@@ -116,22 +162,12 @@ class PlayerListTile extends StatelessWidget {
             SizedBox(width: badgeGap),
             Expanded(child: _NameAndForm(nameParts: nameParts)),
             const SizedBox(width: 2),
-            _MetricBarCaption(
-              label: l10n.squad_staminaLabel,
-              bar: StaminaIndicator(
-                stamina: clampedStamina,
-                l10n: l10n,
-                width: badgeSize,
-              ),
-            ),
-            const SizedBox(width: 4),
-            _MetricBarCaption(
-              label: l10n.squad_formLabel,
-              bar: FormIndicator(
-                form: clampedForm,
-                l10n: l10n,
-                width: badgeSize,
-              ),
+            _tileMetric(
+              context,
+              compact,
+              badgeSize,
+              clampedForm,
+              clampedStamina,
             ),
             const SizedBox(width: 2),
             StatusIcons(
@@ -552,32 +588,131 @@ class StaminaIndicator extends StatelessWidget {
 /// already carries its own [Semantics] label, so the caption is excluded
 /// from the accessibility tree to avoid announcing the value twice.
 class _MetricBarCaption extends StatelessWidget {
-  const _MetricBarCaption({required this.label, required this.bar});
+  const _MetricBarCaption({
+    required this.label,
+    required this.width,
+    required this.bar,
+  });
 
   final String label;
+  final double width;
   final Widget bar;
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).colorScheme;
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ExcludeSemantics(
+    return SizedBox(
+      width: width,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ExcludeSemantics(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                label,
+                maxLines: 1,
+                style: TextStyle(
+                  fontSize: 8,
+                  fontWeight: FontWeight.w600,
+                  color: colors.onSurfaceVariant,
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 2),
+          bar,
+        ],
+      ),
+    );
+  }
+}
+
+class PotentialStars extends StatelessWidget {
+  const PotentialStars({
+    super.key,
+    required this.playerId,
+    required this.stars,
+    required this.color,
+    required this.l10n,
+    this.iconSize = 13,
+  });
+
+  final String playerId;
+  final double stars;
+  final Color color;
+  final AppLocalizations l10n;
+  final double iconSize;
+
+  @override
+  Widget build(BuildContext context) {
+    final segments = StaffPresentation.starsForRaw(stars);
+    final prefix = 'squad-potential-stars-$playerId';
+    return Semantics(
+      container: true,
+      label: l10n.squad_potentialStarsSemantics(stars.toStringAsFixed(1)),
+      child: ExcludeSemantics(
+        child: Row(
+          key: ValueKey<String>(prefix),
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            for (var index = 0; index < segments.length; index++)
+              Icon(
+                switch (segments[index]) {
+                  GraphicStar.full => Icons.star,
+                  GraphicStar.half => Icons.star_half,
+                  GraphicStar.empty => Icons.star_border,
+                },
+                key: ValueKey<String>('$prefix-star-$index'),
+                size: iconSize,
+                color: color,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class OptimalRoleLabel extends StatelessWidget {
+  const OptimalRoleLabel({
+    super.key,
+    required this.playerId,
+    required this.label,
+    required this.l10n,
+    required this.compact,
+  });
+
+  final String playerId;
+  final String label;
+  final AppLocalizations l10n;
+  final bool compact;
+
+  @override
+  Widget build(BuildContext context) {
+    final maxChars = compact ? 10 : 14;
+    final display = compactRoleLabel(label, maxChars: maxChars);
+    return Semantics(
+      container: true,
+      label: l10n.squad_optimalRoleSemantics(label),
+      child: ExcludeSemantics(
+        child: ConstrainedBox(
+          key: ValueKey<String>('squad-optimal-role-$playerId'),
+          constraints: BoxConstraints(maxWidth: compact ? 72 : 96),
           child: Text(
-            label,
-            maxLines: 1,
+            display,
+            maxLines: 2,
             overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
             style: TextStyle(
-              fontSize: 8,
-              fontWeight: FontWeight.w600,
-              color: colors.onSurfaceVariant,
+              fontSize: compact ? 10 : 11,
+              fontWeight: FontWeight.w700,
+              height: 1.1,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
         ),
-        const SizedBox(height: 2),
-        bar,
-      ],
+      ),
     );
   }
 }

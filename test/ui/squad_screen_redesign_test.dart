@@ -14,6 +14,7 @@ import 'package:new_football/app/screens/player_detail_screen.dart';
 import 'package:new_football/app/screens/squad_screen.dart';
 import 'package:new_football/app/utils/color_interpolation.dart';
 import 'package:new_football/app/utils/squad_presentation.dart';
+import 'package:new_football/app/utils/squad_tile_metrics.dart';
 import 'package:new_football/app/widgets/tactics/pitch_field.dart';
 import 'package:new_football/app/widgets/tactics/player_list_tile.dart';
 import 'package:new_football/app/widgets/tactics/substitute_sheet.dart';
@@ -31,7 +32,7 @@ import '../helpers/widget_harness.dart';
 
 void main() {
   testWidgets(
-    'renders the full redesign surface and keeps all four sort modes',
+    'renders the full redesign surface and keeps all three tile metric modes',
     (tester) async {
       final game = task41Game(seed: 9401);
       final harness = _SquadHarness(game);
@@ -59,15 +60,11 @@ void main() {
         findsOneWidget,
       );
       expect(
-        find.byKey(const ValueKey('squad-size-indicator-minimum')),
-        findsOneWidget,
-      );
-      expect(
-        find.byKey(const ValueKey('squad-size-indicator-maximum')),
-        findsOneWidget,
-      );
-      expect(
         find.byKey(const ValueKey('squad-size-indicator-range-track')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const ValueKey('squad-size-indicator-track-fill')),
         findsOneWidget,
       );
       expect(find.byKey(const ValueKey('squad-pitch-field')), findsOneWidget);
@@ -83,48 +80,81 @@ void main() {
         expect(_rowFinder(player.id), findsOneWidget);
       }
 
-      final sortButtonFinder = find.byType(DropdownButton<PlayerSortMode>);
-      expect(sortButtonFinder, findsOneWidget);
-      final sortButton = tester.widget<DropdownButton<PlayerSortMode>>(
-        sortButtonFinder,
+      final metricButtonFinder = find.byType(
+        DropdownButton<SquadTileMetricMode>,
       );
-      expect(sortButton.items, hasLength(4));
-      expect(sortButton.items!.map((item) => item.value), <PlayerSortMode>[
-        PlayerSortMode.overall,
-        PlayerSortMode.assignedZone,
-        PlayerSortMode.form,
-        PlayerSortMode.position,
-      ]);
+      expect(metricButtonFinder, findsOneWidget);
+      final metricButton = tester.widget<DropdownButton<SquadTileMetricMode>>(
+        metricButtonFinder,
+      );
+      expect(metricButton.items, hasLength(3));
       expect(
-        sortButton.items!.map((item) => (item.child as Text).data),
+        metricButton.items!.map((item) => item.value),
+        <SquadTileMetricMode>[
+          SquadTileMetricMode.staminaForm,
+          SquadTileMetricMode.potential,
+          SquadTileMetricMode.optimalRole,
+        ],
+      );
+      expect(
+        metricButton.items!.map((item) => (item.child as Text).data),
         <String>[
-          l10n.squad_sortOverall,
-          l10n.squad_sortAssignedZone,
-          l10n.squad_sortForm,
-          l10n.squad_sortPosition,
+          l10n.squad_metricStaminaForm,
+          l10n.squad_metricPotential,
+          l10n.squad_metricOptimalRole,
         ],
       );
 
-      for (final mode in PlayerSortMode.values) {
-        final currentButton = tester.widget<DropdownButton<PlayerSortMode>>(
-          sortButtonFinder,
-        );
+      final assignedZoneOrder = sortRoster(
+        team,
+        team.roster,
+        PlayerSortMode.assignedZone,
+      ).map((player) => player.id).toList();
+      for (final mode in SquadTileMetricMode.values) {
+        final currentButton = tester
+            .widget<DropdownButton<SquadTileMetricMode>>(metricButtonFinder);
         currentButton.onChanged!(mode);
         await tester.pump();
 
-        final currentTeam = harness.controller.save!.leagueState.playerTeam!;
         expect(
           _rosterRows(tester).map((row) => row.player.id).toList(),
-          sortRoster(
-            currentTeam,
-            currentTeam.roster,
-            mode,
-          ).map((player) => player.id).toList(),
+          assignedZoneOrder,
         );
         expect(
-          tester.widget<DropdownButton<PlayerSortMode>>(sortButtonFinder).value,
+          tester
+              .widget<DropdownButton<SquadTileMetricMode>>(metricButtonFinder)
+              .value,
           mode,
         );
+        switch (mode) {
+          case SquadTileMetricMode.staminaForm:
+            expect(
+              find.byType(FormIndicator),
+              findsNWidgets(team.roster.length),
+            );
+            expect(
+              find.byType(StaminaIndicator),
+              findsNWidgets(team.roster.length),
+            );
+            expect(find.byType(PotentialStars), findsNothing);
+            expect(find.byType(OptimalRoleLabel), findsNothing);
+          case SquadTileMetricMode.potential:
+            expect(find.byType(FormIndicator), findsNothing);
+            expect(find.byType(StaminaIndicator), findsNothing);
+            expect(
+              find.byType(PotentialStars),
+              findsNWidgets(team.roster.length),
+            );
+            expect(find.byType(OptimalRoleLabel), findsNothing);
+          case SquadTileMetricMode.optimalRole:
+            expect(find.byType(FormIndicator), findsNothing);
+            expect(find.byType(StaminaIndicator), findsNothing);
+            expect(find.byType(PotentialStars), findsNothing);
+            expect(
+              find.byType(OptimalRoleLabel),
+              findsNWidgets(team.roster.length),
+            );
+        }
       }
 
       expect(
@@ -150,8 +180,10 @@ void main() {
       await tester.tap(tabs.at(0));
       await tester.pumpAndSettle();
       expect(
-        tester.widget<DropdownButton<PlayerSortMode>>(sortButtonFinder).value,
-        PlayerSortMode.position,
+        tester
+            .widget<DropdownButton<SquadTileMetricMode>>(metricButtonFinder)
+            .value,
+        SquadTileMetricMode.optimalRole,
       );
     },
   );
@@ -169,19 +201,23 @@ void main() {
         id: 'provider-added-player',
         name: 'Provider Added',
       );
-      final sortButtonFinder = find.byType(DropdownButton<PlayerSortMode>);
-      final sortButton = tester.widget<DropdownButton<PlayerSortMode>>(
-        sortButtonFinder,
+      final metricButtonFinder = find.byType(
+        DropdownButton<SquadTileMetricMode>,
       );
-      sortButton.onChanged!(PlayerSortMode.position);
+      final metricButton = tester.widget<DropdownButton<SquadTileMetricMode>>(
+        metricButtonFinder,
+      );
+      metricButton.onChanged!(SquadTileMetricMode.potential);
       await tester.pump();
 
       final initialCount = tester.widget<RosterSizeIndicator>(
         find.byType(RosterSizeIndicator),
       );
-      final initialFill = tester.widget<FractionallySizedBox>(
-        find.byKey(const ValueKey('squad-size-indicator-track-fill')),
-      );
+      final initialFillWidth = tester
+          .getSize(
+            find.byKey(const ValueKey('squad-size-indicator-track-fill')),
+          )
+          .width;
       expect(_rowFinder(addedPlayer.id), findsNothing);
 
       await harness.controller.updateLeague((league) {
@@ -195,15 +231,19 @@ void main() {
       final updatedCount = tester.widget<RosterSizeIndicator>(
         find.byType(RosterSizeIndicator),
       );
-      final updatedFill = tester.widget<FractionallySizedBox>(
-        find.byKey(const ValueKey('squad-size-indicator-track-fill')),
-      );
+      final updatedFillWidth = tester
+          .getSize(
+            find.byKey(const ValueKey('squad-size-indicator-track-fill')),
+          )
+          .width;
       expect(updatedCount.count, initialCount.count + 1);
-      expect(updatedFill.widthFactor, greaterThan(initialFill.widthFactor!));
+      expect(updatedFillWidth, greaterThan(initialFillWidth));
       expect(find.byKey(_rowKey(addedPlayer.id)), findsOneWidget);
       expect(
-        tester.widget<DropdownButton<PlayerSortMode>>(sortButtonFinder).value,
-        PlayerSortMode.position,
+        tester
+            .widget<DropdownButton<SquadTileMetricMode>>(metricButtonFinder)
+            .value,
+        SquadTileMetricMode.potential,
       );
       expect(
         tester.widget<PlayerListTile>(_tileFinder(addedPlayer.id)).zone,
@@ -233,8 +273,10 @@ void main() {
 
       final finalTeam = harness.controller.save!.leagueState.playerTeam!;
       expect(
-        tester.widget<DropdownButton<PlayerSortMode>>(sortButtonFinder).value,
-        PlayerSortMode.position,
+        tester
+            .widget<DropdownButton<SquadTileMetricMode>>(metricButtonFinder)
+            .value,
+        SquadTileMetricMode.potential,
       );
       expect(
         tester.widget<PlayerListTile>(_tileFinder(addedPlayer.id)).zone,
@@ -749,10 +791,12 @@ void main() {
         );
       }
 
-      final sortButtonFinder = find.byType(DropdownButton<PlayerSortMode>);
-      for (final mode in PlayerSortMode.values) {
+      final metricButtonFinder = find.byType(
+        DropdownButton<SquadTileMetricMode>,
+      );
+      for (final mode in SquadTileMetricMode.values) {
         tester
-            .widget<DropdownButton<PlayerSortMode>>(sortButtonFinder)
+            .widget<DropdownButton<SquadTileMetricMode>>(metricButtonFinder)
             .onChanged!(mode);
         await tester.pump();
         expect(
@@ -760,11 +804,13 @@ void main() {
           sortRoster(
             initialTeam,
             initialTeam.roster,
-            mode,
+            PlayerSortMode.assignedZone,
           ).map((player) => player.id).toList(),
         );
         expect(
-          tester.widget<DropdownButton<PlayerSortMode>>(sortButtonFinder).value,
+          tester
+              .widget<DropdownButton<SquadTileMetricMode>>(metricButtonFinder)
+              .value,
           mode,
         );
       }
@@ -854,10 +900,12 @@ void main() {
       );
       final selectedId = initialTeam.roster.last.id;
 
-      final sortButtonFinder = find.byType(DropdownButton<PlayerSortMode>);
+      final metricButtonFinder = find.byType(
+        DropdownButton<SquadTileMetricMode>,
+      );
       tester
-          .widget<DropdownButton<PlayerSortMode>>(sortButtonFinder)
-          .onChanged!(PlayerSortMode.form);
+          .widget<DropdownButton<SquadTileMetricMode>>(metricButtonFinder)
+          .onChanged!(SquadTileMetricMode.potential);
       await tester.pump();
       tester.widget<PlayerListTile>(_tileFinder(selectedId)).onTap();
       await tester.pump();
@@ -978,8 +1026,10 @@ void main() {
       await tester.tap(tabs.at(0));
       await tester.pumpAndSettle();
       expect(
-        tester.widget<DropdownButton<PlayerSortMode>>(sortButtonFinder).value,
-        PlayerSortMode.form,
+        tester
+            .widget<DropdownButton<SquadTileMetricMode>>(metricButtonFinder)
+            .value,
+        SquadTileMetricMode.potential,
       );
       expect(
         tester.widget<PlayerListTile>(_tileFinder(selectedId)).selected,
@@ -1071,10 +1121,10 @@ void main() {
     );
     expect(
       tester
-          .widget<FractionallySizedBox>(
+          .getSize(
             find.byKey(const ValueKey('squad-size-indicator-track-fill')),
           )
-          .widthFactor,
+          .width,
       0,
     );
   });

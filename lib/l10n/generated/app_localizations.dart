@@ -1978,6 +1978,36 @@ abstract class AppLocalizations {
   /// **'Pozycja'**
   String get squad_sortPosition;
 
+  /// Tryb kafelka składu pokazujący paski staminy i formy.
+  ///
+  /// In pl, this message translates to:
+  /// **'Stamina i forma'**
+  String get squad_metricStaminaForm;
+
+  /// Tryb kafelka składu pokazujący gwiazdki potencjału.
+  ///
+  /// In pl, this message translates to:
+  /// **'Potencjał'**
+  String get squad_metricPotential;
+
+  /// Tryb kafelka składu pokazujący optymalną rolę zawodnika.
+  ///
+  /// In pl, this message translates to:
+  /// **'Optymalna rola'**
+  String get squad_metricOptimalRole;
+
+  /// Etykieta dostępności dla gwiazdek potencjału w wierszu składu.
+  ///
+  /// In pl, this message translates to:
+  /// **'Potencjał: {stars}'**
+  String squad_potentialStarsSemantics(String stars);
+
+  /// Etykieta dostępności dla optymalnej roli w wierszu składu.
+  ///
+  /// In pl, this message translates to:
+  /// **'Optymalna rola: {role}'**
+  String squad_optimalRoleSemantics(String role);
+
   /// Krótki podpis nad paskiem formy w wierszu składu.
   ///
   /// In pl, this message translates to:

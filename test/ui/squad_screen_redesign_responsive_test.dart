@@ -10,6 +10,7 @@ import 'package:go_router/go_router.dart';
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/app/screens/player_detail_screen.dart';
 import 'package:new_football/app/screens/squad_screen.dart';
+import 'package:new_football/app/utils/squad_tile_metrics.dart';
 import 'package:new_football/app/widgets/tactics/pitch_field.dart';
 import 'package:new_football/app/widgets/tactics/player_list_tile.dart';
 import 'package:new_football/app/widgets/tactics/substitute_sheet.dart';
@@ -17,7 +18,6 @@ import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/core/models/injury.dart';
 import 'package:new_football/core/models/league_state.dart';
-import 'package:new_football/core/tactics/player_sort.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
 import '../helpers/widget_harness.dart';
@@ -75,14 +75,16 @@ void main() {
               await tester.pump();
               _expectNoFlutterErrors(tester, frameworkErrors, scenario);
 
-              _changeSortMode(tester, PlayerSortMode.form);
+              _changeMetricMode(tester, SquadTileMetricMode.potential);
               await tester.pump();
               _expectNoFlutterErrors(tester, frameworkErrors, scenario);
               expect(
-                _currentSortMode(tester),
-                PlayerSortMode.form,
-                reason: '$scenario: sort control did not activate',
+                _currentMetricMode(tester),
+                SquadTileMetricMode.potential,
+                reason: '$scenario: metric control did not activate',
               );
+              _changeMetricMode(tester, SquadTileMetricMode.staminaForm);
+              await tester.pump();
               expect(
                 _selectedPlayerIds(tester),
                 [selectedId],
@@ -116,7 +118,7 @@ void main() {
 
               final beforeRelayout = _teamSnapshot(harness.controller.save!);
               final selectedBeforeRelayout = _selectedPlayerIds(tester);
-              final sortBeforeRelayout = _currentSortMode(tester);
+              final metricBeforeRelayout = _currentMetricMode(tester);
               final oppositeOrientation = viewport.width < viewport.height
                   ? const Size(844, 390)
                   : const Size(390, 844);
@@ -145,8 +147,8 @@ void main() {
                 scenario: '$scenario after orientation relayout',
               );
               expect(
-                _currentSortMode(tester),
-                sortBeforeRelayout,
+                _currentMetricMode(tester),
+                metricBeforeRelayout,
                 reason: '$scenario: sort mode was not retained after relayout',
               );
               expect(
@@ -631,16 +633,16 @@ String _selectFirstRenderedPlayer(WidgetTester tester) {
   return first.player.id;
 }
 
-void _changeSortMode(WidgetTester tester, PlayerSortMode mode) {
-  final sortControl = tester.widget<DropdownButton<PlayerSortMode>>(
-    find.byType(DropdownButton<PlayerSortMode>),
+void _changeMetricMode(WidgetTester tester, SquadTileMetricMode mode) {
+  final metricControl = tester.widget<DropdownButton<SquadTileMetricMode>>(
+    find.byType(DropdownButton<SquadTileMetricMode>),
   );
-  sortControl.onChanged!(mode);
+  metricControl.onChanged!(mode);
 }
 
-PlayerSortMode _currentSortMode(WidgetTester tester) => tester
-    .widget<DropdownButton<PlayerSortMode>>(
-      find.byType(DropdownButton<PlayerSortMode>),
+SquadTileMetricMode _currentMetricMode(WidgetTester tester) => tester
+    .widget<DropdownButton<SquadTileMetricMode>>(
+      find.byType(DropdownButton<SquadTileMetricMode>),
     )
     .value!;
 
