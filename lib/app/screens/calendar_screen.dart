@@ -217,6 +217,25 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     );
   }
 
+  Future<void> _showDraftSimulationBlocked(
+    BuildContext context,
+    AppLocalizations l10n,
+  ) {
+    return showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.calendar_event_draft),
+        content: Text(l10n.calendar_stopReason_draftPick),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(MaterialLocalizations.of(context).okButtonLabel),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _simulateToDate(int targetWeek, int targetDay) async {
     final runId = _beginCalendarRun();
     final result = await _runBatch(
@@ -336,22 +355,33 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       return;
     }
     if (result.stopReason == SimulationStopReason.event) {
-      if (result.eventId == CalendarEventId.scoutReport) {
-        if (hasPendingUrgent) {
-          _showPendingUrgentSnackBar(context, l10n);
-        }
-        await ref
-            .read(gameControllerProvider.notifier)
-            .runEventAtCurrentDay(CalendarEventId.scoutReport);
-        if (!_isCurrentRun(runId) || !context.mounted) return;
-        context.push('/game/prospects?watchlist=true&combine=true');
-        return;
-      }
       if (result.eventId == CalendarEventId.draft) {
         if (hasPendingUrgent) {
           _showPendingUrgentSnackBar(context, l10n);
         }
+        await _showDraftSimulationBlocked(context, l10n);
+        if (!_isCurrentRun(runId) || !context.mounted) return;
         context.push('/game/draft');
+        return;
+      }
+      final route = switch (result.eventId) {
+        CalendarEventId.lottery => '/game/lottery',
+        CalendarEventId.scoutReport =>
+          '/game/prospects?watchlist=true&combine=true',
+        CalendarEventId.freeAgencyOpen => '/game/contracts',
+        _ => null,
+      };
+      if (route != null) {
+        if (hasPendingUrgent) {
+          _showPendingUrgentSnackBar(context, l10n);
+        }
+        if (result.eventId == CalendarEventId.scoutReport) {
+          await ref
+              .read(gameControllerProvider.notifier)
+              .runEventAtCurrentDay(CalendarEventId.scoutReport);
+          if (!_isCurrentRun(runId) || !context.mounted) return;
+        }
+        context.push(route);
         return;
       }
       // Other informational/automatic events should not reach this path, but

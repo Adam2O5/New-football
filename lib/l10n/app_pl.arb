@@ -1027,7 +1027,7 @@
   "calendar_cancel": "Anuluj",
   "calendar_stopReason_reachedTarget": "Cel osiągnięty",
   "calendar_stopReason_cancelled": "Symulacja przerwana",
-  "calendar_stopReason_draftPick": "Twoja tura draftu",
+  "calendar_stopReason_draftPick": "Nie można przesymulować draftu. Dokończ draft, aby kontynuować symulację.",
   "calendar_stopReason_noSave": "Brak zapisanej gry",
   "calendar_selectedDay_title": "Wybrany dzień",
   "calendar_selectedDay_noEvent": "Brak wydarzeń tego dnia",

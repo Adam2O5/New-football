@@ -752,7 +752,12 @@ class PlayerEventService {
       player: next,
       type: MessageType.injuryRecurrence,
       kind: null,
-      args: {'playerName': next.name, 'days': days},
+      args: {
+        'playerName': next.name,
+        'injuryName': definition.name,
+        'days': days,
+        'recoveryTime': days,
+      },
       payload: {
         'playerId': next.id,
         'teamId': team.id,

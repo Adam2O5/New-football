@@ -6,7 +6,7 @@
 
 | Okno | Kiedy | Kogo dotyczy |
 | ---- | ----- | ------------ |
-| **Contract extensions** | wt–niedz tyg. **46** | Własni zawodnicy (Bird) + **sztab** (wolni / wygasający) |
+| **Contract extensions** | wt–niedz tyg. **46** (10h/dzień) | Własni zawodnicy (Bird) + **sztab** (wolni / wygasający) |
 | **Free agency (phase I)** | pon tyg. **47** → niedziela tyg. **47** | UFA/RFA, niedraftowani, sztab FA |
 | **Free agency (phase II)** | pon tyg. **48** → **niedziela tyg. 45** kolejnego cyklu | UFA/RFA pozostali z fazy I, sztab FA |
 
@@ -33,8 +33,12 @@ tyg. 46 pon        → Draft (nowy cykl)
 
 ## 2. Contract extensions
 
-Obejmuje zarówno staff i zawodników. Możliwość składania ofert 
-w ekranie contracts_screen. Zawodnikom/staffowi można składać jedną ofertę na dzień. W przypadku braku przedłużenia kontraktu staff staje się free agentem, a zawodnicy w zależności od swojego kontraktu stają się RFA/UFA. 
+Obejmuje zarówno staff i zawodników. Możliwość składania ofert
+w ekranie contracts_screen. Każdy dzień ma 10 godzin. W każdej godzinie
+można złożyć jedną ofertę zawodnikowi i jedną ofertę członkowi sztabu.
+Po zakończeniu godziny 10 dzień automatycznie przechodzi do następnego.
+W przypadku braku przedłużenia kontraktu staff staje się free agentem,
+a zawodnicy w zależności od swojego kontraktu stają się RFA/UFA.
 
 ---
 

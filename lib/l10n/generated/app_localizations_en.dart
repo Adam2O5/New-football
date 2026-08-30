@@ -1831,7 +1831,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get calendar_stopReason_cancelled => 'Simulation cancelled';
 
   @override
-  String get calendar_stopReason_draftPick => 'Your draft turn';
+  String get calendar_stopReason_draftPick =>
+      'The draft cannot be simulated. Complete the draft to continue.';
 
   @override
   String get calendar_stopReason_noSave => 'No active save';

@@ -4,6 +4,8 @@ import 'package:new_football/core/models/league_state.dart';
 
 enum CalendarEventKind { match, playerAction, automatic, informational }
 
+enum CalendarEventExecution { automatic, playerAction }
+
 /// Typed calendar event identifiers — single source of truth.
 /// Replaces stringly-typed IDs across the codebase.
 enum CalendarEventId {
@@ -30,6 +32,7 @@ class CalendarEventSlot {
     required this.day,
     required this.order,
     required this.kind,
+    this.execution = CalendarEventExecution.automatic,
     this.endWeek,
     this.endDay,
   });
@@ -39,6 +42,7 @@ class CalendarEventSlot {
   final int day;
   final int order;
   final CalendarEventKind kind;
+  final CalendarEventExecution execution;
   final int? endWeek;
   final int? endDay;
 }
@@ -90,6 +94,7 @@ class CalendarEventRegistry {
         day: 1,
         order: -2,
         kind: CalendarEventKind.automatic,
+        execution: CalendarEventExecution.automatic,
       ),
       CalendarEventSlot(
         id: CalendarEventId.awards,
@@ -97,6 +102,7 @@ class CalendarEventRegistry {
         day: 1,
         order: 0,
         kind: CalendarEventKind.informational,
+        execution: CalendarEventExecution.automatic,
       ),
       CalendarEventSlot(
         id: CalendarEventId.staffGrowth,
@@ -104,6 +110,7 @@ class CalendarEventRegistry {
         day: 2,
         order: 0,
         kind: CalendarEventKind.automatic,
+        execution: CalendarEventExecution.automatic,
       ),
       CalendarEventSlot(
         id: CalendarEventId.retirements,
@@ -111,6 +118,7 @@ class CalendarEventRegistry {
         day: 3,
         order: 0,
         kind: CalendarEventKind.informational,
+        execution: CalendarEventExecution.automatic,
       ),
       CalendarEventSlot(
         id: CalendarEventId.lottery,
@@ -118,6 +126,7 @@ class CalendarEventRegistry {
         day: 5,
         order: 0,
         kind: CalendarEventKind.playerAction,
+        execution: CalendarEventExecution.playerAction,
       ),
       CalendarEventSlot(
         id: CalendarEventId.tradeWindowOpen,
@@ -125,6 +134,7 @@ class CalendarEventRegistry {
         day: 1,
         order: -1,
         kind: CalendarEventKind.automatic,
+        execution: CalendarEventExecution.automatic,
       ),
       CalendarEventSlot(
         id: CalendarEventId.scoutReport,
@@ -132,6 +142,7 @@ class CalendarEventRegistry {
         day: 1,
         order: 0,
         kind: CalendarEventKind.playerAction,
+        execution: CalendarEventExecution.playerAction,
       ),
       CalendarEventSlot(
         id: CalendarEventId.combine,
@@ -139,6 +150,7 @@ class CalendarEventRegistry {
         day: 3,
         order: 0,
         kind: CalendarEventKind.automatic,
+        execution: CalendarEventExecution.automatic,
       ),
       CalendarEventSlot(
         id: CalendarEventId.finalMock,
@@ -146,6 +158,7 @@ class CalendarEventRegistry {
         day: 5,
         order: 0,
         kind: CalendarEventKind.automatic,
+        execution: CalendarEventExecution.automatic,
       ),
       CalendarEventSlot(
         id: CalendarEventId.draft,
@@ -153,6 +166,7 @@ class CalendarEventRegistry {
         day: 1,
         order: 0,
         kind: CalendarEventKind.playerAction,
+        execution: CalendarEventExecution.playerAction,
       ),
       CalendarEventSlot(
         id: CalendarEventId.nextClassGeneration,
@@ -160,6 +174,7 @@ class CalendarEventRegistry {
         day: 1,
         order: 1,
         kind: CalendarEventKind.playerAction,
+        execution: CalendarEventExecution.automatic,
       ),
       CalendarEventSlot(
         id: CalendarEventId.tradeDeadline,
@@ -167,6 +182,7 @@ class CalendarEventRegistry {
         day: 1,
         order: 0,
         kind: CalendarEventKind.informational,
+        execution: CalendarEventExecution.automatic,
       ),
       CalendarEventSlot(
         id: CalendarEventId.freeAgencyOpen,
@@ -174,6 +190,7 @@ class CalendarEventRegistry {
         day: 1,
         order: 0,
         kind: CalendarEventKind.playerAction,
+        execution: CalendarEventExecution.playerAction,
       ),
     ];
   }
@@ -244,6 +261,25 @@ class CalendarEventRegistry {
     }
   }
 
+  static List<CalendarEventSlot> unresolvedEventsOn(
+    LeagueState league,
+    int week,
+    int day, {
+    BalanceConfig balance = BalanceConfig.defaults,
+  }) {
+    final events =
+        build(balance.calendar)
+            .where(
+              (slot) =>
+                  slot.week == week &&
+                  slot.day == day &&
+                  !isDone(league.currentSeason, slot.id),
+            )
+            .toList()
+          ..sort((a, b) => a.order.compareTo(b.order));
+    return events;
+  }
+
   /// Normalizuje tydzień slotu względem bieżącej daty, zawijając do
   /// kolejnego roku gdy (week, day, order) slotu wypada w przeszłości
   /// względem (fromWeek, fromDay, fromOrder).
@@ -280,9 +316,13 @@ class CalendarEventRegistry {
     final fromDay = league.currentDay;
     const fromOrder = 0;
 
-    final candidates = build(
-      balance.calendar,
-    ).where((slot) => !isDone(season, slot.id)).toList();
+    final candidates = build(balance.calendar)
+        .where(
+          (slot) =>
+              slot.execution == CalendarEventExecution.playerAction &&
+              !isDone(season, slot.id),
+        )
+        .toList();
     if (candidates.isEmpty) return null;
 
     candidates.sort((a, b) {

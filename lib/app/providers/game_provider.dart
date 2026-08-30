@@ -77,6 +77,7 @@ final daySimulatorProvider = Provider((ref) {
     playerEvents: ref.watch(playerEventServiceProvider),
     teamEvents: ref.watch(teamEventServiceProvider),
     contractMarket: ref.watch(contractMarketServiceProvider),
+    season: ref.watch(seasonServiceProvider),
   );
 });
 
@@ -485,29 +486,19 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     return _playerEvents.resolveExpiredDecisions(state, saveSeed: saveSeed);
   }
 
-  LeagueState _setClockForDate(LeagueState league) {
-    final hour = _calendar.initialHourForDate(
-      league.currentWeek,
-      league.currentDay,
-    );
-    return league.copyWith(
-      currentHour: hour,
-      hourlyPlayerOfferUsed: false,
-      hourlyStaffOfferUsed: false,
-    );
-  }
-
-  /// Advances the calendar by exactly one day: no phase hooks, no
-  /// calendar-event auto-resolution, no auto-simulating the player's match.
-  /// This is the raw primitive `simulateToEvent`/`simulateToDate` build on.
-  Future<DaySimulationResult?> advanceOneDay({
+  Future<DaySimulationResult?> simulateDay({
     bool resolveContractMarket = true,
+    bool interruptForUrgent = true,
   }) async {
     return _advanceOneDay(
       resolveContractMarket: resolveContractMarket,
-      blockOnPendingUrgent: true,
+      blockOnPendingUrgent: interruptForUrgent,
     );
   }
+
+  Future<DaySimulationResult?> advanceOneDay({
+    bool resolveContractMarket = true,
+  }) => simulateDay(resolveContractMarket: resolveContractMarket);
 
   Future<DaySimulationResult?> _advanceOneDay({
     required bool blockOnPendingUrgent,
@@ -525,49 +516,12 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
       await updateLeague((_) => league);
       return null;
     }
-    final calendar = _calendar;
-    if (calendar
-        .playInSlotsForDay(league.currentWeek, league.currentDay)
-        .isNotEmpty) {
-      league = _season.advancePlayInForDate(
-        league,
-        week: league.currentWeek,
-        day: league.currentDay,
-        saveSeed: current.saveSeed,
-      );
-    }
-    if (calendar.phaseForWeek(league.currentWeek) == SeasonPhase.playoff &&
-        league.currentSeason.playoffBrackets.isEmpty &&
-        league.currentSeason.playInResults.isNotEmpty) {
-      league = _season.setupPlayoffs(league);
-    }
-    if (calendar.postseasonSlotForDay(league.currentWeek, league.currentDay) !=
-        null) {
-      league = _season.advancePlayoffsForDate(
-        league,
-        week: league.currentWeek,
-        day: league.currentDay,
-        saveSeed: current.saveSeed,
-      );
-    }
-
     final result = _days.simulateDay(
       league,
       saveSeed: current.saveSeed,
       resolveContractMarket: resolveContractMarket,
     );
     var updatedLeague = result.league;
-    final isCycleEnd =
-        current.leagueState.currentWeek ==
-            calendar.balance.calendar.seasonCycleWeeks &&
-        current.leagueState.currentDay == 7;
-    if (isCycleEnd) {
-      updatedLeague = _season.rolloverSeason(
-        updatedLeague,
-        saveSeed: current.saveSeed,
-      );
-    }
-    updatedLeague = _setClockForDate(updatedLeague);
     updatedLeague = _deliverStartOfDay(
       updatedLeague,
       hour: updatedLeague.currentHour,
@@ -577,19 +531,16 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
       // the next real start-of-day pass handles the deadline.
       resolveExpired: false,
     );
-    if (isCycleEnd) {
-      final updatedResult = DaySimulationResult(
-        league: updatedLeague,
-        pauseForUrgent: updatedLeague.inbox.pendingUrgent.isNotEmpty,
-        playerMatch: result.playerMatch,
-        simulatedResults: result.simulatedResults,
-        eventId: result.eventId,
-      );
-      await updateLeague((_) => updatedLeague);
-      return updatedResult;
-    }
     await updateLeague((_) => updatedLeague);
-    return result;
+    return DaySimulationResult(
+      league: updatedLeague,
+      pauseForUrgent: updatedLeague.inbox.pendingUrgent.isNotEmpty,
+      playerMatch: result.playerMatch,
+      simulatedResults: result.simulatedResults,
+      eventId: result.eventId,
+      stopReason: result.stopReason,
+      moment: result.moment,
+    );
   }
 
   /// Advances one offer hour during extensions/FA phase I. The tenth hour
@@ -627,16 +578,16 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
       hour: hour,
       saveSeed: current.saveSeed,
     );
-    if (hour >= _calendar.balance.contracts.hoursPerDay) {
+    if (_calendar.isLastHour(league.currentWeek, league.currentDay, hour)) {
       await updateLeague(
         (_) => resolved.copyWith(
           currentHour: _calendar.balance.contracts.hoursPerDay,
         ),
         autosave: true,
       );
-      return _advanceOneDay(
+      return simulateDay(
         resolveContractMarket: false,
-        blockOnPendingUrgent: blockOnPendingUrgent,
+        interruptForUrgent: blockOnPendingUrgent,
       );
     }
 
@@ -646,7 +597,11 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
       hourlyStaffOfferUsed: false,
     );
     await updateLeague((_) => next);
-    return DaySimulationResult(league: next, pauseForUrgent: false);
+    return DaySimulationResult(
+      league: next,
+      pauseForUrgent: false,
+      stopReason: DaySimulationStopReason.hourAdvanced,
+    );
   }
 
   /// Earliest unplayed fixture of the player's team, mapped to its
@@ -733,76 +688,27 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
           );
   }
 
-  /// Non-null only when a non-match calendar event is due exactly today.
-  UpcomingAction? _dueActionToday(LeagueState league) {
-    final action = nextEvent(league: league);
-    if (action == null) return null;
-    if (action.week != league.currentWeek || action.day != league.currentDay) {
-      return null;
-    }
-    return action;
-  }
-
-  /// Returns true if the calendar event due today is a `playerAction` that
-  /// the batch must stop for (for example the Scout Report/Combine target
-  /// selection, lottery, or the player's turn to pick in the draft).
-  bool _isBlockingPlayerEvent(LeagueState league, CalendarEventId eventId) {
-    if (eventId == CalendarEventId.lottery) return true;
-    if (eventId == CalendarEventId.scoutReport) {
-      return league.playerTeam != null &&
-          league.currentSeason.draftState?.draftClass != null;
-    }
-    if (eventId != CalendarEventId.draft) return false;
-    final draft = league.currentSeason.draftState;
-    if (draft == null) return false;
-    if (draft.currentPickIndex >= draft.order.length) return false;
-    return draft.order[draft.currentPickIndex].teamId == league.playerTeamId;
-  }
-
   /// Runs the automatic/informational calendar event registered for
   /// [eventId] at the current date. No-op (besides validation) for
   /// `playerAction` events like `draft` — those are driven entirely by the
   /// dedicated UI + `makeDraftPick`.
   Future<void> runEventAtCurrentDay(CalendarEventId eventId) async {
+    await completeEventAtCurrentDay(eventId);
+  }
+
+  Future<DaySimulationResult?> completeEventAtCurrentDay(
+    CalendarEventId eventId,
+  ) async {
     final saveSeed = save?.saveSeed ?? 0;
     await updateLeague((league) {
-      switch (eventId) {
-        case CalendarEventId.capUpdateTv:
-          return _season.runCapUpdateTv(league, saveSeed: saveSeed);
-        case CalendarEventId.staffGrowth:
-          return _season.runStaffGrowthAndRetire(league);
-        case CalendarEventId.retirements:
-          return _season.runPlayerRetirements(league, saveSeed: saveSeed);
-        case CalendarEventId.awards:
-          return _season.runAwards(league);
-        case CalendarEventId.lottery:
-          // playerAction — handled by the lottery screen interactively.
-          return league;
-        case CalendarEventId.scoutReport:
-          return _season.runScoutReport(league, saveSeed: saveSeed);
-        case CalendarEventId.combine:
-          return _season.runCombine(league, saveSeed: saveSeed);
-        case CalendarEventId.finalMock:
-          return _season.runFinalMock(league, saveSeed: saveSeed);
-        case CalendarEventId.nextClassGeneration:
-          return _season.runNextClassGeneration(league, saveSeed: saveSeed);
-        case CalendarEventId.tradeWindowOpen:
-        case CalendarEventId.contractExtensions:
-          // Ranges are derived windows, not one-shot actions.
-          return league;
-        case CalendarEventId.draft:
-          // playerAction — handled by the draft screen + makeDraftPick.
-          return league;
-        case CalendarEventId.freeAgencyOpen:
-          return _season.runFreeAgencyOpen(league);
-        case CalendarEventId.tradeDeadline:
-          return league.copyWith(
-            currentSeason: league.currentSeason.copyWith(
-              tradeDeadlineAcked: true,
-            ),
-          );
-      }
+      return _days.resolveCalendarEvent(league, eventId, saveSeed: saveSeed);
     });
+    final league = save?.leagueState;
+    if (league == null ||
+        !CalendarEventRegistry.isDone(league.currentSeason, eventId)) {
+      return null;
+    }
+    return simulateDay(interruptForUrgent: false);
   }
 
   /// Auto-simulates the player's fixture headlessly (same engine call as
@@ -1067,15 +973,9 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     }
   }
 
-  /// Repeatedly advances one day at a time until [reachedTarget] holds
-  /// (checked before each day), a due event/match/urgent condition stops
-  /// the batch, cancellation is requested, or [maxDays] is hit as a safety
-  /// cap.
-  ///
-  /// [autoResolveEvents] controls whether automatic/informational/
-  /// non-blocking `playerAction` events encountered along the way are
-  /// executed immediately (`simulateToDate` semantics) or left for the
-  /// caller to react to (`simulateToEvent` semantics).
+  /// Repeatedly invokes the same day primitive until [reachedTarget] holds
+  /// (checked before each day), an interactive event/match/urgent condition
+  /// stops the batch, cancellation is requested, or [maxDays] is hit.
   ///
   /// [autoSimulatePlayerMatch] controls whether the player's own fixture is
   /// auto-simulated headlessly and the batch continues (`simulateToDate`:
@@ -1126,19 +1026,6 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
       }
 
       final league = current.leagueState;
-      final due = _dueActionToday(league);
-      final dueEventId = (due != null && due.kind != CalendarEventKind.match)
-          ? due.calendarEventId
-          : null;
-
-      if (dueEventId != null && _isBlockingPlayerEvent(league, dueEventId)) {
-        return BatchSimulationResult(
-          stopReason: SimulationStopReason.event,
-          daysSimulated: daysSimulated,
-          lastResult: lastResult,
-          eventId: dueEventId,
-        );
-      }
 
       if (reachedTarget(league)) {
         // A calendar target can be the first date on which a scheduled urgent
@@ -1175,32 +1062,6 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
         );
       }
 
-      if (dueEventId != null) {
-        if (!autoResolveEvents) {
-          return BatchSimulationResult(
-            stopReason: SimulationStopReason.event,
-            daysSimulated: daysSimulated,
-            lastResult: lastResult,
-            eventId: dueEventId,
-          );
-        }
-        await runEventAtCurrentDay(dueEventId);
-        if (!_isCurrentSimulationSession(session)) {
-          return BatchSimulationResult(
-            stopReason: SimulationStopReason.cancelled,
-            daysSimulated: daysSimulated,
-            lastResult: lastResult,
-          );
-        }
-        if (session.cancelRequested) {
-          return BatchSimulationResult(
-            stopReason: SimulationStopReason.cancelled,
-            daysSimulated: daysSimulated,
-            lastResult: lastResult,
-          );
-        }
-      }
-
       if (daysSimulated >= maxDays) {
         return BatchSimulationResult(
           stopReason: SimulationStopReason.reachedTarget,
@@ -1212,7 +1073,9 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
       final startWeek = league.currentWeek;
       final startDay = league.currentDay;
       final isHourly = _calendar.isHourlyContractMode(startWeek, startDay);
-      final wasHourlyEnd = isHourly && (league.currentHour ?? 1) >= 10;
+      final wasHourlyEnd =
+          isHourly &&
+          _calendar.isLastHour(startWeek, startDay, league.currentHour ?? 1);
       if (pacer != null && (!isHourly || !pacer.hasActiveDay)) {
         pacer.startDay();
       }
@@ -1221,8 +1084,8 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
           ? await _advanceOneHour(
               blockOnPendingUrgent: session.urgentInterruptionEnabled,
             )
-          : await _advanceOneDay(
-              blockOnPendingUrgent: session.urgentInterruptionEnabled,
+          : await simulateDay(
+              interruptForUrgent: session.urgentInterruptionEnabled,
             );
       if (!_isCurrentSimulationSession(session)) {
         return BatchSimulationResult(
@@ -1253,6 +1116,40 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
         );
       }
       lastResult = result;
+
+      if (result.eventId != null) {
+        if (autoResolveEvents && result.eventId != CalendarEventId.draft) {
+          final eventId = result.eventId!;
+          final saveSeed = save?.saveSeed ?? 0;
+          await updateLeague(
+            (league) =>
+                _days.resolveCalendarEvent(league, eventId, saveSeed: saveSeed),
+          );
+          if (!_isCurrentSimulationSession(session)) {
+            return BatchSimulationResult(
+              stopReason: SimulationStopReason.cancelled,
+              daysSimulated: daysSimulated,
+              lastResult: lastResult,
+            );
+          }
+          final resolvedLeague = save?.leagueState;
+          if (resolvedLeague != null &&
+              CalendarEventRegistry.isDone(
+                resolvedLeague.currentSeason,
+                eventId,
+              )) {
+            pacer?.skipDay();
+            continue;
+          }
+        }
+        pacer?.skipDay();
+        return BatchSimulationResult(
+          stopReason: SimulationStopReason.event,
+          daysSimulated: daysSimulated,
+          lastResult: result,
+          eventId: result.eventId,
+        );
+      }
 
       // Keep the old count semantics for HomeScreen/day-by-day callers. The
       // calendar observer path counts only a date transition, so an hourly
@@ -1416,19 +1313,11 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   /// auto-resolwowane: to jest ścieżka `HomeScreen` (day-by-day / do
   /// następnego meczu-lub-eventu), caller reaguje na `BatchSimulationResult`.
   Future<BatchSimulationResult> simulateToEvent() {
-    return _simulateUntil(
-      (_) => false,
-      autoResolveEvents: false,
-      autoSimulatePlayerMatch: false,
-    );
+    return _simulateUntil((_) => false, autoSimulatePlayerMatch: false);
   }
 
-  /// Szybka symulacja kalendarzowa: dociąga do (week, day), auto-resolwując
-  /// po drodze zarówno automatyczne/informacyjne eventy, jak i mecze
-  /// gracza (headlessly, silnikiem — bez otwierania `MatchdayScreen`).
-  /// Zatrzymuje się wyłącznie na: pilnej wiadomości w skrzynce lub
-  /// `playerAction` evencie, na który wymagana jest realna decyzja gracza
-  /// (obecnie tylko tura draftu gracza).
+  /// Invokes [simulateDay] until the beginning of (week, day). The target day
+  /// itself is not simulated.
   Future<BatchSimulationResult> simulateToDate(
     int targetWeek,
     int targetDay, {
@@ -1708,6 +1597,14 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
         saveSeed: seed,
       ),
     );
+    final league = save?.leagueState;
+    if (league != null &&
+        CalendarEventRegistry.isDone(
+          league.currentSeason,
+          CalendarEventId.draft,
+        )) {
+      await simulateDay(interruptForUrgent: false);
+    }
   }
 
   Future<void> simulateOneDraftPick() async {

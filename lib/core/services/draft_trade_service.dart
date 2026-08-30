@@ -1023,6 +1023,7 @@ ${first.id}|${second.id}|${first.teamId}|${second.teamId}
   LeagueState _sendPendingOfferMessage(LeagueState league, TradeOffer offer) {
     final a = league.teamById(offer.teamAId);
     final b = league.teamById(offer.teamBId);
+    final otherTeam = league.playerTeamId == offer.teamAId ? b : a;
     return messages.send(
       league,
       type: MessageType.tradeOffer,
@@ -1030,6 +1031,9 @@ ${first.id}|${second.id}|${first.teamId}|${second.teamId}
       args: {
         'teamAName': a?.name ?? offer.teamAId,
         'teamBName': b?.name ?? offer.teamBId,
+        'otherTeamName': otherTeam?.name ?? offer.teamBId,
+        'tradeOfferExpiry':
+            '${offer.expirySeasonYear}-W${offer.expiryWeek}-D${offer.expiryDay}',
       },
       payload: {
         'tradeOfferId': offer.id,
@@ -1054,6 +1058,7 @@ ${first.id}|${second.id}|${first.teamId}|${second.teamId}
   LeagueState _sendCounterOfferMessage(LeagueState league, TradeOffer offer) {
     final a = league.teamById(offer.teamAId);
     final b = league.teamById(offer.teamBId);
+    final otherTeam = league.playerTeamId == offer.teamAId ? b : a;
     return messages.send(
       league,
       type: MessageType.trade,
@@ -1062,6 +1067,7 @@ ${first.id}|${second.id}|${first.teamId}|${second.teamId}
       args: {
         'teamAName': a?.name ?? offer.teamAId,
         'teamBName': b?.name ?? offer.teamBId,
+        'otherTeamName': otherTeam?.name ?? offer.teamBId,
       },
       payload: {
         'tradeOfferId': offer.id,
@@ -1091,6 +1097,7 @@ ${first.id}|${second.id}|${first.teamId}|${second.teamId}
   }) {
     final a = league.teamById(offer.teamAId);
     final b = league.teamById(offer.teamBId);
+    final otherTeam = league.playerTeamId == offer.teamAId ? b : a;
     return messages.send(
       league,
       type: MessageType.trade,
@@ -1102,6 +1109,7 @@ ${first.id}|${second.id}|${first.teamId}|${second.teamId}
       args: {
         'teamAName': a?.name ?? offer.teamAId,
         'teamBName': b?.name ?? offer.teamBId,
+        'otherTeamName': otherTeam?.name ?? offer.teamBId,
       },
       payload: {
         'tradeOfferId': offer.id,

@@ -279,13 +279,8 @@ Future<void> _goToEvent(
   _presentHomeBatchResult(context, ref, l10n, batchResult: result);
 }
 
-/// "Symuluj {event}": dociąga kalendarz do dnia eventu, wykonuje go
-/// (`runEventAtCurrentDay`) i dopiero wtedy przesuwa dzień o jeden.
-/// `runEventAtCurrentDay` samo w sobie NIE przesuwa kalendarza (patrz
-/// `GameController.runEventAtCurrentDay` w `game_provider.dart`) — bez
-/// `advanceOneDay()` po jego wywołaniu `currentWeek`/`currentDay`
-/// zostawałyby zamrożone na dniu eventu na stałe, mimo że event jest już
-/// oznaczony jako wykonany (i przycisk "wygląda" na zmieniony).
+/// "Symuluj {event}": dociąga kalendarz do eventu i kończy go przez wspólny
+/// pipeline dnia. Po ostatnim evencie data przesuwa się automatycznie.
 Future<void> _simulateEvent(
   BuildContext context,
   WidgetRef ref,
@@ -307,8 +302,9 @@ Future<void> _simulateEvent(
   }
 
   final controller = ref.read(gameControllerProvider.notifier);
-  await controller.runEventAtCurrentDay(action.calendarEventId!);
-  final dayResult = await controller.advanceOneDay();
+  final dayResult = await controller.completeEventAtCurrentDay(
+    action.calendarEventId!,
+  );
   if (!context.mounted) return;
   _refreshCalendarCursor(ref);
 
@@ -416,13 +412,13 @@ Future<void> _advanceOneHour(
   }
 }
 
-Future<void> _advanceOneDay(
+Future<void> _simulateDay(
   BuildContext context,
   WidgetRef ref,
   AppLocalizations l10n,
 ) async {
   final controller = ref.read(gameControllerProvider.notifier);
-  final result = await controller.advanceOneDay();
+  final result = await controller.simulateDay();
   if (!context.mounted) return;
   _refreshCalendarCursor(ref);
 
@@ -504,7 +500,7 @@ Widget _buildNextActionSection(
       children: [
         Expanded(
           child: OutlinedButton.icon(
-            onPressed: () => _advanceOneDay(context, ref, l10n),
+            onPressed: () => _simulateDay(context, ref, l10n),
             icon: const Icon(Icons.skip_next_outlined),
             label: Text(l10n.home_simulateDay),
             style: OutlinedButton.styleFrom(

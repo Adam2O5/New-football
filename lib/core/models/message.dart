@@ -330,7 +330,7 @@ extension InboxX on Inbox {
         day: base.day,
         titleKey: 'msg_${digestType.name}_digest_title',
         bodyKey: 'msg_${digestType.name}_digest_body',
-        args: {'count': existingCount + members.length},
+        args: {'count': existingCount + members.length, 'week': week},
         payload: {'messageIds': ids},
         groupKey: key,
       );

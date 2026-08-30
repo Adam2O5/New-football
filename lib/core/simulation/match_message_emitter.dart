@@ -28,6 +28,9 @@ class MatchMessageEmitter {
     }
 
     var state = league;
+    final opponentTeamId = playerTeamId == homeTeamId ? awayTeamId : homeTeamId;
+    final opponentName =
+        league.teamById(opponentTeamId)?.name ?? opponentTeamId;
 
     if (report.isAdministrative &&
         report.violatingTeamIds.contains(playerTeamId)) {
@@ -39,14 +42,13 @@ class MatchMessageEmitter {
         args: {
           'team': league.teamById(playerTeamId)?.name ?? playerTeamId,
           'reason': report.reasonCode ?? 'administrative_result',
+          'opponentName': opponentName,
         },
         payload: {
           'matchId': matchId,
-          'homeTeamId': homeTeamId,
-          'awayTeamId': awayTeamId,
           'teamId': playerTeamId,
           'reasonCode': report.reasonCode,
-          'violatingTeamIds': report.violatingTeamIds,
+          'status': report.status.name,
         },
         dedupKey: 'walkover:$matchId',
       );
@@ -62,7 +64,10 @@ class MatchMessageEmitter {
         type: MessageType.lineupNoGk,
         domain: MessageDomain.matchday,
         priority: MessagePriority.urgent,
-        args: {'team': league.teamById(playerTeamId)?.name ?? playerTeamId},
+        args: {
+          'team': league.teamById(playerTeamId)?.name ?? playerTeamId,
+          'opponentName': opponentName,
+        },
         payload: {
           'matchId': matchId,
           'teamId': playerTeamId,
@@ -77,7 +82,12 @@ class MatchMessageEmitter {
         type: MessageType.benchIncomplete,
         domain: MessageDomain.matchday,
         priority: MessagePriority.normal,
-        args: {'missingCount': teamReport.missingBenchCount},
+        args: {
+          'missingCount': teamReport.missingBenchCount,
+          'opponentName': opponentName,
+          'currentBenchCount': teamReport.benchCount,
+          'requiredBenchCount': teamReport.benchTarget,
+        },
         payload: {
           'matchId': matchId,
           'teamId': playerTeamId,

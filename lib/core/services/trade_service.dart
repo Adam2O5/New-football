@@ -759,6 +759,7 @@ class TradeService {
           proposal,
           kind: 'ntcRefusal',
           reason: 'NTC: ${entry.name}',
+          subjectName: entry.name,
           extraPayload: {
             'playerId': entry.id,
             'consentProbability': probability,
@@ -818,6 +819,7 @@ class TradeService {
           proposal,
           kind: 'ntcRefusal',
           reason: 'NTC: ${entry.name}',
+          subjectName: entry.name,
           extraPayload: {
             'playerId': entry.id,
             'consentProbability': probability,
@@ -874,7 +876,11 @@ class TradeService {
           'teamAId': a.id,
           'teamBId': b.id,
         },
-        args: {'teamAName': a.name, 'teamBName': b.name},
+        args: {
+          'teamAName': a.name,
+          'teamBName': b.name,
+          'week': next.currentWeek,
+        },
       );
     }
     return TradeSubmissionResult(
@@ -1729,7 +1735,11 @@ class TradeService {
           'teamBId': b.id,
           if (offer != null) 'tradeOfferId': offer.id,
         },
-        args: {'teamAName': a.name, 'teamBName': b.name},
+        args: {
+          'teamAName': a.name,
+          'teamBName': b.name,
+          'week': next.currentWeek,
+        },
       );
     }
     return TradeSubmissionResult(
@@ -1794,6 +1804,7 @@ class TradeService {
         proposal,
         kind: 'ntcRefusal',
         reason: 'NTC: ${player.name}',
+        subjectName: player.name,
         extraPayload: {
           if (offer != null) 'tradeOfferId': offer.id,
           'playerId': player.id,
@@ -2054,6 +2065,7 @@ class TradeService {
   LeagueState _sendPendingOfferMessage(LeagueState league, TradeOffer offer) {
     final a = league.teamById(offer.teamAId);
     final b = league.teamById(offer.teamBId);
+    final otherTeam = league.playerTeamId == offer.teamAId ? b : a;
     return messages.send(
       league,
       type: MessageType.tradeOffer,
@@ -2061,6 +2073,9 @@ class TradeService {
       args: {
         'teamAName': a?.name ?? offer.teamAId,
         'teamBName': b?.name ?? offer.teamBId,
+        'otherTeamName': otherTeam?.name ?? offer.teamBId,
+        'tradeOfferExpiry':
+            '${offer.expirySeasonYear}-W${offer.expiryWeek}-D${offer.expiryDay}',
       },
       payload: {
         'tradeOfferId': offer.id,
@@ -2084,6 +2099,7 @@ class TradeService {
   LeagueState _sendCounterOfferMessage(LeagueState league, TradeOffer offer) {
     final a = league.teamById(offer.teamAId);
     final b = league.teamById(offer.teamBId);
+    final otherTeam = league.playerTeamId == offer.teamAId ? b : a;
     return messages.send(
       league,
       type: MessageType.trade,
@@ -2092,6 +2108,7 @@ class TradeService {
       args: {
         'teamAName': a?.name ?? offer.teamAId,
         'teamBName': b?.name ?? offer.teamBId,
+        'otherTeamName': otherTeam?.name ?? offer.teamBId,
       },
       payload: {
         'tradeOfferId': offer.id,
@@ -2216,10 +2233,12 @@ class TradeService {
     TradeProposal proposal, {
     required String kind,
     String? reason,
+    String? subjectName,
     Map<String, dynamic> extraPayload = const {},
   }) {
     final a = league.teamById(proposal.teamAId);
     final b = league.teamById(proposal.teamBId);
+    final otherTeam = league.playerTeamId == proposal.teamAId ? b : a;
     return messages.send(
       league,
       type: MessageType.trade,
@@ -2231,6 +2250,8 @@ class TradeService {
       args: {
         'teamAName': a?.name ?? proposal.teamAId,
         'teamBName': b?.name ?? proposal.teamBId,
+        'otherTeamName': otherTeam?.name ?? proposal.teamBId,
+        if (subjectName != null) 'subjectName': subjectName,
       },
       payload: {
         'tradeId':

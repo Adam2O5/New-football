@@ -28,6 +28,17 @@ import 'package:new_football/core/services/team_management_service.dart';
 import 'package:new_football/core/services/team_event_service.dart';
 import 'package:new_football/core/services/schedule_generator.dart';
 import 'package:new_football/core/services/scouting_service.dart';
+import 'package:new_football/core/services/season_service.dart';
+
+enum DaySimulationStopReason {
+  advanced,
+  playerMatch,
+  calendarEvent,
+  urgent,
+  hourAdvanced,
+}
+
+enum DaySimulationMoment { beforeEvent, duringEvent }
 
 class DaySimulationResult {
   const DaySimulationResult({
@@ -36,6 +47,8 @@ class DaySimulationResult {
     this.playerMatch,
     this.simulatedResults = const [],
     this.eventId,
+    this.stopReason = DaySimulationStopReason.advanced,
+    this.moment = DaySimulationMoment.beforeEvent,
   });
 
   final LeagueState league;
@@ -49,6 +62,8 @@ class DaySimulationResult {
   /// is the event id. `null` when the stop reason is the player's match or
   /// other non-calendar reasons.
   final CalendarEventId? eventId;
+  final DaySimulationStopReason stopReason;
+  final DaySimulationMoment moment;
 }
 
 /// Advances the calendar by one day and resolves non-interactive events.
@@ -69,6 +84,7 @@ class DaySimulator {
     TeamManagementService? teamManagement,
     PlayerEventService? playerEvents,
     TeamEventService? teamEvents,
+    SeasonService? season,
   }) : matchEngine = matchEngine ?? SimulationMatchEngine(balance: balance),
        aiMatchdayService =
            aiMatchdayService ??
@@ -104,7 +120,8 @@ class DaySimulator {
            playerEvents ??
            PlayerEventService(balance: balance, messages: messages),
        teamEvents =
-           teamEvents ?? TeamEventService(balance: balance, messages: messages);
+           teamEvents ?? TeamEventService(balance: balance, messages: messages),
+       season = season ?? SeasonService(balance: balance);
 
   final BalanceConfig balance;
   final SimulationMatchEngine matchEngine;
@@ -121,6 +138,47 @@ class DaySimulator {
   final TeamManagementService teamManagement;
   final PlayerEventService playerEvents;
   final TeamEventService teamEvents;
+  final SeasonService season;
+
+  LeagueState resolveCalendarEvent(
+    LeagueState league,
+    CalendarEventId eventId, {
+    int saveSeed = 0,
+  }) {
+    return switch (eventId) {
+      CalendarEventId.capUpdateTv => season.runCapUpdateTv(
+        league,
+        saveSeed: saveSeed,
+      ),
+      CalendarEventId.staffGrowth => season.runStaffGrowthAndRetire(league),
+      CalendarEventId.awards => season.runAwards(league),
+      CalendarEventId.retirements => season.runPlayerRetirements(
+        league,
+        saveSeed: saveSeed,
+      ),
+      CalendarEventId.scoutReport => season.runScoutReport(
+        league,
+        saveSeed: saveSeed,
+      ),
+      CalendarEventId.combine => season.runCombine(league, saveSeed: saveSeed),
+      CalendarEventId.finalMock => season.runFinalMock(
+        league,
+        saveSeed: saveSeed,
+      ),
+      CalendarEventId.nextClassGeneration => season.runNextClassGeneration(
+        league,
+        saveSeed: saveSeed,
+      ),
+      CalendarEventId.freeAgencyOpen => season.runFreeAgencyOpen(league),
+      CalendarEventId.tradeDeadline => league.copyWith(
+        currentSeason: league.currentSeason.copyWith(tradeDeadlineAcked: true),
+      ),
+      CalendarEventId.lottery ||
+      CalendarEventId.draft ||
+      CalendarEventId.tradeWindowOpen ||
+      CalendarEventId.contractExtensions => league,
+    };
+  }
 
   DaySimulationResult simulateDay(
     LeagueState league, {
@@ -139,17 +197,72 @@ class DaySimulator {
       currentSeason: state.currentSeason.copyWith(phase: phase),
     );
 
+    while (true) {
+      final due = CalendarEventRegistry.unresolvedEventsOn(
+        state,
+        week,
+        day,
+        balance: balance,
+      );
+      if (due.isEmpty) break;
+      final event = due.first;
+      if (event.execution == CalendarEventExecution.playerAction) {
+        return DaySimulationResult(
+          league: state,
+          pauseForUrgent: false,
+          eventId: event.id,
+          stopReason: DaySimulationStopReason.calendarEvent,
+          moment: DaySimulationMoment.duringEvent,
+        );
+      }
+      final resolved = resolveCalendarEvent(
+        state,
+        event.id,
+        saveSeed: saveSeed,
+      );
+      if (identical(resolved, state) ||
+          !CalendarEventRegistry.isDone(resolved.currentSeason, event.id)) {
+        break;
+      }
+      state = resolved;
+    }
+
     if (phase == SeasonPhase.preseason) {
       final (nextWeek, nextDay) = calendar.advanceDay(week, day);
       return DaySimulationResult(
         league: state.copyWith(
           currentWeek: nextWeek,
           currentDay: nextDay,
+          currentHour: calendar.initialHourForDate(nextWeek, nextDay),
+          hourlyPlayerOfferUsed: false,
+          hourlyStaffOfferUsed: false,
           currentSeason: state.currentSeason.copyWith(
             phase: calendar.phaseForWeek(nextWeek),
           ),
         ),
         pauseForUrgent: state.inbox.pendingUrgent.isNotEmpty,
+      );
+    }
+
+    if (calendar.playInSlotsForDay(week, day).isNotEmpty) {
+      state = season.advancePlayInForDate(
+        state,
+        week: week,
+        day: day,
+        saveSeed: saveSeed,
+      );
+    }
+    if (phase == SeasonPhase.playoff &&
+        state.currentSeason.playoffBrackets.isEmpty &&
+        state.currentSeason.playInResults.isNotEmpty) {
+      state = season.setupPlayoffs(state);
+    }
+    if (calendar.postseasonSlotForDay(week, day) != null) {
+      state = season.advancePlayoffsForDate(
+        state,
+        week: week,
+        day: day,
+        saveSeed: saveSeed,
       );
     }
 
@@ -224,6 +337,8 @@ class DaySimulator {
             pauseForUrgent: true,
             playerMatch: playerMatch,
             simulatedResults: results,
+            stopReason: DaySimulationStopReason.playerMatch,
+            moment: DaySimulationMoment.duringEvent,
           );
         }
       }
@@ -246,6 +361,9 @@ class DaySimulator {
     state = state.copyWith(
       currentWeek: nextWeek,
       currentDay: nextDay,
+      currentHour: calendar.initialHourForDate(nextWeek, nextDay),
+      hourlyPlayerOfferUsed: false,
+      hourlyStaffOfferUsed: false,
       currentSeason: state.currentSeason.copyWith(phase: nextPhase),
     );
 
@@ -330,11 +448,12 @@ class DaySimulator {
           type: MessageType.playerEvent,
           kind: 'ovrChange',
           domain: MessageDomain.playerEvent,
-          titleKey: 'msg_ovrDigest_title',
-          bodyKey: 'msg_ovrDigest_body',
-          args: {'playerName': change.playerName, 'delta': change.ovrDelta},
+          titleKey: 'msg_ovrDigest_digest_title',
+          bodyKey: 'msg_ovrDigest_digest_body',
+          args: {'count': 1, 'week': week},
           payload: {
             'playerId': change.playerId,
+            'playerName': change.playerName,
             'ovrDelta': change.ovrDelta,
             'growthRate': change.growthRate,
           },
@@ -392,11 +511,26 @@ class DaySimulator {
       );
     }
 
+    if (week == balance.calendar.seasonCycleWeeks && day == 7) {
+      state = season.rolloverSeason(state, saveSeed: saveSeed);
+      state = state.copyWith(
+        currentHour: calendar.initialHourForDate(
+          state.currentWeek,
+          state.currentDay,
+        ),
+        hourlyPlayerOfferUsed: false,
+        hourlyStaffOfferUsed: false,
+      );
+    }
+
     final urgent = state.inbox.pendingUrgent.isNotEmpty;
     return DaySimulationResult(
       league: state,
       pauseForUrgent: urgent,
       simulatedResults: results,
+      stopReason: urgent
+          ? DaySimulationStopReason.urgent
+          : DaySimulationStopReason.advanced,
     );
   }
 
@@ -708,7 +842,9 @@ class DaySimulator {
           'playerName': player.name,
           'injuryName': definition.name,
           'injuryType': injury.injury.type.name,
+          'severity': injury.injury.type.name,
           'days': injury.injury.daysTotal,
+          'recoveryTime': injury.injury.daysTotal,
         },
         payload: {
           'playerId': player.id,
@@ -762,6 +898,8 @@ class DaySimulator {
           args: {
             'playerName': notification.player.name,
             'games': notification.games,
+            'matches': notification.games,
+            'reason': notification.reason,
           },
           payload: {
             'playerId': notification.player.id,
@@ -938,8 +1076,8 @@ class DaySimulator {
       type: MessageType.scoutReport,
       kind: 'monthly',
       domain: MessageDomain.draft,
-      args: {'draftYear': draftClass.year},
-      payload: {'draftYear': draftClass.year},
+      args: {'draftYear': draftClass.year, 'count': ranked.length},
+      payload: {'draftYear': draftClass.year, 'count': ranked.length},
       groupKey: 'scout:monthly:${league.currentSeason.year}',
       dedupKey:
           'scoutReport:monthly:${league.currentSeason.year}:${league.currentWeek}',
@@ -978,7 +1116,7 @@ class DaySimulator {
         'teamPower': after.teamPower,
       },
       dedupKey:
-          'teamStatus:${teamId}:${next.lastCalculatedWeek}:${next.lastCalculatedDay}',
+          'teamStatus:$teamId:${next.lastCalculatedWeek}:${next.lastCalculatedDay}',
     );
   }
 
@@ -994,6 +1132,10 @@ class DaySimulator {
     final responsibleTeamId = result.violatingTeamIds.isEmpty
         ? result.homeTeamId
         : result.violatingTeamIds.first;
+    final playerTeamId = league.playerTeamId;
+    final opponentTeamId = playerTeamId == result.homeTeamId
+        ? result.awayTeamId
+        : result.homeTeamId;
 
     return messages.send(
       league,
@@ -1006,6 +1148,7 @@ class DaySimulator {
             league.teamById(result.awayTeamId)?.name ?? result.awayTeamId,
         'team': league.teamById(responsibleTeamId)?.name ?? responsibleTeamId,
         'reason': result.reasonCode ?? 'administrative_result',
+        'opponentName': league.teamById(opponentTeamId)?.name ?? opponentTeamId,
       },
       payload: {
         'matchId': matchId,
@@ -1014,7 +1157,7 @@ class DaySimulator {
         'reasonCode': result.reasonCode,
         'violatingTeamIds': result.violatingTeamIds,
       },
-      dedupKey: matchId == null ? null : 'walkover:result:$matchId',
+      dedupKey: matchId == null ? null : 'walkover:$matchId',
     );
   }
 }

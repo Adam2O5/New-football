@@ -2246,6 +2246,8 @@ class SeasonService {
           args: {
             'playerName': notification.player.name,
             'games': notification.games,
+            'matches': notification.games,
+            'reason': notification.reason,
           },
           payload: {
             'playerId': notification.player.id,
@@ -2285,7 +2287,9 @@ class SeasonService {
           'playerName': player.name,
           'injuryName': definition.name,
           'injuryType': injury.injury.type.name,
+          'severity': injury.injury.type.name,
           'days': injury.injury.daysTotal,
+          'recoveryTime': injury.injury.daysTotal,
         },
         payload: {
           'playerId': player.id,

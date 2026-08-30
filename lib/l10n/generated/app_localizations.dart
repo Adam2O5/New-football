@@ -3355,7 +3355,7 @@ abstract class AppLocalizations {
   /// No description provided for @calendar_stopReason_draftPick.
   ///
   /// In pl, this message translates to:
-  /// **'Twoja tura draftu'**
+  /// **'Nie można przesymulować draftu. Dokończ draft, aby kontynuować symulację.'**
   String get calendar_stopReason_draftPick;
 
   /// No description provided for @calendar_stopReason_noSave.

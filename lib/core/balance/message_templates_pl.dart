@@ -34,19 +34,19 @@ class MessageTemplatesPl {
       key: 'msg_suspensionStart_title',
       title: 'Zawieszenie zawodnika',
       body:
-          '{playerName} został zawieszony na {matches} mecz(e). Powód: {reason}. Zawieszenie obowiązuje od spotkania z {opponentName}.',
+          '{playerName} został zawieszony na {matches} mecz(e). Powód: {reason}.',
     ),
     'msg_suspensionEnd_title': MessageTextTemplate(
       key: 'msg_suspensionEnd_title',
       title: 'Koniec zawieszenia',
       body:
-          '{playerName} zakończył odbywanie kary i jest ponownie dostępny do gry od meczu z {opponentName}.',
+          '{playerName} zakończył odbywanie kary i jest ponownie dostępny do gry.',
     ),
     'msg_injury_title': MessageTextTemplate(
       key: 'msg_injury_title',
       title: 'Kontuzja zawodnika',
       body:
-          '{playerName} doznał urazu: {injuryName}. Przewidywana przerwa potrwa {recoveryTime}. Status medyczny: {severity}.',
+          '{playerName} doznał urazu: {injuryName}. Przewidywana przerwa potrwa {recoveryTime} dni. Status medyczny: {severity}.',
     ),
     'msg_injuryReturn_title': MessageTextTemplate(
       key: 'msg_injuryReturn_title',
@@ -58,13 +58,13 @@ class MessageTemplatesPl {
       key: 'msg_injuryRecurrence_title',
       title: 'Nawrót kontuzji',
       body:
-          'U {playerName} doszło do nawrotu urazu: {injuryName}. Nowy przewidywany czas przerwy wynosi {recoveryTime}.',
+          'U {playerName} doszło do nawrotu urazu: {injuryName}. Nowy przewidywany czas przerwy wynosi {recoveryTime} dni.',
     ),
     'msg_potentialLoss_title': MessageTextTemplate(
       key: 'msg_potentialLoss_title',
       title: 'Spadek potencjału',
       body:
-          '{playerName} może stracić część potencjału rozwojowego. Przyczyna: {reason}. Obecna ocena ryzyka: {riskLevel}.',
+          '{playerName} może stracić część potencjału rozwojowego w wyniku odniesionej kontuzji.',
     ),
     'msg_playerEvent_plateau_title': MessageTextTemplate(
       key: 'msg_playerEvent_plateau_title',
@@ -105,8 +105,7 @@ class MessageTemplatesPl {
     'msg_playerEvent_breakthrough_title': MessageTextTemplate(
       key: 'msg_playerEvent_breakthrough_title',
       title: 'Przełom w rozwoju',
-      body:
-          '{playerName} wykonał wyraźny krok naprzód w ostatnim okresie. Sztab zauważa poprawę w obszarze: {focusArea}.',
+      body: '{playerName} wykonał wyraźny krok naprzód w ostatnim okresie.',
     ),
     'msg_playerEvent_personalProblems_title': MessageTextTemplate(
       key: 'msg_playerEvent_personalProblems_title',
@@ -124,7 +123,7 @@ class MessageTemplatesPl {
       key: 'msg_playerEvent_nationalTeam_title',
       title: 'Powołanie do reprezentacji',
       body:
-          '{playerName} otrzymał powołanie do reprezentacji {nationalTeamName}. To może podnieść prestiż zawodnika, ale zwiększy też obciążenie.',
+          '{playerName} otrzymał powołanie do reprezentacji narodowej. To może podnieść prestiż zawodnika, ale zwiększy też obciążenie.',
     ),
     'msg_playerEvent_inspiredPerformance_title': MessageTextTemplate(
       key: 'msg_playerEvent_inspiredPerformance_title',
@@ -160,13 +159,13 @@ class MessageTemplatesPl {
       key: 'msg_teamEvent_publicCriticism_title',
       title: 'Publiczna krytyka',
       body:
-          '{playerName} publicznie skomentował sytuację w klubie. Temat wypowiedzi: {topic}. Musisz zdecydować, czy odpowiedzieć, ukarać zawodnika, czy zignorować sprawę.',
+          '{playerName} publicznie skomentował sytuację w klubie. Musisz zdecydować, czy odpowiedzieć, ukarać zawodnika, czy zignorować sprawę.',
     ),
     'msg_teamEvent_declineToExtend_title': MessageTextTemplate(
       key: 'msg_teamEvent_declineToExtend_title',
       title: 'Brak chęci przedłużenia umowy',
       body:
-          '{playerName} nie jest obecnie zainteresowany przedłużeniem kontraktu. Główna przyczyna: {reason}.',
+          '{playerName} nie jest obecnie zainteresowany przedłużeniem kontraktu.',
     ),
     'msg_teamEvent_leaderSupport_title': MessageTextTemplate(
       key: 'msg_teamEvent_leaderSupport_title',
@@ -184,7 +183,7 @@ class MessageTemplatesPl {
       key: 'msg_teamEvent_atmosphereShift_title',
       title: 'Zmiana atmosfery w drużynie',
       body:
-          'W szatni nastąpiła zauważalna zmiana nastrojów. Aktualny trend: {trend}. Warto sprawdzić, co stoi za tą zmianą.',
+          'W szatni nastąpiła zauważalna zmiana nastrojów. Warto sprawdzić, co stoi za tą zmianą.',
     ),
     'msg_retirementPlayer_title': MessageTextTemplate(
       key: 'msg_retirementPlayer_title',
@@ -410,31 +409,28 @@ class MessageTemplatesPl {
       key: 'msg_trade_title',
       title: 'Aktualizacja wymiany',
       body:
-          'Pojawiła się nowa wiadomość dotycząca wymiany z klubem {otherTeamName}. Szczegóły pakietu: {summary}.',
+          'Pojawiła się nowa wiadomość dotycząca wymiany z klubem {otherTeamName}.',
     ),
     'msg_tradeOffer_title': MessageTextTemplate(
       key: 'msg_tradeOffer_title',
       title: 'Nowa oferta wymiany',
       body:
-          'Klub {otherTeamName} przesłał ofertę wymiany. Proponowany pakiet: {summary}. Termin odpowiedzi: {tradeOfferExpiry}.',
+          'Klub {otherTeamName} przesłał ofertę wymiany. Termin odpowiedzi: {tradeOfferExpiry}.',
     ),
     'msg_trade_counter_title': MessageTextTemplate(
       key: 'msg_trade_counter_title',
       title: 'Kontroferta wymiany',
-      body:
-          'Klub {otherTeamName} odpowiedział kontrofertą. Nowy pakiet obejmuje: {summary}.',
+      body: 'Klub {otherTeamName} odpowiedział kontrofertą.',
     ),
     'msg_trade_accepted_title': MessageTextTemplate(
       key: 'msg_trade_accepted_title',
       title: 'Wymiana zaakceptowana',
-      body:
-          'Wymiana z klubem {otherTeamName} została zaakceptowana. Uzgodniony pakiet: {summary}.',
+      body: 'Wymiana z klubem {otherTeamName} została zaakceptowana.',
     ),
     'msg_trade_rejected_title': MessageTextTemplate(
       key: 'msg_trade_rejected_title',
       title: 'Wymiana odrzucona',
-      body:
-          'Klub {otherTeamName} odrzucił propozycję wymiany. Odrzucony pakiet: {summary}.',
+      body: 'Klub {otherTeamName} odrzucił propozycję wymiany.',
     ),
     'msg_trade_hardRejected_title': MessageTextTemplate(
       key: 'msg_trade_hardRejected_title',
@@ -451,8 +447,7 @@ class MessageTemplatesPl {
     'msg_trade_leagueDigest_title': MessageTextTemplate(
       key: 'msg_trade_leagueDigest_title',
       title: 'Skrót wymian w lidze',
-      body:
-          'W tygodniu {week} w lidze wydarzyły się następujące transakcje: {summary}.',
+      body: 'W tygodniu {week} w lidze doszło do wymian zawodników.',
     ),
     'msg_tradeWindowEvent_open_title': MessageTextTemplate(
       key: 'msg_tradeWindowEvent_open_title',
@@ -565,56 +560,53 @@ class MessageTemplatesPl {
     'msg_award_mvp_title': MessageTextTemplate(
       key: 'msg_award_mvp_title',
       title: 'MVP sezonu',
-      body:
-          '{playerName} z klubu {teamName} zdobył nagrodę MVP sezonu. Pozycja lub rola: {slot}.',
+      body: '{playerName} z klubu {teamName} zdobył nagrodę MVP sezonu.',
     ),
     'msg_award_roty_title': MessageTextTemplate(
       key: 'msg_award_roty_title',
       title: 'Debiutant sezonu',
       body:
-          '{playerName} z klubu {teamName} został wybrany debiutantem sezonu. Rola: {slot}.',
+          '{playerName} z klubu {teamName} został wybrany debiutantem sezonu.',
     ),
     'msg_award_dpoy_title': MessageTextTemplate(
       key: 'msg_award_dpoy_title',
       title: 'Obrońca sezonu',
       body:
-          '{playerName} z klubu {teamName} zdobył nagrodę dla najlepszego defensora sezonu. Rola: {slot}.',
+          '{playerName} z klubu {teamName} zdobył nagrodę dla najlepszego defensora sezonu.',
     ),
     'msg_award_coachOfYear_title': MessageTextTemplate(
       key: 'msg_award_coachOfYear_title',
       title: 'Trener roku',
       body:
-          '{playerName} związany z klubem {teamName} otrzymał wyróżnienie Trenera Roku. Oznaczenie: {slot}.',
+          '{playerName} związany z klubem {teamName} otrzymał wyróżnienie Trenera Roku.',
     ),
     'msg_award_topScorer_title': MessageTextTemplate(
       key: 'msg_award_topScorer_title',
       title: 'Król strzelców',
       body:
-          '{playerName} z klubu {teamName} zakończył sezon jako najlepszy strzelec. Rola: {slot}.',
+          '{playerName} z klubu {teamName} zakończył sezon jako najlepszy strzelec.',
     ),
     'msg_award_topAssist_title': MessageTextTemplate(
       key: 'msg_award_topAssist_title',
       title: 'Lider asyst',
       body:
-          '{playerName} z klubu {teamName} zanotował najwięcej asyst w sezonie. Rola: {slot}.',
+          '{playerName} z klubu {teamName} zanotował najwięcej asyst w sezonie.',
     ),
     'msg_award_bestGk_title': MessageTextTemplate(
       key: 'msg_award_bestGk_title',
       title: 'Najlepszy bramkarz',
       body:
-          '{playerName} z klubu {teamName} został uznany za najlepszego bramkarza sezonu. Rola: {slot}.',
+          '{playerName} z klubu {teamName} został uznany za najlepszego bramkarza sezonu.',
     ),
     'msg_award_teamOfSeason_title': MessageTextTemplate(
       key: 'msg_award_teamOfSeason_title',
       title: 'Drużyna sezonu',
-      body:
-          '{playerName} z klubu {teamName} trafił do drużyny sezonu. Pozycja w zestawieniu: {slot}.',
+      body: '{playerName} trafił do drużyny sezonu.',
     ),
     'msg_award_champion_title': MessageTextTemplate(
       key: 'msg_award_champion_title',
       title: 'Mistrz ligi',
-      body:
-          'Klub {teamName} sięgnął po mistrzostwo, a wyróżnioną postacią komunikatu jest {playerName}. Oznaczenie: {slot}.',
+      body: 'Klub {teamName} sięgnął po mistrzostwo ligi.',
     ),
     'msg_atmosphere_title': MessageTextTemplate(
       key: 'msg_atmosphere_title',
@@ -657,6 +649,11 @@ class MessageTemplatesPl {
       title: 'Przypomnienie kalendarza',
       body:
           'Nadchodzi wydarzenie: {eventName}. Data: {eventDate}. Warto przygotować się z wyprzedzeniem.',
+    ),
+    'msg_calendar_newWeek_title': MessageTextTemplate(
+      key: 'msg_calendar_newWeek_title',
+      title: 'Nowy tydzień',
+      body: 'Rozpoczął się tydzień {week} sezonu (faza: {phase}).',
     ),
     'msg_system_title': MessageTextTemplate(
       key: 'msg_system_title',

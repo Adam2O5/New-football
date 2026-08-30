@@ -1835,7 +1835,8 @@ class AppLocalizationsPl extends AppLocalizations {
   String get calendar_stopReason_cancelled => 'Symulacja przerwana';
 
   @override
-  String get calendar_stopReason_draftPick => 'Twoja tura draftu';
+  String get calendar_stopReason_draftPick =>
+      'Nie można przesymulować draftu. Dokończ draft, aby kontynuować symulację.';
 
   @override
   String get calendar_stopReason_noSave => 'Brak zapisanej gry';

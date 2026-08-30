@@ -914,7 +914,7 @@
   "calendar_cancel": "Cancel",
   "calendar_stopReason_reachedTarget": "Target reached",
   "calendar_stopReason_cancelled": "Simulation cancelled",
-  "calendar_stopReason_draftPick": "Your draft turn",
+  "calendar_stopReason_draftPick": "The draft cannot be simulated. Complete the draft to continue.",
   "calendar_stopReason_noSave": "No active save",
   "calendar_selectedDay_title": "Selected day",
   "calendar_selectedDay_noEvent": "No events on this day",

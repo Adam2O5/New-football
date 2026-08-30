@@ -71,6 +71,12 @@ class CalendarService {
   int? initialHourForDate(int week, int day) =>
       isHourlyContractMode(week, day) ? 1 : null;
 
+  int hoursForDate(int week, int day) =>
+      isHourlyContractMode(week, day) ? balance.contracts.hoursPerDay : 0;
+
+  bool isLastHour(int week, int day, int hour) =>
+      isHourlyContractMode(week, day) && hour >= hoursForDate(week, day);
+
   bool isTradeDeadline(int week, int day) =>
       week == _c.tradeDeadlineWeek && day == 1;
 
@@ -199,9 +205,11 @@ class CalendarService {
   /// the UI to render event labels on the calendar grid. Single source of
   /// truth: `CalendarEventRegistry` (`docs/game_calendar.md`).
   List<CalendarEventSlot> eventsOn(int week, int day) {
-    return CalendarEventRegistry.build(
+    final events = CalendarEventRegistry.build(
       _c,
     ).where((event) => event.week == week && event.day == day).toList();
+    events.sort((a, b) => a.order.compareTo(b.order));
+    return events;
   }
 
   /// All registered event windows containing (week, day). Windows are kept

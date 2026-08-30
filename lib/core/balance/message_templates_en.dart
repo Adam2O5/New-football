@@ -31,22 +31,19 @@ class MessageTemplatesEn {
       title: 'Player Suspended',
       body:
           '{playerName} has been suspended for {matches} match(es). Reason: '
-          '{reason}. The suspension takes effect from the match against '
-          '{opponentName}.',
+          '{reason}.',
     ),
     'msg_suspensionEnd_title': MessageTextTemplate(
       key: 'msg_suspensionEnd_title',
       title: 'Suspension Over',
-      body:
-          '{playerName} has served their suspension and is available again '
-          'starting with the match against {opponentName}.',
+      body: '{playerName} has served their suspension and is available again.',
     ),
     'msg_injury_title': MessageTextTemplate(
       key: 'msg_injury_title',
       title: 'Player Injury',
       body:
           '{playerName} has suffered an injury: {injuryName}. Expected '
-          'recovery time: {recoveryTime}. Medical status: {severity}.',
+          'recovery time: {recoveryTime} days. Medical status: {severity}.',
     ),
     'msg_injuryReturn_title': MessageTextTemplate(
       key: 'msg_injuryReturn_title',
@@ -60,14 +57,14 @@ class MessageTemplatesEn {
       title: 'Injury Recurrence',
       body:
           '{playerName} has suffered a recurrence of {injuryName}. The new '
-          'expected recovery time is {recoveryTime}.',
+          'expected recovery time is {recoveryTime} days.',
     ),
     'msg_potentialLoss_title': MessageTextTemplate(
       key: 'msg_potentialLoss_title',
       title: 'Potential Decline',
       body:
-          '{playerName} may lose some development potential. Cause: '
-          '{reason}. Current risk assessment: {riskLevel}.',
+          '{playerName} may lose some development potential as a result of '
+          'the injury sustained.',
     ),
     'msg_playerEvent_plateau_title': MessageTextTemplate(
       key: 'msg_playerEvent_plateau_title',
@@ -118,9 +115,7 @@ class MessageTemplatesEn {
     'msg_playerEvent_breakthrough_title': MessageTextTemplate(
       key: 'msg_playerEvent_breakthrough_title',
       title: 'Development Breakthrough',
-      body:
-          '{playerName} has taken a clear step forward recently. Staff have '
-          'noticed improvement in: {focusArea}.',
+      body: '{playerName} has taken a clear step forward recently.',
     ),
     'msg_playerEvent_personalProblems_title': MessageTextTemplate(
       key: 'msg_playerEvent_personalProblems_title',
@@ -142,9 +137,9 @@ class MessageTemplatesEn {
       key: 'msg_playerEvent_nationalTeam_title',
       title: 'National Team Call-up',
       body:
-          '{playerName} has been called up to the {nationalTeamName} '
-          "national team. This may boost the player's prestige but will "
-          'also increase their workload.',
+          '{playerName} has been called up to the national team. This may '
+          "boost the player's prestige but will also increase their "
+          'workload.',
     ),
     'msg_playerEvent_inspiredPerformance_title': MessageTextTemplate(
       key: 'msg_playerEvent_inspiredPerformance_title',
@@ -190,15 +185,15 @@ class MessageTemplatesEn {
       title: 'Public Criticism',
       body:
           '{playerName} has publicly commented on the situation at the '
-          'club. Topic of the remarks: {topic}. You must decide whether to '
-          'respond, discipline the player, or ignore the matter.',
+          'club. You must decide whether to respond, discipline the '
+          'player, or ignore the matter.',
     ),
     'msg_teamEvent_declineToExtend_title': MessageTextTemplate(
       key: 'msg_teamEvent_declineToExtend_title',
       title: 'Unwilling to Extend Contract',
       body:
           '{playerName} is not currently interested in extending their '
-          'contract. Main reason: {reason}.',
+          'contract.',
     ),
     'msg_teamEvent_leaderSupport_title': MessageTextTemplate(
       key: 'msg_teamEvent_leaderSupport_title',
@@ -221,8 +216,7 @@ class MessageTemplatesEn {
       title: 'Team Atmosphere Shift',
       body:
           'There has been a noticeable mood change in the dressing room. '
-          "Current trend: {trend}. It's worth checking what's behind this "
-          'shift.',
+          "It's worth checking what's behind this shift.",
     ),
     'msg_retirementPlayer_title': MessageTextTemplate(
       key: 'msg_retirementPlayer_title',
@@ -496,35 +490,29 @@ class MessageTemplatesEn {
       title: 'Trade Update',
       body:
           'There is a new message regarding the trade with '
-          '{otherTeamName}. Package details: {summary}.',
+          '{otherTeamName}.',
     ),
     'msg_tradeOffer_title': MessageTextTemplate(
       key: 'msg_tradeOffer_title',
       title: 'New Trade Offer',
       body:
-          '{otherTeamName} has sent a trade offer. Proposed package: '
-          '{summary}. Response deadline: {tradeOfferExpiry}.',
+          '{otherTeamName} has sent a trade offer. Response deadline: '
+          '{tradeOfferExpiry}.',
     ),
     'msg_trade_counter_title': MessageTextTemplate(
       key: 'msg_trade_counter_title',
       title: 'Trade Counter-Offer',
-      body:
-          '{otherTeamName} has responded with a counter-offer. The new '
-          'package includes: {summary}.',
+      body: '{otherTeamName} has responded with a counter-offer.',
     ),
     'msg_trade_accepted_title': MessageTextTemplate(
       key: 'msg_trade_accepted_title',
       title: 'Trade Accepted',
-      body:
-          'The trade with {otherTeamName} has been accepted. Agreed '
-          'package: {summary}.',
+      body: 'The trade with {otherTeamName} has been accepted.',
     ),
     'msg_trade_rejected_title': MessageTextTemplate(
       key: 'msg_trade_rejected_title',
       title: 'Trade Rejected',
-      body:
-          '{otherTeamName} has rejected the trade proposal. Rejected '
-          'package: {summary}.',
+      body: '{otherTeamName} has rejected the trade proposal.',
     ),
     'msg_trade_hardRejected_title': MessageTextTemplate(
       key: 'msg_trade_hardRejected_title',
@@ -543,9 +531,7 @@ class MessageTemplatesEn {
     'msg_trade_leagueDigest_title': MessageTextTemplate(
       key: 'msg_trade_leagueDigest_title',
       title: 'League Trade Digest',
-      body:
-          'In week {week}, the following transactions took place across '
-          'the league: {summary}.',
+      body: 'In week {week}, trades took place across the league.',
     ),
     'msg_tradeWindowEvent_open_title': MessageTextTemplate(
       key: 'msg_tradeWindowEvent_open_title',
@@ -680,65 +666,56 @@ class MessageTemplatesEn {
     'msg_award_mvp_title': MessageTextTemplate(
       key: 'msg_award_mvp_title',
       title: 'Season MVP',
-      body:
-          '{playerName} of {teamName} has won the season MVP award. '
-          'Position or role: {slot}.',
+      body: '{playerName} of {teamName} has won the season MVP award.',
     ),
     'msg_award_roty_title': MessageTextTemplate(
       key: 'msg_award_roty_title',
       title: 'Rookie of the Season',
-      body:
-          '{playerName} of {teamName} has been named Rookie of the '
-          'Season. Role: {slot}.',
+      body: '{playerName} of {teamName} has been named Rookie of the Season.',
     ),
     'msg_award_dpoy_title': MessageTextTemplate(
       key: 'msg_award_dpoy_title',
       title: 'Defender of the Season',
       body:
           '{playerName} of {teamName} has won the award for best defender '
-          'of the season. Role: {slot}.',
+          'of the season.',
     ),
     'msg_award_coachOfYear_title': MessageTextTemplate(
       key: 'msg_award_coachOfYear_title',
       title: 'Coach of the Year',
       body:
           '{playerName}, associated with {teamName}, has received the '
-          'Coach of the Year award. Designation: {slot}.',
+          'Coach of the Year award.',
     ),
     'msg_award_topScorer_title': MessageTextTemplate(
       key: 'msg_award_topScorer_title',
       title: 'Top Scorer',
       body:
           '{playerName} of {teamName} has finished the season as top '
-          'scorer. Role: {slot}.',
+          'scorer.',
     ),
     'msg_award_topAssist_title': MessageTextTemplate(
       key: 'msg_award_topAssist_title',
       title: 'Assists Leader',
       body:
           '{playerName} of {teamName} recorded the most assists this '
-          'season. Role: {slot}.',
+          'season.',
     ),
     'msg_award_bestGk_title': MessageTextTemplate(
       key: 'msg_award_bestGk_title',
       title: 'Best Goalkeeper',
       body:
-          "{playerName} of {teamName} has been named the season's best "
-          'goalkeeper. Role: {slot}.',
+          "{playerName} of {teamName} has been named the season's best goalkeeper.",
     ),
     'msg_award_teamOfSeason_title': MessageTextTemplate(
       key: 'msg_award_teamOfSeason_title',
       title: 'Team of the Season',
-      body:
-          '{playerName} of {teamName} has been named to the Team of the '
-          'Season. Position in the lineup: {slot}.',
+      body: '{playerName} has been named to the Team of the Season.',
     ),
     'msg_award_champion_title': MessageTextTemplate(
       key: 'msg_award_champion_title',
       title: 'League Champion',
-      body:
-          '{teamName} has won the championship, and the featured figure '
-          'in this message is {playerName}. Designation: {slot}.',
+      body: '{teamName} has won the league championship.',
     ),
     'msg_atmosphere_title': MessageTextTemplate(
       key: 'msg_atmosphere_title',
@@ -789,6 +766,11 @@ class MessageTemplatesEn {
       body:
           'An upcoming event: {eventName}. Date: {eventDate}. It\'s worth '
           'preparing in advance.',
+    ),
+    'msg_calendar_newWeek_title': MessageTextTemplate(
+      key: 'msg_calendar_newWeek_title',
+      title: 'New Week',
+      body: 'Week {week} of the season has begun (phase: {phase}).',
     ),
     'msg_system_title': MessageTextTemplate(
       key: 'msg_system_title',
