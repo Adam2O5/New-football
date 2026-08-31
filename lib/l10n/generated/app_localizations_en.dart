@@ -1105,10 +1105,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get standings_noLeague => 'No league';
 
   @override
+  String get standings_tabRegularSeason => 'Regular Season';
+
+  @override
   String get standings_tabEast => 'Europe';
 
   @override
   String get standings_tabWest => 'Rest of World';
+
+  @override
+  String get standings_tabLeague => 'League';
 
   @override
   String get standings_empty => 'No table';

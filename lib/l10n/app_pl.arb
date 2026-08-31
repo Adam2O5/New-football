@@ -697,8 +697,10 @@
   },
 
   "standings_noLeague": "Brak ligi",
+  "standings_tabRegularSeason": "Sezon zasadniczy",
   "standings_tabEast": "Europa",
   "standings_tabWest": "Reszta świata",
+  "standings_tabLeague": "Liga",
   "standings_empty": "Brak tabeli",
   "standings_col_team": "Drużyna",
   "standings_col_record": "W-R-P",

@@ -2050,6 +2050,12 @@ abstract class AppLocalizations {
   /// **'Brak ligi'**
   String get standings_noLeague;
 
+  /// No description provided for @standings_tabRegularSeason.
+  ///
+  /// In pl, this message translates to:
+  /// **'Sezon zasadniczy'**
+  String get standings_tabRegularSeason;
+
   /// No description provided for @standings_tabEast.
   ///
   /// In pl, this message translates to:
@@ -2061,6 +2067,12 @@ abstract class AppLocalizations {
   /// In pl, this message translates to:
   /// **'Reszta świata'**
   String get standings_tabWest;
+
+  /// No description provided for @standings_tabLeague.
+  ///
+  /// In pl, this message translates to:
+  /// **'Liga'**
+  String get standings_tabLeague;
 
   /// No description provided for @standings_empty.
   ///

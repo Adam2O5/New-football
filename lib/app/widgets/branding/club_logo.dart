@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'package:new_football/app/providers/club_branding_provider.dart';
 
 /// Decorative, fixed-size club logo with a fallback image and neutral
 /// placeholder when neither image can be read.
@@ -99,6 +102,33 @@ class _ClubLogoState extends State<ClubLogo> {
         size: widget.size * 0.62,
         color: colors.onSurfaceVariant,
       ),
+    );
+  }
+}
+
+/// Resolves [teamId] through [clubBrandingProvider] and renders the result
+/// via [ClubLogo], so callers that only have a team ID (standings, brackets,
+/// rosters) don't need to touch `ClubBrandingResolution` themselves.
+///
+/// `ClubBrandingRegistry.resolve` already substitutes the registry's own
+/// fallback asset when a team has no registered logo; `fallbackAssetPath`
+/// below covers the separate case where that resolved asset path exists in
+/// the registry but fails to actually load (e.g. a corrupt file), letting
+/// `ClubLogo` retry once before falling back to its placeholder icon.
+class TeamLogo extends ConsumerWidget {
+  const TeamLogo({super.key, required this.teamId, this.size = 24});
+
+  final String teamId;
+  final double size;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final registry = ref.watch(clubBrandingProvider);
+    final resolution = registry.resolve(teamId);
+    return ClubLogo(
+      assetPath: resolution.logoAsset,
+      fallbackAssetPath: registry.assets.fallbackLogoAsset,
+      size: size,
     );
   }
 }

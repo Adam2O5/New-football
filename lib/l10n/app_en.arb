@@ -653,8 +653,10 @@
   },
 
   "standings_noLeague": "No league",
+  "standings_tabRegularSeason": "Regular Season",
   "standings_tabEast": "Europe",
   "standings_tabWest": "Rest of World",
+  "standings_tabLeague": "League",
   "standings_empty": "No table",
   "standings_col_team": "Team",
   "standings_col_record": "W-D-L",

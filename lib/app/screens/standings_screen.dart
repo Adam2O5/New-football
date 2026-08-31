@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:new_football/app/providers/game_provider.dart';
+import 'package:new_football/app/widgets/standings/standings_bracket_view.dart';
+import 'package:new_football/app/widgets/standings/standings_series_list.dart';
+import 'package:new_football/app/widgets/branding/club_logo.dart';
 import 'package:new_football/app/widgets/screen_background.dart';
 import 'package:new_football/core/models/draft_models.dart';
 import 'package:new_football/core/models/enums.dart';
@@ -23,15 +26,8 @@ class StandingsScreen extends ConsumerWidget {
       );
     }
 
-    ConferenceStandings? east;
-    ConferenceStandings? west;
-    for (final cs in league.currentSeason.standings) {
-      if (cs.conference == Conference.europe) east = cs;
-      if (cs.conference == Conference.restOfTheWorld) west = cs;
-    }
-
     return DefaultTabController(
-      length: 3,
+      length: 2,
       child: ScreenBackground(
         child: Container(
           margin: const EdgeInsets.all(8),
@@ -45,22 +41,14 @@ class StandingsScreen extends ConsumerWidget {
             children: [
               TabBar(
                 tabs: [
-                  Tab(text: l10n.standings_tabEast),
-                  Tab(text: l10n.standings_tabWest),
+                  Tab(text: l10n.standings_tabRegularSeason),
                   Tab(text: l10n.standings_tabPostseason),
                 ],
               ),
               Expanded(
                 child: TabBarView(
                   children: [
-                    _StandingsTable(
-                      standings: east?.sorted ?? const [],
-                      league: league,
-                    ),
-                    _StandingsTable(
-                      standings: west?.sorted ?? const [],
-                      league: league,
-                    ),
+                    _RegularSeasonTab(league: league),
                     _PostseasonTab(league: league),
                   ],
                 ),
@@ -68,6 +56,79 @@ class StandingsScreen extends ConsumerWidget {
             ],
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _RegularSeasonTab extends StatelessWidget {
+  const _RegularSeasonTab({required this.league});
+
+  final LeagueState league;
+
+  /// Merges both conferences and re-ranks 1..N by points, then goal
+  /// difference (same tie-break as `ConferenceStandingsX.sorted`). This is
+  /// a display-only rank: `Standing.conferenceRank` is reused as the field
+  /// name, but here it holds a league-wide position rather than a
+  /// per-conference one.
+  List<Standing> _globalStandings(
+    ConferenceStandings? a,
+    ConferenceStandings? b,
+  ) {
+    final merged = [...?a?.standings, ...?b?.standings];
+    merged.sort((x, y) {
+      final pts = y.points.compareTo(x.points);
+      if (pts != 0) return pts;
+      return y.goalDifference.compareTo(x.goalDifference);
+    });
+    return merged
+        .asMap()
+        .entries
+        .map((e) => e.value.copyWith(conferenceRank: e.key + 1))
+        .toList();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
+    ConferenceStandings? europe;
+    ConferenceStandings? restOfWorld;
+    for (final cs in league.currentSeason.standings) {
+      if (cs.conference == Conference.europe) europe = cs;
+      if (cs.conference == Conference.restOfTheWorld) restOfWorld = cs;
+    }
+
+    return DefaultTabController(
+      length: 3,
+      child: Column(
+        children: [
+          TabBar(
+            tabs: [
+              Tab(text: l10n.standings_tabEast),
+              Tab(text: l10n.standings_tabWest),
+              Tab(text: l10n.standings_tabLeague),
+            ],
+          ),
+          Expanded(
+            child: TabBarView(
+              children: [
+                _StandingsTable(
+                  standings: europe?.sorted ?? const [],
+                  league: league,
+                ),
+                _StandingsTable(
+                  standings: restOfWorld?.sorted ?? const [],
+                  league: league,
+                ),
+                _StandingsTable(
+                  standings: _globalStandings(europe, restOfWorld),
+                  league: league,
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -97,7 +158,7 @@ class _StandingsTable extends StatelessWidget {
                 const SizedBox(width: 28, child: Text('#')),
                 Expanded(child: Text(l10n.standings_col_team)),
                 SizedBox(
-                  width: 56,
+                  width: 64,
                   child: Text(
                     l10n.standings_col_record,
                     textAlign: TextAlign.center,
@@ -107,13 +168,6 @@ class _StandingsTable extends StatelessWidget {
                   width: 36,
                   child: Text(
                     l10n.standings_col_points,
-                    textAlign: TextAlign.end,
-                  ),
-                ),
-                SizedBox(
-                  width: 40,
-                  child: Text(
-                    l10n.standings_col_diff,
                     textAlign: TextAlign.end,
                   ),
                 ),
@@ -128,23 +182,36 @@ class _StandingsTable extends StatelessWidget {
           dense: true,
           selected: isPlayer,
           leading: Text('${s.conferenceRank}'),
-          title: Text(
-            name,
-            style: TextStyle(
-              fontWeight: isPlayer ? FontWeight.bold : FontWeight.normal,
-            ),
+          title: Row(
+            children: [
+              TeamLogo(teamId: s.teamId, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  name,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontWeight: isPlayer ? FontWeight.bold : FontWeight.normal,
+                  ),
+                ),
+              ),
+            ],
           ),
           trailing: SizedBox(
-            width: 140,
+            width: 100,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 SizedBox(
-                  width: 56,
-                  child: Text(
-                    '${s.wins}-${s.draws}-${s.losses}',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(fontSize: 13),
+                  width: 64,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      '${s.wins}-${s.draws}-${s.losses}',
+                      maxLines: 1,
+                      softWrap: false,
+                      style: const TextStyle(fontSize: 13),
+                    ),
                   ),
                 ),
                 SizedBox(
@@ -153,13 +220,6 @@ class _StandingsTable extends StatelessWidget {
                     '${s.points}',
                     textAlign: TextAlign.end,
                     style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-                SizedBox(
-                  width: 40,
-                  child: Text(
-                    '${s.goalDifference >= 0 ? '+' : ''}${s.goalDifference}',
-                    textAlign: TextAlign.end,
                   ),
                 ),
               ],
@@ -209,58 +269,79 @@ class _PostseasonTab extends StatelessWidget {
       return Center(child: Text(l10n.standings_noPostseasonData));
     }
 
-    return ListView(
-      padding: const EdgeInsets.all(12),
-      children: [
-        Text(
-          l10n.standings_playIn,
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        const SizedBox(height: 8),
-        if (season.playInResults.isEmpty && season.playInProgress.isEmpty)
-          Card(child: ListTile(title: Text(l10n.standings_notStarted)))
-        else ...[
-          ...season.playInResults.map(
-            (result) => _playInCard(context, l10n, result),
+    return DefaultTabController(
+      length: 2,
+      child: Column(
+        children: [
+          TabBar(
+            tabs: [
+              // Reusing the existing seasonPhase-style labels — no need for
+              // separate standings_tabPlayIn/standings_tabPlayoff keys.
+              Tab(text: l10n.standings_playIn),
+              Tab(text: l10n.standings_playoffs),
+            ],
           ),
-          ...season.playInProgress.map(
-            (progress) => _playInProgressCard(context, l10n, progress),
-          ),
-        ],
-        const SizedBox(height: 16),
-        Text(
-          l10n.standings_playoffs,
-          style: Theme.of(context).textTheme.titleMedium,
-        ),
-        const SizedBox(height: 8),
-        if (season.playoffBrackets.isEmpty)
-          Card(child: ListTile(title: Text(l10n.standings_notStarted)))
-        else ...[
-          ...season.playoffBrackets.asMap().entries.map(
-            (entry) => _bracketCard(
-              context,
-              l10n,
-              entry.value,
-              showLeagueFinal: entry.key ==
-                  season.playoffBrackets.indexWhere(
-                    (bracket) => bracket.leagueFinal != null,
+          Expanded(
+            child: TabBarView(
+              children: [
+                if (season.playInResults.isEmpty &&
+                    season.playInProgress.isEmpty)
+                  Center(child: Text(l10n.standings_notStarted))
+                else
+                  ListView(
+                    padding: const EdgeInsets.all(12),
+                    children: [
+                      PlayInBracket(
+                        results: season.playInResults,
+                        progress: season.playInProgress,
+                        teamName: _teamName,
+                      ),
+                      const Divider(height: 24),
+                      ...season.playInResults.map(
+                        (result) => _playInCard(context, l10n, result),
+                      ),
+                      ...season.playInProgress.map(
+                        (progress) =>
+                            _playInProgressCard(context, l10n, progress),
+                      ),
+                    ],
                   ),
+                if (season.playoffBrackets.isEmpty)
+                  Center(child: Text(l10n.standings_notStarted))
+                else
+                  ListView(
+                    padding: const EdgeInsets.all(12),
+                    children: [
+                      PlayoffBracketView(
+                        brackets: season.playoffBrackets,
+                        teamName: _teamName,
+                      ),
+                      const Divider(height: 24),
+                      SeriesRoundList(
+                        brackets: season.playoffBrackets,
+                        league: league,
+                      ),
+                      if (season.championTeamId != null) ...[
+                        const SizedBox(height: 8),
+                        Card(
+                          color: Theme.of(context).colorScheme.primaryContainer,
+                          child: ListTile(
+                            leading: const Icon(Icons.emoji_events_outlined),
+                            title: Text(
+                              l10n.standings_champion(
+                                _teamName(season.championTeamId!),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+              ],
             ),
           ),
         ],
-        if (season.championTeamId != null) ...[
-          const SizedBox(height: 8),
-          Card(
-            color: Theme.of(context).colorScheme.primaryContainer,
-            child: ListTile(
-              leading: const Icon(Icons.emoji_events_outlined),
-              title: Text(
-                l10n.standings_champion(_teamName(season.championTeamId!)),
-              ),
-            ),
-          ),
-        ],
-      ],
+      ),
     );
   }
 
@@ -321,68 +402,6 @@ class _PostseasonTab extends StatelessWidget {
             subtitle: Text(label(progress.gameFinal)),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget _bracketCard(
-    BuildContext context,
-    AppLocalizations l10n,
-    PlayoffBracket bracket, {
-    required bool showLeagueFinal,
-  }) {
-    return Card(
-      child: ExpansionTile(
-        title: Text(_conferenceName(l10n, bracket.conference)),
-        children: [
-          _round(l10n.standings_quarterFinals, bracket.quarterFinals, l10n),
-          _round(l10n.standings_semiFinals, bracket.semiFinals, l10n),
-          _round(
-            l10n.standings_conferenceFinals,
-            bracket.conferenceFinal,
-            l10n,
-          ),
-          if (showLeagueFinal && bracket.leagueFinal != null)
-            _round(l10n.standings_leagueFinal, [bracket.leagueFinal!], l10n),
-        ],
-      ),
-    );
-  }
-
-  Widget _round(
-    String title,
-    List<PlayoffSeries> series,
-    AppLocalizations l10n,
-  ) {
-    if (series.isEmpty) return const SizedBox.shrink();
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
-          const SizedBox(height: 4),
-          ...series.map((item) => _seriesTile(item, l10n)),
-        ],
-      ),
-    );
-  }
-
-  Widget _seriesTile(PlayoffSeries series, AppLocalizations l10n) {
-    final winner = series.winnerTeamId;
-    return ListTile(
-      dense: true,
-      contentPadding: EdgeInsets.zero,
-      leading: const Icon(Icons.sports_soccer_outlined),
-      title: Text(
-        '${_teamName(series.higherSeedTeamId)} '
-        '${series.higherSeedWins}–${series.lowerSeedWins} '
-        '${_teamName(series.lowerSeedTeamId)}',
-      ),
-      subtitle: Text(
-        winner == null
-            ? l10n.standings_seriesInProgress
-            : l10n.standings_seriesWinner(_teamName(winner)),
       ),
     );
   }
