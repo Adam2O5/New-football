@@ -301,22 +301,24 @@ void main() {
         seed: seed,
       ).copyWith(currentWeek: 31, currentDay: 3);
 
-      state = service.advancePlayInForDate(
+      final result = service.advancePlayInForDate(
         state,
         week: 31,
         day: 3,
         saveSeed: seed,
       );
+      state = result.league;
       expect(state.currentSeason.playInProgress, hasLength(2));
       expect(state.currentSeason.playInResults, isEmpty);
 
       state = state.copyWith(currentWeek: 31, currentDay: 6);
-      state = service.advancePlayInForDate(
+      final result2 = service.advancePlayInForDate(
         state,
         week: 31,
         day: 6,
         saveSeed: seed,
       );
+      state = result2.league;
       expect(state.currentSeason.playInProgress, isEmpty);
       expect(state.currentSeason.playInResults, hasLength(2));
 
@@ -339,12 +341,13 @@ void main() {
         for (final day in [3, 6]) {
           if (state.currentSeason.championTeamId != null) break;
           state = state.copyWith(currentWeek: week, currentDay: day);
-          state = service.advancePlayoffsForDate(
+          final result = service.advancePlayoffsForDate(
             state,
             week: week,
             day: day,
             saveSeed: seed,
           );
+          state = result.league;
         }
       }
 
@@ -373,19 +376,20 @@ void main() {
         seed: seed,
       ).copyWith(currentWeek: 31, currentDay: 3);
 
-      state = service.advancePlayInForDate(
+      final result = service.advancePlayInForDate(
         state,
         week: 31,
         day: 3,
         saveSeed: seed,
       );
-      state = state.copyWith(currentWeek: 31, currentDay: 6);
-      state = service.advancePlayInForDate(
+      state = result.league.copyWith(currentWeek: 31, currentDay: 6);
+      final result2 = service.advancePlayInForDate(
         state,
         week: 31,
         day: 6,
         saveSeed: seed,
       );
+      state = result2.league;
 
       final games = [
         for (final result in state.currentSeason.playInResults) ...[

@@ -212,6 +212,14 @@ abstract class Season with _$Season {
     @Default(false) bool scoutReportDone,
     @Default(false) bool tradeDeadlineAcked,
     DraftState? nextDraftState,
+
+    /// When a play-in/playoff game (keyed by its synthetic `playIn:`/
+    /// `playoff:` match id) was actually played, as `'week:day'`. These
+    /// fixtures don't live in `schedule`, so this is the only record of
+    /// which calendar day produced a given result — used to show past
+    /// postseason results on the calendar the same way `schedule` does for
+    /// regular season matches.
+    @Default(<String, String>{}) Map<String, String> postseasonMatchDates,
   }) = _Season;
 
   factory Season.fromJson(Map<String, dynamic> json) => _$SeasonFromJson(json);

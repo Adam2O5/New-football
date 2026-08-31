@@ -134,27 +134,27 @@ void main() {
       day: 3,
       saveSeed: 42,
     );
-    expect(afterWednesday.currentSeason.playInProgress, hasLength(2));
+    expect(afterWednesday.league.currentSeason.playInProgress, hasLength(2));
     expect(
-      afterWednesday.currentSeason.playInProgress,
+      afterWednesday.league.currentSeason.playInProgress,
       everyElement(
         predicate<PlayInProgress>(
           (progress) => progress.game7v8 != null && progress.game9v10 != null,
         ),
       ),
     );
-    expect(afterWednesday.currentSeason.playInResults, isEmpty);
+    expect(afterWednesday.league.currentSeason.playInResults, isEmpty);
 
     final afterSaturday = service.advancePlayInForDate(
-      afterWednesday,
+      afterWednesday.league,
       week: 31,
       day: 6,
       saveSeed: 42,
     );
-    expect(afterSaturday.currentSeason.playInProgress, isEmpty);
-    expect(afterSaturday.currentSeason.playInResults, hasLength(2));
+    expect(afterSaturday.league.currentSeason.playInProgress, isEmpty);
+    expect(afterSaturday.league.currentSeason.playInResults, hasLength(2));
     expect(
-      afterSaturday.currentSeason.playInResults,
+      afterSaturday.league.currentSeason.playInResults,
       everyElement(
         predicate<PlayInResult>(
           (result) => result.gameFinal.homeTeamId.isNotEmpty,

@@ -622,6 +622,7 @@ void main() {
           saveSeed: 115,
         );
         final result = updated
+            .league
             .currentSeason
             .playoffBrackets
             .single
@@ -664,8 +665,14 @@ void main() {
         playoffLeague,
         saveSeed: 116,
       );
-      final result =
-          updated.currentSeason.playoffBrackets.first.leagueFinal!.games.single;
+      final result = updated
+          .league
+          .currentSeason
+          .playoffBrackets
+          .first
+          .leagueFinal!
+          .games
+          .single;
       expect(result.context.stake, MatchStake.leagueFinal);
     });
 

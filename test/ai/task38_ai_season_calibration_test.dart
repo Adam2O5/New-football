@@ -545,12 +545,13 @@ class _Task38Harness {
     final week = state.currentWeek;
     final day = state.currentDay;
     if (calendar.playInSlotsForDay(week, day).isNotEmpty) {
-      state = seasonService.advancePlayInForDate(
+      final result = seasonService.advancePlayInForDate(
         state,
         week: week,
         day: day,
         saveSeed: rootSeed,
       );
+      state = result.league;
       _collectPostseasonResults(state);
     }
     if (calendar.phaseForWeek(week) == SeasonPhase.playoff &&
@@ -559,12 +560,13 @@ class _Task38Harness {
       state = seasonService.setupPlayoffs(state);
     }
     if (calendar.postseasonSlotForDay(week, day) != null) {
-      state = seasonService.advancePlayoffsForDate(
+      final result = seasonService.advancePlayoffsForDate(
         state,
         week: week,
         day: day,
         saveSeed: rootSeed,
       );
+      state = result.league;
       _collectPostseasonResults(state);
     }
     _observeAprons(state);
@@ -1029,22 +1031,26 @@ double _median(List<double> values) {
 }
 
 void main() {
-  test('Task 38 accelerated calibration runs ten deterministic seasons', () {
-    final report = _Task38Harness(
-      profile: _Task38Profile.accelerated,
-      seasonCount: _task38Seasons,
-    ).run();
-    print(report.render());
+  test(
+    'Task 38 accelerated calibration runs ten deterministic seasons',
+    () {
+      final report = _Task38Harness(
+        profile: _Task38Profile.accelerated,
+        seasonCount: _task38Seasons,
+      ).run();
+      print(report.render());
 
-    expect(report.profile, _Task38Profile.accelerated);
-    expect(report.seasons, hasLength(_task38Seasons));
-    expect(report.logicalDays, _task38Seasons * 52 * 7);
-    expect(report.executedTicks, lessThan(report.logicalDays));
-    expect(
-      report.seasons.every((season) => season.championTeamId != null),
-      isTrue,
-    );
-  }, skip: !_task38RunFull);
+      expect(report.profile, _Task38Profile.accelerated);
+      expect(report.seasons, hasLength(_task38Seasons));
+      expect(report.logicalDays, _task38Seasons * 52 * 7);
+      expect(report.executedTicks, lessThan(report.logicalDays));
+      expect(
+        report.seasons.every((season) => season.championTeamId != null),
+        isTrue,
+      );
+    },
+    skip: !_task38RunFull,
+  );
 
   test('Task 38 full-fidelity one-season smoke test', () {
     final report = _Task38Harness(

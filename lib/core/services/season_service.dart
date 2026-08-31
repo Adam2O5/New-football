@@ -118,16 +118,25 @@ class SeasonService {
   /// [setupPlayIn] API. Wednesday stores the two opening games for each
   /// conference; Saturday stores the deciding games and promotes the eight
   /// playoff teams.
-  LeagueState advancePlayInForDate(
+  /// Advances one dated play-in slot. Returns the (possibly unchanged)
+  /// league plus [playerMatch]: non-null when the player's team has an
+  /// unresolved play-in fixture today, in which case that one game is left
+  /// unsimulated (mirroring the regular season's `playerMatch` handoff) and
+  /// the caller is expected to route to the interactive matchday flow, then
+  /// call [applyPlayInPlayerResult] once it has a result.
+  ({LeagueState league, ScheduledMatch? playerMatch}) advancePlayInForDate(
     LeagueState league, {
     required int week,
     required int day,
     int saveSeed = 0,
   }) {
-    if (calendar.playInSlotsForDay(week, day).isEmpty) return league;
+    if (calendar.playInSlotsForDay(week, day).isEmpty) {
+      return (league: league, playerMatch: null);
+    }
 
     var state = league;
     final season = league.currentSeason;
+    ScheduledMatch? pendingPlayerMatch;
     if (day == 3) {
       final progress = <PlayInProgress>[];
       for (final conference in Conference.values) {
@@ -161,6 +170,7 @@ class SeasonService {
           );
           state = played.league;
           game7v8 = played.result;
+          pendingPlayerMatch ??= played.playerMatch;
         }
         var game9v10 = current.game9v10;
         if (game9v10 == null) {
@@ -174,19 +184,24 @@ class SeasonService {
           );
           state = played.league;
           game9v10 = played.result;
+          pendingPlayerMatch ??= played.playerMatch;
         }
         progress.add(current.copyWith(game7v8: game7v8, game9v10: game9v10));
       }
-      return state.copyWith(
-        currentSeason: state.currentSeason.copyWith(
-          phase: SeasonPhase.playIn,
-          playInProgress: progress,
+      return (
+        league: state.copyWith(
+          currentSeason: state.currentSeason.copyWith(
+            phase: SeasonPhase.playIn,
+            playInProgress: progress,
+          ),
         ),
+        playerMatch: pendingPlayerMatch,
       );
     }
 
     final results = [...season.playInResults];
     final remaining = <PlayInProgress>[];
+    final finished = <PlayInResult>[];
     for (final progress in season.playInProgress) {
       final game7v8 = progress.game7v8;
       final game9v10 = progress.game9v10;
@@ -209,46 +224,148 @@ class SeasonService {
         );
         state = played.league;
         finalGame = played.result;
+        if (played.playerMatch != null) {
+          pendingPlayerMatch ??= played.playerMatch;
+          remaining.add(progress);
+          continue;
+        }
       }
-      final loser78 =
-          _winnerId(game7v8, progress.seed7TeamId, progress.seed8TeamId) ==
-              progress.seed7TeamId
-          ? progress.seed8TeamId
-          : progress.seed7TeamId;
-      final winner910 = _winnerId(
-        game9v10,
-        progress.seed9TeamId,
-        progress.seed10TeamId,
-      );
-      final playoff8 = _winnerId(finalGame, loser78, winner910);
-      final playoff7 = _winnerId(
-        game7v8,
-        progress.seed7TeamId,
-        progress.seed8TeamId,
-      );
-      results.removeWhere((result) => result.conference == progress.conference);
-      results.add(
-        PlayInResult(
-          conference: progress.conference,
-          seed7TeamId: progress.seed7TeamId,
-          seed8TeamId: progress.seed8TeamId,
-          game7v8: game7v8,
-          game9v10: game9v10,
-          gameFinal: finalGame,
-          playoffSeed7TeamId: playoff7,
-          playoffSeed8TeamId: playoff8,
+      finished.add(_buildPlayInResult(progress, game7v8, game9v10, finalGame!));
+    }
+    for (final result in finished) {
+      results.removeWhere((r) => r.conference == result.conference);
+      results.add(result);
+    }
+    return (
+      league: _sendPlayInResultMessages(
+        state.copyWith(
+          currentSeason: state.currentSeason.copyWith(
+            phase: SeasonPhase.playIn,
+            playInResults: results,
+            playInProgress: remaining,
+          ),
         ),
+        finished,
+      ),
+      playerMatch: pendingPlayerMatch,
+    );
+  }
+
+  /// Applies the result of a play-in fixture that was played interactively
+  /// (paused for via `advancePlayInForDate`'s `playerMatch`) and performs
+  /// exactly the bookkeeping that automatic simulation would have: tiebreak
+  /// resolution, discipline, team-event hooks, and — if this was the
+  /// deciding game — building the final `PlayInResult` and sending the same
+  /// messages as the automatic path.
+  LeagueState applyPlayInPlayerResult(
+    LeagueState league, {
+    required String matchId,
+    required MatchResult rawResult,
+    int saveSeed = 0,
+  }) {
+    final parts = matchId.split(':');
+    if (parts.length != 3 || parts[0] != 'playIn') return league;
+    Conference? conference;
+    for (final c in Conference.values) {
+      if (c.name == parts[1]) conference = c;
+    }
+    if (conference == null) return league;
+    final kind = parts[2];
+
+    final result = _resolvePostseasonTiebreak(
+      rawResult,
+      saveSeed: saveSeed,
+      seasonYear: league.currentSeason.year,
+      matchId: matchId,
+    );
+    var state = _applyMatchFatigue(league, result);
+    state = _applyPostseasonDiscipline(
+      state,
+      result,
+      SeasonPhase.playIn,
+      matchId: matchId,
+    );
+    state = teamEvents.afterMatch(state, result, saveSeed: saveSeed);
+    state = _recordPostseasonMatchDate(state, matchId);
+
+    final progressList = state.currentSeason.playInProgress;
+    final index = progressList.indexWhere((p) => p.conference == conference);
+    if (index == -1) return state;
+    final progress = progressList[index];
+
+    final updated = switch (kind) {
+      '7v8' => progress.copyWith(game7v8: result),
+      '9v10' => progress.copyWith(game9v10: result),
+      'final' => progress.copyWith(gameFinal: result),
+      _ => progress,
+    };
+
+    final game7v8 = updated.game7v8;
+    final game9v10 = updated.game9v10;
+    final finalGame = updated.gameFinal;
+    if (kind == 'final' &&
+        game7v8 != null &&
+        game9v10 != null &&
+        finalGame != null) {
+      final playInResult = _buildPlayInResult(
+        progress,
+        game7v8,
+        game9v10,
+        finalGame,
+      );
+      final remaining = [...progressList]..removeAt(index);
+      final results = [...state.currentSeason.playInResults]
+        ..removeWhere((r) => r.conference == conference)
+        ..add(playInResult);
+      return _sendPlayInResultMessages(
+        state.copyWith(
+          currentSeason: state.currentSeason.copyWith(
+            playInResults: results,
+            playInProgress: remaining,
+          ),
+        ),
+        [playInResult],
       );
     }
-    return _sendPlayInResultMessages(
-      state.copyWith(
-        currentSeason: state.currentSeason.copyWith(
-          phase: SeasonPhase.playIn,
-          playInResults: results,
-          playInProgress: remaining,
-        ),
-      ),
-      results,
+
+    final nextProgress = [...progressList];
+    nextProgress[index] = updated;
+    return state.copyWith(
+      currentSeason: state.currentSeason.copyWith(playInProgress: nextProgress),
+    );
+  }
+
+  PlayInResult _buildPlayInResult(
+    PlayInProgress progress,
+    MatchResult game7v8,
+    MatchResult game9v10,
+    MatchResult finalGame,
+  ) {
+    final loser78 =
+        _winnerId(game7v8, progress.seed7TeamId, progress.seed8TeamId) ==
+            progress.seed7TeamId
+        ? progress.seed8TeamId
+        : progress.seed7TeamId;
+    final winner910 = _winnerId(
+      game9v10,
+      progress.seed9TeamId,
+      progress.seed10TeamId,
+    );
+    final playoff8 = _winnerId(finalGame, loser78, winner910);
+    final playoff7 = _winnerId(
+      game7v8,
+      progress.seed7TeamId,
+      progress.seed8TeamId,
+    );
+    return PlayInResult(
+      conference: progress.conference,
+      seed7TeamId: progress.seed7TeamId,
+      seed8TeamId: progress.seed8TeamId,
+      game7v8: game7v8,
+      game9v10: game9v10,
+      gameFinal: finalGame,
+      playoffSeed7TeamId: playoff7,
+      playoffSeed8TeamId: playoff8,
     );
   }
 
@@ -289,6 +406,7 @@ class SeasonService {
         saveSeed: saveSeed,
         matchId: 'playIn:${conf.name}:7v8',
         phase: SeasonPhase.playIn,
+        simulatePlayerMatch: true,
       );
       state = first.league;
       final second = _simPostseason(
@@ -298,10 +416,11 @@ class SeasonService {
         saveSeed: saveSeed,
         matchId: 'playIn:${conf.name}:9v10',
         phase: SeasonPhase.playIn,
+        simulatePlayerMatch: true,
       );
       state = second.league;
-      final g78 = first.result;
-      final g910 = second.result;
+      final g78 = first.result!;
+      final g910 = second.result!;
       final loser78 = _winnerId(g78, s7, s8) == s7 ? s8 : s7;
       final winner910 = _winnerId(g910, s9, s10);
       final third = _simPostseason(
@@ -311,9 +430,10 @@ class SeasonService {
         saveSeed: saveSeed,
         matchId: 'playIn:${conf.name}:final',
         phase: SeasonPhase.playIn,
+        simulatePlayerMatch: true,
       );
       state = third.league;
-      final gFinal = third.result;
+      final gFinal = third.result!;
       final playoff8 = _winnerId(gFinal, loser78, winner910);
       final playoff7 = _winnerId(g78, s7, s8);
 
@@ -463,24 +583,38 @@ class SeasonService {
   /// Advances one dated playoff slot. Calls outside the canonical postseason
   /// slots are no-ops, so the daily calendar cannot consume a series game on
   /// an arbitrary day.
-  LeagueState advancePlayoffsForDate(
+  /// Advances one dated playoff slot. Calls outside the canonical postseason
+  /// slots are no-ops, so the daily calendar cannot consume a series game on
+  /// an arbitrary day. [playerMatch] is non-null when the player's team has
+  /// an unresolved game today; the caller should route to the interactive
+  /// matchday flow and later call [applyPlayoffPlayerResult].
+  ({LeagueState league, ScheduledMatch? playerMatch}) advancePlayoffsForDate(
     LeagueState league, {
     required int week,
     required int day,
     int saveSeed = 0,
   }) {
-    if (calendar.postseasonSlotForDay(week, day) == null) return league;
-    if (calendar.playoffRoundForWeek(week) == null) return league;
+    if (calendar.postseasonSlotForDay(week, day) == null) {
+      return (league: league, playerMatch: null);
+    }
+    if (calendar.playoffRoundForWeek(week) == null) {
+      return (league: league, playerMatch: null);
+    }
     return advancePlayoffs(league, saveSeed: saveSeed);
   }
 
-  LeagueState advancePlayoffs(LeagueState league, {int saveSeed = 0}) {
+  ({LeagueState league, ScheduledMatch? playerMatch}) advancePlayoffs(
+    LeagueState league, {
+    int saveSeed = 0,
+  }) {
     var brackets = <PlayoffBracket>[];
     var state = league;
+    ScheduledMatch? pendingPlayerMatch;
     for (final b in league.currentSeason.playoffBrackets) {
       final advanced = _advanceBracket(state, b, saveSeed);
       state = advanced.league;
       brackets.add(advanced.bracket);
+      pendingPlayerMatch ??= advanced.playerMatch;
     }
 
     String? champion;
@@ -512,7 +646,11 @@ class SeasonService {
           stake: MatchStake.leagueFinal,
         );
         state = played.league;
-        leagueFinal = played.series;
+        if (played.playerMatch != null) {
+          pendingPlayerMatch ??= played.playerMatch;
+        } else {
+          leagueFinal = played.series;
+        }
       }
       champion = leagueFinal.winnerTeamId;
       brackets = brackets
@@ -527,56 +665,185 @@ class SeasonService {
       ),
     );
     if (champion != null) {
-      final alreadyApplied = state.currentSeason.championshipAtmosphereApplied;
-      if (!alreadyApplied) {
-        final championTeam = state.teamById(champion);
-        if (championTeam != null) {
-          final before = championTeam.atmosphere;
-          final updated = const TeamManagementService().applyAtmosphereDelta(
-            championTeam,
-            30,
-          );
-          state = state
-              .updateTeam(updated)
-              .copyWith(
-                currentSeason: state.currentSeason.copyWith(
-                  championshipAtmosphereApplied: true,
-                ),
-              );
-          if (state.playerTeamId == champion) {
-            state = _messages.send(
-              state,
-              type: MessageType.teamEvent,
-              kind: 'atmosphereShift',
-              domain: MessageDomain.teamEvent,
-              args: {
-                'delta': updated.atmosphere - before,
-                'oldLevel': before,
-                'newLevel': updated.atmosphere,
-              },
-              payload: {
-                'teamId': champion,
-                'atmosphereDelta': updated.atmosphere - before,
-                'oldLevel': before,
-                'newLevel': updated.atmosphere,
-                'atmosphereBefore': before,
-                'atmosphereAfter': updated.atmosphere,
-                'reason': 'championship',
-              },
-              dedupKey: 'atmosphere:championship:${state.currentSeason.year}',
-            );
-          }
-        } else {
-          state = state.copyWith(
-            currentSeason: state.currentSeason.copyWith(
-              championshipAtmosphereApplied: true,
-            ),
-          );
-        }
+      state = _crownChampion(state, champion, saveSeed: saveSeed);
+    }
+    return (league: state, playerMatch: pendingPlayerMatch);
+  }
+
+  /// Applies the result of a playoff/league-final fixture that was played
+  /// interactively (paused for via `advancePlayoffsForDate`'s
+  /// `playerMatch`). Records the game into the series wherever it lives
+  /// (quarterfinal/semifinal/conference final/league final, across either
+  /// conference bracket), creates the next round when siblings are already
+  /// complete, and crowns the champion when applicable — the same
+  /// bookkeeping [advancePlayoffs] performs, without simulating any other
+  /// game for the day.
+  LeagueState applyPlayoffPlayerResult(
+    LeagueState league, {
+    required String matchId,
+    required MatchResult rawResult,
+    int saveSeed = 0,
+  }) {
+    final parts = matchId.split(':');
+    if (parts.length != 3 || parts[0] != 'playoff') return league;
+    final seriesId = parts[1];
+
+    final result = _resolvePostseasonTiebreak(
+      rawResult,
+      saveSeed: saveSeed,
+      seasonYear: league.currentSeason.year,
+      matchId: matchId,
+    );
+    var state = _applyMatchFatigue(league, result);
+    state = _applyPostseasonDiscipline(
+      state,
+      result,
+      SeasonPhase.playoff,
+      matchId: matchId,
+    );
+    state = teamEvents.afterMatch(state, result, saveSeed: saveSeed);
+    state = _recordPostseasonMatchDate(state, matchId);
+
+    var recorded = false;
+    PlayoffSeries recordIfMatch(PlayoffSeries s) {
+      if (recorded || s.id != seriesId) return s;
+      recorded = true;
+      return s.recordGame(result);
+    }
+
+    var brackets = state.currentSeason.playoffBrackets.map((b) {
+      var updated = b.copyWith(
+        quarterFinals: b.quarterFinals.map(recordIfMatch).toList(),
+        semiFinals: b.semiFinals.map(recordIfMatch).toList(),
+        conferenceFinal: b.conferenceFinal.map(recordIfMatch).toList(),
+      );
+      final leagueFinal = updated.leagueFinal;
+      if (leagueFinal != null) {
+        updated = updated.copyWith(leagueFinal: recordIfMatch(leagueFinal));
       }
-      state = teamEvents.afterPlayoffs(state, saveSeed: saveSeed);
+      return _progressBracketRounds(updated);
+    }).toList();
+
+    String? champion = state.currentSeason.championTeamId;
+    PlayoffBracket? east;
+    PlayoffBracket? west;
+    for (final b in brackets) {
+      if (b.conference == Conference.europe) east = b;
+      if (b.conference == Conference.restOfTheWorld) west = b;
+    }
+    if (east != null &&
+        west != null &&
+        east.conferenceFinal.isNotEmpty &&
+        west.conferenceFinal.isNotEmpty &&
+        east.conferenceFinal.first.isComplete &&
+        west.conferenceFinal.first.isComplete) {
+      final leagueFinal =
+          east.leagueFinal ??
+          west.leagueFinal ??
+          _series(
+            east.conferenceFinal.first.winnerTeamId!,
+            west.conferenceFinal.first.winnerTeamId!,
+          );
+      champion = leagueFinal.winnerTeamId ?? champion;
+      brackets = brackets
+          .map((b) => b.copyWith(leagueFinal: leagueFinal))
+          .toList();
+    }
+
+    state = state.copyWith(
+      currentSeason: state.currentSeason.copyWith(
+        playoffBrackets: brackets,
+        championTeamId: champion ?? state.currentSeason.championTeamId,
+      ),
+    );
+    if (champion != null) {
+      state = _crownChampion(state, champion, saveSeed: saveSeed);
     }
     return state;
+  }
+
+  /// Creates the next playoff round(s) once every series in the current
+  /// round is complete. Plays no games — pure bracket bookkeeping, shared by
+  /// [advancePlayoffs] (via [_advanceBracket]) and [applyPlayoffPlayerResult].
+  PlayoffBracket _progressBracketRounds(PlayoffBracket b) {
+    var semis = b.semiFinals;
+    if (semis.isEmpty &&
+        b.quarterFinals.length == 4 &&
+        b.quarterFinals.every((s) => s.isComplete)) {
+      semis = [
+        _series(
+          b.quarterFinals[0].winnerTeamId!,
+          b.quarterFinals[3].winnerTeamId!,
+        ),
+        _series(
+          b.quarterFinals[1].winnerTeamId!,
+          b.quarterFinals[2].winnerTeamId!,
+        ),
+      ];
+    }
+    var confFinal = b.conferenceFinal;
+    if (confFinal.isEmpty &&
+        semis.length == 2 &&
+        semis.every((s) => s.isComplete)) {
+      confFinal = [_series(semis[0].winnerTeamId!, semis[1].winnerTeamId!)];
+    }
+    return b.copyWith(semiFinals: semis, conferenceFinal: confFinal);
+  }
+
+  LeagueState _crownChampion(
+    LeagueState league,
+    String champion, {
+    required int saveSeed,
+  }) {
+    var state = league;
+    final alreadyApplied = state.currentSeason.championshipAtmosphereApplied;
+    if (!alreadyApplied) {
+      final championTeam = state.teamById(champion);
+      if (championTeam != null) {
+        final before = championTeam.atmosphere;
+        final updated = const TeamManagementService().applyAtmosphereDelta(
+          championTeam,
+          30,
+        );
+        state = state
+            .updateTeam(updated)
+            .copyWith(
+              currentSeason: state.currentSeason.copyWith(
+                championshipAtmosphereApplied: true,
+              ),
+            );
+        if (state.playerTeamId == champion) {
+          state = _messages.send(
+            state,
+            type: MessageType.teamEvent,
+            kind: 'atmosphereShift',
+            domain: MessageDomain.teamEvent,
+            args: {
+              'delta': updated.atmosphere - before,
+              'oldLevel': before,
+              'newLevel': updated.atmosphere,
+            },
+            payload: {
+              'teamId': champion,
+              'atmosphereDelta': updated.atmosphere - before,
+              'oldLevel': before,
+              'newLevel': updated.atmosphere,
+              'atmosphereBefore': before,
+              'atmosphereAfter': updated.atmosphere,
+              'reason': 'championship',
+            },
+            dedupKey: 'atmosphere:championship:${state.currentSeason.year}',
+          );
+        }
+      } else {
+        state = state.copyWith(
+          currentSeason: state.currentSeason.copyWith(
+            championshipAtmosphereApplied: true,
+          ),
+        );
+      }
+    }
+    return teamEvents.afterPlayoffs(state, saveSeed: saveSeed);
   }
 
   LeagueState runCapUpdateTv(LeagueState league, {int saveSeed = 0}) {
@@ -1859,7 +2126,15 @@ class SeasonService {
     _ => MatchStake.regular,
   };
 
-  ({LeagueState league, MatchResult result}) _simPostseason(
+  /// Simulates one postseason game, unless the player's team is in it — in
+  /// that case (and unless [simulatePlayerMatch] forces the old atomic
+  /// behaviour) the pre-match message is still emitted but simulation is
+  /// skipped: [result] comes back `null` and [playerMatch] describes the
+  /// pending fixture so the caller (ultimately `DaySimulator`) can pause and
+  /// hand off to the interactive matchday flow, exactly like a regular
+  /// season fixture.
+  ({LeagueState league, MatchResult? result, ScheduledMatch? playerMatch})
+  _simPostseason(
     LeagueState league,
     String homeId,
     String awayId, {
@@ -1867,6 +2142,7 @@ class SeasonService {
     required String matchId,
     required SeasonPhase phase,
     MatchStake? stake,
+    bool simulatePlayerMatch = false,
   }) {
     var state = rosterManagement.ensurePreMatchdaySafety(
       league,
@@ -1899,6 +2175,18 @@ class SeasonService {
           context: context,
           report: report,
         );
+        if (!simulatePlayerMatch) {
+          return (
+            league: state,
+            result: null,
+            playerMatch: ScheduledMatch(
+              id: matchId,
+              homeTeamId: homeId,
+              awayTeamId: awayId,
+              round: -1,
+            ),
+          );
+        }
       }
     }
     final rawResult = _sim(
@@ -1916,8 +2204,9 @@ class SeasonService {
       seasonYear: state.currentSeason.year,
       matchId: matchId,
     );
-    var postseasonState = _applyPostseasonDiscipline(
-      state,
+    var postseasonState = _applyMatchFatigue(state, result);
+    postseasonState = _applyPostseasonDiscipline(
+      postseasonState,
       result,
       phase,
       matchId: matchId,
@@ -1927,7 +2216,8 @@ class SeasonService {
       result,
       saveSeed: saveSeed,
     );
-    return (league: postseasonState, result: result);
+    postseasonState = _recordPostseasonMatchDate(postseasonState, matchId);
+    return (league: postseasonState, result: result, playerMatch: null);
   }
 
   String _winnerId(MatchResult r, String homeId, String awayId) {
@@ -1952,12 +2242,10 @@ class SeasonService {
     winsNeeded: 3,
   );
 
-  ({LeagueState league, PlayoffBracket bracket}) _advanceBracket(
-    LeagueState league,
-    PlayoffBracket b,
-    int saveSeed,
-  ) {
+  ({LeagueState league, PlayoffBracket bracket, ScheduledMatch? playerMatch})
+  _advanceBracket(LeagueState league, PlayoffBracket b, int saveSeed) {
     var state = league;
+    ScheduledMatch? pendingPlayerMatch;
     final quarters = <PlayoffSeries>[];
     for (final series in b.quarterFinals) {
       if (series.isComplete) {
@@ -1966,6 +2254,7 @@ class SeasonService {
         final played = _playOneGame(state, series, saveSeed);
         state = played.league;
         quarters.add(played.series);
+        pendingPlayerMatch ??= played.playerMatch;
       }
     }
 
@@ -1984,6 +2273,7 @@ class SeasonService {
           final played = _playOneGame(state, series, saveSeed);
           state = played.league;
           advanced.add(played.series);
+          pendingPlayerMatch ??= played.playerMatch;
         }
       }
       semis = advanced;
@@ -2003,6 +2293,7 @@ class SeasonService {
           final played = _playOneGame(state, series, saveSeed);
           state = played.league;
           advanced.add(played.series);
+          pendingPlayerMatch ??= played.playerMatch;
         }
       }
       confFinal = advanced;
@@ -2015,6 +2306,7 @@ class SeasonService {
         semiFinals: semis,
         conferenceFinal: confFinal,
       ),
+      playerMatch: pendingPlayerMatch,
     );
   }
 
@@ -2027,7 +2319,294 @@ class SeasonService {
     return eliminationGame ? MatchStake.playoffElimination : MatchStake.playoff;
   }
 
-  ({LeagueState league, PlayoffSeries series}) _playOneGame(
+  /// Determines the [MatchStake] for a pending postseason fixture, given the
+  /// `matchId` reported on `playerMatch` by `advancePlayInForDate` /
+  /// `advancePlayoffsForDate`. The interactive matchday flow needs this to
+  /// build a correct [MatchContext] but has no access to the private
+  /// bracket/series lookup it requires.
+  MatchStake stakeForPendingMatch(LeagueState league, String matchId) {
+    final parts = matchId.split(':');
+    if (parts.isEmpty) return MatchStake.regular;
+    if (parts[0] == 'playIn') return MatchStake.playIn;
+    if (parts[0] != 'playoff' || parts.length < 2) return MatchStake.regular;
+    final seriesId = parts[1];
+    for (final b in league.currentSeason.playoffBrackets) {
+      if (b.leagueFinal?.id == seriesId) return MatchStake.leagueFinal;
+      for (final s in [
+        ...b.quarterFinals,
+        ...b.semiFinals,
+        ...b.conferenceFinal,
+      ]) {
+        if (s.id == seriesId) return _stakeForSeries(s);
+      }
+    }
+    return MatchStake.playoff;
+  }
+
+  /// Read-only preview of the still-pending play-in/playoff fixtures for
+  /// [week]/[day] — no simulation, no state changes. Mirrors exactly the
+  /// pairing logic `advancePlayInForDate`/`advancePlayoffsForDate` would use
+  /// if this day were simulated right now. Once a game has been played it no
+  /// longer appears here (it lives in `playInResults`/`playoffBrackets`
+  /// instead) — used by the calendar UI to show postseason match days once
+  /// pairings are known, the same way regular season fixtures are shown from
+  /// `currentSeason.schedule`.
+  List<ScheduledMatch> postseasonMatchesForDate(
+    LeagueState league, {
+    required int week,
+    required int day,
+  }) {
+    final matches = <ScheduledMatch>[];
+    final season = league.currentSeason;
+
+    if (calendar.playInSlotsForDay(week, day).isNotEmpty) {
+      for (final conference in Conference.values) {
+        final progressForConference = season.playInProgress
+            .where((p) => p.conference == conference)
+            .toList();
+        final current = progressForConference.isEmpty
+            ? null
+            : progressForConference.first;
+        if (day == 3) {
+          final seeds = current == null
+              ? _playInSeeds(league, conference)
+              : null;
+          if (current != null) {
+            if (current.game7v8 == null) {
+              matches.add(
+                ScheduledMatch(
+                  id: 'playIn:${conference.name}:7v8',
+                  homeTeamId: current.seed7TeamId,
+                  awayTeamId: current.seed8TeamId,
+                  round: -1,
+                ),
+              );
+            }
+            if (current.game9v10 == null) {
+              matches.add(
+                ScheduledMatch(
+                  id: 'playIn:${conference.name}:9v10',
+                  homeTeamId: current.seed9TeamId,
+                  awayTeamId: current.seed10TeamId,
+                  round: -1,
+                ),
+              );
+            }
+          } else if (seeds != null) {
+            matches.add(
+              ScheduledMatch(
+                id: 'playIn:${conference.name}:7v8',
+                homeTeamId: seeds.s7,
+                awayTeamId: seeds.s8,
+                round: -1,
+              ),
+            );
+            matches.add(
+              ScheduledMatch(
+                id: 'playIn:${conference.name}:9v10',
+                homeTeamId: seeds.s9,
+                awayTeamId: seeds.s10,
+                round: -1,
+              ),
+            );
+          }
+        } else if (day == 6 &&
+            current != null &&
+            current.gameFinal == null &&
+            current.game7v8 != null &&
+            current.game9v10 != null) {
+          final loser78 =
+              _winnerId(
+                    current.game7v8!,
+                    current.seed7TeamId,
+                    current.seed8TeamId,
+                  ) ==
+                  current.seed7TeamId
+              ? current.seed8TeamId
+              : current.seed7TeamId;
+          final winner910 = _winnerId(
+            current.game9v10!,
+            current.seed9TeamId,
+            current.seed10TeamId,
+          );
+          matches.add(
+            ScheduledMatch(
+              id: 'playIn:${conference.name}:final',
+              homeTeamId: loser78,
+              awayTeamId: winner910,
+              round: -1,
+            ),
+          );
+        }
+      }
+    }
+
+    if (calendar.postseasonSlotForDay(week, day) != null &&
+        calendar.playoffRoundForWeek(week) != null) {
+      final seenSeriesIds = <String>{};
+      for (final b in season.playoffBrackets) {
+        final allSeries = [
+          ...b.quarterFinals,
+          ...b.semiFinals,
+          ...b.conferenceFinal,
+          if (b.leagueFinal != null) b.leagueFinal!,
+        ];
+        for (final series in allSeries) {
+          if (series.isComplete || !seenSeriesIds.add(series.id)) continue;
+          final homeFirst = calendar.higherSeedHomeForGame(series.games.length);
+          matches.add(
+            ScheduledMatch(
+              id: 'playoff:${series.id}:${series.games.length}',
+              homeTeamId: homeFirst
+                  ? series.higherSeedTeamId
+                  : series.lowerSeedTeamId,
+              awayTeamId: homeFirst
+                  ? series.lowerSeedTeamId
+                  : series.higherSeedTeamId,
+              round: -1,
+            ),
+          );
+        }
+      }
+    }
+
+    return matches;
+  }
+
+  /// Read-only: the already-played postseason fixtures whose game happened
+  /// to land on [week]/[day], as recorded in `postseasonMatchDates`.
+  /// Complements [postseasonMatchesForDate], which only returns still-
+  /// pending fixtures — together they let the calendar show a play-in/
+  /// playoff day the same way it shows a regular season one, both before and
+  /// after the match is played.
+  List<ScheduledMatch> postseasonResultsForDate(
+    LeagueState league, {
+    required int week,
+    required int day,
+  }) {
+    final key = '$week:$day';
+    final matches = <ScheduledMatch>[];
+    for (final entry in league.currentSeason.postseasonMatchDates.entries) {
+      if (entry.value != key) continue;
+      final result = _resultForPostseasonMatchId(league, entry.key);
+      if (result == null) continue;
+      matches.add(
+        ScheduledMatch(
+          id: entry.key,
+          homeTeamId: result.homeTeamId,
+          awayTeamId: result.awayTeamId,
+          round: -1,
+          result: result,
+        ),
+      );
+    }
+    return matches;
+  }
+
+  MatchResult? _resultForPostseasonMatchId(LeagueState league, String matchId) {
+    final parts = matchId.split(':');
+    final season = league.currentSeason;
+    if (parts.length == 3 && parts[0] == 'playIn') {
+      Conference? conference;
+      for (final c in Conference.values) {
+        if (c.name == parts[1]) conference = c;
+      }
+      if (conference == null) return null;
+      MatchResult? pick(PlayInProgress p) => switch (parts[2]) {
+        '7v8' => p.game7v8,
+        '9v10' => p.game9v10,
+        'final' => p.gameFinal,
+        _ => null,
+      };
+      for (final p in season.playInProgress) {
+        if (p.conference != conference) continue;
+        final r = pick(p);
+        if (r != null) return r;
+      }
+      for (final r in season.playInResults) {
+        if (r.conference != conference) continue;
+        return switch (parts[2]) {
+          '7v8' => r.game7v8,
+          '9v10' => r.game9v10,
+          'final' => r.gameFinal,
+          _ => null,
+        };
+      }
+      return null;
+    }
+    if (parts.length == 3 && parts[0] == 'playoff') {
+      final seriesId = parts[1];
+      final gameIndex = int.tryParse(parts[2]);
+      if (gameIndex == null) return null;
+      for (final b in season.playoffBrackets) {
+        final allSeries = [
+          ...b.quarterFinals,
+          ...b.semiFinals,
+          ...b.conferenceFinal,
+          if (b.leagueFinal != null) b.leagueFinal!,
+        ];
+        for (final s in allSeries) {
+          if (s.id == seriesId && gameIndex < s.games.length) {
+            return s.games[gameIndex];
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  /// Records which calendar day produced [matchId]'s result. Postseason
+  /// fixtures don't live in `schedule`, so — unlike a regular season
+  /// `ScheduledMatch`, which carries its own `round` — this is the only
+  /// place that association is kept.
+  LeagueState _recordPostseasonMatchDate(LeagueState league, String matchId) {
+    final dates = Map<String, String>.from(
+      league.currentSeason.postseasonMatchDates,
+    )..[matchId] = '${league.currentWeek}:${league.currentDay}';
+    return league.copyWith(
+      currentSeason: league.currentSeason.copyWith(postseasonMatchDates: dates),
+    );
+  }
+
+  /// Applies match fatigue to the two participating teams' rosters, mirror
+  /// of `DaySimulator._applyFatigue` for regular season fixtures. Postseason
+  /// games skip `_applyResult` entirely (they don't touch `standings` or
+  /// `schedule`), so without this call playoff/play-in matches would leave
+  /// players fully fresh no matter how many games they'd just played.
+  LeagueState _applyMatchFatigue(LeagueState league, MatchResult result) {
+    if (TeamManagementService.isWalkoverResult(result)) return league;
+    final seasonYear = league.currentSeason.year;
+    final teams = league.teams.map((t) {
+      final isParticipant =
+          t.id == result.homeTeamId || t.id == result.awayTeamId;
+      if (!isParticipant) return t;
+      final statsByPlayer = {
+        for (final stats in result.playerStats) stats.playerId: stats,
+      };
+      final injuries = {
+        for (final injury in result.injuries.where((i) => i.teamId == t.id))
+          injury.playerId: injury,
+      };
+      final roster = t.roster
+          .map(
+            (player) => applyMatchPlayerEffects(
+              player: player,
+              teamId: t.id,
+              result: result,
+              seasonYear: seasonYear,
+              balance: balance,
+              stats: statsByPlayer[player.id],
+              matchInjury: injuries[player.id],
+            ),
+          )
+          .toList();
+      return t.copyWith(roster: roster);
+    }).toList();
+    return league.copyWith(teams: teams);
+  }
+
+  ({LeagueState league, PlayoffSeries series, ScheduledMatch? playerMatch})
+  _playOneGame(
     LeagueState league,
     PlayoffSeries series,
     int saveSeed, {
@@ -2045,7 +2624,18 @@ class SeasonService {
       phase: SeasonPhase.playoff,
       stake: stake ?? _stakeForSeries(series),
     );
-    return (league: played.league, series: series.recordGame(played.result));
+    if (played.playerMatch != null) {
+      return (
+        league: played.league,
+        series: series,
+        playerMatch: played.playerMatch,
+      );
+    }
+    return (
+      league: played.league,
+      series: series.recordGame(played.result!),
+      playerMatch: null,
+    );
   }
 
   MatchResult _resolvePostseasonTiebreak(

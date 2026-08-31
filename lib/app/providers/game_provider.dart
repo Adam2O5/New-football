@@ -726,14 +726,28 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     final away = league.teamById(match.awayTeamId);
     if (home == null || away == null) return null;
 
-    final context = _ref
-        .read(matchContextFactoryProvider)
-        .create(
-          league: league,
-          match: match,
-          saveSeed: current.saveSeed,
-          stake: MatchStake.regular,
-        );
+    final isPostseason =
+        match.id.startsWith('playIn:') || match.id.startsWith('playoff:');
+    final context = isPostseason
+        ? _ref
+              .read(matchContextFactoryProvider)
+              .createForPostseason(
+                home: home,
+                away: away,
+                seasonYear: league.currentSeason.year,
+                matchId: match.id,
+                saveSeed: current.saveSeed,
+                stake: _season.stakeForPendingMatch(league, match.id),
+                week: league.currentWeek,
+              )
+        : _ref
+              .read(matchContextFactoryProvider)
+              .create(
+                league: league,
+                match: match,
+                saveSeed: current.saveSeed,
+                stake: MatchStake.regular,
+              );
     final result = _ref
         .read(aiMatchdayServiceProvider)
         .simulateFullMatch(

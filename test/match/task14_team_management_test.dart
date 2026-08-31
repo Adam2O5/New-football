@@ -845,17 +845,17 @@ void main() {
       );
       final seasonService = SeasonService(random: null);
       final afterChampionship = seasonService.advancePlayoffs(playoffLeague);
-      expect(afterChampionship.teamById(champion)!.atmosphere, 90);
+      expect(afterChampionship.league.teamById(champion)!.atmosphere, 90);
       expect(
-        afterChampionship.currentSeason.championshipAtmosphereApplied,
+        afterChampionship.league.currentSeason.championshipAtmosphereApplied,
         isTrue,
       );
       final repeatedChampionship = seasonService.advancePlayoffs(
-        afterChampionship,
+        afterChampionship.league,
       );
-      expect(repeatedChampionship.teamById(champion)!.atmosphere, 90);
+      expect(repeatedChampionship.league.teamById(champion)!.atmosphere, 90);
       expect(
-        repeatedChampionship.inbox.messages
+        repeatedChampionship.league.inbox.messages
             .where(
               (message) =>
                   message.type == MessageType.teamEvent &&

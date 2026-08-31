@@ -432,6 +432,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
     }
 
     final calendar = ref.watch(calendarServiceProvider);
+    final season = ref.watch(seasonServiceProvider);
     final week = league.currentWeek;
     final day = league.currentDay;
     final seasonYear = league.currentSeason.year;
@@ -497,6 +498,44 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
       if (calendar.isRegularSeasonWeek(w) && slot != null && isActualMatchDay) {
         round = scheduleRoundForWeekSlot(w, slot);
         final fixtures = matchesByRound[round] ?? const [];
+        matchCount = fixtures.length;
+
+        if (playerId != null) {
+          for (final f in fixtures) {
+            if (f.homeTeamId == playerId || f.awayTeamId == playerId) {
+              pm = f;
+              break;
+            }
+          }
+          if (pm != null) {
+            final home = teamNameById[pm.homeTeamId] ?? pm.homeTeamId;
+            final away = teamNameById[pm.awayTeamId] ?? pm.awayTeamId;
+            final score = pm.result != null
+                ? ' ${pm.result!.homeGoals}:${pm.result!.awayGoals}'
+                : '';
+            playerMatchLabel = '$home – $away$score';
+          }
+        }
+      } else if (calendar.playInSlotsForDay(w, d).isNotEmpty ||
+          calendar.postseasonSlotForDay(w, d) != null) {
+        // Play-in/playoff fixtures aren't part of `schedule`, so they're
+        // fetched from `SeasonService`: still-pending ones once their
+        // pairing is known, already-played ones via the recorded match
+        // date. Pending fixtures are only shown for today-or-earlier —
+        // querying further ahead would preview pairings derived from a
+        // not-yet-final regular season table — but a past result, once
+        // recorded, is always shown regardless of how far back it is.
+        final isTodayOrEarlier =
+            isPast || (w == currentWeek && d == currentDay);
+        final playedFixtures = season.postseasonResultsForDate(
+          league,
+          week: w,
+          day: d,
+        );
+        final pendingFixtures = isTodayOrEarlier
+            ? season.postseasonMatchesForDate(league, week: w, day: d)
+            : const <ScheduledMatch>[];
+        final fixtures = [...playedFixtures, ...pendingFixtures];
         matchCount = fixtures.length;
 
         if (playerId != null) {

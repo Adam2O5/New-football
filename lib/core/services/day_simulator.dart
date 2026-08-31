@@ -245,12 +245,22 @@ class DaySimulator {
     }
 
     if (calendar.playInSlotsForDay(week, day).isNotEmpty) {
-      state = season.advancePlayInForDate(
+      final advanced = season.advancePlayInForDate(
         state,
         week: week,
         day: day,
         saveSeed: saveSeed,
       );
+      state = advanced.league;
+      if (advanced.playerMatch != null) {
+        return DaySimulationResult(
+          league: state,
+          pauseForUrgent: true,
+          playerMatch: advanced.playerMatch,
+          stopReason: DaySimulationStopReason.playerMatch,
+          moment: DaySimulationMoment.duringEvent,
+        );
+      }
     }
     if (phase == SeasonPhase.playoff &&
         state.currentSeason.playoffBrackets.isEmpty &&
@@ -258,12 +268,22 @@ class DaySimulator {
       state = season.setupPlayoffs(state);
     }
     if (calendar.postseasonSlotForDay(week, day) != null) {
-      state = season.advancePlayoffsForDate(
+      final advanced = season.advancePlayoffsForDate(
         state,
         week: week,
         day: day,
         saveSeed: saveSeed,
       );
+      state = advanced.league;
+      if (advanced.playerMatch != null) {
+        return DaySimulationResult(
+          league: state,
+          pauseForUrgent: true,
+          playerMatch: advanced.playerMatch,
+          stopReason: DaySimulationStopReason.playerMatch,
+          moment: DaySimulationMoment.duringEvent,
+        );
+      }
     }
 
     // Periodic strength table recalculation (`team_management.md`).
@@ -537,13 +557,33 @@ class DaySimulator {
   /// Apply a finished player match and advance the day. Match-result
   /// messages are created after the date advances, so they are delivered as
   /// part of the next day's start-of-day package.
+  ///
+  /// Play-in/playoff fixtures (identified by the `playIn:`/`playoff:`
+  /// [ScheduledMatch.id] prefix `advancePlayInForDate`/
+  /// `advancePlayoffsForDate` use for a pending `playerMatch`) do not live in
+  /// `currentSeason.schedule`, so they are routed to `SeasonService`'s
+  /// dedicated resume methods instead of [_applyResult].
   LeagueState applyPlayerMatchResult(
     LeagueState league,
     ScheduledMatch match,
     MatchResult result, {
     int saveSeed = 0,
   }) {
-    var state = _applyResult(league, match, result, saveSeed: saveSeed);
+    var state = match.id.startsWith('playIn:')
+        ? season.applyPlayInPlayerResult(
+            league,
+            matchId: match.id,
+            rawResult: result,
+            saveSeed: saveSeed,
+          )
+        : match.id.startsWith('playoff:')
+        ? season.applyPlayoffPlayerResult(
+            league,
+            matchId: match.id,
+            rawResult: result,
+            saveSeed: saveSeed,
+          )
+        : _applyResult(league, match, result, saveSeed: saveSeed);
     final (nextWeek, nextDay) = calendar.advanceDay(
       state.currentWeek,
       state.currentDay,
@@ -1105,6 +1145,7 @@ class DaySimulator {
       args: {
         'oldStatus': before.teamStatus.name,
         'newStatus': after.teamStatus.name,
+        'status': after.teamStatus.name,
         'expectedRank': after.expectedRank,
         'teamPower': after.teamPower,
       },

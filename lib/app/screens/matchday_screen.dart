@@ -60,9 +60,30 @@ class _MatchdayScreenState extends ConsumerState<MatchdayScreen> {
 
     final engine = ref.read(matchEngineProvider);
     final aiMatchday = ref.read(aiMatchdayServiceProvider);
-    final matchContext = ref
-        .read(matchContextFactoryProvider)
-        .create(league: league, match: widget.match, saveSeed: save.saveSeed);
+    final isPostseason =
+        widget.match.id.startsWith('playIn:') ||
+        widget.match.id.startsWith('playoff:');
+    final matchContext = isPostseason
+        ? ref
+              .read(matchContextFactoryProvider)
+              .createForPostseason(
+                home: home,
+                away: away,
+                seasonYear: league.currentSeason.year,
+                matchId: widget.match.id,
+                saveSeed: save.saveSeed,
+                stake: ref
+                    .read(seasonServiceProvider)
+                    .stakeForPendingMatch(league, widget.match.id),
+                week: league.currentWeek,
+              )
+        : ref
+              .read(matchContextFactoryProvider)
+              .create(
+                league: league,
+                match: widget.match,
+                saveSeed: save.saveSeed,
+              );
     final homeHistory = AiMatchdayService.formationHistoryFromSchedule(
       league.currentSeason.schedule,
       home.id,
