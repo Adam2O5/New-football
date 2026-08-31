@@ -779,9 +779,11 @@ class PlayerEventService {
         ? null
         : _currentPlayer(state, teamId, playerId);
     if (team == null || player == null) return state;
+    final events = balance.events;
     final eventState = player.state.eventState;
-    if (eventState.counterValue('plateauWeeks') < balance.events.plateauWeeks ||
-        _hasPendingDecision(state, player.id, 'plateau')) {
+    if (eventState.counterValue('plateauWeeks') < events.plateauWeeks ||
+        _hasPendingDecision(state, player.id, 'plateau') ||
+        !_rollFor(state, player, 'plateau', events.plateauChance, saveSeed)) {
       return state;
     }
     return _emitDecision(

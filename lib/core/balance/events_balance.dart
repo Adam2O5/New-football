@@ -100,6 +100,7 @@ class EventsBalance {
     this.nationalTeamFormBonus = 1.0,
     this.nationalTeamStaminaPenalty = 15,
     this.plateauWeeks = 8,
+    this.plateauChance = 0.20,
     this.plateauGrowthRateBonus = 0.15,
     this.plateauGrowthRateDurationWeeks = 4,
     this.inspiringPerformanceRatingMin = 8.0,
@@ -214,6 +215,7 @@ class EventsBalance {
   final int nationalTeamStaminaPenalty;
 
   final int plateauWeeks;
+  final double plateauChance;
   final double plateauGrowthRateBonus;
   final int plateauGrowthRateDurationWeeks;
 
