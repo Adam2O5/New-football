@@ -22,6 +22,7 @@ import 'package:new_football/app/widgets/squad/squad_indicators.dart';
 import 'package:new_football/core/services/cohesion_service.dart';
 import 'package:new_football/core/tactics/formation_layout.dart';
 import 'package:new_football/core/tactics/player_sort.dart';
+import 'package:new_football/core/tactics/substitute_candidates.dart';
 import 'package:new_football/app/widgets/tactics/role_picker_sheet.dart';
 import 'package:new_football/app/widgets/tactics/substitute_sheet.dart';
 import 'package:new_football/core/tactics/tactics_setup.dart';
@@ -622,13 +623,23 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
     Team team,
     Player outPlayer,
   ) async {
-    final xi = team.lineupPlayerIds.toSet();
-    final candidates = team.roster.where((p) => !xi.contains(p.id)).toList();
+    final allCandidates = allSubstituteCandidatesFor(
+      team: team,
+      outPlayer: outPlayer,
+    );
+    final visibleCandidates = substituteCandidatesFor(
+      team: team,
+      outPlayer: outPlayer,
+    );
+
     await showSubstituteSheet(
       context,
       l10n: l10n,
+      team: team,
       outPlayer: outPlayer,
-      candidates: candidates,
+      candidates: visibleCandidates,
+      totalCandidateCount: allCandidates.length,
+      metricMode: metricMode,
       onSelected: (candidate) =>
           _trySwap(context, team, outPlayer.id, candidate.id),
     );

@@ -310,10 +310,7 @@ class ZoneFrame extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
     final rowBackground = backgroundColor ?? colors.surfaceContainerHighest;
     final semanticZoneColor = frameColor ?? rosterZoneColor(zone);
-    final resolvedFrameColor = _contrastSafeZoneColor(
-      semanticZoneColor,
-      rowBackground,
-    );
+    final resolvedFrameColor = semanticZoneColor;
     final label = _zoneLabel(l10n, zone);
     final textScale = MediaQuery.textScalerOf(context).scale(1);
     final labelInset = (18 * textScale).clamp(18.0, 42.0).toDouble();
