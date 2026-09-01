@@ -19,6 +19,8 @@ dependencies:
   uuid: ^4.5.1
   intl: ^0.20.2
   shared_preferences: ^2.5.5
+  country_flags: ^4.0.0
+  flutter_svg: ^2.0.10+1
   flutter_localizations:
     sdk: flutter
 
@@ -37,6 +39,7 @@ flutter:
   uses-material-design: true
   generate: true
   assets:
+    - assets/flags/england.svg
     - assets/images/new-football-background.png
     - assets/images/New-Football-Logo-bg-removed.png
     - assets/images/Syrenka_FC.png

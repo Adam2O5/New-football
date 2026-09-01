@@ -85,11 +85,26 @@ const List<ColorStop> staminaGradientStops = <ColorStop>[
   ColorStop(value: 100, color: Color(0xFF2E7D32)),
 ];
 
+/// The lower and upper values represented by [pvGradientStops].
+const double minPvGradientValue = -1000;
+const double maxPvGradientValue = 1000;
+
+/// The semantic point-value gradient used by the player detail screen's
+/// point-value indicator.
+const List<ColorStop> pvGradientStops = <ColorStop>[
+  ColorStop(value: -1000, color: Colors.red),
+  ColorStop(value: -300, color: Colors.orange),
+  ColorStop(value: 0, color: Colors.yellow),
+  ColorStop(value: 300, color: Colors.lightGreen),
+  ColorStop(value: 1000, color: Color(0xFF2E7D32)),
+];
+
 /// Aliases that make the gradient purpose explicit at call sites.
 const List<ColorStop> ovrColorStops = ovrGradientStops;
 const List<ColorStop> formColorStops = formGradientStops;
 const List<ColorStop> percentColorStops = percentGradientStops;
 const List<ColorStop> staminaColorStops = staminaGradientStops;
+const List<ColorStop> pvColorStops = pvGradientStops;
 
 /// Linearly interpolates colour channels between [stops] at [value].
 ///
@@ -190,6 +205,28 @@ double clampedStaminaValue(double value) => _clampStamina(value);
 /// Returns the filled fraction for a raw stamina value on a 0–100 track.
 double staminaFillForValue(double value) =>
     (_clampStamina(value) / maxStaminaGradientValue).clamp(0.0, 1.0).toDouble();
+
+/// Returns the point-value background colour after clamping [pv] to
+/// -1000–1000.
+///
+/// Values at or below -1000 use the red endpoint; values at or above 1000 use
+/// the dark-green endpoint. `NaN` is treated as the safe lower endpoint and
+/// infinities are clamped to the corresponding finite endpoint.
+Color pvColorForClampedValue(double pv) =>
+    interpolateStops(_clampPv(pv), pvGradientStops);
+
+/// Clamps a raw point-value to the inclusive -1000–1000 presentation scale.
+double clampedPvValue(double pv) => _clampPv(pv);
+
+/// Returns the filled fraction for a raw point-value on a -1000–1000 track.
+///
+/// Unlike the 0-based tracks above, the PV track is centred: a value of 0
+/// fills the track to its midpoint (fraction 0.5).
+double pvFillForValue(double pv) =>
+    ((_clampPv(pv) - minPvGradientValue) /
+            (maxPvGradientValue - minPvGradientValue))
+        .clamp(0.0, 1.0)
+        .toDouble();
 
 /// Rounds a finite numeric value to the nearest integer using half-up ties.
 ///
@@ -312,6 +349,14 @@ double _clampStamina(double value) {
   return value
       .clamp(minStaminaGradientValue, maxStaminaGradientValue)
       .toDouble();
+}
+
+double _clampPv(double value) {
+  if (value.isNaN || value == double.negativeInfinity) {
+    return minPvGradientValue;
+  }
+  if (value == double.infinity) return maxPvGradientValue;
+  return value.clamp(minPvGradientValue, maxPvGradientValue).toDouble();
 }
 
 double _relativeLuminance(Color color) {

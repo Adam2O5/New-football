@@ -218,6 +218,62 @@ enum Nationality {
   final String label;
 }
 
+extension NationalityIso on Nationality {
+  /// Kod ISO 3166-1 alpha-2 do użycia z pakietem country_flags.
+  /// Zwraca null dla narodowości bez odpowiednika ISO (Anglia) —
+  /// w takim wypadku należy użyć dedykowanego assetu.
+  String? get isoCode {
+    switch (this) {
+      case Nationality.poland:
+        return 'PL';
+      case Nationality.brazil:
+        return 'BR';
+      case Nationality.france:
+        return 'FR';
+      case Nationality.spain:
+        return 'ES';
+      case Nationality.england:
+        return null;
+      case Nationality.germany:
+        return 'DE';
+      case Nationality.argentina:
+        return 'AR';
+      case Nationality.portugal:
+        return 'PT';
+      case Nationality.italy:
+        return 'IT';
+      case Nationality.netherlands:
+        return 'NL';
+      case Nationality.belgium:
+        return 'BE';
+      case Nationality.croatia:
+        return 'HR';
+      case Nationality.nigeria:
+        return 'NG';
+      case Nationality.senegal:
+        return 'SN';
+      case Nationality.japan:
+        return 'JP';
+      case Nationality.usa:
+        return 'US';
+      case Nationality.mexico:
+        return 'MX';
+      case Nationality.morocco:
+        return 'MA';
+      case Nationality.colombia:
+        return 'CO';
+      case Nationality.switzerland:
+        return 'CH';
+      case Nationality.uruguay:
+        return 'UY';
+      case Nationality.egypt:
+        return 'EG';
+      case Nationality.china:
+        return 'CN';
+    }
+  }
+}
+
 enum PressingIntensity { low, medium, high, gegenpressing }
 
 enum DefensiveLine { deep, normal, high }
