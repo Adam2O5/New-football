@@ -19,7 +19,7 @@ import 'package:new_football/app/screens/free_agency_screen.dart';
 import 'package:new_football/app/screens/rankings_screen.dart';
 import 'package:new_football/app/screens/rewards_screen.dart';
 import 'package:new_football/app/screens/search_screen.dart';
-import 'package:new_football/app/screens/stats_screen.dart';
+import 'package:new_football/app/screens/player_stats_screen.dart';
 import 'package:new_football/app/screens/team_overview_screen.dart';
 import 'package:new_football/app/screens/lottery_screen.dart';
 import 'package:new_football/app/screens/prospects_screen.dart';

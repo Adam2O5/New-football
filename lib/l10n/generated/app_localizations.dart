@@ -1393,6 +1393,24 @@ abstract class AppLocalizations {
   /// **'Status'**
   String get teamOverview_status;
 
+  /// No description provided for @teamOverview_tabMyTeam.
+  ///
+  /// In pl, this message translates to:
+  /// **'Mój zespół'**
+  String get teamOverview_tabMyTeam;
+
+  /// No description provided for @teamOverview_tabLeagueOverview.
+  ///
+  /// In pl, this message translates to:
+  /// **'Przegląd ligi'**
+  String get teamOverview_tabLeagueOverview;
+
+  /// No description provided for @teamOverview_sortLeagueRank.
+  ///
+  /// In pl, this message translates to:
+  /// **'Miejsce w lidze'**
+  String get teamOverview_sortLeagueRank;
+
   /// No description provided for @teamOverview_weeklyHistory.
   ///
   /// In pl, this message translates to:
@@ -5680,13 +5698,13 @@ abstract class AppLocalizations {
   /// No description provided for @stats_players.
   ///
   /// In pl, this message translates to:
-  /// **'Statystyki zawodników'**
+  /// **'Mój zespół'**
   String get stats_players;
 
   /// No description provided for @stats_teamOverview.
   ///
   /// In pl, this message translates to:
-  /// **'Przegląd drużyn'**
+  /// **'Liga'**
   String get stats_teamOverview;
 
   /// No description provided for @stats_noStats.
@@ -5694,6 +5712,12 @@ abstract class AppLocalizations {
   /// In pl, this message translates to:
   /// **'Brak zapisanych statystyk meczowych'**
   String get stats_noStats;
+
+  /// No description provided for @stats_seasonNotStarted.
+  ///
+  /// In pl, this message translates to:
+  /// **'Sezon się jeszcze nie rozpoczął'**
+  String get stats_seasonNotStarted;
 
   /// No description provided for @stats_search.
   ///
@@ -5730,6 +5754,36 @@ abstract class AppLocalizations {
   /// In pl, this message translates to:
   /// **'Ocena'**
   String get stats_sortRating;
+
+  /// No description provided for @stats_sortAppearances.
+  ///
+  /// In pl, this message translates to:
+  /// **'Występy'**
+  String get stats_sortAppearances;
+
+  /// No description provided for @stats_leagueGoals.
+  ///
+  /// In pl, this message translates to:
+  /// **'Gole'**
+  String get stats_leagueGoals;
+
+  /// No description provided for @stats_leagueAssists.
+  ///
+  /// In pl, this message translates to:
+  /// **'Asysty'**
+  String get stats_leagueAssists;
+
+  /// No description provided for @stats_leagueCleanSheets.
+  ///
+  /// In pl, this message translates to:
+  /// **'Czyste konta'**
+  String get stats_leagueCleanSheets;
+
+  /// No description provided for @stats_leagueMvp.
+  ///
+  /// In pl, this message translates to:
+  /// **'MVP'**
+  String get stats_leagueMvp;
 
   /// No description provided for @stats_player.
   ///

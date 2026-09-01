@@ -717,6 +717,15 @@ class AppLocalizationsPl extends AppLocalizations {
   String get teamOverview_status => 'Status';
 
   @override
+  String get teamOverview_tabMyTeam => 'Mój zespół';
+
+  @override
+  String get teamOverview_tabLeagueOverview => 'Przegląd ligi';
+
+  @override
+  String get teamOverview_sortLeagueRank => 'Miejsce w lidze';
+
+  @override
   String get teamOverview_weeklyHistory => 'Historia tygodniowa';
 
   @override
@@ -3143,13 +3152,16 @@ class AppLocalizationsPl extends AppLocalizations {
   String get stats_title => 'Statystyki';
 
   @override
-  String get stats_players => 'Statystyki zawodników';
+  String get stats_players => 'Mój zespół';
 
   @override
-  String get stats_teamOverview => 'Przegląd drużyn';
+  String get stats_teamOverview => 'Liga';
 
   @override
   String get stats_noStats => 'Brak zapisanych statystyk meczowych';
+
+  @override
+  String get stats_seasonNotStarted => 'Sezon się jeszcze nie rozpoczął';
 
   @override
   String get stats_search => 'Szukaj zawodnika';
@@ -3168,6 +3180,21 @@ class AppLocalizationsPl extends AppLocalizations {
 
   @override
   String get stats_sortRating => 'Ocena';
+
+  @override
+  String get stats_sortAppearances => 'Występy';
+
+  @override
+  String get stats_leagueGoals => 'Gole';
+
+  @override
+  String get stats_leagueAssists => 'Asysty';
+
+  @override
+  String get stats_leagueCleanSheets => 'Czyste konta';
+
+  @override
+  String get stats_leagueMvp => 'MVP';
 
   @override
   String get stats_player => 'Zawodnik';

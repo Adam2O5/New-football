@@ -850,14 +850,3 @@ String _formatStamina(double value) {
   if (value == value.roundToDouble()) return value.toInt().toString();
   return value.toString();
 }
-
-Color _contrastSafeZoneColor(Color color, Color background) {
-  if (contrastRatio(color, background) >= 4.5) return color;
-
-  for (var step = 1; step <= 20; step++) {
-    final amount = step / 20;
-    final result = Color.lerp(color, Colors.black, amount) ?? color;
-    if (contrastRatio(result, background) >= 4.5) return result;
-  }
-  return Colors.black;
-}

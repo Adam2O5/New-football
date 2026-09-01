@@ -160,7 +160,7 @@ class PlayerDetailScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             _sectionTitle(context, l10n.playerDetail_history),
-            _historySection(context, l10n, p),
+            _historySection(context, l10n, p, league?.currentSeason.year),
             const SizedBox(height: 8),
             Text(
               l10n.playerDetail_personality(p.personality.name),
@@ -176,6 +176,7 @@ class PlayerDetailScreen extends ConsumerWidget {
     BuildContext context,
     AppLocalizations l10n,
     Player p,
+    int? currentSeasonYear,
   ) {
     if (p.seasonStats.isEmpty) {
       return Text(l10n.playerDetail_noHistory);
@@ -195,6 +196,7 @@ class PlayerDetailScreen extends ConsumerWidget {
             '${l10n.playerDetail_season} ${season.year}',
             season,
             l10n,
+            showFullBoxScore: season.year == currentSeasonYear,
           ),
         ),
       ],
@@ -205,25 +207,93 @@ class PlayerDetailScreen extends ConsumerWidget {
     BuildContext context,
     String title,
     PlayerSeasonStats stats,
-    AppLocalizations l10n,
-  ) {
+    AppLocalizations l10n, {
+    bool showFullBoxScore = false,
+  }) {
     return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Wrap(
-          spacing: 16,
-          runSpacing: 8,
-          children: [
-            Text(title, style: Theme.of(context).textTheme.titleSmall),
-            Text('${l10n.playerDetail_appearances}: ${stats.appearances}'),
-            Text('${l10n.playerDetail_minutes}: ${stats.minutes}'),
-            Text('${l10n.playerDetail_goals}: ${stats.goals}'),
-            Text('${l10n.playerDetail_assists}: ${stats.assists}'),
-            Text(
-              '${l10n.playerDetail_rating}: ${stats.ratingAvg.toStringAsFixed(2)}',
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(12),
+            child: Wrap(
+              spacing: 16,
+              runSpacing: 8,
+              children: [
+                Text(title, style: Theme.of(context).textTheme.titleSmall),
+                Text('${l10n.playerDetail_appearances}: ${stats.appearances}'),
+                Text('${l10n.playerDetail_minutes}: ${stats.minutes}'),
+                Text('${l10n.playerDetail_goals}: ${stats.goals}'),
+                Text('${l10n.playerDetail_assists}: ${stats.assists}'),
+                Text(
+                  '${l10n.playerDetail_rating}: ${stats.ratingAvg.toStringAsFixed(2)}',
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+          if (showFullBoxScore)
+            ExpansionTile(
+              title: Text(l10n.stats_boxScore),
+              children: [
+                _statGrid([
+                  _StatLine(l10n.stats_shots, '${stats.shots}'),
+                  _StatLine(l10n.stats_shotsOnTarget, '${stats.shotsOnTarget}'),
+                  _StatLine(l10n.stats_xg, stats.xg.toStringAsFixed(2)),
+                  _StatLine(l10n.stats_passes, '${stats.passes}'),
+                  _StatLine(
+                    l10n.stats_passAccuracy,
+                    '${stats.passAccuracy.toStringAsFixed(1)}%',
+                  ),
+                  _StatLine(l10n.stats_duelsWon, '${stats.duelsWon}'),
+                  _StatLine(l10n.stats_offsides, '${stats.offsides}'),
+                  _StatLine(l10n.stats_corners, '${stats.corners}'),
+                  _StatLine(l10n.stats_tackles, '${stats.tackles}'),
+                  _StatLine(l10n.stats_interceptions, '${stats.interceptions}'),
+                  _StatLine(l10n.stats_cleanSheets, '${stats.cleanSheets}'),
+                  _StatLine(l10n.stats_saves, '${stats.saves}'),
+                  _StatLine(l10n.stats_shotsFaced, '${stats.shotsFaced}'),
+                  _StatLine(l10n.stats_yellowCards, '${stats.yellowCards}'),
+                  _StatLine(l10n.stats_redCards, '${stats.redCards}'),
+                ]),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _statGrid(List<_StatLine> lines) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final columnCount = constraints.maxWidth >= 520 ? 3 : 2;
+          final width =
+              (constraints.maxWidth - (columnCount - 1) * 12) / columnCount;
+          return Wrap(
+            spacing: 12,
+            runSpacing: 8,
+            children: [
+              for (final line in lines)
+                SizedBox(
+                  width: width,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          line.label,
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ),
+                      Text(
+                        line.value,
+                        style: const TextStyle(fontWeight: FontWeight.w600),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          );
+        },
       ),
     );
   }
@@ -278,4 +348,11 @@ class PlayerDetailScreen extends ConsumerWidget {
   Widget _chip(BuildContext context, String label, String value) {
     return Chip(label: Text('$label $value'));
   }
+}
+
+class _StatLine {
+  const _StatLine(this.label, this.value);
+
+  final String label;
+  final String value;
 }
