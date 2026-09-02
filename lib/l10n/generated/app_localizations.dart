@@ -4861,6 +4861,12 @@ abstract class AppLocalizations {
   /// **'Wiek'**
   String get dev_colAge;
 
+  /// No description provided for @dev_colPosition.
+  ///
+  /// In pl, this message translates to:
+  /// **'Poz.'**
+  String get dev_colPosition;
+
   /// No description provided for @dev_colPotential.
   ///
   /// In pl, this message translates to:

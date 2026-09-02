@@ -1225,6 +1225,7 @@
   "dev_vacant": "Vacant",
   "dev_colName": "Name",
   "dev_colAge": "Age",
+  "dev_colPosition": "Pos.",
   "dev_colPotential": "Pot.",
   "dev_colOvr": "OVR",
   "dev_colChange": "+/-",

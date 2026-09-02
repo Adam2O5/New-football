@@ -2702,6 +2702,9 @@ class AppLocalizationsPl extends AppLocalizations {
   String get dev_colAge => 'Wiek';
 
   @override
+  String get dev_colPosition => 'Poz.';
+
+  @override
   String get dev_colPotential => 'Pot.';
 
   @override

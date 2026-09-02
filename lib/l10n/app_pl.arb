@@ -1478,6 +1478,7 @@
   "dev_vacant": "Wakancja",
   "dev_colName": "Nazwa",
   "dev_colAge": "Wiek",
+  "dev_colPosition": "Poz.",
   "dev_colPotential": "Pot.",
   "dev_colOvr": "OVR",
   "dev_colChange": "+/-",
