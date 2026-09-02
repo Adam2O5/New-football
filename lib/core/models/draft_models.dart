@@ -213,13 +213,14 @@ abstract class Season with _$Season {
     @Default(false) bool tradeDeadlineAcked,
     DraftState? nextDraftState,
 
-    /// When a play-in/playoff game (keyed by its synthetic `playIn:`/
-    /// `playoff:` match id) was actually played, as `'week:day'`. These
-    /// fixtures don't live in `schedule`, so this is the only record of
-    /// which calendar day produced a given result — used to show past
-    /// postseason results on the calendar the same way `schedule` does for
-    /// regular season matches.
-    @Default(<String, String>{}) Map<String, String> postseasonMatchDates,
+    /// Play-in/playoff fixtures, populated eagerly as soon as each pairing
+    /// is known (see `game_calendar.md`) — placeholders for a still-pending
+    /// play-in seed, replaced with the real team once decided. This is the
+    /// calendar's sole source for postseason match days, the same way
+    /// `schedule` is for the regular season. `playInProgress`/`playInResults`
+    /// /`playoffBrackets` remain the simulation source of truth; entries here
+    /// are kept in lockstep with them but exist purely for display.
+    @Default(<ScheduledMatch>[]) List<ScheduledMatch> postseasonFixtures,
   }) = _Season;
 
   factory Season.fromJson(Map<String, dynamic> json) => _$SeasonFromJson(json);

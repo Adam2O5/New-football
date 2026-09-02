@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:new_football/app/branding/club_asset_registry.dart';
-import 'package:new_football/app/branding/club_branding_registry.dart';
 import 'package:new_football/app/branding/club_color_tokens.dart';
 import 'package:new_football/app/providers/club_branding_provider.dart';
 import 'package:new_football/app/providers/game_provider.dart';
@@ -483,11 +482,11 @@ class PlayerDetailScreen extends ConsumerWidget {
 /// instead of the 0–10 form gradient. Kept local to this screen since no
 /// other screen currently shows a PV metric.
 class _PvIndicator extends StatelessWidget {
-  const _PvIndicator({required this.pv, required this.l10n, this.width = 56.0});
+  const _PvIndicator({required this.pv, required this.l10n});
 
   final double pv;
   final AppLocalizations l10n;
-  final double width;
+  static const double _width = 56.0;
 
   @override
   Widget build(BuildContext context) {
@@ -503,7 +502,7 @@ class _PvIndicator extends StatelessWidget {
       child: ExcludeSemantics(
         child: Container(
           key: const ValueKey('player-detail-pv-indicator'),
-          width: width,
+          width: _width,
           height: 10,
           padding: const EdgeInsets.all(1),
           decoration: BoxDecoration(

@@ -367,6 +367,11 @@ _ScheduledMatch _$ScheduledMatchFromJson(Map<String, dynamic> json) =>
       result: json['result'] == null
           ? null
           : MatchResult.fromJson(json['result'] as Map<String, dynamic>),
+      week: (json['week'] as num?)?.toInt(),
+      day: (json['day'] as num?)?.toInt(),
+      homePlaceholderLabel: json['homePlaceholderLabel'] as String?,
+      awayPlaceholderLabel: json['awayPlaceholderLabel'] as String?,
+      confirmed: json['confirmed'] as bool? ?? true,
     );
 
 Map<String, dynamic> _$ScheduledMatchToJson(_ScheduledMatch instance) =>
@@ -376,6 +381,11 @@ Map<String, dynamic> _$ScheduledMatchToJson(_ScheduledMatch instance) =>
       'awayTeamId': instance.awayTeamId,
       'round': instance.round,
       'result': instance.result,
+      'week': instance.week,
+      'day': instance.day,
+      'homePlaceholderLabel': instance.homePlaceholderLabel,
+      'awayPlaceholderLabel': instance.awayPlaceholderLabel,
+      'confirmed': instance.confirmed,
     };
 
 _PlayoffSeries _$PlayoffSeriesFromJson(Map<String, dynamic> json) =>
@@ -392,6 +402,7 @@ _PlayoffSeries _$PlayoffSeriesFromJson(Map<String, dynamic> json) =>
               .toList() ??
           const [],
       winnerTeamId: json['winnerTeamId'] as String?,
+      lowerSeedPlaceholderLabel: json['lowerSeedPlaceholderLabel'] as String?,
     );
 
 Map<String, dynamic> _$PlayoffSeriesToJson(_PlayoffSeries instance) =>
@@ -404,4 +415,5 @@ Map<String, dynamic> _$PlayoffSeriesToJson(_PlayoffSeries instance) =>
       'lowerSeedWins': instance.lowerSeedWins,
       'games': instance.games,
       'winnerTeamId': instance.winnerTeamId,
+      'lowerSeedPlaceholderLabel': instance.lowerSeedPlaceholderLabel,
     };

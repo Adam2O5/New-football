@@ -503,7 +503,12 @@ class _ConferenceBracketView extends StatelessWidget {
 
   Widget _seriesNode(PlayoffSeries series) => _BracketNode(
     topTeamId: series.higherSeedTeamId,
-    bottomTeamId: series.lowerSeedTeamId,
+    // The higher seed (1–6) is always known immediately; only a 1v8/2v7
+    // series can still be waiting on a play-in seed, in which case
+    // lowerSeedTeamId holds a non-team placeholder token — reuse the same
+    // "?" rendering _teamRow already does for a genuinely unknown team
+    // rather than resolving that token as if it were one.
+    bottomTeamId: series.isPending ? null : series.lowerSeedTeamId,
     topScore: series.higherSeedWins,
     bottomScore: series.lowerSeedWins,
     teamName: teamName,

@@ -2400,7 +2400,19 @@ $TacticsSetupCopyWith<$Res> get awayTactics {
 /// @nodoc
 mixin _$ScheduledMatch {
 
- String get id; String get homeTeamId; String get awayTeamId; int get round; MatchResult? get result;
+ String get id; String get homeTeamId; String get awayTeamId; int get round; MatchResult? get result;/// Calendar date this fixture is scheduled for. Only set for postseason
+/// fixtures (`Season.postseasonFixtures`) — regular season entries are
+/// dated purely via [round] and stay `null` here.
+ int? get week; int? get day;/// When the play-in outcome that decides this side isn't known yet,
+/// [homeTeamId]/[awayTeamId] holds a non-team placeholder token and this
+/// carries the human label to show instead (e.g. "Playin seed 8"). Null
+/// once the real team is known.
+ String? get homePlaceholderLabel; String? get awayPlaceholderLabel;/// Games 1–3 of a BO5 series are always played, so they're `true` from
+/// creation. Games 4–5 start `false` (shown greyed-out — the series
+/// might not need them) and flip to `true` only once the prior game
+/// resolves without a decision. Always `true` for regular season/play-in
+/// fixtures, which have no such uncertainty.
+ bool get confirmed;
 /// Create a copy of ScheduledMatch
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -2413,16 +2425,16 @@ $ScheduledMatchCopyWith<ScheduledMatch> get copyWith => _$ScheduledMatchCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ScheduledMatch&&(identical(other.id, id) || other.id == id)&&(identical(other.homeTeamId, homeTeamId) || other.homeTeamId == homeTeamId)&&(identical(other.awayTeamId, awayTeamId) || other.awayTeamId == awayTeamId)&&(identical(other.round, round) || other.round == round)&&(identical(other.result, result) || other.result == result));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ScheduledMatch&&(identical(other.id, id) || other.id == id)&&(identical(other.homeTeamId, homeTeamId) || other.homeTeamId == homeTeamId)&&(identical(other.awayTeamId, awayTeamId) || other.awayTeamId == awayTeamId)&&(identical(other.round, round) || other.round == round)&&(identical(other.result, result) || other.result == result)&&(identical(other.week, week) || other.week == week)&&(identical(other.day, day) || other.day == day)&&(identical(other.homePlaceholderLabel, homePlaceholderLabel) || other.homePlaceholderLabel == homePlaceholderLabel)&&(identical(other.awayPlaceholderLabel, awayPlaceholderLabel) || other.awayPlaceholderLabel == awayPlaceholderLabel)&&(identical(other.confirmed, confirmed) || other.confirmed == confirmed));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,homeTeamId,awayTeamId,round,result);
+int get hashCode => Object.hash(runtimeType,id,homeTeamId,awayTeamId,round,result,week,day,homePlaceholderLabel,awayPlaceholderLabel,confirmed);
 
 @override
 String toString() {
-  return 'ScheduledMatch(id: $id, homeTeamId: $homeTeamId, awayTeamId: $awayTeamId, round: $round, result: $result)';
+  return 'ScheduledMatch(id: $id, homeTeamId: $homeTeamId, awayTeamId: $awayTeamId, round: $round, result: $result, week: $week, day: $day, homePlaceholderLabel: $homePlaceholderLabel, awayPlaceholderLabel: $awayPlaceholderLabel, confirmed: $confirmed)';
 }
 
 
@@ -2433,7 +2445,7 @@ abstract mixin class $ScheduledMatchCopyWith<$Res>  {
   factory $ScheduledMatchCopyWith(ScheduledMatch value, $Res Function(ScheduledMatch) _then) = _$ScheduledMatchCopyWithImpl;
 @useResult
 $Res call({
- String id, String homeTeamId, String awayTeamId, int round, MatchResult? result
+ String id, String homeTeamId, String awayTeamId, int round, MatchResult? result, int? week, int? day, String? homePlaceholderLabel, String? awayPlaceholderLabel, bool confirmed
 });
 
 
@@ -2450,14 +2462,19 @@ class _$ScheduledMatchCopyWithImpl<$Res>
 
 /// Create a copy of ScheduledMatch
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? homeTeamId = null,Object? awayTeamId = null,Object? round = null,Object? result = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? homeTeamId = null,Object? awayTeamId = null,Object? round = null,Object? result = freezed,Object? week = freezed,Object? day = freezed,Object? homePlaceholderLabel = freezed,Object? awayPlaceholderLabel = freezed,Object? confirmed = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,homeTeamId: null == homeTeamId ? _self.homeTeamId : homeTeamId // ignore: cast_nullable_to_non_nullable
 as String,awayTeamId: null == awayTeamId ? _self.awayTeamId : awayTeamId // ignore: cast_nullable_to_non_nullable
 as String,round: null == round ? _self.round : round // ignore: cast_nullable_to_non_nullable
 as int,result: freezed == result ? _self.result : result // ignore: cast_nullable_to_non_nullable
-as MatchResult?,
+as MatchResult?,week: freezed == week ? _self.week : week // ignore: cast_nullable_to_non_nullable
+as int?,day: freezed == day ? _self.day : day // ignore: cast_nullable_to_non_nullable
+as int?,homePlaceholderLabel: freezed == homePlaceholderLabel ? _self.homePlaceholderLabel : homePlaceholderLabel // ignore: cast_nullable_to_non_nullable
+as String?,awayPlaceholderLabel: freezed == awayPlaceholderLabel ? _self.awayPlaceholderLabel : awayPlaceholderLabel // ignore: cast_nullable_to_non_nullable
+as String?,confirmed: null == confirmed ? _self.confirmed : confirmed // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 /// Create a copy of ScheduledMatch
@@ -2554,10 +2571,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String homeTeamId,  String awayTeamId,  int round,  MatchResult? result)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String homeTeamId,  String awayTeamId,  int round,  MatchResult? result,  int? week,  int? day,  String? homePlaceholderLabel,  String? awayPlaceholderLabel,  bool confirmed)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ScheduledMatch() when $default != null:
-return $default(_that.id,_that.homeTeamId,_that.awayTeamId,_that.round,_that.result);case _:
+return $default(_that.id,_that.homeTeamId,_that.awayTeamId,_that.round,_that.result,_that.week,_that.day,_that.homePlaceholderLabel,_that.awayPlaceholderLabel,_that.confirmed);case _:
   return orElse();
 
 }
@@ -2575,10 +2592,10 @@ return $default(_that.id,_that.homeTeamId,_that.awayTeamId,_that.round,_that.res
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String homeTeamId,  String awayTeamId,  int round,  MatchResult? result)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String homeTeamId,  String awayTeamId,  int round,  MatchResult? result,  int? week,  int? day,  String? homePlaceholderLabel,  String? awayPlaceholderLabel,  bool confirmed)  $default,) {final _that = this;
 switch (_that) {
 case _ScheduledMatch():
-return $default(_that.id,_that.homeTeamId,_that.awayTeamId,_that.round,_that.result);case _:
+return $default(_that.id,_that.homeTeamId,_that.awayTeamId,_that.round,_that.result,_that.week,_that.day,_that.homePlaceholderLabel,_that.awayPlaceholderLabel,_that.confirmed);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -2595,10 +2612,10 @@ return $default(_that.id,_that.homeTeamId,_that.awayTeamId,_that.round,_that.res
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String homeTeamId,  String awayTeamId,  int round,  MatchResult? result)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String homeTeamId,  String awayTeamId,  int round,  MatchResult? result,  int? week,  int? day,  String? homePlaceholderLabel,  String? awayPlaceholderLabel,  bool confirmed)?  $default,) {final _that = this;
 switch (_that) {
 case _ScheduledMatch() when $default != null:
-return $default(_that.id,_that.homeTeamId,_that.awayTeamId,_that.round,_that.result);case _:
+return $default(_that.id,_that.homeTeamId,_that.awayTeamId,_that.round,_that.result,_that.week,_that.day,_that.homePlaceholderLabel,_that.awayPlaceholderLabel,_that.confirmed);case _:
   return null;
 
 }
@@ -2610,7 +2627,7 @@ return $default(_that.id,_that.homeTeamId,_that.awayTeamId,_that.round,_that.res
 @JsonSerializable()
 
 class _ScheduledMatch implements ScheduledMatch {
-  const _ScheduledMatch({required this.id, required this.homeTeamId, required this.awayTeamId, required this.round, this.result});
+  const _ScheduledMatch({required this.id, required this.homeTeamId, required this.awayTeamId, required this.round, this.result, this.week, this.day, this.homePlaceholderLabel, this.awayPlaceholderLabel, this.confirmed = true});
   factory _ScheduledMatch.fromJson(Map<String, dynamic> json) => _$ScheduledMatchFromJson(json);
 
 @override final  String id;
@@ -2618,6 +2635,23 @@ class _ScheduledMatch implements ScheduledMatch {
 @override final  String awayTeamId;
 @override final  int round;
 @override final  MatchResult? result;
+/// Calendar date this fixture is scheduled for. Only set for postseason
+/// fixtures (`Season.postseasonFixtures`) — regular season entries are
+/// dated purely via [round] and stay `null` here.
+@override final  int? week;
+@override final  int? day;
+/// When the play-in outcome that decides this side isn't known yet,
+/// [homeTeamId]/[awayTeamId] holds a non-team placeholder token and this
+/// carries the human label to show instead (e.g. "Playin seed 8"). Null
+/// once the real team is known.
+@override final  String? homePlaceholderLabel;
+@override final  String? awayPlaceholderLabel;
+/// Games 1–3 of a BO5 series are always played, so they're `true` from
+/// creation. Games 4–5 start `false` (shown greyed-out — the series
+/// might not need them) and flip to `true` only once the prior game
+/// resolves without a decision. Always `true` for regular season/play-in
+/// fixtures, which have no such uncertainty.
+@override@JsonKey() final  bool confirmed;
 
 /// Create a copy of ScheduledMatch
 /// with the given fields replaced by the non-null parameter values.
@@ -2632,16 +2666,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ScheduledMatch&&(identical(other.id, id) || other.id == id)&&(identical(other.homeTeamId, homeTeamId) || other.homeTeamId == homeTeamId)&&(identical(other.awayTeamId, awayTeamId) || other.awayTeamId == awayTeamId)&&(identical(other.round, round) || other.round == round)&&(identical(other.result, result) || other.result == result));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ScheduledMatch&&(identical(other.id, id) || other.id == id)&&(identical(other.homeTeamId, homeTeamId) || other.homeTeamId == homeTeamId)&&(identical(other.awayTeamId, awayTeamId) || other.awayTeamId == awayTeamId)&&(identical(other.round, round) || other.round == round)&&(identical(other.result, result) || other.result == result)&&(identical(other.week, week) || other.week == week)&&(identical(other.day, day) || other.day == day)&&(identical(other.homePlaceholderLabel, homePlaceholderLabel) || other.homePlaceholderLabel == homePlaceholderLabel)&&(identical(other.awayPlaceholderLabel, awayPlaceholderLabel) || other.awayPlaceholderLabel == awayPlaceholderLabel)&&(identical(other.confirmed, confirmed) || other.confirmed == confirmed));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,homeTeamId,awayTeamId,round,result);
+int get hashCode => Object.hash(runtimeType,id,homeTeamId,awayTeamId,round,result,week,day,homePlaceholderLabel,awayPlaceholderLabel,confirmed);
 
 @override
 String toString() {
-  return 'ScheduledMatch(id: $id, homeTeamId: $homeTeamId, awayTeamId: $awayTeamId, round: $round, result: $result)';
+  return 'ScheduledMatch(id: $id, homeTeamId: $homeTeamId, awayTeamId: $awayTeamId, round: $round, result: $result, week: $week, day: $day, homePlaceholderLabel: $homePlaceholderLabel, awayPlaceholderLabel: $awayPlaceholderLabel, confirmed: $confirmed)';
 }
 
 
@@ -2652,7 +2686,7 @@ abstract mixin class _$ScheduledMatchCopyWith<$Res> implements $ScheduledMatchCo
   factory _$ScheduledMatchCopyWith(_ScheduledMatch value, $Res Function(_ScheduledMatch) _then) = __$ScheduledMatchCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String homeTeamId, String awayTeamId, int round, MatchResult? result
+ String id, String homeTeamId, String awayTeamId, int round, MatchResult? result, int? week, int? day, String? homePlaceholderLabel, String? awayPlaceholderLabel, bool confirmed
 });
 
 
@@ -2669,14 +2703,19 @@ class __$ScheduledMatchCopyWithImpl<$Res>
 
 /// Create a copy of ScheduledMatch
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? homeTeamId = null,Object? awayTeamId = null,Object? round = null,Object? result = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? homeTeamId = null,Object? awayTeamId = null,Object? round = null,Object? result = freezed,Object? week = freezed,Object? day = freezed,Object? homePlaceholderLabel = freezed,Object? awayPlaceholderLabel = freezed,Object? confirmed = null,}) {
   return _then(_ScheduledMatch(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,homeTeamId: null == homeTeamId ? _self.homeTeamId : homeTeamId // ignore: cast_nullable_to_non_nullable
 as String,awayTeamId: null == awayTeamId ? _self.awayTeamId : awayTeamId // ignore: cast_nullable_to_non_nullable
 as String,round: null == round ? _self.round : round // ignore: cast_nullable_to_non_nullable
 as int,result: freezed == result ? _self.result : result // ignore: cast_nullable_to_non_nullable
-as MatchResult?,
+as MatchResult?,week: freezed == week ? _self.week : week // ignore: cast_nullable_to_non_nullable
+as int?,day: freezed == day ? _self.day : day // ignore: cast_nullable_to_non_nullable
+as int?,homePlaceholderLabel: freezed == homePlaceholderLabel ? _self.homePlaceholderLabel : homePlaceholderLabel // ignore: cast_nullable_to_non_nullable
+as String?,awayPlaceholderLabel: freezed == awayPlaceholderLabel ? _self.awayPlaceholderLabel : awayPlaceholderLabel // ignore: cast_nullable_to_non_nullable
+as String?,confirmed: null == confirmed ? _self.confirmed : confirmed // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -2699,7 +2738,12 @@ $MatchResultCopyWith<$Res>? get result {
 /// @nodoc
 mixin _$PlayoffSeries {
 
- String get id; String get higherSeedTeamId; String get lowerSeedTeamId; int get winsNeeded; int get higherSeedWins; int get lowerSeedWins; List<MatchResult> get games; String? get winnerTeamId;
+ String get id; String get higherSeedTeamId; String get lowerSeedTeamId; int get winsNeeded; int get higherSeedWins; int get lowerSeedWins; List<MatchResult> get games; String? get winnerTeamId;/// Set while [lowerSeedTeamId] is a placeholder token standing in for a
+/// play-in seed that isn't decided yet (e.g. "Playin seed 8"). The
+/// higher seed (1–6) is always known immediately at bracket creation;
+/// only a 1v8/2v7 series can start out pending like this. Null once the
+/// real team is patched in.
+ String? get lowerSeedPlaceholderLabel;
 /// Create a copy of PlayoffSeries
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -2712,16 +2756,16 @@ $PlayoffSeriesCopyWith<PlayoffSeries> get copyWith => _$PlayoffSeriesCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PlayoffSeries&&(identical(other.id, id) || other.id == id)&&(identical(other.higherSeedTeamId, higherSeedTeamId) || other.higherSeedTeamId == higherSeedTeamId)&&(identical(other.lowerSeedTeamId, lowerSeedTeamId) || other.lowerSeedTeamId == lowerSeedTeamId)&&(identical(other.winsNeeded, winsNeeded) || other.winsNeeded == winsNeeded)&&(identical(other.higherSeedWins, higherSeedWins) || other.higherSeedWins == higherSeedWins)&&(identical(other.lowerSeedWins, lowerSeedWins) || other.lowerSeedWins == lowerSeedWins)&&const DeepCollectionEquality().equals(other.games, games)&&(identical(other.winnerTeamId, winnerTeamId) || other.winnerTeamId == winnerTeamId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PlayoffSeries&&(identical(other.id, id) || other.id == id)&&(identical(other.higherSeedTeamId, higherSeedTeamId) || other.higherSeedTeamId == higherSeedTeamId)&&(identical(other.lowerSeedTeamId, lowerSeedTeamId) || other.lowerSeedTeamId == lowerSeedTeamId)&&(identical(other.winsNeeded, winsNeeded) || other.winsNeeded == winsNeeded)&&(identical(other.higherSeedWins, higherSeedWins) || other.higherSeedWins == higherSeedWins)&&(identical(other.lowerSeedWins, lowerSeedWins) || other.lowerSeedWins == lowerSeedWins)&&const DeepCollectionEquality().equals(other.games, games)&&(identical(other.winnerTeamId, winnerTeamId) || other.winnerTeamId == winnerTeamId)&&(identical(other.lowerSeedPlaceholderLabel, lowerSeedPlaceholderLabel) || other.lowerSeedPlaceholderLabel == lowerSeedPlaceholderLabel));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,higherSeedTeamId,lowerSeedTeamId,winsNeeded,higherSeedWins,lowerSeedWins,const DeepCollectionEquality().hash(games),winnerTeamId);
+int get hashCode => Object.hash(runtimeType,id,higherSeedTeamId,lowerSeedTeamId,winsNeeded,higherSeedWins,lowerSeedWins,const DeepCollectionEquality().hash(games),winnerTeamId,lowerSeedPlaceholderLabel);
 
 @override
 String toString() {
-  return 'PlayoffSeries(id: $id, higherSeedTeamId: $higherSeedTeamId, lowerSeedTeamId: $lowerSeedTeamId, winsNeeded: $winsNeeded, higherSeedWins: $higherSeedWins, lowerSeedWins: $lowerSeedWins, games: $games, winnerTeamId: $winnerTeamId)';
+  return 'PlayoffSeries(id: $id, higherSeedTeamId: $higherSeedTeamId, lowerSeedTeamId: $lowerSeedTeamId, winsNeeded: $winsNeeded, higherSeedWins: $higherSeedWins, lowerSeedWins: $lowerSeedWins, games: $games, winnerTeamId: $winnerTeamId, lowerSeedPlaceholderLabel: $lowerSeedPlaceholderLabel)';
 }
 
 
@@ -2732,7 +2776,7 @@ abstract mixin class $PlayoffSeriesCopyWith<$Res>  {
   factory $PlayoffSeriesCopyWith(PlayoffSeries value, $Res Function(PlayoffSeries) _then) = _$PlayoffSeriesCopyWithImpl;
 @useResult
 $Res call({
- String id, String higherSeedTeamId, String lowerSeedTeamId, int winsNeeded, int higherSeedWins, int lowerSeedWins, List<MatchResult> games, String? winnerTeamId
+ String id, String higherSeedTeamId, String lowerSeedTeamId, int winsNeeded, int higherSeedWins, int lowerSeedWins, List<MatchResult> games, String? winnerTeamId, String? lowerSeedPlaceholderLabel
 });
 
 
@@ -2749,7 +2793,7 @@ class _$PlayoffSeriesCopyWithImpl<$Res>
 
 /// Create a copy of PlayoffSeries
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? higherSeedTeamId = null,Object? lowerSeedTeamId = null,Object? winsNeeded = null,Object? higherSeedWins = null,Object? lowerSeedWins = null,Object? games = null,Object? winnerTeamId = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? higherSeedTeamId = null,Object? lowerSeedTeamId = null,Object? winsNeeded = null,Object? higherSeedWins = null,Object? lowerSeedWins = null,Object? games = null,Object? winnerTeamId = freezed,Object? lowerSeedPlaceholderLabel = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,higherSeedTeamId: null == higherSeedTeamId ? _self.higherSeedTeamId : higherSeedTeamId // ignore: cast_nullable_to_non_nullable
@@ -2759,6 +2803,7 @@ as int,higherSeedWins: null == higherSeedWins ? _self.higherSeedWins : higherSee
 as int,lowerSeedWins: null == lowerSeedWins ? _self.lowerSeedWins : lowerSeedWins // ignore: cast_nullable_to_non_nullable
 as int,games: null == games ? _self.games : games // ignore: cast_nullable_to_non_nullable
 as List<MatchResult>,winnerTeamId: freezed == winnerTeamId ? _self.winnerTeamId : winnerTeamId // ignore: cast_nullable_to_non_nullable
+as String?,lowerSeedPlaceholderLabel: freezed == lowerSeedPlaceholderLabel ? _self.lowerSeedPlaceholderLabel : lowerSeedPlaceholderLabel // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
@@ -2844,10 +2889,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String higherSeedTeamId,  String lowerSeedTeamId,  int winsNeeded,  int higherSeedWins,  int lowerSeedWins,  List<MatchResult> games,  String? winnerTeamId)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String higherSeedTeamId,  String lowerSeedTeamId,  int winsNeeded,  int higherSeedWins,  int lowerSeedWins,  List<MatchResult> games,  String? winnerTeamId,  String? lowerSeedPlaceholderLabel)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PlayoffSeries() when $default != null:
-return $default(_that.id,_that.higherSeedTeamId,_that.lowerSeedTeamId,_that.winsNeeded,_that.higherSeedWins,_that.lowerSeedWins,_that.games,_that.winnerTeamId);case _:
+return $default(_that.id,_that.higherSeedTeamId,_that.lowerSeedTeamId,_that.winsNeeded,_that.higherSeedWins,_that.lowerSeedWins,_that.games,_that.winnerTeamId,_that.lowerSeedPlaceholderLabel);case _:
   return orElse();
 
 }
@@ -2865,10 +2910,10 @@ return $default(_that.id,_that.higherSeedTeamId,_that.lowerSeedTeamId,_that.wins
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String higherSeedTeamId,  String lowerSeedTeamId,  int winsNeeded,  int higherSeedWins,  int lowerSeedWins,  List<MatchResult> games,  String? winnerTeamId)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String higherSeedTeamId,  String lowerSeedTeamId,  int winsNeeded,  int higherSeedWins,  int lowerSeedWins,  List<MatchResult> games,  String? winnerTeamId,  String? lowerSeedPlaceholderLabel)  $default,) {final _that = this;
 switch (_that) {
 case _PlayoffSeries():
-return $default(_that.id,_that.higherSeedTeamId,_that.lowerSeedTeamId,_that.winsNeeded,_that.higherSeedWins,_that.lowerSeedWins,_that.games,_that.winnerTeamId);case _:
+return $default(_that.id,_that.higherSeedTeamId,_that.lowerSeedTeamId,_that.winsNeeded,_that.higherSeedWins,_that.lowerSeedWins,_that.games,_that.winnerTeamId,_that.lowerSeedPlaceholderLabel);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -2885,10 +2930,10 @@ return $default(_that.id,_that.higherSeedTeamId,_that.lowerSeedTeamId,_that.wins
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String higherSeedTeamId,  String lowerSeedTeamId,  int winsNeeded,  int higherSeedWins,  int lowerSeedWins,  List<MatchResult> games,  String? winnerTeamId)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String higherSeedTeamId,  String lowerSeedTeamId,  int winsNeeded,  int higherSeedWins,  int lowerSeedWins,  List<MatchResult> games,  String? winnerTeamId,  String? lowerSeedPlaceholderLabel)?  $default,) {final _that = this;
 switch (_that) {
 case _PlayoffSeries() when $default != null:
-return $default(_that.id,_that.higherSeedTeamId,_that.lowerSeedTeamId,_that.winsNeeded,_that.higherSeedWins,_that.lowerSeedWins,_that.games,_that.winnerTeamId);case _:
+return $default(_that.id,_that.higherSeedTeamId,_that.lowerSeedTeamId,_that.winsNeeded,_that.higherSeedWins,_that.lowerSeedWins,_that.games,_that.winnerTeamId,_that.lowerSeedPlaceholderLabel);case _:
   return null;
 
 }
@@ -2900,7 +2945,7 @@ return $default(_that.id,_that.higherSeedTeamId,_that.lowerSeedTeamId,_that.wins
 @JsonSerializable()
 
 class _PlayoffSeries implements PlayoffSeries {
-  const _PlayoffSeries({required this.id, required this.higherSeedTeamId, required this.lowerSeedTeamId, required this.winsNeeded, this.higherSeedWins = 0, this.lowerSeedWins = 0, final  List<MatchResult> games = const [], this.winnerTeamId}): _games = games;
+  const _PlayoffSeries({required this.id, required this.higherSeedTeamId, required this.lowerSeedTeamId, required this.winsNeeded, this.higherSeedWins = 0, this.lowerSeedWins = 0, final  List<MatchResult> games = const [], this.winnerTeamId, this.lowerSeedPlaceholderLabel}): _games = games;
   factory _PlayoffSeries.fromJson(Map<String, dynamic> json) => _$PlayoffSeriesFromJson(json);
 
 @override final  String id;
@@ -2917,6 +2962,12 @@ class _PlayoffSeries implements PlayoffSeries {
 }
 
 @override final  String? winnerTeamId;
+/// Set while [lowerSeedTeamId] is a placeholder token standing in for a
+/// play-in seed that isn't decided yet (e.g. "Playin seed 8"). The
+/// higher seed (1–6) is always known immediately at bracket creation;
+/// only a 1v8/2v7 series can start out pending like this. Null once the
+/// real team is patched in.
+@override final  String? lowerSeedPlaceholderLabel;
 
 /// Create a copy of PlayoffSeries
 /// with the given fields replaced by the non-null parameter values.
@@ -2931,16 +2982,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PlayoffSeries&&(identical(other.id, id) || other.id == id)&&(identical(other.higherSeedTeamId, higherSeedTeamId) || other.higherSeedTeamId == higherSeedTeamId)&&(identical(other.lowerSeedTeamId, lowerSeedTeamId) || other.lowerSeedTeamId == lowerSeedTeamId)&&(identical(other.winsNeeded, winsNeeded) || other.winsNeeded == winsNeeded)&&(identical(other.higherSeedWins, higherSeedWins) || other.higherSeedWins == higherSeedWins)&&(identical(other.lowerSeedWins, lowerSeedWins) || other.lowerSeedWins == lowerSeedWins)&&const DeepCollectionEquality().equals(other._games, _games)&&(identical(other.winnerTeamId, winnerTeamId) || other.winnerTeamId == winnerTeamId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PlayoffSeries&&(identical(other.id, id) || other.id == id)&&(identical(other.higherSeedTeamId, higherSeedTeamId) || other.higherSeedTeamId == higherSeedTeamId)&&(identical(other.lowerSeedTeamId, lowerSeedTeamId) || other.lowerSeedTeamId == lowerSeedTeamId)&&(identical(other.winsNeeded, winsNeeded) || other.winsNeeded == winsNeeded)&&(identical(other.higherSeedWins, higherSeedWins) || other.higherSeedWins == higherSeedWins)&&(identical(other.lowerSeedWins, lowerSeedWins) || other.lowerSeedWins == lowerSeedWins)&&const DeepCollectionEquality().equals(other._games, _games)&&(identical(other.winnerTeamId, winnerTeamId) || other.winnerTeamId == winnerTeamId)&&(identical(other.lowerSeedPlaceholderLabel, lowerSeedPlaceholderLabel) || other.lowerSeedPlaceholderLabel == lowerSeedPlaceholderLabel));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,higherSeedTeamId,lowerSeedTeamId,winsNeeded,higherSeedWins,lowerSeedWins,const DeepCollectionEquality().hash(_games),winnerTeamId);
+int get hashCode => Object.hash(runtimeType,id,higherSeedTeamId,lowerSeedTeamId,winsNeeded,higherSeedWins,lowerSeedWins,const DeepCollectionEquality().hash(_games),winnerTeamId,lowerSeedPlaceholderLabel);
 
 @override
 String toString() {
-  return 'PlayoffSeries(id: $id, higherSeedTeamId: $higherSeedTeamId, lowerSeedTeamId: $lowerSeedTeamId, winsNeeded: $winsNeeded, higherSeedWins: $higherSeedWins, lowerSeedWins: $lowerSeedWins, games: $games, winnerTeamId: $winnerTeamId)';
+  return 'PlayoffSeries(id: $id, higherSeedTeamId: $higherSeedTeamId, lowerSeedTeamId: $lowerSeedTeamId, winsNeeded: $winsNeeded, higherSeedWins: $higherSeedWins, lowerSeedWins: $lowerSeedWins, games: $games, winnerTeamId: $winnerTeamId, lowerSeedPlaceholderLabel: $lowerSeedPlaceholderLabel)';
 }
 
 
@@ -2951,7 +3002,7 @@ abstract mixin class _$PlayoffSeriesCopyWith<$Res> implements $PlayoffSeriesCopy
   factory _$PlayoffSeriesCopyWith(_PlayoffSeries value, $Res Function(_PlayoffSeries) _then) = __$PlayoffSeriesCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String higherSeedTeamId, String lowerSeedTeamId, int winsNeeded, int higherSeedWins, int lowerSeedWins, List<MatchResult> games, String? winnerTeamId
+ String id, String higherSeedTeamId, String lowerSeedTeamId, int winsNeeded, int higherSeedWins, int lowerSeedWins, List<MatchResult> games, String? winnerTeamId, String? lowerSeedPlaceholderLabel
 });
 
 
@@ -2968,7 +3019,7 @@ class __$PlayoffSeriesCopyWithImpl<$Res>
 
 /// Create a copy of PlayoffSeries
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? higherSeedTeamId = null,Object? lowerSeedTeamId = null,Object? winsNeeded = null,Object? higherSeedWins = null,Object? lowerSeedWins = null,Object? games = null,Object? winnerTeamId = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? higherSeedTeamId = null,Object? lowerSeedTeamId = null,Object? winsNeeded = null,Object? higherSeedWins = null,Object? lowerSeedWins = null,Object? games = null,Object? winnerTeamId = freezed,Object? lowerSeedPlaceholderLabel = freezed,}) {
   return _then(_PlayoffSeries(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,higherSeedTeamId: null == higherSeedTeamId ? _self.higherSeedTeamId : higherSeedTeamId // ignore: cast_nullable_to_non_nullable
@@ -2978,6 +3029,7 @@ as int,higherSeedWins: null == higherSeedWins ? _self.higherSeedWins : higherSee
 as int,lowerSeedWins: null == lowerSeedWins ? _self.lowerSeedWins : lowerSeedWins // ignore: cast_nullable_to_non_nullable
 as int,games: null == games ? _self._games : games // ignore: cast_nullable_to_non_nullable
 as List<MatchResult>,winnerTeamId: freezed == winnerTeamId ? _self.winnerTeamId : winnerTeamId // ignore: cast_nullable_to_non_nullable
+as String?,lowerSeedPlaceholderLabel: freezed == lowerSeedPlaceholderLabel ? _self.lowerSeedPlaceholderLabel : lowerSeedPlaceholderLabel // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }

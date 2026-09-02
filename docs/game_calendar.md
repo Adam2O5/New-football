@@ -97,7 +97,7 @@ Jeden tydzień; obie konferencje równolegle.
 
 ### Drabinka BO5 (tyg. 32–43)
 
-Format: **best-of-5** (do 3 wygranych). Przy 2 slotach/tydz. maksymalnie **4 mecze/tydz.** → seria BO5 mieści się w **2–3 tygodniach** (wyżej rozstawiony zaczyna u siebie; format 1-2-2).
+Format: **best-of-5** (do 3 wygranych). Przy 4 slotach/tydz. (rozkład slotów jak w regular season środa/czwartek i soboa/niedziela ( z blokadą jednoczesnego meczu w czwartek i sobote)) maksymalnie **2 mecze/tydz.** → seria BO5 mieści się w **2–3 tygodniach** (wyżej rozstawiony zaczyna u siebie; format 1-2-2).
 
 | Runda | Tygodnie | Serii równolegle |
 | ----- | -------- | ---------------- |

@@ -6,6 +6,7 @@ import 'package:new_football/app/widgets/branding/club_logo.dart';
 import 'package:new_football/core/models/draft_models.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
+import 'package:new_football/core/models/match_models.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
 import 'package:new_football/app/widgets/standings/standings_round_group.dart';
@@ -102,10 +103,18 @@ class _SeriesTile extends ConsumerWidget {
         ? Theme.of(context).colorScheme.outline
         : _conferenceAccent(item.conference!);
 
+    // The higher seed is always known immediately; a 1v8/2v7 series can
+    // still be waiting on a play-in seed, in which case lowerSeedTeamId
+    // holds a non-team placeholder token — show "?" (the same convention
+    // standings_bracket_view.dart uses) rather than resolving that token as
+    // if it were a real team.
+    final lowerSeedLabel = series.isPending
+        ? '?'
+        : teamName(series.lowerSeedTeamId);
     final matchupText =
         '${teamName(series.higherSeedTeamId)} '
         '${series.higherSeedWins}–${series.lowerSeedWins} '
-        '${teamName(series.lowerSeedTeamId)}';
+        '$lowerSeedLabel';
 
     if (winner == null) {
       return Container(

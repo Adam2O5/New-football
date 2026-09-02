@@ -129,14 +129,40 @@ class CalendarService {
     return slots.isEmpty ? null : slots.first;
   }
 
-  /// Postseason uses two weekly slots: a midweek slot and a weekend slot.
-  int? postseasonSlotForDay(int week, int day) {
-    if (week < _c.playoffStartWeek || week > _c.playoffEndWeek) {
-      return null;
+  /// The six calendar slots (2/week × 3 weeks) available to playoff [round]
+  /// (1 = quarterfinals … 4 = league final), in chronological order — the
+  /// single source of truth for both "which dates can a series' games land
+  /// on" (`SeasonService` eagerly schedules fixtures from this) and "is this
+  /// (week, day) a valid postseason slot" ([postseasonSlotForDay]). Sharing
+  /// one source keeps the fixtures shown on the calendar and the days the
+  /// simulation actually plays on from ever drifting apart.
+  ///
+  /// Like the regular season, the exact midweek/weekend day varies per week
+  /// via [matchDaysForWeek] — unlike play-in, which `game_calendar.md` fixes
+  /// to Wednesday/Saturday, playoff match days get the same week-to-week
+  /// variety as the regular season.
+  List<(int week, int day)> playoffRoundSlotDates(int round, {int seed = 0}) {
+    final startWeek = _c.playoffStartWeek + (round - 1) * 3;
+    final dates = <(int, int)>[];
+    for (var w = startWeek; w < startWeek + 3; w++) {
+      final days = matchDaysForWeek(w, seed: seed);
+      dates.add((w, days.midweekDay));
+      dates.add((w, days.weekendDay));
     }
-    if (day == 3 || day == 4) return 0;
-    if (day == 6 || day == 7) return 1;
-    return null;
+    return dates;
+  }
+
+  /// True only if (week, day) is one of the six slots [playoffRoundSlotDates]
+  /// assigns to that week's round — the sole gate `advancePlayoffsForDate`
+  /// uses (no second, week-specific narrowing like [isActualMatchDay] does
+  /// for the regular season), so it must already be day-exact.
+  int? postseasonSlotForDay(int week, int day, {int seed = 0}) {
+    final round = playoffRoundForWeek(week);
+    if (round == null) return null;
+    final dates = playoffRoundSlotDates(round, seed: seed);
+    final index = dates.indexWhere((d) => d.$1 == week && d.$2 == day);
+    if (index == -1) return null;
+    return index.isEven ? 0 : 1;
   }
 
   /// Playoff round block: conference quarter-finals, semi-finals,

@@ -14,6 +14,7 @@ class CalendarDayTile extends StatelessWidget {
     required this.isToday,
     required this.isSelected,
     required this.matchCount,
+    this.matchConfirmed = true,
     required this.playerMatchLabel,
     required this.eventLabels,
     required this.onTap,
@@ -25,6 +26,12 @@ class CalendarDayTile extends StatelessWidget {
   final bool isToday;
   final bool isSelected;
   final int matchCount;
+
+  /// Games 4/5 of a playoff series aren't guaranteed to be played (see
+  /// `game_calendar.md`) — while still unconfirmed, the match icon renders
+  /// greyed out instead of the usual player-match green. Irrelevant (stays
+  /// `true`) for every other kind of match.
+  final bool matchConfirmed;
   final String? playerMatchLabel;
   final List<String> eventLabels;
   final VoidCallback? onTap;
@@ -124,6 +131,7 @@ class CalendarDayTile extends StatelessWidget {
                           matchTooltip: matchMessage,
                           eventTooltip: eventMessage,
                           isPlayerMatch: playerMatchLabel != null,
+                          matchConfirmed: matchConfirmed,
                         ),
                       ),
                     ],
@@ -147,11 +155,13 @@ class _CalendarDayIndicators extends StatelessWidget {
     required this.matchTooltip,
     required this.eventTooltip,
     required this.isPlayerMatch,
+    this.matchConfirmed = true,
   });
 
   final String? matchTooltip;
   final String? eventTooltip;
   final bool isPlayerMatch;
+  final bool matchConfirmed;
 
   @override
   Widget build(BuildContext context) {
@@ -179,7 +189,11 @@ class _CalendarDayIndicators extends StatelessWidget {
               child: Icon(
                 Icons.sports_soccer,
                 size: iconSize,
-                color: isPlayerMatch ? Colors.greenAccent : Colors.white70,
+                color: !isPlayerMatch
+                    ? Colors.white70
+                    : matchConfirmed
+                    ? Colors.greenAccent
+                    : Colors.grey,
               ),
             ),
           );

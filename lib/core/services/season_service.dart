@@ -114,6 +114,220 @@ class SeasonService {
   final Random _random;
   final _uuid = const Uuid();
 
+  /// Called once, at the Monday of the pre-play-in break week (per
+  /// `game_calendar.md`: `week == breakWeek`, day 1). Writes the two
+  /// already-decided play-in games (7v8, 9v10 — seeding is final the moment
+  /// the regular season ends) and creates all 4 quarterfinal series per
+  /// conference: 3v6 and 4v5 are fully known now, while 1v8 and 2v7 are
+  /// created with a placeholder lower seed since they depend on play-in.
+  /// Every series' first 3 games are eagerly scheduled. The still-unknown
+  /// play-in final and the 1v8/2v7 placeholders are filled in later by
+  /// [revealPlayInFinal]/[revealPlayoffSeed8].
+  LeagueState generatePostseasonFixtures(LeagueState league) {
+    final fixtures = <ScheduledMatch>[
+      ...league.currentSeason.postseasonFixtures,
+    ];
+    final progress = <PlayInProgress>[...league.currentSeason.playInProgress];
+    final brackets = <PlayoffBracket>[];
+    final playInWeek = balance.calendar.playInWeek;
+
+    for (final conference in Conference.values) {
+      final cs = league.currentSeason.standings
+          .firstWhere((s) => s.conference == conference)
+          .sorted;
+      if (cs.length < 10) continue;
+      final seeds = [for (final s in cs.take(10)) s.teamId];
+
+      fixtures.add(
+        ScheduledMatch(
+          id: 'playIn:${conference.name}:7v8',
+          homeTeamId: seeds[6],
+          awayTeamId: seeds[7],
+          round: -1,
+          week: playInWeek,
+          day: 3,
+        ),
+      );
+      fixtures.add(
+        ScheduledMatch(
+          id: 'playIn:${conference.name}:9v10',
+          homeTeamId: seeds[8],
+          awayTeamId: seeds[9],
+          round: -1,
+          week: playInWeek,
+          day: 3,
+        ),
+      );
+      progress.add(
+        PlayInProgress(
+          conference: conference,
+          seed7TeamId: seeds[6],
+          seed8TeamId: seeds[7],
+          seed9TeamId: seeds[8],
+          seed10TeamId: seeds[9],
+        ),
+      );
+
+      final quarterFinals = [
+        _series(
+          seeds[0],
+          _placeholderToken(conference, 'seed8'),
+        ).copyWith(lowerSeedPlaceholderLabel: 'Playin seed 8'),
+        _series(
+          seeds[1],
+          _placeholderToken(conference, 'seed7'),
+        ).copyWith(lowerSeedPlaceholderLabel: 'Playin seed 7'),
+        _series(seeds[2], seeds[5]),
+        _series(seeds[3], seeds[4]),
+      ];
+      brackets.add(
+        PlayoffBracket(conference: conference, quarterFinals: quarterFinals),
+      );
+      for (final series in quarterFinals) {
+        fixtures.addAll(_eagerFixturesForSeries(series, round: 1));
+      }
+    }
+
+    return league.copyWith(
+      currentSeason: league.currentSeason.copyWith(
+        playInProgress: progress,
+        playoffBrackets: brackets,
+        postseasonFixtures: fixtures,
+      ),
+    );
+  }
+
+  /// Called Thursday of play-in week — the day after games 1 & 2 conclude
+  /// (per `game_calendar.md`): writes the now-decided play-in final fixture
+  /// and reveals seed 7 (winner of 7v8) wherever a 1v8/2v7 quarterfinal was
+  /// waiting on it. Safe to call unconditionally: since the player's own
+  /// play-in match (if any) pauses the calendar until played, Wednesday's
+  /// games are always resolved by the time Thursday is reached.
+  LeagueState revealPlayInFinal(LeagueState league) {
+    var state = league;
+    final playInWeek = balance.calendar.playInWeek;
+    for (final progress in league.currentSeason.playInProgress) {
+      final game7v8 = progress.game7v8;
+      final game9v10 = progress.game9v10;
+      if (game7v8 == null || game9v10 == null || progress.gameFinal != null) {
+        continue;
+      }
+      final seed7Winner = _winnerId(
+        game7v8,
+        progress.seed7TeamId,
+        progress.seed8TeamId,
+      );
+      final loser78 = seed7Winner == progress.seed7TeamId
+          ? progress.seed8TeamId
+          : progress.seed7TeamId;
+      final winner910 = _winnerId(
+        game9v10,
+        progress.seed9TeamId,
+        progress.seed10TeamId,
+      );
+
+      final alreadyScheduled = state.currentSeason.postseasonFixtures.any(
+        (f) => f.id == 'playIn:${progress.conference.name}:final',
+      );
+      if (!alreadyScheduled) {
+        state = state.copyWith(
+          currentSeason: state.currentSeason.copyWith(
+            postseasonFixtures: [
+              ...state.currentSeason.postseasonFixtures,
+              ScheduledMatch(
+                id: 'playIn:${progress.conference.name}:final',
+                homeTeamId: loser78,
+                awayTeamId: winner910,
+                round: -1,
+                week: playInWeek,
+                day: 6,
+              ),
+            ],
+          ),
+        );
+      }
+      state = _patchPlaceholder(
+        state,
+        progress.conference,
+        'seed7',
+        seed7Winner,
+      );
+    }
+    return state;
+  }
+
+  /// Called Sunday of play-in week — the day after the play-in final
+  /// concludes (per `game_calendar.md`): reveals seed 8 wherever a 1v8
+  /// quarterfinal was waiting on it. Both play-in seeds are now known for
+  /// every conference, so this is also when the (previously skipped, since
+  /// the bracket still had placeholders) playoff seeding message goes out.
+  LeagueState revealPlayoffSeed8(LeagueState league) {
+    var state = league;
+    for (final result in league.currentSeason.playInResults) {
+      state = _patchPlaceholder(
+        state,
+        result.conference,
+        'seed8',
+        result.playoffSeed8TeamId,
+      );
+    }
+    return _sendPlayoffSeedingMessages(
+      state,
+      state.currentSeason.playoffBrackets,
+    );
+  }
+
+  /// Replaces every occurrence of the [conference]/[seedLabel] placeholder
+  /// token — in both `playoffBrackets` and `postseasonFixtures` — with the
+  /// now-known [realTeamId].
+  LeagueState _patchPlaceholder(
+    LeagueState league,
+    Conference conference,
+    String seedLabel,
+    String realTeamId,
+  ) {
+    final token = _placeholderToken(conference, seedLabel);
+
+    PlayoffSeries patchSeries(PlayoffSeries s) {
+      if (s.lowerSeedTeamId != token) return s;
+      return s.copyWith(
+        lowerSeedTeamId: realTeamId,
+        lowerSeedPlaceholderLabel: null,
+      );
+    }
+
+    final brackets = league.currentSeason.playoffBrackets.map((b) {
+      if (b.conference != conference) return b;
+      return b.copyWith(
+        quarterFinals: b.quarterFinals.map(patchSeries).toList(),
+      );
+    }).toList();
+
+    final fixtures = league.currentSeason.postseasonFixtures.map((f) {
+      var next = f;
+      if (next.homeTeamId == token) {
+        next = next.copyWith(
+          homeTeamId: realTeamId,
+          homePlaceholderLabel: null,
+        );
+      }
+      if (next.awayTeamId == token) {
+        next = next.copyWith(
+          awayTeamId: realTeamId,
+          awayPlaceholderLabel: null,
+        );
+      }
+      return next;
+    }).toList();
+
+    return league.copyWith(
+      currentSeason: league.currentSeason.copyWith(
+        playoffBrackets: brackets,
+        postseasonFixtures: fixtures,
+      ),
+    );
+  }
+
   /// Resolves the dated play-in flow without changing the existing atomic
   /// [setupPlayIn] API. Wednesday stores the two opening games for each
   /// conference; Saturday stores the deciding games and promotes the eight
@@ -286,7 +500,7 @@ class SeasonService {
       matchId: matchId,
     );
     state = teamEvents.afterMatch(state, result, saveSeed: saveSeed);
-    state = _recordPostseasonMatchDate(state, matchId);
+    state = _recordFixtureResult(state, matchId, result);
 
     final progressList = state.currentSeason.playInProgress;
     final index = progressList.indexWhere((p) => p.conference == conference);
@@ -580,12 +794,14 @@ class SeasonService {
     );
   }
 
-  /// Advances one dated playoff slot. Calls outside the canonical postseason
-  /// slots are no-ops, so the daily calendar cannot consume a series game on
-  /// an arbitrary day.
-  /// Advances one dated playoff slot. Calls outside the canonical postseason
-  /// slots are no-ops, so the daily calendar cannot consume a series game on
-  /// an arbitrary day. [playerMatch] is non-null when the player's team has
+  /// Advances one dated playoff slot by playing exactly the fixtures
+  /// scheduled for [week]/[day] — and nothing else. This is what actually
+  /// keeps a series inside its 3-week round window: a newly-created next
+  /// round's series exist as soon as their predecessors decide it, but their
+  /// fixtures are eagerly dated into the *next* round's window
+  /// (`_scheduleNewlyCreatedRounds`), so there's simply nothing due for them
+  /// until that window arrives — no separate "wait for the round boundary"
+  /// check is needed. [playerMatch] is non-null when the player's team has
   /// an unresolved game today; the caller should route to the interactive
   /// matchday flow and later call [applyPlayoffPlayerResult].
   ({LeagueState league, ScheduledMatch? playerMatch}) advancePlayoffsForDate(
@@ -594,79 +810,38 @@ class SeasonService {
     required int day,
     int saveSeed = 0,
   }) {
-    if (calendar.postseasonSlotForDay(week, day) == null) {
-      return (league: league, playerMatch: null);
-    }
-    if (calendar.playoffRoundForWeek(week) == null) {
-      return (league: league, playerMatch: null);
-    }
-    return advancePlayoffs(league, saveSeed: saveSeed);
-  }
+    final round = calendar.playoffRoundForWeek(week);
+    if (round == null) return (league: league, playerMatch: null);
 
-  ({LeagueState league, ScheduledMatch? playerMatch}) advancePlayoffs(
-    LeagueState league, {
-    int saveSeed = 0,
-  }) {
-    var brackets = <PlayoffBracket>[];
+    final dueIds = [
+      for (final f in league.currentSeason.postseasonFixtures)
+        if (f.id.startsWith('playoff:') &&
+            f.week == week &&
+            f.day == day &&
+            f.result == null &&
+            f.homePlaceholderLabel == null &&
+            f.awayPlaceholderLabel == null)
+          f.id,
+    ];
+    if (dueIds.isEmpty) return (league: league, playerMatch: null);
+
     var state = league;
     ScheduledMatch? pendingPlayerMatch;
-    for (final b in league.currentSeason.playoffBrackets) {
-      final advanced = _advanceBracket(state, b, saveSeed);
-      state = advanced.league;
-      brackets.add(advanced.bracket);
-      pendingPlayerMatch ??= advanced.playerMatch;
-    }
-
-    String? champion;
-    PlayoffBracket? east;
-    PlayoffBracket? west;
-    for (final b in brackets) {
-      if (b.conference == Conference.europe) east = b;
-      if (b.conference == Conference.restOfTheWorld) west = b;
-    }
-
-    if (east != null &&
-        west != null &&
-        east.conferenceFinal.isNotEmpty &&
-        west.conferenceFinal.isNotEmpty &&
-        east.conferenceFinal.first.isComplete &&
-        west.conferenceFinal.first.isComplete) {
-      var leagueFinal =
-          east.leagueFinal ??
-          west.leagueFinal ??
-          _series(
-            east.conferenceFinal.first.winnerTeamId!,
-            west.conferenceFinal.first.winnerTeamId!,
-          );
-      if (!leagueFinal.isComplete) {
-        final played = _playOneGame(
-          state,
-          leagueFinal,
-          saveSeed,
-          stake: MatchStake.leagueFinal,
-        );
-        state = played.league;
-        if (played.playerMatch != null) {
-          pendingPlayerMatch ??= played.playerMatch;
-        } else {
-          leagueFinal = played.series;
-        }
+    for (final matchId in dueIds) {
+      final seriesId = matchId.split(':')[1];
+      final series = _findSeriesById(state, seriesId);
+      if (series == null || series.isComplete || series.isPending) continue;
+      final played = _playOneGame(state, series, saveSeed);
+      state = played.league;
+      if (played.playerMatch != null) {
+        pendingPlayerMatch ??= played.playerMatch;
+        continue;
       }
-      champion = leagueFinal.winnerTeamId;
-      brackets = brackets
-          .map((b) => b.copyWith(leagueFinal: leagueFinal))
-          .toList();
+      state = _writeSeriesBack(state, seriesId, played.series);
+      state = _reconcileSeriesFixtures(state, played.series);
     }
 
-    state = state.copyWith(
-      currentSeason: state.currentSeason.copyWith(
-        playoffBrackets: brackets,
-        championTeamId: champion ?? state.currentSeason.championTeamId,
-      ),
-    );
-    if (champion != null) {
-      state = _crownChampion(state, champion, saveSeed: saveSeed);
-    }
+    state = _progressPlayoffBracketsAndChampion(state, saveSeed: saveSeed);
     return (league: state, playerMatch: pendingPlayerMatch);
   }
 
@@ -674,10 +849,9 @@ class SeasonService {
   /// interactively (paused for via `advancePlayoffsForDate`'s
   /// `playerMatch`). Records the game into the series wherever it lives
   /// (quarterfinal/semifinal/conference final/league final, across either
-  /// conference bracket), creates the next round when siblings are already
-  /// complete, and crowns the champion when applicable — the same
-  /// bookkeeping [advancePlayoffs] performs, without simulating any other
-  /// game for the day.
+  /// conference bracket) and performs the same round-progression and
+  /// champion-crowning bookkeeping [advancePlayoffsForDate] does, without
+  /// simulating any other fixture for the day.
   LeagueState applyPlayoffPlayerResult(
     LeagueState league, {
     required String matchId,
@@ -702,27 +876,119 @@ class SeasonService {
       matchId: matchId,
     );
     state = teamEvents.afterMatch(state, result, saveSeed: saveSeed);
-    state = _recordPostseasonMatchDate(state, matchId);
+    state = _recordFixtureResult(state, matchId, result);
 
-    var recorded = false;
-    PlayoffSeries recordIfMatch(PlayoffSeries s) {
-      if (recorded || s.id != seriesId) return s;
-      recorded = true;
-      return s.recordGame(result);
-    }
+    final series = _findSeriesById(state, seriesId);
+    if (series == null) return state;
+    final updated = series.recordGame(result);
+    state = _writeSeriesBack(state, seriesId, updated);
+    state = _reconcileSeriesFixtures(state, updated);
+    return _progressPlayoffBracketsAndChampion(state, saveSeed: saveSeed);
+  }
 
-    var brackets = state.currentSeason.playoffBrackets.map((b) {
-      var updated = b.copyWith(
-        quarterFinals: b.quarterFinals.map(recordIfMatch).toList(),
-        semiFinals: b.semiFinals.map(recordIfMatch).toList(),
-        conferenceFinal: b.conferenceFinal.map(recordIfMatch).toList(),
-      );
-      final leagueFinal = updated.leagueFinal;
-      if (leagueFinal != null) {
-        updated = updated.copyWith(leagueFinal: recordIfMatch(leagueFinal));
+  /// Finds a series by id anywhere across both conference brackets —
+  /// quarterfinal, semifinal, conference final, or league final (which is
+  /// duplicated onto both brackets once created, but always identical).
+  PlayoffSeries? _findSeriesById(LeagueState league, String seriesId) {
+    for (final b in league.currentSeason.playoffBrackets) {
+      if (b.leagueFinal?.id == seriesId) return b.leagueFinal;
+      for (final s in [
+        ...b.quarterFinals,
+        ...b.semiFinals,
+        ...b.conferenceFinal,
+      ]) {
+        if (s.id == seriesId) return s;
       }
-      return _progressBracketRounds(updated);
+    }
+    return null;
+  }
+
+  /// Writes [updated] back wherever a series with [seriesId] lives, across
+  /// both conference brackets (a league final match applies to both, since
+  /// it's duplicated onto each).
+  LeagueState _writeSeriesBack(
+    LeagueState league,
+    String seriesId,
+    PlayoffSeries updated,
+  ) {
+    final brackets = league.currentSeason.playoffBrackets.map((b) {
+      if (b.leagueFinal?.id == seriesId) {
+        return b.copyWith(leagueFinal: updated);
+      }
+      return b.copyWith(
+        quarterFinals: [
+          for (final s in b.quarterFinals) s.id == seriesId ? updated : s,
+        ],
+        semiFinals: [
+          for (final s in b.semiFinals) s.id == seriesId ? updated : s,
+        ],
+        conferenceFinal: [
+          for (final s in b.conferenceFinal) s.id == seriesId ? updated : s,
+        ],
+      );
     }).toList();
+    return league.copyWith(
+      currentSeason: league.currentSeason.copyWith(playoffBrackets: brackets),
+    );
+  }
+
+  /// After a series' game is recorded: once it's complete, any never-played
+  /// game-4/5 fixture is removed outright (per `game_calendar.md`: a series
+  /// decided in 3 or 4 games leaves the rest of its 3-week block empty, it
+  /// doesn't hand the winner an early fixture); otherwise, once 3 games are
+  /// in, the next (4th/5th) game's fixture — already scheduled, just greyed
+  /// out — is confirmed.
+  LeagueState _reconcileSeriesFixtures(
+    LeagueState league,
+    PlayoffSeries series,
+  ) {
+    final played = series.games.length;
+    List<ScheduledMatch> fixtures;
+    if (series.isComplete) {
+      fixtures = [
+        for (final f in league.currentSeason.postseasonFixtures)
+          if (!(f.id.startsWith('playoff:${series.id}:') &&
+              f.result == null &&
+              int.parse(f.id.split(':')[2]) >= played))
+            f,
+      ];
+    } else if (played >= 3) {
+      fixtures = [
+        for (final f in league.currentSeason.postseasonFixtures)
+          if (f.id == 'playoff:${series.id}:$played')
+            f.copyWith(confirmed: true)
+          else
+            f,
+      ];
+    } else {
+      return league;
+    }
+    return league.copyWith(
+      currentSeason: league.currentSeason.copyWith(
+        postseasonFixtures: fixtures,
+      ),
+    );
+  }
+
+  /// Creates the next playoff round(s) once every series in the current
+  /// round is complete (pure bracket bookkeeping, plays no games), eagerly
+  /// schedules the new round's fixtures, and crowns the champion once the
+  /// league final resolves. Shared by [advancePlayoffsForDate] and
+  /// [applyPlayoffPlayerResult] so both paths perform identical bookkeeping.
+  LeagueState _progressPlayoffBracketsAndChampion(
+    LeagueState league, {
+    required int saveSeed,
+  }) {
+    var state = league;
+    final updatedBrackets = <PlayoffBracket>[];
+    for (final b in state.currentSeason.playoffBrackets) {
+      final next = _progressBracketRounds(b);
+      final completedRound =
+          calendar.playoffRoundForWeek(state.currentWeek) ?? 1;
+      state = _scheduleNewlyCreatedRounds(state, b, next, completedRound);
+      updatedBrackets.add(next);
+    }
+    var brackets = updatedBrackets;
 
     String? champion = state.currentSeason.championTeamId;
     PlayoffBracket? east;
@@ -737,6 +1003,8 @@ class SeasonService {
         west.conferenceFinal.isNotEmpty &&
         east.conferenceFinal.first.isComplete &&
         west.conferenceFinal.first.isComplete) {
+      final alreadyHadFinal =
+          east.leagueFinal != null || west.leagueFinal != null;
       final leagueFinal =
           east.leagueFinal ??
           west.leagueFinal ??
@@ -744,6 +1012,16 @@ class SeasonService {
             east.conferenceFinal.first.winnerTeamId!,
             west.conferenceFinal.first.winnerTeamId!,
           );
+      if (!alreadyHadFinal) {
+        state = state.copyWith(
+          currentSeason: state.currentSeason.copyWith(
+            postseasonFixtures: [
+              ...state.currentSeason.postseasonFixtures,
+              ..._eagerFixturesForSeries(leagueFinal, round: 4),
+            ],
+          ),
+        );
+      }
       champion = leagueFinal.winnerTeamId ?? champion;
       brackets = brackets
           .map((b) => b.copyWith(leagueFinal: leagueFinal))
@@ -763,8 +1041,7 @@ class SeasonService {
   }
 
   /// Creates the next playoff round(s) once every series in the current
-  /// round is complete. Plays no games — pure bracket bookkeeping, shared by
-  /// [advancePlayoffs] (via [_advanceBracket]) and [applyPlayoffPlayerResult].
+  /// round is complete. Plays no games — pure bracket bookkeeping.
   PlayoffBracket _progressBracketRounds(PlayoffBracket b) {
     var semis = b.semiFinals;
     if (semis.isEmpty &&
@@ -2216,7 +2493,7 @@ class SeasonService {
       result,
       saveSeed: saveSeed,
     );
-    postseasonState = _recordPostseasonMatchDate(postseasonState, matchId);
+    postseasonState = _recordFixtureResult(postseasonState, matchId, result);
     return (league: postseasonState, result: result, playerMatch: null);
   }
 
@@ -2242,72 +2519,114 @@ class SeasonService {
     winsNeeded: 3,
   );
 
-  ({LeagueState league, PlayoffBracket bracket, ScheduledMatch? playerMatch})
-  _advanceBracket(LeagueState league, PlayoffBracket b, int saveSeed) {
-    var state = league;
-    ScheduledMatch? pendingPlayerMatch;
-    final quarters = <PlayoffSeries>[];
-    for (final series in b.quarterFinals) {
-      if (series.isComplete) {
-        quarters.add(series);
-      } else {
-        final played = _playOneGame(state, series, saveSeed);
-        state = played.league;
-        quarters.add(played.series);
-        pendingPlayerMatch ??= played.playerMatch;
-      }
-    }
+  /// Deterministic non-team-id token standing in for a play-in seed that
+  /// isn't decided yet, e.g. `'pending:europe:seed8'`. Used as
+  /// [PlayoffSeries.lowerSeedTeamId] until the real team is patched in — the
+  /// human-readable label lives separately in [PlayoffSeries]'s /
+  /// [ScheduledMatch]'s placeholder-label fields.
+  String _placeholderToken(Conference conference, String seedLabel) =>
+      'pending:${conference.name}:$seedLabel';
 
-    var semis = b.semiFinals;
-    if (semis.isEmpty && quarters.every((s) => s.isComplete)) {
-      semis = [
-        _series(quarters[0].winnerTeamId!, quarters[3].winnerTeamId!),
-        _series(quarters[1].winnerTeamId!, quarters[2].winnerTeamId!),
-      ];
-    } else {
-      final advanced = <PlayoffSeries>[];
-      for (final series in semis) {
-        if (series.isComplete) {
-          advanced.add(series);
-        } else {
-          final played = _playOneGame(state, series, saveSeed);
-          state = played.league;
-          advanced.add(played.series);
-          pendingPlayerMatch ??= played.playerMatch;
-        }
-      }
-      semis = advanced;
-    }
+  /// The six calendar slots available to playoff [round] — delegates to
+  /// `CalendarService.playoffRoundSlotDates`, the single source of truth
+  /// shared with [postseasonSlotForDay]'s gating, so the fixtures written
+  /// here and the days the simulation actually plays on can never drift
+  /// apart.
+  List<(int week, int day)> _roundSlotDates(int round) =>
+      calendar.playoffRoundSlotDates(round);
 
-    var confFinal = b.conferenceFinal;
-    if (confFinal.isEmpty &&
-        semis.isNotEmpty &&
-        semis.every((s) => s.isComplete)) {
-      confFinal = [_series(semis[0].winnerTeamId!, semis[1].winnerTeamId!)];
-    } else {
-      final advanced = <PlayoffSeries>[];
-      for (final series in confFinal) {
-        if (series.isComplete) {
-          advanced.add(series);
-        } else {
-          final played = _playOneGame(state, series, saveSeed);
-          state = played.league;
-          advanced.add(played.series);
-          pendingPlayerMatch ??= played.playerMatch;
-        }
-      }
-      confFinal = advanced;
+  /// Eagerly schedules all 5 potential games of [series] into playoff
+  /// [round]'s slot calendar — not just the first 3, per `game_calendar.md`:
+  /// a BO5 series' dead time (if decided early) still spans the full 3-week
+  /// block. Games 1–3 are marked [ScheduledMatch.confirmed]; games 4–5 start
+  /// unconfirmed (greyed out in the calendar) until [_reconcileSeriesFixtures]
+  /// either confirms or removes them. A still-[PlayoffSeries.isPending]
+  /// series produces fixtures with a placeholder label on whichever side the
+  /// lower seed lands, per the 1-2-2 home pattern.
+  List<ScheduledMatch> _eagerFixturesForSeries(
+    PlayoffSeries series, {
+    required int round,
+  }) {
+    final dates = _roundSlotDates(round);
+    final fixtures = <ScheduledMatch>[];
+    for (var i = 0; i < 5 && i < dates.length; i++) {
+      final homeFirst = calendar.higherSeedHomeForGame(i);
+      final (week, day) = dates[i];
+      fixtures.add(
+        ScheduledMatch(
+          id: 'playoff:${series.id}:$i',
+          homeTeamId: homeFirst
+              ? series.higherSeedTeamId
+              : series.lowerSeedTeamId,
+          awayTeamId: homeFirst
+              ? series.lowerSeedTeamId
+              : series.higherSeedTeamId,
+          round: -1,
+          week: week,
+          day: day,
+          confirmed: i < 3,
+          homePlaceholderLabel: homeFirst
+              ? null
+              : series.lowerSeedPlaceholderLabel,
+          awayPlaceholderLabel: homeFirst
+              ? series.lowerSeedPlaceholderLabel
+              : null,
+        ),
+      );
     }
+    return fixtures;
+  }
 
-    return (
-      league: state,
-      bracket: b.copyWith(
-        quarterFinals: quarters,
-        semiFinals: semis,
-        conferenceFinal: confFinal,
+  /// Attaches [result] to the already-scheduled fixture with id [matchId].
+  /// Every postseason fixture is written to `postseasonFixtures` ahead of
+  /// time (see `game_calendar.md`), so playing it never adds a row — it only
+  /// fills in the one that's already there.
+  LeagueState _recordFixtureResult(
+    LeagueState league,
+    String matchId,
+    MatchResult result,
+  ) {
+    final fixtures = [
+      for (final f in league.currentSeason.postseasonFixtures)
+        if (f.id == matchId) f.copyWith(result: result) else f,
+    ];
+    return league.copyWith(
+      currentSeason: league.currentSeason.copyWith(
+        postseasonFixtures: fixtures,
       ),
-      playerMatch: pendingPlayerMatch,
     );
+  }
+
+  /// If [next] has a semifinal/conference-final round [previous] didn't,
+  /// this call just created it — eagerly schedule its first 3 games into the
+  /// following playoff round's slot calendar.
+  LeagueState _scheduleNewlyCreatedRounds(
+    LeagueState league,
+    PlayoffBracket previous,
+    PlayoffBracket next,
+    int completedRound,
+  ) {
+    var state = league;
+    void scheduleAll(List<PlayoffSeries> seriesList) {
+      for (final s in seriesList) {
+        state = state.copyWith(
+          currentSeason: state.currentSeason.copyWith(
+            postseasonFixtures: [
+              ...state.currentSeason.postseasonFixtures,
+              ..._eagerFixturesForSeries(s, round: completedRound + 1),
+            ],
+          ),
+        );
+      }
+    }
+
+    if (previous.semiFinals.isEmpty && next.semiFinals.isNotEmpty) {
+      scheduleAll(next.semiFinals);
+    }
+    if (previous.conferenceFinal.isEmpty && next.conferenceFinal.isNotEmpty) {
+      scheduleAll(next.conferenceFinal);
+    }
+    return state;
   }
 
   MatchStake _stakeForSeries(PlayoffSeries series) {
@@ -2341,231 +2660,6 @@ class SeasonService {
       }
     }
     return MatchStake.playoff;
-  }
-
-  /// Read-only preview of the still-pending play-in/playoff fixtures for
-  /// [week]/[day] — no simulation, no state changes. Mirrors exactly the
-  /// pairing logic `advancePlayInForDate`/`advancePlayoffsForDate` would use
-  /// if this day were simulated right now. Once a game has been played it no
-  /// longer appears here (it lives in `playInResults`/`playoffBrackets`
-  /// instead) — used by the calendar UI to show postseason match days once
-  /// pairings are known, the same way regular season fixtures are shown from
-  /// `currentSeason.schedule`.
-  List<ScheduledMatch> postseasonMatchesForDate(
-    LeagueState league, {
-    required int week,
-    required int day,
-  }) {
-    final matches = <ScheduledMatch>[];
-    final season = league.currentSeason;
-
-    if (calendar.playInSlotsForDay(week, day).isNotEmpty) {
-      for (final conference in Conference.values) {
-        final progressForConference = season.playInProgress
-            .where((p) => p.conference == conference)
-            .toList();
-        final current = progressForConference.isEmpty
-            ? null
-            : progressForConference.first;
-        if (day == 3) {
-          final seeds = current == null
-              ? _playInSeeds(league, conference)
-              : null;
-          if (current != null) {
-            if (current.game7v8 == null) {
-              matches.add(
-                ScheduledMatch(
-                  id: 'playIn:${conference.name}:7v8',
-                  homeTeamId: current.seed7TeamId,
-                  awayTeamId: current.seed8TeamId,
-                  round: -1,
-                ),
-              );
-            }
-            if (current.game9v10 == null) {
-              matches.add(
-                ScheduledMatch(
-                  id: 'playIn:${conference.name}:9v10',
-                  homeTeamId: current.seed9TeamId,
-                  awayTeamId: current.seed10TeamId,
-                  round: -1,
-                ),
-              );
-            }
-          } else if (seeds != null) {
-            matches.add(
-              ScheduledMatch(
-                id: 'playIn:${conference.name}:7v8',
-                homeTeamId: seeds.s7,
-                awayTeamId: seeds.s8,
-                round: -1,
-              ),
-            );
-            matches.add(
-              ScheduledMatch(
-                id: 'playIn:${conference.name}:9v10',
-                homeTeamId: seeds.s9,
-                awayTeamId: seeds.s10,
-                round: -1,
-              ),
-            );
-          }
-        } else if (day == 6 &&
-            current != null &&
-            current.gameFinal == null &&
-            current.game7v8 != null &&
-            current.game9v10 != null) {
-          final loser78 =
-              _winnerId(
-                    current.game7v8!,
-                    current.seed7TeamId,
-                    current.seed8TeamId,
-                  ) ==
-                  current.seed7TeamId
-              ? current.seed8TeamId
-              : current.seed7TeamId;
-          final winner910 = _winnerId(
-            current.game9v10!,
-            current.seed9TeamId,
-            current.seed10TeamId,
-          );
-          matches.add(
-            ScheduledMatch(
-              id: 'playIn:${conference.name}:final',
-              homeTeamId: loser78,
-              awayTeamId: winner910,
-              round: -1,
-            ),
-          );
-        }
-      }
-    }
-
-    if (calendar.postseasonSlotForDay(week, day) != null &&
-        calendar.playoffRoundForWeek(week) != null) {
-      final seenSeriesIds = <String>{};
-      for (final b in season.playoffBrackets) {
-        final allSeries = [
-          ...b.quarterFinals,
-          ...b.semiFinals,
-          ...b.conferenceFinal,
-          if (b.leagueFinal != null) b.leagueFinal!,
-        ];
-        for (final series in allSeries) {
-          if (series.isComplete || !seenSeriesIds.add(series.id)) continue;
-          final homeFirst = calendar.higherSeedHomeForGame(series.games.length);
-          matches.add(
-            ScheduledMatch(
-              id: 'playoff:${series.id}:${series.games.length}',
-              homeTeamId: homeFirst
-                  ? series.higherSeedTeamId
-                  : series.lowerSeedTeamId,
-              awayTeamId: homeFirst
-                  ? series.lowerSeedTeamId
-                  : series.higherSeedTeamId,
-              round: -1,
-            ),
-          );
-        }
-      }
-    }
-
-    return matches;
-  }
-
-  /// Read-only: the already-played postseason fixtures whose game happened
-  /// to land on [week]/[day], as recorded in `postseasonMatchDates`.
-  /// Complements [postseasonMatchesForDate], which only returns still-
-  /// pending fixtures — together they let the calendar show a play-in/
-  /// playoff day the same way it shows a regular season one, both before and
-  /// after the match is played.
-  List<ScheduledMatch> postseasonResultsForDate(
-    LeagueState league, {
-    required int week,
-    required int day,
-  }) {
-    final key = '$week:$day';
-    final matches = <ScheduledMatch>[];
-    for (final entry in league.currentSeason.postseasonMatchDates.entries) {
-      if (entry.value != key) continue;
-      final result = _resultForPostseasonMatchId(league, entry.key);
-      if (result == null) continue;
-      matches.add(
-        ScheduledMatch(
-          id: entry.key,
-          homeTeamId: result.homeTeamId,
-          awayTeamId: result.awayTeamId,
-          round: -1,
-          result: result,
-        ),
-      );
-    }
-    return matches;
-  }
-
-  MatchResult? _resultForPostseasonMatchId(LeagueState league, String matchId) {
-    final parts = matchId.split(':');
-    final season = league.currentSeason;
-    if (parts.length == 3 && parts[0] == 'playIn') {
-      Conference? conference;
-      for (final c in Conference.values) {
-        if (c.name == parts[1]) conference = c;
-      }
-      if (conference == null) return null;
-      MatchResult? pick(PlayInProgress p) => switch (parts[2]) {
-        '7v8' => p.game7v8,
-        '9v10' => p.game9v10,
-        'final' => p.gameFinal,
-        _ => null,
-      };
-      for (final p in season.playInProgress) {
-        if (p.conference != conference) continue;
-        final r = pick(p);
-        if (r != null) return r;
-      }
-      for (final r in season.playInResults) {
-        if (r.conference != conference) continue;
-        return switch (parts[2]) {
-          '7v8' => r.game7v8,
-          '9v10' => r.game9v10,
-          'final' => r.gameFinal,
-          _ => null,
-        };
-      }
-      return null;
-    }
-    if (parts.length == 3 && parts[0] == 'playoff') {
-      final seriesId = parts[1];
-      final gameIndex = int.tryParse(parts[2]);
-      if (gameIndex == null) return null;
-      for (final b in season.playoffBrackets) {
-        final allSeries = [
-          ...b.quarterFinals,
-          ...b.semiFinals,
-          ...b.conferenceFinal,
-          if (b.leagueFinal != null) b.leagueFinal!,
-        ];
-        for (final s in allSeries) {
-          if (s.id == seriesId && gameIndex < s.games.length) {
-            return s.games[gameIndex];
-          }
-        }
-      }
-    }
-    return null;
-  }
-
-  /// Records which calendar day produced [matchId]'s result. Postseason
-  /// fixtures don't live in `schedule`, so — unlike a regular season
-  /// `ScheduledMatch`, which carries its own `round` — this is the only
-  /// place that association is kept.
-  LeagueState _recordPostseasonMatchDate(LeagueState league, String matchId) {
-    final dates = Map<String, String>.from(
-      league.currentSeason.postseasonMatchDates,
-    )..[matchId] = '${league.currentWeek}:${league.currentDay}';
-    return league.copyWith(
-      currentSeason: league.currentSeason.copyWith(postseasonMatchDates: dates),
-    );
   }
 
   /// Applies match fatigue to the two participating teams' rosters, mirror

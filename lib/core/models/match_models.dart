@@ -168,6 +168,26 @@ abstract class ScheduledMatch with _$ScheduledMatch {
     required String awayTeamId,
     required int round,
     MatchResult? result,
+
+    /// Calendar date this fixture is scheduled for. Only set for postseason
+    /// fixtures (`Season.postseasonFixtures`) — regular season entries are
+    /// dated purely via [round] and stay `null` here.
+    int? week,
+    int? day,
+
+    /// When the play-in outcome that decides this side isn't known yet,
+    /// [homeTeamId]/[awayTeamId] holds a non-team placeholder token and this
+    /// carries the human label to show instead (e.g. "Playin seed 8"). Null
+    /// once the real team is known.
+    String? homePlaceholderLabel,
+    String? awayPlaceholderLabel,
+
+    /// Games 1–3 of a BO5 series are always played, so they're `true` from
+    /// creation. Games 4–5 start `false` (shown greyed-out — the series
+    /// might not need them) and flip to `true` only once the prior game
+    /// resolves without a decision. Always `true` for regular season/play-in
+    /// fixtures, which have no such uncertainty.
+    @Default(true) bool confirmed,
   }) = _ScheduledMatch;
 
   factory ScheduledMatch.fromJson(Map<String, dynamic> json) =>
@@ -185,6 +205,13 @@ abstract class PlayoffSeries with _$PlayoffSeries {
     @Default(0) int lowerSeedWins,
     @Default([]) List<MatchResult> games,
     String? winnerTeamId,
+
+    /// Set while [lowerSeedTeamId] is a placeholder token standing in for a
+    /// play-in seed that isn't decided yet (e.g. "Playin seed 8"). The
+    /// higher seed (1–6) is always known immediately at bracket creation;
+    /// only a 1v8/2v7 series can start out pending like this. Null once the
+    /// real team is patched in.
+    String? lowerSeedPlaceholderLabel,
   }) = _PlayoffSeries;
 
   factory PlayoffSeries.fromJson(Map<String, dynamic> json) =>
@@ -193,6 +220,7 @@ abstract class PlayoffSeries with _$PlayoffSeries {
 
 extension PlayoffSeriesX on PlayoffSeries {
   bool get isComplete => winnerTeamId != null;
+  bool get isPending => lowerSeedPlaceholderLabel != null;
 
   PlayoffSeries recordGame(MatchResult result) {
     final resolvedWinner = result.winnerTeamId;

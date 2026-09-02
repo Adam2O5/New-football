@@ -244,6 +244,18 @@ class DaySimulator {
       );
     }
 
+    // Eager postseason fixtures, per `game_calendar.md`: pairings are written
+    // to the calendar as soon as they're known, not lazily on match day.
+    if (week == balance.calendar.breakWeek && day == 1) {
+      state = season.generatePostseasonFixtures(state);
+    }
+    if (week == balance.calendar.playInWeek && day == 4) {
+      state = season.revealPlayInFinal(state);
+    }
+    if (week == balance.calendar.playInWeek && day == 7) {
+      state = season.revealPlayoffSeed8(state);
+    }
+
     if (calendar.playInSlotsForDay(week, day).isNotEmpty) {
       final advanced = season.advancePlayInForDate(
         state,
@@ -261,11 +273,6 @@ class DaySimulator {
           moment: DaySimulationMoment.duringEvent,
         );
       }
-    }
-    if (phase == SeasonPhase.playoff &&
-        state.currentSeason.playoffBrackets.isEmpty &&
-        state.currentSeason.playInResults.isNotEmpty) {
-      state = season.setupPlayoffs(state);
     }
     if (calendar.postseasonSlotForDay(week, day) != null) {
       final advanced = season.advancePlayoffsForDate(
@@ -1145,7 +1152,6 @@ class DaySimulator {
       args: {
         'oldStatus': before.teamStatus.name,
         'newStatus': after.teamStatus.name,
-        'status': after.teamStatus.name,
         'expectedRank': after.expectedRank,
         'teamPower': after.teamPower,
       },

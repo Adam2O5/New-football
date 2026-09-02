@@ -300,11 +300,11 @@ _Season _$SeasonFromJson(Map<String, dynamic> json) => _Season(
   nextDraftState: json['nextDraftState'] == null
       ? null
       : DraftState.fromJson(json['nextDraftState'] as Map<String, dynamic>),
-  postseasonMatchDates:
-      (json['postseasonMatchDates'] as Map<String, dynamic>?)?.map(
-        (k, e) => MapEntry(k, e as String),
-      ) ??
-      const <String, String>{},
+  postseasonFixtures:
+      (json['postseasonFixtures'] as List<dynamic>?)
+          ?.map((e) => ScheduledMatch.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const <ScheduledMatch>[],
 );
 
 Map<String, dynamic> _$SeasonToJson(_Season instance) => <String, dynamic>{
@@ -331,7 +331,7 @@ Map<String, dynamic> _$SeasonToJson(_Season instance) => <String, dynamic>{
   'scoutReportDone': instance.scoutReportDone,
   'tradeDeadlineAcked': instance.tradeDeadlineAcked,
   'nextDraftState': instance.nextDraftState,
-  'postseasonMatchDates': instance.postseasonMatchDates,
+  'postseasonFixtures': instance.postseasonFixtures,
 };
 
 const _$SeasonPhaseEnumMap = {
