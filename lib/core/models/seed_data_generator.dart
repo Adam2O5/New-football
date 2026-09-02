@@ -284,6 +284,47 @@ class SeedDataGenerator {
   int _gkAttrForOvr(int targetOvr, Random rng) =>
       (targetOvr - 2 + rng.nextInt(5)).clamp(1, 99);
 
+  /// Atrybuty gracza wg wag pozycji i docelowego OVR — wspólna formuła dla
+  /// startowego rosteru (`_generatePlayer`) i prospektów draftowych
+  /// (`generateDraftClass`), zgodnie z `data_generation.md` §„Atrybuty:
+  /// identyczna formuła jak u zawodników".
+  PlayerAttributes _attributesForOvr(
+    Position position,
+    int targetOvr,
+    Random rng,
+  ) {
+    if (position == Position.gk) {
+      return PlayerAttributes.goalkeeper(
+        stats: GoalkeeperAttributes(
+          diving: _gkAttrForOvr(targetOvr, rng),
+          handling: _gkAttrForOvr(targetOvr, rng),
+          kicking: _gkAttrForOvr(targetOvr, rng),
+          reflexes: _gkAttrForOvr(targetOvr, rng),
+          speed: _gkAttrForOvr(targetOvr, rng),
+          positioning: _gkAttrForOvr(targetOvr, rng),
+        ),
+      );
+    }
+    final weights =
+        BalanceConfig.defaults.player.outfieldOverallWeights[position];
+    if (weights == null) {
+      throw StateError(
+        'Brak wag atrybutów dla pozycji $position w '
+        'BalanceConfig.defaults.player.outfieldOverallWeights.',
+      );
+    }
+    return PlayerAttributes.outfield(
+      stats: FieldPlayerAttributes(
+        pace: _attrForWeight(targetOvr, weights.pace, rng),
+        shooting: _attrForWeight(targetOvr, weights.shooting, rng),
+        passing: _attrForWeight(targetOvr, weights.passing, rng),
+        dribbling: _attrForWeight(targetOvr, weights.dribbling, rng),
+        defending: _attrForWeight(targetOvr, weights.defending, rng),
+        physicality: _attrForWeight(targetOvr, weights.physicality, rng),
+      ),
+    );
+  }
+
   /// Potencjał (★) wg wieku i OVR (`data_generation.md` §„Potencjał").
   /// Wiersze/kolumny poza tabelą (np. wiek <18 albo OVR <50) są przycinane
   /// do najbliższego zdefiniowanego przedziału.
@@ -371,38 +412,7 @@ class SeedDataGenerator {
         Nationality.values[rng.nextInt(Nationality.values.length)];
     final name = _generateName(rng, nationality);
 
-    final PlayerAttributes attrs;
-    if (position == Position.gk) {
-      attrs = PlayerAttributes.goalkeeper(
-        stats: GoalkeeperAttributes(
-          diving: _gkAttrForOvr(targetOvr, rng),
-          handling: _gkAttrForOvr(targetOvr, rng),
-          kicking: _gkAttrForOvr(targetOvr, rng),
-          reflexes: _gkAttrForOvr(targetOvr, rng),
-          speed: _gkAttrForOvr(targetOvr, rng),
-          positioning: _gkAttrForOvr(targetOvr, rng),
-        ),
-      );
-    } else {
-      final weights =
-          BalanceConfig.defaults.player.outfieldOverallWeights[position];
-      if (weights == null) {
-        throw StateError(
-          'Brak wag atrybutów dla pozycji $position w '
-          'BalanceConfig.defaults.player.outfieldOverallWeights.',
-        );
-      }
-      attrs = PlayerAttributes.outfield(
-        stats: FieldPlayerAttributes(
-          pace: _attrForWeight(targetOvr, weights.pace, rng),
-          shooting: _attrForWeight(targetOvr, weights.shooting, rng),
-          passing: _attrForWeight(targetOvr, weights.passing, rng),
-          dribbling: _attrForWeight(targetOvr, weights.dribbling, rng),
-          defending: _attrForWeight(targetOvr, weights.defending, rng),
-          physicality: _attrForWeight(targetOvr, weights.physicality, rng),
-        ),
-      );
-    }
+    final attrs = _attributesForOvr(position, targetOvr, rng);
 
     final salary = _rollSalary(targetOvr);
     final roundedStars = _rollPotentialStars(age, targetOvr, rng);
@@ -468,16 +478,45 @@ class SeedDataGenerator {
     return minH + rng.nextInt(maxH - minH + 1);
   }
 
-  int _attr(int base, Random rng, {int boost = 0}) =>
-      (base + boost + rng.nextInt(10) - 5).clamp(50, 99);
-
   /// Random optimal role for a given position (`data_generation.md`).
   AssignedRole _randomRoleFor(Position position, Random rng) {
     final roles = rolesForPosition(position);
     return roles[rng.nextInt(roles.length)];
   }
 
+  /// Liczba prospektów, przedział OVR i przedział potencjału per kubełek
+  /// (`data_generation.md` §„Potencjał i OVR”). Suma liczebności musi
+  /// odpowiadać `prospectCount` (domyślnie 120).
+  static const List<
+    (int count, int ovrMin, int ovrMax, double starMin, double starMax)
+  >
+  _draftClassOvrTable = [
+    (3, 77, 79, 4.0, 5.0),
+    (8, 74, 76, 3.5, 4.5),
+    (12, 70, 73, 3.5, 4.0),
+    (10, 65, 75, 3.0, 4.5),
+    (20, 66, 69, 3.0, 3.5),
+    (20, 62, 65, 2.5, 3.0),
+    (20, 58, 61, 2.0, 2.5),
+    (27, 58, 79, 2.0, 5.0),
+  ];
+
   DraftClass generateDraftClass({required int year, int prospectCount = 120}) {
+    final ovrTargets =
+        <(int ovrMin, int ovrMax, double starMin, double starMax)>[];
+    for (final (count, ovrMin, ovrMax, starMin, starMax)
+        in _draftClassOvrTable) {
+      ovrTargets.addAll(List.filled(count, (ovrMin, ovrMax, starMin, starMax)));
+    }
+    if (ovrTargets.length != prospectCount) {
+      throw StateError(
+        'Suma liczebności w _draftClassOvrTable (${ovrTargets.length}) nie '
+        'zgadza się z prospectCount ($prospectCount) — zaktualizuj tabelę '
+        'zgodnie z data_generation.md.',
+      );
+    }
+    ovrTargets.shuffle(_random);
+
     final prospects = <Prospect>[];
     for (var i = 0; i < prospectCount; i++) {
       final positions = Position.values.where((p) => p != Position.gk).toList();
@@ -485,14 +524,14 @@ class SeedDataGenerator {
         positions.insert(0, Position.gk);
       }
       final pos = positions[_random.nextInt(positions.length)];
-      final base = (90 - i * 0.8 + _random.nextInt(10) - 5).round().clamp(
-        50,
-        95,
-      );
+
+      final (ovrMin, ovrMax, starMin, starMax) = ovrTargets[i];
+      final ovr = ovrMin + _random.nextInt(ovrMax - ovrMin + 1);
+      final stars = starMin + _random.nextDouble() * (starMax - starMin);
+      final roundedStars = (stars * 2).round() / 2.0;
+
       final nationality =
           Nationality.values[_random.nextInt(Nationality.values.length)];
-      final potentialStars = ((base - 50) / 10).clamp(0.5, 5.0);
-      final roundedStars = (potentialStars * 2).round() / 2.0;
 
       prospects.add(
         Prospect(
@@ -504,29 +543,9 @@ class SeedDataGenerator {
           position: pos,
           age: 18 + _random.nextInt(3),
           optimalRole: _randomRoleFor(pos, _random),
-          attributes: pos == Position.gk
-              ? PlayerAttributes.goalkeeper(
-                  stats: GoalkeeperAttributes(
-                    diving: _attr(base, _random, boost: 5),
-                    handling: _attr(base, _random, boost: 5),
-                    kicking: _attr(base, _random),
-                    reflexes: _attr(base, _random, boost: 5),
-                    speed: _attr(base, _random),
-                    positioning: _attr(base, _random, boost: 3),
-                  ),
-                )
-              : PlayerAttributes.outfield(
-                  stats: FieldPlayerAttributes(
-                    pace: _attr(base, _random),
-                    shooting: _attr(base, _random),
-                    passing: _attr(base, _random),
-                    dribbling: _attr(base, _random),
-                    defending: _attr(base, _random),
-                    physicality: _attr(base, _random),
-                  ),
-                ),
-          scoutGrade: (base + _random.nextInt(8) - 4).clamp(30, 99),
-          combineScore: (base + _random.nextInt(12) - 6).clamp(30, 99),
+          attributes: _attributesForOvr(pos, ovr, _random),
+          scoutGrade: (ovr + _random.nextInt(8) - 4).clamp(30, 99),
+          combineScore: (ovr + _random.nextInt(12) - 6).clamp(30, 99),
           potentialStars: roundedStars,
           heightCm: _heightCmFor(pos, _random),
           injuryProne: 1 + _random.nextInt(10),
@@ -540,7 +559,21 @@ class SeedDataGenerator {
 
   int _staffCounter = 0;
 
-  /// Generates one free/unhired staff member (`docs/staff_rules.md` §1–2).
+  /// Rozkład gwiazdek generowanego sztabu (`data_generation.md`
+  /// §„Generowanie po staffGrowth"). Wagi sumują się do 1.0.
+  static const List<(double stars, double probability)> _staffStarWeights = [
+    (0.5, 0.10),
+    (1.0, 0.10),
+    (1.5, 0.10),
+    (2.0, 0.15),
+    (2.5, 0.20),
+    (3.0, 0.15),
+    (3.5, 0.10),
+    (4.0, 0.06),
+    (4.5, 0.03),
+    (5.0, 0.01),
+  ];
+
   StaffMember generateStaffMember(
     Random rng,
     StaffRole role, {
@@ -549,15 +582,16 @@ class SeedDataGenerator {
     final nationality =
         Nationality.values[rng.nextInt(Nationality.values.length)];
     final name = _generateName(rng, nationality);
-    final age = 35 + rng.nextInt(26); // 35–60
-    final b = balance.staff;
+    final age = 35 + rng.nextInt(16); // 35–50
 
     double star() {
-      final steps = ((b.starMax - b.starMin) / b.starStep).round();
-      // Skewed towards 1.5–3★: elite (6/6 max) staff should be rare.
-      final roll = rng.nextDouble() * rng.nextDouble();
-      final step = (roll * steps).round().clamp(0, steps);
-      return b.starMin + step * b.starStep;
+      final roll = rng.nextDouble();
+      var cumulative = 0.0;
+      for (final (stars, probability) in _staffStarWeights) {
+        cumulative += probability;
+        if (roll < cumulative) return stars;
+      }
+      return _staffStarWeights.last.$1;
     }
 
     final attrs = switch (role) {
@@ -579,6 +613,53 @@ class SeedDataGenerator {
       ),
       StaffRole.doctor => StaffAttributes(prevention: star(), care: star()),
       StaffRole.cfo => StaffAttributes(negotiation: star()),
+    };
+
+    _staffCounter++;
+    return StaffMember(
+      id: 'staff_${_staffCounter}_${rng.nextInt(1 << 32)}',
+      name: name,
+      nationality: nationality,
+      age: age,
+      role: role,
+      attributes: attrs,
+    );
+  }
+
+  /// Generuje członka sztabu z atrybutami relevantnymi dla [role] ustawionymi
+  /// wprost na [stars] — deterministyczny target zamiast losowego rozkładu z
+  /// [generateStaffMember] (`data_generation.md` §„Generowanie na początku
+  /// save'a").
+  StaffMember generateStaffMemberAtStars(
+    Random rng,
+    StaffRole role,
+    double stars,
+  ) {
+    final nationality =
+        Nationality.values[rng.nextInt(Nationality.values.length)];
+    final name = _generateName(rng, nationality);
+    final age = 35 + rng.nextInt(16); // 35–50
+    final clamped = StaffRatingSystem.clampToScale(stars);
+
+    final attrs = switch (role) {
+      StaffRole.headCoach => StaffAttributes(
+        tactics: clamped,
+        motivation: clamped,
+      ),
+      StaffRole.youthCoach => StaffAttributes(
+        development: clamped,
+        mentoring: clamped,
+      ),
+      StaffRole.scout => StaffAttributes(
+        coverage: clamped,
+        evaluation: clamped,
+      ),
+      StaffRole.physio => StaffAttributes(
+        rehabilitation: clamped,
+        regenaration: clamped,
+      ),
+      StaffRole.doctor => StaffAttributes(prevention: clamped, care: clamped),
+      StaffRole.cfo => StaffAttributes(negotiation: clamped),
     };
 
     _staffCounter++;

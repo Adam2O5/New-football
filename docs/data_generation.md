@@ -212,7 +212,7 @@ Każdy zespół otrzymuje staff na każdą pozycję. Dodatkowo generowanych jest
 ## Seed Generation
 
 ### Game schedule
-_(do uzupełnienia — harmonogram meczów generowany poza `SeedDataGenerator`)_
+_(harmonogram meczów generowany poza `SeedDataGenerator`)_
 
 ### Imiona i nazwiska graczy i staffu
 - Pula imion i nazwisk per narodowość (`namePools[nationality]`)

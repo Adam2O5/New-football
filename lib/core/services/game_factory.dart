@@ -7,11 +7,10 @@ import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/seed_data_generator.dart';
-import 'package:new_football/core/models/staff.dart';
 import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/services/league_strength_service.dart';
 import 'package:new_football/core/services/schedule_generator.dart';
-import 'package:new_football/core/services/staff_service.dart';
+import 'package:new_football/core/models/staff.dart';
 
 class NewGameRequest {
   const NewGameRequest({
@@ -63,12 +62,9 @@ class GameFactory {
     var teams = league.teams.map(ai.autoSelectLineup).toList();
 
     final staffRng = Random(saveSeed);
-    final staffService = StaffService();
-    teams = teams
-        .map((t) => _seedInitialStaff(t, staffRng, staffService))
-        .toList();
+    teams = teams.map((t) => _seedInitialStaff(t, staffRng)).toList();
     final staffPool = _seedGenerator
-        .generateStaffPool(36, random: staffRng)
+        .generateStaffPool(90, random: staffRng)
         .map(
           (m) => m.copyWith(
             contract: null, // free agents: no contract until hired
@@ -114,19 +110,33 @@ class GameFactory {
 
   /// Starting squads only have some slots filled (`docs/staff_rules.md` §3:
   /// hiring all 6 elite at once is not achievable via market generation).
-  Team _seedInitialStaff(Team team, Random rng, StaffService staffService) {
+  /// Startowy sztab drużyny (`data_generation.md` §„Generowanie na początku
+  /// save'a"): wszystkie 6 ról obsadzone, ustalony rozkład gwiazdek/pensji/
+  /// długości kontraktu przydzielony do losowo przetasowanych ról.
+  static const List<(double stars, int years, int salary)>
+  _initialStaffDistribution = [
+    (2.0, 1, 750000),
+    (2.0, 1, 750000),
+    (2.0, 1, 750000),
+    (2.5, 1, 1000000),
+    (3.0, 2, 1500000),
+    (3.5, 2, 2000000),
+  ];
+
+  Team _seedInitialStaff(Team team, Random rng) {
     var staff = team.staff;
-    for (final role in StaffRole.values) {
-      if (rng.nextDouble() >= 0.55) continue;
-      final member = _seedGenerator.generateStaffMember(rng, role);
-      final salary = staffService.marketSalary(member).round();
-      final hired = member.copyWith(
-        contract: StaffContract(
-          salary: salary,
-          yearsRemaining: 2 + rng.nextInt(3),
-        ),
+    final roles = StaffRole.values.toList()..shuffle(rng);
+    for (var i = 0; i < roles.length; i++) {
+      final (stars, years, salary) = _initialStaffDistribution[i];
+      final member = _seedGenerator.generateStaffMemberAtStars(
+        rng,
+        roles[i],
+        stars,
       );
-      staff = staff.withMember(role, hired);
+      final hired = member.copyWith(
+        contract: StaffContract(salary: salary, yearsRemaining: years),
+      );
+      staff = staff.withMember(roles[i], hired);
     }
     return team.copyWith(staff: staff);
   }
