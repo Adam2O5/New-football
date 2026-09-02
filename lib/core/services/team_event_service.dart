@@ -477,13 +477,15 @@ class TeamEventService {
     int saveSeed,
   ) {
     final team = state.teamById(teamId);
-    if (team == null ||
-        team.eventState.isOnCooldown('leaderSupport') ||
+    if (team == null || team.eventState.isOnCooldown('leaderSupport')) {
+      return state;
+    }
+    final leader = team.startingEleven
+        .where((player) => player.personality == PlayerPersonality.leader)
+        .firstOrNull;
+    if (leader == null ||
         _winStreak(team.recentMatchResults) <
-            balance.events.leaderSupportWinStreak ||
-        !team.startingEleven.any(
-          (player) => player.personality == PlayerPersonality.leader,
-        )) {
+            balance.events.leaderSupportWinStreak) {
       return state;
     }
     final chance =
@@ -511,7 +513,12 @@ class TeamEventService {
       next,
       teamId: team.id,
       kind: 'leaderSupport',
-      payload: {'teamId': team.id, 'eventKind': 'leaderSupport'},
+      args: {'playerName': leader.name},
+      payload: {
+        'teamId': team.id,
+        'playerId': leader.id,
+        'eventKind': 'leaderSupport',
+      },
     );
   }
 
