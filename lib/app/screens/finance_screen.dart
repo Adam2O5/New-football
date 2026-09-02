@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:new_football/app/providers/club_branding_provider.dart';
 import 'package:new_football/app/providers/game_provider.dart';
+import 'package:new_football/app/providers/settings_provider.dart';
+import 'package:new_football/app/theme/app_theme.dart';
+import 'package:new_football/app/utils/color_interpolation.dart';
 import 'package:new_football/app/utils/formatters.dart';
 import 'package:new_football/app/widgets/screen_background.dart';
 import 'package:new_football/core/models/league_state.dart';
-import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/services/salary_cap_service.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
@@ -29,15 +32,99 @@ class _FinanceMetric {
   final String value;
 }
 
+/// Payroll bar for the salary cap card: a filled track from 0 to the second
+/// apron, with thin markers at [markerFractions] (used for the salary cap
+/// and first apron thresholds).
+class _CapProgressBar extends StatelessWidget {
+  const _CapProgressBar({
+    required this.progress,
+    required this.color,
+    required this.markerFractions,
+    required this.backgroundColor,
+  });
+
+  final double progress;
+  final Color color;
+  final List<double> markerFractions;
+  final Color backgroundColor;
+
+  static const double _height = 8;
+  static const double _markerWidth = 2;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: _height,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final width = constraints.maxWidth;
+          return Stack(
+            children: [
+              LinearProgressIndicator(
+                value: progress,
+                minHeight: _height,
+                borderRadius: BorderRadius.circular(_height / 2),
+                color: color,
+                backgroundColor: backgroundColor,
+              ),
+              for (final fraction in markerFractions)
+                Positioned(
+                  left: (width * fraction).clamp(0.0, width - _markerWidth),
+                  top: 0,
+                  bottom: 0,
+                  child: Container(width: _markerWidth, color: Colors.black45),
+                ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
 class FinanceScreen extends ConsumerWidget {
   const FinanceScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final team = ref.watch(activeLeagueProvider)?.playerTeam;
+    final league = ref.watch(activeLeagueProvider);
+    final useLegacyColorTheme = ref.watch(legacyColorThemeSettingProvider);
+    final activeTeamId = league?.playerTeamId;
+    final branding = ref
+        .watch(clubBrandingProvider)
+        .resolve(activeTeamId ?? '');
+    final team = league?.playerTeam;
+
     if (team == null) {
-      return Scaffold(
+      return _themed(
+        useLegacyColorTheme,
+        branding.primaryColor,
+        branding.secondaryColor,
+        Scaffold(
+          appBar: AppBar(
+            title: Text(l10n.finance_title),
+            leading: IconButton(
+              tooltip: l10n.common_cancel,
+              icon: const Icon(Icons.arrow_back),
+              onPressed: () => context.go('/game'),
+            ),
+          ),
+          body: ScreenBackground(
+            child: Center(child: Text(l10n.finance_noTeam)),
+          ),
+        ),
+      );
+    }
+
+    const capService = SalaryCapService();
+    final snapshot = capService.snapshot(team);
+
+    return _themed(
+      useLegacyColorTheme,
+      branding.primaryColor,
+      branding.secondaryColor,
+      Scaffold(
         appBar: AppBar(
           title: Text(l10n.finance_title),
           leading: IconButton(
@@ -46,64 +133,33 @@ class FinanceScreen extends ConsumerWidget {
             onPressed: () => context.go('/game'),
           ),
         ),
-        body: ScreenBackground(child: Center(child: Text(l10n.finance_noTeam))),
-      );
-    }
-
-    const capService = SalaryCapService();
-    final snapshot = capService.snapshot(team);
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.finance_title),
-        leading: IconButton(
-          tooltip: l10n.common_cancel,
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => context.go('/game'),
-        ),
-      ),
-      body: ScreenBackground(
-        child: ListView(
-          key: const ValueKey('finance-scroll'),
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
-          children: [
-            _buildTeamHeader(context, l10n, team),
-            const SizedBox(height: 12),
-            _buildCapOverview(context, l10n, snapshot),
-            const SizedBox(height: 12),
-            _buildApronOverview(context, l10n, snapshot),
-            const SizedBox(height: 12),
-            _buildCashOverview(context, l10n, team),
-            const SizedBox(height: 12),
-            _buildHealthCard(context, l10n, snapshot),
-            const SizedBox(height: 12),
-            _buildActions(context, l10n),
-          ],
+        body: ScreenBackground(
+          child: ListView(
+            key: const ValueKey('finance-scroll'),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 28),
+            children: [
+              _buildCapOverview(context, l10n, snapshot),
+              const SizedBox(height: 12),
+              _buildApronOverview(context, l10n, snapshot),
+              const SizedBox(height: 12),
+              _buildHealthCard(context, l10n, snapshot),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildTeamHeader(
-    BuildContext context,
-    AppLocalizations l10n,
-    Team team,
+  Widget _themed(
+    bool useLegacyColorTheme,
+    Color primary,
+    Color secondary,
+    Widget child,
   ) {
-    final theme = Theme.of(context);
-    final initial = team.name.trim().isEmpty
-        ? '?'
-        : team.name.trim().substring(0, 1).toUpperCase();
-    return Card(
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        leading: CircleAvatar(
-          backgroundColor: theme.colorScheme.primary,
-          foregroundColor: theme.colorScheme.onPrimary,
-          child: Text(initial),
-        ),
-        title: Text(team.name, style: theme.textTheme.titleLarge),
-        subtitle: Text(l10n.finance_dashboardSubtitle),
-      ),
+    if (useLegacyColorTheme) return child;
+    return Theme(
+      data: AppTheme.forClub(primary: primary, secondary: secondary),
+      child: child,
     );
   }
 
@@ -112,9 +168,16 @@ class FinanceScreen extends ConsumerWidget {
     AppLocalizations l10n,
     CapSnapshot snapshot,
   ) {
-    final progress = snapshot.cap <= 0
-        ? 0.0
-        : (snapshot.payroll / snapshot.cap).clamp(0.0, 1.0).toDouble();
+    // Scale of the bar is 0..secondApron; a second apron of 0 would make the
+    // scale degenerate, so it falls back to 1 to keep the fractions finite.
+    final maxScale = snapshot.secondApron > 0 ? snapshot.secondApron : 1.0;
+    final clampedPayroll = snapshot.payroll.clamp(0.0, maxScale);
+    final progress = (clampedPayroll / maxScale).clamp(0.0, 1.0).toDouble();
+    final capFraction = (snapshot.cap / maxScale).clamp(0.0, 1.0).toDouble();
+    final firstApronFraction = (snapshot.firstApron / maxScale)
+        .clamp(0.0, 1.0)
+        .toDouble();
+
     return _sectionCard(
       context,
       title: l10n.finance_capOverview,
@@ -141,31 +204,32 @@ class FinanceScreen extends ConsumerWidget {
           value: _capStatusLabel(l10n, snapshot.status),
         ),
       ],
-      footer: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 16),
-          LinearProgressIndicator(
-            value: progress,
-            minHeight: 8,
-            borderRadius: BorderRadius.circular(8),
-            color: snapshot.capSpace >= 0
-                ? Theme.of(context).colorScheme.primary
-                : Theme.of(context).colorScheme.error,
-            backgroundColor: Theme.of(
-              context,
-            ).colorScheme.surfaceContainerHighest,
-          ),
-          const SizedBox(height: 6),
-          Text(
-            snapshot.capSpace >= 0
-                ? l10n.finance_capHealthy
-                : l10n.finance_capWarning,
-            style: Theme.of(context).textTheme.bodySmall,
-          ),
-        ],
+      footer: Padding(
+        padding: const EdgeInsets.only(top: 16),
+        child: _CapProgressBar(
+          progress: progress,
+          color: _capBarColor(snapshot),
+          markerFractions: [capFraction, firstApronFraction],
+          backgroundColor: Theme.of(
+            context,
+          ).colorScheme.surfaceContainerHighest,
+        ),
       ),
     );
+  }
+
+  /// Colour of the payroll bar/health tile for [snapshot], read off a
+  /// gradient over the 0..secondApron scale: dark green at 0, light green at
+  /// the salary cap, orange at the first apron, red at the second apron.
+  Color _capBarColor(CapSnapshot snapshot) {
+    final maxScale = snapshot.secondApron > 0 ? snapshot.secondApron : 1.0;
+    final clampedPayroll = snapshot.payroll.clamp(0.0, maxScale);
+    return interpolateStops(clampedPayroll.toDouble(), [
+      const ColorStop(value: 0, color: Color(0xFF2E7D32)),
+      ColorStop(value: snapshot.cap.toDouble(), color: Colors.lightGreen),
+      ColorStop(value: snapshot.firstApron.toDouble(), color: Colors.orange),
+      ColorStop(value: maxScale.toDouble(), color: Colors.red),
+    ]);
   }
 
   Widget _buildApronOverview(
@@ -189,32 +253,6 @@ class FinanceScreen extends ConsumerWidget {
           value: formatMoney(context, snapshot.secondApron),
         ),
       ],
-      footer: Text(
-        l10n.finance_apronHeadroom(
-          formatMoney(context, snapshot.firstApron - snapshot.payroll),
-          formatMoney(context, snapshot.secondApron - snapshot.payroll),
-        ),
-        style: Theme.of(context).textTheme.bodySmall,
-      ),
-    );
-  }
-
-  Widget _buildCashOverview(
-    BuildContext context,
-    AppLocalizations l10n,
-    Team team,
-  ) {
-    return _sectionCard(
-      context,
-      title: l10n.finance_cashOverview,
-      icon: Icons.account_balance_outlined,
-      metrics: [
-        _FinanceMetric(
-          icon: Icons.payments_outlined,
-          label: l10n.finance_cash,
-          value: formatMoney(context, team.finance.cashBalance),
-        ),
-      ],
     );
   }
 
@@ -224,52 +262,22 @@ class FinanceScreen extends ConsumerWidget {
     CapSnapshot snapshot,
   ) {
     final healthy = snapshot.capSpace >= 0;
-    final colors = Theme.of(context).colorScheme;
+    final barColor = _capBarColor(snapshot);
+    final foreground = foregroundForContrast(barColor);
     return Card(
-      color: healthy ? colors.primaryContainer : colors.errorContainer,
+      color: barColor,
       child: ListTile(
         leading: Icon(
           healthy ? Icons.check_circle_outline : Icons.warning_amber_outlined,
-          color: healthy ? colors.onPrimaryContainer : colors.onErrorContainer,
+          color: foreground,
         ),
-        title: Text(l10n.finance_financialHealth),
+        title: Text(
+          l10n.finance_financialHealth,
+          style: TextStyle(color: foreground),
+        ),
         subtitle: Text(
           healthy ? l10n.finance_capHealthy : l10n.finance_capWarning,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildActions(BuildContext context, AppLocalizations l10n) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              l10n.finance_actions,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 12),
-            FilledButton.icon(
-              onPressed: () => context.push('/game/trade'),
-              icon: const Icon(Icons.swap_horiz),
-              label: Text(l10n.finance_trade),
-            ),
-            const SizedBox(height: 8),
-            OutlinedButton.icon(
-              onPressed: () => context.push('/game/contracts'),
-              icon: const Icon(Icons.description_outlined),
-              label: Text(l10n.finance_contracts),
-            ),
-            const SizedBox(height: 8),
-            OutlinedButton.icon(
-              onPressed: () => context.push('/game/staff'),
-              icon: const Icon(Icons.groups_outlined),
-              label: Text(l10n.staff_title),
-            ),
-          ],
+          style: TextStyle(color: foreground),
         ),
       ),
     );
