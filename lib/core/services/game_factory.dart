@@ -72,9 +72,17 @@ class GameFactory {
         )
         .toList();
 
+    // Osobne ziarno (nie `saveSeed` wprost) — inaczej dałby dokładnie ten sam
+    // strumień liczb co `staffRng`, korelując pulę wolnych agentów ze sztabem.
+    final freeAgentRng = Random(saveSeed + 1);
+    final freeAgentPlayers = _seedGenerator.generateFreeAgentPlayers(
+      rng: freeAgentRng,
+    );
+
     league = league.copyWith(
       teams: teams,
       staffFreeAgents: staffPool,
+      freeAgents: freeAgentPlayers,
       currentWeek: 1,
       currentDay: 1,
       currentRound: 0,

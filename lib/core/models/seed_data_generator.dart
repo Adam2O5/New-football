@@ -467,6 +467,100 @@ class SeedDataGenerator {
         .recalculatePointValue();
   }
 
+  /// Startowa pula wolnych agentów dostępnych od pierwszego dnia save'a
+  /// (`data_generation.md` §„Wolni agenci na starcie save'a"): 25–35 graczy,
+  /// OVR 73–78, wiek 22–32, potencjał 2,5–4,0★. Pozycja, narodowość, rola,
+  /// temperament itd. są w pełni losowe (możliwe 0 bramkarzy w puli).
+  List<Player> generateFreeAgentPlayers({required Random rng}) {
+    final count = 25 + rng.nextInt(11); // 25..35
+    return List.generate(count, (i) {
+      final position = Position.values[rng.nextInt(Position.values.length)];
+      final targetOvr = 73 + rng.nextInt(6); // 73..78
+      final age = 22 + rng.nextInt(11); // 22..32
+      return _generateFreeAgentPlayer(
+        index: i,
+        position: position,
+        targetOvr: targetOvr,
+        age: age,
+        rng: rng,
+      );
+    });
+  }
+
+  /// Potencjał (★) wolnych agentów: 2,5–4,0★, zadany wprost i niezależny od
+  /// `_potentialTable` (wiek/OVR) używanej dla rosterów startowych i draftu
+  /// (`data_generation.md` §„Wolni agenci na starcie save'a").
+  double _rollFreeAgentPotentialStars(Random rng) {
+    const starMin = 2.5;
+    const starMax = 4.0;
+    final stars = starMin + rng.nextDouble() * (starMax - starMin);
+    return (stars * 2).round() / 2.0;
+  }
+
+  Player _generateFreeAgentPlayer({
+    required int index,
+    required Position position,
+    required int targetOvr,
+    required int age,
+    required Random rng,
+  }) {
+    final id = 'free_agent_start_$index';
+    final nationality =
+        Nationality.values[rng.nextInt(Nationality.values.length)];
+    final name = _generateName(rng, nationality);
+
+    final attrs = _attributesForOvr(position, targetOvr, rng);
+    final salary = _rollSalary(targetOvr);
+    final potentialStars = _rollFreeAgentPotentialStars(rng);
+
+    final injuryProne = 1 + rng.nextInt(10);
+    final determination = 1 + rng.nextInt(10);
+    final heightCm = _heightCmFor(position, rng);
+    final outcome = rollDevelopmentOutcome(determination, rng);
+
+    final player = Player(
+      id: id,
+      name: name,
+      position: position,
+      nationality: nationality,
+      age: age,
+      attributes: attrs,
+      personality: PlayerPersonality
+          .values[rng.nextInt(PlayerPersonality.values.length)],
+      potentialStars: potentialStars,
+      heightCm: heightCm,
+      optimalRole: _randomRoleFor(position, rng),
+      // Brak klubu od startu save'a — ta sama konwencja `yearsRemaining: 0`
+      // co dla graczy z wygasłym kontraktem (`contract_market_models.dart`).
+      contract: Contract(salary: salary, yearsRemaining: 0),
+      state: PlayerState(
+        stamina: 100,
+        form: (3 + rng.nextInt(6)).toDouble(),
+        role: position.defaultAssignedRole,
+        seasonsWithTeam: 0,
+      ),
+      hidden: PlayerHidden(
+        injuryProne: injuryProne,
+        determination: determination,
+        overallProgress: (age <= 26 ? 40 + rng.nextInt(50) : rng.nextInt(30))
+            .clamp(0.0, 99.0)
+            .toDouble(),
+        growthRate: BalanceConfig.defaults.development.baseGrowthRateFor(
+          determination,
+        ),
+        developmentOutcome: outcome,
+        developmentCeilingStars: rollDevelopmentCeilingStars(
+          potentialStars,
+          outcome,
+          rng,
+        ),
+      ),
+    );
+    return player
+        .copyWith(seasonStartOvr: player.overall())
+        .recalculatePointValue();
+  }
+
   int _heightCmFor(Position position, Random rng) {
     final (minH, maxH) = switch (position) {
       Position.gk => (175, 200),
