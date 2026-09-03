@@ -6088,14 +6088,14 @@ abstract class AppLocalizations {
   /// No description provided for @search_hint.
   ///
   /// In pl, this message translates to:
-  /// **'Szukaj drużyn, zawodników i prospektów'**
+  /// **'Szukaj zawodników, prospektów i picków'**
   String get search_hint;
 
-  /// No description provided for @search_allTypes.
+  /// No description provided for @search_optionsButton.
   ///
   /// In pl, this message translates to:
-  /// **'Wszystkie typy'**
-  String get search_allTypes;
+  /// **'Opcje wyszukiwania'**
+  String get search_optionsButton;
 
   /// No description provided for @search_players.
   ///
@@ -6103,23 +6103,17 @@ abstract class AppLocalizations {
   /// **'Zawodnicy'**
   String get search_players;
 
-  /// No description provided for @search_teams.
-  ///
-  /// In pl, this message translates to:
-  /// **'Drużyny'**
-  String get search_teams;
-
   /// No description provided for @search_prospects.
   ///
   /// In pl, this message translates to:
   /// **'Prospekci'**
   String get search_prospects;
 
-  /// No description provided for @search_freeAgents.
+  /// No description provided for @search_picks.
   ///
   /// In pl, this message translates to:
-  /// **'Wolni agenci'**
-  String get search_freeAgents;
+  /// **'Picki'**
+  String get search_picks;
 
   /// No description provided for @search_noResults.
   ///
@@ -6133,12 +6127,6 @@ abstract class AppLocalizations {
   /// **'Wymień'**
   String get search_tradeAction;
 
-  /// No description provided for @search_teamResult.
-  ///
-  /// In pl, this message translates to:
-  /// **'Drużyna · {conference}'**
-  String search_teamResult(Object conference);
-
   /// No description provided for @search_playerResult.
   ///
   /// In pl, this message translates to:
@@ -6148,7 +6136,7 @@ abstract class AppLocalizations {
   /// No description provided for @search_prospectResult.
   ///
   /// In pl, this message translates to:
-  /// **'Prospekt · {position} · wiek {age}'**
+  /// **'Prospekt · {position} · {age}'**
   String search_prospectResult(Object age, Object position);
 
   /// No description provided for @search_freeAgentResult.
@@ -6156,6 +6144,114 @@ abstract class AppLocalizations {
   /// In pl, this message translates to:
   /// **'Wolny agent · {position} · OVR {ovr}'**
   String search_freeAgentResult(Object ovr, Object position);
+
+  /// No description provided for @search_pickResult.
+  ///
+  /// In pl, this message translates to:
+  /// **'Pick · {team} · Runda {round} · {year}'**
+  String search_pickResult(Object round, Object team, Object year);
+
+  /// No description provided for @search_pickDialogTitle.
+  ///
+  /// In pl, this message translates to:
+  /// **'Pick draftowy'**
+  String get search_pickDialogTitle;
+
+  /// No description provided for @search_pickDialogMessage.
+  ///
+  /// In pl, this message translates to:
+  /// **'Pick draftowy {year}, runda {round}, właściciel: {team}.'**
+  String search_pickDialogMessage(Object round, Object team, Object year);
+
+  /// No description provided for @search_pickDialogGoToTrade.
+  ///
+  /// In pl, this message translates to:
+  /// **'Przejdź do transakcji'**
+  String get search_pickDialogGoToTrade;
+
+  /// No description provided for @searchFilters_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Opcje wyszukiwania'**
+  String get searchFilters_title;
+
+  /// No description provided for @searchFilters_showTitle.
+  ///
+  /// In pl, this message translates to:
+  /// **'Pokaż'**
+  String get searchFilters_showTitle;
+
+  /// No description provided for @searchFilters_reset.
+  ///
+  /// In pl, this message translates to:
+  /// **'Przywróć domyślne'**
+  String get searchFilters_reset;
+
+  /// No description provided for @searchFilters_nationality.
+  ///
+  /// In pl, this message translates to:
+  /// **'Narodowość'**
+  String get searchFilters_nationality;
+
+  /// No description provided for @searchFilters_salary.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wynagrodzenie'**
+  String get searchFilters_salary;
+
+  /// No description provided for @searchFilters_contractLength.
+  ///
+  /// In pl, this message translates to:
+  /// **'Długość kontraktu'**
+  String get searchFilters_contractLength;
+
+  /// No description provided for @searchFilters_club.
+  ///
+  /// In pl, this message translates to:
+  /// **'Klub'**
+  String get searchFilters_club;
+
+  /// No description provided for @searchFilters_noClub.
+  ///
+  /// In pl, this message translates to:
+  /// **'Bez klubu (wolny agent)'**
+  String get searchFilters_noClub;
+
+  /// No description provided for @searchFilters_originalClub.
+  ///
+  /// In pl, this message translates to:
+  /// **'Oryginalny klub'**
+  String get searchFilters_originalClub;
+
+  /// No description provided for @searchFilters_round.
+  ///
+  /// In pl, this message translates to:
+  /// **'Runda'**
+  String get searchFilters_round;
+
+  /// No description provided for @searchFilters_year.
+  ///
+  /// In pl, this message translates to:
+  /// **'Rok'**
+  String get searchFilters_year;
+
+  /// No description provided for @searchFilters_allRoles.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wszystkie role'**
+  String get searchFilters_allRoles;
+
+  /// No description provided for @searchFilters_allSelected.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wszystkie'**
+  String get searchFilters_allSelected;
+
+  /// No description provided for @searchFilters_selectedCount.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wybrano: {count}'**
+  String searchFilters_selectedCount(Object count);
 
   /// No description provided for @msg_matchPreview_title.
   ///

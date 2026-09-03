@@ -3342,22 +3342,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get search_title => 'Search';
 
   @override
-  String get search_hint => 'Search teams, players and prospects';
+  String get search_hint => 'Search players, prospects and picks';
 
   @override
-  String get search_allTypes => 'All types';
+  String get search_optionsButton => 'Search options';
 
   @override
   String get search_players => 'Players';
 
   @override
-  String get search_teams => 'Teams';
-
-  @override
   String get search_prospects => 'Prospects';
 
   @override
-  String get search_freeAgents => 'Free agents';
+  String get search_picks => 'Picks';
 
   @override
   String get search_noResults => 'No results';
@@ -3366,23 +3363,78 @@ class AppLocalizationsEn extends AppLocalizations {
   String get search_tradeAction => 'Trade';
 
   @override
-  String search_teamResult(Object conference) {
-    return 'Team · $conference';
-  }
-
-  @override
   String search_playerResult(Object position, Object team) {
     return 'Player · $team · $position';
   }
 
   @override
   String search_prospectResult(Object age, Object position) {
-    return 'Prospect · $position · age $age';
+    return 'Prospect · $position · $age';
   }
 
   @override
   String search_freeAgentResult(Object ovr, Object position) {
     return 'Free agent · $position · OVR $ovr';
+  }
+
+  @override
+  String search_pickResult(Object round, Object team, Object year) {
+    return 'Pick · $team · Round $round · $year';
+  }
+
+  @override
+  String get search_pickDialogTitle => 'Draft pick';
+
+  @override
+  String search_pickDialogMessage(Object round, Object team, Object year) {
+    return '$year Round $round pick, owned by $team.';
+  }
+
+  @override
+  String get search_pickDialogGoToTrade => 'Go to trade';
+
+  @override
+  String get searchFilters_title => 'Search options';
+
+  @override
+  String get searchFilters_showTitle => 'Show';
+
+  @override
+  String get searchFilters_reset => 'Restore defaults';
+
+  @override
+  String get searchFilters_nationality => 'Nationality';
+
+  @override
+  String get searchFilters_salary => 'Salary';
+
+  @override
+  String get searchFilters_contractLength => 'Contract length';
+
+  @override
+  String get searchFilters_club => 'Club';
+
+  @override
+  String get searchFilters_noClub => 'No club (free agent)';
+
+  @override
+  String get searchFilters_originalClub => 'Original club';
+
+  @override
+  String get searchFilters_round => 'Round';
+
+  @override
+  String get searchFilters_year => 'Year';
+
+  @override
+  String get searchFilters_allRoles => 'All roles';
+
+  @override
+  String get searchFilters_allSelected => 'All';
+
+  @override
+  String searchFilters_selectedCount(Object count) {
+    return '$count selected';
   }
 
   @override

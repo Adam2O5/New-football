@@ -3347,22 +3347,19 @@ class AppLocalizationsPl extends AppLocalizations {
   String get search_title => 'Wyszukiwanie';
 
   @override
-  String get search_hint => 'Szukaj drużyn, zawodników i prospektów';
+  String get search_hint => 'Szukaj zawodników, prospektów i picków';
 
   @override
-  String get search_allTypes => 'Wszystkie typy';
+  String get search_optionsButton => 'Opcje wyszukiwania';
 
   @override
   String get search_players => 'Zawodnicy';
 
   @override
-  String get search_teams => 'Drużyny';
-
-  @override
   String get search_prospects => 'Prospekci';
 
   @override
-  String get search_freeAgents => 'Wolni agenci';
+  String get search_picks => 'Picki';
 
   @override
   String get search_noResults => 'Brak wyników';
@@ -3371,23 +3368,78 @@ class AppLocalizationsPl extends AppLocalizations {
   String get search_tradeAction => 'Wymień';
 
   @override
-  String search_teamResult(Object conference) {
-    return 'Drużyna · $conference';
-  }
-
-  @override
   String search_playerResult(Object position, Object team) {
     return 'Zawodnik · $team · $position';
   }
 
   @override
   String search_prospectResult(Object age, Object position) {
-    return 'Prospekt · $position · wiek $age';
+    return 'Prospekt · $position · $age';
   }
 
   @override
   String search_freeAgentResult(Object ovr, Object position) {
     return 'Wolny agent · $position · OVR $ovr';
+  }
+
+  @override
+  String search_pickResult(Object round, Object team, Object year) {
+    return 'Pick · $team · Runda $round · $year';
+  }
+
+  @override
+  String get search_pickDialogTitle => 'Pick draftowy';
+
+  @override
+  String search_pickDialogMessage(Object round, Object team, Object year) {
+    return 'Pick draftowy $year, runda $round, właściciel: $team.';
+  }
+
+  @override
+  String get search_pickDialogGoToTrade => 'Przejdź do transakcji';
+
+  @override
+  String get searchFilters_title => 'Opcje wyszukiwania';
+
+  @override
+  String get searchFilters_showTitle => 'Pokaż';
+
+  @override
+  String get searchFilters_reset => 'Przywróć domyślne';
+
+  @override
+  String get searchFilters_nationality => 'Narodowość';
+
+  @override
+  String get searchFilters_salary => 'Wynagrodzenie';
+
+  @override
+  String get searchFilters_contractLength => 'Długość kontraktu';
+
+  @override
+  String get searchFilters_club => 'Klub';
+
+  @override
+  String get searchFilters_noClub => 'Bez klubu (wolny agent)';
+
+  @override
+  String get searchFilters_originalClub => 'Oryginalny klub';
+
+  @override
+  String get searchFilters_round => 'Runda';
+
+  @override
+  String get searchFilters_year => 'Rok';
+
+  @override
+  String get searchFilters_allRoles => 'Wszystkie role';
+
+  @override
+  String get searchFilters_allSelected => 'Wszystkie';
+
+  @override
+  String searchFilters_selectedCount(Object count) {
+    return 'Wybrano: $count';
   }
 
   @override

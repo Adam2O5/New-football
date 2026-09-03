@@ -728,8 +728,8 @@ class MessageTemplatesEn {
       key: 'msg_teamStatusChange_title',
       title: 'Team Status Change',
       body:
-          "The club's sporting or organizational status has changed. New "
-          'status: {status}.',
+          "The club's sporting or organizational status has changed from "
+          '{oldStatus} to {newStatus}.',
     ),
     'msg_seasonSummary_title': MessageTextTemplate(
       key: 'msg_seasonSummary_title',

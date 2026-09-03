@@ -19,7 +19,7 @@ import 'package:new_football/l10n/generated/app_localizations.dart';
 const String _unknownValue = '?';
 
 String _tierLabel(ScoutingTier? tier) =>
-    tier == null ? _unknownValue : '${tier.index + 1}';
+    tier == null ? '1' : '${tier.index + 1}';
 
 String _rangeLabel(int? min, int? max) =>
     (min == null || max == null) ? _unknownValue : '$min-$max';
@@ -67,10 +67,16 @@ class ProspectsScreen extends ConsumerStatefulWidget {
     super.key,
     this.initialWatchOnly = false,
     this.initialCombine = false,
+    this.initialHighlightProspectId,
   });
 
   final bool initialWatchOnly;
   final bool initialCombine;
+
+  /// When set, the table scrolls to and briefly highlights this prospect's
+  /// row on open (see `search_screen.dart`). Any active position/watchlist
+  /// filter is cleared on init so the target row is guaranteed to render.
+  final String? initialHighlightProspectId;
 
   @override
   ConsumerState<ProspectsScreen> createState() => _ProspectsScreenState();
@@ -84,6 +90,13 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
   bool _combineMode = false;
   bool _initialized = false;
   bool _combineInitialized = false;
+
+  // Scroll-to-row support for arriving from the search screen with a
+  // specific prospect to highlight.
+  final ScrollController _tableScrollController = ScrollController();
+  final Map<String, GlobalKey> _rowKeys = {};
+  String? _highlightedProspectId;
+  bool _didScrollToHighlight = false;
 
   // `ref.read` is unsafe inside `dispose()` (the widget may already be
   // unmounted by then), so the notifier is cached here on every dependency
@@ -121,13 +134,19 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
       _colPotentialWidth +
       _colInjWidth +
       _colDetWidth +
-      (withRoleColumn ? _colRoleWidth : 0);
+      (withRoleColumn ? _colRoleWidth : 0) +
+      8; //padding
 
   @override
   void initState() {
     super.initState();
     _watchOnly = widget.initialWatchOnly;
     _combineMode = widget.initialCombine;
+    if (widget.initialHighlightProspectId != null) {
+      _highlightedProspectId = widget.initialHighlightProspectId;
+      _positionFilter = null;
+      _watchOnly = false;
+    }
   }
 
   @override
@@ -139,6 +158,7 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
   @override
   void dispose() {
     _persistOnExit();
+    _tableScrollController.dispose();
     super.dispose();
   }
 
@@ -180,6 +200,12 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
         league.currentSeason.scoutReportDone &&
         !league.currentSeason.combineDone;
 
+    if (_highlightedProspectId != null) {
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _scrollToHighlighted(),
+      );
+    }
+
     return Scaffold(
       appBar: _appBar(l10n),
       body: ScreenBackground(
@@ -196,6 +222,26 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
       ),
     );
   }
+
+  void _scrollToHighlighted() {
+    if (_didScrollToHighlight) return;
+    final id = _highlightedProspectId;
+    if (id == null) return;
+    final rowContext = _rowKeys[id]?.currentContext;
+    if (rowContext == null) return;
+    _didScrollToHighlight = true;
+    Scrollable.ensureVisible(
+      rowContext,
+      duration: const Duration(milliseconds: 400),
+      alignment: 0.3,
+    );
+    Future.delayed(const Duration(seconds: 3), () {
+      if (mounted) setState(() => _highlightedProspectId = null);
+    });
+  }
+
+  GlobalKey _rowKey(String prospectId) =>
+      _rowKeys.putIfAbsent(prospectId, () => GlobalKey());
 
   PreferredSizeWidget _appBar(AppLocalizations l10n) {
     return AppBar(
@@ -400,6 +446,7 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
   ) {
     final showRoleColumn = _combineIds.isNotEmpty;
     return SingleChildScrollView(
+      controller: _tableScrollController,
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: SizedBox(
@@ -476,6 +523,7 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
         : watched || _selectedIds.length < watchlistLimit;
     final showCombinedRole = !combineAvailable && assigned;
     final textStyle = Theme.of(context).textTheme.bodySmall;
+    final isHighlighted = prospect.id == _highlightedProspectId;
 
     Widget cell(double width, String text) => SizedBox(
       width: width,
@@ -483,7 +531,12 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
     );
 
     return Material(
-      color: Colors.transparent,
+      key: _rowKey(prospect.id),
+      color: isHighlighted
+          ? Theme.of(
+              context,
+            ).colorScheme.primaryContainer.withValues(alpha: 0.5)
+          : Colors.transparent,
       child: InkWell(
         onTap: () => _showProspectDetail(
           context,

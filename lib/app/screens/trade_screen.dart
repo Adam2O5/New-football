@@ -18,12 +18,14 @@ class TradeScreen extends ConsumerStatefulWidget {
     this.initialOwnPlayerId,
     this.initialTargetTeamId,
     this.initialTheirPlayerId,
+    this.initialTheirPickId,
     this.initialTradeOfferId,
   });
 
   final String? initialOwnPlayerId;
   final String? initialTargetTeamId;
   final String? initialTheirPlayerId;
+  final String? initialTheirPickId;
   final String? initialTradeOfferId;
 
   @override
@@ -46,6 +48,7 @@ class _TradeScreenState extends ConsumerState<TradeScreen> {
     _ownPlayerId = widget.initialOwnPlayerId;
     _targetTeamId = widget.initialTargetTeamId;
     _theirPlayerId = widget.initialTheirPlayerId;
+    _theirPickId = widget.initialTheirPickId;
 
     final offerId = widget.initialTradeOfferId;
     final league = offerId == null ? null : ref.read(activeLeagueProvider);

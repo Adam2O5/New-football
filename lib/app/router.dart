@@ -19,6 +19,7 @@ import 'package:new_football/app/screens/free_agency_screen.dart';
 import 'package:new_football/app/screens/rankings_screen.dart';
 import 'package:new_football/app/screens/rewards_screen.dart';
 import 'package:new_football/app/screens/search_screen.dart';
+import 'package:new_football/app/screens/search_filters_screen.dart';
 import 'package:new_football/app/screens/player_stats_screen.dart';
 import 'package:new_football/app/screens/team_overview_screen.dart';
 import 'package:new_football/app/screens/lottery_screen.dart';
@@ -102,6 +103,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           initialOwnPlayerId: state.uri.queryParameters['ownPlayerId'],
           initialTargetTeamId: state.uri.queryParameters['targetTeamId'],
           initialTheirPlayerId: state.uri.queryParameters['theirPlayerId'],
+          initialTheirPickId: state.uri.queryParameters['theirPickId'],
           initialTradeOfferId: state.uri.queryParameters['tradeOfferId'],
         ),
       ),
@@ -126,6 +128,8 @@ final goRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => ProspectsScreen(
           initialWatchOnly: state.uri.queryParameters['watchlist'] == 'true',
           initialCombine: state.uri.queryParameters['combine'] == 'true',
+          initialHighlightProspectId:
+              state.uri.queryParameters['highlightProspectId'],
         ),
       ),
       GoRoute(
@@ -163,6 +167,10 @@ final goRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/game/search',
         builder: (context, state) => const SearchScreen(),
+      ),
+      GoRoute(
+        path: '/game/search/filters',
+        builder: (context, state) => const SearchFiltersScreen(),
       ),
     ],
   );
