@@ -2766,6 +2766,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get prospects_positionShort => 'Pos';
 
   @override
+  String get prospects_tier => 'Tier';
+
+  @override
+  String get prospects_overallRange => 'OVR range';
+
+  @override
   String get prospects_combine => 'Combine';
 
   @override

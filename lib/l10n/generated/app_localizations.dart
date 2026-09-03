@@ -4999,6 +4999,18 @@ abstract class AppLocalizations {
   /// **'Poz.'**
   String get prospects_positionShort;
 
+  /// No description provided for @prospects_tier.
+  ///
+  /// In pl, this message translates to:
+  /// **'Tier'**
+  String get prospects_tier;
+
+  /// No description provided for @prospects_overallRange.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zakres OVR'**
+  String get prospects_overallRange;
+
   /// No description provided for @prospects_combine.
   ///
   /// In pl, this message translates to:

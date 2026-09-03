@@ -2771,6 +2771,12 @@ class AppLocalizationsPl extends AppLocalizations {
   String get prospects_positionShort => 'Poz.';
 
   @override
+  String get prospects_tier => 'Tier';
+
+  @override
+  String get prospects_overallRange => 'Zakres OVR';
+
+  @override
   String get prospects_combine => 'Combine';
 
   @override
