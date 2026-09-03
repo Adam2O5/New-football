@@ -221,7 +221,7 @@ class _TeamOverviewScreenState extends ConsumerState<TeamOverviewScreen> {
     entries.sort((a, b) {
       switch (_sort) {
         case _LeagueSort.ovr:
-          return b.averageOvr.compareTo(a.averageOvr);
+          return (b.teamPower ?? 0).compareTo(a.teamPower ?? 0);
         case _LeagueSort.leagueRank:
           return (a.overallRank ?? 999).compareTo(b.overallRank ?? 999);
         case _LeagueSort.expectedRank:
@@ -276,7 +276,11 @@ class _TeamOverviewScreenState extends ConsumerState<TeamOverviewScreen> {
           children: [
             TeamLogo(teamId: row.team.id, size: 36),
             const SizedBox(width: 8),
-            CircleAvatar(child: Text(row.averageOvr.round().toString())),
+            CircleAvatar(
+              child: Text(
+                row.teamPower == null ? '—' : row.teamPower!.round().toString(),
+              ),
+            ),
           ],
         ),
         title: Text(row.team.name),
@@ -552,14 +556,10 @@ class _TeamOverviewScreenState extends ConsumerState<TeamOverviewScreen> {
       final found = conference.forTeam(team.id);
       if (found != null) standing = found;
     }
-    final average = team.roster.isEmpty
-        ? 0.0
-        : team.roster.map((p) => p.overall()).reduce((a, b) => a + b) /
-              team.roster.length;
     return _TeamOverviewRow(
       team: team,
       standing: standing,
-      averageOvr: average,
+      teamPower: league.strengthTable?.entryFor(team.id)?.teamPower,
       injured: team.roster.where((p) => p.state.injured).length,
       matchStats: matchStats,
       overallRank: overallRank,
@@ -662,7 +662,7 @@ class _TeamOverviewRow {
   const _TeamOverviewRow({
     required this.team,
     required this.standing,
-    required this.averageOvr,
+    required this.teamPower,
     required this.injured,
     required this.matchStats,
     required this.overallRank,
@@ -671,7 +671,10 @@ class _TeamOverviewRow {
 
   final Team team;
   final Standing? standing;
-  final double averageOvr;
+
+  /// Sourced from `LeagueStrengthTable.entryFor(team.id).teamPower`; null
+  /// when the table hasn't been calculated yet or has no entry for the team.
+  final double? teamPower;
   final int injured;
   final TeamMatchStats? matchStats;
   final int? overallRank;
