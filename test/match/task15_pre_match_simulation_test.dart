@@ -584,8 +584,32 @@ void main() {
           winsNeeded: 3,
           higherSeedWins: 2,
         );
+        final seasonService = SeasonService();
+        // Quarterfinal round is round 1. Game index is series.games.length
+        // (0 here, since `eliminationSeries` has no recorded games yet) —
+        // must match how `_playOneGame` builds the fixture id.
+        final (week, day) = seasonService.calendar.playoffRoundSlotDates(1)[0];
+        final homeFirst = seasonService.calendar.higherSeedHomeForGame(0);
+        final dueFixture = ScheduledMatch(
+          id: 'playoff:${eliminationSeries.id}:0',
+          homeTeamId: homeFirst
+              ? eliminationSeries.higherSeedTeamId
+              : eliminationSeries.lowerSeedTeamId,
+          awayTeamId: homeFirst
+              ? eliminationSeries.lowerSeedTeamId
+              : eliminationSeries.higherSeedTeamId,
+          round: -1,
+          week: week,
+          day: day,
+        );
+
         final playoffLeague = baseLeague.copyWith(
-          playerTeamId: teams[0].id,
+          // Player team must sit outside this series, otherwise
+          // `advancePlayoffsForDate` pauses for the interactive matchday
+          // flow instead of simulating the game.
+          playerTeamId: baseLeague.teams
+              .firstWhere((team) => team.conference != Conference.europe)
+              .id,
           currentSeason: baseLeague.currentSeason.copyWith(
             phase: SeasonPhase.playoff,
             playoffBrackets: [
@@ -614,11 +638,14 @@ void main() {
                 ],
               ),
             ],
+            postseasonFixtures: [dueFixture],
           ),
         );
 
-        final updated = SeasonService().advancePlayoffs(
+        final updated = seasonService.advancePlayoffsForDate(
           playoffLeague,
+          week: week,
+          day: day,
           saveSeed: 115,
         );
         final result = updated
@@ -650,19 +677,44 @@ void main() {
         winsNeeded: 3,
         higherSeedWins: 2,
       );
+      final seasonService = SeasonService();
+      // League final lives in round 4. Game index is
+      // leagueFinal.games.length (0 here, since it has no recorded games
+      // yet) — must match how `_playOneGame` builds the fixture id.
+      final (week, day) = seasonService.calendar.playoffRoundSlotDates(4)[0];
+      final homeFirst = seasonService.calendar.higherSeedHomeForGame(0);
+      final dueFixture = ScheduledMatch(
+        id: 'playoff:${leagueFinal.id}:0',
+        homeTeamId: homeFirst
+            ? leagueFinal.higherSeedTeamId
+            : leagueFinal.lowerSeedTeamId,
+        awayTeamId: homeFirst
+            ? leagueFinal.lowerSeedTeamId
+            : leagueFinal.higherSeedTeamId,
+        round: -1,
+        week: week,
+        day: day,
+      );
+
       final playoffLeague = baseLeague.copyWith(
-        playerTeamId: east[0].id,
+        // Player team must sit outside the league final, otherwise
+        // `advancePlayoffsForDate` pauses for the interactive matchday
+        // flow instead of simulating the game.
+        playerTeamId: east[1].id,
         currentSeason: baseLeague.currentSeason.copyWith(
           phase: SeasonPhase.playoff,
           playoffBrackets: [
             completedBracket(Conference.europe, east, leagueFinal: leagueFinal),
             completedBracket(Conference.restOfTheWorld, west),
           ],
+          postseasonFixtures: [dueFixture],
         ),
       );
 
-      final updated = SeasonService().advancePlayoffs(
+      final updated = seasonService.advancePlayoffsForDate(
         playoffLeague,
+        week: week,
+        day: day,
         saveSeed: 116,
       );
       final result = updated
