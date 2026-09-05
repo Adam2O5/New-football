@@ -71,10 +71,9 @@ class _LotteryScreenState extends ConsumerState<LotteryScreen> {
               Container(
                 margin: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .surface
-                      .withValues(alpha: 0.85),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.surface.withValues(alpha: 0.85),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: _buildContent(league),
@@ -163,10 +162,9 @@ class _LotteryScreenState extends ConsumerState<LotteryScreen> {
                   icon: const Icon(Icons.mail_outline),
                   label: const Text('Pokaż kolejny pick'),
                   style: OutlinedButton.styleFrom(
-                    backgroundColor: Theme.of(context)
-                        .colorScheme
-                        .surface
-                        .withValues(alpha: 0.85),
+                    backgroundColor: Theme.of(
+                      context,
+                    ).colorScheme.surface.withValues(alpha: 0.85),
                   ),
                 ),
               ),
@@ -222,6 +220,7 @@ class _LotteryScreenState extends ConsumerState<LotteryScreen> {
       color: Colors.black.withValues(alpha: 0.6),
       child: EnvelopeAnimation(
         teamName: teamName,
+        showConfetti: currentPick == 1,
         onComplete: _onAnimationComplete,
       ),
     );
@@ -294,9 +293,9 @@ class _LotteryScreenState extends ConsumerState<LotteryScreen> {
       });
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Błąd zapisu: $e')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Błąd zapisu: $e')));
     }
   }
 
