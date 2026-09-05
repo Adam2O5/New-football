@@ -3043,55 +3043,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rankings_title => 'Rankings';
 
   @override
-  String get rankings_power => 'Power ranking';
-
-  @override
-  String get rankings_expected => 'Expected rank';
-
-  @override
-  String get rankings_assets => 'Trade assets';
-
-  @override
-  String get rankings_noStrength => 'Power ranking is not calculated yet';
-
-  @override
-  String get rankings_rank => 'Rank';
-
-  @override
   String get rankings_team => 'Team';
 
   @override
-  String get rankings_powerValue => 'Power';
-
-  @override
   String get rankings_status => 'Status';
-
-  @override
-  String rankings_updated(Object day, Object week) {
-    return 'Updated: week $week, day $day';
-  }
-
-  @override
-  String get rankings_expectedDisclaimer =>
-      'Expected rank reflects roster strength, not a simulated final table.';
-
-  @override
-  String get rankings_assetValue => 'Value';
-
-  @override
-  String get rankings_assetType => 'Type';
-
-  @override
-  String get rankings_owner => 'Owner';
-
-  @override
-  String get rankings_noAssets => 'No trade assets available';
-
-  @override
-  String get rankings_playerAsset => 'Player';
-
-  @override
-  String get rankings_pickAsset => 'Draft pick';
 
   @override
   String get rankings_statusRebuild => 'Rebuild';
@@ -3109,48 +3064,43 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rankings_statusElite => 'Elite';
 
   @override
-  String get rankings_rightsAsset => 'Draft rights';
+  String get rankings_teamRanking => 'Team ranking';
 
   @override
-  String get rankings_aiValuationTeam => 'Valuation from team perspective';
+  String get rankings_tradePowerRanking => 'Trade power ranking';
 
   @override
-  String rankings_aiValuationDisclaimer(String team) {
-    return 'Asset values are calculated from: $team perspective.';
-  }
+  String get rankings_youngPlayersRanking => 'Young players ranking';
 
   @override
-  String get rankings_openPlayer => 'Open player profile';
+  String get rankings_playersRanking => 'Players ranking';
 
   @override
-  String get rankings_aiBaseValue => 'pointValue base';
+  String get rankings_columnNumber => '#';
 
   @override
-  String get rankings_aiStatusAge => 'Status/age multiplier';
+  String get rankings_columnLeaguePosition => 'League position';
 
   @override
-  String get rankings_aiNeedMultiplier => 'Need multiplier';
+  String get rankings_columnProjectedPosition => 'Projected position';
 
   @override
-  String get rankings_aiContextMultiplier => 'Context multiplier';
+  String get rankings_columnTotalPointValue => 'Total point value';
 
   @override
-  String get rankings_aiProjectedSlot => 'Projected slot';
+  String get rankings_columnPlayer => 'Player';
 
   @override
-  String get rankings_aiFutureDiscount => 'Future discount';
+  String get rankings_columnAge => 'Age';
 
   @override
-  String get rankings_aiUncertainty => 'Uncertainty';
+  String get rankings_columnOvr => 'OVR';
 
   @override
-  String get rankings_aiRightsMultiplier => 'Rights multiplier';
+  String get rankings_columnPotential => 'Potential';
 
   @override
-  String get rankings_aiContractDrag => 'contractDrag';
-
-  @override
-  String get rankings_aiFactors => 'Active factors';
+  String get rankings_noData => 'No data available';
 
   @override
   String get stats_title => 'Statistics';

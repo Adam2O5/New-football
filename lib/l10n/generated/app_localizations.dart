@@ -5497,101 +5497,17 @@ abstract class AppLocalizations {
   /// **'Rankingi'**
   String get rankings_title;
 
-  /// No description provided for @rankings_power.
-  ///
-  /// In pl, this message translates to:
-  /// **'Ranking siły'**
-  String get rankings_power;
-
-  /// No description provided for @rankings_expected.
-  ///
-  /// In pl, this message translates to:
-  /// **'Przewidywane miejsce'**
-  String get rankings_expected;
-
-  /// No description provided for @rankings_assets.
-  ///
-  /// In pl, this message translates to:
-  /// **'Aktywa transferowe'**
-  String get rankings_assets;
-
-  /// No description provided for @rankings_noStrength.
-  ///
-  /// In pl, this message translates to:
-  /// **'Ranking siły nie został jeszcze obliczony'**
-  String get rankings_noStrength;
-
-  /// No description provided for @rankings_rank.
-  ///
-  /// In pl, this message translates to:
-  /// **'Miejsce'**
-  String get rankings_rank;
-
   /// No description provided for @rankings_team.
   ///
   /// In pl, this message translates to:
   /// **'Drużyna'**
   String get rankings_team;
 
-  /// No description provided for @rankings_powerValue.
-  ///
-  /// In pl, this message translates to:
-  /// **'Siła'**
-  String get rankings_powerValue;
-
   /// No description provided for @rankings_status.
   ///
   /// In pl, this message translates to:
   /// **'Status'**
   String get rankings_status;
-
-  /// No description provided for @rankings_updated.
-  ///
-  /// In pl, this message translates to:
-  /// **'Aktualizacja: tydzień {week}, dzień {day}'**
-  String rankings_updated(Object day, Object week);
-
-  /// No description provided for @rankings_expectedDisclaimer.
-  ///
-  /// In pl, this message translates to:
-  /// **'Przewidywane miejsce odzwierciedla siłę składu, a nie symulację końcowej tabeli.'**
-  String get rankings_expectedDisclaimer;
-
-  /// No description provided for @rankings_assetValue.
-  ///
-  /// In pl, this message translates to:
-  /// **'Wartość'**
-  String get rankings_assetValue;
-
-  /// No description provided for @rankings_assetType.
-  ///
-  /// In pl, this message translates to:
-  /// **'Typ'**
-  String get rankings_assetType;
-
-  /// No description provided for @rankings_owner.
-  ///
-  /// In pl, this message translates to:
-  /// **'Właściciel'**
-  String get rankings_owner;
-
-  /// No description provided for @rankings_noAssets.
-  ///
-  /// In pl, this message translates to:
-  /// **'Brak dostępnych aktywów transferowych'**
-  String get rankings_noAssets;
-
-  /// No description provided for @rankings_playerAsset.
-  ///
-  /// In pl, this message translates to:
-  /// **'Zawodnik'**
-  String get rankings_playerAsset;
-
-  /// No description provided for @rankings_pickAsset.
-  ///
-  /// In pl, this message translates to:
-  /// **'Pick draftowy'**
-  String get rankings_pickAsset;
 
   /// No description provided for @rankings_statusRebuild.
   ///
@@ -5623,89 +5539,83 @@ abstract class AppLocalizations {
   /// **'Elita'**
   String get rankings_statusElite;
 
-  /// No description provided for @rankings_rightsAsset.
+  /// No description provided for @rankings_teamRanking.
   ///
   /// In pl, this message translates to:
-  /// **'Prawa draftowe'**
-  String get rankings_rightsAsset;
+  /// **'Ranking drużyn'**
+  String get rankings_teamRanking;
 
-  /// No description provided for @rankings_aiValuationTeam.
+  /// No description provided for @rankings_tradePowerRanking.
   ///
   /// In pl, this message translates to:
-  /// **'Wycena oczami drużyny'**
-  String get rankings_aiValuationTeam;
+  /// **'Ranking siły transferowej'**
+  String get rankings_tradePowerRanking;
 
-  /// No description provided for @rankings_aiValuationDisclaimer.
+  /// No description provided for @rankings_youngPlayersRanking.
   ///
   /// In pl, this message translates to:
-  /// **'Wartości aktywów są liczone z perspektywy: {team}.'**
-  String rankings_aiValuationDisclaimer(String team);
+  /// **'Ranking młodych zawodników'**
+  String get rankings_youngPlayersRanking;
 
-  /// No description provided for @rankings_openPlayer.
+  /// No description provided for @rankings_playersRanking.
   ///
   /// In pl, this message translates to:
-  /// **'Otwórz profil zawodnika'**
-  String get rankings_openPlayer;
+  /// **'Ranking zawodników'**
+  String get rankings_playersRanking;
 
-  /// No description provided for @rankings_aiBaseValue.
+  /// No description provided for @rankings_columnNumber.
   ///
   /// In pl, this message translates to:
-  /// **'Baza pointValue'**
-  String get rankings_aiBaseValue;
+  /// **'#'**
+  String get rankings_columnNumber;
 
-  /// No description provided for @rankings_aiStatusAge.
+  /// No description provided for @rankings_columnLeaguePosition.
   ///
   /// In pl, this message translates to:
-  /// **'Mnożnik status/wiek'**
-  String get rankings_aiStatusAge;
+  /// **'Miejsce w lidze'**
+  String get rankings_columnLeaguePosition;
 
-  /// No description provided for @rankings_aiNeedMultiplier.
+  /// No description provided for @rankings_columnProjectedPosition.
   ///
   /// In pl, this message translates to:
-  /// **'Mnożnik potrzeby'**
-  String get rankings_aiNeedMultiplier;
+  /// **'Prognozowane miejsce'**
+  String get rankings_columnProjectedPosition;
 
-  /// No description provided for @rankings_aiContextMultiplier.
+  /// No description provided for @rankings_columnTotalPointValue.
   ///
   /// In pl, this message translates to:
-  /// **'Mnożnik kontekstu'**
-  String get rankings_aiContextMultiplier;
+  /// **'Suma point value'**
+  String get rankings_columnTotalPointValue;
 
-  /// No description provided for @rankings_aiProjectedSlot.
+  /// No description provided for @rankings_columnPlayer.
   ///
   /// In pl, this message translates to:
-  /// **'Projektowany slot'**
-  String get rankings_aiProjectedSlot;
+  /// **'Zawodnik'**
+  String get rankings_columnPlayer;
 
-  /// No description provided for @rankings_aiFutureDiscount.
+  /// No description provided for @rankings_columnAge.
   ///
   /// In pl, this message translates to:
-  /// **'Dyskonto przyszłości'**
-  String get rankings_aiFutureDiscount;
+  /// **'Wiek'**
+  String get rankings_columnAge;
 
-  /// No description provided for @rankings_aiUncertainty.
+  /// No description provided for @rankings_columnOvr.
   ///
   /// In pl, this message translates to:
-  /// **'Niepewność'**
-  String get rankings_aiUncertainty;
+  /// **'OVR'**
+  String get rankings_columnOvr;
 
-  /// No description provided for @rankings_aiRightsMultiplier.
+  /// No description provided for @rankings_columnPotential.
   ///
   /// In pl, this message translates to:
-  /// **'Mnożnik praw'**
-  String get rankings_aiRightsMultiplier;
+  /// **'Potencjał'**
+  String get rankings_columnPotential;
 
-  /// No description provided for @rankings_aiContractDrag.
+  /// No description provided for @rankings_noData.
   ///
   /// In pl, this message translates to:
-  /// **'contractDrag'**
-  String get rankings_aiContractDrag;
-
-  /// No description provided for @rankings_aiFactors.
-  ///
-  /// In pl, this message translates to:
-  /// **'Aktywne czynniki'**
-  String get rankings_aiFactors;
+  /// **'Brak danych'**
+  String get rankings_noData;
 
   /// No description provided for @stats_title.
   ///
