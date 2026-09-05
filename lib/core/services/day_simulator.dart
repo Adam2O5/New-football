@@ -246,11 +246,13 @@ class DaySimulator {
 
     // Eager postseason fixtures, per `game_calendar.md`: pairings are written
     // to the calendar as soon as they're known, not lazily on match day.
-    if (week == balance.calendar.breakWeek && day == 1) {
+    // Generated the moment the regular season ends (one day before the break
+    // week itself starts) — standings are already final by then, so there's
+    // no reason to wait. Seed 7 and the play-in final's real matchup reveal
+    // themselves the instant the relevant games resolve (see
+    // `SeasonService._maybeRevealPlayInProgress`), not on a fixed day.
+    if (week == balance.calendar.regularSeasonWeeks && day == 7) {
       state = season.generatePostseasonFixtures(state);
-    }
-    if (week == balance.calendar.playInWeek && day == 4) {
-      state = season.revealPlayInFinal(state);
     }
     if (week == balance.calendar.playInWeek && day == 7) {
       state = season.revealPlayoffSeed8(state);
@@ -499,7 +501,7 @@ class DaySimulator {
       );
 
       // Continuous scouting tick (`docs/staff_rules.md` §5), while a draft
-      // class is known (from game creation through the season's draft week).
+      // class is known (from lottery through draft week).
       if (state.currentSeason.draftState != null) {
         final draftClass = state.currentSeason.draftState!.draftClass;
         state = state.copyWith(

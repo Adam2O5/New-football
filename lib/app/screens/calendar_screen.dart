@@ -102,6 +102,28 @@ String _formatMatchScore(MatchResult result) {
   return '$base (${result.shootoutHomeGoals}:${result.shootoutAwayGoals})';
 }
 
+/// The play-in final's placeholder fixture (before both 7v8 and 9v10 are
+/// known) has neither side set to a real team id — it can't be, since which
+/// two of the four seeded teams actually reach it isn't decided yet — so it
+/// can never match [playerId] by simple id equality the way every other
+/// fixture does. This checks conference membership instead: is [playerId]
+/// one of that conference's four play-in seeds (win-or-lose, one of them
+/// always ends up in the final).
+bool _isPlayerInPlayInConference(
+  LeagueState league,
+  String conferenceName,
+  String playerId,
+) {
+  for (final p in league.currentSeason.playInProgress) {
+    if (p.conference.name != conferenceName) continue;
+    return p.seed7TeamId == playerId ||
+        p.seed8TeamId == playerId ||
+        p.seed9TeamId == playerId ||
+        p.seed10TeamId == playerId;
+  }
+  return false;
+}
+
 class CalendarScreen extends ConsumerStatefulWidget {
   const CalendarScreen({super.key});
 
@@ -540,7 +562,18 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen> {
         if (playerId != null) {
           for (final f in league.currentSeason.postseasonFixtures) {
             if (f.week != w || f.day != d) continue;
-            if (f.homeTeamId == playerId || f.awayTeamId == playerId) {
+            final isPlayerSide =
+                f.homeTeamId == playerId || f.awayTeamId == playerId;
+            final isPendingPlayInFinal =
+                f.id.startsWith('playIn:') &&
+                f.id.endsWith(':final') &&
+                !f.confirmed &&
+                _isPlayerInPlayInConference(
+                  league,
+                  f.id.split(':')[1],
+                  playerId,
+                );
+            if (isPlayerSide || isPendingPlayInFinal) {
               pm = f;
               break;
             }

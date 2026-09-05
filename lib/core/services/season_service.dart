@@ -163,6 +163,19 @@ class SeasonService {
           day: 3,
         ),
       );
+      fixtures.add(
+        ScheduledMatch(
+          id: 'playIn:${conference.name}:final',
+          homeTeamId: _placeholderToken(conference, 'playInFinalLoser78'),
+          awayTeamId: _placeholderToken(conference, 'playInFinalWinner910'),
+          round: -1,
+          week: playInWeek,
+          day: 6,
+          confirmed: false,
+          homePlaceholderLabel: 'Loser 7v8',
+          awayPlaceholderLabel: 'Winner 9v10',
+        ),
+      );
       progress.add(
         PlayInProgress(
           conference: conference,
@@ -202,21 +215,41 @@ class SeasonService {
     );
   }
 
-  /// Called Thursday of play-in week — the day after games 1 & 2 conclude
-  /// (per `game_calendar.md`): writes the now-decided play-in final fixture
-  /// and reveals seed 7 (winner of 7v8) wherever a 1v8/2v7 quarterfinal was
-  /// waiting on it. Safe to call unconditionally: since the player's own
-  /// play-in match (if any) pauses the calendar until played, Wednesday's
-  /// games are always resolved by the time Thursday is reached.
-  LeagueState revealPlayInFinal(LeagueState league) {
+  /// Reveals seed 7 the moment 7v8 resolves (patches the 1v8/2v7
+  /// quarterfinal placeholder in `playoffBrackets` wherever it's waiting on
+  /// it — this is what turns the "?" in `standings_bracket_view.dart` into
+  /// the real team's logo) and reveals the play-in final's real matchup —
+  /// confirming its calendar fixture and clearing its placeholder — the
+  /// moment both 7v8 and 9v10 are known. Both happen immediately, regardless
+  /// of which calendar day that lands on: called from [advancePlayInForDate]
+  /// right after a game resolves, and from [applyPlayInPlayerResult] for the
+  /// interactive path, so there's never an artificial day's delay.
+  LeagueState _maybeRevealPlayInProgress(
+    LeagueState league,
+    Conference conference,
+  ) {
     var state = league;
-    final playInWeek = balance.calendar.playInWeek;
-    for (final progress in league.currentSeason.playInProgress) {
-      final game7v8 = progress.game7v8;
-      final game9v10 = progress.game9v10;
-      if (game7v8 == null || game9v10 == null || progress.gameFinal != null) {
-        continue;
+    PlayInProgress? progress;
+    for (final p in state.currentSeason.playInProgress) {
+      if (p.conference == conference) {
+        progress = p;
+        break;
       }
+    }
+    if (progress == null) return state;
+
+    final game7v8 = progress.game7v8;
+    if (game7v8 != null) {
+      final seed7Winner = _winnerId(
+        game7v8,
+        progress.seed7TeamId,
+        progress.seed8TeamId,
+      );
+      state = _patchPlaceholder(state, conference, 'seed7', seed7Winner);
+    }
+
+    final game9v10 = progress.game9v10;
+    if (game7v8 != null && game9v10 != null && progress.gameFinal == null) {
       final seed7Winner = _winnerId(
         game7v8,
         progress.seed7TeamId,
@@ -230,32 +263,39 @@ class SeasonService {
         progress.seed9TeamId,
         progress.seed10TeamId,
       );
-
-      final alreadyScheduled = state.currentSeason.postseasonFixtures.any(
-        (f) => f.id == 'playIn:${progress.conference.name}:final',
-      );
-      if (!alreadyScheduled) {
-        state = state.copyWith(
-          currentSeason: state.currentSeason.copyWith(
-            postseasonFixtures: [
-              ...state.currentSeason.postseasonFixtures,
+      final finalId = 'playIn:${conference.name}:final';
+      final fixtures = state.currentSeason.postseasonFixtures;
+      final hasFixture = fixtures.any((f) => f.id == finalId);
+      final playInWeek = balance.calendar.playInWeek;
+      final updatedFixtures = hasFixture
+          ? [
+              for (final f in fixtures)
+                if (f.id == finalId)
+                  f.copyWith(
+                    homeTeamId: loser78,
+                    awayTeamId: winner910,
+                    confirmed: true,
+                    homePlaceholderLabel: null,
+                    awayPlaceholderLabel: null,
+                  )
+                else
+                  f,
+            ]
+          : [
+              ...fixtures,
               ScheduledMatch(
-                id: 'playIn:${progress.conference.name}:final',
+                id: finalId,
                 homeTeamId: loser78,
                 awayTeamId: winner910,
                 round: -1,
                 week: playInWeek,
                 day: 6,
               ),
-            ],
-          ),
-        );
-      }
-      state = _patchPlaceholder(
-        state,
-        progress.conference,
-        'seed7',
-        seed7Winner,
+            ];
+      state = state.copyWith(
+        currentSeason: state.currentSeason.copyWith(
+          postseasonFixtures: updatedFixtures,
+        ),
       );
     }
     return state;
@@ -405,7 +445,21 @@ class SeasonService {
           game9v10 = played.result;
           pendingPlayerMatch ??= played.playerMatch;
         }
-        progress.add(current.copyWith(game7v8: game7v8, game9v10: game9v10));
+        final updatedProgress = current.copyWith(
+          game7v8: game7v8,
+          game9v10: game9v10,
+        );
+        progress.add(updatedProgress);
+        state = state.copyWith(
+          currentSeason: state.currentSeason.copyWith(
+            playInProgress: [
+              for (final p in state.currentSeason.playInProgress)
+                if (p.conference != conference) p,
+              updatedProgress,
+            ],
+          ),
+        );
+        state = _maybeRevealPlayInProgress(state, conference);
       }
       return (
         league: state.copyWith(
@@ -549,9 +603,10 @@ class SeasonService {
 
     final nextProgress = [...progressList];
     nextProgress[index] = updated;
-    return state.copyWith(
+    state = state.copyWith(
       currentSeason: state.currentSeason.copyWith(playInProgress: nextProgress),
     );
+    return _maybeRevealPlayInProgress(state, conference);
   }
 
   PlayInResult _buildPlayInResult(
