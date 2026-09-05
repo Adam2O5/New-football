@@ -122,6 +122,26 @@ _DraftClass _$DraftClassFromJson(Map<String, dynamic> json) => _DraftClass(
 Map<String, dynamic> _$DraftClassToJson(_DraftClass instance) =>
     <String, dynamic>{'year': instance.year, 'prospects': instance.prospects};
 
+_MockDraftBoard _$MockDraftBoardFromJson(Map<String, dynamic> json) =>
+    _MockDraftBoard(
+      displayedRank:
+          (json['displayedRank'] as Map<String, dynamic>?)?.map(
+            (k, e) => MapEntry(k, (e as num).toInt()),
+          ) ??
+          const {},
+      previousDisplayedRank:
+          (json['previousDisplayedRank'] as Map<String, dynamic>?)?.map(
+            (k, e) => MapEntry(k, (e as num).toInt()),
+          ) ??
+          const {},
+    );
+
+Map<String, dynamic> _$MockDraftBoardToJson(_MockDraftBoard instance) =>
+    <String, dynamic>{
+      'displayedRank': instance.displayedRank,
+      'previousDisplayedRank': instance.previousDisplayedRank,
+    };
+
 _DraftState _$DraftStateFromJson(Map<String, dynamic> json) => _DraftState(
   year: (json['year'] as num).toInt(),
   order:
@@ -141,6 +161,9 @@ _DraftState _$DraftStateFromJson(Map<String, dynamic> json) => _DraftState(
       const [],
   draftClass: DraftClass.fromJson(json['draftClass'] as Map<String, dynamic>),
   currentPickIndex: (json['currentPickIndex'] as num?)?.toInt() ?? 0,
+  mockDraftBoard: json['mockDraftBoard'] == null
+      ? null
+      : MockDraftBoard.fromJson(json['mockDraftBoard'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$DraftStateToJson(_DraftState instance) =>
@@ -151,6 +174,7 @@ Map<String, dynamic> _$DraftStateToJson(_DraftState instance) =>
       'lotteryResults': instance.lotteryResults,
       'draftClass': instance.draftClass,
       'currentPickIndex': instance.currentPickIndex,
+      'mockDraftBoard': instance.mockDraftBoard,
     };
 
 _CompletedDraft _$CompletedDraftFromJson(Map<String, dynamic> json) =>

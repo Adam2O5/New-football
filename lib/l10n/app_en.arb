@@ -1249,6 +1249,7 @@
   "prospects_nationality": "Nat",
   "prospects_age": "Age",
   "prospects_positionShort": "Pos",
+  "prospects_mockRank": "Mock",
   "prospects_tier": "Tier",
   "prospects_overallRange": "OVR range",
   "prospects_combine": "Combine",

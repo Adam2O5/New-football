@@ -2771,6 +2771,9 @@ class AppLocalizationsPl extends AppLocalizations {
   String get prospects_positionShort => 'Poz.';
 
   @override
+  String get prospects_mockRank => 'Mock';
+
+  @override
   String get prospects_tier => 'Tier';
 
   @override

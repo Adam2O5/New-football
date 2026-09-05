@@ -116,6 +116,24 @@ abstract class DraftClass with _$DraftClass {
       _$DraftClassFromJson(json);
 }
 
+/// Kolejność wyświetlania klasy draftowej (`draft.md` §"Dwa mock drafty"),
+/// oddzielna od `DraftState.order` (kolejność picków klubów w loterii).
+/// `displayedRank` to aktualnie obowiązujący board (1-based, 1 = najlepszy).
+/// `previousDisplayedRank` to board sprzed poprzedniego mocka — pusty po
+/// mocku wstępnym (brak punktu odniesienia), wypełniony po mocku finalnym,
+/// żeby UI mógł pokazać wskaźnik zmiany pozycji. Klucz w obu mapach to
+/// `Prospect.id`.
+@freezed
+abstract class MockDraftBoard with _$MockDraftBoard {
+  const factory MockDraftBoard({
+    @Default({}) Map<String, int> displayedRank,
+    @Default({}) Map<String, int> previousDisplayedRank,
+  }) = _MockDraftBoard;
+
+  factory MockDraftBoard.fromJson(Map<String, dynamic> json) =>
+      _$MockDraftBoardFromJson(json);
+}
+
 @freezed
 abstract class DraftState with _$DraftState {
   const factory DraftState({
@@ -125,6 +143,11 @@ abstract class DraftState with _$DraftState {
     @Default([]) List<LotteryResult> lotteryResults,
     required DraftClass draftClass,
     @Default(0) int currentPickIndex,
+
+    /// Bieżący displayed board (mock wstępny do piątku tyg. 45, potem mock
+    /// finalny). `null` tylko w testach/legacy save'ach sprzed tej funkcji —
+    /// produkcyjnie ustawiany razem z `draftClass` w `ProspectService`.
+    MockDraftBoard? mockDraftBoard,
   }) = _DraftState;
 
   factory DraftState.fromJson(Map<String, dynamic> json) =>

@@ -36,6 +36,7 @@ import 'package:new_football/core/services/discipline_service.dart';
 import 'package:new_football/core/services/prospect_service.dart';
 import 'package:new_football/core/services/match_post_match_service.dart';
 import 'package:new_football/core/services/message_service.dart';
+import 'package:new_football/core/services/mock_draft_service.dart';
 import 'package:new_football/core/services/salary_cap_service.dart';
 import 'package:new_football/core/services/schedule_generator.dart';
 import 'package:new_football/core/services/scouting_service.dart';
@@ -62,6 +63,7 @@ class SeasonService {
     ScoutingService? scoutingService,
     MessageService? messages,
     TeamEventService? teamEvents,
+    MockDraftService? mockDraftService,
     Random? random,
   }) : matchEngine = matchEngine ?? SimulationMatchEngine(balance: balance),
        aiMatchdayService =
@@ -90,6 +92,8 @@ class SeasonService {
        capService = capService ?? SalaryCapService(balance: balance),
        staffService = staffService ?? StaffService(balance: balance),
        scoutingService = scoutingService ?? ScoutingService(balance: balance),
+       mockDraftService =
+           mockDraftService ?? MockDraftService(balance: balance),
        _messages = messages ?? MessageService(),
        teamEvents =
            teamEvents ?? TeamEventService(balance: balance, messages: messages),
@@ -109,6 +113,7 @@ class SeasonService {
   final SalaryCapService capService;
   final StaffService staffService;
   final ScoutingService scoutingService;
+  final MockDraftService mockDraftService;
   final MessageService _messages;
   final TeamEventService teamEvents;
   final Random _random;
@@ -1385,7 +1390,9 @@ class SeasonService {
   LeagueState runNextClassGeneration(LeagueState league, {int saveSeed = 0}) {
     var state = ProspectService(
       random: _random,
-    ).generateNextClassForLeague(league);
+      balance: balance,
+      mockDraftService: mockDraftService,
+    ).generateNextClassForLeague(league, seed: saveSeed);
     final nextDraft = state.currentSeason.draftState;
     if (nextDraft == null) return state;
     final year = nextDraft.year;
@@ -1503,10 +1510,16 @@ class SeasonService {
     );
   }
 
-  /// Mock Draft finalny (pt tyg. 45, `docs/offseason.md` §7).
+  /// Mock Draft finalny (pt tyg. 45, `docs/offseason.md` §7). Updates both
+  /// the per-team scouting estimate (`ScoutingService.runFinalMock`, watched
+  /// prospects only, noise scaled by that team's scout Evaluation) and the
+  /// league-wide displayed board (`MockDraftService`, all 120 prospects,
+  /// fixed noise bands — `draft.md` §"Mock finalny") that drives the
+  /// Prospects screen's sort order and position-change indicator.
   LeagueState runFinalMock(LeagueState league, {int saveSeed = 0}) {
-    final draftClass = league.currentSeason.draftState?.draftClass;
-    if (draftClass == null) return league;
+    final draftState = league.currentSeason.draftState;
+    final draftClass = draftState?.draftClass;
+    if (draftClass == null || draftState == null) return league;
     final ranked = [...draftClass.prospects]
       ..sort((a, b) {
         final grade = b.scoutGrade.compareTo(a.scoutGrade);
@@ -1526,10 +1539,23 @@ class SeasonService {
         ),
       );
     }).toList();
+
+    final trueBoard = mockDraftService.trueBoard(draftClass.prospects);
+    final previousBoard = draftState.mockDraftBoard ?? const MockDraftBoard();
+    final finalBoard = mockDraftService.generateFinalMock(
+      trueBoard,
+      previousBoard,
+      seed: saveSeed,
+      seasonYear: league.currentSeason.year,
+    );
+
     return _msg(
       league.copyWith(
         teams: teams,
-        currentSeason: league.currentSeason.copyWith(finalMockDone: true),
+        currentSeason: league.currentSeason.copyWith(
+          finalMockDone: true,
+          draftState: draftState.copyWith(mockDraftBoard: finalBoard),
+        ),
       ),
       MessageType.mockDraft,
       'Mock Draft finalny',

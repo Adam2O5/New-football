@@ -104,6 +104,29 @@ int teamEventSeed(
   ]);
 }
 
+/// Returns a deterministic seed for a league-wide draft event that isn't
+/// scoped to any single team — e.g. the global mock draft board
+/// (`draft.md` §"Dwa mock drafty"), which ranks the whole class once for
+/// everyone rather than per team like [teamEventSeed]'s scouting rolls.
+/// Scoped per prospect so perturbing one prospect's noise roll cannot shift
+/// another's.
+int draftEventSeed(
+  int saveSeed,
+  int seasonYear,
+  String eventKind,
+  String prospectId, {
+  int salt = 0,
+}) {
+  return _stableHash([
+    'draft-event',
+    saveSeed,
+    seasonYear,
+    eventKind,
+    prospectId,
+    salt,
+  ]);
+}
+
 /// A stable 31-bit FNV-1a hash.
 ///
 /// [Object.hash] is deliberately avoided here: seeds are persisted game

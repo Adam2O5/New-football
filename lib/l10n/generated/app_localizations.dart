@@ -4999,6 +4999,12 @@ abstract class AppLocalizations {
   /// **'Poz.'**
   String get prospects_positionShort;
 
+  /// No description provided for @prospects_mockRank.
+  ///
+  /// In pl, this message translates to:
+  /// **'Mock'**
+  String get prospects_mockRank;
+
   /// No description provided for @prospects_tier.
   ///
   /// In pl, this message translates to:

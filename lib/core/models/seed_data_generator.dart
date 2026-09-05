@@ -16,14 +16,23 @@ import 'package:new_football/core/models/seed_data.dart';
 import 'package:new_football/core/models/staff.dart';
 import 'package:new_football/core/models/standing.dart';
 import 'package:new_football/core/models/team.dart';
+import 'package:new_football/core/services/mock_draft_service.dart';
 import 'package:new_football/core/services/salary_cap_service.dart';
 import 'package:new_football/core/tactics/tactics_setup.dart';
 import 'package:new_football/core/tactics/formation_layout.dart';
 
 class SeedDataGenerator {
-  SeedDataGenerator({Random? random}) : _random = random ?? Random();
+  SeedDataGenerator({
+    Random? random,
+    this.balance = BalanceConfig.defaults,
+    MockDraftService? mockDraftService,
+  }) : _random = random ?? Random(),
+       _mockDraftService =
+           mockDraftService ?? MockDraftService(balance: balance);
 
   final Random _random;
+  final BalanceConfig balance;
+  final MockDraftService _mockDraftService;
 
   LeagueState generateLeague({
     int year = 2026,
@@ -91,9 +100,16 @@ class SeedDataGenerator {
       ),
     ];
 
+    final year0Class = generateDraftClass(year: year);
+    final trueBoard = _mockDraftService.trueBoard(year0Class.prospects);
     final draftState = DraftState(
       year: year,
-      draftClass: generateDraftClass(year: year),
+      draftClass: year0Class,
+      mockDraftBoard: _mockDraftService.generateInitialMock(
+        trueBoard,
+        seed: seed,
+        seasonYear: year,
+      ),
     );
     final tvSchedule = tvCapScheduleFor(currentYear: year, saveSeed: seed ?? 0);
 
