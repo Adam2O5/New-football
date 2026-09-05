@@ -62,6 +62,48 @@ Widget _buildPotentialEstimate(
   );
 }
 
+/// Displayed mock draft slot (`draft.md` §"Dwa mock drafty"), with the
+/// position-change indicator vs. the previous mock. The indicator only
+/// renders once a previous board exists — i.e. after the mock finalny, never
+/// after the mock wstępny, since there's nothing yet to compare it to.
+Widget _buildMockRankCell(int? mockRank, int? previousMockRank) {
+  if (mockRank == null) {
+    return const Text(_unknownValue, textAlign: TextAlign.center);
+  }
+  return Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Text('$mockRank', textAlign: TextAlign.center),
+      if (previousMockRank != null)
+        _buildMockRankDelta(previousMockRank - mockRank),
+    ],
+  );
+}
+
+/// Delta > 0: prospect climbed the board (lower slot number) → green ▲.
+/// Delta < 0: prospect fell → red ▼. Delta == 0: unchanged → blue ⏸.
+Widget _buildMockRankDelta(int delta) {
+  if (delta == 0) {
+    return const Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.pause, size: 10, color: Colors.blue),
+        Text('0', style: TextStyle(fontSize: 9, color: Colors.blue)),
+      ],
+    );
+  }
+  final rising = delta > 0;
+  final color = rising ? Colors.green : Colors.red;
+  final icon = rising ? Icons.arrow_drop_up : Icons.arrow_drop_down;
+  return Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Icon(icon, size: 12, color: color),
+      Text('${delta.abs()}', style: TextStyle(fontSize: 9, color: color)),
+    ],
+  );
+}
+
 class ProspectsScreen extends ConsumerStatefulWidget {
   const ProspectsScreen({
     super.key,
@@ -114,6 +156,7 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
   static const double _colFlagWidth = 32;
   static const double _colAgeWidth = 32;
   static const double _colPositionWidth = 32;
+  static const double _colMockRankWidth = 40;
   static const double _colTierWidth = 32;
   static const double _colOvrRangeWidth = 64;
   static const double _colProjWidth = 48;
@@ -128,6 +171,7 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
       _colFlagWidth +
       _colAgeWidth +
       _colPositionWidth +
+      _colMockRankWidth +
       _colTierWidth +
       _colOvrRangeWidth +
       _colProjWidth +
@@ -186,6 +230,7 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
     }
 
     final draftState = league.currentSeason.draftState;
+    final mockBoard = draftState?.mockDraftBoard;
     final scouting = league.playerTeam?.scouting;
     if (!_initialized && scouting != null) {
       _selectedIds.addAll(scouting.watchlistProspectIds);
@@ -216,6 +261,7 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
                 draftState.draftClass.prospects,
                 scouting,
                 league,
+                mockBoard,
                 combineAvailable: combineAvailable,
               ),
       ),
@@ -259,7 +305,8 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
     AppLocalizations l10n,
     List<Prospect> prospects,
     TeamScouting? scouting,
-    LeagueState league, {
+    LeagueState league,
+    MockDraftBoard? mockBoard, {
     required bool combineAvailable,
   }) {
     final coverage = league.playerTeam?.staff.scout?.attributes.coverage ?? 0.0;
@@ -269,6 +316,7 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
     final visible = _filteredProspects(
       prospects,
       scouting,
+      mockBoard,
       forceWatchOnly: _combineMode,
     );
     final noCombineTargets =
@@ -372,6 +420,7 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
                     l10n,
                     visible,
                     scouting,
+                    mockBoard,
                     watchlistLimit,
                     combineLimit,
                     combineAvailable,
@@ -416,7 +465,8 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
 
   List<Prospect> _filteredProspects(
     List<Prospect> prospects,
-    TeamScouting? scouting, {
+    TeamScouting? scouting,
+    MockDraftBoard? mockBoard, {
     bool forceWatchOnly = false,
   }) {
     final filtered = prospects.where((prospect) {
@@ -430,7 +480,19 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
       return true;
     }).toList();
 
-    filtered.sort((a, b) => a.name.compareTo(b.name));
+    // Ordered by the current displayed mock draft board (`draft.md`
+    // §"Dwa mock drafty"), not by name. Prospects missing from the board
+    // (shouldn't happen once a class has been generated, but guards against
+    // stale saves) sort after everyone with a known slot, alphabetically.
+    final ranks = mockBoard?.displayedRank ?? const <String, int>{};
+    filtered.sort((a, b) {
+      final rankA = ranks[a.id];
+      final rankB = ranks[b.id];
+      if (rankA == null && rankB == null) return a.name.compareTo(b.name);
+      if (rankA == null) return 1;
+      if (rankB == null) return -1;
+      return rankA.compareTo(rankB);
+    });
     return filtered;
   }
 
@@ -439,6 +501,7 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
     AppLocalizations l10n,
     List<Prospect> prospects,
     TeamScouting? scouting,
+    MockDraftBoard? mockBoard,
     int watchlistLimit,
     int combineLimit,
     bool combineAvailable,
@@ -461,6 +524,7 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
                   l10n,
                   prospect,
                   scouting,
+                  mockBoard,
                   watchlistLimit,
                   combineLimit,
                   combineAvailable,
@@ -484,7 +548,7 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
       child: Row(
         children: [
-          const SizedBox(width: _colCheckboxWidth),
+          SizedBox(width: _colCheckboxWidth),
           SizedBox(
             width: _colNameWidth,
             child: Text(l10n.prospects_name, style: headerStyle),
@@ -492,6 +556,7 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
           cell(_colFlagWidth, ''),
           cell(_colAgeWidth, l10n.prospects_age),
           cell(_colPositionWidth, l10n.prospects_positionShort),
+          cell(_colMockRankWidth, l10n.prospects_mockRank),
           cell(_colTierWidth, l10n.prospects_tier),
           cell(_colOvrRangeWidth, l10n.prospects_overallRange),
           cell(_colProjWidth, l10n.prospects_slot),
@@ -509,12 +574,15 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
     AppLocalizations l10n,
     Prospect prospect,
     TeamScouting? scouting,
+    MockDraftBoard? mockBoard,
     int watchlistLimit,
     int combineLimit,
     bool combineAvailable,
     bool showRoleColumn,
   ) {
     final knowledge = scouting?.forProspect(prospect.id);
+    final mockRank = mockBoard?.displayedRank[prospect.id];
+    final previousMockRank = mockBoard?.previousDisplayedRank[prospect.id];
     final watched = _selectedIds.contains(prospect.id);
     final assigned = _combineIds.contains(prospect.id);
     final canSelect = _combineMode
@@ -575,6 +643,10 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
               ),
               cell(_colAgeWidth, '${prospect.age}'),
               cell(_colPositionWidth, prospect.position.code),
+              SizedBox(
+                width: _colMockRankWidth,
+                child: _buildMockRankCell(mockRank, previousMockRank),
+              ),
               cell(_colTierWidth, _tierLabel(knowledge?.tier)),
               cell(
                 _colOvrRangeWidth,
