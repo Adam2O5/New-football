@@ -451,7 +451,7 @@ void main() {
       final shooter = clearLive.state.homeLineup.firstWhere(
         (player) => player.position != Position.gk,
       );
-      final clearShot = ShotResolver().resolve(
+      final clearShot = const ShotResolver().resolve(
         sequenceType: SequenceType.centralBuildUp,
         shotKind: SequenceShotKind.box,
         shooter: shooter,
@@ -463,7 +463,7 @@ void main() {
         useSequenceGate: false,
         baseXgOverride: 0.20,
       );
-      final rainShot = ShotResolver().resolve(
+      final rainShot = const ShotResolver().resolve(
         sequenceType: SequenceType.centralBuildUp,
         shotKind: SequenceShotKind.box,
         shooter: shooter,
@@ -477,13 +477,13 @@ void main() {
       );
       expect(rainShot.xg / clearShot.xg, closeTo(1.05, 1e-9));
 
-      final clearGoalkeeper = GoalkeeperResolver().resolve(
+      final clearGoalkeeper = const GoalkeeperResolver().resolve(
         shotKind: SequenceShotKind.box,
         defendingLineup: clearLive.state.awayLineup,
         effectiveAttributes: clearLive.awayEffectiveAttributes,
         weather: Weather.clear,
       );
-      final rainGoalkeeper = GoalkeeperResolver().resolve(
+      final rainGoalkeeper = const GoalkeeperResolver().resolve(
         shotKind: SequenceShotKind.box,
         defendingLineup: rainLive.state.awayLineup,
         effectiveAttributes: rainLive.awayEffectiveAttributes,
@@ -510,7 +510,7 @@ void main() {
         context: context(weather: Weather.wind),
         rngSeed: 2129,
       );
-      final selector = SequenceSelector(balance: balance);
+      final selector = const SequenceSelector(balance: balance);
       final clearWeights = selector.weightsFor(
         sequenceContextFor(live, weather: Weather.clear),
       );
@@ -563,8 +563,14 @@ void main() {
       expect(regular.isDerby, isTrue);
       expect(regular.crowdIntensity, 80);
       expect(playIn.crowdIntensity, 90);
-      expect(MatchdayBalance().crowdHomeMultiplier(80), closeTo(1.032, 1e-12));
-      expect(MatchdayBalance().crowdAwayMultiplier(80), closeTo(0.98, 1e-12));
+      expect(
+        const MatchdayBalance().crowdHomeMultiplier(80),
+        closeTo(1.032, 1e-12),
+      );
+      expect(
+        const MatchdayBalance().crowdAwayMultiplier(80),
+        closeTo(0.98, 1e-12),
+      );
 
       final regularLive = SimulationMatchEngine(balance: quietBalance()).start(
         home: home,

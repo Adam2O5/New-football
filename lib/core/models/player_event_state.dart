@@ -95,7 +95,7 @@ extension PlayerEventStateX on PlayerEventState {
     return copyWith(
       modifiers: [
         ...modifiers.where((modifier) => modifier.type != type),
-        if (replacement != null) replacement,
+        ?replacement,
       ],
     );
   }

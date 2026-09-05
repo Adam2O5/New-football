@@ -86,7 +86,7 @@ void main() {
   });
 
   test('rozszerzone modele MatchResult przechodzą JSON round-trip', () {
-    final playerStats = PlayerMatchStats(
+    final playerStats = const PlayerMatchStats(
       playerId: 'p-22',
       minutes: 73,
       goals: 1,

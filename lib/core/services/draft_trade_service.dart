@@ -810,7 +810,7 @@ class DraftTradeService {
     String actingTeamId,
   ) {
     if (!offer.isPending) {
-      return TradeValidation(
+      return const TradeValidation(
         ok: false,
         code: 'offerClosed',
         reason: 'Oferta wymiany jest już zamknięta',
@@ -1115,7 +1115,7 @@ ${first.id}|${second.id}|${first.teamId}|${second.teamId}
         'tradeOfferId': offer.id,
         'threadId': offer.threadId,
         'draftTrade': true,
-        if (reason != null) 'reason': reason,
+        'reason': ?reason,
         'assetsFromA': [for (final asset in offer.assetsFromA) asset.toJson()],
         'assetsFromB': [for (final asset in offer.assetsFromB) asset.toJson()],
       },

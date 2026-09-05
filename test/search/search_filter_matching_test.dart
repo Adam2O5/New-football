@@ -244,7 +244,7 @@ void main() {
       });
 
       test('noClubSentinel selects free agents specifically', () {
-        final f = PlayersFilterState(
+        final f = const PlayersFilterState(
           clubIds: {PlayersFilterState.noClubSentinel},
         );
         expect(matchesPlayerFilters(_player(teamId: null), f), isTrue);
@@ -252,7 +252,7 @@ void main() {
       });
 
       test('a team + noClubSentinel selection includes both', () {
-        final f = PlayersFilterState(
+        final f = const PlayersFilterState(
           clubIds: {'team-1', PlayersFilterState.noClubSentinel},
         );
         expect(matchesPlayerFilters(_player(teamId: 'team-1'), f), isTrue);

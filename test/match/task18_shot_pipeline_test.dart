@@ -285,7 +285,7 @@ void main() {
         expect(first.totalGoals, tracedGoals);
         expect(first.homeXg + first.awayXg, greaterThan(0));
         expect(
-          traces.any((trace) => trace.chain != null && trace.duels.length >= 1),
+          traces.any((trace) => trace.chain != null && trace.duels.isNotEmpty),
           isTrue,
         );
         expect(traces.every((trace) => trace.duels.length <= 2), isTrue);

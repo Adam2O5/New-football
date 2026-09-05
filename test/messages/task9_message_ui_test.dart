@@ -95,16 +95,16 @@ void main() {
   Widget app(LeagueStateFixture fixture) {
     return ProviderScope(
       overrides: [activeLeagueProvider.overrideWithValue(fixture.league)],
-      child: MaterialApp(
-        locale: const Locale('pl'),
-        localizationsDelegates: const [
+      child: const MaterialApp(
+        locale: Locale('pl'),
+        localizationsDelegates: [
           AppLocalizations.delegate,
           GlobalMaterialLocalizations.delegate,
           GlobalWidgetsLocalizations.delegate,
           GlobalCupertinoLocalizations.delegate,
         ],
         supportedLocales: AppLocalizations.supportedLocales,
-        home: const Scaffold(body: InboxScreen()),
+        home: Scaffold(body: InboxScreen()),
       ),
     );
   }
@@ -145,15 +145,15 @@ void main() {
             ),
           )
           .leagueState;
-      final decision = DecisionSpec(
+      final decision = const DecisionSpec(
         options: [
-          const MessageAction(id: 'accept', labelKey: 'accept'),
-          const MessageAction(id: 'decline', labelKey: 'decline'),
+          MessageAction(id: 'accept', labelKey: 'accept'),
+          MessageAction(id: 'decline', labelKey: 'decline'),
         ],
         defaultOnExpiry: 'decline',
       );
       final league = base.copyWith(
-        inbox: Inbox().addMessage(
+        inbox: const Inbox().addMessage(
           GameMessage(
             id: 'decision',
             type: MessageType.playerEvent,
@@ -202,7 +202,7 @@ void main() {
         )
         .leagueState
         .copyWith(
-          messageSettings: MessageSettings().withTypeLevel(
+          messageSettings: const MessageSettings().withTypeLevel(
             MessageType.walkover,
             NotificationLevel.muted,
           ),

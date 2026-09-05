@@ -161,7 +161,7 @@ extension TeamEventStateX on TeamEventState {
     return copyWith(
       modifiers: [
         ...modifiers.where((modifier) => modifier.type != type),
-        if (replacement != null) replacement,
+        ?replacement,
       ],
     );
   }

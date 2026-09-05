@@ -40,13 +40,13 @@ void main() {
   });
 
   test('CohesionService stosuje tier multiplier i motywację head coacha', () {
-    final coach = StaffMember(
+    final coach = const StaffMember(
       id: 'task41-head-coach',
       name: 'Task 41 HC',
       nationality: Nationality.poland,
       age: 44,
       role: StaffRole.headCoach,
-      attributes: const StaffAttributes(motivation: 4.5),
+      attributes: StaffAttributes(motivation: 4.5),
     );
 
     expect(cohesion.cohesionMult(0), closeTo(1.01, 1e-9));

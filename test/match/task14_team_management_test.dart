@@ -337,8 +337,8 @@ void main() {
 
   test('strength table follows four-week schedule and week 44 refresh', () {
     const service = LeagueStrengthService();
-    final current = LeagueStrengthTable(
-      entries: const [],
+    final current = const LeagueStrengthTable(
+      entries: [],
       lastCalculatedWeek: 1,
       lastCalculatedDay: 1,
       seasonYear: 2026,
@@ -403,7 +403,7 @@ void main() {
             ),
           ),
         ],
-        finance: TeamFinance(totalPayroll: 100),
+        finance: const TeamFinance(totalPayroll: 100),
       );
       final higherRaw = sourceTeam.copyWith(
         id: 'raw-high',
@@ -421,7 +421,7 @@ void main() {
             ),
           ),
         ],
-        finance: TeamFinance(totalPayroll: 100),
+        finance: const TeamFinance(totalPayroll: 100),
       );
       expect(
         service.computeTeamPower(lowerRaw),
@@ -434,7 +434,7 @@ void main() {
       final rawTable = service.calculate(
         LeagueState(
           teams: [lowerRaw, higherRaw],
-          currentSeason: Season(year: 2026),
+          currentSeason: const Season(year: 2026),
         ),
         week: 1,
         seasonYear: 2026,
@@ -445,7 +445,7 @@ void main() {
       final pointB = strengthTeam('points-b', 70);
       final pointLeague = LeagueState(
         teams: [pointA, pointB],
-        currentSeason: Season(year: 2026),
+        currentSeason: const Season(year: 2026),
         history: [
           SeasonHistory(
             year: 2025,
@@ -475,7 +475,7 @@ void main() {
       final payrollTable = service.calculate(
         LeagueState(
           teams: [payrollB, payrollA],
-          currentSeason: Season(year: 2026),
+          currentSeason: const Season(year: 2026),
         ),
         week: 1,
         seasonYear: 2026,
@@ -485,7 +485,7 @@ void main() {
       final idA = strengthTeam('id-a', 70);
       final idB = strengthTeam('id-b', 70);
       final idTable = service.calculate(
-        LeagueState(teams: [idB, idA], currentSeason: Season(year: 2026)),
+        LeagueState(teams: [idB, idA], currentSeason: const Season(year: 2026)),
         week: 1,
         seasonYear: 2026,
       );
@@ -502,7 +502,7 @@ void main() {
       ];
       final league = LeagueState(
         teams: teams,
-        currentSeason: Season(year: 2026),
+        currentSeason: const Season(year: 2026),
       );
       final first = service.calculate(league, week: 1, seasonYear: 2026);
 

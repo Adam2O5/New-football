@@ -812,8 +812,9 @@ class AiTradeService {
           saveSeed: saveSeed,
           packageSalt: 7000 + offered.id.length,
         );
-        if (decision.surplusPct >= balance.ai.tradeOfferMinimum)
+        if (decision.surplusPct >= balance.ai.tradeOfferMinimum) {
           return proposal;
+        }
       }
     }
     return null;
@@ -1182,15 +1183,17 @@ class AiTradeService {
       proposal.assetsFromA,
       proposal.assetsFromB,
       b,
-    ))
+    )) {
       return true;
+    }
     if (_forbidsVeteranForFirstRound(
       bContext,
       proposal.assetsFromB,
       proposal.assetsFromA,
       a,
-    ))
+    )) {
       return true;
+    }
     return false;
   }
 
@@ -1209,8 +1212,9 @@ class AiTradeService {
     for (final entry in league.tradeHistory) {
       if (entry.outcome != 'accepted' ||
           entry.seasonYear < start ||
-          entry.seasonYear > end)
+          entry.seasonYear > end) {
         continue;
+      }
       final assets = entry.teamAId == team.id
           ? entry.assetsFromA
           : entry.teamBId == team.id
@@ -1230,8 +1234,9 @@ class AiTradeService {
     Team incomingSource,
   ) {
     if (context.teamStatus != TeamStatus.rebuild &&
-        context.teamStatus != TeamStatus.retool)
+        context.teamStatus != TeamStatus.retool) {
       return false;
+    }
     final getsVeteran = _playersFromAssets(
       null,
       incomingSource,
@@ -1339,8 +1344,9 @@ class AiTradeService {
         source: a,
         destination: b,
         playerId: asset.playerId!,
-      ))
+      )) {
         return false;
+      }
     }
     for (final asset in proposal.assetsFromB.where((asset) => asset.isPlayer)) {
       if (!_passesNtcPlanning(
@@ -1348,8 +1354,9 @@ class AiTradeService {
         source: b,
         destination: a,
         playerId: asset.playerId!,
-      ))
+      )) {
         return false;
+      }
     }
     return true;
   }

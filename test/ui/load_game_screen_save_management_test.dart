@@ -575,7 +575,10 @@ void main() {
         find.byKey(ValueKey<String>('save-row-${source.meta.id}')),
         findsOneWidget,
       );
-      expect(find.byKey(ValueKey<String>('save-row-copy-3')), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey<String>('save-row-copy-3')),
+        findsOneWidget,
+      );
       container.dispose();
       await _resetWidget(tester);
     },

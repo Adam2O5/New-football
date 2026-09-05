@@ -21,7 +21,7 @@ void main() {
   const balance = BalanceConfig.defaults;
   final policy = AiContractMarketService(balance: balance);
   final market = ContractMarketService(balance: balance);
-  final capService = SalaryCapService(balance: balance);
+  final capService = const SalaryCapService(balance: balance);
 
   Player freeAgentFrom(Player source, {required String id}) {
     return source.copyWith(
@@ -273,21 +273,12 @@ void main() {
       maxPayrollRates.add(payrollPercentages.reduce(max));
     }
 
-    final meanRawStaffRate =
-        rawStaffRates.reduce((a, b) => a + b) / rawStaffRates.length;
     final meanAffordableStaffRate =
         affordableStaffRates.reduce((a, b) => a + b) /
         affordableStaffRates.length;
     final meanPayrollPercent =
         payrollRates.reduce((a, b) => a + b) / payrollRates.length;
     final maximumPayrollPercent = maxPayrollRates.reduce(max);
-
-    print(
-      'Task 35 benchmark: rawStaff=${(meanRawStaffRate * 100).toStringAsFixed(2)}%, '
-      'affordableStaff=${(meanAffordableStaffRate * 100).toStringAsFixed(2)}%, '
-      'payroll=${meanPayrollPercent.toStringAsFixed(2)}%, '
-      'maxPayroll=${maximumPayrollPercent.toStringAsFixed(2)}%',
-    );
 
     expect(meanAffordableStaffRate, greaterThanOrEqualTo(0.92));
     // A lower payroll bound would reward needless FA signings. The benchmark

@@ -1005,7 +1005,7 @@ class _EventFeed extends StatelessWidget {
                       final player = _playerName(event, home, away);
                       final detail = [
                         matchEventLabel(context, event.type),
-                        if (player != null) player,
+                        ?player,
                       ].join(' · ');
                       return ListTile(
                         dense: true,
@@ -1200,7 +1200,7 @@ class _LiveSubstitutionSheetState extends State<_LiveSubstitutionSheet> {
               Text(l10n.matchday_subsUsed(widget.used)),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: _outId,
+                initialValue: _outId,
                 isExpanded: true,
                 decoration: InputDecoration(
                   labelText: l10n.matchday_selectOutgoing,
@@ -1218,7 +1218,7 @@ class _LiveSubstitutionSheetState extends State<_LiveSubstitutionSheet> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                value: _inId,
+                initialValue: _inId,
                 isExpanded: true,
                 decoration: InputDecoration(
                   labelText: l10n.matchday_selectIncoming,
@@ -1244,7 +1244,7 @@ class _LiveSubstitutionSheetState extends State<_LiveSubstitutionSheet> {
                         if (mounted && !accepted) {
                           setState(() => _submitting = false);
                         }
-                        if (accepted && mounted) {
+                        if (accepted && context.mounted) {
                           Navigator.of(context).pop();
                         }
                       },
@@ -1333,7 +1333,7 @@ class _LiveTacticsSheetState extends State<_LiveTacticsSheet> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<Formation>(
-                value: _formation,
+                initialValue: _formation,
                 isExpanded: true,
                 decoration: InputDecoration(labelText: l10n.tactics_formation),
                 items: [
@@ -1348,7 +1348,7 @@ class _LiveTacticsSheetState extends State<_LiveTacticsSheet> {
               ),
               const SizedBox(height: 10),
               DropdownButtonFormField<Tempo>(
-                value: _tempo,
+                initialValue: _tempo,
                 isExpanded: true,
                 decoration: InputDecoration(labelText: l10n.tactics_tempo),
                 items: [
@@ -1366,7 +1366,7 @@ class _LiveTacticsSheetState extends State<_LiveTacticsSheet> {
               ),
               const SizedBox(height: 10),
               DropdownButtonFormField<PressingIntensity>(
-                value: _pressing,
+                initialValue: _pressing,
                 isExpanded: true,
                 decoration: InputDecoration(labelText: l10n.tactics_pressing),
                 items: [
@@ -1384,7 +1384,7 @@ class _LiveTacticsSheetState extends State<_LiveTacticsSheet> {
               ),
               const SizedBox(height: 10),
               DropdownButtonFormField<DefensiveLine>(
-                value: _defensiveLine,
+                initialValue: _defensiveLine,
                 isExpanded: true,
                 decoration: InputDecoration(
                   labelText: l10n.tactics_defensiveLine,
@@ -1406,7 +1406,7 @@ class _LiveTacticsSheetState extends State<_LiveTacticsSheet> {
               ),
               const SizedBox(height: 10),
               DropdownButtonFormField<AttackWidth>(
-                value: _attackWidth,
+                initialValue: _attackWidth,
                 isExpanded: true,
                 decoration: InputDecoration(
                   labelText: l10n.tactics_attackWidth,
@@ -1431,7 +1431,9 @@ class _LiveTacticsSheetState extends State<_LiveTacticsSheet> {
                     : () async {
                         setState(() => _submitting = true);
                         final accepted = await widget.onSubmit(_current);
-                        if (accepted && mounted) Navigator.of(context).pop();
+                        if (accepted && context.mounted) {
+                          Navigator.of(context).pop();
+                        }
                         if (!accepted && mounted) {
                           setState(() => _submitting = false);
                         }

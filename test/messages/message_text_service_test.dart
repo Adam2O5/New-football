@@ -1,7 +1,7 @@
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/message.dart';
 import 'package:new_football/core/services/message_text_service.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 GameMessage _message({
   required String titleKey,

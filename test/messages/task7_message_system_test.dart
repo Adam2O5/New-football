@@ -45,10 +45,10 @@ void main() {
   test(
     'expired decision executes defaultOnExpiry and acknowledges message',
     () {
-      final decision = DecisionSpec(
+      final decision = const DecisionSpec(
         options: [
-          const MessageAction(id: 'accept', labelKey: 'accept'),
-          const MessageAction(id: 'decline', labelKey: 'decline'),
+          MessageAction(id: 'accept', labelKey: 'accept'),
+          MessageAction(id: 'decline', labelKey: 'decline'),
         ],
         defaultOnExpiry: 'decline',
       );
@@ -62,7 +62,7 @@ void main() {
           )
           .leagueState
           .copyWith(
-            inbox: Inbox().addMessage(
+            inbox: const Inbox().addMessage(
               message(
                 id: 'expired',
                 kind: 'plateau',
@@ -123,7 +123,7 @@ void main() {
       league,
       'confirmed',
       'accept',
-      onDecision: (state, _message, _option) {
+      onDecision: (state, message, option) {
         dispatchCount++;
         return state;
       },
@@ -159,11 +159,7 @@ void main() {
           ),
         );
     var dispatchCount = 0;
-    LeagueState handler(
-      LeagueState state,
-      GameMessage _message,
-      String _option,
-    ) {
+    LeagueState handler(LeagueState state, GameMessage message, String option) {
       dispatchCount++;
       return state;
     }
@@ -325,7 +321,7 @@ void main() {
   });
 
   test('missing payload reference removes actions and decision', () {
-    final inbox = Inbox().addMessage(
+    final inbox = const Inbox().addMessage(
       message(
         id: 'missing-player',
         payload: const {'playerId': 'deleted'},

@@ -50,8 +50,9 @@ void main() {
           ];
 
     final xi = <Player>[];
-    if (goalkeeperInXi)
+    if (goalkeeperInXi) {
       xi.add(roster.firstWhere((p) => p.position == Position.gk));
+    }
     xi.addAll(
       roster
           .where((player) => player.position != Position.gk)
@@ -334,7 +335,7 @@ void main() {
   });
 
   group('Task 15 — MatchContext i snapshoty', () {
-    final factory = MatchContextFactory();
+    final factory = const MatchContextFactory();
     final regularHome = teamWithRoster(baseHome, size: 25);
     final regularAway = teamWithRoster(baseAway, size: 25);
 
@@ -775,7 +776,7 @@ void main() {
           ).lineupPlayerIds,
         );
         final away = teamWithRoster(baseAway, size: 25);
-        final context = MatchContextFactory().createForTeams(
+        final context = const MatchContextFactory().createForTeams(
           home: noGkHome,
           away: away,
           seasonYear: 2026,
@@ -820,7 +821,7 @@ void main() {
         final walkoverLeague = playerLeague
             .updateTeam(walkoverHome)
             .copyWith(inbox: const Inbox());
-        final walkoverContext = MatchContextFactory().createForTeams(
+        final walkoverContext = const MatchContextFactory().createForTeams(
           home: walkoverHome,
           away: away,
           seasonYear: 2026,
@@ -850,7 +851,7 @@ void main() {
       );
       final home = teamWithRoster(baseHome, size: 25);
       final away = teamWithRoster(baseAway, size: 25);
-      final context = MatchContextFactory().createForTeams(
+      final context = const MatchContextFactory().createForTeams(
         home: home,
         away: away,
         seasonYear: 2026,

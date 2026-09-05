@@ -3,7 +3,7 @@ import 'dart:math';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/seed_data_generator.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('SeedDataGenerator.generateFreeAgentPlayers', () {

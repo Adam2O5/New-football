@@ -361,27 +361,27 @@ void main() {
           payload: {'playerId': playerId},
           path: '/game/player/$playerId',
         ),
-        _RouteCase(
+        const _RouteCase(
           type: MessageType.tradeOffer,
           title: 'Akcja transfer',
           path: '/game/trade',
         ),
-        _RouteCase(
+        const _RouteCase(
           type: MessageType.contractOffer,
           title: 'Akcja kontrakt',
           path: '/game/contracts',
         ),
-        _RouteCase(
+        const _RouteCase(
           type: MessageType.staffHired,
           title: 'Akcja sztab',
           path: '/game/staff',
         ),
-        _RouteCase(
+        const _RouteCase(
           type: MessageType.apronWarning,
           title: 'Akcja finanse',
           path: '/game/finance',
         ),
-        _RouteCase(
+        const _RouteCase(
           type: MessageType.scoutReport,
           title: 'Akcja prospekty',
           path: '/game/prospects',

@@ -52,18 +52,24 @@ class RolePickerSheet extends StatelessWidget {
             ),
           ),
           const Divider(height: 1),
-          for (final role in roles)
-            RadioListTile<AssignedRole>(
-              value: role,
-              groupValue: currentRole,
-              title: Text(roleDisplayInfo(role).label),
-              subtitle: Text(roleDisplayInfo(role).description),
-              onChanged: (value) {
-                if (value == null) return;
-                Navigator.of(context).pop();
-                onSelected(value);
-              },
+          RadioGroup<AssignedRole>(
+            groupValue: currentRole,
+            onChanged: (value) {
+              if (value == null) return;
+              Navigator.of(context).pop();
+              onSelected(value);
+            },
+            child: Column(
+              children: [
+                for (final role in roles)
+                  RadioListTile<AssignedRole>(
+                    value: role,
+                    title: Text(roleDisplayInfo(role).label),
+                    subtitle: Text(roleDisplayInfo(role).description),
+                  ),
+              ],
             ),
+          ),
         ],
       ),
     );

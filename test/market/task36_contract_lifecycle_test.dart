@@ -21,10 +21,10 @@ void main() {
   final generator = SeedDataGenerator();
   final balance = BalanceConfig.defaults;
 
-  Team _aiTeam(LeagueState league) =>
+  Team aiTeam(LeagueState league) =>
       league.teams.firstWhere((team) => team.ai != null);
 
-  LeagueState _replaceTeam(LeagueState league, Team replacement) =>
+  LeagueState replaceTeam(LeagueState league, Team replacement) =>
       league.copyWith(
         teams: [
           for (final team in league.teams)
@@ -32,7 +32,7 @@ void main() {
         ],
       );
 
-  Player _prospectPlayer(
+  Player prospectPlayer(
     LeagueState league, {
     required String id,
     required int index,
@@ -58,7 +58,7 @@ void main() {
         .recalculatePointValue(balance);
   }
 
-  FreshUndraftedPlayer _freshRecord(LeagueState league, String playerId) =>
+  FreshUndraftedPlayer freshRecord(LeagueState league, String playerId) =>
       FreshUndraftedPlayer(
         playerId: playerId,
         draftYear: league.currentSeason.year,
@@ -125,11 +125,11 @@ void main() {
     final base = generator
         .generateLeague(seed: 3611)
         .copyWith(currentWeek: 47, currentDay: 1, currentHour: 1);
-    final originalTeam = _aiTeam(base);
+    final originalTeam = aiTeam(base);
     final team = originalTeam.copyWith(
       roster: originalTeam.roster.take(20).toList(),
     );
-    final player = _prospectPlayer(
+    final player = prospectPlayer(
       base,
       id: 'task36-deferred-right',
       index: 2,
@@ -143,7 +143,7 @@ void main() {
       draftYear: base.currentSeason.year,
       pickNumber: 60,
     );
-    final state = _replaceTeam(base.copyWith(draftedRights: [right]), team);
+    final state = replaceTeam(base.copyWith(draftedRights: [right]), team);
     final policy = AiDraftService();
     final market = ContractMarketService();
 
@@ -173,23 +173,23 @@ void main() {
     'fresh undrafted offer enters negotiation and cleans provenance on sign',
     () {
       final base = generator.generateLeague(seed: 3612);
-      final originalTeam = _aiTeam(base);
+      final originalTeam = aiTeam(base);
       final team = originalTeam.copyWith(
         roster: originalTeam.roster.take(19).toList(),
       );
-      final player = _prospectPlayer(
+      final player = prospectPlayer(
         base,
         id: 'task36-fresh-undrafted',
         index: 4,
         yearsRemaining: 0,
       );
-      final state = _replaceTeam(
+      final state = replaceTeam(
         base.copyWith(
           currentWeek: 47,
           currentDay: 1,
           currentHour: 1,
           freeAgents: [player],
-          freshUndraftedPlayers: [_freshRecord(base, player.id)],
+          freshUndraftedPlayers: [freshRecord(base, player.id)],
         ),
         team,
       );
@@ -244,23 +244,23 @@ void main() {
         for (final team in aiTeams)
           team.copyWith(roster: team.roster.take(19).toList()),
       ];
-      final player = _prospectPlayer(
+      final player = prospectPlayer(
         base,
         id: 'task36-competition-undrafted',
         index: 6,
         yearsRemaining: 0,
       );
-      var state = _replaceTeam(
+      var state = replaceTeam(
         base.copyWith(
           currentWeek: 47,
           currentDay: 1,
           currentHour: 1,
           freeAgents: [player],
-          freshUndraftedPlayers: [_freshRecord(base, player.id)],
+          freshUndraftedPlayers: [freshRecord(base, player.id)],
         ),
         configuredTeams.first,
       );
-      state = _replaceTeam(state, configuredTeams.last);
+      state = replaceTeam(state, configuredTeams.last);
       final market = ContractMarketService();
 
       LeagueState? competing;
@@ -301,14 +301,14 @@ void main() {
 
       final phaseTwoPlayers = [
         for (var index = 0; index < 6; index++)
-          _prospectPlayer(
+          prospectPlayer(
             base,
             id: 'task36-phase-two-$index',
             index: index + 10,
             yearsRemaining: 0,
           ),
       ];
-      final phaseTwoState = _replaceTeam(
+      final phaseTwoState = replaceTeam(
         base.copyWith(
           currentWeek: 48,
           currentDay: 1,
@@ -316,7 +316,7 @@ void main() {
           freeAgents: phaseTwoPlayers,
           freshUndraftedPlayers: [
             for (final candidate in phaseTwoPlayers)
-              _freshRecord(base, candidate.id),
+              freshRecord(base, candidate.id),
           ],
         ),
         configuredTeams.first,
@@ -339,7 +339,7 @@ void main() {
 
   test('central cap validation rejects a fresh undrafted offer', () {
     final base = generator.generateLeague(seed: 3614);
-    final originalTeam = _aiTeam(base);
+    final originalTeam = aiTeam(base);
     final expensiveTeam = originalTeam.copyWith(
       roster: [
         for (final player in originalTeam.roster.take(20))
@@ -351,19 +351,19 @@ void main() {
           ),
       ],
     );
-    final player = _prospectPlayer(
+    final player = prospectPlayer(
       base,
       id: 'task36-cap-rejected-undrafted',
       index: 8,
       yearsRemaining: 0,
     );
-    final state = _replaceTeam(
+    final state = replaceTeam(
       base.copyWith(
         currentWeek: 47,
         currentDay: 1,
         currentHour: 1,
         freeAgents: [player],
-        freshUndraftedPlayers: [_freshRecord(base, player.id)],
+        freshUndraftedPlayers: [freshRecord(base, player.id)],
       ),
       expensiveTeam,
     );
@@ -380,7 +380,7 @@ void main() {
     'weekly special market pass is disabled with resolveContractMarket false',
     () {
       final base = generator.generateLeague(seed: 3615);
-      final player = _prospectPlayer(
+      final player = prospectPlayer(
         base,
         id: 'task36-disabled-undrafted',
         index: 9,
@@ -391,7 +391,7 @@ void main() {
         currentDay: 7,
         currentHour: null,
         freeAgents: [player],
-        freshUndraftedPlayers: [_freshRecord(base, player.id)],
+        freshUndraftedPlayers: [freshRecord(base, player.id)],
       );
 
       final result = DaySimulator()

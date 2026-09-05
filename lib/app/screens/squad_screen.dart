@@ -467,7 +467,7 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
               child: Column(
                 children: [
                   DropdownButtonFormField<Formation>(
-                    value: formation,
+                    initialValue: formation,
                     decoration: InputDecoration(
                       labelText: l10n.tactics_formation,
                     ),
@@ -484,7 +484,7 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<Tempo>(
-                    value: tempo,
+                    initialValue: tempo,
                     decoration: InputDecoration(labelText: l10n.tactics_tempo),
                     items: Tempo.values
                         .map(
@@ -501,7 +501,7 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<PressingIntensity>(
-                    value: pressing,
+                    initialValue: pressing,
                     decoration: InputDecoration(
                       labelText: l10n.tactics_pressing,
                     ),
@@ -520,7 +520,7 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<DefensiveLine>(
-                    value: line,
+                    initialValue: line,
                     decoration: InputDecoration(
                       labelText: l10n.tactics_defensiveLine,
                     ),
@@ -539,7 +539,7 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
                   ),
                   const SizedBox(height: 12),
                   DropdownButtonFormField<AttackWidth>(
-                    value: width,
+                    initialValue: width,
                     decoration: InputDecoration(
                       labelText: l10n.tactics_attackWidth,
                     ),

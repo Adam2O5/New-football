@@ -305,7 +305,7 @@ class FinanceScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 14),
             _metricGrid(context, metrics),
-            if (footer != null) footer,
+            ?footer,
           ],
         ),
       ),

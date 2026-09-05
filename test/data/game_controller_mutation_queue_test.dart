@@ -462,7 +462,7 @@ GameMessage _urgentMessage() => const GameMessage(
   day: 1,
   titleKey: 'msg_playerEvent_title',
   bodyKey: 'msg_playerEvent_body',
-  args: const {'_legacyTitle': 'Pilna wiadomość', '_legacyBody': 'Treść'},
+  args: {'_legacyTitle': 'Pilna wiadomość', '_legacyBody': 'Treść'},
 );
 
 GameMessage _decisionMessage() => _urgentMessage().copyWith(

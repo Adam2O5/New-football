@@ -133,12 +133,12 @@ class _TradeScreenState extends ConsumerState<TradeScreen> {
     final theirPick = target == null ? null : _pickAsset(target, theirPickId);
     final previewAssetsFromA = [
       if (ownPlayerId != null) TradeAsset.player(ownPlayerId),
-      if (ownPick != null) ownPick,
+      ?ownPick,
       if (ownRightsId != null) TradeAsset.draftedRights(ownRightsId),
     ];
     final previewAssetsFromB = [
       if (theirPlayerId != null) TradeAsset.player(theirPlayerId),
-      if (theirPick != null) theirPick,
+      ?theirPick,
       if (theirRightsId != null) TradeAsset.draftedRights(theirRightsId),
     ];
     TradeValidation? previewValidation;
@@ -171,7 +171,7 @@ class _TradeScreenState extends ConsumerState<TradeScreen> {
           padding: const EdgeInsets.all(16),
           children: [
             DropdownButtonFormField<String>(
-              value: ownPlayerId,
+              initialValue: ownPlayerId,
               decoration: InputDecoration(labelText: l10n.trade_yourPlayer),
               items: own.roster
                   .map(
@@ -191,7 +191,7 @@ class _TradeScreenState extends ConsumerState<TradeScreen> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              value: ownPickId,
+              initialValue: ownPickId,
               decoration: InputDecoration(labelText: l10n.trade_yourPick),
               items: own.ownedPicks
                   .map(
@@ -205,7 +205,7 @@ class _TradeScreenState extends ConsumerState<TradeScreen> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              value: ownRightsId,
+              initialValue: ownRightsId,
               decoration: InputDecoration(labelText: l10n.trade_yourRights),
               items: ownRights
                   .map(
@@ -219,7 +219,7 @@ class _TradeScreenState extends ConsumerState<TradeScreen> {
             ),
             const SizedBox(height: 20),
             DropdownButtonFormField<String>(
-              value: targetId,
+              initialValue: targetId,
               decoration: InputDecoration(labelText: l10n.trade_targetTeam),
               items: others
                   .map(
@@ -235,7 +235,7 @@ class _TradeScreenState extends ConsumerState<TradeScreen> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              value: theirPlayerId,
+              initialValue: theirPlayerId,
               decoration: InputDecoration(labelText: l10n.trade_theirPlayer),
               items: (target?.roster ?? <Player>[])
                   .map(
@@ -257,7 +257,7 @@ class _TradeScreenState extends ConsumerState<TradeScreen> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              value: theirPickId,
+              initialValue: theirPickId,
               decoration: InputDecoration(labelText: l10n.trade_theirPick),
               items: (target?.ownedPicks ?? <DraftPick>[])
                   .map(
@@ -273,7 +273,7 @@ class _TradeScreenState extends ConsumerState<TradeScreen> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
-              value: theirRightsId,
+              initialValue: theirRightsId,
               decoration: InputDecoration(labelText: l10n.trade_theirRights),
               items: targetRights
                   .map(
@@ -344,12 +344,12 @@ class _TradeScreenState extends ConsumerState<TradeScreen> {
 
     final assetsFromA = [
       if (ownId != null) TradeAsset.player(ownId),
-      if (ownPick != null) ownPick,
+      ?ownPick,
       if (ownRightsId != null) TradeAsset.draftedRights(ownRightsId),
     ];
     final assetsFromB = [
       if (theirId != null) TradeAsset.player(theirId),
-      if (theirPick != null) theirPick,
+      ?theirPick,
       if (theirRightsId != null) TradeAsset.draftedRights(theirRightsId),
     ];
 

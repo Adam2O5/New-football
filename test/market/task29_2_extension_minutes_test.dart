@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:new_football/core/balance/balance_config.dart';
-import 'package:new_football/core/balance/events_balance.dart';
 import 'package:new_football/core/models/contract_negotiation.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/field_player_attributes.dart';
@@ -103,8 +102,8 @@ void main() {
     );
   }
 
-  BalanceConfig noRandomTeamEventsBalance() => BalanceConfig(
-    events: const EventsBalance(
+  BalanceConfig noRandomTeamEventsBalance() => const BalanceConfig(
+    events: EventsBalance(
       minutesRequestChance: 0,
       minutesRequestAmbitiousChance: 0,
       transferRequestIChance: 0,
@@ -410,7 +409,7 @@ void main() {
       expect(result.league.negotiationBlocks.single.untilWeek, 50);
       expect(result.league.negotiationBlocks.single.untilDay, 4);
       expect(
-        NegotiationService().isBlocked(
+        const NegotiationService().isBlocked(
           league: result.league,
           subjectId: player.id,
           subjectKind: NegotiationSubjectKind.player,

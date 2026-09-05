@@ -315,7 +315,7 @@ void main() {
   });
 
   test('recurringInjury creates a minor injury in the old Major group', () {
-    final oldMajor = Injury(
+    final oldMajor = const Injury(
       id: 'acl_tear',
       group: InjuryGroup.knees,
       type: InjuryType.major,
@@ -389,7 +389,7 @@ void main() {
   );
 
   test('injuryComplication cautious path adds rehabilitation days', () {
-    final oldMajor = Injury(
+    final oldMajor = const Injury(
       id: 'hamstring_tear',
       group: InjuryGroup.legMuscles,
       type: InjuryType.major,

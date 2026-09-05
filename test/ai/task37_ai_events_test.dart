@@ -236,7 +236,7 @@ void main() {
       isTrue,
     );
 
-    final previousMajor = Injury(
+    final previousMajor = const Injury(
       id: 'ai-recovery-major',
       group: InjuryGroup.knees,
       type: InjuryType.major,

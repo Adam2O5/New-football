@@ -66,7 +66,7 @@ void main() {
     );
     final team = staffFixtureTeam();
     final offer = staffOfferFor(candidate, salaryFactor: 0.9);
-    final negotiation = NegotiationService()
+    final negotiation = const NegotiationService()
         .start(
           id: 'staff-recompute-negotiation',
           subjectId: candidate.id,

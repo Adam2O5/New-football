@@ -315,15 +315,15 @@ void main() {
         jsonDecode(jsonEncode(player.toJson())) as Map<String, dynamic>;
     expect(Player.fromJson(playerJson).state.form, 5.2);
 
-    final result = MatchResult(
+    final result = const MatchResult(
       homeTeamId: 'home',
       awayTeamId: 'away',
       homeGoals: 1,
       awayGoals: 0,
-      homeStats: const TeamMatchStats(teamId: 'home'),
-      awayStats: const TeamMatchStats(teamId: 'away'),
-      context: const MatchContext(isDerby: true, weather: Weather.heat),
-      homeTactics: const TacticsSetup(
+      homeStats: TeamMatchStats(teamId: 'home'),
+      awayStats: TeamMatchStats(teamId: 'away'),
+      context: MatchContext(isDerby: true, weather: Weather.heat),
+      homeTactics: TacticsSetup(
         tempo: Tempo.fast,
         pressing: PressingIntensity.high,
       ),

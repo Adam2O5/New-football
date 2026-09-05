@@ -263,7 +263,7 @@ void main() {
   });
 
   test('hard reject creates a 30-day subject-club block', () {
-    final service = NegotiationService();
+    final service = const NegotiationService();
     final block = service.blockFor(
       subjectId: 'player-1',
       subjectKind: NegotiationSubjectKind.player,
@@ -302,7 +302,7 @@ void main() {
   test(
     'finalization timeout hard-rejects and rival selection does not block',
     () {
-      final service = NegotiationService();
+      final service = const NegotiationService();
       final started = service.start(
         id: 'task28-timeout',
         subjectId: 'player-timeout',
@@ -355,7 +355,7 @@ void main() {
   );
 
   test('phase II negotiations cancel at the end of the FA window', () {
-    final service = NegotiationService();
+    final service = const NegotiationService();
     final negotiation = service.start(
       id: 'task28-phase2',
       subjectId: 'player-phase2',

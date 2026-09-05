@@ -1,5 +1,5 @@
 import 'package:new_football/core/services/game_factory.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('GameFactory.create — wolni agenci', () {
@@ -17,20 +17,23 @@ void main() {
       expect(freeAgents.map((p) => p.id).toSet().length, freeAgents.length);
     });
 
-    test('pula wolnych agentów jest deterministyczna dla tego samego seeda', () {
-      const request = NewGameRequest(
-        saveName: 'test',
-        playerTeamId: 'team_europe_0',
-        seed: 999,
-      );
-      final saveA = GameFactory().create(request);
-      final saveB = GameFactory().create(request);
+    test(
+      'pula wolnych agentów jest deterministyczna dla tego samego seeda',
+      () {
+        const request = NewGameRequest(
+          saveName: 'test',
+          playerTeamId: 'team_europe_0',
+          seed: 999,
+        );
+        final saveA = GameFactory().create(request);
+        final saveB = GameFactory().create(request);
 
-      expect(
-        saveA.leagueState.freeAgents.map((p) => p.id).toList(),
-        equals(saveB.leagueState.freeAgents.map((p) => p.id).toList()),
-      );
-    });
+        expect(
+          saveA.leagueState.freeAgents.map((p) => p.id).toList(),
+          equals(saveB.leagueState.freeAgents.map((p) => p.id).toList()),
+        );
+      },
+    );
 
     test('pula wolnych agentów różni się od puli sztabu (różne ziarno)', () {
       final save = GameFactory().create(

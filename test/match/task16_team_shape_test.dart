@@ -76,7 +76,7 @@ void main() {
 
     test('role deltas are applied independently of the base formation', () {
       const calculator = TeamShapeCalculator();
-      const tactics = const TacticsSetup(
+      const tactics = TacticsSetup(
         formation: Formation.f433,
         tempo: Tempo.balanced,
         attackWidth: AttackWidth.balanced,
@@ -93,7 +93,7 @@ void main() {
         lineup: [
           sourcePlayer.copyWith(
             state: sourcePlayer.state.copyWith(
-              role: AssignedRole.cb(role: CbRole.noNonsenseCentreBack),
+              role: const AssignedRole.cb(role: CbRole.noNonsenseCentreBack),
             ),
           ),
         ],

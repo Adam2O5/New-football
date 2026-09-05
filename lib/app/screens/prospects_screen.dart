@@ -484,7 +484,7 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
       padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
       child: Row(
         children: [
-          SizedBox(width: _colCheckboxWidth),
+          const SizedBox(width: _colCheckboxWidth),
           SizedBox(
             width: _colNameWidth,
             child: Text(l10n.prospects_name, style: headerStyle),

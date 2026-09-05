@@ -40,7 +40,7 @@ class ScoreStateModifiers {
   }) {
     final difference = homeSide ? homeGoals - awayGoals : awayGoals - homeGoals;
     if (minute < 65 || difference == 0 || manualTacticsAfter65) {
-      return ScoreStateModifiers.neutral();
+      return const ScoreStateModifiers.neutral();
     }
 
     if (difference < 0) {

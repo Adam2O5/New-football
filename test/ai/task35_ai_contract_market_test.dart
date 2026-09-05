@@ -495,7 +495,7 @@ void main() {
     expect(hour10Plan!.targetScore, 88);
 
     final user = base.playerTeam!;
-    final competing = NegotiationService().start(
+    final competing = const NegotiationService().start(
       id: 'task35-user-competing-offer',
       subjectId: fa.id,
       subjectKind: NegotiationSubjectKind.player,
@@ -965,13 +965,13 @@ void main() {
       expect(balance.ai.staffCapUsageTargetMin, 0.90);
       expect(balance.ai.staffCapUsageTargetMax, 1.00);
 
-      final oldFreeAgent = StaffMember(
+      final oldFreeAgent = const StaffMember(
         id: 'task35-staff-age-60',
         name: 'Task 35 Old Staff',
         nationality: Nationality.poland,
         age: 60,
         role: StaffRole.headCoach,
-        attributes: const StaffAttributes(tactics: 3.0, motivation: 3.0),
+        attributes: StaffAttributes(tactics: 3.0, motivation: 3.0),
       );
       final oldState = singleAiLeague(
         base,

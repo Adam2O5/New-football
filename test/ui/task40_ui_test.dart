@@ -34,7 +34,9 @@ void main() {
     await tester.pumpAndSettle();
 
     final context = tester.element(find.byType(Scaffold));
-    final snapshot = SalaryCapService().snapshot(game.leagueState.playerTeam!);
+    final snapshot = const SalaryCapService().snapshot(
+      game.leagueState.playerTeam!,
+    );
     expect(find.text('Salary cap i payroll'), findsOneWidget);
     expect(find.text('Aprony'), findsOneWidget);
     expect(find.text(formatMoney(context, snapshot.payroll)), findsOneWidget);
@@ -54,7 +56,7 @@ void main() {
     final game = _game(seed: 4002);
     final league = game.leagueState;
     final team = league.playerTeam!;
-    final baseSnapshot = SalaryCapService().snapshot(team);
+    final baseSnapshot = const SalaryCapService().snapshot(team);
     final overCapSalary =
         team.roster.first.contract.salary +
         baseSnapshot.cap -

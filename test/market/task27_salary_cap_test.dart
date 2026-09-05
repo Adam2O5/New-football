@@ -319,8 +319,8 @@ void main() {
     expect(staff.canHire(sourceTeam, 499999), isFalse);
 
     final nearCap = sourceTeam.copyWith(
-      staff: TeamStaff(
-        headCoach: const StaffMember(
+      staff: const TeamStaff(
+        headCoach: StaffMember(
           id: 'cap-hc',
           name: 'Cap HC',
           nationality: Nationality.poland,
@@ -328,7 +328,7 @@ void main() {
           role: StaffRole.headCoach,
           contract: StaffContract(salary: 5000000, yearsRemaining: 1),
         ),
-        youthCoach: const StaffMember(
+        youthCoach: StaffMember(
           id: 'cap-youth',
           name: 'Cap Youth',
           nationality: Nationality.poland,
@@ -336,7 +336,7 @@ void main() {
           role: StaffRole.youthCoach,
           contract: StaffContract(salary: 5000000, yearsRemaining: 1),
         ),
-        scout: const StaffMember(
+        scout: StaffMember(
           id: 'cap-scout',
           name: 'Cap Scout',
           nationality: Nationality.poland,

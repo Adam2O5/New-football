@@ -3,7 +3,7 @@ import 'package:new_football/core/balance/message_templates_en.dart';
 import 'package:new_football/core/balance/message_templates_pl.dart';
 import 'package:new_football/core/models/message.dart';
 import 'package:new_football/core/services/message_text_service.dart';
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 final _placeholderPattern = RegExp(r'\{(\w+)\}');
 
@@ -31,13 +31,15 @@ void main() {
         expect(
           plTemplate,
           isNotNull,
-          reason: 'Missing PL template for titleKey "${template.titleKey}" '
+          reason:
+              'Missing PL template for titleKey "${template.titleKey}" '
               '($label).',
         );
         expect(
           enTemplate,
           isNotNull,
-          reason: 'Missing EN template for titleKey "${template.titleKey}" '
+          reason:
+              'Missing EN template for titleKey "${template.titleKey}" '
               '($label).',
         );
         if (plTemplate == null || enTemplate == null) return;

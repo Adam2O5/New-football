@@ -52,13 +52,13 @@ void main() {
   });
 
   test('doctor care multiplier uses missing-staff and five-star endpoints', () {
-    final fiveStar = StaffMember(
+    final fiveStar = const StaffMember(
       id: 'doctor-5',
       name: 'Doctor',
       nationality: Nationality.poland,
       age: 40,
       role: StaffRole.doctor,
-      attributes: const StaffAttributes(prevention: 5, care: 5),
+      attributes: StaffAttributes(prevention: 5, care: 5),
     );
     expect(injuryService.doctorCareMult(null), closeTo(1.05, 0.0001));
     expect(injuryService.doctorCareMult(fiveStar), closeTo(0.87, 0.0001));
@@ -158,7 +158,7 @@ void main() {
         .roster
         .first
         .copyWith(age: 20);
-    final injury = Injury(
+    final injury = const Injury(
       id: 'ankle_sprain',
       group: InjuryGroup.anklesFeet,
       type: InjuryType.minor,
@@ -193,7 +193,7 @@ void main() {
       random: null,
     ).generateLeague(year: 2026, seed: 15).teams.first;
     final injured = team.roster.first;
-    final injury = Injury(
+    final injury = const Injury(
       id: 'foot_contusion',
       group: InjuryGroup.anklesFeet,
       type: InjuryType.minor,
@@ -226,7 +226,7 @@ void main() {
   });
 
   test('structural match injury and Injury serialization round-trip', () {
-    final injury = Injury(
+    final injury = const Injury(
       id: 'acl_tear',
       group: InjuryGroup.knees,
       type: InjuryType.major,

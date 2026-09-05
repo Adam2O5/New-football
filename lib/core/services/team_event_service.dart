@@ -1131,8 +1131,9 @@ class TeamEventService {
             ? 'intervene'
             : 'ignore';
       case 'publicCriticism':
-        if (roll < balance.events.aiPublicCriticismPunishChance)
+        if (roll < balance.events.aiPublicCriticismPunishChance) {
           return 'punish';
+        }
         if (roll < balance.events.aiPublicCriticismResponseCutoff) {
           return 'response';
         }

@@ -1038,7 +1038,6 @@ void main() {
         profile: _Task38Profile.accelerated,
         seasonCount: _task38Seasons,
       ).run();
-      print(report.render());
 
       expect(report.profile, _Task38Profile.accelerated);
       expect(report.seasons, hasLength(_task38Seasons));
@@ -1057,7 +1056,6 @@ void main() {
       profile: _Task38Profile.full,
       seasonCount: 1,
     ).run();
-    print(report.render());
 
     expect(report.profile, _Task38Profile.full);
     expect(report.seasons, hasLength(1));
@@ -1071,7 +1069,6 @@ void main() {
       profile: _Task38Profile.full,
       seasonCount: _task38Seasons,
     ).run();
-    print(report.render());
 
     expect(report.profile, _Task38Profile.full);
     expect(report.seasons, hasLength(_task38Seasons));

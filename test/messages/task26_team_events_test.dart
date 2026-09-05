@@ -162,7 +162,7 @@ void main() {
       kind: kind,
       payload: {
         'teamId': league.playerTeamId,
-        if (playerId != null) 'playerId': playerId,
+        'playerId': playerId ?? '',
         if (temperamentalPlayerIds.isNotEmpty)
           'temperamentalPlayerIds': temperamentalPlayerIds,
       },
@@ -433,7 +433,7 @@ void main() {
   test(
     'transfer II uses the current strength table and degrades to no extension',
     () {
-      final table = LeagueStrengthTable(
+      final table = const LeagueStrengthTable(
         entries: [
           TeamStrengthEntry(
             teamId: 'postseason-home',

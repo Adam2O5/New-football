@@ -255,7 +255,7 @@ void main() {
   );
 
   test('discipline and player state survive JSON round-trip', () {
-    final state = PlayerState(
+    final state = const PlayerState(
       regularSeasonYellowCards: 4,
       playoffYellowCards: 2,
       suspensionGamesRemaining: 3,

@@ -66,7 +66,12 @@ String _slotLabel(AppLocalizations l10n, EstimatedDraftSlot slot) =>
       EstimatedDraftSlot.x => l10n.scouting_slot_x,
     };
 
-String _fogValue(dynamic rawValue, ScoutingTier? tier, ScoutingTier requiredTier, {bool? additionalFlag}) {
+String _fogValue(
+  dynamic rawValue,
+  ScoutingTier? tier,
+  ScoutingTier requiredTier, {
+  bool? additionalFlag,
+}) {
   if (tier == null || tier.index < requiredTier.index) return '—';
   if (additionalFlag != null && additionalFlag == false) return '—';
   return rawValue.toString();
@@ -141,10 +146,9 @@ class _DraftScreenState extends ConsumerState<DraftScreen> {
           child: Container(
             margin: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: Theme.of(context)
-                  .colorScheme
-                  .surface
-                  .withValues(alpha: 0.85),
+              color: Theme.of(
+                context,
+              ).colorScheme.surface.withValues(alpha: 0.85),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
@@ -241,8 +245,8 @@ class _DraftScreenState extends ConsumerState<DraftScreen> {
       itemBuilder: (context, index) {
         final pick = draft.order[index];
         final teamName = league.teamById(pick.teamId)?.name ?? pick.teamId;
-        final isCurrent = index == draft.currentPickIndex &&
-            _phase != DraftPhase.preStart;
+        final isCurrent =
+            index == draft.currentPickIndex && _phase != DraftPhase.preStart;
         final isPlayerTeam = pick.teamId == league.playerTeamId;
         final isCompleted = pick.prospectId != null;
 
@@ -286,10 +290,9 @@ class _DraftScreenState extends ConsumerState<DraftScreen> {
               style: TextStyle(
                 fontWeight: isPlayerTeam ? FontWeight.bold : FontWeight.normal,
                 color: isCompleted && !isPlayerTeam
-                    ? Theme.of(context)
-                        .colorScheme
-                        .onSurface
-                        .withValues(alpha: 0.6)
+                    ? Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.6)
                     : null,
               ),
             ),
@@ -322,10 +325,11 @@ class _DraftScreenState extends ConsumerState<DraftScreen> {
         .map((p) => p.prospectId)
         .whereType<String>()
         .toSet();
-    final remaining = draft.draftClass.prospects
-        .where((p) => !pickedIds.contains(p.id))
-        .toList()
-      ..sort((a, b) => b.scoutGrade.compareTo(a.scoutGrade));
+    final remaining =
+        draft.draftClass.prospects
+            .where((p) => !pickedIds.contains(p.id))
+            .toList()
+          ..sort((a, b) => b.scoutGrade.compareTo(a.scoutGrade));
 
     if (remaining.isEmpty) {
       return const Center(child: Text('Brak dostępnych prospektów'));
@@ -381,19 +385,19 @@ class _DraftScreenState extends ConsumerState<DraftScreen> {
         );
 
       case DraftPhase.playerTurn:
-        return Row(
+        return const Row(
           children: [
             Expanded(
               child: OutlinedButton(
                 onPressed: null, // disabled
-                child: const Text('Symuluj wybór'),
+                child: Text('Symuluj wybór'),
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12),
             Expanded(
               child: FilledButton(
                 onPressed: null, // disabled
-                child: const Text('Symuluj do mojego wyboru'),
+                child: Text('Symuluj do mojego wyboru'),
               ),
             ),
           ],
@@ -443,9 +447,7 @@ class _DraftScreenState extends ConsumerState<DraftScreen> {
         .where((p) => p.id == prospectId)
         .firstOrNull;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Wybrano: ${prospect?.name ?? prospectId}'),
-      ),
+      SnackBar(content: Text('Wybrano: ${prospect?.name ?? prospectId}')),
     );
   }
 
@@ -508,10 +510,11 @@ class _DraftScreenState extends ConsumerState<DraftScreen> {
               .map((p) => p.prospectId)
               .whereType<String>()
               .toSet();
-          final remaining = draft.draftClass.prospects
-              .where((p) => !pickedIds.contains(p.id))
-              .toList()
-            ..sort((a, b) => b.scoutGrade.compareTo(a.scoutGrade));
+          final remaining =
+              draft.draftClass.prospects
+                  .where((p) => !pickedIds.contains(p.id))
+                  .toList()
+                ..sort((a, b) => b.scoutGrade.compareTo(a.scoutGrade));
           if (remaining.isNotEmpty) {
             await ref
                 .read(gameControllerProvider.notifier)
@@ -601,7 +604,9 @@ class _ProspectDetailSheet extends StatelessWidget {
               height: 4,
               margin: const EdgeInsets.only(bottom: 16),
               decoration: BoxDecoration(
-                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+                color: theme.colorScheme.onSurfaceVariant.withValues(
+                  alpha: 0.4,
+                ),
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -631,24 +636,49 @@ class _ProspectDetailSheet extends StatelessWidget {
               ),
             )
           else ...[
-            _detailRow('Combine Score',
-                _fogValue(prospect.combineScore, tier, ScoutingTier.tier2)),
-            _detailRow('Scout Grade',
-                _fogValue(prospect.scoutGrade, tier, ScoutingTier.tier3)),
-            _detailRow('Potencjał',
-                _fogValue(prospect.potentialStars.toStringAsFixed(1), tier, ScoutingTier.tier4)),
             _detailRow(
-                'Podatność na kontuzje',
-                _fogValue(prospect.injuryProne, tier, ScoutingTier.tier5,
-                    additionalFlag: knowledge?.injuryProneKnown)),
+              'Combine Score',
+              _fogValue(prospect.combineScore, tier, ScoutingTier.tier2),
+            ),
             _detailRow(
-                'Determinacja',
-                _fogValue(prospect.determination, tier, ScoutingTier.tier5,
-                    additionalFlag: knowledge?.determinationKnown)),
-            _detailRow('Estymowany slot',
-                knowledge!.estimatedSlot != null
-                    ? _slotLabel(AppLocalizations.of(context)!, knowledge!.estimatedSlot!)
-                    : '—'),
+              'Scout Grade',
+              _fogValue(prospect.scoutGrade, tier, ScoutingTier.tier3),
+            ),
+            _detailRow(
+              'Potencjał',
+              _fogValue(
+                prospect.potentialStars.toStringAsFixed(1),
+                tier,
+                ScoutingTier.tier4,
+              ),
+            ),
+            _detailRow(
+              'Podatność na kontuzje',
+              _fogValue(
+                prospect.injuryProne,
+                tier,
+                ScoutingTier.tier5,
+                additionalFlag: knowledge?.injuryProneKnown,
+              ),
+            ),
+            _detailRow(
+              'Determinacja',
+              _fogValue(
+                prospect.determination,
+                tier,
+                ScoutingTier.tier5,
+                additionalFlag: knowledge?.determinationKnown,
+              ),
+            ),
+            _detailRow(
+              'Estymowany slot',
+              knowledge!.estimatedSlot != null
+                  ? _slotLabel(
+                      AppLocalizations.of(context)!,
+                      knowledge!.estimatedSlot!,
+                    )
+                  : '—',
+            ),
           ],
 
           // Pick button

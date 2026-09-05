@@ -133,10 +133,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     String? theirPickId,
   }) {
     final query = <String, String>{
-      if (ownPlayerId != null) 'ownPlayerId': ownPlayerId,
-      if (targetTeamId != null) 'targetTeamId': targetTeamId,
-      if (theirPlayerId != null) 'theirPlayerId': theirPlayerId,
-      if (theirPickId != null) 'theirPickId': theirPickId,
+      'ownPlayerId': ?ownPlayerId,
+      'targetTeamId': ?targetTeamId,
+      'theirPlayerId': ?theirPlayerId,
+      'theirPickId': ?theirPickId,
     };
     return Uri(path: '/game/trade', queryParameters: query).toString();
   }

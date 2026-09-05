@@ -257,7 +257,7 @@ void main() {
     () {
       final base = leagueAt(week: 45, day: 7);
       final candidate = freeAgent(base, 'task29-phase2-expiry');
-      final negotiationService = NegotiationService();
+      final negotiationService = const NegotiationService();
       final started = negotiationService.start(
         id: 'task29-phase2-expiry',
         subjectId: candidate.id,
@@ -299,7 +299,7 @@ void main() {
       playerTeamId: team.id,
       freeAgents: [candidate],
     );
-    final negotiationService = NegotiationService();
+    final negotiationService = const NegotiationService();
     final started = negotiationService.start(
       id: 'task29-waiting',
       subjectId: candidate.id,
@@ -349,7 +349,7 @@ void main() {
     final userTeam = base.playerTeam!;
     final aiTeam = base.teams.firstWhere((team) => !team.isPlayerControlled);
     final player = userTeam.roster.first;
-    final negotiationService = NegotiationService();
+    final negotiationService = const NegotiationService();
     final user = negotiationService
         .start(
           id: 'task29-user-rank',
@@ -410,7 +410,7 @@ void main() {
       final base = leagueAt(week: 47, day: 1, hour: 1);
       final team = base.playerTeam!;
       final candidate = freeAgent(base, 'task29-counter-sign');
-      final negotiationService = NegotiationService();
+      final negotiationService = const NegotiationService();
       final started = negotiationService
           .start(
             id: 'task29-counter-sign',

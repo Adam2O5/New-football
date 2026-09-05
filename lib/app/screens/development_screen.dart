@@ -394,11 +394,11 @@ class _DevelopmentScreenState extends ConsumerState<DevelopmentScreen>
             child: Text('-', textAlign: TextAlign.center),
           ),
           for (var i = 0; i < entry.attributeNames.length; i++) ...[
-            SizedBox(
+            const SizedBox(
               width: _staffAttrValueWidth,
-              child: const Text('-', textAlign: TextAlign.center),
+              child: Text('-', textAlign: TextAlign.center),
             ),
-            SizedBox(width: _staffAttrDeltaWidth),
+            const SizedBox(width: _staffAttrDeltaWidth),
           ],
         ],
       );

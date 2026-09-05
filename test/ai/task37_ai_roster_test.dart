@@ -105,7 +105,7 @@ void main() {
   }) {
     final replacements = <String, Team>{
       target.id: target,
-      if (partner != null) partner.id: partner,
+      ?partner?.id: ?partner,
     };
     return seeded.copyWith(
       teams: seeded.teams.map((team) => replacements[team.id] ?? team).toList(),
@@ -192,7 +192,7 @@ void main() {
       'fa-emergency-gk',
       position: Position.gk,
     );
-    final balance = BalanceConfig(
+    final balance = const BalanceConfig(
       ai: AiBalance(
         pRosterMajorGk: 1.0,
         pRosterMajorInjury: 0.0,
@@ -229,7 +229,7 @@ void main() {
   });
 
   test('available depth at or below 13 receives an available emergency FA', () {
-    final minorInjury = (int index) => Injury(
+    Injury minorInjury(int index) => Injury(
       id: 'task37-minor-$index',
       group: InjuryGroup.legMuscles,
       type: InjuryType.minor,
@@ -250,7 +250,7 @@ void main() {
       'fa-depth-repair',
       position: aiSource.roster.first.position,
     );
-    final balance = BalanceConfig(
+    final balance = const BalanceConfig(
       ai: AiBalance(
         pRosterMajorGk: 0.0,
         pRosterMajorInjury: 0.0,
@@ -287,7 +287,7 @@ void main() {
       );
       final state = stateFor(team, draftedRights: [right]);
       final service = AiRosterManagementService(
-        balance: BalanceConfig(ai: AiBalance(pRosterSpaceTrade: 0.0)),
+        balance: const BalanceConfig(ai: AiBalance(pRosterSpaceTrade: 0.0)),
       );
 
       final repaired = service.ensureRosterSafety(state, saveSeed: 3705);
@@ -364,7 +364,7 @@ void main() {
       ];
       final partnerTeam = withRoster(aiPartner, partnerRoster);
       final state = stateFor(sourceTeam, partner: partnerTeam);
-      final balance = BalanceConfig(
+      final balance = const BalanceConfig(
         ai: AiBalance(
           pRosterMajorGk: 1.0,
           pRosterSpaceTrade: 1.0,

@@ -22,8 +22,7 @@ final class SaveRecord {
   ///
   /// A missing file is represented by [serializedFileAvailable] being false,
   /// so it is not conflated with an unavailable file size.
-  bool get sizeReadFailed =>
-      serializedFileAvailable && sizeBytes == null;
+  bool get sizeReadFailed => serializedFileAvailable && sizeBytes == null;
 
   @override
   bool operator ==(Object other) {
@@ -36,12 +35,8 @@ final class SaveRecord {
   }
 
   @override
-  int get hashCode => Object.hash(
-    meta,
-    compatibility,
-    serializedFileAvailable,
-    sizeBytes,
-  );
+  int get hashCode =>
+      Object.hash(meta, compatibility, serializedFileAvailable, sizeBytes);
 
   @override
   String toString() {
@@ -71,9 +66,8 @@ final class SaveFileInfo {
       sizeBytes = null,
       sizeReadFailed = false;
 
-  const SaveFileInfo.available(int sizeBytes)
+  const SaveFileInfo.available(this.sizeBytes)
     : exists = true,
-      sizeBytes = sizeBytes,
       sizeReadFailed = false;
 
   const SaveFileInfo.sizeUnavailable()

@@ -1838,7 +1838,7 @@ class TradeService {
       );
     }
     if (!offer.isPending) {
-      return TradeValidation(
+      return const TradeValidation(
         ok: false,
         code: 'offerClosed',
         reason: 'Oferta wymiany jest już zamknięta',
@@ -2251,14 +2251,14 @@ class TradeService {
         'teamAName': a?.name ?? proposal.teamAId,
         'teamBName': b?.name ?? proposal.teamBId,
         'otherTeamName': otherTeam?.name ?? proposal.teamBId,
-        if (subjectName != null) 'subjectName': subjectName,
+        'subjectName': ?subjectName,
       },
       payload: {
         'tradeId':
             'trade:${league.currentSeason.year}:${league.currentWeek}:${league.currentDay}',
         'teamAId': proposal.teamAId,
         'teamBId': proposal.teamBId,
-        if (reason != null) 'reason': reason,
+        'reason': ?reason,
         'assetsFromA': [
           for (final asset in proposal.assetsFromA) asset.toSnapshot().toJson(),
         ],
