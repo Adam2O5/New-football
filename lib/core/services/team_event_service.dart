@@ -393,6 +393,9 @@ class TeamEventService {
     if (candidates.isEmpty) return state;
 
     final player = candidates.first;
+    final lowAtmosphere =
+        team.eventState.lowAtmosphereWeeks >= events.lowAtmosphereWeeks;
+    final reason = lowAtmosphere ? 'lowAtmosphere' : 'valuableInWeakClub';
     final chance =
         events.transferRequestIChance *
         (player.personality == PlayerPersonality.ambitious
@@ -417,6 +420,7 @@ class TeamEventService {
       player.id,
       'transferRequestI',
       saveSeed: saveSeed,
+      payload: {'reason': reason},
     );
   }
 
@@ -467,6 +471,10 @@ class TeamEventService {
         'temperamentalPlayerIds': [
           for (final player in temperamental) player.id,
         ],
+        'personA': temperamental[0].name,
+        'personB': temperamental.length > 1
+            ? temperamental[1].name
+            : temperamental[0].name,
       },
     );
   }
@@ -477,15 +485,13 @@ class TeamEventService {
     int saveSeed,
   ) {
     final team = state.teamById(teamId);
-    if (team == null || team.eventState.isOnCooldown('leaderSupport')) {
-      return state;
-    }
-    final leader = team.startingEleven
-        .where((player) => player.personality == PlayerPersonality.leader)
-        .firstOrNull;
-    if (leader == null ||
+    if (team == null ||
+        team.eventState.isOnCooldown('leaderSupport') ||
         _winStreak(team.recentMatchResults) <
-            balance.events.leaderSupportWinStreak) {
+            balance.events.leaderSupportWinStreak ||
+        !team.startingEleven.any(
+          (player) => player.personality == PlayerPersonality.leader,
+        )) {
       return state;
     }
     final chance =
@@ -513,12 +519,7 @@ class TeamEventService {
       next,
       teamId: team.id,
       kind: 'leaderSupport',
-      args: {'playerName': leader.name},
-      payload: {
-        'teamId': team.id,
-        'playerId': leader.id,
-        'eventKind': 'leaderSupport',
-      },
+      payload: {'teamId': team.id, 'eventKind': 'leaderSupport'},
     );
   }
 
@@ -990,6 +991,7 @@ class TeamEventService {
     String kind, {
     required int saveSeed,
     bool bypassWindow = false,
+    Map<String, dynamic> payload = const {},
   }) {
     final team = state.teamById(teamId);
     final player = team == null ? null : _findPlayer(team, playerId);
@@ -1014,6 +1016,7 @@ class TeamEventService {
       playerId: playerId,
       kind: kind,
       saveSeed: saveSeed,
+      payload: payload,
     );
   }
 
