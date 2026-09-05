@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:new_football/app/branding/club_color_tokens.dart';
 import 'package:new_football/app/l10n/enum_labels.dart';
+import 'package:new_football/app/providers/club_branding_provider.dart';
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/app/providers/search_filters_provider.dart';
 import 'package:new_football/app/widgets/screen_background.dart';
 import 'package:new_football/core/models/assigned_role.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
+import 'package:new_football/core/services/search_filter_matching.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
 /// Ordered so a tab index always lines up with [SearchGroup]'s declaration
@@ -59,9 +62,23 @@ class _SearchFiltersScreenState extends ConsumerState<SearchFiltersScreen>
     final notifier = ref.read(searchFiltersProvider(saveKey).notifier);
     final league = ref.watch(activeLeagueProvider);
 
+    final brandingRegistry = ref.watch(clubBrandingProvider);
+    final ownTeam = league?.playerTeam;
+    final branding = ownTeam == null
+        ? null
+        : brandingRegistry.resolve(ownTeam.id);
+    final colorScheme = Theme.of(context).colorScheme;
+    final headerBackground =
+        branding?.primaryColor ?? colorScheme.surfaceContainerHighest;
+    final headerForeground = branding == null
+        ? colorScheme.onSurface
+        : foregroundFor(headerBackground);
+
     return Scaffold(
       appBar: AppBar(
         title: Text(l10n.searchFilters_title),
+        backgroundColor: headerBackground,
+        foregroundColor: headerForeground,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
@@ -70,11 +87,14 @@ class _SearchFiltersScreenState extends ConsumerState<SearchFiltersScreen>
           IconButton(
             tooltip: l10n.searchFilters_reset,
             icon: const Icon(Icons.restore),
-            onPressed: notifier.resetAll,
+            onPressed: () => _confirmReset(context, l10n, notifier),
           ),
         ],
         bottom: TabBar(
           controller: _tabController,
+          labelColor: headerForeground,
+          unselectedLabelColor: headerForeground.withValues(alpha: 0.7),
+          indicatorColor: headerForeground,
           tabs: [
             Tab(text: l10n.search_players),
             Tab(text: l10n.search_prospects),
@@ -121,7 +141,45 @@ class _SearchFiltersScreenState extends ConsumerState<SearchFiltersScreen>
           ],
         ),
       ),
+      // `bottomNavigationBar` (rather than a trailing item in the scrollable
+      // body) keeps the search button pinned above the content and tappable
+      // regardless of scroll position, on every tab.
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: FilledButton.icon(
+            onPressed: () => context.pop(),
+            icon: const Icon(Icons.search),
+            label: Text(l10n.searchFilters_searchButton),
+          ),
+        ),
+      ),
     );
+  }
+
+  Future<void> _confirmReset(
+    BuildContext context,
+    AppLocalizations l10n,
+    SearchFiltersNotifier notifier,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.searchFilters_resetConfirmTitle),
+        content: Text(l10n.searchFilters_resetConfirmMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(l10n.common_cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(l10n.searchFilters_reset),
+          ),
+        ],
+      ),
+    );
+    if (confirmed ?? false) notifier.resetAll();
   }
 }
 
@@ -179,6 +237,10 @@ class _GroupToggleRow extends StatelessWidget {
 /// An inclusive range slider bound to a [RangeFilter]. Dragging a handle back
 /// to the track's outer edge clears that side back to "unset" rather than
 /// pinning it at the numeric bound, matching the unset-by-default contract.
+/// The minus/plus buttons nudge the lower/upper bound by one slider step
+/// (the same granularity as `divisions`, e.g. one whole OVR point or one
+/// $1M salary step — not a hardcoded "1", which would be meaningless for a
+/// filter stepped in millions).
 class _RangeFilterTile extends StatelessWidget {
   const _RangeFilterTile({
     required this.label,
@@ -198,11 +260,25 @@ class _RangeFilterTile extends StatelessWidget {
   final int? divisions;
   final String Function(double value)? formatValue;
 
+  double get _step =>
+      (divisions != null && divisions! > 0) ? (max - min) / divisions! : 1.0;
+
   @override
   Widget build(BuildContext context) {
     final effectiveMin = (filter.min ?? min).clamp(min, max);
     final effectiveMax = (filter.max ?? max).clamp(min, max);
     final fmt = formatValue ?? (v) => v.round().toString();
+    final step = _step;
+
+    void applyRange(double newMin, double newMax) {
+      onChanged(
+        RangeFilter(
+          min: newMin <= min ? null : newMin,
+          max: newMax >= max ? null : newMax,
+        ),
+      );
+    }
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8),
       child: Column(
@@ -215,18 +291,39 @@ class _RangeFilterTile extends StatelessWidget {
               Text('${fmt(effectiveMin)} - ${fmt(effectiveMax)}'),
             ],
           ),
-          RangeSlider(
-            min: min,
-            max: max,
-            divisions: divisions,
-            values: RangeValues(effectiveMin, effectiveMax),
-            labels: RangeLabels(fmt(effectiveMin), fmt(effectiveMax)),
-            onChanged: (values) => onChanged(
-              RangeFilter(
-                min: values.start <= min ? null : values.start,
-                max: values.end >= max ? null : values.end,
+          Row(
+            children: [
+              IconButton(
+                icon: const Icon(Icons.remove),
+                visualDensity: VisualDensity.compact,
+                onPressed: effectiveMin <= min
+                    ? null
+                    : () => applyRange(
+                        (effectiveMin - step).clamp(min, max),
+                        effectiveMax,
+                      ),
               ),
-            ),
+              Expanded(
+                child: RangeSlider(
+                  min: min,
+                  max: max,
+                  divisions: divisions,
+                  values: RangeValues(effectiveMin, effectiveMax),
+                  labels: RangeLabels(fmt(effectiveMin), fmt(effectiveMax)),
+                  onChanged: (values) => applyRange(values.start, values.end),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.add),
+                visualDensity: VisualDensity.compact,
+                onPressed: effectiveMax >= max
+                    ? null
+                    : () => applyRange(
+                        effectiveMin,
+                        (effectiveMax + step).clamp(min, max),
+                      ),
+              ),
+            ],
           ),
         ],
       ),
@@ -512,6 +609,14 @@ class _PlayersFilterTab extends StatelessWidget {
           onChanged: (v) => onChanged(filters.copyWith(nationality: () => v)),
           l10n: l10n,
         ),
+        const SizedBox(height: 4),
+        _MultiSelectTile<String>(
+          label: l10n.searchFilters_club,
+          options: teamOptions,
+          selected: filters.clubIds,
+          onChanged: (v) => onChanged(filters.copyWith(clubIds: v)),
+          l10n: l10n,
+        ),
         const SizedBox(height: 12),
         _PositionDropdown(
           value: filters.position,
@@ -568,14 +673,6 @@ class _PlayersFilterTab extends StatelessWidget {
           max: 6,
           divisions: 6,
           onChanged: (v) => onChanged(filters.copyWith(contractLength: v)),
-        ),
-        const SizedBox(height: 4),
-        _MultiSelectTile<String>(
-          label: l10n.searchFilters_club,
-          options: teamOptions,
-          selected: filters.clubIds,
-          onChanged: (v) => onChanged(filters.copyWith(clubIds: v)),
-          l10n: l10n,
         ),
       ],
     );
@@ -697,12 +794,10 @@ class _PicksFilterTab extends StatelessWidget {
         for (final pick in team.ownedPicks) pick.year,
     ];
     final currentYear = league?.currentSeason.year ?? DateTime.now().year;
-    final minYear = years.isEmpty
-        ? currentYear
-        : years.reduce((a, b) => a < b ? a : b);
-    final maxYear = years.isEmpty
-        ? currentYear + 3
-        : years.reduce((a, b) => a > b ? a : b);
+    final yearBounds = yearSliderBounds(
+      years.cast<int>(),
+      fallbackYear: currentYear,
+    );
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -749,9 +844,9 @@ class _PicksFilterTab extends StatelessWidget {
         _RangeFilterTile(
           label: l10n.searchFilters_year,
           filter: filters.year,
-          min: minYear.toDouble(),
-          max: (maxYear < minYear ? minYear : maxYear).toDouble() + 0.001,
-          divisions: (maxYear - minYear).clamp(1, 100),
+          min: yearBounds.min.toDouble(),
+          max: yearBounds.max.toDouble(),
+          divisions: yearBounds.divisions,
           onChanged: (v) => onChanged(filters.copyWith(year: v)),
         ),
       ],

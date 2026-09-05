@@ -3403,6 +3403,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get searchFilters_reset => 'Restore defaults';
 
   @override
+  String get searchFilters_searchButton => 'Search';
+
+  @override
+  String get searchFilters_resetConfirmTitle => 'Restore defaults?';
+
+  @override
+  String get searchFilters_resetConfirmMessage =>
+      'This clears every filter and group selection on all three tabs. This can\'t be undone.';
+
+  @override
   String get searchFilters_nationality => 'Nationality';
 
   @override

@@ -3408,6 +3408,17 @@ class AppLocalizationsPl extends AppLocalizations {
   String get searchFilters_reset => 'Przywróć domyślne';
 
   @override
+  String get searchFilters_searchButton => 'Szukaj';
+
+  @override
+  String get searchFilters_resetConfirmTitle =>
+      'Przywrócić domyślne ustawienia?';
+
+  @override
+  String get searchFilters_resetConfirmMessage =>
+      'Wyczyści to wszystkie filtry i wybór grup na wszystkich trzech zakładkach. Tej operacji nie można cofnąć.';
+
+  @override
   String get searchFilters_nationality => 'Narodowość';
 
   @override

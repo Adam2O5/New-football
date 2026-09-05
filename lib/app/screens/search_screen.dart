@@ -14,6 +14,7 @@ import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/scouting.dart';
 import 'package:new_football/core/models/team.dart';
+import 'package:new_football/core/services/search_filter_matching.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
 class SearchScreen extends ConsumerStatefulWidget {
@@ -140,33 +141,6 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     return Uri(path: '/game/trade', queryParameters: query).toString();
   }
 
-  bool _queryOrFiltersActive(String query, SearchFiltersState filters) {
-    if (query.isNotEmpty) return true;
-    final p = filters.players;
-    final pr = filters.prospects;
-    final pk = filters.picks;
-    return p.nationality != null ||
-        p.position != null ||
-        p.optimalRole != null ||
-        p.potential.isSet ||
-        p.age.isSet ||
-        p.ovr.isSet ||
-        p.salary.isSet ||
-        p.contractLength.isSet ||
-        p.clubIds.isNotEmpty ||
-        pr.nationality != null ||
-        pr.position != null ||
-        pr.optimalRole != null ||
-        pr.potential.isSet ||
-        pr.age.isSet ||
-        pr.ovr.isSet ||
-        pr.scoutingTiers.isNotEmpty ||
-        pk.clubIds.isNotEmpty ||
-        pk.originalClubIds.isNotEmpty ||
-        pk.rounds.isNotEmpty ||
-        pk.year.isSet;
-  }
-
   List<_SearchResult> _results(
     BuildContext context,
     LeagueState league,
@@ -174,7 +148,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     AppLocalizations l10n,
   ) {
     final query = _controller.text.trim().toLowerCase();
-    if (!_queryOrFiltersActive(query, filters)) return const [];
+    if (!queryOrFiltersActive(query, filters)) return const [];
 
     final players = <_SearchResult>[];
     final prospects = <_SearchResult>[];
@@ -184,7 +158,10 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       for (final team in league.teams) {
         for (final player in team.roster) {
           if (!player.name.toLowerCase().contains(query)) continue;
-          if (!_matchesPlayerFilters(player, team.id, filters.players)) {
+          if (!matchesPlayerFilters(
+            _playerFilterInput(player, team.id),
+            filters.players,
+          )) {
             continue;
           }
           players.add(_playerResult(context, l10n, league, team, player));
@@ -192,16 +169,19 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
       }
       for (final player in league.freeAgents) {
         if (!player.name.toLowerCase().contains(query)) continue;
-        if (!_matchesPlayerFilters(player, null, filters.players)) continue;
+        if (!matchesPlayerFilters(
+          _playerFilterInput(player, null),
+          filters.players,
+        )) {
+          continue;
+        }
         players.add(_freeAgentResult(context, l10n, player));
       }
       players.sort((a, b) => b.value.compareTo(a.value));
     }
 
     if (filters.groups.contains(SearchGroup.prospects)) {
-      final draftState =
-          league.currentSeason.draftState ??
-          league.currentSeason.nextDraftState;
+      final draftState = league.currentSeason.draftState;
       final scouting = league.playerTeam?.scouting;
       final combineAvailable =
           league.currentSeason.scoutReportDone &&
@@ -214,10 +194,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
             !combineAvailable &&
             (scouting?.combineAssignedProspectIds.contains(prospect.id) ??
                 false);
-        if (!_matchesProspectFilters(
-          prospect,
-          knowledge,
-          roleKnown,
+        if (!matchesProspectFilters(
+          _prospectFilterInput(prospect, knowledge, roleKnown),
           filters.prospects,
         )) {
           continue;
@@ -246,7 +224,9 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
                       '${pick.year} r${pick.round}'
                   .toLowerCase();
           if (query.isNotEmpty && !searchable.contains(query)) continue;
-          if (!_matchesPickFilters(pick, filters.picks)) continue;
+          if (!matchesPickFilters(_pickFilterInput(pick), filters.picks)) {
+            continue;
+          }
           picks.add(
             _pickResult(context, l10n, league, pick, ownerTeam, originalTeam),
           );
@@ -258,98 +238,46 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     return [...players, ...prospects, ...picks];
   }
 
-  bool _matchesPlayerFilters(
-    Player player,
-    String? teamId,
-    PlayersFilterState f,
-  ) {
-    if (f.nationality != null && player.nationality != f.nationality) {
-      return false;
-    }
-    if (f.position != null && player.position != f.position) return false;
-    if (f.optimalRole != null && player.optimalRole != f.optimalRole) {
-      return false;
-    }
-    if (!f.potential.matches(player.potentialStars)) return false;
-    if (!f.age.matches(player.age.toDouble())) return false;
-    if (!f.ovr.matches(player.overall())) return false;
-    if (!f.salary.matches(player.contract.salary.toDouble())) return false;
-    if (!f.contractLength.matches(player.contract.yearsRemaining.toDouble())) {
-      return false;
-    }
-    if (f.clubIds.isNotEmpty) {
-      final key = teamId ?? PlayersFilterState.noClubSentinel;
-      if (!f.clubIds.contains(key)) return false;
-    }
-    return true;
+  PlayerFilterInput _playerFilterInput(Player player, String? teamId) {
+    return PlayerFilterInput(
+      teamId: teamId,
+      nationality: player.nationality,
+      position: player.position,
+      optimalRole: player.optimalRole,
+      potentialStars: player.potentialStars,
+      age: player.age,
+      overall: player.overall(),
+      salary: player.contract.salary.toDouble(),
+      contractYearsRemaining: player.contract.yearsRemaining,
+    );
   }
 
-  bool _matchesProspectFilters(
+  ProspectFilterInput _prospectFilterInput(
     Prospect prospect,
     ScoutingKnowledge? knowledge,
     bool roleKnown,
-    ProspectsFilterState f,
   ) {
-    if (f.nationality != null && prospect.nationality != f.nationality) {
-      return false;
-    }
-    if (f.position != null && prospect.position != f.position) return false;
-    if (f.optimalRole != null) {
-      if (!roleKnown || prospect.optimalRole != f.optimalRole) return false;
-    }
-    if (f.potential.isSet) {
-      final min = knowledge?.estimatedPotentialMin;
-      final max = knowledge?.estimatedPotentialMax;
-      if (min == null || max == null) return false;
-      if (!_rangesOverlap(f.potential.min, f.potential.max, min, max)) {
-        return false;
-      }
-    }
-    if (!f.age.matches(prospect.age.toDouble())) return false;
-    if (f.ovr.isSet) {
-      final min = knowledge?.estimatedOvrMin;
-      final max = knowledge?.estimatedOvrMax;
-      if (min == null || max == null) return false;
-      if (!_rangesOverlap(
-        f.ovr.min,
-        f.ovr.max,
-        min.toDouble(),
-        max.toDouble(),
-      )) {
-        return false;
-      }
-    }
-    if (f.scoutingTiers.isNotEmpty) {
-      final tier = knowledge?.tier;
-      if (tier == null || !f.scoutingTiers.contains(tier.index)) return false;
-    }
-    return true;
+    return ProspectFilterInput(
+      nationality: prospect.nationality,
+      position: prospect.position,
+      optimalRole: prospect.optimalRole,
+      age: prospect.age,
+      roleKnown: roleKnown,
+      estimatedPotentialMin: knowledge?.estimatedPotentialMin,
+      estimatedPotentialMax: knowledge?.estimatedPotentialMax,
+      estimatedOvrMin: knowledge?.estimatedOvrMin,
+      estimatedOvrMax: knowledge?.estimatedOvrMax,
+      scoutingTier: knowledge?.tier.index,
+    );
   }
 
-  bool _matchesPickFilters(DraftPick pick, PicksFilterState f) {
-    if (f.clubIds.isNotEmpty && !f.clubIds.contains(pick.teamId)) {
-      return false;
-    }
-    if (f.originalClubIds.isNotEmpty &&
-        !f.originalClubIds.contains(pick.originalTeamId)) {
-      return false;
-    }
-    if (f.rounds.isNotEmpty && !f.rounds.contains(pick.round)) return false;
-    if (!f.year.matches(pick.year.toDouble())) return false;
-    return true;
-  }
-
-  /// Whether [filterMin]-[filterMax] (either bound may be unset, meaning
-  /// unbounded on that side) overlaps the known [knownMin]-[knownMax] range.
-  bool _rangesOverlap(
-    double? filterMin,
-    double? filterMax,
-    double knownMin,
-    double knownMax,
-  ) {
-    if (filterMin != null && knownMax < filterMin) return false;
-    if (filterMax != null && knownMin > filterMax) return false;
-    return true;
+  PickFilterInput _pickFilterInput(DraftPick pick) {
+    return PickFilterInput(
+      teamId: pick.teamId,
+      originalTeamId: pick.originalTeamId,
+      round: pick.round,
+      year: pick.year,
+    );
   }
 
   _SearchResult _playerResult(

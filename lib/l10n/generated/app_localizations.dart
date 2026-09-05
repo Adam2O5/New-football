@@ -6187,6 +6187,24 @@ abstract class AppLocalizations {
   /// **'Przywróć domyślne'**
   String get searchFilters_reset;
 
+  /// No description provided for @searchFilters_searchButton.
+  ///
+  /// In pl, this message translates to:
+  /// **'Szukaj'**
+  String get searchFilters_searchButton;
+
+  /// No description provided for @searchFilters_resetConfirmTitle.
+  ///
+  /// In pl, this message translates to:
+  /// **'Przywrócić domyślne ustawienia?'**
+  String get searchFilters_resetConfirmTitle;
+
+  /// No description provided for @searchFilters_resetConfirmMessage.
+  ///
+  /// In pl, this message translates to:
+  /// **'Wyczyści to wszystkie filtry i wybór grup na wszystkich trzech zakładkach. Tej operacji nie można cofnąć.'**
+  String get searchFilters_resetConfirmMessage;
+
   /// No description provided for @searchFilters_nationality.
   ///
   /// In pl, this message translates to:

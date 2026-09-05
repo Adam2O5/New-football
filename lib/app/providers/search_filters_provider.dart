@@ -1,8 +1,14 @@
+import 'package:flutter/foundation.dart' show setEquals;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/core/models/assigned_role.dart';
 import 'package:new_football/core/models/enums.dart';
+
+/// Order-independent hash for a set's elements (XOR is commutative), since
+/// `Set` has no defined iteration order to hash against.
+int _unorderedHash(Iterable<Object?> items) =>
+    items.fold(0, (acc, item) => acc ^ item.hashCode);
 
 /// Which of the three record groups are currently shown in search results
 /// and in the filters sub-screen's tab bar.
@@ -87,6 +93,33 @@ class PlayersFilterState {
       clubIds: clubIds ?? this.clubIds,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PlayersFilterState &&
+          other.nationality == nationality &&
+          other.position == position &&
+          other.optimalRole == optimalRole &&
+          other.potential == potential &&
+          other.age == age &&
+          other.ovr == ovr &&
+          other.salary == salary &&
+          other.contractLength == contractLength &&
+          setEquals(other.clubIds, clubIds);
+
+  @override
+  int get hashCode => Object.hash(
+    nationality,
+    position,
+    optimalRole,
+    potential,
+    age,
+    ovr,
+    salary,
+    contractLength,
+    _unorderedHash(clubIds),
+  );
 }
 
 class ProspectsFilterState {
@@ -130,6 +163,29 @@ class ProspectsFilterState {
       scoutingTiers: scoutingTiers ?? this.scoutingTiers,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ProspectsFilterState &&
+          other.nationality == nationality &&
+          other.position == position &&
+          other.optimalRole == optimalRole &&
+          other.potential == potential &&
+          other.age == age &&
+          other.ovr == ovr &&
+          setEquals(other.scoutingTiers, scoutingTiers);
+
+  @override
+  int get hashCode => Object.hash(
+    nationality,
+    position,
+    optimalRole,
+    potential,
+    age,
+    ovr,
+    _unorderedHash(scoutingTiers),
+  );
 }
 
 class PicksFilterState {
@@ -160,6 +216,23 @@ class PicksFilterState {
       year: year ?? this.year,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PicksFilterState &&
+          setEquals(other.clubIds, clubIds) &&
+          setEquals(other.originalClubIds, originalClubIds) &&
+          setEquals(other.rounds, rounds) &&
+          other.year == year;
+
+  @override
+  int get hashCode => Object.hash(
+    _unorderedHash(clubIds),
+    _unorderedHash(originalClubIds),
+    _unorderedHash(rounds),
+    year,
+  );
 }
 
 class SearchFiltersState {
@@ -192,6 +265,19 @@ class SearchFiltersState {
       picks: picks ?? this.picks,
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SearchFiltersState &&
+          setEquals(other.groups, groups) &&
+          other.players == players &&
+          other.prospects == prospects &&
+          other.picks == picks;
+
+  @override
+  int get hashCode =>
+      Object.hash(_unorderedHash(groups), players, prospects, picks);
 }
 
 class SearchFiltersNotifier extends Notifier<SearchFiltersState> {
@@ -217,11 +303,13 @@ class SearchFiltersNotifier extends Notifier<SearchFiltersState> {
   void resetAll() => state = const SearchFiltersState();
 }
 
-/// Filters live only in memory and are scoped to the active save: switching
-/// saves (a different `saveSeed`) starts from a fresh, unset filter state,
-/// and `autoDispose` drops a save's filters once no screen is watching them.
-final searchFiltersProvider = NotifierProvider.autoDispose
-    .family<SearchFiltersNotifier, SearchFiltersState, int>(
+/// Filters live only in memory (cleared on app restart) and are scoped to
+/// the active save: switching saves (a different `saveSeed`) starts from a
+/// fresh, unset filter state. Deliberately NOT `autoDispose` — the person
+/// can leave and return to search repeatedly within the same save and the
+/// filters must still be there.
+final searchFiltersProvider =
+    NotifierProvider.family<SearchFiltersNotifier, SearchFiltersState, int>(
       SearchFiltersNotifier.new,
     );
 
