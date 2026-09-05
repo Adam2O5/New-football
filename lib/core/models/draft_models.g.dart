@@ -153,6 +153,22 @@ Map<String, dynamic> _$DraftStateToJson(_DraftState instance) =>
       'currentPickIndex': instance.currentPickIndex,
     };
 
+_CompletedDraft _$CompletedDraftFromJson(Map<String, dynamic> json) =>
+    _CompletedDraft(
+      year: (json['year'] as num).toInt(),
+      completedPicks:
+          (json['completedPicks'] as List<dynamic>?)
+              ?.map((e) => DraftPick.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const [],
+    );
+
+Map<String, dynamic> _$CompletedDraftToJson(_CompletedDraft instance) =>
+    <String, dynamic>{
+      'year': instance.year,
+      'completedPicks': instance.completedPicks,
+    };
+
 _PlayInResult _$PlayInResultFromJson(Map<String, dynamic> json) =>
     _PlayInResult(
       conference: $enumDecode(_$ConferenceEnumMap, json['conference']),
@@ -297,9 +313,7 @@ _Season _$SeasonFromJson(Map<String, dynamic> json) => _Season(
   faOpenDone: json['faOpenDone'] as bool? ?? false,
   scoutReportDone: json['scoutReportDone'] as bool? ?? false,
   tradeDeadlineAcked: json['tradeDeadlineAcked'] as bool? ?? false,
-  nextDraftState: json['nextDraftState'] == null
-      ? null
-      : DraftState.fromJson(json['nextDraftState'] as Map<String, dynamic>),
+  nextClassGenerationDone: json['nextClassGenerationDone'] as bool? ?? false,
   postseasonFixtures:
       (json['postseasonFixtures'] as List<dynamic>?)
           ?.map((e) => ScheduledMatch.fromJson(e as Map<String, dynamic>))
@@ -330,7 +344,7 @@ Map<String, dynamic> _$SeasonToJson(_Season instance) => <String, dynamic>{
   'faOpenDone': instance.faOpenDone,
   'scoutReportDone': instance.scoutReportDone,
   'tradeDeadlineAcked': instance.tradeDeadlineAcked,
-  'nextDraftState': instance.nextDraftState,
+  'nextClassGenerationDone': instance.nextClassGenerationDone,
   'postseasonFixtures': instance.postseasonFixtures,
 };
 

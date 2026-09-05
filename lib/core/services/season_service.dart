@@ -1386,7 +1386,7 @@ class SeasonService {
     var state = ProspectService(
       random: _random,
     ).generateNextClassForLeague(league);
-    final nextDraft = state.currentSeason.nextDraftState;
+    final nextDraft = state.currentSeason.draftState;
     if (nextDraft == null) return state;
     final year = nextDraft.year;
     final teams = state.teams.map((team) {
@@ -2215,22 +2215,15 @@ class SeasonService {
       year: league.currentSeason.year,
       finalStandings: league.currentSeason.standings,
       championTeamId: league.currentSeason.championTeamId,
-      draftPicks: league.currentSeason.draftState?.completedPicks ?? [],
+      draftPicks: league.lastCompletedDraft?.completedPicks ?? [],
       awards: league.currentSeason.awards,
     );
 
     final newYear = league.currentSeason.year + 1;
 
-    // Promocja: draftClass wygenerowana przez runNextClassGeneration (tydz. 46/1,
-    // order 1) staje się bazą draftState nowego sezonu. Wyjątek: pierwszy sezon
-    // (nowy save) nie ma nextDraftState — draftState zostaje null, a runLottery
-    // wygeneruje draftClass "w locie" jako fallback (patrz zmiana w runLottery).
-    final promotedDraftState = league.currentSeason.nextDraftState != null
-        ? DraftState(
-            year: newYear,
-            draftClass: league.currentSeason.nextDraftState!.draftClass,
-          )
-        : null;
+    // draftState wygenerowana przez runNextClassGeneration (tydz. 46/1, order 1)
+    // jest już klasą na `newYear` — nowy sezon dziedziczy ją wprost, bez promocji.
+    final nextSeasonDraftState = league.currentSeason.draftState;
 
     var teams = league.teams.map((t) {
       final roster = t.roster.map((p) {
@@ -2315,7 +2308,7 @@ class SeasonService {
         phase: SeasonPhase.regular,
         schedule: schedule,
         standings: standings,
-        draftState: promotedDraftState,
+        draftState: nextSeasonDraftState,
         staffGrowthDone: false,
         playerRetirementsDone: false,
         combineDone: false,
@@ -2323,7 +2316,7 @@ class SeasonService {
         faOpenDone: false,
         scoutReportDone: false,
         tradeDeadlineAcked: false,
-        nextDraftState: null,
+        nextClassGenerationDone: false,
         nextTvCapResetSeason: league.currentSeason.nextTvCapResetSeason,
         nextTvCapIncreasePct: league.currentSeason.nextTvCapIncreasePct,
         capUpdateTvDone: false,

@@ -185,8 +185,7 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
       );
     }
 
-    final draftState =
-        league.currentSeason.draftState ?? league.currentSeason.nextDraftState;
+    final draftState = league.currentSeason.draftState;
     final scouting = league.playerTeam?.scouting;
     if (!_initialized && scouting != null) {
       _selectedIds.addAll(scouting.watchlistProspectIds);

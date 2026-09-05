@@ -1217,6 +1217,278 @@ $DraftClassCopyWith<$Res> get draftClass {
 
 
 /// @nodoc
+mixin _$CompletedDraft {
+
+ int get year; List<DraftPick> get completedPicks;
+/// Create a copy of CompletedDraft
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$CompletedDraftCopyWith<CompletedDraft> get copyWith => _$CompletedDraftCopyWithImpl<CompletedDraft>(this as CompletedDraft, _$identity);
+
+  /// Serializes this CompletedDraft to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CompletedDraft&&(identical(other.year, year) || other.year == year)&&const DeepCollectionEquality().equals(other.completedPicks, completedPicks));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,year,const DeepCollectionEquality().hash(completedPicks));
+
+@override
+String toString() {
+  return 'CompletedDraft(year: $year, completedPicks: $completedPicks)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $CompletedDraftCopyWith<$Res>  {
+  factory $CompletedDraftCopyWith(CompletedDraft value, $Res Function(CompletedDraft) _then) = _$CompletedDraftCopyWithImpl;
+@useResult
+$Res call({
+ int year, List<DraftPick> completedPicks
+});
+
+
+
+
+}
+/// @nodoc
+class _$CompletedDraftCopyWithImpl<$Res>
+    implements $CompletedDraftCopyWith<$Res> {
+  _$CompletedDraftCopyWithImpl(this._self, this._then);
+
+  final CompletedDraft _self;
+  final $Res Function(CompletedDraft) _then;
+
+/// Create a copy of CompletedDraft
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? year = null,Object? completedPicks = null,}) {
+  return _then(_self.copyWith(
+year: null == year ? _self.year : year // ignore: cast_nullable_to_non_nullable
+as int,completedPicks: null == completedPicks ? _self.completedPicks : completedPicks // ignore: cast_nullable_to_non_nullable
+as List<DraftPick>,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [CompletedDraft].
+extension CompletedDraftPatterns on CompletedDraft {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _CompletedDraft value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _CompletedDraft() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _CompletedDraft value)  $default,){
+final _that = this;
+switch (_that) {
+case _CompletedDraft():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _CompletedDraft value)?  $default,){
+final _that = this;
+switch (_that) {
+case _CompletedDraft() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int year,  List<DraftPick> completedPicks)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _CompletedDraft() when $default != null:
+return $default(_that.year,_that.completedPicks);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int year,  List<DraftPick> completedPicks)  $default,) {final _that = this;
+switch (_that) {
+case _CompletedDraft():
+return $default(_that.year,_that.completedPicks);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int year,  List<DraftPick> completedPicks)?  $default,) {final _that = this;
+switch (_that) {
+case _CompletedDraft() when $default != null:
+return $default(_that.year,_that.completedPicks);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _CompletedDraft implements CompletedDraft {
+  const _CompletedDraft({required this.year, final  List<DraftPick> completedPicks = const []}): _completedPicks = completedPicks;
+  factory _CompletedDraft.fromJson(Map<String, dynamic> json) => _$CompletedDraftFromJson(json);
+
+@override final  int year;
+ final  List<DraftPick> _completedPicks;
+@override@JsonKey() List<DraftPick> get completedPicks {
+  if (_completedPicks is EqualUnmodifiableListView) return _completedPicks;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_completedPicks);
+}
+
+
+/// Create a copy of CompletedDraft
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$CompletedDraftCopyWith<_CompletedDraft> get copyWith => __$CompletedDraftCopyWithImpl<_CompletedDraft>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$CompletedDraftToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CompletedDraft&&(identical(other.year, year) || other.year == year)&&const DeepCollectionEquality().equals(other._completedPicks, _completedPicks));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,year,const DeepCollectionEquality().hash(_completedPicks));
+
+@override
+String toString() {
+  return 'CompletedDraft(year: $year, completedPicks: $completedPicks)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$CompletedDraftCopyWith<$Res> implements $CompletedDraftCopyWith<$Res> {
+  factory _$CompletedDraftCopyWith(_CompletedDraft value, $Res Function(_CompletedDraft) _then) = __$CompletedDraftCopyWithImpl;
+@override @useResult
+$Res call({
+ int year, List<DraftPick> completedPicks
+});
+
+
+
+
+}
+/// @nodoc
+class __$CompletedDraftCopyWithImpl<$Res>
+    implements _$CompletedDraftCopyWith<$Res> {
+  __$CompletedDraftCopyWithImpl(this._self, this._then);
+
+  final _CompletedDraft _self;
+  final $Res Function(_CompletedDraft) _then;
+
+/// Create a copy of CompletedDraft
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? year = null,Object? completedPicks = null,}) {
+  return _then(_CompletedDraft(
+year: null == year ? _self.year : year // ignore: cast_nullable_to_non_nullable
+as int,completedPicks: null == completedPicks ? _self._completedPicks : completedPicks // ignore: cast_nullable_to_non_nullable
+as List<DraftPick>,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
 mixin _$PlayInResult {
 
  Conference get conference; String get seed7TeamId; String get seed8TeamId; MatchResult get game7v8; MatchResult get game9v10; MatchResult get gameFinal; String get playoffSeed7TeamId; String get playoffSeed8TeamId;
@@ -2232,7 +2504,7 @@ mixin _$Season {
 
  int get year; SeasonPhase get phase; List<ScheduledMatch> get schedule; List<ConferenceStandings> get standings; List<PlayInResult> get playInResults; List<PlayInProgress> get playInProgress; List<PlayoffBracket> get playoffBrackets; String? get championTeamId; bool get championshipAtmosphereApplied; bool get playoffMissAtmosphereApplied; DraftState? get draftState; SeasonAwards? get awards; bool get staffGrowthDone; bool get playerRetirementsDone;/// Persisted TV agreement: the exact reset year and increase are known
 /// before the event fires, so loading a save cannot reroll the cap.
- int get nextTvCapResetSeason; int get nextTvCapIncreasePct; bool get capUpdateTvDone; bool get combineDone; bool get finalMockDone; bool get faOpenDone; bool get scoutReportDone; bool get tradeDeadlineAcked; DraftState? get nextDraftState;/// Play-in/playoff fixtures, populated eagerly as soon as each pairing
+ int get nextTvCapResetSeason; int get nextTvCapIncreasePct; bool get capUpdateTvDone; bool get combineDone; bool get finalMockDone; bool get faOpenDone; bool get scoutReportDone; bool get tradeDeadlineAcked; bool get nextClassGenerationDone;/// Play-in/playoff fixtures, populated eagerly as soon as each pairing
 /// is known (see `game_calendar.md`) — placeholders for a still-pending
 /// play-in seed, replaced with the real team once decided. This is the
 /// calendar's sole source for postseason match days, the same way
@@ -2252,16 +2524,16 @@ $SeasonCopyWith<Season> get copyWith => _$SeasonCopyWithImpl<Season>(this as Sea
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Season&&(identical(other.year, year) || other.year == year)&&(identical(other.phase, phase) || other.phase == phase)&&const DeepCollectionEquality().equals(other.schedule, schedule)&&const DeepCollectionEquality().equals(other.standings, standings)&&const DeepCollectionEquality().equals(other.playInResults, playInResults)&&const DeepCollectionEquality().equals(other.playInProgress, playInProgress)&&const DeepCollectionEquality().equals(other.playoffBrackets, playoffBrackets)&&(identical(other.championTeamId, championTeamId) || other.championTeamId == championTeamId)&&(identical(other.championshipAtmosphereApplied, championshipAtmosphereApplied) || other.championshipAtmosphereApplied == championshipAtmosphereApplied)&&(identical(other.playoffMissAtmosphereApplied, playoffMissAtmosphereApplied) || other.playoffMissAtmosphereApplied == playoffMissAtmosphereApplied)&&(identical(other.draftState, draftState) || other.draftState == draftState)&&(identical(other.awards, awards) || other.awards == awards)&&(identical(other.staffGrowthDone, staffGrowthDone) || other.staffGrowthDone == staffGrowthDone)&&(identical(other.playerRetirementsDone, playerRetirementsDone) || other.playerRetirementsDone == playerRetirementsDone)&&(identical(other.nextTvCapResetSeason, nextTvCapResetSeason) || other.nextTvCapResetSeason == nextTvCapResetSeason)&&(identical(other.nextTvCapIncreasePct, nextTvCapIncreasePct) || other.nextTvCapIncreasePct == nextTvCapIncreasePct)&&(identical(other.capUpdateTvDone, capUpdateTvDone) || other.capUpdateTvDone == capUpdateTvDone)&&(identical(other.combineDone, combineDone) || other.combineDone == combineDone)&&(identical(other.finalMockDone, finalMockDone) || other.finalMockDone == finalMockDone)&&(identical(other.faOpenDone, faOpenDone) || other.faOpenDone == faOpenDone)&&(identical(other.scoutReportDone, scoutReportDone) || other.scoutReportDone == scoutReportDone)&&(identical(other.tradeDeadlineAcked, tradeDeadlineAcked) || other.tradeDeadlineAcked == tradeDeadlineAcked)&&(identical(other.nextDraftState, nextDraftState) || other.nextDraftState == nextDraftState)&&const DeepCollectionEquality().equals(other.postseasonFixtures, postseasonFixtures));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Season&&(identical(other.year, year) || other.year == year)&&(identical(other.phase, phase) || other.phase == phase)&&const DeepCollectionEquality().equals(other.schedule, schedule)&&const DeepCollectionEquality().equals(other.standings, standings)&&const DeepCollectionEquality().equals(other.playInResults, playInResults)&&const DeepCollectionEquality().equals(other.playInProgress, playInProgress)&&const DeepCollectionEquality().equals(other.playoffBrackets, playoffBrackets)&&(identical(other.championTeamId, championTeamId) || other.championTeamId == championTeamId)&&(identical(other.championshipAtmosphereApplied, championshipAtmosphereApplied) || other.championshipAtmosphereApplied == championshipAtmosphereApplied)&&(identical(other.playoffMissAtmosphereApplied, playoffMissAtmosphereApplied) || other.playoffMissAtmosphereApplied == playoffMissAtmosphereApplied)&&(identical(other.draftState, draftState) || other.draftState == draftState)&&(identical(other.awards, awards) || other.awards == awards)&&(identical(other.staffGrowthDone, staffGrowthDone) || other.staffGrowthDone == staffGrowthDone)&&(identical(other.playerRetirementsDone, playerRetirementsDone) || other.playerRetirementsDone == playerRetirementsDone)&&(identical(other.nextTvCapResetSeason, nextTvCapResetSeason) || other.nextTvCapResetSeason == nextTvCapResetSeason)&&(identical(other.nextTvCapIncreasePct, nextTvCapIncreasePct) || other.nextTvCapIncreasePct == nextTvCapIncreasePct)&&(identical(other.capUpdateTvDone, capUpdateTvDone) || other.capUpdateTvDone == capUpdateTvDone)&&(identical(other.combineDone, combineDone) || other.combineDone == combineDone)&&(identical(other.finalMockDone, finalMockDone) || other.finalMockDone == finalMockDone)&&(identical(other.faOpenDone, faOpenDone) || other.faOpenDone == faOpenDone)&&(identical(other.scoutReportDone, scoutReportDone) || other.scoutReportDone == scoutReportDone)&&(identical(other.tradeDeadlineAcked, tradeDeadlineAcked) || other.tradeDeadlineAcked == tradeDeadlineAcked)&&(identical(other.nextClassGenerationDone, nextClassGenerationDone) || other.nextClassGenerationDone == nextClassGenerationDone)&&const DeepCollectionEquality().equals(other.postseasonFixtures, postseasonFixtures));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,year,phase,const DeepCollectionEquality().hash(schedule),const DeepCollectionEquality().hash(standings),const DeepCollectionEquality().hash(playInResults),const DeepCollectionEquality().hash(playInProgress),const DeepCollectionEquality().hash(playoffBrackets),championTeamId,championshipAtmosphereApplied,playoffMissAtmosphereApplied,draftState,awards,staffGrowthDone,playerRetirementsDone,nextTvCapResetSeason,nextTvCapIncreasePct,capUpdateTvDone,combineDone,finalMockDone,faOpenDone,scoutReportDone,tradeDeadlineAcked,nextDraftState,const DeepCollectionEquality().hash(postseasonFixtures)]);
+int get hashCode => Object.hashAll([runtimeType,year,phase,const DeepCollectionEquality().hash(schedule),const DeepCollectionEquality().hash(standings),const DeepCollectionEquality().hash(playInResults),const DeepCollectionEquality().hash(playInProgress),const DeepCollectionEquality().hash(playoffBrackets),championTeamId,championshipAtmosphereApplied,playoffMissAtmosphereApplied,draftState,awards,staffGrowthDone,playerRetirementsDone,nextTvCapResetSeason,nextTvCapIncreasePct,capUpdateTvDone,combineDone,finalMockDone,faOpenDone,scoutReportDone,tradeDeadlineAcked,nextClassGenerationDone,const DeepCollectionEquality().hash(postseasonFixtures)]);
 
 @override
 String toString() {
-  return 'Season(year: $year, phase: $phase, schedule: $schedule, standings: $standings, playInResults: $playInResults, playInProgress: $playInProgress, playoffBrackets: $playoffBrackets, championTeamId: $championTeamId, championshipAtmosphereApplied: $championshipAtmosphereApplied, playoffMissAtmosphereApplied: $playoffMissAtmosphereApplied, draftState: $draftState, awards: $awards, staffGrowthDone: $staffGrowthDone, playerRetirementsDone: $playerRetirementsDone, nextTvCapResetSeason: $nextTvCapResetSeason, nextTvCapIncreasePct: $nextTvCapIncreasePct, capUpdateTvDone: $capUpdateTvDone, combineDone: $combineDone, finalMockDone: $finalMockDone, faOpenDone: $faOpenDone, scoutReportDone: $scoutReportDone, tradeDeadlineAcked: $tradeDeadlineAcked, nextDraftState: $nextDraftState, postseasonFixtures: $postseasonFixtures)';
+  return 'Season(year: $year, phase: $phase, schedule: $schedule, standings: $standings, playInResults: $playInResults, playInProgress: $playInProgress, playoffBrackets: $playoffBrackets, championTeamId: $championTeamId, championshipAtmosphereApplied: $championshipAtmosphereApplied, playoffMissAtmosphereApplied: $playoffMissAtmosphereApplied, draftState: $draftState, awards: $awards, staffGrowthDone: $staffGrowthDone, playerRetirementsDone: $playerRetirementsDone, nextTvCapResetSeason: $nextTvCapResetSeason, nextTvCapIncreasePct: $nextTvCapIncreasePct, capUpdateTvDone: $capUpdateTvDone, combineDone: $combineDone, finalMockDone: $finalMockDone, faOpenDone: $faOpenDone, scoutReportDone: $scoutReportDone, tradeDeadlineAcked: $tradeDeadlineAcked, nextClassGenerationDone: $nextClassGenerationDone, postseasonFixtures: $postseasonFixtures)';
 }
 
 
@@ -2272,11 +2544,11 @@ abstract mixin class $SeasonCopyWith<$Res>  {
   factory $SeasonCopyWith(Season value, $Res Function(Season) _then) = _$SeasonCopyWithImpl;
 @useResult
 $Res call({
- int year, SeasonPhase phase, List<ScheduledMatch> schedule, List<ConferenceStandings> standings, List<PlayInResult> playInResults, List<PlayInProgress> playInProgress, List<PlayoffBracket> playoffBrackets, String? championTeamId, bool championshipAtmosphereApplied, bool playoffMissAtmosphereApplied, DraftState? draftState, SeasonAwards? awards, bool staffGrowthDone, bool playerRetirementsDone, int nextTvCapResetSeason, int nextTvCapIncreasePct, bool capUpdateTvDone, bool combineDone, bool finalMockDone, bool faOpenDone, bool scoutReportDone, bool tradeDeadlineAcked, DraftState? nextDraftState, List<ScheduledMatch> postseasonFixtures
+ int year, SeasonPhase phase, List<ScheduledMatch> schedule, List<ConferenceStandings> standings, List<PlayInResult> playInResults, List<PlayInProgress> playInProgress, List<PlayoffBracket> playoffBrackets, String? championTeamId, bool championshipAtmosphereApplied, bool playoffMissAtmosphereApplied, DraftState? draftState, SeasonAwards? awards, bool staffGrowthDone, bool playerRetirementsDone, int nextTvCapResetSeason, int nextTvCapIncreasePct, bool capUpdateTvDone, bool combineDone, bool finalMockDone, bool faOpenDone, bool scoutReportDone, bool tradeDeadlineAcked, bool nextClassGenerationDone, List<ScheduledMatch> postseasonFixtures
 });
 
 
-$DraftStateCopyWith<$Res>? get draftState;$SeasonAwardsCopyWith<$Res>? get awards;$DraftStateCopyWith<$Res>? get nextDraftState;
+$DraftStateCopyWith<$Res>? get draftState;$SeasonAwardsCopyWith<$Res>? get awards;
 
 }
 /// @nodoc
@@ -2289,7 +2561,7 @@ class _$SeasonCopyWithImpl<$Res>
 
 /// Create a copy of Season
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? year = null,Object? phase = null,Object? schedule = null,Object? standings = null,Object? playInResults = null,Object? playInProgress = null,Object? playoffBrackets = null,Object? championTeamId = freezed,Object? championshipAtmosphereApplied = null,Object? playoffMissAtmosphereApplied = null,Object? draftState = freezed,Object? awards = freezed,Object? staffGrowthDone = null,Object? playerRetirementsDone = null,Object? nextTvCapResetSeason = null,Object? nextTvCapIncreasePct = null,Object? capUpdateTvDone = null,Object? combineDone = null,Object? finalMockDone = null,Object? faOpenDone = null,Object? scoutReportDone = null,Object? tradeDeadlineAcked = null,Object? nextDraftState = freezed,Object? postseasonFixtures = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? year = null,Object? phase = null,Object? schedule = null,Object? standings = null,Object? playInResults = null,Object? playInProgress = null,Object? playoffBrackets = null,Object? championTeamId = freezed,Object? championshipAtmosphereApplied = null,Object? playoffMissAtmosphereApplied = null,Object? draftState = freezed,Object? awards = freezed,Object? staffGrowthDone = null,Object? playerRetirementsDone = null,Object? nextTvCapResetSeason = null,Object? nextTvCapIncreasePct = null,Object? capUpdateTvDone = null,Object? combineDone = null,Object? finalMockDone = null,Object? faOpenDone = null,Object? scoutReportDone = null,Object? tradeDeadlineAcked = null,Object? nextClassGenerationDone = null,Object? postseasonFixtures = null,}) {
   return _then(_self.copyWith(
 year: null == year ? _self.year : year // ignore: cast_nullable_to_non_nullable
 as int,phase: null == phase ? _self.phase : phase // ignore: cast_nullable_to_non_nullable
@@ -2313,8 +2585,8 @@ as bool,finalMockDone: null == finalMockDone ? _self.finalMockDone : finalMockDo
 as bool,faOpenDone: null == faOpenDone ? _self.faOpenDone : faOpenDone // ignore: cast_nullable_to_non_nullable
 as bool,scoutReportDone: null == scoutReportDone ? _self.scoutReportDone : scoutReportDone // ignore: cast_nullable_to_non_nullable
 as bool,tradeDeadlineAcked: null == tradeDeadlineAcked ? _self.tradeDeadlineAcked : tradeDeadlineAcked // ignore: cast_nullable_to_non_nullable
-as bool,nextDraftState: freezed == nextDraftState ? _self.nextDraftState : nextDraftState // ignore: cast_nullable_to_non_nullable
-as DraftState?,postseasonFixtures: null == postseasonFixtures ? _self.postseasonFixtures : postseasonFixtures // ignore: cast_nullable_to_non_nullable
+as bool,nextClassGenerationDone: null == nextClassGenerationDone ? _self.nextClassGenerationDone : nextClassGenerationDone // ignore: cast_nullable_to_non_nullable
+as bool,postseasonFixtures: null == postseasonFixtures ? _self.postseasonFixtures : postseasonFixtures // ignore: cast_nullable_to_non_nullable
 as List<ScheduledMatch>,
   ));
 }
@@ -2341,18 +2613,6 @@ $SeasonAwardsCopyWith<$Res>? get awards {
 
   return $SeasonAwardsCopyWith<$Res>(_self.awards!, (value) {
     return _then(_self.copyWith(awards: value));
-  });
-}/// Create a copy of Season
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$DraftStateCopyWith<$Res>? get nextDraftState {
-    if (_self.nextDraftState == null) {
-    return null;
-  }
-
-  return $DraftStateCopyWith<$Res>(_self.nextDraftState!, (value) {
-    return _then(_self.copyWith(nextDraftState: value));
   });
 }
 }
@@ -2436,10 +2696,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int year,  SeasonPhase phase,  List<ScheduledMatch> schedule,  List<ConferenceStandings> standings,  List<PlayInResult> playInResults,  List<PlayInProgress> playInProgress,  List<PlayoffBracket> playoffBrackets,  String? championTeamId,  bool championshipAtmosphereApplied,  bool playoffMissAtmosphereApplied,  DraftState? draftState,  SeasonAwards? awards,  bool staffGrowthDone,  bool playerRetirementsDone,  int nextTvCapResetSeason,  int nextTvCapIncreasePct,  bool capUpdateTvDone,  bool combineDone,  bool finalMockDone,  bool faOpenDone,  bool scoutReportDone,  bool tradeDeadlineAcked,  DraftState? nextDraftState,  List<ScheduledMatch> postseasonFixtures)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int year,  SeasonPhase phase,  List<ScheduledMatch> schedule,  List<ConferenceStandings> standings,  List<PlayInResult> playInResults,  List<PlayInProgress> playInProgress,  List<PlayoffBracket> playoffBrackets,  String? championTeamId,  bool championshipAtmosphereApplied,  bool playoffMissAtmosphereApplied,  DraftState? draftState,  SeasonAwards? awards,  bool staffGrowthDone,  bool playerRetirementsDone,  int nextTvCapResetSeason,  int nextTvCapIncreasePct,  bool capUpdateTvDone,  bool combineDone,  bool finalMockDone,  bool faOpenDone,  bool scoutReportDone,  bool tradeDeadlineAcked,  bool nextClassGenerationDone,  List<ScheduledMatch> postseasonFixtures)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Season() when $default != null:
-return $default(_that.year,_that.phase,_that.schedule,_that.standings,_that.playInResults,_that.playInProgress,_that.playoffBrackets,_that.championTeamId,_that.championshipAtmosphereApplied,_that.playoffMissAtmosphereApplied,_that.draftState,_that.awards,_that.staffGrowthDone,_that.playerRetirementsDone,_that.nextTvCapResetSeason,_that.nextTvCapIncreasePct,_that.capUpdateTvDone,_that.combineDone,_that.finalMockDone,_that.faOpenDone,_that.scoutReportDone,_that.tradeDeadlineAcked,_that.nextDraftState,_that.postseasonFixtures);case _:
+return $default(_that.year,_that.phase,_that.schedule,_that.standings,_that.playInResults,_that.playInProgress,_that.playoffBrackets,_that.championTeamId,_that.championshipAtmosphereApplied,_that.playoffMissAtmosphereApplied,_that.draftState,_that.awards,_that.staffGrowthDone,_that.playerRetirementsDone,_that.nextTvCapResetSeason,_that.nextTvCapIncreasePct,_that.capUpdateTvDone,_that.combineDone,_that.finalMockDone,_that.faOpenDone,_that.scoutReportDone,_that.tradeDeadlineAcked,_that.nextClassGenerationDone,_that.postseasonFixtures);case _:
   return orElse();
 
 }
@@ -2457,10 +2717,10 @@ return $default(_that.year,_that.phase,_that.schedule,_that.standings,_that.play
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int year,  SeasonPhase phase,  List<ScheduledMatch> schedule,  List<ConferenceStandings> standings,  List<PlayInResult> playInResults,  List<PlayInProgress> playInProgress,  List<PlayoffBracket> playoffBrackets,  String? championTeamId,  bool championshipAtmosphereApplied,  bool playoffMissAtmosphereApplied,  DraftState? draftState,  SeasonAwards? awards,  bool staffGrowthDone,  bool playerRetirementsDone,  int nextTvCapResetSeason,  int nextTvCapIncreasePct,  bool capUpdateTvDone,  bool combineDone,  bool finalMockDone,  bool faOpenDone,  bool scoutReportDone,  bool tradeDeadlineAcked,  DraftState? nextDraftState,  List<ScheduledMatch> postseasonFixtures)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int year,  SeasonPhase phase,  List<ScheduledMatch> schedule,  List<ConferenceStandings> standings,  List<PlayInResult> playInResults,  List<PlayInProgress> playInProgress,  List<PlayoffBracket> playoffBrackets,  String? championTeamId,  bool championshipAtmosphereApplied,  bool playoffMissAtmosphereApplied,  DraftState? draftState,  SeasonAwards? awards,  bool staffGrowthDone,  bool playerRetirementsDone,  int nextTvCapResetSeason,  int nextTvCapIncreasePct,  bool capUpdateTvDone,  bool combineDone,  bool finalMockDone,  bool faOpenDone,  bool scoutReportDone,  bool tradeDeadlineAcked,  bool nextClassGenerationDone,  List<ScheduledMatch> postseasonFixtures)  $default,) {final _that = this;
 switch (_that) {
 case _Season():
-return $default(_that.year,_that.phase,_that.schedule,_that.standings,_that.playInResults,_that.playInProgress,_that.playoffBrackets,_that.championTeamId,_that.championshipAtmosphereApplied,_that.playoffMissAtmosphereApplied,_that.draftState,_that.awards,_that.staffGrowthDone,_that.playerRetirementsDone,_that.nextTvCapResetSeason,_that.nextTvCapIncreasePct,_that.capUpdateTvDone,_that.combineDone,_that.finalMockDone,_that.faOpenDone,_that.scoutReportDone,_that.tradeDeadlineAcked,_that.nextDraftState,_that.postseasonFixtures);case _:
+return $default(_that.year,_that.phase,_that.schedule,_that.standings,_that.playInResults,_that.playInProgress,_that.playoffBrackets,_that.championTeamId,_that.championshipAtmosphereApplied,_that.playoffMissAtmosphereApplied,_that.draftState,_that.awards,_that.staffGrowthDone,_that.playerRetirementsDone,_that.nextTvCapResetSeason,_that.nextTvCapIncreasePct,_that.capUpdateTvDone,_that.combineDone,_that.finalMockDone,_that.faOpenDone,_that.scoutReportDone,_that.tradeDeadlineAcked,_that.nextClassGenerationDone,_that.postseasonFixtures);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -2477,10 +2737,10 @@ return $default(_that.year,_that.phase,_that.schedule,_that.standings,_that.play
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int year,  SeasonPhase phase,  List<ScheduledMatch> schedule,  List<ConferenceStandings> standings,  List<PlayInResult> playInResults,  List<PlayInProgress> playInProgress,  List<PlayoffBracket> playoffBrackets,  String? championTeamId,  bool championshipAtmosphereApplied,  bool playoffMissAtmosphereApplied,  DraftState? draftState,  SeasonAwards? awards,  bool staffGrowthDone,  bool playerRetirementsDone,  int nextTvCapResetSeason,  int nextTvCapIncreasePct,  bool capUpdateTvDone,  bool combineDone,  bool finalMockDone,  bool faOpenDone,  bool scoutReportDone,  bool tradeDeadlineAcked,  DraftState? nextDraftState,  List<ScheduledMatch> postseasonFixtures)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int year,  SeasonPhase phase,  List<ScheduledMatch> schedule,  List<ConferenceStandings> standings,  List<PlayInResult> playInResults,  List<PlayInProgress> playInProgress,  List<PlayoffBracket> playoffBrackets,  String? championTeamId,  bool championshipAtmosphereApplied,  bool playoffMissAtmosphereApplied,  DraftState? draftState,  SeasonAwards? awards,  bool staffGrowthDone,  bool playerRetirementsDone,  int nextTvCapResetSeason,  int nextTvCapIncreasePct,  bool capUpdateTvDone,  bool combineDone,  bool finalMockDone,  bool faOpenDone,  bool scoutReportDone,  bool tradeDeadlineAcked,  bool nextClassGenerationDone,  List<ScheduledMatch> postseasonFixtures)?  $default,) {final _that = this;
 switch (_that) {
 case _Season() when $default != null:
-return $default(_that.year,_that.phase,_that.schedule,_that.standings,_that.playInResults,_that.playInProgress,_that.playoffBrackets,_that.championTeamId,_that.championshipAtmosphereApplied,_that.playoffMissAtmosphereApplied,_that.draftState,_that.awards,_that.staffGrowthDone,_that.playerRetirementsDone,_that.nextTvCapResetSeason,_that.nextTvCapIncreasePct,_that.capUpdateTvDone,_that.combineDone,_that.finalMockDone,_that.faOpenDone,_that.scoutReportDone,_that.tradeDeadlineAcked,_that.nextDraftState,_that.postseasonFixtures);case _:
+return $default(_that.year,_that.phase,_that.schedule,_that.standings,_that.playInResults,_that.playInProgress,_that.playoffBrackets,_that.championTeamId,_that.championshipAtmosphereApplied,_that.playoffMissAtmosphereApplied,_that.draftState,_that.awards,_that.staffGrowthDone,_that.playerRetirementsDone,_that.nextTvCapResetSeason,_that.nextTvCapIncreasePct,_that.capUpdateTvDone,_that.combineDone,_that.finalMockDone,_that.faOpenDone,_that.scoutReportDone,_that.tradeDeadlineAcked,_that.nextClassGenerationDone,_that.postseasonFixtures);case _:
   return null;
 
 }
@@ -2492,7 +2752,7 @@ return $default(_that.year,_that.phase,_that.schedule,_that.standings,_that.play
 @JsonSerializable()
 
 class _Season implements Season {
-  const _Season({required this.year, this.phase = SeasonPhase.preseason, final  List<ScheduledMatch> schedule = const [], final  List<ConferenceStandings> standings = const [], final  List<PlayInResult> playInResults = const [], final  List<PlayInProgress> playInProgress = const [], final  List<PlayoffBracket> playoffBrackets = const [], this.championTeamId, this.championshipAtmosphereApplied = false, this.playoffMissAtmosphereApplied = false, this.draftState, this.awards, this.staffGrowthDone = false, this.playerRetirementsDone = false, this.nextTvCapResetSeason = 0, this.nextTvCapIncreasePct = 0, this.capUpdateTvDone = false, this.combineDone = false, this.finalMockDone = false, this.faOpenDone = false, this.scoutReportDone = false, this.tradeDeadlineAcked = false, this.nextDraftState, final  List<ScheduledMatch> postseasonFixtures = const <ScheduledMatch>[]}): _schedule = schedule,_standings = standings,_playInResults = playInResults,_playInProgress = playInProgress,_playoffBrackets = playoffBrackets,_postseasonFixtures = postseasonFixtures;
+  const _Season({required this.year, this.phase = SeasonPhase.preseason, final  List<ScheduledMatch> schedule = const [], final  List<ConferenceStandings> standings = const [], final  List<PlayInResult> playInResults = const [], final  List<PlayInProgress> playInProgress = const [], final  List<PlayoffBracket> playoffBrackets = const [], this.championTeamId, this.championshipAtmosphereApplied = false, this.playoffMissAtmosphereApplied = false, this.draftState, this.awards, this.staffGrowthDone = false, this.playerRetirementsDone = false, this.nextTvCapResetSeason = 0, this.nextTvCapIncreasePct = 0, this.capUpdateTvDone = false, this.combineDone = false, this.finalMockDone = false, this.faOpenDone = false, this.scoutReportDone = false, this.tradeDeadlineAcked = false, this.nextClassGenerationDone = false, final  List<ScheduledMatch> postseasonFixtures = const <ScheduledMatch>[]}): _schedule = schedule,_standings = standings,_playInResults = playInResults,_playInProgress = playInProgress,_playoffBrackets = playoffBrackets,_postseasonFixtures = postseasonFixtures;
   factory _Season.fromJson(Map<String, dynamic> json) => _$SeasonFromJson(json);
 
 @override final  int year;
@@ -2549,7 +2809,7 @@ class _Season implements Season {
 @override@JsonKey() final  bool faOpenDone;
 @override@JsonKey() final  bool scoutReportDone;
 @override@JsonKey() final  bool tradeDeadlineAcked;
-@override final  DraftState? nextDraftState;
+@override@JsonKey() final  bool nextClassGenerationDone;
 /// Play-in/playoff fixtures, populated eagerly as soon as each pairing
 /// is known (see `game_calendar.md`) — placeholders for a still-pending
 /// play-in seed, replaced with the real team once decided. This is the
@@ -2585,16 +2845,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Season&&(identical(other.year, year) || other.year == year)&&(identical(other.phase, phase) || other.phase == phase)&&const DeepCollectionEquality().equals(other._schedule, _schedule)&&const DeepCollectionEquality().equals(other._standings, _standings)&&const DeepCollectionEquality().equals(other._playInResults, _playInResults)&&const DeepCollectionEquality().equals(other._playInProgress, _playInProgress)&&const DeepCollectionEquality().equals(other._playoffBrackets, _playoffBrackets)&&(identical(other.championTeamId, championTeamId) || other.championTeamId == championTeamId)&&(identical(other.championshipAtmosphereApplied, championshipAtmosphereApplied) || other.championshipAtmosphereApplied == championshipAtmosphereApplied)&&(identical(other.playoffMissAtmosphereApplied, playoffMissAtmosphereApplied) || other.playoffMissAtmosphereApplied == playoffMissAtmosphereApplied)&&(identical(other.draftState, draftState) || other.draftState == draftState)&&(identical(other.awards, awards) || other.awards == awards)&&(identical(other.staffGrowthDone, staffGrowthDone) || other.staffGrowthDone == staffGrowthDone)&&(identical(other.playerRetirementsDone, playerRetirementsDone) || other.playerRetirementsDone == playerRetirementsDone)&&(identical(other.nextTvCapResetSeason, nextTvCapResetSeason) || other.nextTvCapResetSeason == nextTvCapResetSeason)&&(identical(other.nextTvCapIncreasePct, nextTvCapIncreasePct) || other.nextTvCapIncreasePct == nextTvCapIncreasePct)&&(identical(other.capUpdateTvDone, capUpdateTvDone) || other.capUpdateTvDone == capUpdateTvDone)&&(identical(other.combineDone, combineDone) || other.combineDone == combineDone)&&(identical(other.finalMockDone, finalMockDone) || other.finalMockDone == finalMockDone)&&(identical(other.faOpenDone, faOpenDone) || other.faOpenDone == faOpenDone)&&(identical(other.scoutReportDone, scoutReportDone) || other.scoutReportDone == scoutReportDone)&&(identical(other.tradeDeadlineAcked, tradeDeadlineAcked) || other.tradeDeadlineAcked == tradeDeadlineAcked)&&(identical(other.nextDraftState, nextDraftState) || other.nextDraftState == nextDraftState)&&const DeepCollectionEquality().equals(other._postseasonFixtures, _postseasonFixtures));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Season&&(identical(other.year, year) || other.year == year)&&(identical(other.phase, phase) || other.phase == phase)&&const DeepCollectionEquality().equals(other._schedule, _schedule)&&const DeepCollectionEquality().equals(other._standings, _standings)&&const DeepCollectionEquality().equals(other._playInResults, _playInResults)&&const DeepCollectionEquality().equals(other._playInProgress, _playInProgress)&&const DeepCollectionEquality().equals(other._playoffBrackets, _playoffBrackets)&&(identical(other.championTeamId, championTeamId) || other.championTeamId == championTeamId)&&(identical(other.championshipAtmosphereApplied, championshipAtmosphereApplied) || other.championshipAtmosphereApplied == championshipAtmosphereApplied)&&(identical(other.playoffMissAtmosphereApplied, playoffMissAtmosphereApplied) || other.playoffMissAtmosphereApplied == playoffMissAtmosphereApplied)&&(identical(other.draftState, draftState) || other.draftState == draftState)&&(identical(other.awards, awards) || other.awards == awards)&&(identical(other.staffGrowthDone, staffGrowthDone) || other.staffGrowthDone == staffGrowthDone)&&(identical(other.playerRetirementsDone, playerRetirementsDone) || other.playerRetirementsDone == playerRetirementsDone)&&(identical(other.nextTvCapResetSeason, nextTvCapResetSeason) || other.nextTvCapResetSeason == nextTvCapResetSeason)&&(identical(other.nextTvCapIncreasePct, nextTvCapIncreasePct) || other.nextTvCapIncreasePct == nextTvCapIncreasePct)&&(identical(other.capUpdateTvDone, capUpdateTvDone) || other.capUpdateTvDone == capUpdateTvDone)&&(identical(other.combineDone, combineDone) || other.combineDone == combineDone)&&(identical(other.finalMockDone, finalMockDone) || other.finalMockDone == finalMockDone)&&(identical(other.faOpenDone, faOpenDone) || other.faOpenDone == faOpenDone)&&(identical(other.scoutReportDone, scoutReportDone) || other.scoutReportDone == scoutReportDone)&&(identical(other.tradeDeadlineAcked, tradeDeadlineAcked) || other.tradeDeadlineAcked == tradeDeadlineAcked)&&(identical(other.nextClassGenerationDone, nextClassGenerationDone) || other.nextClassGenerationDone == nextClassGenerationDone)&&const DeepCollectionEquality().equals(other._postseasonFixtures, _postseasonFixtures));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,year,phase,const DeepCollectionEquality().hash(_schedule),const DeepCollectionEquality().hash(_standings),const DeepCollectionEquality().hash(_playInResults),const DeepCollectionEquality().hash(_playInProgress),const DeepCollectionEquality().hash(_playoffBrackets),championTeamId,championshipAtmosphereApplied,playoffMissAtmosphereApplied,draftState,awards,staffGrowthDone,playerRetirementsDone,nextTvCapResetSeason,nextTvCapIncreasePct,capUpdateTvDone,combineDone,finalMockDone,faOpenDone,scoutReportDone,tradeDeadlineAcked,nextDraftState,const DeepCollectionEquality().hash(_postseasonFixtures)]);
+int get hashCode => Object.hashAll([runtimeType,year,phase,const DeepCollectionEquality().hash(_schedule),const DeepCollectionEquality().hash(_standings),const DeepCollectionEquality().hash(_playInResults),const DeepCollectionEquality().hash(_playInProgress),const DeepCollectionEquality().hash(_playoffBrackets),championTeamId,championshipAtmosphereApplied,playoffMissAtmosphereApplied,draftState,awards,staffGrowthDone,playerRetirementsDone,nextTvCapResetSeason,nextTvCapIncreasePct,capUpdateTvDone,combineDone,finalMockDone,faOpenDone,scoutReportDone,tradeDeadlineAcked,nextClassGenerationDone,const DeepCollectionEquality().hash(_postseasonFixtures)]);
 
 @override
 String toString() {
-  return 'Season(year: $year, phase: $phase, schedule: $schedule, standings: $standings, playInResults: $playInResults, playInProgress: $playInProgress, playoffBrackets: $playoffBrackets, championTeamId: $championTeamId, championshipAtmosphereApplied: $championshipAtmosphereApplied, playoffMissAtmosphereApplied: $playoffMissAtmosphereApplied, draftState: $draftState, awards: $awards, staffGrowthDone: $staffGrowthDone, playerRetirementsDone: $playerRetirementsDone, nextTvCapResetSeason: $nextTvCapResetSeason, nextTvCapIncreasePct: $nextTvCapIncreasePct, capUpdateTvDone: $capUpdateTvDone, combineDone: $combineDone, finalMockDone: $finalMockDone, faOpenDone: $faOpenDone, scoutReportDone: $scoutReportDone, tradeDeadlineAcked: $tradeDeadlineAcked, nextDraftState: $nextDraftState, postseasonFixtures: $postseasonFixtures)';
+  return 'Season(year: $year, phase: $phase, schedule: $schedule, standings: $standings, playInResults: $playInResults, playInProgress: $playInProgress, playoffBrackets: $playoffBrackets, championTeamId: $championTeamId, championshipAtmosphereApplied: $championshipAtmosphereApplied, playoffMissAtmosphereApplied: $playoffMissAtmosphereApplied, draftState: $draftState, awards: $awards, staffGrowthDone: $staffGrowthDone, playerRetirementsDone: $playerRetirementsDone, nextTvCapResetSeason: $nextTvCapResetSeason, nextTvCapIncreasePct: $nextTvCapIncreasePct, capUpdateTvDone: $capUpdateTvDone, combineDone: $combineDone, finalMockDone: $finalMockDone, faOpenDone: $faOpenDone, scoutReportDone: $scoutReportDone, tradeDeadlineAcked: $tradeDeadlineAcked, nextClassGenerationDone: $nextClassGenerationDone, postseasonFixtures: $postseasonFixtures)';
 }
 
 
@@ -2605,11 +2865,11 @@ abstract mixin class _$SeasonCopyWith<$Res> implements $SeasonCopyWith<$Res> {
   factory _$SeasonCopyWith(_Season value, $Res Function(_Season) _then) = __$SeasonCopyWithImpl;
 @override @useResult
 $Res call({
- int year, SeasonPhase phase, List<ScheduledMatch> schedule, List<ConferenceStandings> standings, List<PlayInResult> playInResults, List<PlayInProgress> playInProgress, List<PlayoffBracket> playoffBrackets, String? championTeamId, bool championshipAtmosphereApplied, bool playoffMissAtmosphereApplied, DraftState? draftState, SeasonAwards? awards, bool staffGrowthDone, bool playerRetirementsDone, int nextTvCapResetSeason, int nextTvCapIncreasePct, bool capUpdateTvDone, bool combineDone, bool finalMockDone, bool faOpenDone, bool scoutReportDone, bool tradeDeadlineAcked, DraftState? nextDraftState, List<ScheduledMatch> postseasonFixtures
+ int year, SeasonPhase phase, List<ScheduledMatch> schedule, List<ConferenceStandings> standings, List<PlayInResult> playInResults, List<PlayInProgress> playInProgress, List<PlayoffBracket> playoffBrackets, String? championTeamId, bool championshipAtmosphereApplied, bool playoffMissAtmosphereApplied, DraftState? draftState, SeasonAwards? awards, bool staffGrowthDone, bool playerRetirementsDone, int nextTvCapResetSeason, int nextTvCapIncreasePct, bool capUpdateTvDone, bool combineDone, bool finalMockDone, bool faOpenDone, bool scoutReportDone, bool tradeDeadlineAcked, bool nextClassGenerationDone, List<ScheduledMatch> postseasonFixtures
 });
 
 
-@override $DraftStateCopyWith<$Res>? get draftState;@override $SeasonAwardsCopyWith<$Res>? get awards;@override $DraftStateCopyWith<$Res>? get nextDraftState;
+@override $DraftStateCopyWith<$Res>? get draftState;@override $SeasonAwardsCopyWith<$Res>? get awards;
 
 }
 /// @nodoc
@@ -2622,7 +2882,7 @@ class __$SeasonCopyWithImpl<$Res>
 
 /// Create a copy of Season
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? year = null,Object? phase = null,Object? schedule = null,Object? standings = null,Object? playInResults = null,Object? playInProgress = null,Object? playoffBrackets = null,Object? championTeamId = freezed,Object? championshipAtmosphereApplied = null,Object? playoffMissAtmosphereApplied = null,Object? draftState = freezed,Object? awards = freezed,Object? staffGrowthDone = null,Object? playerRetirementsDone = null,Object? nextTvCapResetSeason = null,Object? nextTvCapIncreasePct = null,Object? capUpdateTvDone = null,Object? combineDone = null,Object? finalMockDone = null,Object? faOpenDone = null,Object? scoutReportDone = null,Object? tradeDeadlineAcked = null,Object? nextDraftState = freezed,Object? postseasonFixtures = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? year = null,Object? phase = null,Object? schedule = null,Object? standings = null,Object? playInResults = null,Object? playInProgress = null,Object? playoffBrackets = null,Object? championTeamId = freezed,Object? championshipAtmosphereApplied = null,Object? playoffMissAtmosphereApplied = null,Object? draftState = freezed,Object? awards = freezed,Object? staffGrowthDone = null,Object? playerRetirementsDone = null,Object? nextTvCapResetSeason = null,Object? nextTvCapIncreasePct = null,Object? capUpdateTvDone = null,Object? combineDone = null,Object? finalMockDone = null,Object? faOpenDone = null,Object? scoutReportDone = null,Object? tradeDeadlineAcked = null,Object? nextClassGenerationDone = null,Object? postseasonFixtures = null,}) {
   return _then(_Season(
 year: null == year ? _self.year : year // ignore: cast_nullable_to_non_nullable
 as int,phase: null == phase ? _self.phase : phase // ignore: cast_nullable_to_non_nullable
@@ -2646,8 +2906,8 @@ as bool,finalMockDone: null == finalMockDone ? _self.finalMockDone : finalMockDo
 as bool,faOpenDone: null == faOpenDone ? _self.faOpenDone : faOpenDone // ignore: cast_nullable_to_non_nullable
 as bool,scoutReportDone: null == scoutReportDone ? _self.scoutReportDone : scoutReportDone // ignore: cast_nullable_to_non_nullable
 as bool,tradeDeadlineAcked: null == tradeDeadlineAcked ? _self.tradeDeadlineAcked : tradeDeadlineAcked // ignore: cast_nullable_to_non_nullable
-as bool,nextDraftState: freezed == nextDraftState ? _self.nextDraftState : nextDraftState // ignore: cast_nullable_to_non_nullable
-as DraftState?,postseasonFixtures: null == postseasonFixtures ? _self._postseasonFixtures : postseasonFixtures // ignore: cast_nullable_to_non_nullable
+as bool,nextClassGenerationDone: null == nextClassGenerationDone ? _self.nextClassGenerationDone : nextClassGenerationDone // ignore: cast_nullable_to_non_nullable
+as bool,postseasonFixtures: null == postseasonFixtures ? _self._postseasonFixtures : postseasonFixtures // ignore: cast_nullable_to_non_nullable
 as List<ScheduledMatch>,
   ));
 }
@@ -2675,18 +2935,6 @@ $SeasonAwardsCopyWith<$Res>? get awards {
 
   return $SeasonAwardsCopyWith<$Res>(_self.awards!, (value) {
     return _then(_self.copyWith(awards: value));
-  });
-}/// Create a copy of Season
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$DraftStateCopyWith<$Res>? get nextDraftState {
-    if (_self.nextDraftState == null) {
-    return null;
-  }
-
-  return $DraftStateCopyWith<$Res>(_self.nextDraftState!, (value) {
-    return _then(_self.copyWith(nextDraftState: value));
   });
 }
 }

@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ScoutingKnowledge {
 
- String get prospectId; ScoutingTier get tier; EstimatedDraftSlot? get estimatedSlot; int get mockRank; int? get estimatedOvrMin; int? get estimatedOvrMax; double? get estimatedPotentialMin; double? get estimatedPotentialMax; int? get injuryProneMin; int? get injuryProneMax; int? get determinationMin; int? get determinationMax; bool get injuryProneKnown; bool get determinationKnown;
+ String get prospectId; ScoutingTier get tier; int get weeksAtCurrentTier; EstimatedDraftSlot? get estimatedSlot; int get mockRank; int? get estimatedOvrMin; int? get estimatedOvrMax; double? get estimatedPotentialMin; double? get estimatedPotentialMax; int? get injuryProneMin; int? get injuryProneMax; int? get determinationMin; int? get determinationMax; bool get injuryProneKnown; bool get determinationKnown;
 /// Create a copy of ScoutingKnowledge
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $ScoutingKnowledgeCopyWith<ScoutingKnowledge> get copyWith => _$ScoutingKnowledg
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ScoutingKnowledge&&(identical(other.prospectId, prospectId) || other.prospectId == prospectId)&&(identical(other.tier, tier) || other.tier == tier)&&(identical(other.estimatedSlot, estimatedSlot) || other.estimatedSlot == estimatedSlot)&&(identical(other.mockRank, mockRank) || other.mockRank == mockRank)&&(identical(other.estimatedOvrMin, estimatedOvrMin) || other.estimatedOvrMin == estimatedOvrMin)&&(identical(other.estimatedOvrMax, estimatedOvrMax) || other.estimatedOvrMax == estimatedOvrMax)&&(identical(other.estimatedPotentialMin, estimatedPotentialMin) || other.estimatedPotentialMin == estimatedPotentialMin)&&(identical(other.estimatedPotentialMax, estimatedPotentialMax) || other.estimatedPotentialMax == estimatedPotentialMax)&&(identical(other.injuryProneMin, injuryProneMin) || other.injuryProneMin == injuryProneMin)&&(identical(other.injuryProneMax, injuryProneMax) || other.injuryProneMax == injuryProneMax)&&(identical(other.determinationMin, determinationMin) || other.determinationMin == determinationMin)&&(identical(other.determinationMax, determinationMax) || other.determinationMax == determinationMax)&&(identical(other.injuryProneKnown, injuryProneKnown) || other.injuryProneKnown == injuryProneKnown)&&(identical(other.determinationKnown, determinationKnown) || other.determinationKnown == determinationKnown));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ScoutingKnowledge&&(identical(other.prospectId, prospectId) || other.prospectId == prospectId)&&(identical(other.tier, tier) || other.tier == tier)&&(identical(other.weeksAtCurrentTier, weeksAtCurrentTier) || other.weeksAtCurrentTier == weeksAtCurrentTier)&&(identical(other.estimatedSlot, estimatedSlot) || other.estimatedSlot == estimatedSlot)&&(identical(other.mockRank, mockRank) || other.mockRank == mockRank)&&(identical(other.estimatedOvrMin, estimatedOvrMin) || other.estimatedOvrMin == estimatedOvrMin)&&(identical(other.estimatedOvrMax, estimatedOvrMax) || other.estimatedOvrMax == estimatedOvrMax)&&(identical(other.estimatedPotentialMin, estimatedPotentialMin) || other.estimatedPotentialMin == estimatedPotentialMin)&&(identical(other.estimatedPotentialMax, estimatedPotentialMax) || other.estimatedPotentialMax == estimatedPotentialMax)&&(identical(other.injuryProneMin, injuryProneMin) || other.injuryProneMin == injuryProneMin)&&(identical(other.injuryProneMax, injuryProneMax) || other.injuryProneMax == injuryProneMax)&&(identical(other.determinationMin, determinationMin) || other.determinationMin == determinationMin)&&(identical(other.determinationMax, determinationMax) || other.determinationMax == determinationMax)&&(identical(other.injuryProneKnown, injuryProneKnown) || other.injuryProneKnown == injuryProneKnown)&&(identical(other.determinationKnown, determinationKnown) || other.determinationKnown == determinationKnown));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,prospectId,tier,estimatedSlot,mockRank,estimatedOvrMin,estimatedOvrMax,estimatedPotentialMin,estimatedPotentialMax,injuryProneMin,injuryProneMax,determinationMin,determinationMax,injuryProneKnown,determinationKnown);
+int get hashCode => Object.hash(runtimeType,prospectId,tier,weeksAtCurrentTier,estimatedSlot,mockRank,estimatedOvrMin,estimatedOvrMax,estimatedPotentialMin,estimatedPotentialMax,injuryProneMin,injuryProneMax,determinationMin,determinationMax,injuryProneKnown,determinationKnown);
 
 @override
 String toString() {
-  return 'ScoutingKnowledge(prospectId: $prospectId, tier: $tier, estimatedSlot: $estimatedSlot, mockRank: $mockRank, estimatedOvrMin: $estimatedOvrMin, estimatedOvrMax: $estimatedOvrMax, estimatedPotentialMin: $estimatedPotentialMin, estimatedPotentialMax: $estimatedPotentialMax, injuryProneMin: $injuryProneMin, injuryProneMax: $injuryProneMax, determinationMin: $determinationMin, determinationMax: $determinationMax, injuryProneKnown: $injuryProneKnown, determinationKnown: $determinationKnown)';
+  return 'ScoutingKnowledge(prospectId: $prospectId, tier: $tier, weeksAtCurrentTier: $weeksAtCurrentTier, estimatedSlot: $estimatedSlot, mockRank: $mockRank, estimatedOvrMin: $estimatedOvrMin, estimatedOvrMax: $estimatedOvrMax, estimatedPotentialMin: $estimatedPotentialMin, estimatedPotentialMax: $estimatedPotentialMax, injuryProneMin: $injuryProneMin, injuryProneMax: $injuryProneMax, determinationMin: $determinationMin, determinationMax: $determinationMax, injuryProneKnown: $injuryProneKnown, determinationKnown: $determinationKnown)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $ScoutingKnowledgeCopyWith<$Res>  {
   factory $ScoutingKnowledgeCopyWith(ScoutingKnowledge value, $Res Function(ScoutingKnowledge) _then) = _$ScoutingKnowledgeCopyWithImpl;
 @useResult
 $Res call({
- String prospectId, ScoutingTier tier, EstimatedDraftSlot? estimatedSlot, int mockRank, int? estimatedOvrMin, int? estimatedOvrMax, double? estimatedPotentialMin, double? estimatedPotentialMax, int? injuryProneMin, int? injuryProneMax, int? determinationMin, int? determinationMax, bool injuryProneKnown, bool determinationKnown
+ String prospectId, ScoutingTier tier, int weeksAtCurrentTier, EstimatedDraftSlot? estimatedSlot, int mockRank, int? estimatedOvrMin, int? estimatedOvrMax, double? estimatedPotentialMin, double? estimatedPotentialMax, int? injuryProneMin, int? injuryProneMax, int? determinationMin, int? determinationMax, bool injuryProneKnown, bool determinationKnown
 });
 
 
@@ -65,11 +65,12 @@ class _$ScoutingKnowledgeCopyWithImpl<$Res>
 
 /// Create a copy of ScoutingKnowledge
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? prospectId = null,Object? tier = null,Object? estimatedSlot = freezed,Object? mockRank = null,Object? estimatedOvrMin = freezed,Object? estimatedOvrMax = freezed,Object? estimatedPotentialMin = freezed,Object? estimatedPotentialMax = freezed,Object? injuryProneMin = freezed,Object? injuryProneMax = freezed,Object? determinationMin = freezed,Object? determinationMax = freezed,Object? injuryProneKnown = null,Object? determinationKnown = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? prospectId = null,Object? tier = null,Object? weeksAtCurrentTier = null,Object? estimatedSlot = freezed,Object? mockRank = null,Object? estimatedOvrMin = freezed,Object? estimatedOvrMax = freezed,Object? estimatedPotentialMin = freezed,Object? estimatedPotentialMax = freezed,Object? injuryProneMin = freezed,Object? injuryProneMax = freezed,Object? determinationMin = freezed,Object? determinationMax = freezed,Object? injuryProneKnown = null,Object? determinationKnown = null,}) {
   return _then(_self.copyWith(
 prospectId: null == prospectId ? _self.prospectId : prospectId // ignore: cast_nullable_to_non_nullable
 as String,tier: null == tier ? _self.tier : tier // ignore: cast_nullable_to_non_nullable
-as ScoutingTier,estimatedSlot: freezed == estimatedSlot ? _self.estimatedSlot : estimatedSlot // ignore: cast_nullable_to_non_nullable
+as ScoutingTier,weeksAtCurrentTier: null == weeksAtCurrentTier ? _self.weeksAtCurrentTier : weeksAtCurrentTier // ignore: cast_nullable_to_non_nullable
+as int,estimatedSlot: freezed == estimatedSlot ? _self.estimatedSlot : estimatedSlot // ignore: cast_nullable_to_non_nullable
 as EstimatedDraftSlot?,mockRank: null == mockRank ? _self.mockRank : mockRank // ignore: cast_nullable_to_non_nullable
 as int,estimatedOvrMin: freezed == estimatedOvrMin ? _self.estimatedOvrMin : estimatedOvrMin // ignore: cast_nullable_to_non_nullable
 as int?,estimatedOvrMax: freezed == estimatedOvrMax ? _self.estimatedOvrMax : estimatedOvrMax // ignore: cast_nullable_to_non_nullable
@@ -166,10 +167,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String prospectId,  ScoutingTier tier,  EstimatedDraftSlot? estimatedSlot,  int mockRank,  int? estimatedOvrMin,  int? estimatedOvrMax,  double? estimatedPotentialMin,  double? estimatedPotentialMax,  int? injuryProneMin,  int? injuryProneMax,  int? determinationMin,  int? determinationMax,  bool injuryProneKnown,  bool determinationKnown)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String prospectId,  ScoutingTier tier,  int weeksAtCurrentTier,  EstimatedDraftSlot? estimatedSlot,  int mockRank,  int? estimatedOvrMin,  int? estimatedOvrMax,  double? estimatedPotentialMin,  double? estimatedPotentialMax,  int? injuryProneMin,  int? injuryProneMax,  int? determinationMin,  int? determinationMax,  bool injuryProneKnown,  bool determinationKnown)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ScoutingKnowledge() when $default != null:
-return $default(_that.prospectId,_that.tier,_that.estimatedSlot,_that.mockRank,_that.estimatedOvrMin,_that.estimatedOvrMax,_that.estimatedPotentialMin,_that.estimatedPotentialMax,_that.injuryProneMin,_that.injuryProneMax,_that.determinationMin,_that.determinationMax,_that.injuryProneKnown,_that.determinationKnown);case _:
+return $default(_that.prospectId,_that.tier,_that.weeksAtCurrentTier,_that.estimatedSlot,_that.mockRank,_that.estimatedOvrMin,_that.estimatedOvrMax,_that.estimatedPotentialMin,_that.estimatedPotentialMax,_that.injuryProneMin,_that.injuryProneMax,_that.determinationMin,_that.determinationMax,_that.injuryProneKnown,_that.determinationKnown);case _:
   return orElse();
 
 }
@@ -187,10 +188,10 @@ return $default(_that.prospectId,_that.tier,_that.estimatedSlot,_that.mockRank,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String prospectId,  ScoutingTier tier,  EstimatedDraftSlot? estimatedSlot,  int mockRank,  int? estimatedOvrMin,  int? estimatedOvrMax,  double? estimatedPotentialMin,  double? estimatedPotentialMax,  int? injuryProneMin,  int? injuryProneMax,  int? determinationMin,  int? determinationMax,  bool injuryProneKnown,  bool determinationKnown)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String prospectId,  ScoutingTier tier,  int weeksAtCurrentTier,  EstimatedDraftSlot? estimatedSlot,  int mockRank,  int? estimatedOvrMin,  int? estimatedOvrMax,  double? estimatedPotentialMin,  double? estimatedPotentialMax,  int? injuryProneMin,  int? injuryProneMax,  int? determinationMin,  int? determinationMax,  bool injuryProneKnown,  bool determinationKnown)  $default,) {final _that = this;
 switch (_that) {
 case _ScoutingKnowledge():
-return $default(_that.prospectId,_that.tier,_that.estimatedSlot,_that.mockRank,_that.estimatedOvrMin,_that.estimatedOvrMax,_that.estimatedPotentialMin,_that.estimatedPotentialMax,_that.injuryProneMin,_that.injuryProneMax,_that.determinationMin,_that.determinationMax,_that.injuryProneKnown,_that.determinationKnown);case _:
+return $default(_that.prospectId,_that.tier,_that.weeksAtCurrentTier,_that.estimatedSlot,_that.mockRank,_that.estimatedOvrMin,_that.estimatedOvrMax,_that.estimatedPotentialMin,_that.estimatedPotentialMax,_that.injuryProneMin,_that.injuryProneMax,_that.determinationMin,_that.determinationMax,_that.injuryProneKnown,_that.determinationKnown);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -207,10 +208,10 @@ return $default(_that.prospectId,_that.tier,_that.estimatedSlot,_that.mockRank,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String prospectId,  ScoutingTier tier,  EstimatedDraftSlot? estimatedSlot,  int mockRank,  int? estimatedOvrMin,  int? estimatedOvrMax,  double? estimatedPotentialMin,  double? estimatedPotentialMax,  int? injuryProneMin,  int? injuryProneMax,  int? determinationMin,  int? determinationMax,  bool injuryProneKnown,  bool determinationKnown)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String prospectId,  ScoutingTier tier,  int weeksAtCurrentTier,  EstimatedDraftSlot? estimatedSlot,  int mockRank,  int? estimatedOvrMin,  int? estimatedOvrMax,  double? estimatedPotentialMin,  double? estimatedPotentialMax,  int? injuryProneMin,  int? injuryProneMax,  int? determinationMin,  int? determinationMax,  bool injuryProneKnown,  bool determinationKnown)?  $default,) {final _that = this;
 switch (_that) {
 case _ScoutingKnowledge() when $default != null:
-return $default(_that.prospectId,_that.tier,_that.estimatedSlot,_that.mockRank,_that.estimatedOvrMin,_that.estimatedOvrMax,_that.estimatedPotentialMin,_that.estimatedPotentialMax,_that.injuryProneMin,_that.injuryProneMax,_that.determinationMin,_that.determinationMax,_that.injuryProneKnown,_that.determinationKnown);case _:
+return $default(_that.prospectId,_that.tier,_that.weeksAtCurrentTier,_that.estimatedSlot,_that.mockRank,_that.estimatedOvrMin,_that.estimatedOvrMax,_that.estimatedPotentialMin,_that.estimatedPotentialMax,_that.injuryProneMin,_that.injuryProneMax,_that.determinationMin,_that.determinationMax,_that.injuryProneKnown,_that.determinationKnown);case _:
   return null;
 
 }
@@ -222,11 +223,12 @@ return $default(_that.prospectId,_that.tier,_that.estimatedSlot,_that.mockRank,_
 @JsonSerializable()
 
 class _ScoutingKnowledge implements ScoutingKnowledge {
-  const _ScoutingKnowledge({required this.prospectId, this.tier = ScoutingTier.tier1, this.estimatedSlot, this.mockRank = 0, this.estimatedOvrMin, this.estimatedOvrMax, this.estimatedPotentialMin, this.estimatedPotentialMax, this.injuryProneMin, this.injuryProneMax, this.determinationMin, this.determinationMax, this.injuryProneKnown = false, this.determinationKnown = false});
+  const _ScoutingKnowledge({required this.prospectId, this.tier = ScoutingTier.tier1, this.weeksAtCurrentTier = 0, this.estimatedSlot, this.mockRank = 0, this.estimatedOvrMin, this.estimatedOvrMax, this.estimatedPotentialMin, this.estimatedPotentialMax, this.injuryProneMin, this.injuryProneMax, this.determinationMin, this.determinationMax, this.injuryProneKnown = false, this.determinationKnown = false});
   factory _ScoutingKnowledge.fromJson(Map<String, dynamic> json) => _$ScoutingKnowledgeFromJson(json);
 
 @override final  String prospectId;
 @override@JsonKey() final  ScoutingTier tier;
+@override@JsonKey() final  int weeksAtCurrentTier;
 @override final  EstimatedDraftSlot? estimatedSlot;
 @override@JsonKey() final  int mockRank;
 @override final  int? estimatedOvrMin;
@@ -253,16 +255,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ScoutingKnowledge&&(identical(other.prospectId, prospectId) || other.prospectId == prospectId)&&(identical(other.tier, tier) || other.tier == tier)&&(identical(other.estimatedSlot, estimatedSlot) || other.estimatedSlot == estimatedSlot)&&(identical(other.mockRank, mockRank) || other.mockRank == mockRank)&&(identical(other.estimatedOvrMin, estimatedOvrMin) || other.estimatedOvrMin == estimatedOvrMin)&&(identical(other.estimatedOvrMax, estimatedOvrMax) || other.estimatedOvrMax == estimatedOvrMax)&&(identical(other.estimatedPotentialMin, estimatedPotentialMin) || other.estimatedPotentialMin == estimatedPotentialMin)&&(identical(other.estimatedPotentialMax, estimatedPotentialMax) || other.estimatedPotentialMax == estimatedPotentialMax)&&(identical(other.injuryProneMin, injuryProneMin) || other.injuryProneMin == injuryProneMin)&&(identical(other.injuryProneMax, injuryProneMax) || other.injuryProneMax == injuryProneMax)&&(identical(other.determinationMin, determinationMin) || other.determinationMin == determinationMin)&&(identical(other.determinationMax, determinationMax) || other.determinationMax == determinationMax)&&(identical(other.injuryProneKnown, injuryProneKnown) || other.injuryProneKnown == injuryProneKnown)&&(identical(other.determinationKnown, determinationKnown) || other.determinationKnown == determinationKnown));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ScoutingKnowledge&&(identical(other.prospectId, prospectId) || other.prospectId == prospectId)&&(identical(other.tier, tier) || other.tier == tier)&&(identical(other.weeksAtCurrentTier, weeksAtCurrentTier) || other.weeksAtCurrentTier == weeksAtCurrentTier)&&(identical(other.estimatedSlot, estimatedSlot) || other.estimatedSlot == estimatedSlot)&&(identical(other.mockRank, mockRank) || other.mockRank == mockRank)&&(identical(other.estimatedOvrMin, estimatedOvrMin) || other.estimatedOvrMin == estimatedOvrMin)&&(identical(other.estimatedOvrMax, estimatedOvrMax) || other.estimatedOvrMax == estimatedOvrMax)&&(identical(other.estimatedPotentialMin, estimatedPotentialMin) || other.estimatedPotentialMin == estimatedPotentialMin)&&(identical(other.estimatedPotentialMax, estimatedPotentialMax) || other.estimatedPotentialMax == estimatedPotentialMax)&&(identical(other.injuryProneMin, injuryProneMin) || other.injuryProneMin == injuryProneMin)&&(identical(other.injuryProneMax, injuryProneMax) || other.injuryProneMax == injuryProneMax)&&(identical(other.determinationMin, determinationMin) || other.determinationMin == determinationMin)&&(identical(other.determinationMax, determinationMax) || other.determinationMax == determinationMax)&&(identical(other.injuryProneKnown, injuryProneKnown) || other.injuryProneKnown == injuryProneKnown)&&(identical(other.determinationKnown, determinationKnown) || other.determinationKnown == determinationKnown));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,prospectId,tier,estimatedSlot,mockRank,estimatedOvrMin,estimatedOvrMax,estimatedPotentialMin,estimatedPotentialMax,injuryProneMin,injuryProneMax,determinationMin,determinationMax,injuryProneKnown,determinationKnown);
+int get hashCode => Object.hash(runtimeType,prospectId,tier,weeksAtCurrentTier,estimatedSlot,mockRank,estimatedOvrMin,estimatedOvrMax,estimatedPotentialMin,estimatedPotentialMax,injuryProneMin,injuryProneMax,determinationMin,determinationMax,injuryProneKnown,determinationKnown);
 
 @override
 String toString() {
-  return 'ScoutingKnowledge(prospectId: $prospectId, tier: $tier, estimatedSlot: $estimatedSlot, mockRank: $mockRank, estimatedOvrMin: $estimatedOvrMin, estimatedOvrMax: $estimatedOvrMax, estimatedPotentialMin: $estimatedPotentialMin, estimatedPotentialMax: $estimatedPotentialMax, injuryProneMin: $injuryProneMin, injuryProneMax: $injuryProneMax, determinationMin: $determinationMin, determinationMax: $determinationMax, injuryProneKnown: $injuryProneKnown, determinationKnown: $determinationKnown)';
+  return 'ScoutingKnowledge(prospectId: $prospectId, tier: $tier, weeksAtCurrentTier: $weeksAtCurrentTier, estimatedSlot: $estimatedSlot, mockRank: $mockRank, estimatedOvrMin: $estimatedOvrMin, estimatedOvrMax: $estimatedOvrMax, estimatedPotentialMin: $estimatedPotentialMin, estimatedPotentialMax: $estimatedPotentialMax, injuryProneMin: $injuryProneMin, injuryProneMax: $injuryProneMax, determinationMin: $determinationMin, determinationMax: $determinationMax, injuryProneKnown: $injuryProneKnown, determinationKnown: $determinationKnown)';
 }
 
 
@@ -273,7 +275,7 @@ abstract mixin class _$ScoutingKnowledgeCopyWith<$Res> implements $ScoutingKnowl
   factory _$ScoutingKnowledgeCopyWith(_ScoutingKnowledge value, $Res Function(_ScoutingKnowledge) _then) = __$ScoutingKnowledgeCopyWithImpl;
 @override @useResult
 $Res call({
- String prospectId, ScoutingTier tier, EstimatedDraftSlot? estimatedSlot, int mockRank, int? estimatedOvrMin, int? estimatedOvrMax, double? estimatedPotentialMin, double? estimatedPotentialMax, int? injuryProneMin, int? injuryProneMax, int? determinationMin, int? determinationMax, bool injuryProneKnown, bool determinationKnown
+ String prospectId, ScoutingTier tier, int weeksAtCurrentTier, EstimatedDraftSlot? estimatedSlot, int mockRank, int? estimatedOvrMin, int? estimatedOvrMax, double? estimatedPotentialMin, double? estimatedPotentialMax, int? injuryProneMin, int? injuryProneMax, int? determinationMin, int? determinationMax, bool injuryProneKnown, bool determinationKnown
 });
 
 
@@ -290,11 +292,12 @@ class __$ScoutingKnowledgeCopyWithImpl<$Res>
 
 /// Create a copy of ScoutingKnowledge
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? prospectId = null,Object? tier = null,Object? estimatedSlot = freezed,Object? mockRank = null,Object? estimatedOvrMin = freezed,Object? estimatedOvrMax = freezed,Object? estimatedPotentialMin = freezed,Object? estimatedPotentialMax = freezed,Object? injuryProneMin = freezed,Object? injuryProneMax = freezed,Object? determinationMin = freezed,Object? determinationMax = freezed,Object? injuryProneKnown = null,Object? determinationKnown = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? prospectId = null,Object? tier = null,Object? weeksAtCurrentTier = null,Object? estimatedSlot = freezed,Object? mockRank = null,Object? estimatedOvrMin = freezed,Object? estimatedOvrMax = freezed,Object? estimatedPotentialMin = freezed,Object? estimatedPotentialMax = freezed,Object? injuryProneMin = freezed,Object? injuryProneMax = freezed,Object? determinationMin = freezed,Object? determinationMax = freezed,Object? injuryProneKnown = null,Object? determinationKnown = null,}) {
   return _then(_ScoutingKnowledge(
 prospectId: null == prospectId ? _self.prospectId : prospectId // ignore: cast_nullable_to_non_nullable
 as String,tier: null == tier ? _self.tier : tier // ignore: cast_nullable_to_non_nullable
-as ScoutingTier,estimatedSlot: freezed == estimatedSlot ? _self.estimatedSlot : estimatedSlot // ignore: cast_nullable_to_non_nullable
+as ScoutingTier,weeksAtCurrentTier: null == weeksAtCurrentTier ? _self.weeksAtCurrentTier : weeksAtCurrentTier // ignore: cast_nullable_to_non_nullable
+as int,estimatedSlot: freezed == estimatedSlot ? _self.estimatedSlot : estimatedSlot // ignore: cast_nullable_to_non_nullable
 as EstimatedDraftSlot?,mockRank: null == mockRank ? _self.mockRank : mockRank // ignore: cast_nullable_to_non_nullable
 as int,estimatedOvrMin: freezed == estimatedOvrMin ? _self.estimatedOvrMin : estimatedOvrMin // ignore: cast_nullable_to_non_nullable
 as int?,estimatedOvrMax: freezed == estimatedOvrMax ? _self.estimatedOvrMax : estimatedOvrMax // ignore: cast_nullable_to_non_nullable

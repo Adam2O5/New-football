@@ -9,6 +9,7 @@ abstract class ScoutingKnowledge with _$ScoutingKnowledge {
   const factory ScoutingKnowledge({
     required String prospectId,
     @Default(ScoutingTier.tier1) ScoutingTier tier,
+    @Default(0) int weeksAtCurrentTier,
     EstimatedDraftSlot? estimatedSlot,
     @Default(0) int mockRank,
     int? estimatedOvrMin,

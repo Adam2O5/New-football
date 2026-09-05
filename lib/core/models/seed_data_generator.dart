@@ -91,9 +91,9 @@ class SeedDataGenerator {
       ),
     ];
 
-    final nextDraftState = DraftState(
-      year: year + 1,
-      draftClass: generateDraftClass(year: year + 1),
+    final draftState = DraftState(
+      year: year,
+      draftClass: generateDraftClass(year: year),
     );
     final tvSchedule = tvCapScheduleFor(currentYear: year, saveSeed: seed ?? 0);
 
@@ -102,7 +102,7 @@ class SeedDataGenerator {
       currentSeason: Season(
         year: year,
         standings: standings,
-        nextDraftState: nextDraftState,
+        draftState: draftState,
         nextTvCapResetSeason: tvSchedule.nextTvCapResetSeason,
         nextTvCapIncreasePct: tvSchedule.nextTvCapIncreasePct,
       ),

@@ -616,7 +616,7 @@ class _Task38Harness {
     }
     if (week == calendarBalance.draftWeek && day == 1) {
       state = _completePassiveDraft(state);
-      if (state.currentSeason.nextDraftState == null &&
+      if (state.currentSeason.draftState == null &&
           (state.currentSeason.draftState?.currentPickIndex ?? 0) >=
               (state.currentSeason.draftState?.order.length ?? 0)) {
         state = seasonService.runNextClassGeneration(state, saveSeed: rootSeed);

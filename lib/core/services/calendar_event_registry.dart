@@ -249,7 +249,7 @@ class CalendarEventRegistry {
         final draft = season.draftState;
         return draft != null && draft.currentPickIndex >= draft.order.length;
       case CalendarEventId.nextClassGeneration:
-        return season.nextDraftState != null;
+        return season.nextClassGenerationDone;
       case CalendarEventId.tradeWindowOpen:
       case CalendarEventId.contractExtensions:
         // These are derived ranges, not one-shot stateful events.

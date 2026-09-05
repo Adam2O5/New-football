@@ -19,6 +19,11 @@ abstract class LeagueState with _$LeagueState {
     required List<Team> teams,
     required Season currentSeason,
     @Default([]) List<SeasonHistory> history,
+
+    /// Picks from the just-finished draft, snapshotted once
+    /// `currentSeason.draftState` is overwritten by the next class
+    /// (`generateNextClassForLeague`, week after the draft).
+    CompletedDraft? lastCompletedDraft,
     String? playerTeamId,
     @Default(0) int currentRound,
     @Default(1) int currentWeek,

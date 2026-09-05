@@ -16,6 +16,11 @@ _LeagueState _$LeagueStateFromJson(Map<String, dynamic> json) => _LeagueState(
           ?.map((e) => SeasonHistory.fromJson(e as Map<String, dynamic>))
           .toList() ??
       const [],
+  lastCompletedDraft: json['lastCompletedDraft'] == null
+      ? null
+      : CompletedDraft.fromJson(
+          json['lastCompletedDraft'] as Map<String, dynamic>,
+        ),
   playerTeamId: json['playerTeamId'] as String?,
   currentRound: (json['currentRound'] as num?)?.toInt() ?? 0,
   currentWeek: (json['currentWeek'] as num?)?.toInt() ?? 1,
@@ -98,6 +103,7 @@ Map<String, dynamic> _$LeagueStateToJson(_LeagueState instance) =>
       'teams': instance.teams,
       'currentSeason': instance.currentSeason,
       'history': instance.history,
+      'lastCompletedDraft': instance.lastCompletedDraft,
       'playerTeamId': instance.playerTeamId,
       'currentRound': instance.currentRound,
       'currentWeek': instance.currentWeek,

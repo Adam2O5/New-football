@@ -17,19 +17,18 @@ class ProspectService {
     final draftClass = SeedDataGenerator(
       random: _random,
     ).generateDraftClass(year: currentYear + 1);
-    return DraftState(
-      year: currentYear + 1,
-      draftClass: draftClass,
-    );
+    return DraftState(year: currentYear + 1, draftClass: draftClass);
   }
 
   /// Generates the next draft class AND extends each team's owned picks
   /// horizon by one year (7-year rolling window).
   /// Full logic previously in SeasonService.runNextClassGeneration.
   LeagueState generateNextClassForLeague(LeagueState league) {
-    final nextDraftState = generateNextDraftClass(
+    final newDraftState = generateNextDraftClass(
       currentYear: league.currentSeason.year,
     );
+
+    final oldDraftState = league.currentSeason.draftState;
 
     final currentYear = league.currentSeason.year;
     final horizonYear = currentYear + 7;
@@ -49,8 +48,15 @@ class ProspectService {
 
     return league.copyWith(
       teams: teams,
+      lastCompletedDraft: oldDraftState == null
+          ? league.lastCompletedDraft
+          : CompletedDraft(
+              year: oldDraftState.year,
+              completedPicks: oldDraftState.completedPicks,
+            ),
       currentSeason: league.currentSeason.copyWith(
-        nextDraftState: nextDraftState,
+        draftState: newDraftState,
+        nextClassGenerationDone: true,
       ),
     );
   }

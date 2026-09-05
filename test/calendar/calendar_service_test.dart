@@ -204,7 +204,6 @@ void main() {
       tradeDeadlineAcked: true,
       capUpdateTvDone: true,
       draftState: draft,
-      nextDraftState: draft,
     );
     final league = game.leagueState.copyWith(
       currentWeek: 45,

@@ -13,6 +13,7 @@ _ScoutingKnowledge _$ScoutingKnowledgeFromJson(
   tier:
       $enumDecodeNullable(_$ScoutingTierEnumMap, json['tier']) ??
       ScoutingTier.tier1,
+  weeksAtCurrentTier: (json['weeksAtCurrentTier'] as num?)?.toInt() ?? 0,
   estimatedSlot: $enumDecodeNullable(
     _$EstimatedDraftSlotEnumMap,
     json['estimatedSlot'],
@@ -34,6 +35,7 @@ Map<String, dynamic> _$ScoutingKnowledgeToJson(_ScoutingKnowledge instance) =>
     <String, dynamic>{
       'prospectId': instance.prospectId,
       'tier': _$ScoutingTierEnumMap[instance.tier]!,
+      'weeksAtCurrentTier': instance.weeksAtCurrentTier,
       'estimatedSlot': _$EstimatedDraftSlotEnumMap[instance.estimatedSlot],
       'mockRank': instance.mockRank,
       'estimatedOvrMin': instance.estimatedOvrMin,

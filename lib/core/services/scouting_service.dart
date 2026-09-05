@@ -70,7 +70,22 @@ class ScoutingService {
     return scouting.copyWith(combineAssignedProspectIds: selected);
   }
 
-  /// Cotygodniowy progres tieru dla obserwowanych prospectów, ∝ Evaluation.
+  /// Tygodnie potrzebne do przejścia z [currentTier] na kolejny tier, wg
+  /// tabeli `staff.md` §4 "Evaluation": tier2 = 30 − 2×eval, tier3-5 = 20 −
+  /// 2×eval (każdy z osobna). Zwraca null, gdy progres jest niemożliwy
+  /// (tier5 = max, albo evaluationStars <= 0 = brak scouta).
+  int? _weeksNeededForNextTier(
+    ScoutingTier currentTier,
+    double evaluationStars,
+  ) {
+    if (currentTier == ScoutingTier.tier5) return null;
+    if (evaluationStars <= 0) return null;
+    final base = currentTier == ScoutingTier.tier1 ? 30.0 : 20.0;
+    return (base - 2 * evaluationStars).round().clamp(1, 999);
+  }
+
+  /// Cotygodniowy progres tieru dla obserwowanych prospectów, deterministyczny
+  /// wg czasu spędzonego na obecnym tierze — patrz `staff.md` §4.
   TeamScouting tickKnowledge(
     TeamScouting scouting,
     double evaluationStars, {
@@ -81,22 +96,20 @@ class ScoutingService {
     String teamId = '',
   }) {
     final byId = {for (final p in prospects) p.id: p};
-    final chance = (0.15 + evaluationStars * 0.09).clamp(0.05, 0.6);
     final updated = scouting.knowledge.map((knowledge) {
-      if (knowledge.tier == ScoutingTier.tier5) return knowledge;
-      final random = _scopedRandom(
-        seed: seed,
-        seasonYear: seasonYear,
-        week: week,
-        teamId: teamId,
-        kind: 'scout-tier',
-        prospectId: knowledge.prospectId,
+      final weeksNeeded = _weeksNeededForNextTier(
+        knowledge.tier,
+        evaluationStars,
       );
-      if (random.nextDouble() >= chance) return knowledge;
+      if (weeksNeeded == null) return knowledge;
+      final weeksAtTier = knowledge.weeksAtCurrentTier + 1;
+      if (weeksAtTier < weeksNeeded) {
+        return knowledge.copyWith(weeksAtCurrentTier: weeksAtTier);
+      }
       final nextIndex = ScoutingTier.values.indexOf(knowledge.tier) + 1;
       final nextTier = ScoutingTier.values[nextIndex];
       return _evidenceForTier(
-        knowledge.copyWith(tier: nextTier),
+        knowledge.copyWith(tier: nextTier, weeksAtCurrentTier: 0),
         byId[knowledge.prospectId],
         nextTier,
       );

@@ -15,7 +15,10 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$LeagueState {
 
- List<Team> get teams; Season get currentSeason; List<SeasonHistory> get history; String? get playerTeamId; int get currentRound; int get currentWeek;/// 1 = Monday … 7 = Sunday within [currentWeek].
+ List<Team> get teams; Season get currentSeason; List<SeasonHistory> get history;/// Picks from the just-finished draft, snapshotted once
+/// `currentSeason.draftState` is overwritten by the next class
+/// (`generateNextClassForLeague`, week after the draft).
+ CompletedDraft? get lastCompletedDraft; String? get playerTeamId; int get currentRound; int get currentWeek;/// 1 = Monday … 7 = Sunday within [currentWeek].
  int get currentDay;/// Hourly contract mode clock. Null outside extensions/FA phase I;
 /// otherwise 1–10 identifies the current offer slot.
  int? get currentHour; bool get hourlyPlayerOfferUsed; bool get hourlyStaffOfferUsed; Inbox get inbox; MessageSettings get messageSettings;/// Sztab bez klubu — pula dostępna do zatrudnienia (`docs/staff_rules.md`).
@@ -53,16 +56,16 @@ $LeagueStateCopyWith<LeagueState> get copyWith => _$LeagueStateCopyWithImpl<Leag
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is LeagueState&&const DeepCollectionEquality().equals(other.teams, teams)&&(identical(other.currentSeason, currentSeason) || other.currentSeason == currentSeason)&&const DeepCollectionEquality().equals(other.history, history)&&(identical(other.playerTeamId, playerTeamId) || other.playerTeamId == playerTeamId)&&(identical(other.currentRound, currentRound) || other.currentRound == currentRound)&&(identical(other.currentWeek, currentWeek) || other.currentWeek == currentWeek)&&(identical(other.currentDay, currentDay) || other.currentDay == currentDay)&&(identical(other.currentHour, currentHour) || other.currentHour == currentHour)&&(identical(other.hourlyPlayerOfferUsed, hourlyPlayerOfferUsed) || other.hourlyPlayerOfferUsed == hourlyPlayerOfferUsed)&&(identical(other.hourlyStaffOfferUsed, hourlyStaffOfferUsed) || other.hourlyStaffOfferUsed == hourlyStaffOfferUsed)&&(identical(other.inbox, inbox) || other.inbox == inbox)&&(identical(other.messageSettings, messageSettings) || other.messageSettings == messageSettings)&&const DeepCollectionEquality().equals(other.staffFreeAgents, staffFreeAgents)&&const DeepCollectionEquality().equals(other.freeAgents, freeAgents)&&const DeepCollectionEquality().equals(other.freshUndraftedPlayers, freshUndraftedPlayers)&&(identical(other.strengthTable, strengthTable) || other.strengthTable == strengthTable)&&const DeepCollectionEquality().equals(other.negotiations, negotiations)&&const DeepCollectionEquality().equals(other.negotiationBlocks, negotiationBlocks)&&const DeepCollectionEquality().equals(other.tradeHistory, tradeHistory)&&const DeepCollectionEquality().equals(other.tradeOffers, tradeOffers)&&const DeepCollectionEquality().equals(other.ntcTradeBlocks, ntcTradeBlocks)&&const DeepCollectionEquality().equals(other.draftedRights, draftedRights)&&const DeepCollectionEquality().equals(other.rfaQualifyingOffers, rfaQualifyingOffers)&&const DeepCollectionEquality().equals(other.rfaOfferSheets, rfaOfferSheets));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is LeagueState&&const DeepCollectionEquality().equals(other.teams, teams)&&(identical(other.currentSeason, currentSeason) || other.currentSeason == currentSeason)&&const DeepCollectionEquality().equals(other.history, history)&&(identical(other.lastCompletedDraft, lastCompletedDraft) || other.lastCompletedDraft == lastCompletedDraft)&&(identical(other.playerTeamId, playerTeamId) || other.playerTeamId == playerTeamId)&&(identical(other.currentRound, currentRound) || other.currentRound == currentRound)&&(identical(other.currentWeek, currentWeek) || other.currentWeek == currentWeek)&&(identical(other.currentDay, currentDay) || other.currentDay == currentDay)&&(identical(other.currentHour, currentHour) || other.currentHour == currentHour)&&(identical(other.hourlyPlayerOfferUsed, hourlyPlayerOfferUsed) || other.hourlyPlayerOfferUsed == hourlyPlayerOfferUsed)&&(identical(other.hourlyStaffOfferUsed, hourlyStaffOfferUsed) || other.hourlyStaffOfferUsed == hourlyStaffOfferUsed)&&(identical(other.inbox, inbox) || other.inbox == inbox)&&(identical(other.messageSettings, messageSettings) || other.messageSettings == messageSettings)&&const DeepCollectionEquality().equals(other.staffFreeAgents, staffFreeAgents)&&const DeepCollectionEquality().equals(other.freeAgents, freeAgents)&&const DeepCollectionEquality().equals(other.freshUndraftedPlayers, freshUndraftedPlayers)&&(identical(other.strengthTable, strengthTable) || other.strengthTable == strengthTable)&&const DeepCollectionEquality().equals(other.negotiations, negotiations)&&const DeepCollectionEquality().equals(other.negotiationBlocks, negotiationBlocks)&&const DeepCollectionEquality().equals(other.tradeHistory, tradeHistory)&&const DeepCollectionEquality().equals(other.tradeOffers, tradeOffers)&&const DeepCollectionEquality().equals(other.ntcTradeBlocks, ntcTradeBlocks)&&const DeepCollectionEquality().equals(other.draftedRights, draftedRights)&&const DeepCollectionEquality().equals(other.rfaQualifyingOffers, rfaQualifyingOffers)&&const DeepCollectionEquality().equals(other.rfaOfferSheets, rfaOfferSheets));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,const DeepCollectionEquality().hash(teams),currentSeason,const DeepCollectionEquality().hash(history),playerTeamId,currentRound,currentWeek,currentDay,currentHour,hourlyPlayerOfferUsed,hourlyStaffOfferUsed,inbox,messageSettings,const DeepCollectionEquality().hash(staffFreeAgents),const DeepCollectionEquality().hash(freeAgents),const DeepCollectionEquality().hash(freshUndraftedPlayers),strengthTable,const DeepCollectionEquality().hash(negotiations),const DeepCollectionEquality().hash(negotiationBlocks),const DeepCollectionEquality().hash(tradeHistory),const DeepCollectionEquality().hash(tradeOffers),const DeepCollectionEquality().hash(ntcTradeBlocks),const DeepCollectionEquality().hash(draftedRights),const DeepCollectionEquality().hash(rfaQualifyingOffers),const DeepCollectionEquality().hash(rfaOfferSheets)]);
+int get hashCode => Object.hashAll([runtimeType,const DeepCollectionEquality().hash(teams),currentSeason,const DeepCollectionEquality().hash(history),lastCompletedDraft,playerTeamId,currentRound,currentWeek,currentDay,currentHour,hourlyPlayerOfferUsed,hourlyStaffOfferUsed,inbox,messageSettings,const DeepCollectionEquality().hash(staffFreeAgents),const DeepCollectionEquality().hash(freeAgents),const DeepCollectionEquality().hash(freshUndraftedPlayers),strengthTable,const DeepCollectionEquality().hash(negotiations),const DeepCollectionEquality().hash(negotiationBlocks),const DeepCollectionEquality().hash(tradeHistory),const DeepCollectionEquality().hash(tradeOffers),const DeepCollectionEquality().hash(ntcTradeBlocks),const DeepCollectionEquality().hash(draftedRights),const DeepCollectionEquality().hash(rfaQualifyingOffers),const DeepCollectionEquality().hash(rfaOfferSheets)]);
 
 @override
 String toString() {
-  return 'LeagueState(teams: $teams, currentSeason: $currentSeason, history: $history, playerTeamId: $playerTeamId, currentRound: $currentRound, currentWeek: $currentWeek, currentDay: $currentDay, currentHour: $currentHour, hourlyPlayerOfferUsed: $hourlyPlayerOfferUsed, hourlyStaffOfferUsed: $hourlyStaffOfferUsed, inbox: $inbox, messageSettings: $messageSettings, staffFreeAgents: $staffFreeAgents, freeAgents: $freeAgents, freshUndraftedPlayers: $freshUndraftedPlayers, strengthTable: $strengthTable, negotiations: $negotiations, negotiationBlocks: $negotiationBlocks, tradeHistory: $tradeHistory, tradeOffers: $tradeOffers, ntcTradeBlocks: $ntcTradeBlocks, draftedRights: $draftedRights, rfaQualifyingOffers: $rfaQualifyingOffers, rfaOfferSheets: $rfaOfferSheets)';
+  return 'LeagueState(teams: $teams, currentSeason: $currentSeason, history: $history, lastCompletedDraft: $lastCompletedDraft, playerTeamId: $playerTeamId, currentRound: $currentRound, currentWeek: $currentWeek, currentDay: $currentDay, currentHour: $currentHour, hourlyPlayerOfferUsed: $hourlyPlayerOfferUsed, hourlyStaffOfferUsed: $hourlyStaffOfferUsed, inbox: $inbox, messageSettings: $messageSettings, staffFreeAgents: $staffFreeAgents, freeAgents: $freeAgents, freshUndraftedPlayers: $freshUndraftedPlayers, strengthTable: $strengthTable, negotiations: $negotiations, negotiationBlocks: $negotiationBlocks, tradeHistory: $tradeHistory, tradeOffers: $tradeOffers, ntcTradeBlocks: $ntcTradeBlocks, draftedRights: $draftedRights, rfaQualifyingOffers: $rfaQualifyingOffers, rfaOfferSheets: $rfaOfferSheets)';
 }
 
 
@@ -73,11 +76,11 @@ abstract mixin class $LeagueStateCopyWith<$Res>  {
   factory $LeagueStateCopyWith(LeagueState value, $Res Function(LeagueState) _then) = _$LeagueStateCopyWithImpl;
 @useResult
 $Res call({
- List<Team> teams, Season currentSeason, List<SeasonHistory> history, String? playerTeamId, int currentRound, int currentWeek, int currentDay, int? currentHour, bool hourlyPlayerOfferUsed, bool hourlyStaffOfferUsed, Inbox inbox, MessageSettings messageSettings, List<StaffMember> staffFreeAgents, List<Player> freeAgents, List<FreshUndraftedPlayer> freshUndraftedPlayers, LeagueStrengthTable? strengthTable, List<ContractNegotiation> negotiations, List<NegotiationBlock> negotiationBlocks, List<TradeHistoryEntry> tradeHistory, List<TradeOffer> tradeOffers, List<NtcTradeBlock> ntcTradeBlocks, List<DraftedPlayerRights> draftedRights, List<RfaQualifyingOffer> rfaQualifyingOffers, List<RfaOfferSheet> rfaOfferSheets
+ List<Team> teams, Season currentSeason, List<SeasonHistory> history, CompletedDraft? lastCompletedDraft, String? playerTeamId, int currentRound, int currentWeek, int currentDay, int? currentHour, bool hourlyPlayerOfferUsed, bool hourlyStaffOfferUsed, Inbox inbox, MessageSettings messageSettings, List<StaffMember> staffFreeAgents, List<Player> freeAgents, List<FreshUndraftedPlayer> freshUndraftedPlayers, LeagueStrengthTable? strengthTable, List<ContractNegotiation> negotiations, List<NegotiationBlock> negotiationBlocks, List<TradeHistoryEntry> tradeHistory, List<TradeOffer> tradeOffers, List<NtcTradeBlock> ntcTradeBlocks, List<DraftedPlayerRights> draftedRights, List<RfaQualifyingOffer> rfaQualifyingOffers, List<RfaOfferSheet> rfaOfferSheets
 });
 
 
-$SeasonCopyWith<$Res> get currentSeason;$InboxCopyWith<$Res> get inbox;$MessageSettingsCopyWith<$Res> get messageSettings;$LeagueStrengthTableCopyWith<$Res>? get strengthTable;
+$SeasonCopyWith<$Res> get currentSeason;$CompletedDraftCopyWith<$Res>? get lastCompletedDraft;$InboxCopyWith<$Res> get inbox;$MessageSettingsCopyWith<$Res> get messageSettings;$LeagueStrengthTableCopyWith<$Res>? get strengthTable;
 
 }
 /// @nodoc
@@ -90,12 +93,13 @@ class _$LeagueStateCopyWithImpl<$Res>
 
 /// Create a copy of LeagueState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? teams = null,Object? currentSeason = null,Object? history = null,Object? playerTeamId = freezed,Object? currentRound = null,Object? currentWeek = null,Object? currentDay = null,Object? currentHour = freezed,Object? hourlyPlayerOfferUsed = null,Object? hourlyStaffOfferUsed = null,Object? inbox = null,Object? messageSettings = null,Object? staffFreeAgents = null,Object? freeAgents = null,Object? freshUndraftedPlayers = null,Object? strengthTable = freezed,Object? negotiations = null,Object? negotiationBlocks = null,Object? tradeHistory = null,Object? tradeOffers = null,Object? ntcTradeBlocks = null,Object? draftedRights = null,Object? rfaQualifyingOffers = null,Object? rfaOfferSheets = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? teams = null,Object? currentSeason = null,Object? history = null,Object? lastCompletedDraft = freezed,Object? playerTeamId = freezed,Object? currentRound = null,Object? currentWeek = null,Object? currentDay = null,Object? currentHour = freezed,Object? hourlyPlayerOfferUsed = null,Object? hourlyStaffOfferUsed = null,Object? inbox = null,Object? messageSettings = null,Object? staffFreeAgents = null,Object? freeAgents = null,Object? freshUndraftedPlayers = null,Object? strengthTable = freezed,Object? negotiations = null,Object? negotiationBlocks = null,Object? tradeHistory = null,Object? tradeOffers = null,Object? ntcTradeBlocks = null,Object? draftedRights = null,Object? rfaQualifyingOffers = null,Object? rfaOfferSheets = null,}) {
   return _then(_self.copyWith(
 teams: null == teams ? _self.teams : teams // ignore: cast_nullable_to_non_nullable
 as List<Team>,currentSeason: null == currentSeason ? _self.currentSeason : currentSeason // ignore: cast_nullable_to_non_nullable
 as Season,history: null == history ? _self.history : history // ignore: cast_nullable_to_non_nullable
-as List<SeasonHistory>,playerTeamId: freezed == playerTeamId ? _self.playerTeamId : playerTeamId // ignore: cast_nullable_to_non_nullable
+as List<SeasonHistory>,lastCompletedDraft: freezed == lastCompletedDraft ? _self.lastCompletedDraft : lastCompletedDraft // ignore: cast_nullable_to_non_nullable
+as CompletedDraft?,playerTeamId: freezed == playerTeamId ? _self.playerTeamId : playerTeamId // ignore: cast_nullable_to_non_nullable
 as String?,currentRound: null == currentRound ? _self.currentRound : currentRound // ignore: cast_nullable_to_non_nullable
 as int,currentWeek: null == currentWeek ? _self.currentWeek : currentWeek // ignore: cast_nullable_to_non_nullable
 as int,currentDay: null == currentDay ? _self.currentDay : currentDay // ignore: cast_nullable_to_non_nullable
@@ -127,6 +131,18 @@ $SeasonCopyWith<$Res> get currentSeason {
   
   return $SeasonCopyWith<$Res>(_self.currentSeason, (value) {
     return _then(_self.copyWith(currentSeason: value));
+  });
+}/// Create a copy of LeagueState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$CompletedDraftCopyWith<$Res>? get lastCompletedDraft {
+    if (_self.lastCompletedDraft == null) {
+    return null;
+  }
+
+  return $CompletedDraftCopyWith<$Res>(_self.lastCompletedDraft!, (value) {
+    return _then(_self.copyWith(lastCompletedDraft: value));
   });
 }/// Create a copy of LeagueState
 /// with the given fields replaced by the non-null parameter values.
@@ -240,10 +256,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<Team> teams,  Season currentSeason,  List<SeasonHistory> history,  String? playerTeamId,  int currentRound,  int currentWeek,  int currentDay,  int? currentHour,  bool hourlyPlayerOfferUsed,  bool hourlyStaffOfferUsed,  Inbox inbox,  MessageSettings messageSettings,  List<StaffMember> staffFreeAgents,  List<Player> freeAgents,  List<FreshUndraftedPlayer> freshUndraftedPlayers,  LeagueStrengthTable? strengthTable,  List<ContractNegotiation> negotiations,  List<NegotiationBlock> negotiationBlocks,  List<TradeHistoryEntry> tradeHistory,  List<TradeOffer> tradeOffers,  List<NtcTradeBlock> ntcTradeBlocks,  List<DraftedPlayerRights> draftedRights,  List<RfaQualifyingOffer> rfaQualifyingOffers,  List<RfaOfferSheet> rfaOfferSheets)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<Team> teams,  Season currentSeason,  List<SeasonHistory> history,  CompletedDraft? lastCompletedDraft,  String? playerTeamId,  int currentRound,  int currentWeek,  int currentDay,  int? currentHour,  bool hourlyPlayerOfferUsed,  bool hourlyStaffOfferUsed,  Inbox inbox,  MessageSettings messageSettings,  List<StaffMember> staffFreeAgents,  List<Player> freeAgents,  List<FreshUndraftedPlayer> freshUndraftedPlayers,  LeagueStrengthTable? strengthTable,  List<ContractNegotiation> negotiations,  List<NegotiationBlock> negotiationBlocks,  List<TradeHistoryEntry> tradeHistory,  List<TradeOffer> tradeOffers,  List<NtcTradeBlock> ntcTradeBlocks,  List<DraftedPlayerRights> draftedRights,  List<RfaQualifyingOffer> rfaQualifyingOffers,  List<RfaOfferSheet> rfaOfferSheets)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _LeagueState() when $default != null:
-return $default(_that.teams,_that.currentSeason,_that.history,_that.playerTeamId,_that.currentRound,_that.currentWeek,_that.currentDay,_that.currentHour,_that.hourlyPlayerOfferUsed,_that.hourlyStaffOfferUsed,_that.inbox,_that.messageSettings,_that.staffFreeAgents,_that.freeAgents,_that.freshUndraftedPlayers,_that.strengthTable,_that.negotiations,_that.negotiationBlocks,_that.tradeHistory,_that.tradeOffers,_that.ntcTradeBlocks,_that.draftedRights,_that.rfaQualifyingOffers,_that.rfaOfferSheets);case _:
+return $default(_that.teams,_that.currentSeason,_that.history,_that.lastCompletedDraft,_that.playerTeamId,_that.currentRound,_that.currentWeek,_that.currentDay,_that.currentHour,_that.hourlyPlayerOfferUsed,_that.hourlyStaffOfferUsed,_that.inbox,_that.messageSettings,_that.staffFreeAgents,_that.freeAgents,_that.freshUndraftedPlayers,_that.strengthTable,_that.negotiations,_that.negotiationBlocks,_that.tradeHistory,_that.tradeOffers,_that.ntcTradeBlocks,_that.draftedRights,_that.rfaQualifyingOffers,_that.rfaOfferSheets);case _:
   return orElse();
 
 }
@@ -261,10 +277,10 @@ return $default(_that.teams,_that.currentSeason,_that.history,_that.playerTeamId
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<Team> teams,  Season currentSeason,  List<SeasonHistory> history,  String? playerTeamId,  int currentRound,  int currentWeek,  int currentDay,  int? currentHour,  bool hourlyPlayerOfferUsed,  bool hourlyStaffOfferUsed,  Inbox inbox,  MessageSettings messageSettings,  List<StaffMember> staffFreeAgents,  List<Player> freeAgents,  List<FreshUndraftedPlayer> freshUndraftedPlayers,  LeagueStrengthTable? strengthTable,  List<ContractNegotiation> negotiations,  List<NegotiationBlock> negotiationBlocks,  List<TradeHistoryEntry> tradeHistory,  List<TradeOffer> tradeOffers,  List<NtcTradeBlock> ntcTradeBlocks,  List<DraftedPlayerRights> draftedRights,  List<RfaQualifyingOffer> rfaQualifyingOffers,  List<RfaOfferSheet> rfaOfferSheets)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<Team> teams,  Season currentSeason,  List<SeasonHistory> history,  CompletedDraft? lastCompletedDraft,  String? playerTeamId,  int currentRound,  int currentWeek,  int currentDay,  int? currentHour,  bool hourlyPlayerOfferUsed,  bool hourlyStaffOfferUsed,  Inbox inbox,  MessageSettings messageSettings,  List<StaffMember> staffFreeAgents,  List<Player> freeAgents,  List<FreshUndraftedPlayer> freshUndraftedPlayers,  LeagueStrengthTable? strengthTable,  List<ContractNegotiation> negotiations,  List<NegotiationBlock> negotiationBlocks,  List<TradeHistoryEntry> tradeHistory,  List<TradeOffer> tradeOffers,  List<NtcTradeBlock> ntcTradeBlocks,  List<DraftedPlayerRights> draftedRights,  List<RfaQualifyingOffer> rfaQualifyingOffers,  List<RfaOfferSheet> rfaOfferSheets)  $default,) {final _that = this;
 switch (_that) {
 case _LeagueState():
-return $default(_that.teams,_that.currentSeason,_that.history,_that.playerTeamId,_that.currentRound,_that.currentWeek,_that.currentDay,_that.currentHour,_that.hourlyPlayerOfferUsed,_that.hourlyStaffOfferUsed,_that.inbox,_that.messageSettings,_that.staffFreeAgents,_that.freeAgents,_that.freshUndraftedPlayers,_that.strengthTable,_that.negotiations,_that.negotiationBlocks,_that.tradeHistory,_that.tradeOffers,_that.ntcTradeBlocks,_that.draftedRights,_that.rfaQualifyingOffers,_that.rfaOfferSheets);case _:
+return $default(_that.teams,_that.currentSeason,_that.history,_that.lastCompletedDraft,_that.playerTeamId,_that.currentRound,_that.currentWeek,_that.currentDay,_that.currentHour,_that.hourlyPlayerOfferUsed,_that.hourlyStaffOfferUsed,_that.inbox,_that.messageSettings,_that.staffFreeAgents,_that.freeAgents,_that.freshUndraftedPlayers,_that.strengthTable,_that.negotiations,_that.negotiationBlocks,_that.tradeHistory,_that.tradeOffers,_that.ntcTradeBlocks,_that.draftedRights,_that.rfaQualifyingOffers,_that.rfaOfferSheets);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -281,10 +297,10 @@ return $default(_that.teams,_that.currentSeason,_that.history,_that.playerTeamId
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<Team> teams,  Season currentSeason,  List<SeasonHistory> history,  String? playerTeamId,  int currentRound,  int currentWeek,  int currentDay,  int? currentHour,  bool hourlyPlayerOfferUsed,  bool hourlyStaffOfferUsed,  Inbox inbox,  MessageSettings messageSettings,  List<StaffMember> staffFreeAgents,  List<Player> freeAgents,  List<FreshUndraftedPlayer> freshUndraftedPlayers,  LeagueStrengthTable? strengthTable,  List<ContractNegotiation> negotiations,  List<NegotiationBlock> negotiationBlocks,  List<TradeHistoryEntry> tradeHistory,  List<TradeOffer> tradeOffers,  List<NtcTradeBlock> ntcTradeBlocks,  List<DraftedPlayerRights> draftedRights,  List<RfaQualifyingOffer> rfaQualifyingOffers,  List<RfaOfferSheet> rfaOfferSheets)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<Team> teams,  Season currentSeason,  List<SeasonHistory> history,  CompletedDraft? lastCompletedDraft,  String? playerTeamId,  int currentRound,  int currentWeek,  int currentDay,  int? currentHour,  bool hourlyPlayerOfferUsed,  bool hourlyStaffOfferUsed,  Inbox inbox,  MessageSettings messageSettings,  List<StaffMember> staffFreeAgents,  List<Player> freeAgents,  List<FreshUndraftedPlayer> freshUndraftedPlayers,  LeagueStrengthTable? strengthTable,  List<ContractNegotiation> negotiations,  List<NegotiationBlock> negotiationBlocks,  List<TradeHistoryEntry> tradeHistory,  List<TradeOffer> tradeOffers,  List<NtcTradeBlock> ntcTradeBlocks,  List<DraftedPlayerRights> draftedRights,  List<RfaQualifyingOffer> rfaQualifyingOffers,  List<RfaOfferSheet> rfaOfferSheets)?  $default,) {final _that = this;
 switch (_that) {
 case _LeagueState() when $default != null:
-return $default(_that.teams,_that.currentSeason,_that.history,_that.playerTeamId,_that.currentRound,_that.currentWeek,_that.currentDay,_that.currentHour,_that.hourlyPlayerOfferUsed,_that.hourlyStaffOfferUsed,_that.inbox,_that.messageSettings,_that.staffFreeAgents,_that.freeAgents,_that.freshUndraftedPlayers,_that.strengthTable,_that.negotiations,_that.negotiationBlocks,_that.tradeHistory,_that.tradeOffers,_that.ntcTradeBlocks,_that.draftedRights,_that.rfaQualifyingOffers,_that.rfaOfferSheets);case _:
+return $default(_that.teams,_that.currentSeason,_that.history,_that.lastCompletedDraft,_that.playerTeamId,_that.currentRound,_that.currentWeek,_that.currentDay,_that.currentHour,_that.hourlyPlayerOfferUsed,_that.hourlyStaffOfferUsed,_that.inbox,_that.messageSettings,_that.staffFreeAgents,_that.freeAgents,_that.freshUndraftedPlayers,_that.strengthTable,_that.negotiations,_that.negotiationBlocks,_that.tradeHistory,_that.tradeOffers,_that.ntcTradeBlocks,_that.draftedRights,_that.rfaQualifyingOffers,_that.rfaOfferSheets);case _:
   return null;
 
 }
@@ -296,7 +312,7 @@ return $default(_that.teams,_that.currentSeason,_that.history,_that.playerTeamId
 @JsonSerializable()
 
 class _LeagueState implements LeagueState {
-  const _LeagueState({required final  List<Team> teams, required this.currentSeason, final  List<SeasonHistory> history = const [], this.playerTeamId, this.currentRound = 0, this.currentWeek = 1, this.currentDay = 1, this.currentHour, this.hourlyPlayerOfferUsed = false, this.hourlyStaffOfferUsed = false, this.inbox = const Inbox(), this.messageSettings = const MessageSettings(), final  List<StaffMember> staffFreeAgents = const [], final  List<Player> freeAgents = const [], final  List<FreshUndraftedPlayer> freshUndraftedPlayers = const [], this.strengthTable, final  List<ContractNegotiation> negotiations = const [], final  List<NegotiationBlock> negotiationBlocks = const [], final  List<TradeHistoryEntry> tradeHistory = const [], final  List<TradeOffer> tradeOffers = const [], final  List<NtcTradeBlock> ntcTradeBlocks = const [], final  List<DraftedPlayerRights> draftedRights = const [], final  List<RfaQualifyingOffer> rfaQualifyingOffers = const [], final  List<RfaOfferSheet> rfaOfferSheets = const []}): _teams = teams,_history = history,_staffFreeAgents = staffFreeAgents,_freeAgents = freeAgents,_freshUndraftedPlayers = freshUndraftedPlayers,_negotiations = negotiations,_negotiationBlocks = negotiationBlocks,_tradeHistory = tradeHistory,_tradeOffers = tradeOffers,_ntcTradeBlocks = ntcTradeBlocks,_draftedRights = draftedRights,_rfaQualifyingOffers = rfaQualifyingOffers,_rfaOfferSheets = rfaOfferSheets;
+  const _LeagueState({required final  List<Team> teams, required this.currentSeason, final  List<SeasonHistory> history = const [], this.lastCompletedDraft, this.playerTeamId, this.currentRound = 0, this.currentWeek = 1, this.currentDay = 1, this.currentHour, this.hourlyPlayerOfferUsed = false, this.hourlyStaffOfferUsed = false, this.inbox = const Inbox(), this.messageSettings = const MessageSettings(), final  List<StaffMember> staffFreeAgents = const [], final  List<Player> freeAgents = const [], final  List<FreshUndraftedPlayer> freshUndraftedPlayers = const [], this.strengthTable, final  List<ContractNegotiation> negotiations = const [], final  List<NegotiationBlock> negotiationBlocks = const [], final  List<TradeHistoryEntry> tradeHistory = const [], final  List<TradeOffer> tradeOffers = const [], final  List<NtcTradeBlock> ntcTradeBlocks = const [], final  List<DraftedPlayerRights> draftedRights = const [], final  List<RfaQualifyingOffer> rfaQualifyingOffers = const [], final  List<RfaOfferSheet> rfaOfferSheets = const []}): _teams = teams,_history = history,_staffFreeAgents = staffFreeAgents,_freeAgents = freeAgents,_freshUndraftedPlayers = freshUndraftedPlayers,_negotiations = negotiations,_negotiationBlocks = negotiationBlocks,_tradeHistory = tradeHistory,_tradeOffers = tradeOffers,_ntcTradeBlocks = ntcTradeBlocks,_draftedRights = draftedRights,_rfaQualifyingOffers = rfaQualifyingOffers,_rfaOfferSheets = rfaOfferSheets;
   factory _LeagueState.fromJson(Map<String, dynamic> json) => _$LeagueStateFromJson(json);
 
  final  List<Team> _teams;
@@ -314,6 +330,10 @@ class _LeagueState implements LeagueState {
   return EqualUnmodifiableListView(_history);
 }
 
+/// Picks from the just-finished draft, snapshotted once
+/// `currentSeason.draftState` is overwritten by the next class
+/// (`generateNextClassForLeague`, week after the draft).
+@override final  CompletedDraft? lastCompletedDraft;
 @override final  String? playerTeamId;
 @override@JsonKey() final  int currentRound;
 @override@JsonKey() final  int currentWeek;
@@ -458,16 +478,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _LeagueState&&const DeepCollectionEquality().equals(other._teams, _teams)&&(identical(other.currentSeason, currentSeason) || other.currentSeason == currentSeason)&&const DeepCollectionEquality().equals(other._history, _history)&&(identical(other.playerTeamId, playerTeamId) || other.playerTeamId == playerTeamId)&&(identical(other.currentRound, currentRound) || other.currentRound == currentRound)&&(identical(other.currentWeek, currentWeek) || other.currentWeek == currentWeek)&&(identical(other.currentDay, currentDay) || other.currentDay == currentDay)&&(identical(other.currentHour, currentHour) || other.currentHour == currentHour)&&(identical(other.hourlyPlayerOfferUsed, hourlyPlayerOfferUsed) || other.hourlyPlayerOfferUsed == hourlyPlayerOfferUsed)&&(identical(other.hourlyStaffOfferUsed, hourlyStaffOfferUsed) || other.hourlyStaffOfferUsed == hourlyStaffOfferUsed)&&(identical(other.inbox, inbox) || other.inbox == inbox)&&(identical(other.messageSettings, messageSettings) || other.messageSettings == messageSettings)&&const DeepCollectionEquality().equals(other._staffFreeAgents, _staffFreeAgents)&&const DeepCollectionEquality().equals(other._freeAgents, _freeAgents)&&const DeepCollectionEquality().equals(other._freshUndraftedPlayers, _freshUndraftedPlayers)&&(identical(other.strengthTable, strengthTable) || other.strengthTable == strengthTable)&&const DeepCollectionEquality().equals(other._negotiations, _negotiations)&&const DeepCollectionEquality().equals(other._negotiationBlocks, _negotiationBlocks)&&const DeepCollectionEquality().equals(other._tradeHistory, _tradeHistory)&&const DeepCollectionEquality().equals(other._tradeOffers, _tradeOffers)&&const DeepCollectionEquality().equals(other._ntcTradeBlocks, _ntcTradeBlocks)&&const DeepCollectionEquality().equals(other._draftedRights, _draftedRights)&&const DeepCollectionEquality().equals(other._rfaQualifyingOffers, _rfaQualifyingOffers)&&const DeepCollectionEquality().equals(other._rfaOfferSheets, _rfaOfferSheets));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _LeagueState&&const DeepCollectionEquality().equals(other._teams, _teams)&&(identical(other.currentSeason, currentSeason) || other.currentSeason == currentSeason)&&const DeepCollectionEquality().equals(other._history, _history)&&(identical(other.lastCompletedDraft, lastCompletedDraft) || other.lastCompletedDraft == lastCompletedDraft)&&(identical(other.playerTeamId, playerTeamId) || other.playerTeamId == playerTeamId)&&(identical(other.currentRound, currentRound) || other.currentRound == currentRound)&&(identical(other.currentWeek, currentWeek) || other.currentWeek == currentWeek)&&(identical(other.currentDay, currentDay) || other.currentDay == currentDay)&&(identical(other.currentHour, currentHour) || other.currentHour == currentHour)&&(identical(other.hourlyPlayerOfferUsed, hourlyPlayerOfferUsed) || other.hourlyPlayerOfferUsed == hourlyPlayerOfferUsed)&&(identical(other.hourlyStaffOfferUsed, hourlyStaffOfferUsed) || other.hourlyStaffOfferUsed == hourlyStaffOfferUsed)&&(identical(other.inbox, inbox) || other.inbox == inbox)&&(identical(other.messageSettings, messageSettings) || other.messageSettings == messageSettings)&&const DeepCollectionEquality().equals(other._staffFreeAgents, _staffFreeAgents)&&const DeepCollectionEquality().equals(other._freeAgents, _freeAgents)&&const DeepCollectionEquality().equals(other._freshUndraftedPlayers, _freshUndraftedPlayers)&&(identical(other.strengthTable, strengthTable) || other.strengthTable == strengthTable)&&const DeepCollectionEquality().equals(other._negotiations, _negotiations)&&const DeepCollectionEquality().equals(other._negotiationBlocks, _negotiationBlocks)&&const DeepCollectionEquality().equals(other._tradeHistory, _tradeHistory)&&const DeepCollectionEquality().equals(other._tradeOffers, _tradeOffers)&&const DeepCollectionEquality().equals(other._ntcTradeBlocks, _ntcTradeBlocks)&&const DeepCollectionEquality().equals(other._draftedRights, _draftedRights)&&const DeepCollectionEquality().equals(other._rfaQualifyingOffers, _rfaQualifyingOffers)&&const DeepCollectionEquality().equals(other._rfaOfferSheets, _rfaOfferSheets));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,const DeepCollectionEquality().hash(_teams),currentSeason,const DeepCollectionEquality().hash(_history),playerTeamId,currentRound,currentWeek,currentDay,currentHour,hourlyPlayerOfferUsed,hourlyStaffOfferUsed,inbox,messageSettings,const DeepCollectionEquality().hash(_staffFreeAgents),const DeepCollectionEquality().hash(_freeAgents),const DeepCollectionEquality().hash(_freshUndraftedPlayers),strengthTable,const DeepCollectionEquality().hash(_negotiations),const DeepCollectionEquality().hash(_negotiationBlocks),const DeepCollectionEquality().hash(_tradeHistory),const DeepCollectionEquality().hash(_tradeOffers),const DeepCollectionEquality().hash(_ntcTradeBlocks),const DeepCollectionEquality().hash(_draftedRights),const DeepCollectionEquality().hash(_rfaQualifyingOffers),const DeepCollectionEquality().hash(_rfaOfferSheets)]);
+int get hashCode => Object.hashAll([runtimeType,const DeepCollectionEquality().hash(_teams),currentSeason,const DeepCollectionEquality().hash(_history),lastCompletedDraft,playerTeamId,currentRound,currentWeek,currentDay,currentHour,hourlyPlayerOfferUsed,hourlyStaffOfferUsed,inbox,messageSettings,const DeepCollectionEquality().hash(_staffFreeAgents),const DeepCollectionEquality().hash(_freeAgents),const DeepCollectionEquality().hash(_freshUndraftedPlayers),strengthTable,const DeepCollectionEquality().hash(_negotiations),const DeepCollectionEquality().hash(_negotiationBlocks),const DeepCollectionEquality().hash(_tradeHistory),const DeepCollectionEquality().hash(_tradeOffers),const DeepCollectionEquality().hash(_ntcTradeBlocks),const DeepCollectionEquality().hash(_draftedRights),const DeepCollectionEquality().hash(_rfaQualifyingOffers),const DeepCollectionEquality().hash(_rfaOfferSheets)]);
 
 @override
 String toString() {
-  return 'LeagueState(teams: $teams, currentSeason: $currentSeason, history: $history, playerTeamId: $playerTeamId, currentRound: $currentRound, currentWeek: $currentWeek, currentDay: $currentDay, currentHour: $currentHour, hourlyPlayerOfferUsed: $hourlyPlayerOfferUsed, hourlyStaffOfferUsed: $hourlyStaffOfferUsed, inbox: $inbox, messageSettings: $messageSettings, staffFreeAgents: $staffFreeAgents, freeAgents: $freeAgents, freshUndraftedPlayers: $freshUndraftedPlayers, strengthTable: $strengthTable, negotiations: $negotiations, negotiationBlocks: $negotiationBlocks, tradeHistory: $tradeHistory, tradeOffers: $tradeOffers, ntcTradeBlocks: $ntcTradeBlocks, draftedRights: $draftedRights, rfaQualifyingOffers: $rfaQualifyingOffers, rfaOfferSheets: $rfaOfferSheets)';
+  return 'LeagueState(teams: $teams, currentSeason: $currentSeason, history: $history, lastCompletedDraft: $lastCompletedDraft, playerTeamId: $playerTeamId, currentRound: $currentRound, currentWeek: $currentWeek, currentDay: $currentDay, currentHour: $currentHour, hourlyPlayerOfferUsed: $hourlyPlayerOfferUsed, hourlyStaffOfferUsed: $hourlyStaffOfferUsed, inbox: $inbox, messageSettings: $messageSettings, staffFreeAgents: $staffFreeAgents, freeAgents: $freeAgents, freshUndraftedPlayers: $freshUndraftedPlayers, strengthTable: $strengthTable, negotiations: $negotiations, negotiationBlocks: $negotiationBlocks, tradeHistory: $tradeHistory, tradeOffers: $tradeOffers, ntcTradeBlocks: $ntcTradeBlocks, draftedRights: $draftedRights, rfaQualifyingOffers: $rfaQualifyingOffers, rfaOfferSheets: $rfaOfferSheets)';
 }
 
 
@@ -478,11 +498,11 @@ abstract mixin class _$LeagueStateCopyWith<$Res> implements $LeagueStateCopyWith
   factory _$LeagueStateCopyWith(_LeagueState value, $Res Function(_LeagueState) _then) = __$LeagueStateCopyWithImpl;
 @override @useResult
 $Res call({
- List<Team> teams, Season currentSeason, List<SeasonHistory> history, String? playerTeamId, int currentRound, int currentWeek, int currentDay, int? currentHour, bool hourlyPlayerOfferUsed, bool hourlyStaffOfferUsed, Inbox inbox, MessageSettings messageSettings, List<StaffMember> staffFreeAgents, List<Player> freeAgents, List<FreshUndraftedPlayer> freshUndraftedPlayers, LeagueStrengthTable? strengthTable, List<ContractNegotiation> negotiations, List<NegotiationBlock> negotiationBlocks, List<TradeHistoryEntry> tradeHistory, List<TradeOffer> tradeOffers, List<NtcTradeBlock> ntcTradeBlocks, List<DraftedPlayerRights> draftedRights, List<RfaQualifyingOffer> rfaQualifyingOffers, List<RfaOfferSheet> rfaOfferSheets
+ List<Team> teams, Season currentSeason, List<SeasonHistory> history, CompletedDraft? lastCompletedDraft, String? playerTeamId, int currentRound, int currentWeek, int currentDay, int? currentHour, bool hourlyPlayerOfferUsed, bool hourlyStaffOfferUsed, Inbox inbox, MessageSettings messageSettings, List<StaffMember> staffFreeAgents, List<Player> freeAgents, List<FreshUndraftedPlayer> freshUndraftedPlayers, LeagueStrengthTable? strengthTable, List<ContractNegotiation> negotiations, List<NegotiationBlock> negotiationBlocks, List<TradeHistoryEntry> tradeHistory, List<TradeOffer> tradeOffers, List<NtcTradeBlock> ntcTradeBlocks, List<DraftedPlayerRights> draftedRights, List<RfaQualifyingOffer> rfaQualifyingOffers, List<RfaOfferSheet> rfaOfferSheets
 });
 
 
-@override $SeasonCopyWith<$Res> get currentSeason;@override $InboxCopyWith<$Res> get inbox;@override $MessageSettingsCopyWith<$Res> get messageSettings;@override $LeagueStrengthTableCopyWith<$Res>? get strengthTable;
+@override $SeasonCopyWith<$Res> get currentSeason;@override $CompletedDraftCopyWith<$Res>? get lastCompletedDraft;@override $InboxCopyWith<$Res> get inbox;@override $MessageSettingsCopyWith<$Res> get messageSettings;@override $LeagueStrengthTableCopyWith<$Res>? get strengthTable;
 
 }
 /// @nodoc
@@ -495,12 +515,13 @@ class __$LeagueStateCopyWithImpl<$Res>
 
 /// Create a copy of LeagueState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? teams = null,Object? currentSeason = null,Object? history = null,Object? playerTeamId = freezed,Object? currentRound = null,Object? currentWeek = null,Object? currentDay = null,Object? currentHour = freezed,Object? hourlyPlayerOfferUsed = null,Object? hourlyStaffOfferUsed = null,Object? inbox = null,Object? messageSettings = null,Object? staffFreeAgents = null,Object? freeAgents = null,Object? freshUndraftedPlayers = null,Object? strengthTable = freezed,Object? negotiations = null,Object? negotiationBlocks = null,Object? tradeHistory = null,Object? tradeOffers = null,Object? ntcTradeBlocks = null,Object? draftedRights = null,Object? rfaQualifyingOffers = null,Object? rfaOfferSheets = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? teams = null,Object? currentSeason = null,Object? history = null,Object? lastCompletedDraft = freezed,Object? playerTeamId = freezed,Object? currentRound = null,Object? currentWeek = null,Object? currentDay = null,Object? currentHour = freezed,Object? hourlyPlayerOfferUsed = null,Object? hourlyStaffOfferUsed = null,Object? inbox = null,Object? messageSettings = null,Object? staffFreeAgents = null,Object? freeAgents = null,Object? freshUndraftedPlayers = null,Object? strengthTable = freezed,Object? negotiations = null,Object? negotiationBlocks = null,Object? tradeHistory = null,Object? tradeOffers = null,Object? ntcTradeBlocks = null,Object? draftedRights = null,Object? rfaQualifyingOffers = null,Object? rfaOfferSheets = null,}) {
   return _then(_LeagueState(
 teams: null == teams ? _self._teams : teams // ignore: cast_nullable_to_non_nullable
 as List<Team>,currentSeason: null == currentSeason ? _self.currentSeason : currentSeason // ignore: cast_nullable_to_non_nullable
 as Season,history: null == history ? _self._history : history // ignore: cast_nullable_to_non_nullable
-as List<SeasonHistory>,playerTeamId: freezed == playerTeamId ? _self.playerTeamId : playerTeamId // ignore: cast_nullable_to_non_nullable
+as List<SeasonHistory>,lastCompletedDraft: freezed == lastCompletedDraft ? _self.lastCompletedDraft : lastCompletedDraft // ignore: cast_nullable_to_non_nullable
+as CompletedDraft?,playerTeamId: freezed == playerTeamId ? _self.playerTeamId : playerTeamId // ignore: cast_nullable_to_non_nullable
 as String?,currentRound: null == currentRound ? _self.currentRound : currentRound // ignore: cast_nullable_to_non_nullable
 as int,currentWeek: null == currentWeek ? _self.currentWeek : currentWeek // ignore: cast_nullable_to_non_nullable
 as int,currentDay: null == currentDay ? _self.currentDay : currentDay // ignore: cast_nullable_to_non_nullable
@@ -533,6 +554,18 @@ $SeasonCopyWith<$Res> get currentSeason {
   
   return $SeasonCopyWith<$Res>(_self.currentSeason, (value) {
     return _then(_self.copyWith(currentSeason: value));
+  });
+}/// Create a copy of LeagueState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$CompletedDraftCopyWith<$Res>? get lastCompletedDraft {
+    if (_self.lastCompletedDraft == null) {
+    return null;
+  }
+
+  return $CompletedDraftCopyWith<$Res>(_self.lastCompletedDraft!, (value) {
+    return _then(_self.copyWith(lastCompletedDraft: value));
   });
 }/// Create a copy of LeagueState
 /// with the given fields replaced by the non-null parameter values.

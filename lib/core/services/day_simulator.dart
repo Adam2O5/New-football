@@ -499,7 +499,7 @@ class DaySimulator {
       );
 
       // Continuous scouting tick (`docs/staff_rules.md` §5), while a draft
-      // class is known (from lottery through draft week).
+      // class is known (from game creation through the season's draft week).
       if (state.currentSeason.draftState != null) {
         final draftClass = state.currentSeason.draftState!.draftClass;
         state = state.copyWith(

@@ -131,6 +131,21 @@ abstract class DraftState with _$DraftState {
       _$DraftStateFromJson(json);
 }
 
+/// Snapshot of a finished draft's picks, kept once `draftState` on [Season]
+/// is overwritten by `generateNextClassForLeague` (week after the draft).
+/// Deliberately lives on `LeagueState`, not `Season` — see `staff_rules.md`
+/// discussion on keeping `Season` from accumulating unrelated history data.
+@freezed
+abstract class CompletedDraft with _$CompletedDraft {
+  const factory CompletedDraft({
+    required int year,
+    @Default([]) List<DraftPick> completedPicks,
+  }) = _CompletedDraft;
+
+  factory CompletedDraft.fromJson(Map<String, dynamic> json) =>
+      _$CompletedDraftFromJson(json);
+}
+
 @freezed
 abstract class PlayInResult with _$PlayInResult {
   const factory PlayInResult({
@@ -211,7 +226,7 @@ abstract class Season with _$Season {
     @Default(false) bool faOpenDone,
     @Default(false) bool scoutReportDone,
     @Default(false) bool tradeDeadlineAcked,
-    DraftState? nextDraftState,
+    @Default(false) bool nextClassGenerationDone,
 
     /// Play-in/playoff fixtures, populated eagerly as soon as each pairing
     /// is known (see `game_calendar.md`) — placeholders for a still-pending
