@@ -120,6 +120,14 @@ extension InboxX on Inbox {
   static const maxUnreadInbox = 50;
   static const retentionSeasons = 2;
 
+  /// Hard ceilings on the persisted inbox. Neither list had one, so a save
+  /// accumulated every message ever generated — one week boundary alone
+  /// produces a dozen or more. At ~1 KB per message these two caps keep the
+  /// inbox around 0.4 MB and bound the cost of [_containsDedup] and
+  /// [degradeMissingPayload], which walk all three lists on every send.
+  static const maxInboxMessages = 200;
+  static const maxArchiveMessages = 200;
+
   List<GameMessage> get unread => messages.where((m) => !m.read).toList();
 
   List<GameMessage> get pendingUrgent => messages
@@ -135,21 +143,21 @@ extension InboxX on Inbox {
   }) {
     if (_containsDedup(message)) return this;
     if (message.priority == MessagePriority.silenced) {
-      return copyWith(archive: [...archive, message]);
+      return copyWith(archive: _capArchive([...archive, message]));
     }
 
     final active = [...messages, message];
     final compacted = _compactDigest(active, archive, digestMinItems);
     return copyWith(
-      messages: _capUnread(compacted.$1, maxUnread),
-      archive: compacted.$2,
+      messages: _capMessages(_capUnread(compacted.$1, maxUnread)),
+      archive: _capArchive(compacted.$2),
     );
   }
 
   Inbox scheduleMessage(GameMessage message) {
     if (_containsDedup(message)) return this;
     if (message.priority == MessagePriority.silenced) {
-      return copyWith(archive: [...archive, message]);
+      return copyWith(archive: _capArchive([...archive, message]));
     }
     return copyWith(scheduled: [...scheduled, message]);
   }
@@ -218,7 +226,7 @@ extension InboxX on Inbox {
       scheduled: scheduled
           .where((m) => m.seasonYear >= firstKeptSeason)
           .toList(),
-      archive: [...archive, ...oldMessages, ...oldScheduled],
+      archive: _capArchive([...archive, ...oldMessages, ...oldScheduled]),
     );
   }
 
@@ -249,11 +257,10 @@ extension InboxX on Inbox {
   bool _containsDedup(GameMessage message) {
     final key = message.dedupKey;
     if (key == null || key.isEmpty) return false;
-    return [
-      ...messages,
-      ...scheduled,
-      ...archive,
-    ].any((existing) => existing.dedupKey == key);
+    bool matches(GameMessage existing) => existing.dedupKey == key;
+    return messages.any(matches) ||
+        scheduled.any(matches) ||
+        archive.any(matches);
   }
 
   (List<GameMessage>, List<GameMessage>) _compactDigest(
@@ -344,6 +351,49 @@ extension InboxX on Inbox {
     }
     return (result, history);
   }
+
+  /// Drops the oldest evictable messages down to [maxInboxMessages].
+  ///
+  /// The cap is a soft ceiling: game logic reads the inbox, so a message is
+  /// only evictable once losing it cannot change behaviour. Protected are
+  /// unread messages (the player has not seen them), everything urgent
+  /// (`pendingUrgent` blocks the day from advancing) and any unanswered
+  /// decision (`MessageService.resolveExpiredDecisions` still owes it a
+  /// default outcome). If nothing qualifies, the list is left over the limit.
+  List<GameMessage> _capMessages(
+    List<GameMessage> input, {
+    int maximum = InboxX.maxInboxMessages,
+  }) {
+    if (input.length <= maximum) return input;
+    var toDrop = input.length - maximum;
+    final dropped = <int>{};
+    for (var i = 0; i < input.length && toDrop > 0; i++) {
+      final message = input[i];
+      final evictable =
+          message.read &&
+          message.priority != MessagePriority.urgent &&
+          (message.decision == null || message.acknowledged);
+      if (!evictable) continue;
+      dropped.add(i);
+      toDrop--;
+    }
+    if (dropped.isEmpty) return input;
+    return [
+      for (var i = 0; i < input.length; i++)
+        if (!dropped.contains(i)) input[i],
+    ];
+  }
+
+  /// Keeps the newest [maxArchiveMessages] entries. Nothing in the game logic
+  /// reads the archive, so this needs no exemptions; the only consequence is
+  /// that `dedupKey` matches older than the window stop suppressing repeats,
+  /// and those keys are scoped to a single match or season anyway.
+  List<GameMessage> _capArchive(
+    List<GameMessage> input, {
+    int maximum = InboxX.maxArchiveMessages,
+  }) => input.length <= maximum
+      ? input
+      : input.sublist(input.length - maximum);
 
   List<GameMessage> _capUnread(List<GameMessage> input, int maximum) {
     final result = [...input];

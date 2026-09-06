@@ -35,6 +35,10 @@ abstract class PlayerSeasonStats with _$PlayerSeasonStats {
     @Default(0) int saves,
     @Default(0) int shotsFaced,
     @Default(6.0) double ratingAvg,
+
+    /// Accumulated here rather than derived from stored fixtures: a persisted
+    /// `MatchResult` no longer keeps per-match player rows.
+    @Default(0) int motmCount,
   }) = _PlayerSeasonStats;
 
   factory PlayerSeasonStats.fromJson(Map<String, dynamic> json) =>
@@ -66,6 +70,7 @@ PlayerSeasonStats aggregatePlayerSeasonStats(
   var cleanSheets = 0;
   var saves = 0;
   var shotsFaced = 0;
+  var motmCount = 0;
   var ratingWeighted = 0.0;
   var ratingWeight = 0;
 
@@ -90,6 +95,7 @@ PlayerSeasonStats aggregatePlayerSeasonStats(
     cleanSheets += s.cleanSheets;
     saves += s.saves;
     shotsFaced += s.shotsFaced;
+    motmCount += s.motmCount;
     final w = s.minutes > 0
         ? s.minutes
         : (s.appearances > 0 ? s.appearances : 0);
@@ -122,6 +128,7 @@ PlayerSeasonStats aggregatePlayerSeasonStats(
     cleanSheets: cleanSheets,
     saves: saves,
     shotsFaced: shotsFaced,
+    motmCount: motmCount,
     ratingAvg: ratingWeight > 0 ? ratingWeighted / ratingWeight : 0.0,
   );
 }

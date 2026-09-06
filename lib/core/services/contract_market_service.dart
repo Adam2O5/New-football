@@ -2509,19 +2509,41 @@ class ContractMarketService {
             .toList(),
       );
 
+  Object? _indexedTeams;
+  Object? _indexedFreeAgents;
+  Object? _indexedDraftedRights;
+  Map<String, Player> _playerIndex = const {};
+
+  /// An hourly free-agency day looks players up dozens of times per team, and
+  /// a linear lookup walks every roster before reaching the free agents.
+  ///
+  /// The index is a function of exactly three immutable lists, so it stays
+  /// valid while all three keep their identity — which is the case across the
+  /// many states an hour produces by touching only negotiations and the inbox.
   Player? _findPlayer(LeagueState league, String playerId) {
-    for (final team in league.teams) {
-      for (final player in team.roster) {
-        if (player.id == playerId) return player;
+    if (!identical(_indexedTeams, league.teams) ||
+        !identical(_indexedFreeAgents, league.freeAgents) ||
+        !identical(_indexedDraftedRights, league.draftedRights)) {
+      // putIfAbsent, not assignment: the first roster to hold an id wins, as
+      // it did when this walked the rosters in order.
+      final index = <String, Player>{};
+      for (final team in league.teams) {
+        for (final player in team.roster) {
+          index.putIfAbsent(player.id, () => player);
+        }
       }
+      for (final player in league.freeAgents) {
+        index.putIfAbsent(player.id, () => player);
+      }
+      for (final right in league.draftedRights) {
+        index.putIfAbsent(right.player.id, () => right.player);
+      }
+      _playerIndex = index;
+      _indexedTeams = league.teams;
+      _indexedFreeAgents = league.freeAgents;
+      _indexedDraftedRights = league.draftedRights;
     }
-    for (final player in league.freeAgents) {
-      if (player.id == playerId) return player;
-    }
-    for (final right in league.draftedRights) {
-      if (right.player.id == playerId) return right.player;
-    }
-    return null;
+    return _playerIndex[playerId];
   }
 
   /// Returns a member only when its declared role matches the occupied slot.

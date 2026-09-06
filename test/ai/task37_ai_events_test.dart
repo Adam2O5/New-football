@@ -138,6 +138,7 @@ void main() {
     double extraTrainingChance = 0,
     double personalProblemsChance = 0,
     double personalSupportChance = 0,
+    double plateauChance = 0,
     double aiPlateauAcceptChance = 1,
     double aiColdStreakAcceptChance = 1,
     double aiInjuryComplicationCautiousChance = 1,
@@ -153,6 +154,7 @@ void main() {
     personalProblemsChance: personalProblemsChance,
     professionalPersonalProblemsChance: 0,
     personalSupportChance: personalSupportChance,
+    plateauChance: plateauChance,
     lateBloomerChance: 0,
     recurringInjuryChance: 0,
     aiPlateauAcceptChance: aiPlateauAcceptChance,
@@ -168,7 +170,7 @@ void main() {
       (player) => player.position != Position.gk,
     );
     final plateauEvents = PlayerEventService(
-      balance: BalanceConfig(events: playerBalance()),
+      balance: BalanceConfig(events: playerBalance(plateauChance: 1)),
     );
     final coldEvents = PlayerEventService(
       balance: BalanceConfig(events: playerBalance(coldStreakChance: 1)),

@@ -9,7 +9,6 @@ import 'package:new_football/app/theme/app_theme.dart';
 import 'package:new_football/app/widgets/branding/club_logo.dart';
 import 'package:new_football/app/widgets/screen_background.dart';
 import 'package:new_football/core/models/league_state.dart';
-import 'package:new_football/core/models/match_models.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
@@ -105,12 +104,12 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
       return Center(child: Text(l10n.teamOverview_invalidTeam));
     }
 
-    final aggregates = _aggregateStats(league);
+    final year = league.currentSeason.year;
     final players =
         [
           for (final player in team.roster)
-            if (aggregates.containsKey(player.id))
-              _PlayerStatsRow(player: player, stats: aggregates[player.id]!),
+            if (_seasonStatsOf(player, year) case final stats?)
+              _PlayerStatsRow(player: player, stats: stats),
         ]..sort((a, b) {
           return switch (_sort) {
             _StatsSort.ovr => b.player.overall().compareTo(a.player.overall()),
@@ -223,7 +222,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
       });
     final mvpRows = [...rows]
       ..sort((a, b) {
-        final byMvp = b.mvpTitles.compareTo(a.mvpTitles);
+        final byMvp = b.stats.motmCount.compareTo(a.stats.motmCount);
         if (byMvp != 0) return byMvp;
         return b.stats.ratingAvg.compareTo(a.stats.ratingAvg);
       });
@@ -269,7 +268,7 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                   l10n,
                   l10n.stats_leagueMvp,
                   mvpRows.take(15).toList(),
-                  (row) => '${row.mvpTitles}',
+                  (row) => '${row.stats.motmCount}',
                 ),
               ],
             ),
@@ -378,157 +377,23 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
   }
 
   List<_LeaguePlayerRow> _leaguePlayerRows(LeagueState league) {
-    final aggregates = _aggregateStats(league);
-    final mvpCounts = _mvpCounts(league);
+    final year = league.currentSeason.year;
     return [
       for (final team in league.teams)
         for (final player in team.roster)
-          if (aggregates.containsKey(player.id))
-            _LeaguePlayerRow(
-              player: player,
-              teamId: team.id,
-              stats: aggregates[player.id]!,
-              mvpTitles: mvpCounts[player.id] ?? 0,
-            ),
+          if (_seasonStatsOf(player, year) case final stats?)
+            _LeaguePlayerRow(player: player, teamId: team.id, stats: stats),
     ];
   }
 
-  Map<String, int> _mvpCounts(LeagueState league) {
-    final counts = <String, int>{};
-    for (final result in _allSeasonResults(league)) {
-      final id = result.manOfTheMatchPlayerId;
-      if (id == null) continue;
-      counts[id] = (counts[id] ?? 0) + 1;
+  /// Null for a player without a single appearance this season — the same
+  /// filter the old per-match aggregation applied by omitting the key.
+  PlayerSeasonStats? _seasonStatsOf(Player player, int year) {
+    for (final season in player.seasonStats) {
+      if (season.year == year) return season;
     }
-    return counts;
+    return null;
   }
-
-  Map<String, PlayerSeasonStats> _aggregateStats(LeagueState league) {
-    final accumulators = <String, _StatsAccumulator>{};
-    for (final result in _allSeasonResults(league)) {
-      for (final stat in result.playerStats) {
-        accumulators
-            .putIfAbsent(stat.playerId, _StatsAccumulator.new)
-            .add(stat);
-      }
-    }
-    return {
-      for (final entry in accumulators.entries)
-        entry.key: entry.value.toStats(league.currentSeason.year),
-    };
-  }
-
-  List<MatchResult> _allSeasonResults(LeagueState league) {
-    final results = <MatchResult>[];
-    final seen = <MatchResult>{};
-    void add(MatchResult? result) {
-      if (result != null && seen.add(result)) results.add(result);
-    }
-
-    for (final match in league.currentSeason.schedule) {
-      add(match.result);
-    }
-    for (final progress in league.currentSeason.playInProgress) {
-      add(progress.game7v8);
-      add(progress.game9v10);
-      add(progress.gameFinal);
-    }
-    for (final result in league.currentSeason.playInResults) {
-      add(result.game7v8);
-      add(result.game9v10);
-      add(result.gameFinal);
-    }
-    for (final bracket in league.currentSeason.playoffBrackets) {
-      for (final series in [
-        ...bracket.quarterFinals,
-        ...bracket.semiFinals,
-        ...bracket.conferenceFinal,
-        if (bracket.leagueFinal != null) bracket.leagueFinal!,
-      ]) {
-        for (final result in series.games) {
-          add(result);
-        }
-      }
-    }
-    return results;
-  }
-}
-
-class _StatsAccumulator {
-  int minutes = 0;
-  int goals = 0;
-  int assists = 0;
-  int appearances = 0;
-  int yellowCards = 0;
-  int redCards = 0;
-  int shots = 0;
-  int shotsOnTarget = 0;
-  double xg = 0.0;
-  int passes = 0;
-  double passAccuracyWeighted = 0.0;
-  int passAccuracyWeight = 0;
-  int duelsWon = 0;
-  int offsides = 0;
-  int corners = 0;
-  int tackles = 0;
-  int interceptions = 0;
-  int cleanSheets = 0;
-  int saves = 0;
-  int shotsFaced = 0;
-  double ratingTotal = 0;
-  int ratingWeight = 0;
-
-  void add(PlayerMatchStats stat) {
-    minutes += stat.minutes;
-    goals += stat.goals;
-    assists += stat.assists;
-    appearances += stat.minutes > 0 ? 1 : 0;
-    yellowCards += stat.yellowCards;
-    redCards += stat.redCards;
-    shots += stat.shots;
-    shotsOnTarget += stat.shotsOnTarget;
-    xg += stat.xg;
-    passes += stat.passes;
-    passAccuracyWeighted += stat.passAccuracy * stat.passes;
-    passAccuracyWeight += stat.passes;
-    duelsWon += stat.duelsWon;
-    offsides += stat.offsides;
-    corners += stat.corners;
-    tackles += stat.tackles;
-    interceptions += stat.interceptions;
-    cleanSheets += stat.cleanSheet ? 1 : 0;
-    saves += stat.saves;
-    shotsFaced += stat.shotsFaced;
-    final weight = stat.minutes > 0 ? stat.minutes : 1;
-    ratingTotal += stat.rating * weight;
-    ratingWeight += weight;
-  }
-
-  PlayerSeasonStats toStats(int year) => PlayerSeasonStats(
-    year: year,
-    minutes: minutes,
-    goals: goals,
-    assists: assists,
-    appearances: appearances,
-    yellowCards: yellowCards,
-    redCards: redCards,
-    shots: shots,
-    shotsOnTarget: shotsOnTarget,
-    xg: xg,
-    passes: passes,
-    passAccuracy: passAccuracyWeight == 0
-        ? 0.0
-        : passAccuracyWeighted / passAccuracyWeight,
-    duelsWon: duelsWon,
-    offsides: offsides,
-    corners: corners,
-    tackles: tackles,
-    interceptions: interceptions,
-    cleanSheets: cleanSheets,
-    saves: saves,
-    shotsFaced: shotsFaced,
-    ratingAvg: ratingWeight == 0 ? 0 : ratingTotal / ratingWeight,
-  );
 }
 
 class _PlayerStatsRow {
@@ -543,11 +408,9 @@ class _LeaguePlayerRow {
     required this.player,
     required this.teamId,
     required this.stats,
-    required this.mvpTitles,
   });
 
   final Player player;
   final String teamId;
   final PlayerSeasonStats stats;
-  final int mvpTitles;
 }

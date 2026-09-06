@@ -84,7 +84,23 @@ class CalendarEventWindow {
 class CalendarEventRegistry {
   const CalendarEventRegistry._();
 
+  static CalendarBalance? _cachedSlotsFor;
+  static List<CalendarEventSlot>? _cachedSlots;
+
+  /// The slot list is a pure function of [calendar] and every simulated day
+  /// asks for it more than once, so it is built only when the configuration
+  /// actually differs — in practice once per process. Callers filter it into
+  /// their own list and never mutate it.
   static List<CalendarEventSlot> build(CalendarBalance calendar) {
+    final cached = _cachedSlots;
+    if (cached != null && _cachedSlotsFor == calendar) return cached;
+    final slots = _buildSlots(calendar);
+    _cachedSlotsFor = calendar;
+    _cachedSlots = slots;
+    return slots;
+  }
+
+  static List<CalendarEventSlot> _buildSlots(CalendarBalance calendar) {
     final awardsWeek = calendar.awardsWeek;
     final scoutWeek = awardsWeek + 1;
     return [
@@ -196,7 +212,19 @@ class CalendarEventRegistry {
   }
 
   /// Builds ranges that are intentionally not actionable point events.
+  static CalendarBalance? _cachedWindowsFor;
+  static List<CalendarEventWindow>? _cachedWindows;
+
   static List<CalendarEventWindow> buildWindows(CalendarBalance calendar) {
+    final cached = _cachedWindows;
+    if (cached != null && _cachedWindowsFor == calendar) return cached;
+    final windows = _buildWindows(calendar);
+    _cachedWindowsFor = calendar;
+    _cachedWindows = windows;
+    return windows;
+  }
+
+  static List<CalendarEventWindow> _buildWindows(CalendarBalance calendar) {
     return [
       CalendarEventWindow(
         id: CalendarEventId.tradeWindowOpen,

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:path_provider/path_provider.dart';
 import 'package:new_football/core/models/game_save.dart';
@@ -82,11 +83,25 @@ class SaveRepository {
   SaveRepository({
     Directory? overrideDirectory,
     SaveRepositoryPublishHook? beforePublish,
+    this.verifyTypedCommit = false,
+    this.saveInIsolate = true,
   }) : _overrideDirectory = overrideDirectory,
        _beforePublish = beforePublish;
 
   final Directory? _overrideDirectory;
   final SaveRepositoryPublishHook? _beforePublish;
+
+  /// Re-decodes the committed game file into a [GameSave] and compares it to
+  /// what was written. That is a second full model graph on top of the one
+  /// being saved, which is why it is off by default — on Android it was a
+  /// direct contributor to the process running out of memory. Callers that
+  /// specifically test the write transaction can turn it back on.
+  final bool verifyTypedCommit;
+
+  /// Runs [save] in a background isolate so serializing and writing the save
+  /// never blocks the UI. Ignored when a publish hook is installed, because a
+  /// closure cannot be sent to another isolate.
+  final bool saveInIsolate;
 
   static int _transactionSequence = 0;
 
@@ -280,9 +295,7 @@ class SaveRepository {
     final currentMetas = await listSaves();
     final indexedMetas = currentMetas.where((meta) => meta.id == id).toList();
     if (indexedMetas.isEmpty) {
-      throw SaveRepositoryException(
-        'Save index does not contain save $id',
-      );
+      throw SaveRepositoryException('Save index does not contain save $id');
     }
     if (indexedMetas.any((meta) => meta.name != previousName)) {
       throw SaveRepositoryException(
@@ -314,9 +327,7 @@ class SaveRepository {
     final indexTemporary = transaction.indexFile.temporary;
 
     try {
-      final gameJson = const JsonEncoder.withIndent(
-        '  ',
-      ).convert(renamedJson);
+      final gameJson = const JsonEncoder.withIndent('  ').convert(renamedJson);
       final indexJson = const JsonEncoder.withIndent(
         '  ',
       ).convert(renamedIndex.map((meta) => meta.toJson()).toList());
@@ -334,10 +345,7 @@ class SaveRepository {
       return renamedMeta;
     } catch (e) {
       if (e is SaveRepositoryException) rethrow;
-      throw SaveRepositoryException(
-        'Failed to rename save $id',
-        cause: e,
-      );
+      throw SaveRepositoryException('Failed to rename save $id', cause: e);
     } finally {
       await _deleteIfExists(gameTemporary);
       await _deleteIfExists(indexTemporary);
@@ -488,6 +496,24 @@ class SaveRepository {
   }
 
   Future<void> save(GameSave gameSave) async {
+    // The directory has to be resolved here: `getApplicationDocumentsDirectory`
+    // is a platform channel call and does not work in a plain isolate.
+    final directory = await _savesDir();
+    if (!saveInIsolate || _beforePublish != null) {
+      return _saveInPlace(gameSave);
+    }
+    final path = directory.path;
+    final verifyTyped = verifyTypedCommit;
+    await Isolate.run(
+      () => SaveRepository(
+        overrideDirectory: Directory(path),
+        verifyTypedCommit: verifyTyped,
+        saveInIsolate: false,
+      )._saveInPlace(gameSave),
+    );
+  }
+
+  Future<void> _saveInPlace(GameSave gameSave) async {
     final stamped = gameSave.copyWith(
       schemaVersion: currentSchemaVersion,
       meta: gameSave.meta.copyWith(
@@ -506,18 +532,25 @@ class SaveRepository {
     try {
       final metas = await listSaves();
       final filtered = metas.where((m) => m.id != stamped.meta.id).toList();
-      final gameJson = const JsonEncoder.withIndent(
-        '  ',
-      ).convert(stamped.toJson());
       final indexJson = const JsonEncoder.withIndent(
         '  ',
       ).convert([...filtered, stamped.meta].map((m) => m.toJson()).toList());
 
-      await _writeTemporary(gameTemporary, gameJson);
+      // The game file is streamed compact: nobody edits it by hand, and
+      // holding the whole document as a Dart string first cost twice its
+      // size in memory (strings are UTF-16) on top of the JSON map graph.
+      final gameBytes = await _writeJsonTemporary(
+        gameTemporary,
+        stamped.toJson(),
+      );
       await _writeTemporary(indexTemporary, indexJson);
       await _commitPreparedFiles(
         transaction,
-        verify: () => _verifyTypedCommit(transaction, stamped),
+        verify: () => _verifyCommittedSave(
+          transaction,
+          stamped,
+          expectedGameBytes: gameBytes,
+        ),
       );
     } catch (e) {
       if (e is SaveRepositoryException) rethrow;
@@ -558,6 +591,30 @@ class SaveRepository {
 
   Future<void> _writeTemporary(File file, String contents) async {
     await file.writeAsString(contents, flush: true);
+  }
+
+  /// Streams [json] to [file] as compact UTF-8 and returns the byte count.
+  ///
+  /// [JsonUtf8Encoder] emits fixed-size chunks, so the encoded document never
+  /// exists in memory as a whole — only the map graph being encoded does.
+  Future<int> _writeJsonTemporary(File file, Object? json) async {
+    const chunkBytes = 64 * 1024;
+    final sink = file.openWrite();
+    var written = 0;
+    try {
+      await JsonUtf8Encoder(
+        null,
+        null,
+        chunkBytes,
+      ).bind(Stream.value(json)).forEach((chunk) {
+        written += chunk.length;
+        sink.add(chunk);
+      });
+      await sink.flush();
+    } finally {
+      await sink.close();
+    }
+    return written;
   }
 
   Future<void> _commitPreparedFiles(
@@ -700,19 +757,31 @@ class SaveRepository {
     return committed;
   }
 
-  Future<void> _verifyTypedCommit(
+  /// Confirms the published pair without re-reading the game document.
+  ///
+  /// The game file is checked by size against what the encoder reported, so a
+  /// truncated or partially published write is still caught. The index is
+  /// small enough to parse and compare exactly. Set [verifyTypedCommit] to
+  /// additionally decode the game file back into a [GameSave] and compare it
+  /// field by field.
+  Future<void> _verifyCommittedSave(
     _PreparedSaveTransaction transaction,
-    GameSave stamped,
-  ) async {
-    final committed = await _verifyRawCommit(transaction);
-    final persistedGame = GameSave.fromJson(committed.gameJson);
-    if (persistedGame != stamped) {
+    GameSave stamped, {
+    required int expectedGameBytes,
+  }) async {
+    final gameFile = transaction.gameFile.destination;
+    final actualBytes = await gameFile.length();
+    if (actualBytes != expectedGameBytes) {
       throw SaveRepositoryException(
-        'Game save ${stamped.meta.id} does not match the committed snapshot',
+        'Game save ${stamped.meta.id} was published with $actualBytes bytes '
+        'instead of $expectedGameBytes',
       );
     }
 
-    final matchingMeta = committed.indexJson
+    final indexJson =
+        jsonDecode(await transaction.indexFile.destination.readAsString())
+            as List<dynamic>;
+    final matchingMeta = indexJson
         .whereType<Map<String, dynamic>>()
         .where((meta) => meta['id'] == stamped.meta.id)
         .map(GameSaveMeta.fromJson)
@@ -720,6 +789,15 @@ class SaveRepository {
     if (matchingMeta.length != 1 || matchingMeta.single != stamped.meta) {
       throw SaveRepositoryException(
         'Save index does not match save ${stamped.meta.id}',
+      );
+    }
+
+    if (!verifyTypedCommit) return;
+    final gameJson =
+        jsonDecode(await gameFile.readAsString()) as Map<String, dynamic>;
+    if (GameSave.fromJson(gameJson) != stamped) {
+      throw SaveRepositoryException(
+        'Game save ${stamped.meta.id} does not match the committed snapshot',
       );
     }
   }

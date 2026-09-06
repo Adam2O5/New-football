@@ -19,7 +19,9 @@ import 'package:new_football/core/services/calendar_service.dart';
 import 'package:new_football/core/services/contract_market_service.dart';
 import 'package:new_football/core/services/contract_service.dart';
 import 'package:new_football/core/services/negotiation_service.dart';
+import 'package:new_football/core/services/day_pipeline.dart';
 import 'package:new_football/core/services/day_simulator.dart';
+import 'package:new_football/core/services/simulation_worker.dart';
 import 'package:new_football/core/services/draft_service.dart';
 import 'package:new_football/core/services/draft_trade_service.dart';
 import 'package:new_football/core/services/game_factory.dart';
@@ -79,6 +81,28 @@ final daySimulatorProvider = Provider((ref) {
     contractMarket: ref.watch(contractMarketServiceProvider),
     season: ref.watch(seasonServiceProvider),
   );
+});
+
+final dayPipelineProvider = Provider(
+  (ref) => DayPipeline(
+    calendar: ref.watch(calendarServiceProvider),
+    days: ref.watch(daySimulatorProvider),
+    negotiations: ref.watch(negotiationServiceProvider),
+    draftTrades: ref.watch(draftTradeServiceProvider),
+    trades: ref.watch(tradeServiceProvider),
+    playerEvents: ref.watch(playerEventServiceProvider),
+    teamEvents: ref.watch(teamEventServiceProvider),
+    contractMarket: ref.watch(contractMarketServiceProvider),
+  ),
+);
+
+/// Day advancement runs inline by default so tests stay deterministic and
+/// free of isolate lifecycles. `main.dart` overrides this with
+/// [IsolateSimulationRunner] so the app keeps simulation off the UI isolate.
+final simulationRunnerProvider = Provider<SimulationRunner>((ref) {
+  final runner = InlineSimulationRunner(ref.watch(dayPipelineProvider));
+  ref.onDispose(runner.dispose);
+  return runner;
 });
 
 final seasonServiceProvider = Provider(
@@ -213,7 +237,8 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   final Ref _ref;
 
   SaveRepository get _repo => _ref.read(saveRepositoryProvider);
-  DaySimulator get _days => _ref.read(daySimulatorProvider);
+  DayPipeline get _pipeline => _ref.read(dayPipelineProvider);
+  SimulationRunner get _runner => _ref.read(simulationRunnerProvider);
   PlayerEventService get _playerEvents => _ref.read(playerEventServiceProvider);
   TeamEventService get _teamEvents => _ref.read(teamEventServiceProvider);
   SeasonService get _season => _ref.read(seasonServiceProvider);
@@ -356,6 +381,9 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
       if (generation != _saveGeneration) return;
       final current = save;
       if (current == null) return;
+      // This write is of the newest state, so a queued autosave of an older
+      // one has nothing left to contribute.
+      _pendingAutosave = null;
       await _repo.save(current);
     });
   }
@@ -396,21 +424,78 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     );
 
     // Batch simulation deliberately publishes working state without saving
-    // each intermediate day. All autosaved mutations, including message
-    // operations, commit to the repository before exposing their result.
+    // each intermediate day.
     final shouldPersist = autosave && !_batchSimulationActive;
-    if (shouldPersist) {
-      await _repo.save(next);
-      if (generation != _saveGeneration) return;
-    }
     if (generation == _saveGeneration) {
       state = AsyncValue.data(next);
     }
+    // The state is published before the write starts, so advancing a day does
+    // not wait for several megabytes to reach the disk. Ordering is still
+    // guaranteed: the write is appended to the same mutation queue. Callers
+    // that must not lose the write — manual save, entering matchday, app
+    // backgrounding, end of a batch — go through [flushPendingSave].
+    if (shouldPersist) {
+      _scheduleAutosave(next, generation);
+    }
+  }
+
+  GameSave? _pendingAutosave;
+  bool _autosaveScheduled = false;
+  Object? _autosaveError;
+  StackTrace? _autosaveStackTrace;
+
+  void _scheduleAutosave(GameSave next, int generation) {
+    // Only the newest state is worth writing; a day advanced while the
+    // previous write was still queued makes that write redundant.
+    _pendingAutosave = next;
+    if (_autosaveScheduled) return;
+    _autosaveScheduled = true;
+    _enqueueMutation(() async {
+      _autosaveScheduled = false;
+      final pending = _pendingAutosave;
+      _pendingAutosave = null;
+      if (pending == null || generation != _saveGeneration) return;
+      await _repo.save(pending);
+    }).then<void>(
+      (_) {},
+      // Nothing awaits a background autosave, so its failure is kept here and
+      // rethrown by the next [flushPendingSave] rather than being lost.
+      onError: (Object error, StackTrace stackTrace) {
+        _autosaveError = error;
+        _autosaveStackTrace = stackTrace;
+      },
+    );
+  }
+
+  /// Waits for any background autosave to reach the disk.
+  ///
+  /// Rethrows a failure from an earlier background write, which is the only
+  /// point at which such a failure can be reported to the caller.
+  Future<void> flushPendingSave() async {
+    if (_pendingAutosave != null || _autosaveScheduled) {
+      await _enqueueMutation(() async {});
+    }
+    final error = _autosaveError;
+    if (error == null) return;
+    final stackTrace = _autosaveStackTrace;
+    _autosaveError = null;
+    _autosaveStackTrace = null;
+    Error.throwWithStackTrace(error, stackTrace ?? StackTrace.current);
   }
 
   bool get _batchSimulationActive => _activeSimulationSession != null;
   _SimulationSession? _activeSimulationSession;
   int _nextSimulationRunId = 0;
+
+  /// Tests that construct a [GameController] without prefs still get the
+  /// production default instead of crashing mid-batch.
+  bool _readUrgentInterruptionEnabled() {
+    try {
+      return _ref.read(urgentInterruptionSettingProvider);
+    } catch (_) {
+      return defaultUrgentInterruptionSetting;
+    }
+  }
 
   _SimulationSession _startSimulationSession({
     required bool urgentInterruptionEnabled,
@@ -462,29 +547,12 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     int? hour,
     int saveSeed = 0,
     bool resolveExpired = true,
-  }) {
-    var state = league.copyWith(
-      inbox: league.inbox.deliverScheduled(
-        league.currentWeek,
-        league.currentDay,
-        hour: hour,
-      ),
-    );
-    if (!resolveExpired) return state;
-    state = _ref
-        .read(negotiationServiceProvider)
-        .expireAt(
-          league: state,
-          seasonYear: state.currentSeason.year,
-          week: state.currentWeek,
-          day: state.currentDay,
-          hour: state.currentHour ?? 0,
-        );
-    state = _draftTrades.expireOffers(state);
-    state = _ref.read(tradeServiceProvider).expireOffers(state);
-    state = _teamEvents.resolveExpiredDecisions(state, saveSeed: saveSeed);
-    return _playerEvents.resolveExpiredDecisions(state, saveSeed: saveSeed);
-  }
+  }) => _pipeline.deliverStartOfDay(
+    league,
+    hour: hour,
+    saveSeed: saveSeed,
+    resolveExpired: resolveExpired,
+  );
 
   Future<DaySimulationResult?> simulateDay({
     bool resolveContractMarket = true,
@@ -503,44 +571,25 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   Future<DaySimulationResult?> _advanceOneDay({
     required bool blockOnPendingUrgent,
     bool resolveContractMarket = true,
-  }) async {
-    final current = save;
-    if (current == null) return null;
+  }) {
+    final generation = _saveGeneration;
+    // Read, simulate and publish are one queue entry. The simulation is now
+    // awaited — it may be running on the worker isolate — and any mutation
+    // that slipped in during that await would be overwritten by the day.
+    return _enqueueMutation(() async {
+      final current = save;
+      if (current == null) return null;
 
-    var league = _deliverStartOfDay(
-      current.leagueState,
-      hour: current.leagueState.currentHour,
-      saveSeed: current.saveSeed,
-    );
-    if (blockOnPendingUrgent && _hasPendingUrgent(league)) {
-      await updateLeague((_) => league);
-      return null;
-    }
-    final result = _days.simulateDay(
-      league,
-      saveSeed: current.saveSeed,
-      resolveContractMarket: resolveContractMarket,
-    );
-    var updatedLeague = result.league;
-    updatedLeague = _deliverStartOfDay(
-      updatedLeague,
-      hour: updatedLeague.currentHour,
-      saveSeed: current.saveSeed,
-      // Messages created by the day simulation are already in the inbox. Do
-      // not expire them at the same boundary before the player can see them;
-      // the next real start-of-day pass handles the deadline.
-      resolveExpired: false,
-    );
-    await updateLeague((_) => updatedLeague);
-    return DaySimulationResult(
-      league: updatedLeague,
-      pauseForUrgent: updatedLeague.inbox.pendingUrgent.isNotEmpty,
-      playerMatch: result.playerMatch,
-      simulatedResults: result.simulatedResults,
-      eventId: result.eventId,
-      stopReason: result.stopReason,
-      moment: result.moment,
-    );
+      final step = await _runner.advanceDay(
+        current.leagueState,
+        saveSeed: current.saveSeed,
+        blockOnPendingUrgent: blockOnPendingUrgent,
+        resolveContractMarket: resolveContractMarket,
+      );
+      if (generation != _saveGeneration) return null;
+      await _updateLeagueInQueue((_) => step.league, generation: generation);
+      return step.result;
+    });
   }
 
   /// Advances one offer hour during extensions/FA phase I. The tenth hour
@@ -553,55 +602,34 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   Future<DaySimulationResult?> _advanceOneHour({
     required bool blockOnPendingUrgent,
   }) async {
-    final current = save;
-    if (current == null) return null;
+    final generation = _saveGeneration;
+    final step = await _enqueueMutation(() async {
+      final current = save;
+      if (current == null) return null;
 
-    var league = _deliverStartOfDay(
-      current.leagueState,
-      hour: current.leagueState.currentHour,
-      saveSeed: current.saveSeed,
-    );
-    if (!_calendar.isHourlyContractMode(
-      league.currentWeek,
-      league.currentDay,
-    )) {
-      return null;
-    }
-    if (blockOnPendingUrgent && _hasPendingUrgent(league)) {
-      await updateLeague((_) => league);
-      return null;
-    }
-
-    final hour = league.currentHour ?? 1;
-    final resolved = _market.resolveHour(
-      league,
-      hour: hour,
-      saveSeed: current.saveSeed,
-    );
-    if (_calendar.isLastHour(league.currentWeek, league.currentDay, hour)) {
-      await updateLeague(
-        (_) => resolved.copyWith(
-          currentHour: _calendar.balance.contracts.hoursPerDay,
-        ),
-        autosave: true,
+      final hour = await _runner.advanceHour(
+        current.leagueState,
+        saveSeed: current.saveSeed,
+        blockOnPendingUrgent: blockOnPendingUrgent,
       );
+      if (generation != _saveGeneration ||
+          hour.outcome == HourStepOutcome.notHourly) {
+        return null;
+      }
+      await _updateLeagueInQueue((_) => hour.league, generation: generation);
+      return hour;
+    });
+    if (step == null) return null;
+
+    // The tenth hour leaves the calendar where it is on purpose, so the
+    // regular day path stays the only place that resolves end-of-day work.
+    if (step.outcome == HourStepOutcome.lastHourReached) {
       return simulateDay(
         resolveContractMarket: false,
         interruptForUrgent: blockOnPendingUrgent,
       );
     }
-
-    final next = resolved.copyWith(
-      currentHour: hour + 1,
-      hourlyPlayerOfferUsed: false,
-      hourlyStaffOfferUsed: false,
-    );
-    await updateLeague((_) => next);
-    return DaySimulationResult(
-      league: next,
-      pauseForUrgent: false,
-      stopReason: DaySimulationStopReason.hourAdvanced,
-    );
+    return step.result;
   }
 
   /// Earliest unplayed fixture of the player's team, mapped to its
@@ -699,16 +727,28 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   Future<DaySimulationResult?> completeEventAtCurrentDay(
     CalendarEventId eventId,
   ) async {
-    final saveSeed = save?.saveSeed ?? 0;
-    await updateLeague((league) {
-      return _days.resolveCalendarEvent(league, eventId, saveSeed: saveSeed);
-    });
+    await _resolveCalendarEventInQueue(eventId);
     final league = save?.leagueState;
     if (league == null ||
         !CalendarEventRegistry.isDone(league.currentSeason, eventId)) {
       return null;
     }
     return simulateDay(interruptForUrgent: false);
+  }
+
+  Future<void> _resolveCalendarEventInQueue(CalendarEventId eventId) {
+    final generation = _saveGeneration;
+    return _enqueueMutation(() async {
+      final current = save;
+      if (current == null) return;
+      final resolved = await _runner.resolveCalendarEvent(
+        current.leagueState,
+        eventId,
+        saveSeed: current.saveSeed,
+      );
+      if (generation != _saveGeneration) return;
+      await _updateLeagueInQueue((_) => resolved, generation: generation);
+    });
   }
 
   /// Auto-simulates the player's fixture headlessly (same engine call as
@@ -718,57 +758,21 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   /// (`DaySimulator.simulateDay` deliberately does not auto-sim it).
   /// Returns `null` if either team can't be resolved (should not happen in
   /// practice; treated as a hard stop by the caller).
-  Future<MatchResult?> _autoSimulatePlayerMatch(ScheduledMatch match) async {
-    final current = save;
-    if (current == null) return null;
-    final league = current.leagueState;
-    final home = league.teamById(match.homeTeamId);
-    final away = league.teamById(match.awayTeamId);
-    if (home == null || away == null) return null;
+  Future<MatchResult?> _autoSimulatePlayerMatch(ScheduledMatch match) {
+    final generation = _saveGeneration;
+    return _enqueueMutation(() async {
+      final current = save;
+      if (current == null) return null;
 
-    final isPostseason =
-        match.id.startsWith('playIn:') || match.id.startsWith('playoff:');
-    final context = isPostseason
-        ? _ref
-              .read(matchContextFactoryProvider)
-              .createForPostseason(
-                home: home,
-                away: away,
-                seasonYear: league.currentSeason.year,
-                matchId: match.id,
-                saveSeed: current.saveSeed,
-                stake: _season.stakeForPendingMatch(league, match.id),
-                week: league.currentWeek,
-              )
-        : _ref
-              .read(matchContextFactoryProvider)
-              .create(
-                league: league,
-                match: match,
-                saveSeed: current.saveSeed,
-                stake: MatchStake.regular,
-              );
-    final result = _ref
-        .read(aiMatchdayServiceProvider)
-        .simulateFullMatch(
-          home: home,
-          away: away,
-          context: context,
-          saveSeed: current.saveSeed,
-          seasonYear: league.currentSeason.year,
-          week: league.currentWeek,
-          matchId: match.id,
-          phase: league.currentSeason.phase,
-        );
-    await updateLeague(
-      (l) => _days.applyPlayerMatchResult(
-        l,
+      final auto = await _runner.autoSimulatePlayerMatch(
+        current.leagueState,
         match,
-        result,
         saveSeed: current.saveSeed,
-      ),
-    );
-    return result;
+      );
+      if (auto.result == null || generation != _saveGeneration) return null;
+      await _updateLeagueInQueue((_) => auto.league, generation: generation);
+      return auto.result;
+    });
   }
 
   Future<bool> _publishCompletedCalendarDay({
@@ -961,7 +965,7 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     CalendarSimulationPacer? pacer,
   }) async {
     final session = _startSimulationSession(
-      urgentInterruptionEnabled: _ref.read(urgentInterruptionSettingProvider),
+      urgentInterruptionEnabled: _readUrgentInterruptionEnabled(),
     );
     // A pacer can be reused by a resumed calendar run. Do not let an
     // incomplete cycle from an older run affect the new run's first day.
@@ -1134,11 +1138,7 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
       if (result.eventId != null) {
         if (autoResolveEvents && result.eventId != CalendarEventId.draft) {
           final eventId = result.eventId!;
-          final saveSeed = save?.saveSeed ?? 0;
-          await updateLeague(
-            (league) =>
-                _days.resolveCalendarEvent(league, eventId, saveSeed: saveSeed),
-          );
+          await _resolveCalendarEventInQueue(eventId);
           if (!_isCurrentSimulationSession(session)) {
             return BatchSimulationResult(
               stopReason: SimulationStopReason.cancelled,
@@ -1379,18 +1379,20 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     );
   }
 
-  Future<void> applyPlayerMatch(
-    ScheduledMatch match,
-    MatchResult result,
-  ) async {
-    await updateLeague(
-      (l) => _days.applyPlayerMatchResult(
-        l,
+  Future<void> applyPlayerMatch(ScheduledMatch match, MatchResult result) {
+    final generation = _saveGeneration;
+    return _enqueueMutation(() async {
+      final current = save;
+      if (current == null) return;
+      final applied = await _runner.applyPlayerMatchResult(
+        current.leagueState,
         match,
         result,
-        saveSeed: save?.saveSeed ?? 0,
-      ),
-    );
+        saveSeed: current.saveSeed,
+      );
+      if (generation != _saveGeneration) return;
+      await _updateLeagueInQueue((_) => applied, generation: generation);
+    });
   }
 
   /// Marks a message as read without acknowledging an urgent pause.

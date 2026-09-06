@@ -143,6 +143,36 @@ abstract class MatchResult with _$MatchResult {
       _$MatchResultFromJson(json);
 }
 
+extension MatchResultX on MatchResult {
+  /// Strips everything that only the post-match pipeline consumes, leaving
+  /// what the calendar, the playoff series resolution and
+  /// `AiMatchdayService.formationHistoryFromSchedule` still read back.
+  ///
+  /// A full result carries both lineups and both squad snapshots as `Player`
+  /// objects — roughly 58 of them, ~120 KB of JSON. Multiplied by the 870
+  /// fixtures of a season that alone pushed the save file past 100 MB and got
+  /// the app killed on Android.
+  ///
+  /// Applied when the result is written into [LeagueState], not in `toJson`,
+  /// so the in-memory state matches the file. Anything that needs the full
+  /// result must use the local value returned by the simulation instead of
+  /// reading it back out of the state.
+  MatchResult slimForStorage() => copyWith(
+    homeLineup: const [],
+    awayLineup: const [],
+    homeLineupPositions: const [],
+    awayLineupPositions: const [],
+    homeSnapshot: const MatchTeamSnapshot(),
+    awaySnapshot: const MatchTeamSnapshot(),
+    playerStats: const [],
+    events: const [],
+    injuries: const [],
+    disciplines: const [],
+    context: const MatchContext(),
+    inspiredPerformancePlayerId: null,
+  );
+}
+
 @freezed
 abstract class MatchSetup with _$MatchSetup {
   const factory MatchSetup({
@@ -244,7 +274,7 @@ extension PlayoffSeriesX on PlayoffSeries {
     return copyWith(
       higherSeedWins: newHigherWins,
       lowerSeedWins: newLowerWins,
-      games: [...games, result],
+      games: [...games, result.slimForStorage()],
       winnerTeamId: winner,
     );
   }

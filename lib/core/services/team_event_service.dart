@@ -51,6 +51,9 @@ class TeamEventService {
     _ => 0.0,
   };
 
+  int? _valueThresholdCache;
+  bool _valueThresholdReady = false;
+
   /// Records the completed match and performs the two after-match rolls:
   /// `moreMinutesRequest` and `transferRequestI`.
   LeagueState afterMatch(
@@ -61,11 +64,18 @@ class TeamEventService {
     var state = recordMatchMinutes(league, result);
     if (TeamManagementService.isWalkoverResult(result)) return state;
 
-    for (final teamId in {result.homeTeamId, result.awayTeamId}) {
-      state = _tryMoreMinutes(state, teamId, saveSeed);
-      state = _tryTransferRequestI(state, teamId, saveSeed);
+    _valueThresholdReady = false;
+    _valueThresholdCache = null;
+    try {
+      for (final teamId in {result.homeTeamId, result.awayTeamId}) {
+        state = _tryMoreMinutes(state, teamId, saveSeed);
+        state = _tryTransferRequestI(state, teamId, saveSeed);
+      }
+      return state;
+    } finally {
+      _valueThresholdReady = false;
+      _valueThresholdCache = null;
     }
-    return state;
   }
 
   /// Adds one zero/actual-minute row for every rostered player in the two
@@ -365,6 +375,14 @@ class TeamEventService {
       return state;
     }
     final events = balance.events;
+    // Neither condition depends on the individual player, and the value cut-off
+    // sorts every point value in the league. Resolving both once per team keeps
+    // the weekly boundary from repeating that sort for each of its players.
+    final lowAtmosphere =
+        team.eventState.lowAtmosphereWeeks >= events.lowAtmosphereWeeks;
+    final valuableThreshold = lowAtmosphere || !_isBottomHalf(state, team.id)
+        ? null
+        : _topTwentyPercentValueThreshold(state);
     final candidates =
         team.roster.where((player) {
           if (player.personality == PlayerPersonality.loyal ||
@@ -380,12 +398,9 @@ class TeamEventService {
               )) {
             return false;
           }
-          final lowAtmosphere =
-              team.eventState.lowAtmosphereWeeks >= events.lowAtmosphereWeeks;
-          final valuableInWeakClub =
-              _isTopTwentyPercentValue(state, player) &&
-              _isBottomHalf(state, team.id);
-          return lowAtmosphere || valuableInWeakClub;
+          return lowAtmosphere ||
+              (valuableThreshold != null &&
+                  player.pointValue >= valuableThreshold);
         }).toList()..sort((a, b) {
           final byValue = b.pointValue.compareTo(a.pointValue);
           return byValue != 0 ? byValue : a.id.compareTo(b.id);
@@ -393,8 +408,6 @@ class TeamEventService {
     if (candidates.isEmpty) return state;
 
     final player = candidates.first;
-    final lowAtmosphere =
-        team.eventState.lowAtmosphereWeeks >= events.lowAtmosphereWeeks;
     final reason = lowAtmosphere ? 'lowAtmosphere' : 'valuableInWeakClub';
     final chance =
         events.transferRequestIChance *
@@ -515,11 +528,19 @@ class TeamEventService {
       chemistry: 1,
       reason: 'leaderSupport',
     );
+    final leader = team.startingEleven.firstWhere(
+      (player) => player.personality == PlayerPersonality.leader,
+    );
     return _emitAutomatic(
       next,
       teamId: team.id,
       kind: 'leaderSupport',
-      payload: {'teamId': team.id, 'eventKind': 'leaderSupport'},
+      args: {'playerName': leader.name},
+      payload: {
+        'teamId': team.id,
+        'playerId': leader.id,
+        'eventKind': 'leaderSupport',
+      },
     );
   }
 
@@ -652,6 +673,7 @@ class TeamEventService {
           teamId: team.id,
           kind: 'promiseBroken',
           priority: MessagePriority.urgent,
+          args: {if (player != null) 'playerName': player.name},
           payload: {
             'teamId': team.id,
             'playerId': promise.playerId,
@@ -1204,13 +1226,18 @@ class TeamEventService {
     MessagePriority? priority,
   }) {
     if (state.playerTeamId != teamId) return state;
+    final playerId = payload['playerId'] ?? args['playerId'];
+    final team = state.teamById(teamId);
+    final player = playerId is String && team != null
+        ? _findPlayer(team, playerId)
+        : null;
     return messages.send(
       state,
       type: MessageType.teamEvent,
       kind: kind,
       domain: MessageDomain.teamEvent,
       priority: priority ?? MessagePriority.normal,
-      args: args,
+      args: {if (player != null) 'playerName': player.name, ...args},
       payload: payload,
       dedupKey:
           'teamEvent:$kind:$teamId:${payload['playerId'] ?? 'team'}:${state.currentSeason.year}:${state.currentWeek}',
@@ -1391,14 +1418,22 @@ class TeamEventService {
     return possible == 0 ? 0 : minutes / possible;
   }
 
-  bool _isTopTwentyPercentValue(LeagueState state, Player player) {
+  /// Lowest point value still inside the league's most valuable fifth, or null
+  /// when the league has no players.
+  int? _topTwentyPercentValueThreshold(LeagueState state) {
+    if (_valueThresholdReady) return _valueThresholdCache;
     final values = [
       for (final team in state.teams)
         for (final candidate in team.roster) candidate.pointValue,
     ]..sort((a, b) => b.compareTo(a));
-    if (values.isEmpty) return false;
-    final count = max(1, (values.length * 0.20).ceil());
-    return player.pointValue >= values[min(count - 1, values.length - 1)];
+    if (values.isEmpty) {
+      _valueThresholdCache = null;
+    } else {
+      final count = max(1, (values.length * 0.20).ceil());
+      _valueThresholdCache = values[min(count - 1, values.length - 1)];
+    }
+    _valueThresholdReady = true;
+    return _valueThresholdCache;
   }
 
   bool _isBottomHalf(LeagueState state, String teamId) {
@@ -1477,14 +1512,16 @@ class TeamEventService {
     String? playerId,
     String kind, {
     String? teamId,
-  }) => [...state.inbox.messages, ...state.inbox.scheduled].any(
-    (message) =>
+  }) {
+    bool pending(GameMessage message) =>
         !message.acknowledged &&
         message.type == MessageType.teamEvent &&
         message.kind == kind &&
         (teamId == null || message.payload['teamId'] == teamId) &&
-        (playerId == null || message.payload['playerId'] == playerId),
-  );
+        (playerId == null || message.payload['playerId'] == playerId);
+    return state.inbox.messages.any(pending) ||
+        state.inbox.scheduled.any(pending);
+  }
 
   Player? _findPlayer(Team team, String playerId) {
     for (final player in team.roster) {

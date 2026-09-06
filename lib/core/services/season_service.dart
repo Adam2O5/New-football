@@ -566,10 +566,11 @@ class SeasonService {
     if (index == -1) return state;
     final progress = progressList[index];
 
+    final stored = result.slimForStorage();
     final updated = switch (kind) {
-      '7v8' => progress.copyWith(game7v8: result),
-      '9v10' => progress.copyWith(game9v10: result),
-      'final' => progress.copyWith(gameFinal: result),
+      '7v8' => progress.copyWith(game7v8: stored),
+      '9v10' => progress.copyWith(game9v10: stored),
+      'final' => progress.copyWith(gameFinal: stored),
       _ => progress,
     };
 
@@ -716,9 +717,9 @@ class SeasonService {
           conference: conf,
           seed7TeamId: s7,
           seed8TeamId: s8,
-          game7v8: g78,
-          game9v10: g910,
-          gameFinal: gFinal,
+          game7v8: g78.slimForStorage(),
+          game9v10: g910.slimForStorage(),
+          gameFinal: gFinal.slimForStorage(),
           playoffSeed7TeamId: playoff7,
           playoffSeed8TeamId: playoff8,
         ),
@@ -1233,6 +1234,8 @@ class SeasonService {
       args: {
         'increasePct': increasePct,
         'salaryCap': state.teams.first.finance.salaryCap,
+        'newCap': state.teams.first.finance.salaryCap,
+        'seasonLabel': '${season.year}',
         'firstApron': state.teams.first.finance.firstApron,
         'secondApron': state.teams.first.finance.secondApron,
         'nextResetSeason': nextAgreement.nextTvCapResetSeason,
@@ -1258,6 +1261,8 @@ class SeasonService {
           domain: MessageDomain.finance,
           args: {
             'payroll': snapshot.payroll,
+            'currentPayroll': snapshot.payroll,
+            'thresholdName': snapshot.status.name,
             'firstApron': snapshot.firstApron,
             'secondApron': snapshot.secondApron,
             'payrollAboveSecondApron': snapshot.isAboveSecondApron,
@@ -1301,6 +1306,9 @@ class SeasonService {
             : _teamName(state, awards.championTeamId!),
         'mvpPlayer': _playerName(state, awards.mvpPlayerId),
         'playoffTeams': _playoffQualifiedTeamIds(state).length,
+        'seasonLabel': '${state.currentSeason.year}',
+        'record': _playerTeamRecord(state),
+        'summary': _seasonSummaryText(state, awards),
       },
       payload: {
         'championTeamId': awards.championTeamId,
@@ -2120,8 +2128,10 @@ class SeasonService {
             domain: MessageDomain.contracts,
             args: {
               'playerName': p.name,
+              'subjectName': p.name,
               'teamName': t.name,
               'yearsRemaining': p.contract.yearsRemaining,
+              'seasonLabel': '${league.currentSeason.year}',
             },
             payload: {
               'playerId': p.id,
@@ -2144,7 +2154,11 @@ class SeasonService {
               type: MessageType.contractExpired,
               kind: 'player',
               domain: MessageDomain.contracts,
-              args: {'playerName': p.name, 'teamName': t.name},
+              args: {
+                'playerName': p.name,
+                'subjectName': p.name,
+                'teamName': t.name,
+              },
               payload: {
                 'playerId': p.id,
                 'teamId': t.id,
@@ -2176,9 +2190,12 @@ class SeasonService {
             domain: MessageDomain.staff,
             args: {
               'staffName': member.name,
+              'subjectName': member.name,
               'role': member.role.name,
+              'staffRole': member.role.name,
               'teamName': t.name,
               'yearsRemaining': contract.yearsRemaining,
+              'seasonLabel': '${league.currentSeason.year}',
             },
             payload: {
               'staffId': memberId,
@@ -2202,7 +2219,9 @@ class SeasonService {
             domain: MessageDomain.staff,
             args: {
               'staffName': member.name,
+              'subjectName': member.name,
               'role': member.role.name,
+              'staffRole': member.role.name,
               'teamName': t.name,
             },
             payload: {
@@ -2272,7 +2291,9 @@ class SeasonService {
           type: MessageType.playoffMissed,
           domain: MessageDomain.season,
           priority: MessagePriority.urgent,
-          args: {
+            args: {
+            'teamName': playerTeam?.name ?? playerId,
+            'seasonLabel': '${league.currentSeason.year}',
             'atmosphereDelta': playerDelta,
             'oldLevel': (playerTeam?.atmosphere ?? 0) - playerDelta,
             'newLevel': playerTeam?.atmosphere ?? 0,
@@ -2660,9 +2681,10 @@ class SeasonService {
     String matchId,
     MatchResult result,
   ) {
+    final stored = result.slimForStorage();
     final fixtures = [
       for (final f in league.currentSeason.postseasonFixtures)
-        if (f.id == matchId) f.copyWith(result: result) else f,
+        if (f.id == matchId) f.copyWith(result: stored) else f,
     ];
     return league.copyWith(
       currentSeason: league.currentSeason.copyWith(
@@ -2978,6 +3000,7 @@ class SeasonService {
             team: next,
             result: result,
             startingEleven: startingEleven,
+            seasonYear: league.currentSeason.year,
             assignedPositions: assignedPositions.isEmpty
                 ? null
                 : assignedPositions,
@@ -3152,39 +3175,19 @@ class SeasonService {
       }
     }
 
-    final regularResults = league.currentSeason.schedule
-        .map((match) => match.result)
-        .whereType<MatchResult>()
-        .toList();
-    final regularStats = _collectAwardStats(
-      league,
-      regularResults,
-      postseason: false,
-    );
-    final postseasonStats = _collectAwardStats(
-      league,
-      _postseasonResults(league.currentSeason),
-      postseason: true,
-    );
-
     final candidates = <_AwardCandidate>[];
     for (final player in playersById.values) {
-      final stats = regularResults.isEmpty
-          ? _AwardStats.fromSeasonStats(
-              player.seasonStats.firstWhere(
-                (item) => item.year == league.currentSeason.year,
-                orElse: () =>
-                    PlayerSeasonStats(year: league.currentSeason.year),
-              ),
-              player.position,
-            )
-          : (regularStats[player.id] ?? _AwardStats());
-      stats.mergePostseason(postseasonStats[player.id]);
       candidates.add(
         _AwardCandidate(
           player: player,
           teamId: currentTeamByPlayerId[player.id],
-          stats: stats,
+          stats: _AwardStats.fromSeasonStats(
+            player.seasonStats.firstWhere(
+              (item) => item.year == league.currentSeason.year,
+              orElse: () => PlayerSeasonStats(year: league.currentSeason.year),
+            ),
+            player.position,
+          ),
         ),
       );
     }
@@ -3295,12 +3298,16 @@ class SeasonService {
 
     final coachTeamId = awards.coachOfYearTeamId;
     if (coachTeamId != null) {
+      final coachName =
+          state.teamById(coachTeamId)?.staff.headCoach?.name ??
+          _teamName(state, coachTeamId);
       state = _messages.send(
         state,
         type: MessageType.award,
         kind: 'coachOfYear',
         domain: MessageDomain.season,
         args: {
+          'playerName': coachName,
           'teamName': _teamName(state, coachTeamId),
           'ownClub': coachTeamId == state.playerTeamId,
         },
@@ -3364,113 +3371,6 @@ class SeasonService {
     return null;
   }
 
-  Map<String, _AwardStats> _collectAwardStats(
-    LeagueState league,
-    Iterable<MatchResult> results, {
-    required bool postseason,
-  }) {
-    final currentPlayers = <String, Player>{};
-    final currentTeamByPlayerId = <String, String>{};
-    for (final team in league.teams) {
-      for (final player in team.roster) {
-        currentPlayers[player.id] = player;
-        currentTeamByPlayerId[player.id] = team.id;
-      }
-    }
-
-    final byPlayer = <String, _AwardStats>{};
-    for (final result in results) {
-      final playerTeamIds = <String, String>{
-        for (final player in [
-          ...result.homeLineup,
-          ...result.homeSnapshot.startingXi,
-        ])
-          player.id: result.homeTeamId,
-        for (final player in [
-          ...result.awayLineup,
-          ...result.awaySnapshot.startingXi,
-        ])
-          player.id: result.awayTeamId,
-      };
-      for (final stat in result.playerStats) {
-        final player = currentPlayers[stat.playerId];
-        if (player == null) continue;
-        final teamId =
-            playerTeamIds[stat.playerId] ?? currentTeamByPlayerId[player.id];
-        if (teamId == null) continue;
-        final isHome = teamId == result.homeTeamId;
-        final scored = isHome ? result.homeGoals : result.awayGoals;
-        final conceded = isHome ? result.awayGoals : result.homeGoals;
-        final teamPoints = scored > conceded
-            ? 3
-            : scored == conceded
-            ? 1
-            : 0;
-        final position = _positionForPlayer(result, stat.playerId, player);
-        final aggregate = byPlayer.putIfAbsent(stat.playerId, _AwardStats.new);
-        aggregate.addMatch(
-          stat,
-          position: position,
-          teamPoints: teamPoints,
-          conceded: conceded,
-          postseason: postseason,
-        );
-      }
-    }
-    return byPlayer;
-  }
-
-  Position _positionForPlayer(
-    MatchResult result,
-    String playerId,
-    Player player,
-  ) {
-    final homeIndex = result.homeLineup.indexWhere(
-      (candidate) => candidate.id == playerId,
-    );
-    if (homeIndex >= 0 && homeIndex < result.homeLineupPositions.length) {
-      return result.homeLineupPositions[homeIndex];
-    }
-    final awayIndex = result.awayLineup.indexWhere(
-      (candidate) => candidate.id == playerId,
-    );
-    if (awayIndex >= 0 && awayIndex < result.awayLineupPositions.length) {
-      return result.awayLineupPositions[awayIndex];
-    }
-    return player.position;
-  }
-
-  List<MatchResult> _postseasonResults(Season season) {
-    final seen = <MatchResult>{};
-    final results = <MatchResult>[];
-    void add(MatchResult? result) {
-      if (result != null && seen.add(result)) results.add(result);
-    }
-
-    for (final progress in season.playInProgress) {
-      add(progress.game7v8);
-      add(progress.game9v10);
-      add(progress.gameFinal);
-    }
-    for (final result in season.playInResults) {
-      add(result.game7v8);
-      add(result.game9v10);
-      add(result.gameFinal);
-    }
-    for (final bracket in season.playoffBrackets) {
-      for (final series in [
-        ...bracket.quarterFinals,
-        ...bracket.semiFinals,
-        ...bracket.conferenceFinal,
-        if (bracket.leagueFinal != null) bracket.leagueFinal!,
-      ]) {
-        for (final result in series.games) {
-          add(result);
-        }
-      }
-    }
-    return results;
-  }
 
   _AwardCandidate? _bestCandidate(
     Iterable<_AwardCandidate> candidates,
@@ -3491,33 +3391,24 @@ class SeasonService {
     return best;
   }
 
+  /// The team-points share (weight 0.35) and the postseason bonus (0.05–0.10)
+  /// that used to be part of this score needed per-match player rows and are
+  /// gone with them — see the note on [_AwardStats]. The surviving terms keep
+  /// their relative weights, so the ranking is unchanged versus leaving the
+  /// two removed terms permanently at zero. [rookie] no longer changes the
+  /// score and is kept so the call sites stay honest about their intent.
   double _mvpScore(_AwardCandidate candidate, {bool rookie = false}) {
     final stats = candidate.stats;
-    final teamShare = stats.teamPossiblePointsWhenOn == 0
-        ? 0.0
-        : stats.teamPointsWhenOn / stats.teamPossiblePointsWhenOn;
     final production = stats.minutes == 0
         ? 0.0
         : ((stats.goals + stats.assists) * 90 / stats.minutes / 4)
               .clamp(0.0, 1.0)
               .toDouble();
-    final playoffBonus = stats.postseasonMinutes == 0
-        ? 0.0
-        : ((stats.postseasonGoals + stats.postseasonAssists) *
-                      90 /
-                      stats.postseasonMinutes /
-                      4 +
-                  stats.postseasonRatingAvg / 10)
-              .clamp(0.0, 1.0)
-              .toDouble();
     final overallNorm = ((candidate.player.overall(balance) - 50) / 49)
         .clamp(0.0, 1.0)
         .toDouble();
-    final playoffWeight = rookie ? 0.05 : 0.10;
-    return 0.35 * teamShare +
-        0.25 * (stats.ratingAvg / 10).clamp(0.0, 1.0).toDouble() +
+    return 0.25 * (stats.ratingAvg / 10).clamp(0.0, 1.0).toDouble() +
         0.20 * production +
-        playoffWeight * (rookie ? playoffBonus * 0.5 : playoffBonus) +
         0.10 * overallNorm;
   }
 
@@ -3531,12 +3422,8 @@ class SeasonService {
           ? max
           : candidate.stats.tackles + candidate.stats.interceptions,
     );
-    final maxConcededRate = candidates.fold<double>(
-      0.0,
-      (max, candidate) => max > candidate.stats.concededPer90
-          ? max
-          : candidate.stats.concededPer90,
-    );
+    // The goals-conceded-while-on-the-pitch term (weight 0.15) needed
+    // per-match player rows — see the note on [_AwardStats].
     return _bestCandidate(candidates, (candidate) {
       final stats = candidate.stats;
       final cleanShare = stats.appearances == 0
@@ -3545,15 +3432,9 @@ class SeasonService {
       final actions = maxDefensiveActions == 0
           ? 0.0
           : (stats.tackles + stats.interceptions) / maxDefensiveActions;
-      final conceded = maxConcededRate == 0
-          ? 1.0
-          : (1 - stats.concededPer90 / maxConcededRate)
-                .clamp(0.0, 1.0)
-                .toDouble();
       return 0.40 * (stats.ratingAvg / 10).clamp(0.0, 1.0).toDouble() +
           0.25 * cleanShare +
-          0.20 * actions +
-          0.15 * conceded;
+          0.20 * actions;
     });
   }
 
@@ -3877,6 +3758,28 @@ class SeasonService {
 
   String _teamName(LeagueState s, String id) => s.teamById(id)?.name ?? id;
 
+  String _playerTeamRecord(LeagueState state) {
+    final teamId = state.playerTeamId;
+    if (teamId == null) return '—';
+    for (final conference in state.currentSeason.standings) {
+      for (final standing in conference.standings) {
+        if (standing.teamId == teamId) {
+          return '${standing.wins}-${standing.draws}-${standing.losses}';
+        }
+      }
+    }
+    return '—';
+  }
+
+  String _seasonSummaryText(LeagueState state, SeasonAwards awards) {
+    final parts = <String>[
+      if (awards.championTeamId != null)
+        _teamName(state, awards.championTeamId!),
+      if (awards.mvpPlayerId != null) _playerName(state, awards.mvpPlayerId),
+    ];
+    return parts.isEmpty ? '—' : parts.join(', ');
+  }
+
   LeagueState _msg(
     LeagueState league,
     MessageType type,
@@ -3907,9 +3810,16 @@ class _AwardCandidate {
   final _AwardStats stats;
 }
 
+/// Award inputs, derived purely from the player's accumulated season row.
+///
+/// TODO(awards): this is a deliberately degraded stand-in. Stored fixtures no
+/// longer keep per-match player rows, so metrics that needed them are gone:
+/// the share of team points earned while on the pitch, the postseason bonus,
+/// per-slot minutes (now attributed wholly to the natural position) and goals
+/// prevented (now derived from the player's own goals rather than the goals
+/// his team conceded). Rebuild these on purpose-built accumulators when the
+/// awards system gets its final design.
 class _AwardStats {
-  _AwardStats() : positionMinutes = {};
-
   _AwardStats.fromSeasonStats(PlayerSeasonStats stats, Position naturalPosition)
     : minutes = stats.minutes,
       goals = stats.goals,
@@ -3929,91 +3839,22 @@ class _AwardStats {
       ),
       positionMinutes = {naturalPosition: stats.minutes};
 
-  int minutes = 0;
-  int goals = 0;
-  int assists = 0;
-  int appearances = 0;
-  int tackles = 0;
-  int interceptions = 0;
-  int cleanSheets = 0;
-  int saves = 0;
-  int shotsFaced = 0;
-  int gkMinutes = 0;
-  int goalsPrevented = 0;
-  int goalsConcededWhenOn = 0;
-  int teamPointsWhenOn = 0;
-  int teamPossiblePointsWhenOn = 0;
-  double ratingTotal = 0.0;
-  int ratingWeight = 0;
-  late final Map<Position, int> positionMinutes;
-
-  int postseasonMinutes = 0;
-  int postseasonGoals = 0;
-  int postseasonAssists = 0;
-  double postseasonRatingTotal = 0.0;
-  int postseasonRatingWeight = 0;
+  final int minutes;
+  final int goals;
+  final int assists;
+  final int appearances;
+  final int tackles;
+  final int interceptions;
+  final int cleanSheets;
+  final int saves;
+  final int shotsFaced;
+  final int gkMinutes;
+  final int goalsPrevented;
+  final double ratingTotal;
+  final int ratingWeight;
+  final Map<Position, int> positionMinutes;
 
   double get ratingAvg => ratingWeight == 0 ? 0.0 : ratingTotal / ratingWeight;
-
-  double get postseasonRatingAvg => postseasonRatingWeight == 0
-      ? 0.0
-      : postseasonRatingTotal / postseasonRatingWeight;
-
-  double get concededPer90 =>
-      minutes == 0 ? 0.0 : goalsConcededWhenOn * 90 / minutes;
-
-  void addMatch(
-    PlayerMatchStats stat, {
-    required Position position,
-    required int teamPoints,
-    required int conceded,
-    required bool postseason,
-  }) {
-    if (postseason) {
-      postseasonMinutes += stat.minutes;
-      postseasonGoals += stat.goals;
-      postseasonAssists += stat.assists;
-      if (stat.minutes > 0) {
-        postseasonRatingTotal += stat.rating * stat.minutes;
-        postseasonRatingWeight += stat.minutes;
-      }
-      return;
-    }
-
-    minutes += stat.minutes;
-    goals += stat.goals;
-    assists += stat.assists;
-    if (stat.minutes > 0) {
-      appearances++;
-      positionMinutes[position] =
-          (positionMinutes[position] ?? 0) + stat.minutes;
-      if (position == Position.gk) gkMinutes += stat.minutes;
-      teamPointsWhenOn += teamPoints;
-      teamPossiblePointsWhenOn += 3;
-      goalsConcededWhenOn += conceded;
-    }
-    tackles += stat.tackles;
-    interceptions += stat.interceptions;
-    cleanSheets += stat.cleanSheet || (stat.minutes > 0 && conceded == 0)
-        ? 1
-        : 0;
-    saves += stat.saves;
-    shotsFaced += stat.shotsFaced;
-    goalsPrevented += (stat.shotsFaced - conceded).clamp(0, stat.shotsFaced);
-    if (stat.minutes > 0) {
-      ratingTotal += stat.rating * stat.minutes;
-      ratingWeight += stat.minutes;
-    }
-  }
-
-  void mergePostseason(_AwardStats? other) {
-    if (other == null) return;
-    postseasonMinutes += other.postseasonMinutes;
-    postseasonGoals += other.postseasonGoals;
-    postseasonAssists += other.postseasonAssists;
-    postseasonRatingTotal += other.postseasonRatingTotal;
-    postseasonRatingWeight += other.postseasonRatingWeight;
-  }
 }
 
 class _TeamOfSeasonOption {

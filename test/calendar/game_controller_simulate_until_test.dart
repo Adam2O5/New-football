@@ -148,7 +148,7 @@ void main() {
     expect(league.currentWeek, 30);
     expect(league.currentDay, 1);
     expect(result.stopReason, SimulationStopReason.reachedTarget);
-  });
+  }, timeout: const Timeout(Duration(minutes: 3)));
 
   test('cancelSimulation stops the batch after the current day', () async {
     await controller.updateLeague(

@@ -182,6 +182,7 @@ class TeamManagementService {
     required Team team,
     required MatchResult result,
     required List<Player> startingEleven,
+    required int seasonYear,
     List<Position>? assignedPositions,
   }) {
     final isHome = team.id == result.homeTeamId;
@@ -189,6 +190,12 @@ class TeamManagementService {
     if (!isHome && !isAway) {
       return TeamMatchUpdate(team: team, chemistryDelta: 0.0, result: 0);
     }
+
+    final withStats = _recordSeasonStats(
+      team,
+      stats: isHome ? result.homeStats : result.awayStats,
+      seasonYear: seasonYear,
+    );
 
     final scored = isHome ? result.homeGoals : result.awayGoals;
     final conceded = isHome ? result.awayGoals : result.homeGoals;
@@ -206,7 +213,7 @@ class TeamManagementService {
     // as a normal XI chemistry appearance.
     if (isWalkoverResult(result) || startingEleven.isEmpty) {
       return TeamMatchUpdate(
-        team: team.copyWith(recentMatchResults: recentResults),
+        team: withStats.copyWith(recentMatchResults: recentResults),
         chemistryDelta: 0.0,
         result: outcome,
       );
@@ -268,7 +275,7 @@ class TeamManagementService {
     appearances.removeWhere((id, _) => !rosterIds.contains(id));
     final nextChemistry = (team.chemistry + delta).clamp(0.0, 100.0).toDouble();
     return TeamMatchUpdate(
-      team: team.copyWith(
+      team: withStats.copyWith(
         chemistry: nextChemistry,
         recentMatchResults: recentResults,
         chemistryAppearances: appearances,
@@ -276,6 +283,25 @@ class TeamManagementService {
       chemistryDelta: nextChemistry - team.chemistry,
       result: outcome,
     );
+  }
+
+  Team _recordSeasonStats(
+    Team team, {
+    required TeamMatchStats stats,
+    required int seasonYear,
+  }) {
+    final seasons = [...team.seasonStats];
+    final index = seasons.indexWhere((season) => season.year == seasonYear);
+    final previous = index < 0
+        ? TeamSeasonStats(year: seasonYear)
+        : seasons[index];
+    final next = previous.addMatch(stats);
+    if (index < 0) {
+      seasons.add(next);
+    } else {
+      seasons[index] = next;
+    }
+    return team.copyWith(seasonStats: seasons);
   }
 
   /// Performs the weekly atmosphere update and the slower chemistry drift.

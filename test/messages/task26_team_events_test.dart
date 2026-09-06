@@ -156,13 +156,33 @@ void main() {
     String? playerId,
     List<String> temperamentalPlayerIds = const [],
   }) {
+    Player? player;
+    if (playerId != null) {
+      for (final candidate in league.playerTeam?.roster ?? const <Player>[]) {
+        if (candidate.id == playerId) {
+          player = candidate;
+          break;
+        }
+      }
+    }
+    final names = [
+      for (final id in temperamentalPlayerIds)
+        for (final candidate in league.playerTeam?.roster ?? const <Player>[])
+          if (candidate.id == id) candidate.name,
+    ];
     return MessageService().send(
       league,
       type: MessageType.teamEvent,
       kind: kind,
+      args: {
+        if (player != null) 'playerName': player.name,
+        'reason': 'test',
+        if (names.length >= 2) 'personA': names[0],
+        if (names.length >= 2) 'personB': names[1],
+      },
       payload: {
         'teamId': league.playerTeamId,
-        'playerId': playerId ?? '',
+        if (playerId != null) 'playerId': playerId,
         if (temperamentalPlayerIds.isNotEmpty)
           'temperamentalPlayerIds': temperamentalPlayerIds,
       },

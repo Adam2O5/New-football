@@ -32,6 +32,7 @@ void main() {
     double lateBloomerChance = 0,
     double recurringInjuryChance = 0,
     double personalSupportChance = 0,
+    double plateauChance = 0,
   }) => EventsBalance(
     breakthroughChance: breakthroughChance,
     coldStreakChance: coldStreakChance,
@@ -43,6 +44,7 @@ void main() {
     lateBloomerChance: lateBloomerChance,
     recurringInjuryChance: recurringInjuryChance,
     personalSupportChance: personalSupportChance,
+    plateauChance: plateauChance,
   );
 
   Player fixture({
@@ -367,7 +369,7 @@ void main() {
         eventState: const PlayerEventState(counters: {'plateauWeeks': 7}),
       );
       final service = PlayerEventService(
-        balance: BalanceConfig(events: eventBalance()),
+        balance: BalanceConfig(events: eventBalance(plateauChance: 1)),
       );
       final pending = service.weeklyTick(leagueFor(player), saveSeed: 25);
       final decision = messageOf(pending, 'plateau');

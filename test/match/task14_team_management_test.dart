@@ -189,6 +189,7 @@ void main() {
         team: team,
         result: resultFor(team.id, 'away'),
         startingEleven: preparedLineup,
+        seasonYear: 2026,
         assignedPositions: positions,
       );
 
@@ -204,6 +205,7 @@ void main() {
         team: team,
         result: resultFor(team.id, 'away'),
         startingEleven: preparedLineup,
+        seasonYear: 2026,
         assignedPositions: wrongPositions,
       );
       // The optimal-XI bonus disappears and one player costs 0.4.
@@ -238,6 +240,7 @@ void main() {
           team: team,
           result: resultFor(team.id, 'away'),
           startingEleven: lineup,
+          seasonYear: 2026,
           assignedPositions: positions,
         );
         expect(update.chemistryDelta, closeTo(expected[i], 0.000001));

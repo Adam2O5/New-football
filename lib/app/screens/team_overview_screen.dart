@@ -489,60 +489,31 @@ class _TeamOverviewScreenState extends ConsumerState<TeamOverviewScreen> {
   }
 
   Map<String, TeamMatchStats> _aggregateTeamStats(LeagueState league) {
-    final accumulators = <String, _TeamStatsAccumulator>{};
-    for (final result in _allSeasonResults(league)) {
-      accumulators
-          .putIfAbsent(
-            result.homeStats.teamId,
-            () => _TeamStatsAccumulator(result.homeStats.teamId),
-          )
-          .add(result.homeStats);
-      accumulators
-          .putIfAbsent(
-            result.awayStats.teamId,
-            () => _TeamStatsAccumulator(result.awayStats.teamId),
-          )
-          .add(result.awayStats);
-    }
-    return {
-      for (final entry in accumulators.entries)
-        entry.key: entry.value.toStats(),
-    };
-  }
-
-  List<MatchResult> _allSeasonResults(LeagueState league) {
-    final results = <MatchResult>[];
-    final seen = <MatchResult>{};
-    void add(MatchResult? result) {
-      if (result != null && seen.add(result)) results.add(result);
-    }
-
-    for (final match in league.currentSeason.schedule) {
-      add(match.result);
-    }
-    for (final progress in league.currentSeason.playInProgress) {
-      add(progress.game7v8);
-      add(progress.game9v10);
-      add(progress.gameFinal);
-    }
-    for (final result in league.currentSeason.playInResults) {
-      add(result.game7v8);
-      add(result.game9v10);
-      add(result.gameFinal);
-    }
-    for (final bracket in league.currentSeason.playoffBrackets) {
-      for (final series in [
-        ...bracket.quarterFinals,
-        ...bracket.semiFinals,
-        ...bracket.conferenceFinal,
-        if (bracket.leagueFinal != null) bracket.leagueFinal!,
-      ]) {
-        for (final result in series.games) {
-          add(result);
-        }
+    final year = league.currentSeason.year;
+    final stats = <String, TeamMatchStats>{};
+    for (final team in league.teams) {
+      for (final season in team.seasonStats) {
+        if (season.year != year || season.matches == 0) continue;
+        stats[team.id] = TeamMatchStats(
+          teamId: team.id,
+          goals: season.goals,
+          shots: season.shots,
+          shotsOnTarget: season.shotsOnTarget,
+          possession: season.possession,
+          xg: season.xg,
+          passes: season.passes,
+          passAccuracy: season.passAccuracy,
+          duelsWon: season.duelsWon,
+          offsides: season.offsides,
+          corners: season.corners,
+          fouls: season.fouls,
+          yellowCards: season.yellowCards,
+          redCards: season.redCards,
+          saves: season.saves,
+        );
       }
     }
-    return results;
+    return stats;
   }
 
   _TeamOverviewRow _teamRow(
@@ -583,67 +554,6 @@ class _StatLine {
 
   final String label;
   final String value;
-}
-
-class _TeamStatsAccumulator {
-  _TeamStatsAccumulator(this.teamId);
-
-  final String teamId;
-  int goals = 0;
-  int shots = 0;
-  int shotsOnTarget = 0;
-  int possessionTotal = 0;
-  double xg = 0.0;
-  int passes = 0;
-  double passAccuracyWeighted = 0.0;
-  int passAccuracyWeight = 0;
-  int duelsWon = 0;
-  int offsides = 0;
-  int corners = 0;
-  int fouls = 0;
-  int yellowCards = 0;
-  int redCards = 0;
-  int saves = 0;
-  int matches = 0;
-
-  void add(TeamMatchStats stats) {
-    matches++;
-    goals += stats.goals;
-    shots += stats.shots;
-    shotsOnTarget += stats.shotsOnTarget;
-    possessionTotal += stats.possession;
-    xg += stats.xg;
-    passes += stats.passes;
-    passAccuracyWeighted += stats.passAccuracy * stats.passes;
-    passAccuracyWeight += stats.passes;
-    duelsWon += stats.duelsWon;
-    offsides += stats.offsides;
-    corners += stats.corners;
-    fouls += stats.fouls;
-    yellowCards += stats.yellowCards;
-    redCards += stats.redCards;
-    saves += stats.saves;
-  }
-
-  TeamMatchStats toStats() => TeamMatchStats(
-    teamId: teamId,
-    goals: goals,
-    shots: shots,
-    shotsOnTarget: shotsOnTarget,
-    possession: matches == 0 ? 0 : (possessionTotal / matches).round(),
-    xg: xg,
-    passes: passes,
-    passAccuracy: passAccuracyWeight == 0
-        ? 0.0
-        : passAccuracyWeighted / passAccuracyWeight,
-    duelsWon: duelsWon,
-    offsides: offsides,
-    corners: corners,
-    fouls: fouls,
-    yellowCards: yellowCards,
-    redCards: redCards,
-    saves: saves,
-  );
 }
 
 class _TeamStandings {

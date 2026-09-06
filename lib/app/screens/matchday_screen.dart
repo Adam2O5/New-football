@@ -46,7 +46,12 @@ class _MatchdayScreenState extends ConsumerState<MatchdayScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _start());
+    // The interactive match is the one place a crash would cost the player a
+    // whole matchday, so the background autosave is forced to disk first.
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await ref.read(gameControllerProvider.notifier).flushPendingSave();
+      _start();
+    });
   }
 
   void _start() {

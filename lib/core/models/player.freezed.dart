@@ -15,7 +15,9 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$PlayerSeasonStats {
 
- int get year; int get minutes; int get goals; int get assists; int get appearances; int get yellowCards; int get redCards; int get shots; int get shotsOnTarget; double get xg; int get passes; double get passAccuracy; int get duelsWon; int get offsides; int get corners; int get tackles; int get interceptions; int get cleanSheets; int get saves; int get shotsFaced; double get ratingAvg;
+ int get year; int get minutes; int get goals; int get assists; int get appearances; int get yellowCards; int get redCards; int get shots; int get shotsOnTarget; double get xg; int get passes; double get passAccuracy; int get duelsWon; int get offsides; int get corners; int get tackles; int get interceptions; int get cleanSheets; int get saves; int get shotsFaced; double get ratingAvg;/// Accumulated here rather than derived from stored fixtures: a persisted
+/// `MatchResult` no longer keeps per-match player rows.
+ int get motmCount;
 /// Create a copy of PlayerSeasonStats
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +30,16 @@ $PlayerSeasonStatsCopyWith<PlayerSeasonStats> get copyWith => _$PlayerSeasonStat
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PlayerSeasonStats&&(identical(other.year, year) || other.year == year)&&(identical(other.minutes, minutes) || other.minutes == minutes)&&(identical(other.goals, goals) || other.goals == goals)&&(identical(other.assists, assists) || other.assists == assists)&&(identical(other.appearances, appearances) || other.appearances == appearances)&&(identical(other.yellowCards, yellowCards) || other.yellowCards == yellowCards)&&(identical(other.redCards, redCards) || other.redCards == redCards)&&(identical(other.shots, shots) || other.shots == shots)&&(identical(other.shotsOnTarget, shotsOnTarget) || other.shotsOnTarget == shotsOnTarget)&&(identical(other.xg, xg) || other.xg == xg)&&(identical(other.passes, passes) || other.passes == passes)&&(identical(other.passAccuracy, passAccuracy) || other.passAccuracy == passAccuracy)&&(identical(other.duelsWon, duelsWon) || other.duelsWon == duelsWon)&&(identical(other.offsides, offsides) || other.offsides == offsides)&&(identical(other.corners, corners) || other.corners == corners)&&(identical(other.tackles, tackles) || other.tackles == tackles)&&(identical(other.interceptions, interceptions) || other.interceptions == interceptions)&&(identical(other.cleanSheets, cleanSheets) || other.cleanSheets == cleanSheets)&&(identical(other.saves, saves) || other.saves == saves)&&(identical(other.shotsFaced, shotsFaced) || other.shotsFaced == shotsFaced)&&(identical(other.ratingAvg, ratingAvg) || other.ratingAvg == ratingAvg));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PlayerSeasonStats&&(identical(other.year, year) || other.year == year)&&(identical(other.minutes, minutes) || other.minutes == minutes)&&(identical(other.goals, goals) || other.goals == goals)&&(identical(other.assists, assists) || other.assists == assists)&&(identical(other.appearances, appearances) || other.appearances == appearances)&&(identical(other.yellowCards, yellowCards) || other.yellowCards == yellowCards)&&(identical(other.redCards, redCards) || other.redCards == redCards)&&(identical(other.shots, shots) || other.shots == shots)&&(identical(other.shotsOnTarget, shotsOnTarget) || other.shotsOnTarget == shotsOnTarget)&&(identical(other.xg, xg) || other.xg == xg)&&(identical(other.passes, passes) || other.passes == passes)&&(identical(other.passAccuracy, passAccuracy) || other.passAccuracy == passAccuracy)&&(identical(other.duelsWon, duelsWon) || other.duelsWon == duelsWon)&&(identical(other.offsides, offsides) || other.offsides == offsides)&&(identical(other.corners, corners) || other.corners == corners)&&(identical(other.tackles, tackles) || other.tackles == tackles)&&(identical(other.interceptions, interceptions) || other.interceptions == interceptions)&&(identical(other.cleanSheets, cleanSheets) || other.cleanSheets == cleanSheets)&&(identical(other.saves, saves) || other.saves == saves)&&(identical(other.shotsFaced, shotsFaced) || other.shotsFaced == shotsFaced)&&(identical(other.ratingAvg, ratingAvg) || other.ratingAvg == ratingAvg)&&(identical(other.motmCount, motmCount) || other.motmCount == motmCount));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,year,minutes,goals,assists,appearances,yellowCards,redCards,shots,shotsOnTarget,xg,passes,passAccuracy,duelsWon,offsides,corners,tackles,interceptions,cleanSheets,saves,shotsFaced,ratingAvg]);
+int get hashCode => Object.hashAll([runtimeType,year,minutes,goals,assists,appearances,yellowCards,redCards,shots,shotsOnTarget,xg,passes,passAccuracy,duelsWon,offsides,corners,tackles,interceptions,cleanSheets,saves,shotsFaced,ratingAvg,motmCount]);
 
 @override
 String toString() {
-  return 'PlayerSeasonStats(year: $year, minutes: $minutes, goals: $goals, assists: $assists, appearances: $appearances, yellowCards: $yellowCards, redCards: $redCards, shots: $shots, shotsOnTarget: $shotsOnTarget, xg: $xg, passes: $passes, passAccuracy: $passAccuracy, duelsWon: $duelsWon, offsides: $offsides, corners: $corners, tackles: $tackles, interceptions: $interceptions, cleanSheets: $cleanSheets, saves: $saves, shotsFaced: $shotsFaced, ratingAvg: $ratingAvg)';
+  return 'PlayerSeasonStats(year: $year, minutes: $minutes, goals: $goals, assists: $assists, appearances: $appearances, yellowCards: $yellowCards, redCards: $redCards, shots: $shots, shotsOnTarget: $shotsOnTarget, xg: $xg, passes: $passes, passAccuracy: $passAccuracy, duelsWon: $duelsWon, offsides: $offsides, corners: $corners, tackles: $tackles, interceptions: $interceptions, cleanSheets: $cleanSheets, saves: $saves, shotsFaced: $shotsFaced, ratingAvg: $ratingAvg, motmCount: $motmCount)';
 }
 
 
@@ -48,7 +50,7 @@ abstract mixin class $PlayerSeasonStatsCopyWith<$Res>  {
   factory $PlayerSeasonStatsCopyWith(PlayerSeasonStats value, $Res Function(PlayerSeasonStats) _then) = _$PlayerSeasonStatsCopyWithImpl;
 @useResult
 $Res call({
- int year, int minutes, int goals, int assists, int appearances, int yellowCards, int redCards, int shots, int shotsOnTarget, double xg, int passes, double passAccuracy, int duelsWon, int offsides, int corners, int tackles, int interceptions, int cleanSheets, int saves, int shotsFaced, double ratingAvg
+ int year, int minutes, int goals, int assists, int appearances, int yellowCards, int redCards, int shots, int shotsOnTarget, double xg, int passes, double passAccuracy, int duelsWon, int offsides, int corners, int tackles, int interceptions, int cleanSheets, int saves, int shotsFaced, double ratingAvg, int motmCount
 });
 
 
@@ -65,7 +67,7 @@ class _$PlayerSeasonStatsCopyWithImpl<$Res>
 
 /// Create a copy of PlayerSeasonStats
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? year = null,Object? minutes = null,Object? goals = null,Object? assists = null,Object? appearances = null,Object? yellowCards = null,Object? redCards = null,Object? shots = null,Object? shotsOnTarget = null,Object? xg = null,Object? passes = null,Object? passAccuracy = null,Object? duelsWon = null,Object? offsides = null,Object? corners = null,Object? tackles = null,Object? interceptions = null,Object? cleanSheets = null,Object? saves = null,Object? shotsFaced = null,Object? ratingAvg = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? year = null,Object? minutes = null,Object? goals = null,Object? assists = null,Object? appearances = null,Object? yellowCards = null,Object? redCards = null,Object? shots = null,Object? shotsOnTarget = null,Object? xg = null,Object? passes = null,Object? passAccuracy = null,Object? duelsWon = null,Object? offsides = null,Object? corners = null,Object? tackles = null,Object? interceptions = null,Object? cleanSheets = null,Object? saves = null,Object? shotsFaced = null,Object? ratingAvg = null,Object? motmCount = null,}) {
   return _then(_self.copyWith(
 year: null == year ? _self.year : year // ignore: cast_nullable_to_non_nullable
 as int,minutes: null == minutes ? _self.minutes : minutes // ignore: cast_nullable_to_non_nullable
@@ -88,7 +90,8 @@ as int,cleanSheets: null == cleanSheets ? _self.cleanSheets : cleanSheets // ign
 as int,saves: null == saves ? _self.saves : saves // ignore: cast_nullable_to_non_nullable
 as int,shotsFaced: null == shotsFaced ? _self.shotsFaced : shotsFaced // ignore: cast_nullable_to_non_nullable
 as int,ratingAvg: null == ratingAvg ? _self.ratingAvg : ratingAvg // ignore: cast_nullable_to_non_nullable
-as double,
+as double,motmCount: null == motmCount ? _self.motmCount : motmCount // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 
@@ -173,10 +176,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int year,  int minutes,  int goals,  int assists,  int appearances,  int yellowCards,  int redCards,  int shots,  int shotsOnTarget,  double xg,  int passes,  double passAccuracy,  int duelsWon,  int offsides,  int corners,  int tackles,  int interceptions,  int cleanSheets,  int saves,  int shotsFaced,  double ratingAvg)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int year,  int minutes,  int goals,  int assists,  int appearances,  int yellowCards,  int redCards,  int shots,  int shotsOnTarget,  double xg,  int passes,  double passAccuracy,  int duelsWon,  int offsides,  int corners,  int tackles,  int interceptions,  int cleanSheets,  int saves,  int shotsFaced,  double ratingAvg,  int motmCount)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PlayerSeasonStats() when $default != null:
-return $default(_that.year,_that.minutes,_that.goals,_that.assists,_that.appearances,_that.yellowCards,_that.redCards,_that.shots,_that.shotsOnTarget,_that.xg,_that.passes,_that.passAccuracy,_that.duelsWon,_that.offsides,_that.corners,_that.tackles,_that.interceptions,_that.cleanSheets,_that.saves,_that.shotsFaced,_that.ratingAvg);case _:
+return $default(_that.year,_that.minutes,_that.goals,_that.assists,_that.appearances,_that.yellowCards,_that.redCards,_that.shots,_that.shotsOnTarget,_that.xg,_that.passes,_that.passAccuracy,_that.duelsWon,_that.offsides,_that.corners,_that.tackles,_that.interceptions,_that.cleanSheets,_that.saves,_that.shotsFaced,_that.ratingAvg,_that.motmCount);case _:
   return orElse();
 
 }
@@ -194,10 +197,10 @@ return $default(_that.year,_that.minutes,_that.goals,_that.assists,_that.appeara
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int year,  int minutes,  int goals,  int assists,  int appearances,  int yellowCards,  int redCards,  int shots,  int shotsOnTarget,  double xg,  int passes,  double passAccuracy,  int duelsWon,  int offsides,  int corners,  int tackles,  int interceptions,  int cleanSheets,  int saves,  int shotsFaced,  double ratingAvg)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int year,  int minutes,  int goals,  int assists,  int appearances,  int yellowCards,  int redCards,  int shots,  int shotsOnTarget,  double xg,  int passes,  double passAccuracy,  int duelsWon,  int offsides,  int corners,  int tackles,  int interceptions,  int cleanSheets,  int saves,  int shotsFaced,  double ratingAvg,  int motmCount)  $default,) {final _that = this;
 switch (_that) {
 case _PlayerSeasonStats():
-return $default(_that.year,_that.minutes,_that.goals,_that.assists,_that.appearances,_that.yellowCards,_that.redCards,_that.shots,_that.shotsOnTarget,_that.xg,_that.passes,_that.passAccuracy,_that.duelsWon,_that.offsides,_that.corners,_that.tackles,_that.interceptions,_that.cleanSheets,_that.saves,_that.shotsFaced,_that.ratingAvg);case _:
+return $default(_that.year,_that.minutes,_that.goals,_that.assists,_that.appearances,_that.yellowCards,_that.redCards,_that.shots,_that.shotsOnTarget,_that.xg,_that.passes,_that.passAccuracy,_that.duelsWon,_that.offsides,_that.corners,_that.tackles,_that.interceptions,_that.cleanSheets,_that.saves,_that.shotsFaced,_that.ratingAvg,_that.motmCount);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -214,10 +217,10 @@ return $default(_that.year,_that.minutes,_that.goals,_that.assists,_that.appeara
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int year,  int minutes,  int goals,  int assists,  int appearances,  int yellowCards,  int redCards,  int shots,  int shotsOnTarget,  double xg,  int passes,  double passAccuracy,  int duelsWon,  int offsides,  int corners,  int tackles,  int interceptions,  int cleanSheets,  int saves,  int shotsFaced,  double ratingAvg)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int year,  int minutes,  int goals,  int assists,  int appearances,  int yellowCards,  int redCards,  int shots,  int shotsOnTarget,  double xg,  int passes,  double passAccuracy,  int duelsWon,  int offsides,  int corners,  int tackles,  int interceptions,  int cleanSheets,  int saves,  int shotsFaced,  double ratingAvg,  int motmCount)?  $default,) {final _that = this;
 switch (_that) {
 case _PlayerSeasonStats() when $default != null:
-return $default(_that.year,_that.minutes,_that.goals,_that.assists,_that.appearances,_that.yellowCards,_that.redCards,_that.shots,_that.shotsOnTarget,_that.xg,_that.passes,_that.passAccuracy,_that.duelsWon,_that.offsides,_that.corners,_that.tackles,_that.interceptions,_that.cleanSheets,_that.saves,_that.shotsFaced,_that.ratingAvg);case _:
+return $default(_that.year,_that.minutes,_that.goals,_that.assists,_that.appearances,_that.yellowCards,_that.redCards,_that.shots,_that.shotsOnTarget,_that.xg,_that.passes,_that.passAccuracy,_that.duelsWon,_that.offsides,_that.corners,_that.tackles,_that.interceptions,_that.cleanSheets,_that.saves,_that.shotsFaced,_that.ratingAvg,_that.motmCount);case _:
   return null;
 
 }
@@ -229,7 +232,7 @@ return $default(_that.year,_that.minutes,_that.goals,_that.assists,_that.appeara
 @JsonSerializable()
 
 class _PlayerSeasonStats implements PlayerSeasonStats {
-  const _PlayerSeasonStats({required this.year, this.minutes = 0, this.goals = 0, this.assists = 0, this.appearances = 0, this.yellowCards = 0, this.redCards = 0, this.shots = 0, this.shotsOnTarget = 0, this.xg = 0.0, this.passes = 0, this.passAccuracy = 0.0, this.duelsWon = 0, this.offsides = 0, this.corners = 0, this.tackles = 0, this.interceptions = 0, this.cleanSheets = 0, this.saves = 0, this.shotsFaced = 0, this.ratingAvg = 6.0});
+  const _PlayerSeasonStats({required this.year, this.minutes = 0, this.goals = 0, this.assists = 0, this.appearances = 0, this.yellowCards = 0, this.redCards = 0, this.shots = 0, this.shotsOnTarget = 0, this.xg = 0.0, this.passes = 0, this.passAccuracy = 0.0, this.duelsWon = 0, this.offsides = 0, this.corners = 0, this.tackles = 0, this.interceptions = 0, this.cleanSheets = 0, this.saves = 0, this.shotsFaced = 0, this.ratingAvg = 6.0, this.motmCount = 0});
   factory _PlayerSeasonStats.fromJson(Map<String, dynamic> json) => _$PlayerSeasonStatsFromJson(json);
 
 @override final  int year;
@@ -253,6 +256,9 @@ class _PlayerSeasonStats implements PlayerSeasonStats {
 @override@JsonKey() final  int saves;
 @override@JsonKey() final  int shotsFaced;
 @override@JsonKey() final  double ratingAvg;
+/// Accumulated here rather than derived from stored fixtures: a persisted
+/// `MatchResult` no longer keeps per-match player rows.
+@override@JsonKey() final  int motmCount;
 
 /// Create a copy of PlayerSeasonStats
 /// with the given fields replaced by the non-null parameter values.
@@ -267,16 +273,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PlayerSeasonStats&&(identical(other.year, year) || other.year == year)&&(identical(other.minutes, minutes) || other.minutes == minutes)&&(identical(other.goals, goals) || other.goals == goals)&&(identical(other.assists, assists) || other.assists == assists)&&(identical(other.appearances, appearances) || other.appearances == appearances)&&(identical(other.yellowCards, yellowCards) || other.yellowCards == yellowCards)&&(identical(other.redCards, redCards) || other.redCards == redCards)&&(identical(other.shots, shots) || other.shots == shots)&&(identical(other.shotsOnTarget, shotsOnTarget) || other.shotsOnTarget == shotsOnTarget)&&(identical(other.xg, xg) || other.xg == xg)&&(identical(other.passes, passes) || other.passes == passes)&&(identical(other.passAccuracy, passAccuracy) || other.passAccuracy == passAccuracy)&&(identical(other.duelsWon, duelsWon) || other.duelsWon == duelsWon)&&(identical(other.offsides, offsides) || other.offsides == offsides)&&(identical(other.corners, corners) || other.corners == corners)&&(identical(other.tackles, tackles) || other.tackles == tackles)&&(identical(other.interceptions, interceptions) || other.interceptions == interceptions)&&(identical(other.cleanSheets, cleanSheets) || other.cleanSheets == cleanSheets)&&(identical(other.saves, saves) || other.saves == saves)&&(identical(other.shotsFaced, shotsFaced) || other.shotsFaced == shotsFaced)&&(identical(other.ratingAvg, ratingAvg) || other.ratingAvg == ratingAvg));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PlayerSeasonStats&&(identical(other.year, year) || other.year == year)&&(identical(other.minutes, minutes) || other.minutes == minutes)&&(identical(other.goals, goals) || other.goals == goals)&&(identical(other.assists, assists) || other.assists == assists)&&(identical(other.appearances, appearances) || other.appearances == appearances)&&(identical(other.yellowCards, yellowCards) || other.yellowCards == yellowCards)&&(identical(other.redCards, redCards) || other.redCards == redCards)&&(identical(other.shots, shots) || other.shots == shots)&&(identical(other.shotsOnTarget, shotsOnTarget) || other.shotsOnTarget == shotsOnTarget)&&(identical(other.xg, xg) || other.xg == xg)&&(identical(other.passes, passes) || other.passes == passes)&&(identical(other.passAccuracy, passAccuracy) || other.passAccuracy == passAccuracy)&&(identical(other.duelsWon, duelsWon) || other.duelsWon == duelsWon)&&(identical(other.offsides, offsides) || other.offsides == offsides)&&(identical(other.corners, corners) || other.corners == corners)&&(identical(other.tackles, tackles) || other.tackles == tackles)&&(identical(other.interceptions, interceptions) || other.interceptions == interceptions)&&(identical(other.cleanSheets, cleanSheets) || other.cleanSheets == cleanSheets)&&(identical(other.saves, saves) || other.saves == saves)&&(identical(other.shotsFaced, shotsFaced) || other.shotsFaced == shotsFaced)&&(identical(other.ratingAvg, ratingAvg) || other.ratingAvg == ratingAvg)&&(identical(other.motmCount, motmCount) || other.motmCount == motmCount));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,year,minutes,goals,assists,appearances,yellowCards,redCards,shots,shotsOnTarget,xg,passes,passAccuracy,duelsWon,offsides,corners,tackles,interceptions,cleanSheets,saves,shotsFaced,ratingAvg]);
+int get hashCode => Object.hashAll([runtimeType,year,minutes,goals,assists,appearances,yellowCards,redCards,shots,shotsOnTarget,xg,passes,passAccuracy,duelsWon,offsides,corners,tackles,interceptions,cleanSheets,saves,shotsFaced,ratingAvg,motmCount]);
 
 @override
 String toString() {
-  return 'PlayerSeasonStats(year: $year, minutes: $minutes, goals: $goals, assists: $assists, appearances: $appearances, yellowCards: $yellowCards, redCards: $redCards, shots: $shots, shotsOnTarget: $shotsOnTarget, xg: $xg, passes: $passes, passAccuracy: $passAccuracy, duelsWon: $duelsWon, offsides: $offsides, corners: $corners, tackles: $tackles, interceptions: $interceptions, cleanSheets: $cleanSheets, saves: $saves, shotsFaced: $shotsFaced, ratingAvg: $ratingAvg)';
+  return 'PlayerSeasonStats(year: $year, minutes: $minutes, goals: $goals, assists: $assists, appearances: $appearances, yellowCards: $yellowCards, redCards: $redCards, shots: $shots, shotsOnTarget: $shotsOnTarget, xg: $xg, passes: $passes, passAccuracy: $passAccuracy, duelsWon: $duelsWon, offsides: $offsides, corners: $corners, tackles: $tackles, interceptions: $interceptions, cleanSheets: $cleanSheets, saves: $saves, shotsFaced: $shotsFaced, ratingAvg: $ratingAvg, motmCount: $motmCount)';
 }
 
 
@@ -287,7 +293,7 @@ abstract mixin class _$PlayerSeasonStatsCopyWith<$Res> implements $PlayerSeasonS
   factory _$PlayerSeasonStatsCopyWith(_PlayerSeasonStats value, $Res Function(_PlayerSeasonStats) _then) = __$PlayerSeasonStatsCopyWithImpl;
 @override @useResult
 $Res call({
- int year, int minutes, int goals, int assists, int appearances, int yellowCards, int redCards, int shots, int shotsOnTarget, double xg, int passes, double passAccuracy, int duelsWon, int offsides, int corners, int tackles, int interceptions, int cleanSheets, int saves, int shotsFaced, double ratingAvg
+ int year, int minutes, int goals, int assists, int appearances, int yellowCards, int redCards, int shots, int shotsOnTarget, double xg, int passes, double passAccuracy, int duelsWon, int offsides, int corners, int tackles, int interceptions, int cleanSheets, int saves, int shotsFaced, double ratingAvg, int motmCount
 });
 
 
@@ -304,7 +310,7 @@ class __$PlayerSeasonStatsCopyWithImpl<$Res>
 
 /// Create a copy of PlayerSeasonStats
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? year = null,Object? minutes = null,Object? goals = null,Object? assists = null,Object? appearances = null,Object? yellowCards = null,Object? redCards = null,Object? shots = null,Object? shotsOnTarget = null,Object? xg = null,Object? passes = null,Object? passAccuracy = null,Object? duelsWon = null,Object? offsides = null,Object? corners = null,Object? tackles = null,Object? interceptions = null,Object? cleanSheets = null,Object? saves = null,Object? shotsFaced = null,Object? ratingAvg = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? year = null,Object? minutes = null,Object? goals = null,Object? assists = null,Object? appearances = null,Object? yellowCards = null,Object? redCards = null,Object? shots = null,Object? shotsOnTarget = null,Object? xg = null,Object? passes = null,Object? passAccuracy = null,Object? duelsWon = null,Object? offsides = null,Object? corners = null,Object? tackles = null,Object? interceptions = null,Object? cleanSheets = null,Object? saves = null,Object? shotsFaced = null,Object? ratingAvg = null,Object? motmCount = null,}) {
   return _then(_PlayerSeasonStats(
 year: null == year ? _self.year : year // ignore: cast_nullable_to_non_nullable
 as int,minutes: null == minutes ? _self.minutes : minutes // ignore: cast_nullable_to_non_nullable
@@ -327,7 +333,8 @@ as int,cleanSheets: null == cleanSheets ? _self.cleanSheets : cleanSheets // ign
 as int,saves: null == saves ? _self.saves : saves // ignore: cast_nullable_to_non_nullable
 as int,shotsFaced: null == shotsFaced ? _self.shotsFaced : shotsFaced // ignore: cast_nullable_to_non_nullable
 as int,ratingAvg: null == ratingAvg ? _self.ratingAvg : ratingAvg // ignore: cast_nullable_to_non_nullable
-as double,
+as double,motmCount: null == motmCount ? _self.motmCount : motmCount // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 

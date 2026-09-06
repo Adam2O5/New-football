@@ -29,6 +29,7 @@ _PlayerSeasonStats _$PlayerSeasonStatsFromJson(Map<String, dynamic> json) =>
       saves: (json['saves'] as num?)?.toInt() ?? 0,
       shotsFaced: (json['shotsFaced'] as num?)?.toInt() ?? 0,
       ratingAvg: (json['ratingAvg'] as num?)?.toDouble() ?? 6.0,
+      motmCount: (json['motmCount'] as num?)?.toInt() ?? 0,
     );
 
 Map<String, dynamic> _$PlayerSeasonStatsToJson(_PlayerSeasonStats instance) =>
@@ -54,6 +55,7 @@ Map<String, dynamic> _$PlayerSeasonStatsToJson(_PlayerSeasonStats instance) =>
       'saves': instance.saves,
       'shotsFaced': instance.shotsFaced,
       'ratingAvg': instance.ratingAvg,
+      'motmCount': instance.motmCount,
     };
 
 _PlayerHidden _$PlayerHiddenFromJson(Map<String, dynamic> json) =>

@@ -118,17 +118,32 @@ class MessageService {
     var inbox = isFuture
         ? league.inbox.scheduleMessage(msg)
         : league.inbox.addMessage(msg);
-    inbox = inbox
-        .degradeMissingPayload(
-          playerIds: {
-            for (final team in league.teams) ...team.roster.map((p) => p.id),
-            ...league.freeAgents.map((p) => p.id),
-          },
-          teamIds: {for (final team in league.teams) team.id},
-        )
-        .retainSeasons(league.currentSeason.year);
-    return league.copyWith(inbox: inbox);
+    // Degradation can only ever strip a message that offers actions on a
+    // player or a team, so the id sets — every roster in the league plus the
+    // free agents — are worth building only when such a message is present.
+    if (_hasDegradablePayload(inbox)) {
+      inbox = inbox.degradeMissingPayload(
+        playerIds: {
+          for (final team in league.teams) ...team.roster.map((p) => p.id),
+          ...league.freeAgents.map((p) => p.id),
+        },
+        teamIds: {for (final team in league.teams) team.id},
+      );
+    }
+    return league.copyWith(
+      inbox: inbox.retainSeasons(league.currentSeason.year),
+    );
   }
+
+  static bool _referencesPlayerOrTeam(GameMessage message) =>
+      (message.actions.isNotEmpty || message.decision != null) &&
+      (message.payload['playerId'] != null ||
+          message.payload['teamId'] != null);
+
+  static bool _hasDegradablePayload(Inbox inbox) =>
+      inbox.messages.any(_referencesPlayerOrTeam) ||
+      inbox.scheduled.any(_referencesPlayerOrTeam) ||
+      inbox.archive.any(_referencesPlayerOrTeam);
 
   /// Applies a validated player choice and acknowledges the message.
   ///

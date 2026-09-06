@@ -776,9 +776,12 @@ class DaySimulator {
     MatchResult result, {
     int saveSeed = 0,
   }) {
+    // Only the slim projection reaches the state; the full [result] stays
+    // local for the post-match pipeline below.
+    final stored = result.slimForStorage();
     final newSchedule = league.currentSeason.schedule.map((m) {
       if (m.id != match.id) return m;
-      return m.copyWith(result: result);
+      return m.copyWith(result: stored);
     }).toList();
 
     var standings = result.status == MatchStatus.dsq
@@ -876,6 +879,7 @@ class DaySimulator {
         team: team,
         result: result,
         startingEleven: startingEleven,
+        seasonYear: league.currentSeason.year,
         assignedPositions: assignedPositions.isEmpty ? null : assignedPositions,
       );
       var next = update.team;
@@ -1099,44 +1103,51 @@ class DaySimulator {
     LeagueState league, {
     Set<String> excludedTeamIds = const {},
   }) {
-    var state = league;
+    // The recovered roster of every team is collected before anything is
+    // published. Rebuilding the league team by team would copy the whole
+    // 30-team list once per team, every single day.
+    final teams = <Team>[];
+    final recoveryReturns = <({String teamId, Player player, String injuryId})>[];
+
     for (final team in league.teams) {
-      if (excludedTeamIds.contains(team.id)) continue;
-      final recoveryReturns = <({Player player, String injuryId})>[];
+      if (excludedTeamIds.contains(team.id)) {
+        teams.add(team);
+        continue;
+      }
       final roster = team.roster.map((player) {
         final recovered = player.recoverBetweenMatches(balance);
         if (player.state.injured && !recovered.state.injured) {
           final injuryId = player.state.injury?.id;
           if (injuryId != null) {
-            recoveryReturns.add((player: player, injuryId: injuryId));
+            recoveryReturns.add((
+              teamId: team.id,
+              player: player,
+              injuryId: injuryId,
+            ));
           }
         }
         return recovered;
       }).toList();
-      state = state.copyWith(
-        teams: state.teams.map((candidate) {
-          return candidate.id == team.id
-              ? team.copyWith(roster: roster)
-              : candidate;
-        }).toList(),
+      teams.add(team.copyWith(roster: roster));
+    }
+
+    var state = league.copyWith(teams: teams);
+    for (final returned in recoveryReturns) {
+      if (state.playerTeamId != returned.teamId) continue;
+      final definition = InjuryCatalog.byId(returned.injuryId);
+      state = messages.send(
+        state,
+        type: MessageType.injuryReturn,
+        domain: MessageDomain.health,
+        args: {
+          'playerName': returned.player.name,
+          'injuryName': definition.name,
+        },
+        payload: {
+          'playerId': returned.player.id,
+          'injuryId': returned.injuryId,
+        },
       );
-      for (final returned in recoveryReturns) {
-        if (state.playerTeamId != team.id) continue;
-        final definition = InjuryCatalog.byId(returned.injuryId);
-        state = messages.send(
-          state,
-          type: MessageType.injuryReturn,
-          domain: MessageDomain.health,
-          args: {
-            'playerName': returned.player.name,
-            'injuryName': definition.name,
-          },
-          payload: {
-            'playerId': returned.player.id,
-            'injuryId': returned.injuryId,
-          },
-        );
-      }
     }
     return state;
   }

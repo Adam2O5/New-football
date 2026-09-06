@@ -62,6 +62,7 @@ Player applyMatchPlayerEffects({
       stats: stats,
       seasonYear: seasonYear,
       balance: balance,
+      isManOfTheMatch: result.manOfTheMatchPlayerId == player.id,
     );
   }
 
@@ -156,6 +157,7 @@ Player _recordSeasonStats(
   required PlayerMatchStats stats,
   required int seasonYear,
   required BalanceConfig balance,
+  required bool isManOfTheMatch,
 }) {
   final seasons = [...player.seasonStats];
   final index = seasons.indexWhere((season) => season.year == seasonYear);
@@ -193,6 +195,7 @@ Player _recordSeasonStats(
     cleanSheets: previous.cleanSheets + (stats.cleanSheet ? 1 : 0),
     saves: previous.saves + stats.saves,
     shotsFaced: previous.shotsFaced + stats.shotsFaced,
+    motmCount: previous.motmCount + (isManOfTheMatch ? 1 : 0),
     ratingAvg: ratingWeight == 0
         ? 0.0
         : (previous.ratingAvg * previousRatingWeight +

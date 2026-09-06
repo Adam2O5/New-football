@@ -28,34 +28,47 @@ class PlayerEventService {
   final BalanceConfig balance;
   final MessageService messages;
 
+  /// Working roster map for the current [weeklyTick]. Mutations stay here
+  /// until a message or the end of the tick publishes them, so a Sunday
+  /// boundary does not copy the 30-team list once per player event.
+  Map<String, Team>? _tickTeams;
+  Set<String>? _pendingDecisionKeys;
+  Set<String>? _bottomHalfTeamIds;
+
   /// Applies one weekly event tick to every player in the league.
   LeagueState weeklyTick(
     LeagueState league, {
     int saveSeed = 0,
     bool offseason = false,
   }) {
+    _pendingDecisionKeys = _indexPendingDecisions(league);
+    _bottomHalfTeamIds = _indexBottomHalf(league);
+    _tickTeams = {for (final team in league.teams) team.id: team};
     var state = league;
-    final playerIdsByTeam = {
-      for (final team in league.teams)
-        team.id: [for (final player in team.roster) player.id],
-    };
-
-    for (final teamEntry in playerIdsByTeam.entries) {
-      for (final playerId in teamEntry.value) {
-        final team = state.teamById(teamEntry.key);
-        final player = team?.roster.where((p) => p.id == playerId).firstOrNull;
-        if (team == null || player == null) continue;
-        state = _tickPlayer(
-          state,
-          team,
-          player,
-          saveSeed: saveSeed,
-          offseason:
-              offseason || state.currentSeason.phase == SeasonPhase.offseason,
-        );
+    try {
+      for (final original in league.teams) {
+        final playerIds = [for (final player in original.roster) player.id];
+        for (final playerId in playerIds) {
+          final team = _teamById(state, original.id);
+          final player = team == null ? null : _findPlayer(team, playerId);
+          if (team == null || player == null) continue;
+          state = _tickPlayer(
+            state,
+            team,
+            player,
+            saveSeed: saveSeed,
+            offseason:
+                offseason ||
+                state.currentSeason.phase == SeasonPhase.offseason,
+          );
+        }
       }
+      return _publishTickTeams(state);
+    } finally {
+      _tickTeams = null;
+      _pendingDecisionKeys = null;
+      _bottomHalfTeamIds = null;
     }
-    return state;
   }
 
   /// Explicit aliases keep the service convenient for simulation and tests
@@ -136,7 +149,7 @@ class PlayerEventService {
     if (playerId is! String) return league;
     final teamId = message.payload['teamId'];
     final team = teamId is String
-        ? league.teamById(teamId)
+        ? _teamById(league, teamId)
         : _findTeamWithPlayer(league, playerId);
     final player = team == null ? null : _findPlayer(team, playerId);
     if (team == null || player == null) return league;
@@ -334,7 +347,7 @@ class PlayerEventService {
     String playerId,
     int saveSeed,
   ) {
-    final team = state.teamById(teamId);
+    final team = _teamById(state, teamId);
     final player = team == null
         ? null
         : _currentPlayer(state, teamId, playerId);
@@ -394,7 +407,7 @@ class PlayerEventService {
     String playerId,
     int saveSeed,
   ) {
-    final team = state.teamById(teamId);
+    final team = _teamById(state, teamId);
     final player = team == null
         ? null
         : _currentPlayer(state, teamId, playerId);
@@ -436,7 +449,7 @@ class PlayerEventService {
     int saveSeed, {
     required bool recoveryWeek,
   }) {
-    final team = state.teamById(teamId);
+    final team = _teamById(state, teamId);
     final player = team == null
         ? null
         : _currentPlayer(state, teamId, playerId);
@@ -483,7 +496,7 @@ class PlayerEventService {
     String playerId,
     int saveSeed,
   ) {
-    final team = state.teamById(teamId);
+    final team = _teamById(state, teamId);
     final player = team == null
         ? null
         : _currentPlayer(state, teamId, playerId);
@@ -525,7 +538,7 @@ class PlayerEventService {
     String playerId,
     int saveSeed,
   ) {
-    final team = state.teamById(teamId);
+    final team = _teamById(state, teamId);
     final player = team == null
         ? null
         : _currentPlayer(state, teamId, playerId);
@@ -566,7 +579,7 @@ class PlayerEventService {
     String playerId,
     int saveSeed,
   ) {
-    final team = state.teamById(teamId);
+    final team = _teamById(state, teamId);
     final player = team == null
         ? null
         : _currentPlayer(state, teamId, playerId);
@@ -626,7 +639,7 @@ class PlayerEventService {
     int saveSeed, {
     required bool offseason,
   }) {
-    final team = state.teamById(teamId);
+    final team = _teamById(state, teamId);
     final player = team == null
         ? null
         : _currentPlayer(state, teamId, playerId);
@@ -694,7 +707,7 @@ class PlayerEventService {
     String playerId,
     int saveSeed,
   ) {
-    final team = state.teamById(teamId);
+    final team = _teamById(state, teamId);
     final player = team == null
         ? null
         : _currentPlayer(state, teamId, playerId);
@@ -774,7 +787,7 @@ class PlayerEventService {
     String playerId,
     int saveSeed,
   ) {
-    final team = state.teamById(teamId);
+    final team = _teamById(state, teamId);
     final player = team == null
         ? null
         : _currentPlayer(state, teamId, playerId);
@@ -1201,6 +1214,10 @@ class PlayerEventService {
     // The inbox is the manager's inbox; AI-club events still affect simulation
     // but are not actionable messages for the human manager.
     if (state.playerTeamId != teamId) return state;
+    if (kind != null && expiryDays != null) {
+      _pendingDecisionKeys?.add(_pendingKey(player.id, kind));
+    }
+    state = _publishTickTeams(state);
     final expiresAt = expiryDays == null
         ? null
         : logicalDate(state).add(Duration(days: expiryDays)).toIso8601String();
@@ -1278,32 +1295,85 @@ class PlayerEventService {
     ),
   );
 
-  bool _hasPendingDecision(LeagueState state, String playerId, String kind) =>
-      [...state.inbox.messages, ...state.inbox.scheduled].any(
-        (message) =>
-            !message.acknowledged &&
-            message.type == MessageType.playerEvent &&
-            message.kind == kind &&
-            message.payload['playerId'] == playerId,
-      );
+  bool _hasPendingDecision(LeagueState state, String playerId, String kind) {
+    final keys = _pendingDecisionKeys;
+    if (keys != null) return keys.contains(_pendingKey(playerId, kind));
+    bool pending(GameMessage message) =>
+        !message.acknowledged &&
+        message.type == MessageType.playerEvent &&
+        message.kind == kind &&
+        message.payload['playerId'] == playerId;
+    return state.inbox.messages.any(pending) ||
+        state.inbox.scheduled.any(pending);
+  }
 
-  bool _isBottomHalf(LeagueState state, String teamId) {
+  static String _pendingKey(String playerId, String kind) => '$playerId|$kind';
+
+  Set<String> _indexPendingDecisions(LeagueState state) {
+    final keys = <String>{};
+    void consider(GameMessage message) {
+      if (message.acknowledged || message.type != MessageType.playerEvent) {
+        return;
+      }
+      final playerId = message.payload['playerId'];
+      final kind = message.kind;
+      if (playerId is String && kind != null) {
+        keys.add(_pendingKey(playerId, kind));
+      }
+    }
+
+    for (final message in state.inbox.messages) {
+      consider(message);
+    }
+    for (final message in state.inbox.scheduled) {
+      consider(message);
+    }
+    return keys;
+  }
+
+  Set<String> _indexBottomHalf(LeagueState state) {
     final all = [
       for (final conference in state.currentSeason.standings)
         ...conference.standings,
     ];
-    if (all.isEmpty) return false;
+    if (all.isEmpty) return {};
     final sorted = [...all]
       ..sort((a, b) {
         final points = b.points.compareTo(a.points);
         if (points != 0) return points;
         return b.goalDifference.compareTo(a.goalDifference);
       });
-    final rank = sorted.indexWhere((standing) => standing.teamId == teamId);
-    return rank >= (sorted.length / 2).ceil();
+    final cutoff = (sorted.length / 2).ceil();
+    return {
+      for (var i = cutoff; i < sorted.length; i++) sorted[i].teamId,
+    };
+  }
+
+  bool _isBottomHalf(LeagueState state, String teamId) {
+    final cached = _bottomHalfTeamIds;
+    if (cached != null) return cached.contains(teamId);
+    return _indexBottomHalf(state).contains(teamId);
+  }
+
+  Team? _teamById(LeagueState state, String teamId) =>
+      _tickTeams?[teamId] ?? state.teamById(teamId);
+
+  LeagueState _publishTickTeams(LeagueState state) {
+    final tickTeams = _tickTeams;
+    if (tickTeams == null) return state;
+    return state.copyWith(
+      teams: [for (final team in state.teams) tickTeams[team.id] ?? team],
+    );
   }
 
   Team? _findTeamWithPlayer(LeagueState state, String playerId) {
+    final tickTeams = _tickTeams;
+    if (tickTeams != null) {
+      for (final team in tickTeams.values) {
+        if (_findPlayer(team, playerId) != null) return team;
+      }
+      return null;
+    }
     for (final team in state.teams) {
       if (_findPlayer(team, playerId) != null) return team;
     }
@@ -1319,13 +1389,25 @@ class PlayerEventService {
   }
 
   Player? _currentPlayer(LeagueState state, String teamId, String? playerId) {
-    final team = state.teamById(teamId);
+    final team = _teamById(state, teamId);
     if (team == null) return null;
     if (playerId != null) return _findPlayer(team, playerId);
     return team.roster.isEmpty ? null : team.roster.first;
   }
 
   LeagueState _replacePlayer(LeagueState state, String teamId, Player player) {
+    final tickTeams = _tickTeams;
+    if (tickTeams != null) {
+      final team = tickTeams[teamId];
+      if (team == null) return state;
+      tickTeams[teamId] = team.copyWith(
+        roster: [
+          for (final candidate in team.roster)
+            candidate.id == player.id ? player : candidate,
+        ],
+      );
+      return state;
+    }
     final team = state.teamById(teamId);
     if (team == null) return state;
     return state.updateTeam(
@@ -1341,8 +1423,4 @@ class PlayerEventService {
   int _range(Random random, int minValue, int maxValue) => minValue == maxValue
       ? minValue
       : minValue + random.nextInt(maxValue - minValue + 1);
-}
-
-extension<T> on Iterable<T> {
-  T? get firstOrNull => isEmpty ? null : first;
 }

@@ -3,6 +3,7 @@ import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/contract.dart';
 import 'package:new_football/core/models/draft_pick.dart';
 import 'package:new_football/core/models/enums.dart';
+import 'package:new_football/core/models/match_models.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/player_event_state.dart';
 import 'package:new_football/core/models/scouting.dart';
@@ -43,6 +44,66 @@ abstract class TeamWeeklyHistory with _$TeamWeeklyHistory {
       _$TeamWeeklyHistoryFromJson(json);
 }
 
+/// Running per-season totals of the team's own box score.
+///
+/// Accumulated after every match instead of being re-derived from stored
+/// fixtures, because a persisted `MatchResult` no longer keeps its team stat
+/// lines. [matches] is the divisor for the averaged columns.
+@freezed
+abstract class TeamSeasonStats with _$TeamSeasonStats {
+  const factory TeamSeasonStats({
+    required int year,
+    @Default(0) int matches,
+    @Default(0) int goals,
+    @Default(0) int shots,
+    @Default(0) int shotsOnTarget,
+    @Default(0) int possessionTotal,
+    @Default(0.0) double xg,
+    @Default(0) int passes,
+    @Default(0.0) double passAccuracy,
+    @Default(0) int duelsWon,
+    @Default(0) int offsides,
+    @Default(0) int corners,
+    @Default(0) int fouls,
+    @Default(0) int yellowCards,
+    @Default(0) int redCards,
+    @Default(0) int saves,
+  }) = _TeamSeasonStats;
+
+  factory TeamSeasonStats.fromJson(Map<String, dynamic> json) =>
+      _$TeamSeasonStatsFromJson(json);
+}
+
+extension TeamSeasonStatsX on TeamSeasonStats {
+  int get possession => matches == 0 ? 0 : possessionTotal ~/ matches;
+
+  /// Folds one finished match into the running totals. [passAccuracy] is
+  /// weighted by pass volume, matching how player rows aggregate it.
+  TeamSeasonStats addMatch(TeamMatchStats stats) {
+    final passWeight = passes + stats.passes;
+    return copyWith(
+      matches: matches + 1,
+      goals: goals + stats.goals,
+      shots: shots + stats.shots,
+      shotsOnTarget: shotsOnTarget + stats.shotsOnTarget,
+      possessionTotal: possessionTotal + stats.possession,
+      xg: xg + stats.xg,
+      passes: passWeight,
+      passAccuracy: passWeight == 0
+          ? passAccuracy
+          : (passAccuracy * passes + stats.passAccuracy * stats.passes) /
+                passWeight,
+      duelsWon: duelsWon + stats.duelsWon,
+      offsides: offsides + stats.offsides,
+      corners: corners + stats.corners,
+      fouls: fouls + stats.fouls,
+      yellowCards: yellowCards + stats.yellowCards,
+      redCards: redCards + stats.redCards,
+      saves: saves + stats.saves,
+    );
+  }
+}
+
 @freezed
 abstract class Team with _$Team {
   const factory Team({
@@ -58,6 +119,7 @@ abstract class Team with _$Team {
     @Default(50) int atmosphere,
     @Default(50.0) double chemistry,
     @Default([]) List<TeamWeeklyHistory> weeklyHistory,
+    @Default([]) List<TeamSeasonStats> seasonStats,
     @Default([]) List<int> recentMatchResults,
     @Default({}) Map<String, int> chemistryAppearances,
     @Default(TeamEventState()) TeamEventState eventState,
