@@ -182,6 +182,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
 
     if (filters.groups.contains(SearchGroup.prospects)) {
       final draftState = league.currentSeason.draftState;
+      final mockBoard = draftState?.mockDraftBoard;
       final scouting = league.playerTeam?.scouting;
       final combineAvailable =
           league.currentSeason.scoutReportDone &&
@@ -201,17 +202,18 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
           continue;
         }
         prospects.add(
-          _prospectResult(context, l10n, prospect, knowledge?.mockRank ?? 0),
+          _prospectResult(
+            context,
+            l10n,
+            prospect,
+            mockBoard?.displayedRank[prospect.id],
+          ),
         );
       }
-      prospects.sort((a, b) {
-        final rankA = a.value;
-        final rankB = b.value;
-        if (rankA == 0 && rankB == 0) return 0;
-        if (rankA == 0) return 1;
-        if (rankB == 0) return -1;
-        return rankA.compareTo(rankB);
-      });
+      // Sortowane po miejscu w globalnym mock drafcie (`draft.md`
+      // §"Dwa mock drafty"), nie po per-drużynowej estymacji scouta —
+      // `null` (brak wygenerowanego boardu) ląduje na końcu listy.
+      prospects.sort((a, b) => a.value.compareTo(b.value));
     }
 
     if (filters.groups.contains(SearchGroup.picks)) {
@@ -325,7 +327,7 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
     BuildContext context,
     AppLocalizations l10n,
     Prospect prospect,
-    int mockRank,
+    int? displayedMockRank,
   ) {
     return _SearchResult(
       title: prospect.name,
@@ -333,8 +335,8 @@ class _SearchScreenState extends ConsumerState<SearchScreen> {
         prospect.position.code,
         prospect.age,
       ),
-      value: mockRank.toDouble(),
-      leading: const SizedBox(width: 48),
+      value: (displayedMockRank ?? double.maxFinite.toInt()).toDouble(),
+      leading: _MockRankBadge(rank: displayedMockRank),
       onTap: () => context.push(
         Uri(
           path: '/game/prospects',
@@ -466,6 +468,39 @@ class _ValueBar extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Miejsce w globalnym mock drafcie (`DraftState.mockDraftBoard`,
+/// `draft.md` §"Dwa mock drafty") — ta sama liczba co w kolumnie "Mock" na
+/// ekranie Prospects. Osobne od `ScoutingKnowledge.mockRank` (per-drużynowa,
+/// zaszumiona wg jakości scouta estymacja, widoczna tylko dla obserwowanych
+/// prospectów) — ten znacznik pokazuje faktyczne miejsce w ogólnoligowym
+/// boardzie, dostępne dla każdego prospecta, i to ono napędza też
+/// sortowanie listy wyników w `_results`.
+class _MockRankBadge extends StatelessWidget {
+  const _MockRankBadge({required this.rank});
+
+  final int? rank;
+  static const double _width = 48.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).colorScheme;
+    return SizedBox(
+      width: _width,
+      child: Center(
+        child: CircleAvatar(
+          radius: 16,
+          backgroundColor: colors.secondaryContainer,
+          foregroundColor: colors.onSecondaryContainer,
+          child: Text(
+            rank == null ? '?' : '$rank',
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
           ),
         ),
       ),
