@@ -1,6 +1,44 @@
-# Nowe testy — etap 0
+# Nowe testy — etapy 0 i 1
 
-Etap I00 przygotowany do review, 15 października 2026. Kod aplikacji nie został zmieniony. Etap 1 wymaga osobnej zgody po review i commicie użytkownika.
+Etap 0 został zaakceptowany i zapisany przez użytkownika w commicie `dc6e454` (`refactor etap 0`). **Etap 1 (I01–I03) jest przygotowany do review.** Nie wykonano automatycznego commita ani prac etapu 2. Poniższe dane etapu 0 zachowują punkt odniesienia sprzed napraw.
+
+## Wynik etapu 1
+
+- **37 testów przechodzi**, w tym wszystkie trzy wcześniejsze regresje F01–F03.
+- Analiza `lib/app`, `lib/data`, `lib/core/services`, `lib/main.dart` i `test/nowe_testy` nie zgłasza uwag.
+- Kompilacja `flutter build bundle --debug --no-pub` zakończyła się powodzeniem. To lokalny debug bundle, bez instalacji ani wdrożenia; nie wykonywano kompilacji APK ani profilu na urządzeniu.
+- Schemat save'a pozostaje 24. Nie zmieniono modeli, formatu persystencji, generatorów ani wyłączonych implementacji AI/silnika/wymian. Wywołania wymian w kontrolerze objęto wspólną kolejką bez zmiany algorytmu placeholderów; bezpośrednie przepływy placeholderowego `trade_screen.dart` pozostają poza zakresem.
+- Stare testy pozostają nieanalizowane i nieuruchamiane. Wszystkie nowe testy i helpery są w tym folderze.
+
+### Zmiany zachowania
+
+1. **I01 / F02:** bariera obejmuje trwający zapis i mutacje zlecone przed nią, nawet jeśli ich autosave został dopisany później. Niepotrzebne snapshoty są scalane. Błąd niezapisanej wersji jest dostępny do skutecznego ponowienia; nowszy udany zapis usuwa poprzedni błąd. Autosave pobiera najnowszy stan w kolejce, zachowując również metadane zmienione przez zarządzanie zapisami.
+2. **I02 / F01:** odczyt, walidacja i publikacja ofert, finalizacji, counterów, RFA/QO, praw draftowych, sztabu i Combine odbywają się w jednym wpisie kolejki. Polecenia używają aktualnych osób/drużyn. Zmiana roli i zamiana miejsc w UI składu nie podmieniają rosteru starszą migawką. Jawne sloty XI (F09) pozostają zadaniem późniejszego etapu.
+3. **I03 / F03:** asynchroniczne `clear()` zatrzymuje batch, czeka na zaczęty krok i zapisuje najnowszy stan przed wyjściem. Powtórne wyjście współdzieli tę samą operację. Nowe polecenia gry są blokowane podczas zmiany kariery. Load/create respektują tę samą granicę; spóźniony load A nie publikuje się po żądaniu B. Nieudany zapis lub load zachowuje wcześniejszą aktywną karierę i pozwala ponowić operację.
+4. Menu czeka na zakończenie wyjścia i pokazuje istniejący lokalizowany komunikat błędu zapisu. Manualny save obsługuje błąd. Matchday przy nieudanym zapisie pokazuje błąd oraz ponowienie/powrót, zamiast rozpoczynać mecz. Lifecycle obsługuje wyjątek, a kontroler zachowuje możliwość ponowienia. Usunięcie aktywnego save'a korzysta z osobnej, ograniczonej do kolejki zarządzania ścieżki czyszczenia, aby nie odtworzyć usuniętego pliku.
+
+### Nowe scenariusze etapu 1
+
+- `game_controller_persistence_test.dart` — 8 testów: manualny zapis, F01–F03, bariera przed powstaniem autosave, trwałość informacji o błędzie, nowszy udany zapis i manualne ponowienie.
+- `game_controller_lifecycle_test.dart` — 14 testów: wyjście podczas zapisu/kroku symulacji, powtórne kliknięcie, blokowanie nowych poleceń, anulowanie observera/pacera, load A → B, zapis przed przełączeniem/utworzeniem kariery, nieudane load/create, odzyskanie działania po błędzie i usunięcie aktywnego save'a.
+- `game_controller_mutations_test.dart` — 6 testów: dwie oferty, aktualny roster przy usuwaniu sztabu z wygasłą umową, usunięty kandydat, zakończone Combine, błąd polecenia i metadane zmienione przed autosave.
+- `career_navigation_test.dart` — 3 testy widgetowe: oczekiwanie menu na zapis, błąd i ponowienie wyjścia, błąd zapisu przed startem matchday. Bariery synchronizują rzeczywistą strefę async kontrolera z zegarem widgetów Fluttera.
+- `support/controlled_simulation_runner.dart` — kontrolowany krok zmieniający datę; bez uruchamiania AI i silnika meczu.
+- Istniejące 5 kontroli fixture'ów oraz test bazowych operacji repozytorium także przechodzą.
+
+Polecenia odbioru:
+
+```powershell
+dart analyze lib/app lib/data lib/core/services lib/main.dart test/nowe_testy
+flutter test --no-pub test/nowe_testy --concurrency=1 --reporter expanded
+flutter build bundle --debug --no-pub
+```
+
+Do ręcznego review: wyjście do menu w czasie symulacji kalendarza i ponowne wczytanie daty; dwie operacje rynku wykonywane blisko siebie; manualny zapis i wejście do meczu. Awarię I/O oraz trzymane bariery sprawdzają nowe testy w pamięci, bez celowego uszkadzania zapisów użytkownika.
+
+Wyniki pełnego uruchomienia są w [etap-1-test-results.txt](C:/Users/dadam/New-football/reports/lib-audit-2026-10-13/etap-1-test-results.txt). Folder `reports/` jest ignorowany przez Git; opis odbioru i wynik 37/37 pozostają w tym wersjonowanym README.
+
+## Etap 0 — historyczny punkt odniesienia
 
 ## Punkt odniesienia
 

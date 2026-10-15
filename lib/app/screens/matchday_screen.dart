@@ -37,6 +37,7 @@ class _MatchdayScreenState extends ConsumerState<MatchdayScreen> {
   bool _paused = true;
   bool _finishing = false;
   bool _finalized = false;
+  bool _saveFailed = false;
   int _speed = 1;
   Timer? _timer;
   String? _autoPauseNotice;
@@ -49,9 +50,21 @@ class _MatchdayScreenState extends ConsumerState<MatchdayScreen> {
     // The interactive match is the one place a crash would cost the player a
     // whole matchday, so the background autosave is forced to disk first.
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await ref.read(gameControllerProvider.notifier).flushPendingSave();
-      _start();
+      await _prepareMatch();
     });
+  }
+
+  Future<void> _prepareMatch({bool retry = false}) async {
+    if (!mounted) return;
+    setState(() => _saveFailed = false);
+    try {
+      final controller = ref.read(gameControllerProvider.notifier);
+      if (retry) await controller.persist();
+      await controller.flushPendingSave();
+      _start();
+    } catch (_) {
+      if (mounted) setState(() => _saveFailed = true);
+    }
   }
 
   void _start() {
@@ -504,7 +517,24 @@ class _MatchdayScreenState extends ConsumerState<MatchdayScreen> {
         automaticallyImplyLeading: false,
       ),
       body: ScreenBackground(
-        child: live == null || home == null || away == null
+        child: _saveFailed
+            ? Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(l10n.loadGame_writeFailed),
+                    FilledButton(
+                      onPressed: () => _prepareMatch(retry: true),
+                      child: Text(l10n.inbox_retry),
+                    ),
+                    TextButton(
+                      onPressed: () => context.go('/game'),
+                      child: Text(l10n.common_cancel),
+                    ),
+                  ],
+                ),
+              )
+            : live == null || home == null || away == null
             ? const Center(child: CircularProgressIndicator())
             : LayoutBuilder(
                 builder: (context, constraints) {

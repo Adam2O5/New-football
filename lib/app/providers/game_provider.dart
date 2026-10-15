@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
@@ -255,6 +257,11 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   /// Invalidates callbacks that belong to a save which has been cleared or
   /// replaced while an asynchronous repository operation was pending.
   int _saveGeneration = 0;
+  int _stateRevision = 0;
+  int _persistedRevision = 0;
+  Future<void>? _careerTransition;
+  int _careerRequestId = 0;
+  bool _leavingCareer = false;
 
   /// Generation captured by the management operation currently executing in
   /// [_mutationQueue]. It lets [applyManagedMeta] reject a result that was
@@ -277,6 +284,23 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     );
     return queued;
   }
+
+  Future<T> _mutateSave<T>(
+    T unavailable,
+    Future<T> Function(GameSave current) operation,
+  ) {
+    if (_careerTransition != null) return Future<T>.value(unavailable);
+    final generation = _saveGeneration;
+    return _enqueueMutation(() async {
+      final current = save;
+      if (generation != _saveGeneration || current == null) return unavailable;
+      return operation(current);
+    });
+  }
+
+  Future<void> _publishLeagueInQueue(
+    LeagueState Function(LeagueState) transform,
+  ) => _updateLeagueInQueue(transform, generation: _saveGeneration);
 
   /// Enqueues save-management work on the same queue as all state mutations
   /// and persistence operations.
@@ -326,6 +350,7 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     _MessageOperationKind kind,
     Future<void> Function() operation,
   ) {
+    if (_careerTransition != null) return Future<void>.value();
     final key = _MessageOperationKey(messageId, kind);
     final existing = _inFlightMessageOperations[key];
     if (existing != null) return existing;
@@ -357,46 +382,90 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     return null;
   }
 
-  Future<void> createNewGame(NewGameRequest request) async {
-    _saveGeneration++;
-    _inFlightMessageOperations.clear();
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async {
+  Future<void> createNewGame(NewGameRequest request) {
+    return _changeCareer(() async {
       final game = _ref.read(gameFactoryProvider).create(request);
       await _repo.save(game);
       return game;
     });
   }
 
-  Future<void> loadGame(String id) async {
-    _saveGeneration++;
+  Future<void> loadGame(String id) => _changeCareer(() => _repo.load(id));
+
+  Future<void> _changeCareer(
+    Future<GameSave?> Function() open, {
+    bool leaving = false,
+  }) {
+    final requestId = ++_careerRequestId;
+    _leavingCareer = leaving;
+    final session = _activeSimulationSession;
+    session?.cancel();
+    late final Future<void> transition;
+    transition = () async {
+      try {
+        // The batch's finally block uses the same mutation queue. Wait for
+        // it outside that queue, including when presentation was cancelled.
+        if (session != null) await session.done.future;
+        await _enqueueMutation(() async {
+          if (requestId != _careerRequestId) return;
+          await _writeCurrentSaveInQueue(_saveGeneration);
+          if (requestId != _careerRequestId) return;
+          final previous = save;
+          _saveGeneration++;
+          _resetPersistence();
+          try {
+            if (previous == null && !leaving) {
+              state = const AsyncValue.loading();
+            }
+            final next = await open();
+            if (requestId == _careerRequestId) state = AsyncValue.data(next);
+          } catch (error, stackTrace) {
+            if (requestId == _careerRequestId) {
+              state = previous == null
+                  ? AsyncValue.error(error, stackTrace)
+                  : AsyncValue.data(previous);
+            }
+            rethrow;
+          }
+        });
+      } finally {
+        if (identical(_careerTransition, transition)) {
+          _careerTransition = null;
+          _leavingCareer = false;
+        }
+      }
+    }();
+    _careerTransition = transition;
+    return transition;
+  }
+
+  void _resetPersistence() {
+    _stateRevision = 0;
+    _persistedRevision = 0;
+    _pendingAutosave = null;
+    _autosaveScheduled = false;
+    _autosaveError = null;
+    _autosaveStackTrace = null;
+    _failedSaveRevision = null;
     _inFlightMessageOperations.clear();
-    state = const AsyncValue.loading();
-    state = await AsyncValue.guard(() async => _repo.load(id));
   }
 
   Future<void> persist() {
     final generation = _saveGeneration;
-    return _enqueueMutation(() async {
-      if (generation != _saveGeneration) return;
-      final current = save;
-      if (current == null) return;
-      // This write is of the newest state, so a queued autosave of an older
-      // one has nothing left to contribute.
-      _pendingAutosave = null;
-      await _repo.save(current);
-    });
+    return _enqueueMutation(
+      () => _writeCurrentSaveInQueue(generation, force: true),
+    );
   }
 
   Future<void> updateLeague(
     LeagueState Function(LeagueState) transform, {
     bool autosave = true,
   }) {
-    final generation = _saveGeneration;
-    return _enqueueMutation(
-      () => _updateLeagueInQueue(
+    return _mutateSave<void>(
+      null,
+      (_) => _updateLeagueInQueue(
         transform,
-        generation: generation,
+        generation: _saveGeneration,
         autosave: autosave,
       ),
     );
@@ -427,6 +496,7 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     // each intermediate day.
     final shouldPersist = autosave && !_batchSimulationActive;
     if (generation == _saveGeneration) {
+      _stateRevision++;
       state = AsyncValue.data(next);
     }
     // The state is published before the write starts, so advancing a day does
@@ -443,6 +513,35 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   bool _autosaveScheduled = false;
   Object? _autosaveError;
   StackTrace? _autosaveStackTrace;
+  int? _failedSaveRevision;
+
+  Future<void> _writeCurrentSaveInQueue(
+    int generation, {
+    bool force = false,
+  }) async {
+    if (generation != _saveGeneration) return;
+    final current = save;
+    if (current == null || (!force && _stateRevision == _persistedRevision)) {
+      return;
+    }
+    final revision = _stateRevision;
+    _pendingAutosave = null;
+    try {
+      await _repo.save(current);
+      if (generation != _saveGeneration) return;
+      _persistedRevision = revision;
+      _autosaveError = null;
+      _autosaveStackTrace = null;
+      _failedSaveRevision = null;
+    } catch (error, stackTrace) {
+      if (generation == _saveGeneration) {
+        _autosaveError = error;
+        _autosaveStackTrace = stackTrace;
+        _failedSaveRevision = revision;
+      }
+      rethrow;
+    }
+  }
 
   void _scheduleAutosave(GameSave next, int generation) {
     // Only the newest state is worth writing; a day advanced while the
@@ -451,36 +550,38 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     if (_autosaveScheduled) return;
     _autosaveScheduled = true;
     _enqueueMutation(() async {
+      if (generation != _saveGeneration) return;
       _autosaveScheduled = false;
       final pending = _pendingAutosave;
       _pendingAutosave = null;
-      if (pending == null || generation != _saveGeneration) return;
-      await _repo.save(pending);
+      if (pending == null) return;
+      // Read inside the queue so metadata updated by save management is kept.
+      await _writeCurrentSaveInQueue(generation);
     }).then<void>(
       (_) {},
-      // Nothing awaits a background autosave, so its failure is kept here and
-      // rethrown by the next [flushPendingSave] rather than being lost.
-      onError: (Object error, StackTrace stackTrace) {
-        _autosaveError = error;
-        _autosaveStackTrace = stackTrace;
-      },
+      // The queued writer records the error before another queue entry runs.
+      onError: (Object error, StackTrace stackTrace) {},
     );
   }
 
-  /// Waits for any background autosave to reach the disk.
+  /// Persists mutations requested before this barrier, including mutations
+  /// whose background autosave has not yet been scheduled.
   ///
-  /// Rethrows a failure from an earlier background write, which is the only
-  /// point at which such a failure can be reported to the caller.
-  Future<void> flushPendingSave() async {
-    if (_pendingAutosave != null || _autosaveScheduled) {
-      await _enqueueMutation(() async {});
-    }
-    final error = _autosaveError;
-    if (error == null) return;
-    final stackTrace = _autosaveStackTrace;
-    _autosaveError = null;
-    _autosaveStackTrace = null;
-    Error.throwWithStackTrace(error, stackTrace ?? StackTrace.current);
+  /// An unsaved revision's failure remains visible until a successful write;
+  /// a newer successfully persisted revision supersedes an older failure.
+  Future<void> flushPendingSave() {
+    final generation = _saveGeneration;
+    return _enqueueMutation(() async {
+      if (generation != _saveGeneration) return;
+      final error = _autosaveError;
+      if (error != null && _failedSaveRevision == _stateRevision) {
+        Error.throwWithStackTrace(
+          error,
+          _autosaveStackTrace ?? StackTrace.current,
+        );
+      }
+      await _writeCurrentSaveInQueue(generation);
+    });
   }
 
   bool get _batchSimulationActive => _activeSimulationSession != null;
@@ -504,7 +605,7 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     // shared flag. The old loop will observe that it is no longer current
     // after its next await and cannot publish stale feedback or clear the new
     // session in its finally block.
-    _activeSimulationSession?.cancelRequested = true;
+    _activeSimulationSession?.cancel();
     final session = _SimulationSession(
       _nextSimulationRunId++,
       urgentInterruptionEnabled: urgentInterruptionEnabled,
@@ -514,12 +615,12 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   }
 
   bool _isCurrentSimulationSession(_SimulationSession session) =>
-      identical(_activeSimulationSession, session);
+      identical(_activeSimulationSession, session) && !session.cancelRequested;
 
   /// Requests that an in-progress batch stop as soon as possible (checked
   /// between simulated days).
   void cancelSimulation() {
-    _activeSimulationSession?.cancelRequested = true;
+    _activeSimulationSession?.cancel();
   }
 
   bool _hasPendingUrgent(LeagueState league) =>
@@ -572,13 +673,14 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     required bool blockOnPendingUrgent,
     bool resolveContractMarket = true,
   }) {
+    if (_careerTransition != null) return Future.value(null);
     final generation = _saveGeneration;
     // Read, simulate and publish are one queue entry. The simulation is now
     // awaited — it may be running on the worker isolate — and any mutation
     // that slipped in during that await would be overwritten by the day.
     return _enqueueMutation(() async {
       final current = save;
-      if (current == null) return null;
+      if (current == null || generation != _saveGeneration) return null;
 
       final step = await _runner.advanceDay(
         current.leagueState,
@@ -602,10 +704,11 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   Future<DaySimulationResult?> _advanceOneHour({
     required bool blockOnPendingUrgent,
   }) async {
+    if (_careerTransition != null) return null;
     final generation = _saveGeneration;
     final step = await _enqueueMutation(() async {
       final current = save;
-      if (current == null) return null;
+      if (current == null || generation != _saveGeneration) return null;
 
       final hour = await _runner.advanceHour(
         current.leagueState,
@@ -737,10 +840,11 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   }
 
   Future<void> _resolveCalendarEventInQueue(CalendarEventId eventId) {
+    if (_careerTransition != null) return Future<void>.value();
     final generation = _saveGeneration;
     return _enqueueMutation(() async {
       final current = save;
-      if (current == null) return;
+      if (current == null || generation != _saveGeneration) return;
       final resolved = await _runner.resolveCalendarEvent(
         current.leagueState,
         eventId,
@@ -759,10 +863,11 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   /// Returns `null` if either team can't be resolved (should not happen in
   /// practice; treated as a hard stop by the caller).
   Future<MatchResult?> _autoSimulatePlayerMatch(ScheduledMatch match) {
+    if (_careerTransition != null) return Future.value(null);
     final generation = _saveGeneration;
     return _enqueueMutation(() async {
       final current = save;
-      if (current == null) return null;
+      if (current == null || generation != _saveGeneration) return null;
 
       final auto = await _runner.autoSimulatePlayerMatch(
         current.leagueState,
@@ -788,20 +893,22 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     if (!_isCurrentSimulationSession(session)) return false;
 
     if (observer != null) {
-      await observer(
-        CalendarDaySimulationFeedback(
-          runId: session.runId,
-          sequence: sequence,
+      final feedback = CalendarDaySimulationFeedback(
+        runId: session.runId,
+        sequence: sequence,
+        week: week,
+        day: day,
+        results: _calendarFeedbackResults(
+          league: league,
           week: week,
           day: day,
-          results: _calendarFeedbackResults(
-            league: league,
-            week: week,
-            day: day,
-            results: result.simulatedResults,
-          ),
+          results: result.simulatedResults,
         ),
       );
+      await Future.any<void>([
+        Future<void>.sync(() => observer(feedback)),
+        session.cancelled.future,
+      ]);
     }
 
     // An observer may start a newer run while this session is suspended. In
@@ -809,7 +916,7 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     if (!_isCurrentSimulationSession(session)) return false;
 
     if (pacer != null) {
-      await pacer.completeDay();
+      await Future.any<void>([pacer.completeDay(), session.cancelled.future]);
       if (!_isCurrentSimulationSession(session)) return false;
     }
     return true;
@@ -964,6 +1071,12 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     CalendarDaySimulationObserver? observer,
     CalendarSimulationPacer? pacer,
   }) async {
+    if (_careerTransition != null) {
+      return const BatchSimulationResult(
+        stopReason: SimulationStopReason.cancelled,
+        daysSimulated: 0,
+      );
+    }
     final session = _startSimulationSession(
       urgentInterruptionEnabled: _readUrgentInterruptionEnabled(),
     );
@@ -983,10 +1096,14 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     } finally {
       // Only the session that still owns the controller may clear the active
       // marker or persist. A stale batch must not reset a newer batch's state.
-      if (identical(_activeSimulationSession, session)) {
-        pacer?.skipDay();
-        _activeSimulationSession = null;
-        await persist();
+      try {
+        if (identical(_activeSimulationSession, session)) {
+          pacer?.skipDay();
+          _activeSimulationSession = null;
+          await persist();
+        }
+      } finally {
+        session.done.complete();
       }
     }
   }
@@ -1051,13 +1168,14 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
         // target, but do not simulate the target day or publish incomplete
         // feedback for it.
         if (calendarPresentation && _hasScheduledUrgentDue(league)) {
-          final delivered = _deliverStartOfDay(
-            league,
-            hour: league.currentHour,
-            saveSeed: current.saveSeed,
-            resolveExpired: false,
+          await updateLeague(
+            (latest) => _deliverStartOfDay(
+              latest,
+              hour: latest.currentHour,
+              saveSeed: save!.saveSeed,
+              resolveExpired: false,
+            ),
           );
-          await updateLeague((_) => delivered);
           if (!_isCurrentSimulationSession(session)) {
             return BatchSimulationResult(
               stopReason: SimulationStopReason.cancelled,
@@ -1065,7 +1183,7 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
               lastResult: lastResult,
             );
           }
-          if (_shouldStopForUrgent(session, delivered)) {
+          if (_shouldStopForUrgent(session, save!.leagueState)) {
             return BatchSimulationResult(
               stopReason: SimulationStopReason.urgent,
               daysSimulated: daysSimulated,
@@ -1380,10 +1498,11 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   }
 
   Future<void> applyPlayerMatch(ScheduledMatch match, MatchResult result) {
+    if (_careerTransition != null) return Future<void>.value();
     final generation = _saveGeneration;
     return _enqueueMutation(() async {
       final current = save;
-      if (current == null) return;
+      if (current == null || generation != _saveGeneration) return;
       final applied = await _runner.applyPlayerMatchResult(
         current.leagueState,
         match,
@@ -1431,72 +1550,75 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     );
   }
 
-  Future<TradeOfferResult?> acceptTradeOffer(String offerId) async {
-    final current = save;
-    final actingTeamId = current?.leagueState.playerTeamId;
-    if (current == null || actingTeamId == null) return null;
-    final result = _draftTrades.isDraftOffer(current.leagueState, offerId)
-        ? _draftTrades.acceptOffer(
-            current.leagueState,
-            offerId,
-            actingTeamId: actingTeamId,
-          )
-        : _ref
-              .read(tradeServiceProvider)
-              .acceptOffer(
-                current.leagueState,
-                offerId,
-                actingTeamId: actingTeamId,
-              );
-    await updateLeague((_) => result.league);
-    return result;
+  Future<TradeOfferResult?> acceptTradeOffer(String offerId) {
+    return _mutateSave<TradeOfferResult?>(null, (current) async {
+      final actingTeamId = current.leagueState.playerTeamId;
+      if (actingTeamId == null) return null;
+      final result = _draftTrades.isDraftOffer(current.leagueState, offerId)
+          ? _draftTrades.acceptOffer(
+              current.leagueState,
+              offerId,
+              actingTeamId: actingTeamId,
+            )
+          : _ref
+                .read(tradeServiceProvider)
+                .acceptOffer(
+                  current.leagueState,
+                  offerId,
+                  actingTeamId: actingTeamId,
+                );
+      await _publishLeagueInQueue((_) => result.league);
+      return result;
+    });
   }
 
-  Future<TradeOfferResult?> rejectTradeOffer(String offerId) async {
-    final current = save;
-    final actingTeamId = current?.leagueState.playerTeamId;
-    if (current == null || actingTeamId == null) return null;
-    final result = _draftTrades.isDraftOffer(current.leagueState, offerId)
-        ? _draftTrades.rejectOffer(
-            current.leagueState,
-            offerId,
-            actingTeamId: actingTeamId,
-          )
-        : _ref
-              .read(tradeServiceProvider)
-              .rejectOffer(
-                current.leagueState,
-                offerId,
-                actingTeamId: actingTeamId,
-              );
-    await updateLeague((_) => result.league);
-    return result;
+  Future<TradeOfferResult?> rejectTradeOffer(String offerId) {
+    return _mutateSave<TradeOfferResult?>(null, (current) async {
+      final actingTeamId = current.leagueState.playerTeamId;
+      if (actingTeamId == null) return null;
+      final result = _draftTrades.isDraftOffer(current.leagueState, offerId)
+          ? _draftTrades.rejectOffer(
+              current.leagueState,
+              offerId,
+              actingTeamId: actingTeamId,
+            )
+          : _ref
+                .read(tradeServiceProvider)
+                .rejectOffer(
+                  current.leagueState,
+                  offerId,
+                  actingTeamId: actingTeamId,
+                );
+      await _publishLeagueInQueue((_) => result.league);
+      return result;
+    });
   }
 
   Future<TradeOfferResult?> counterTradeOffer(
     String offerId,
     TradeProposal proposal,
-  ) async {
-    final current = save;
-    final actingTeamId = current?.leagueState.playerTeamId;
-    if (current == null || actingTeamId == null) return null;
-    final result = _draftTrades.isDraftOffer(current.leagueState, offerId)
-        ? _draftTrades.counterOffer(
-            current.leagueState,
-            offerId,
-            proposal,
-            actingTeamId: actingTeamId,
-          )
-        : _ref
-              .read(tradeServiceProvider)
-              .counterOffer(
-                current.leagueState,
-                offerId,
-                proposal,
-                actingTeamId: actingTeamId,
-              );
-    if (result.changed) await updateLeague((_) => result.league);
-    return result;
+  ) {
+    return _mutateSave<TradeOfferResult?>(null, (current) async {
+      final actingTeamId = current.leagueState.playerTeamId;
+      if (actingTeamId == null) return null;
+      final result = _draftTrades.isDraftOffer(current.leagueState, offerId)
+          ? _draftTrades.counterOffer(
+              current.leagueState,
+              offerId,
+              proposal,
+              actingTeamId: actingTeamId,
+            )
+          : _ref
+                .read(tradeServiceProvider)
+                .counterOffer(
+                  current.leagueState,
+                  offerId,
+                  proposal,
+                  actingTeamId: actingTeamId,
+                );
+      if (result.changed) await _publishLeagueInQueue((_) => result.league);
+      return result;
+    });
   }
 
   Future<void> expireTradeOffers() async {
@@ -1605,14 +1727,15 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   }
 
   Future<void> makeDraftPick(String prospectId) async {
-    final seed = save?.saveSeed ?? 0;
+    final generation = _saveGeneration;
     await updateLeague(
       (l) => _season.advanceDraft(
         l,
         playerPickProspectId: prospectId,
-        saveSeed: seed,
+        saveSeed: save!.saveSeed,
       ),
     );
+    if (generation != _saveGeneration || _careerTransition != null) return;
     final league = save?.leagueState;
     if (league != null &&
         CalendarEventRegistry.isDone(
@@ -1624,13 +1747,15 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   }
 
   Future<void> simulateOneDraftPick() async {
-    final seed = save?.saveSeed ?? 0;
-    await updateLeague((l) => _season.advanceDraftOnePick(l, saveSeed: seed));
+    await updateLeague(
+      (l) => _season.advanceDraftOnePick(l, saveSeed: save!.saveSeed),
+    );
   }
 
   Future<void> simulateDraftToPlayerTurn() async {
-    final seed = save?.saveSeed ?? 0;
-    await updateLeague((l) => _season.advanceDraft(l, saveSeed: seed));
+    await updateLeague(
+      (l) => _season.advanceDraft(l, saveSeed: save!.saveSeed),
+    );
   }
 
   /// Submits a free-agent offer through the central contract-market
@@ -1638,18 +1763,20 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   Future<ContractReaction> offerFreeAgent(
     String freeAgentId,
     ContractOffer offer,
-  ) async {
-    final current = save;
-    if (current == null) return ContractReaction.hardReject;
-    final submission = _market.submitPlayerOffer(
-      league: current.leagueState,
-      playerId: freeAgentId,
-      offer: offer,
-      saveSeed: current.saveSeed,
-    );
-    if (submission == null) return ContractReaction.hardReject;
-    await updateLeague((_) => submission.league);
-    return submission.reaction;
+  ) {
+    return _mutateSave<ContractReaction>(ContractReaction.hardReject, (
+      current,
+    ) async {
+      final submission = _market.submitPlayerOffer(
+        league: current.leagueState,
+        playerId: freeAgentId,
+        offer: offer,
+        saveSeed: current.saveSeed,
+      );
+      if (submission == null) return ContractReaction.hardReject;
+      await _publishLeagueInQueue((_) => submission.league);
+      return submission.reaction;
+    });
   }
 
   /// Submits a player extension through the central contract-market
@@ -1657,169 +1784,175 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
   Future<ContractReaction> offerContractExtension(
     String playerId,
     ContractOffer offer,
-  ) async {
-    final current = save;
-    if (current == null) return ContractReaction.hardReject;
-    final submission = _market.submitPlayerOffer(
-      league: current.leagueState,
-      playerId: playerId,
-      offer: offer,
-      saveSeed: current.saveSeed,
-    );
-    if (submission == null) return ContractReaction.hardReject;
-    await updateLeague((_) => submission.league);
-    return submission.reaction;
+  ) {
+    return _mutateSave<ContractReaction>(ContractReaction.hardReject, (
+      current,
+    ) async {
+      final submission = _market.submitPlayerOffer(
+        league: current.leagueState,
+        playerId: playerId,
+        offer: offer,
+        saveSeed: current.saveSeed,
+      );
+      if (submission == null) return ContractReaction.hardReject;
+      await _publishLeagueInQueue((_) => submission.league);
+      return submission.reaction;
+    });
   }
 
-  Future<bool> finalizeContractNegotiation(String negotiationId) async {
-    final current = save;
-    if (current == null) return false;
-    final next = _market.finalizeNegotiation(
-      current.leagueState,
-      negotiationId,
-      saveSeed: current.saveSeed,
-    );
-    if (next == null) return false;
-    await updateLeague((_) => next);
-    return true;
+  Future<bool> finalizeContractNegotiation(String negotiationId) {
+    return _mutateSave<bool>(false, (current) async {
+      final next = _market.finalizeNegotiation(
+        current.leagueState,
+        negotiationId,
+        saveSeed: current.saveSeed,
+      );
+      if (next == null) return false;
+      await _publishLeagueInQueue((_) => next);
+      return true;
+    });
   }
 
   Future<bool> respondToContractCounter(
     String negotiationId, {
     required bool accept,
     ContractOffer? offer,
-  }) async {
-    final current = save;
-    if (current == null) return false;
-    final next = _market.resolveCounterResponse(
-      current.leagueState,
-      negotiationId,
-      accept: accept,
-      playerOffer: offer,
-      saveSeed: current.saveSeed,
-    );
-    if (next == null) return false;
-    await updateLeague((_) => next);
-    return true;
+  }) {
+    return _mutateSave<bool>(false, (current) async {
+      final next = _market.resolveCounterResponse(
+        current.leagueState,
+        negotiationId,
+        accept: accept,
+        playerOffer: offer,
+        saveSeed: current.saveSeed,
+      );
+      if (next == null) return false;
+      await _publishLeagueInQueue((_) => next);
+      return true;
+    });
   }
 
   Future<bool> respondToStaffCounter(
     String negotiationId, {
     required bool accept,
     StaffOffer? offer,
-  }) async {
-    final current = save;
-    if (current == null) return false;
-    final next = _market.resolveCounterResponse(
-      current.leagueState,
-      negotiationId,
-      accept: accept,
-      staffOffer: offer,
-      saveSeed: current.saveSeed,
-    );
-    if (next == null) return false;
-    await updateLeague((_) => next);
-    return true;
+  }) {
+    return _mutateSave<bool>(false, (current) async {
+      final next = _market.resolveCounterResponse(
+        current.leagueState,
+        negotiationId,
+        accept: accept,
+        staffOffer: offer,
+        saveSeed: current.saveSeed,
+      );
+      if (next == null) return false;
+      await _publishLeagueInQueue((_) => next);
+      return true;
+    });
   }
 
   Future<bool> submitQualifyingOffer(
     String playerId, {
     int? salary,
     int years = 1,
-  }) async {
-    final current = save;
-    final teamId = current?.leagueState.playerTeamId;
-    if (current == null || teamId == null) return false;
-    final next = _market.submitQualifyingOffer(
-      league: current.leagueState,
-      ownerTeamId: teamId,
-      playerId: playerId,
-      salary: salary,
-      years: years,
-    );
-    if (next == null) return false;
-    await updateLeague((_) => next);
-    return true;
+  }) {
+    return _mutateSave<bool>(false, (current) async {
+      final teamId = current.leagueState.playerTeamId;
+      if (teamId == null) return false;
+      final next = _market.submitQualifyingOffer(
+        league: current.leagueState,
+        ownerTeamId: teamId,
+        playerId: playerId,
+        salary: salary,
+        years: years,
+      );
+      if (next == null) return false;
+      await _publishLeagueInQueue((_) => next);
+      return true;
+    });
   }
 
-  Future<bool> declineQualifyingOffer(String playerId) async {
-    final current = save;
-    if (current == null || current.leagueState.playerTeamId == null) {
-      return false;
-    }
-    await updateLeague(
-      (league) => _market.declineQualifyingOffer(league, playerId),
-    );
-    return true;
+  Future<bool> declineQualifyingOffer(String playerId) {
+    return _mutateSave<bool>(false, (current) async {
+      if (current.leagueState.playerTeamId == null) {
+        return false;
+      }
+      await _publishLeagueInQueue(
+        (league) => _market.declineQualifyingOffer(league, playerId),
+      );
+      return true;
+    });
   }
 
-  Future<bool> submitRfaOfferSheet(String playerId, ContractOffer offer) async {
-    final current = save;
-    final teamId = current?.leagueState.playerTeamId;
-    if (current == null || teamId == null) return false;
-    final next = _market.submitOfferSheet(
-      league: current.leagueState,
-      offeringTeamId: teamId,
-      playerId: playerId,
-      offer: offer,
-      saveSeed: current.saveSeed,
-    );
-    if (next == null) return false;
-    await updateLeague((_) => next);
-    return true;
+  Future<bool> submitRfaOfferSheet(String playerId, ContractOffer offer) {
+    return _mutateSave<bool>(false, (current) async {
+      final teamId = current.leagueState.playerTeamId;
+      if (teamId == null) return false;
+      final next = _market.submitOfferSheet(
+        league: current.leagueState,
+        offeringTeamId: teamId,
+        playerId: playerId,
+        offer: offer,
+        saveSeed: current.saveSeed,
+      );
+      if (next == null) return false;
+      await _publishLeagueInQueue((_) => next);
+      return true;
+    });
   }
 
-  Future<bool> matchRfaOfferSheet(String sheetId) async {
-    final current = save;
-    if (current == null) return false;
-    final next = _market.matchOfferSheet(
-      current.leagueState,
-      sheetId,
-      saveSeed: current.saveSeed,
-    );
-    if (next == null) return false;
-    await updateLeague((_) => next);
-    return true;
+  Future<bool> matchRfaOfferSheet(String sheetId) {
+    return _mutateSave<bool>(false, (current) async {
+      final next = _market.matchOfferSheet(
+        current.leagueState,
+        sheetId,
+        saveSeed: current.saveSeed,
+      );
+      if (next == null) return false;
+      await _publishLeagueInQueue((_) => next);
+      return true;
+    });
   }
 
-  Future<bool> declineRfaOfferSheet(String sheetId) async {
-    final current = save;
-    if (current == null) return false;
-    await updateLeague((league) => _market.declineOfferSheet(league, sheetId));
-    return true;
+  Future<bool> declineRfaOfferSheet(String sheetId) {
+    return _mutateSave<bool>(false, (current) async {
+      await _publishLeagueInQueue(
+        (league) => _market.declineOfferSheet(league, sheetId),
+      );
+      return true;
+    });
   }
 
-  Future<bool> signDraftedRight(String rightId) async {
-    final current = save;
-    if (current == null) return false;
-    final next = _market.signDraftedRight(
-      current.leagueState,
-      rightId,
-      saveSeed: current.saveSeed,
-    );
-    if (next == null) return false;
-    await updateLeague((_) => next);
-    return true;
+  Future<bool> signDraftedRight(String rightId) {
+    return _mutateSave<bool>(false, (current) async {
+      final next = _market.signDraftedRight(
+        current.leagueState,
+        rightId,
+        saveSeed: current.saveSeed,
+      );
+      if (next == null) return false;
+      await _publishLeagueInQueue((_) => next);
+      return true;
+    });
   }
 
   StaffService get _staff => _ref.read(staffServiceProvider);
 
   /// Submits a staff offer through the central contract-market resolver.
-  Future<StaffReaction> offerStaff(
-    StaffMember candidate,
-    StaffOffer offer,
-  ) async {
-    final current = save;
-    if (current == null) return StaffReaction.hardReject;
-    final submission = _market.submitStaffOffer(
-      league: current.leagueState,
-      candidate: candidate,
-      offer: offer,
-      saveSeed: current.saveSeed,
-    );
-    if (submission == null) return StaffReaction.hardReject;
-    await updateLeague((_) => submission.league);
-    return submission.reaction;
+  Future<StaffReaction> offerStaff(StaffMember candidate, StaffOffer offer) {
+    return _mutateSave<StaffReaction>(StaffReaction.hardReject, (
+      current,
+    ) async {
+      final submission = _market.submitStaffOffer(
+        league: current.leagueState,
+        candidate: candidate,
+        offer: offer,
+        saveSeed: current.saveSeed,
+      );
+      if (submission == null) return StaffReaction.hardReject;
+      await _publishLeagueInQueue((_) => submission.league);
+      return submission.reaction;
+    });
   }
 
   /// Compatibility wrapper for callers that only need to know whether the
@@ -1830,14 +1963,15 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     return reaction == StaffReaction.accept;
   }
 
-  Future<bool> fireStaff(StaffRole role) async {
-    final current = save;
-    final team = current?.leagueState.playerTeam;
-    if (current == null || team == null) return false;
-    final updatedTeam = _staff.fire(team, role);
-    if (updatedTeam == team) return false;
-    await updateLeague((league) => league.updateTeam(updatedTeam));
-    return true;
+  Future<bool> fireStaff(StaffRole role) {
+    return _mutateSave<bool>(false, (current) async {
+      final team = current.leagueState.playerTeam;
+      if (team == null) return false;
+      final updatedTeam = _staff.fire(team, role);
+      if (updatedTeam == team) return false;
+      await _publishLeagueInQueue((league) => league.updateTeam(updatedTeam));
+      return true;
+    });
   }
 
   ScoutingService get _scouting => _ref.read(scoutingServiceProvider);
@@ -1859,42 +1993,50 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
 
   /// Saves player-selected Combine targets only after Scout Report and before
   /// the automatic Combine event.
-  Future<bool> setCombineAssignments(List<String> prospectIds) async {
-    final current = save;
-    final league = current?.leagueState;
-    final team = league?.playerTeam;
-    final draftClass = league?.currentSeason.draftState?.draftClass;
-    if (current == null ||
-        league == null ||
-        team == null ||
-        draftClass == null) {
-      return false;
-    }
-    final season = league.currentSeason;
-    if (!season.scoutReportDone || season.combineDone) return false;
-    if (team.scouting.watchlistProspectIds.isEmpty) return false;
-    final coverage = team.staff.scout?.attributes.coverage ?? 0.0;
-    final scouting = _scouting.setCombineAssignments(
-      team.scouting,
-      prospectIds,
-      coverageStars: coverage,
-      availableProspectIds: draftClass.prospects.map((prospect) => prospect.id),
-    );
-    await updateLeague(
-      (state) => state.updateTeam(team.copyWith(scouting: scouting)),
-    );
-    return true;
+  Future<bool> setCombineAssignments(List<String> prospectIds) {
+    return _mutateSave<bool>(false, (current) async {
+      final league = current.leagueState;
+      final team = league.playerTeam;
+      final draftClass = league.currentSeason.draftState?.draftClass;
+      if (team == null || draftClass == null) {
+        return false;
+      }
+      final season = league.currentSeason;
+      if (!season.scoutReportDone || season.combineDone) return false;
+      if (team.scouting.watchlistProspectIds.isEmpty) return false;
+      final coverage = team.staff.scout?.attributes.coverage ?? 0.0;
+      final scouting = _scouting.setCombineAssignments(
+        team.scouting,
+        prospectIds,
+        coverageStars: coverage,
+        availableProspectIds: draftClass.prospects.map(
+          (prospect) => prospect.id,
+        ),
+      );
+      await _publishLeagueInQueue(
+        (state) => state.updateTeam(team.copyWith(scouting: scouting)),
+      );
+      return true;
+    });
   }
 
-  /// Clears the active save immediately, then leaves a marker in the mutation
-  /// queue so mutations requested after the clear cannot overtake earlier
-  /// repository work. The generation check in those mutations prevents a late
-  /// completion from publishing the cleared save again.
-  void clear() {
+  /// Stops the active batch and persists its final state before leaving.
+  /// Repeated clicks share the same operation; a write failure keeps the save.
+  Future<void> clear() {
+    if (_leavingCareer && _careerTransition != null) return _careerTransition!;
+    return _changeCareer(() async => null, leaving: true);
+  }
+
+  /// Called only inside save management, after an explicitly requested delete.
+  /// It must not save the deleted career or enqueue work behind itself.
+  void clearDeletedSave(String id) {
+    if (_saveManagementGeneration != _saveGeneration || save?.meta.id != id) {
+      return;
+    }
+    cancelSimulation();
     _saveGeneration++;
-    _inFlightMessageOperations.clear();
+    _resetPersistence();
     state = const AsyncValue.data(null);
-    _enqueueMutation<void>(() async {});
   }
 }
 
@@ -1903,7 +2045,14 @@ final class _SimulationSession {
 
   final int runId;
   final bool urgentInterruptionEnabled;
-  bool cancelRequested = false;
+  final cancelled = Completer<void>();
+  final done = Completer<void>();
+
+  bool get cancelRequested => cancelled.isCompleted;
+
+  void cancel() {
+    if (!cancelled.isCompleted) cancelled.complete();
+  }
 }
 
 final gameControllerProvider =

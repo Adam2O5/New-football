@@ -83,6 +83,70 @@ void main() {
     expect(controller.save!.leagueState.currentDay, 2);
   });
 
+  test('flush includes a mutation queued before its autosave exists', () async {
+    final queueGate = Completer<void>();
+    final writeGate = Completer<void>();
+    final writeStarted = Completer<void>();
+    repository.writeGate = writeGate;
+    repository.writeStarted = writeStarted;
+    final blocking = controller.enqueueSaveManagement(() => queueGate.future);
+    final change = controller.updateLeague(
+      (league) => league.copyWith(currentDay: 2),
+    );
+    var flushed = false;
+    final flush = controller.flushPendingSave().then((_) => flushed = true);
+
+    queueGate.complete();
+    await blocking;
+    await change;
+    await writeStarted.future;
+    await Future<void>.value();
+    final flushedBeforeRelease = flushed;
+    writeGate.complete();
+    await flush;
+    await controller.enqueueSaveManagement(() async {});
+
+    expect(flushedBeforeRelease, isFalse);
+    expect(repository.game.leagueState.currentDay, 2);
+  });
+
+  test('flush keeps reporting a failure while the state is unsaved', () async {
+    final error = StateError('write failed');
+    repository.writeError = error;
+    await controller.updateLeague((league) => league.copyWith(currentDay: 2));
+    await controller.enqueueSaveManagement(() async {});
+
+    await expectLater(controller.flushPendingSave(), throwsA(same(error)));
+    await expectLater(controller.flushPendingSave(), throwsA(same(error)));
+    expect(repository.game.leagueState.currentDay, 1);
+  });
+
+  test('a successful newer autosave supersedes an older failure', () async {
+    repository.writeError = StateError('first write failed');
+    await controller.updateLeague((league) => league.copyWith(currentDay: 2));
+    await controller.enqueueSaveManagement(() async {});
+    repository.writeError = null;
+    await controller.updateLeague((league) => league.copyWith(currentDay: 3));
+    await controller.enqueueSaveManagement(() async {});
+
+    await expectLater(controller.flushPendingSave(), completes);
+    expect(repository.game.leagueState.currentDay, 3);
+  });
+
+  test(
+    'manual retry clears the failure after saving the current state',
+    () async {
+      repository.writeError = StateError('first write failed');
+      await controller.updateLeague((league) => league.copyWith(currentDay: 2));
+      await controller.enqueueSaveManagement(() async {});
+      repository.writeError = null;
+
+      await controller.persist();
+      await expectLater(controller.flushPendingSave(), completes);
+      expect(repository.game.leagueState.currentDay, 2);
+    },
+  );
+
   test(
     'F03: leaving the career persists a published queued autosave',
     () async {
@@ -99,9 +163,7 @@ void main() {
       await started.future;
       expect(controller.save!.leagueState.currentDay, 2);
 
-      // The current menu calls clear(). Follow the public leave operation if
-      // stage 1 introduces a dedicated asynchronous method for this purpose.
-      final leaving = Future<void>.sync(controller.clear);
+      final leaving = controller.clear();
       gate.complete();
       await blocking;
       await leaving;

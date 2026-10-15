@@ -109,10 +109,7 @@ class SaveManagementCoordinator {
     final controller = _ref.read(gameControllerProvider.notifier);
     return controller.enqueueSaveManagement(() async {
       await _ref.read(saveRepositoryProvider).delete(saveId);
-      final current = _ref.read(gameControllerProvider).value;
-      if (current?.meta.id == saveId) {
-        controller.clear();
-      }
+      controller.clearDeletedSave(saveId);
       _invalidateSaveLists();
     });
   }

@@ -599,15 +599,16 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
     Player player,
     AssignedRole role,
   ) async {
-    final updatedRoster = team.roster
-        .map(
-          (p) => p.id == player.id
-              ? p.copyWith(state: p.state.copyWith(role: role))
-              : p,
-        )
-        .toList();
     await ref.read(gameControllerProvider.notifier).updateLeague((league) {
-      final currentTeam = league.playerTeam!;
+      final currentTeam = league.playerTeam;
+      if (currentTeam == null || currentTeam.id != team.id) return league;
+      final updatedRoster = currentTeam.roster
+          .map(
+            (p) => p.id == player.id
+                ? p.copyWith(state: p.state.copyWith(role: role))
+                : p,
+          )
+          .toList();
       return league.updateTeam(currentTeam.copyWith(roster: updatedRoster));
     });
     if (!context.mounted) return;
@@ -659,77 +660,84 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
     _trySwap(context, team, current, player.id);
   }
 
-  void _trySwap(BuildContext context, Team team, String idA, String idB) {
+  Future<void> _trySwap(
+    BuildContext context,
+    Team team,
+    String idA,
+    String idB,
+  ) async {
     if (idA == idB) return;
     final l10n = AppLocalizations.of(context)!;
-    final playerA = team.roster.where((p) => p.id == idA).firstOrNull;
-    final playerB = team.roster.where((p) => p.id == idB).firstOrNull;
-    if (playerA == null || playerB == null) return;
+    String? notice;
+    var swapped = false;
+    await ref.read(gameControllerProvider.notifier).updateLeague((league) {
+      final currentTeam = league.playerTeam;
+      if (currentTeam == null || currentTeam.id != team.id) return league;
+      final playerA = currentTeam.roster.where((p) => p.id == idA).firstOrNull;
+      final playerB = currentTeam.roster.where((p) => p.id == idB).firstOrNull;
+      if (playerA == null || playerB == null) return league;
 
-    final zoneA = rosterZoneOf(team, idA);
-    final zoneB = rosterZoneOf(team, idB);
+      final zoneA = rosterZoneOf(currentTeam, idA);
+      final zoneB = rosterZoneOf(currentTeam, idB);
 
-    bool entersMatchdaySquad(RosterZone zone) =>
-        zone == RosterZone.xi || zone == RosterZone.bench;
+      bool entersMatchdaySquad(RosterZone zone) =>
+          zone == RosterZone.xi || zone == RosterZone.bench;
 
-    String unavailableMessage(Player player) =>
-        (player.state.injury?.daysRemaining ?? 0) > 0
-        ? l10n.squad_cannotFieldInjured
-        : l10n.matchday_failurePlayerUnavailable;
+      String unavailableMessage(Player player) =>
+          (player.state.injury?.daysRemaining ?? 0) > 0
+          ? l10n.squad_cannotFieldInjured
+          : l10n.matchday_failurePlayerUnavailable;
 
-    if (entersMatchdaySquad(zoneB) && !playerA.isAvailable) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(unavailableMessage(playerA))));
-      return;
-    }
-    if (entersMatchdaySquad(zoneA) && !playerB.isAvailable) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(unavailableMessage(playerB))));
-      return;
-    }
-
-    final lineup = [...team.lineupPlayerIds];
-    final bench = [...team.benchPlayerIds];
-
-    void removeFromZone(RosterZone zone, String id) {
-      switch (zone) {
-        case RosterZone.xi:
-          lineup.remove(id);
-        case RosterZone.bench:
-          bench.remove(id);
-        case RosterZone.reserve:
-          break;
+      if (entersMatchdaySquad(zoneB) && !playerA.isAvailable) {
+        notice = unavailableMessage(playerA);
+        return league;
       }
-    }
-
-    void addToZone(RosterZone zone, String id) {
-      switch (zone) {
-        case RosterZone.xi:
-          lineup.add(id);
-        case RosterZone.bench:
-          bench.add(id);
-        case RosterZone.reserve:
-          break;
+      if (entersMatchdaySquad(zoneA) && !playerB.isAvailable) {
+        notice = unavailableMessage(playerB);
+        return league;
       }
-    }
 
-    removeFromZone(zoneA, idA);
-    removeFromZone(zoneB, idB);
-    addToZone(zoneB, idA);
-    addToZone(zoneA, idB);
+      final lineup = [...currentTeam.lineupPlayerIds];
+      final bench = [...currentTeam.benchPlayerIds];
 
-    final newTeam = team.copyWith(
-      lineupPlayerIds: lineup,
-      benchPlayerIds: bench,
-    );
-    ref
-        .read(gameControllerProvider.notifier)
-        .updateLeague((l) => l.updateTeam(newTeam));
+      void removeFromZone(RosterZone zone, String id) {
+        switch (zone) {
+          case RosterZone.xi:
+            lineup.remove(id);
+          case RosterZone.bench:
+            bench.remove(id);
+          case RosterZone.reserve:
+            break;
+        }
+      }
+
+      void addToZone(RosterZone zone, String id) {
+        switch (zone) {
+          case RosterZone.xi:
+            lineup.add(id);
+          case RosterZone.bench:
+            bench.add(id);
+          case RosterZone.reserve:
+            break;
+        }
+      }
+
+      removeFromZone(zoneA, idA);
+      removeFromZone(zoneB, idB);
+      addToZone(zoneB, idA);
+      addToZone(zoneA, idB);
+
+      final newTeam = currentTeam.copyWith(
+        lineupPlayerIds: lineup,
+        benchPlayerIds: bench,
+      );
+      swapped = true;
+      return league.updateTeam(newTeam);
+    });
+    if (!context.mounted || (!swapped && notice == null)) return;
     ScaffoldMessenger.of(
       context,
-    ).showSnackBar(SnackBar(content: Text(l10n.squad_swappedPlaces)));
+    ).showSnackBar(SnackBar(content: Text(notice ?? l10n.squad_swappedPlaces)));
   }
 }
 

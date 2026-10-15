@@ -30,6 +30,7 @@ class _NewGameScreenState extends ConsumerState<NewGameScreen> {
   }
 
   Future<void> _create(AppLocalizations l10n) async {
+    if (_creating) return;
     final teamId = _selectedTeamId;
     final name = _nameCtrl.text.trim();
     if (teamId == null || name.isEmpty) {
@@ -39,19 +40,19 @@ class _NewGameScreenState extends ConsumerState<NewGameScreen> {
       return;
     }
     setState(() => _creating = true);
-    await ref
-        .read(gameControllerProvider.notifier)
-        .createNewGame(NewGameRequest(saveName: name, playerTeamId: teamId));
-    if (!mounted) return;
-    setState(() => _creating = false);
-    final err = ref.read(gameControllerProvider).hasError;
-    if (err) {
+    try {
+      await ref
+          .read(gameControllerProvider.notifier)
+          .createNewGame(NewGameRequest(saveName: name, playerTeamId: teamId));
+      if (mounted) context.go('/game');
+    } catch (_) {
+      if (!mounted) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(l10n.newGame_createFailed)));
-      return;
+    } finally {
+      if (mounted) setState(() => _creating = false);
     }
-    context.go('/game');
   }
 
   @override

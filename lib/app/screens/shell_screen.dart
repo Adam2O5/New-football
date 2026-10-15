@@ -30,6 +30,48 @@ class ShellScreen extends ConsumerStatefulWidget {
 }
 
 class _ShellScreenState extends ConsumerState<ShellScreen> {
+  bool _leaving = false;
+  bool _saving = false;
+
+  Future<void> _leaveGame() async {
+    if (_leaving) return;
+    setState(() => _leaving = true);
+    try {
+      await ref.read(gameControllerProvider.notifier).clear();
+      if (mounted) context.go('/');
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.loadGame_writeFailed),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _leaving = false);
+    }
+  }
+
+  Future<void> _saveGame() async {
+    if (_saving) return;
+    setState(() => _saving = true);
+    try {
+      await ref.read(gameControllerProvider.notifier).persist();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context)!.common_save)),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(AppLocalizations.of(context)!.loadGame_writeFailed),
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
   static const _tabs = [
     HomeScreen(),
     CalendarScreen(),
@@ -97,83 +139,78 @@ class _ShellScreenState extends ConsumerState<ShellScreen> {
           secondaryColor: branding.secondaryColor,
           showClubStripe: !useLegacyColorTheme,
         ),
-          actions: [
-            IconButton(
-              tooltip: l10n.shell_settingsTooltip,
-              onPressed: () => context.push('/settings'),
-              icon: const Icon(Icons.settings_outlined),
-            ),
-            IconButton(
-              tooltip: l10n.shell_saveTooltip,
-              onPressed: () async {
-                await ref.read(gameControllerProvider.notifier).persist();
-                if (context.mounted) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text(l10n.common_save)));
-                }
-              },
-              icon: const Icon(Icons.save_outlined),
-            ),
-            IconButton(
-              tooltip: l10n.shell_menuTooltip,
-              onPressed: () {
-                ref.read(gameControllerProvider.notifier).clear();
-                context.go('/');
-              },
-              icon: const Icon(Icons.logout),
-            ),
-          ],
-        ),
-        body: ScreenBackground(
+        actions: [
+          IconButton(
+            tooltip: l10n.shell_settingsTooltip,
+            onPressed: _leaving ? null : () => context.push('/settings'),
+            icon: const Icon(Icons.settings_outlined),
+          ),
+          IconButton(
+            tooltip: l10n.shell_saveTooltip,
+            onPressed: _leaving || _saving ? null : _saveGame,
+            icon: const Icon(Icons.save_outlined),
+          ),
+          IconButton(
+            tooltip: l10n.shell_menuTooltip,
+            onPressed: _leaving ? null : _leaveGame,
+            icon: const Icon(Icons.logout),
+          ),
+        ],
+      ),
+      body: ScreenBackground(
+        child: AbsorbPointer(
+          absorbing: _leaving,
           child: IndexedStack(index: index, children: _tabs),
         ),
-        bottomNavigationBar: NavigationBar(
-          selectedIndex: index,
-          onDestinationSelected: (i) {
-            ref.read(shellTabIndexProvider.notifier).state = i;
-          },
-          destinations: [
-            NavigationDestination(
-              icon: const Icon(Icons.home_outlined),
-              selectedIcon: const Icon(Icons.home),
-              label: l10n.shell_tab_home,
+      ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: index,
+        onDestinationSelected: _leaving
+            ? null
+            : (i) {
+                ref.read(shellTabIndexProvider.notifier).state = i;
+              },
+        destinations: [
+          NavigationDestination(
+            icon: const Icon(Icons.home_outlined),
+            selectedIcon: const Icon(Icons.home),
+            label: l10n.shell_tab_home,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.calendar_month_outlined),
+            selectedIcon: const Icon(Icons.calendar_month),
+            label: l10n.shell_tab_calendar,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.groups_outlined),
+            selectedIcon: const Icon(Icons.groups),
+            label: l10n.shell_tab_squad,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.table_chart_outlined),
+            selectedIcon: const Icon(Icons.table_chart),
+            label: l10n.shell_tab_standings,
+          ),
+          NavigationDestination(
+            icon: const Icon(Icons.more_horiz_outlined),
+            selectedIcon: const Icon(Icons.more_horiz),
+            label: l10n.shell_tab_other,
+          ),
+          NavigationDestination(
+            icon: _InboxBadge(
+              unreadCount: league.inbox.unread.length,
+              urgent: league.inbox.pendingUrgent.isNotEmpty,
+              icon: Icons.mail_outline,
             ),
-            NavigationDestination(
-              icon: const Icon(Icons.calendar_month_outlined),
-              selectedIcon: const Icon(Icons.calendar_month),
-              label: l10n.shell_tab_calendar,
+            selectedIcon: _InboxBadge(
+              unreadCount: league.inbox.unread.length,
+              urgent: league.inbox.pendingUrgent.isNotEmpty,
+              icon: Icons.mail,
             ),
-            NavigationDestination(
-              icon: const Icon(Icons.groups_outlined),
-              selectedIcon: const Icon(Icons.groups),
-              label: l10n.shell_tab_squad,
-            ),
-            NavigationDestination(
-              icon: const Icon(Icons.table_chart_outlined),
-              selectedIcon: const Icon(Icons.table_chart),
-              label: l10n.shell_tab_standings,
-            ),
-            NavigationDestination(
-              icon: const Icon(Icons.more_horiz_outlined),
-              selectedIcon: const Icon(Icons.more_horiz),
-              label: l10n.shell_tab_other,
-            ),
-            NavigationDestination(
-              icon: _InboxBadge(
-                unreadCount: league.inbox.unread.length,
-                urgent: league.inbox.pendingUrgent.isNotEmpty,
-                icon: Icons.mail_outline,
-              ),
-              selectedIcon: _InboxBadge(
-                unreadCount: league.inbox.unread.length,
-                urgent: league.inbox.pendingUrgent.isNotEmpty,
-                icon: Icons.mail,
-              ),
-              label: l10n.shell_tab_inbox,
-            ),
-          ],
-        ),
+            label: l10n.shell_tab_inbox,
+          ),
+        ],
+      ),
     );
 
     if (useLegacyColorTheme) return scaffold;

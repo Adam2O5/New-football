@@ -57,8 +57,22 @@ class _NewFootballAppState extends ConsumerState<NewFootballApp> {
     super.dispose();
   }
 
-  void _flushPendingSave() {
-    ref.read(gameControllerProvider.notifier).flushPendingSave();
+  Future<void> _flushPendingSave() async {
+    try {
+      await ref.read(gameControllerProvider.notifier).flushPendingSave();
+    } catch (error, stackTrace) {
+      // The controller keeps the failure until a successful retry. Lifecycle
+      // callbacks have no screen on which to present a retry action.
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: error,
+          stack: stackTrace,
+          context: ErrorDescription(
+            'while saving the active career on app lifecycle change',
+          ),
+        ),
+      );
+    }
   }
 
   @override

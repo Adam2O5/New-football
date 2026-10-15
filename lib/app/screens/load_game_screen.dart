@@ -28,6 +28,7 @@ class LoadGameScreen extends ConsumerStatefulWidget {
 
 class _LoadGameScreenState extends ConsumerState<LoadGameScreen> {
   final Set<String> _inFlightActions = <String>{};
+  int _loadRequestId = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -314,15 +315,19 @@ class _LoadGameScreenState extends ConsumerState<LoadGameScreen> {
     String saveId,
     AppLocalizations l10n,
   ) async {
-    await ref.read(gameControllerProvider.notifier).loadGame(saveId);
-    if (!context.mounted) return;
-    if (ref.read(gameControllerProvider).hasError) {
+    final requestId = ++_loadRequestId;
+    try {
+      await ref.read(gameControllerProvider.notifier).loadGame(saveId);
+      if (!context.mounted || requestId != _loadRequestId) return;
+      if (ref.read(gameControllerProvider).value?.meta.id == saveId) {
+        context.go('/game');
+      }
+    } catch (_) {
+      if (!context.mounted || requestId != _loadRequestId) return;
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text(l10n.loadGame_loadFailed)));
-      return;
     }
-    context.go('/game');
   }
 
   Future<void> _confirmDeleteSave(
