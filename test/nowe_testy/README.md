@@ -1,6 +1,59 @@
-# Nowe testy — etapy 0, 1, 2 i 3
+# Nowe testy — etapy 0, 1, 2, 3 i 4
 
-Etapy 0, 1 i 2 zostały zaakceptowane i zapisane przez użytkownika: `dc6e454`, `b4048fb`, `553198c` oraz końcowy etap 2 w `f8e45e1`. **Etap 3 (I11–I15) jest ukończony i przygotowany do review, bez commita.** Etapu 4 nie rozpoczęto. Wyniki wcześniejszych etapów poniżej są historycznym punktem odniesienia.
+Etapy 0–3 zostały zaakceptowane i zapisane przez użytkownika: `dc6e454`, `b4048fb`, `553198c`, `f8e45e1` oraz końcowy etap 3 w `5762f4f`. **Etap 4 (R01–R03) jest ukończony i przygotowany do review, bez commita.** Etapu 5 nie rozpoczęto. Wyniki wcześniejszych etapów poniżej są historycznym punktem odniesienia.
+
+## Wynik etapu 4 — 16 października 2026
+
+- **131 testów przechodzi:** 125 wcześniejszych scenariuszy i 6 scenariuszy podziału deklaracji. Uruchamiano wyłącznie `test/nowe_testy/`. Analiza kodu aplikacji w dozwolonym zakresie, przeniesionych deklaracji i nowych testów: **bez uwag**.
+- Stan wyjściowy: `5762f4f`, czyste repozytorium. Wzorzec danych utrwalono przed podziałami. Pierwszych pięć scenariuszy przeszło przed zmianami oraz osobno po R01, R02 i R03; końcowy zestaw obejmuje dodatkowo pełny graf zapisu z sekcjami JSON sprzed przeniesienia.
+- **Schemat pozostaje 26.** Nazwy typów, konstruktory, metody, wartości domyślne i format JSON nie zmieniły się. Zapis z etapu 3 może być używany dalej; ten etap nie wymaga nowej kariery ani migracji.
+- Kompilacja `flutter build bundle --debug --no-pub`: **exit code 0**, zaktualizowany `build/flutter_assets/kernel_blob.bin`. Nie budowano instalatora ani wersji produkcyjnej i nie wykonywano profilu na urządzeniu.
+- Zmiany produkcyjne obejmują trzy pierwotne pliki, 20 nowych plików ręcznie pisanych oraz wynik regeneracji modeli. Nie zmieniano implementacji AI/silnika, istniejących osobnych grup balansu, assets ani starych testów. Zamrożony raport audytu pozostaje bez zmian.
+
+### R01 / S22 — modele draftu, postseason i sezonu
+
+- `draft_models.dart` skrócono z 280 do **8 linii** eksportów. Dotychczasowi odbiorcy, w tym eksport przez `core.dart`, zachowują dostęp do wszystkich 11 modeli i `ProspectX`.
+- Nowe pliki w `lib/core/models/`: `prospect.dart`, `draft_class.dart`, `draft_state.dart`, `lottery_result.dart`, `play_in_models.dart`, `playoff_bracket.dart`, `season.dart`, `season_history.dart`.
+- `ProspectX` pozostaje przy `Prospect`; `MockDraftBoard` przy `DraftClass`; `CompletedDraft` przy `DraftState`; oba typy play-in są razem. Zależności nowych bibliotek wskazują bezpośrednio właściwe modele.
+- Zregenerowano po dwa pliki Freezed/JSON dla ośmiu nowych bibliotek. Dwa nieużywane pliki generowane `draft_models.freezed.dart` / `draft_models.g.dart` usunięto. Nie analizowano ich treści ani nie edytowano ręcznie wyników generatora.
+
+### R02 / S13 — grupy balansu
+
+- `balance_config.dart` skrócono z 1016 do **77 linii**. Pozostają agregat, `BalanceConfig.defaults` oraz importy/eksporty grup.
+- Nowe pliki w `lib/core/balance/`: `player_balance.dart`, `finance_balance.dart`, `staff_balance.dart`, `draft_awards_balance.dart`, `development_balance.dart`, `contract_neg_balance.dart`, `team_calendar_balance.dart`.
+- Przeniesiono 13 całych klas grup; prywatne tabele pozostały przy swoich klasach. Zachowano `const`, sygnatury, pola, wartości i metody. Odbiorcy nadal mogą importować wszystkie grupy z `balance_config.dart`.
+
+### R03 / S07 — katalog klubów i pule nazw
+
+- `seed_data.dart` skrócono z 1335 do **41 linii**. Zachowano publiczne `namePools`, `NamePool` i eksport katalogów klubów.
+- `seed_clubs.dart` zawiera obie dotychczasowe listy klubów. Jest osobną biblioteką, dostępną bez generowania świata i bez importowania pul nazw; dalsze wykorzystanie katalogu w I17 pozostaje w późniejszym etapie.
+- `seed_name_pools_europe.dart`, `seed_name_pools_americas.dart`, `seed_name_pools_africa.dart`, `seed_name_pools_asia.dart` zawierają regionalne stałe. Są częściami biblioteki `seed_data.dart`, więc współdzielą `NamePool`, bez dodatkowych publicznych typów lub cyklicznych importów. Europejski plik ma **628 linii**; jest największym ręcznie pisanym plikiem powstałym w tym etapie.
+- Mapa narodowości odwołuje się do regionalnych stałych w pierwotnej kolejności kluczy. Zachowano teksty, kolejność imion i nazwisk, kolejność klubów oraz stałość danych.
+
+### Weryfikacja i pliki pomocnicze
+
+`declaration_split_test.dart` obejmuje sześć scenariuszy: JSON wszystkich 11 modeli, wynik konwersji prospecta wraz z kolejnym odczytem RNG, reprezentatywne obliczenia balansu, generację świata dla seedów 123/456 i katalog danych, odczyt JSON wszystkich modeli przez dotychczasowy import oraz pełny graf zapisu z utrwalonymi sekcjami modeli.
+
+`support/stage_four_snapshot.dart` buduje dane tych testów. Jego jawny punkt wejścia służy do zapisania wzorca — użyto go przed zmianami. `support/stage_four_baseline.json` zawiera ten wzorzec: JSON modeli, wynik konwersji, dane balansu, katalog klubów i kolejność narodowości oraz skróty dużych zbiorów danych. Zwykłe testy odczytują wzorzec i nie aktualizują go. Są to wyłącznie pliki pomocnicze nowych testów, bez udziału w aplikacji.
+
+Dodatkowe porównanie ze źródłami w `5762f4f` potwierdziło identyczną treść 11 modeli, `ProspectX`, 14 klas balansu z agregatem i klasy `NamePool`; 23 literały pul nazw różnią się tylko wcięciami. Wynik zapisano w `stage-4-mechanical-check.txt`.
+
+Logi w `reports/lib-audit-2026-10-13/`: `stage-4-before-tests.txt`, `stage-4-generation.txt`, `stage-4-r01-tests.txt`, `stage-4-r02-tests.txt`, `stage-4-r03-tests.txt`, `stage-4-mechanical-check.txt`, `stage-4-final-analyze.txt`, `stage-4-final-tests.txt`, `stage-4-final-build.txt`.
+
+### Ręczne review etapu 4
+
+1. Przejrzyj osobno trzy grupy plików opisane powyżej. W deklaracjach powinny występować przeniesienia; zmianami na granicach plików są importy, eksporty i dyrektywy `part`. Nie ma nowych reguł gry.
+2. Możesz wczytać zapis z etapu 3 (schemat 26). Otwórz skład, skauting/draft oraz kalendarz. Sprawdź dostępne dane, zapisz, wyjdź do menu i wczytaj ponownie.
+3. Utwórz nową karierę i sprawdź katalog klubów, nazwiska zawodników oraz klasę draftu. Dokładną zgodność generacji z ustalonymi seedami sprawdzają testy, bez zależności od ręcznego porównywania losowych karier.
+
+Polecenia odbioru:
+
+```powershell
+flutter test --no-pub test/nowe_testy --concurrency=1 --reporter expanded
+flutter build bundle --debug --no-pub
+```
+
+Analiza obejmowała `lib/app`, `lib/data`, `lib/core/services`, `lib/core/tactics`, 23 ręcznie pisane pliki trzech dzielonych grup oraz `test/nowe_testy`; pełny wykaz wejść znajduje się w `stage-4-final-analyze.txt`.
 
 ## Wynik etapu 3 — 16 października 2026
 
