@@ -230,9 +230,7 @@ class MessageTemplatesEn {
       key: 'msg_retirementStaff_title',
       title: 'Staff Member Departing',
       body:
-          '{staffName}, serving as {staffRole}, has announced they will '
-          "leave after the {seasonLabel} season. It's worth preparing a "
-          'succession plan.',
+          '{staffName} has retired from {teamName} as {staffRole} at age {age}.',
     ),
     'msg_retirementLeagueDigest_digest_title': MessageTextTemplate(
       key: 'msg_retirementLeagueDigest_digest_title',
@@ -461,8 +459,8 @@ class MessageTemplatesEn {
       key: 'msg_staffGrowth_title',
       title: 'Staff Development',
       body:
-          '{subjectName} has improved their competency rating in '
-          '{focusArea}. Current growth: {growthValue}.',
+          'Seasonal development for {subjectName} at {teamName}. '
+          'Overall rating: {previousRating} → {rating}.',
     ),
     'msg_staffHired_title': MessageTextTemplate(
       key: 'msg_staffHired_title',

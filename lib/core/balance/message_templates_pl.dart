@@ -195,7 +195,7 @@ class MessageTemplatesPl {
       key: 'msg_retirementStaff_title',
       title: 'Członek sztabu kończy pracę',
       body:
-          '{staffName}, pełniący rolę {staffRole}, ogłosił odejście po sezonie {seasonLabel}. Warto przygotować plan sukcesji.',
+          '{staffName} zakończył pracę w klubie {teamName} jako {staffRole} w wieku {age} lat.',
     ),
     'msg_retirementLeagueDigest_digest_title': MessageTextTemplate(
       key: 'msg_retirementLeagueDigest_digest_title',
@@ -384,7 +384,7 @@ class MessageTemplatesPl {
       key: 'msg_staffGrowth_title',
       title: 'Rozwój członka sztabu',
       body:
-          '{subjectName} poprawił ocenę kompetencji w obszarze {focusArea}. Aktualny wzrost: {growthValue}.',
+          'Sezonowy rozwój {subjectName} w klubie {teamName}. Ocena ogólna: {previousRating} → {rating}.',
     ),
     'msg_staffHired_title': MessageTextTemplate(
       key: 'msg_staffHired_title',

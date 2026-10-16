@@ -625,6 +625,10 @@ class DaySimulator {
           )
         : _applyResult(league, match, result, saveSeed: saveSeed);
     state = season.finalizeRegularSeason(state);
+    // Resolve the match day's market before advancing, as in simulateDay.
+    if (resolveContractMarket) {
+      state = contractMarket.resolveDay(state, saveSeed: saveSeed);
+    }
     final (nextWeek, nextDay) = calendar.advanceDay(
       state.currentWeek,
       state.currentDay,
@@ -646,12 +650,6 @@ class DaySimulator {
       state,
       excludedTeamIds: TeamManagementService.walkoverTeamIds(result),
     );
-    // Was missing from this path entirely (unlike _dailyRecovery, which was
-    // already here) — every-day contract market resolution used to be
-    // silently skipped on days resolved via the player-match resume path.
-    if (resolveContractMarket) {
-      state = contractMarket.resolveDay(state, saveSeed: saveSeed);
-    }
     state = _notifyWalkover(state, result, matchId: match.id);
 
     // Week boundary can land on a day resolved through this path (the

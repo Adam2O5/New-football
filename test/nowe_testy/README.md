@@ -1,17 +1,55 @@
-# Nowe testy — etapy 0, 1 i rozpoczęty etap 2
+# Nowe testy — etapy 0, 1 i 2
 
-Etapy 0 i 1 zostały zaakceptowane i zapisane przez użytkownika w commitach `dc6e454` i `b4048fb`. **Etap 2 jest rozpoczęty i zatrzymany do decyzji użytkownika z powodu dodatkowego błędu wiadomości sztabu.** Nie wykonano automatycznego commita. Poniższe wyniki etapów 0 i 1 pozostają historycznym punktem odniesienia.
+Etapy 0 i 1 zostały zaakceptowane i zapisane przez użytkownika w commitach `dc6e454` i `b4048fb`. Część pośrednia etapu 2 została zapisana przez użytkownika w `553198c`. **Etap 2 (I04–I10) jest ukończony i przygotowany do review.** Uzupełniający diff nie został zacommitowany. Wyniki wcześniejszych etapów poniżej zachowują historyczny punkt odniesienia.
 
-## Etap 2 — stan częściowy, 15 października 2026
+## Wynik etapu 2 — 16 października 2026
 
-- Pełny nowy zestaw: **51 testów przechodzi, 2 nie przechodzą**. Analiza zmienionego zakresu i nowych testów nie zgłasza uwag. Nie wykonywano jeszcze kompilacji bundle ani końcowego odbioru etapu.
-- Dwa nieprzechodzące scenariusze w `staff_season_messages_test.dart` odtwarzają istniejący błąd: `StaffService._msg` przesyła tylko `_legacyTitle`/`_legacyBody`, podczas gdy szablony `msg_staffGrowth_title` oraz `msg_retirementStaff_title` wymagają danych domenowych. Pierwszy zgłasza brak `subjectName`, drugi brak `staffName`. Nie zmieniono tego nadawcy ani tych szablonów w rozpoczętym wdrożeniu.
-- Proponowane rozszerzenie I04: przekazać rzeczywiste dane członka sztabu i zmiany atrybutów; dopasować PL/EN do faktycznego momentu emerytury. Zachować walidację tekstu. Naprawa czeka na decyzję użytkownika, zgodnie z jego poleceniem zatrzymania przy nieprzewidzianych komplikacjach.
-- `phase_two_window_test.dart`: 11 scenariuszy dostępności tygodni, początku w 48/52/1/45, indywidualnego deadline i zamknięcia pomimo waiting. `postseason_finalization_test.dart`: 3 scenariusze końcowego wyniku gracza, nieukończonego sezonu i idempotencji/walidacji stanu częściowego. Te 14 scenariuszy przechodzi.
-- Rozpoczęty diff obejmuje I04–I10: treść wiadomości kontraktowych i QO, stabilny seed terminarza, wybór klubu, część strumieni RNG, granicę FA II, finalizację postseason i mapowanie 52 tygodni. **Nie oznacza to zakończenia żadnego pełnego odbioru etapu.** W szczególności pozostają: testy generatorów i dwóch osobnych procesów, referencyjne daty, odtwarzalność zdarzeń sezonowych, pełne scenariusze wiadomości/rynku, miejsce 10/11 i porównanie ścieżek postseason oraz testy przycisków kalendarza.
-- Rozpoczęte I05 podnosi schemat z 24 do **25**. Po wznowieniu i ukończeniu etapu review wymaga nowych karier, zgodnie z przyjętą polityką braku migracji. Dotychczasowych zapisów nie usunięto.
-- Logi diagnostyczne: `reports/lib-audit-2026-10-13/stage-2-staff-blocker.txt`, `stage-2-partial-analyze.txt`, `stage-2-partial-tests.txt`. Kod wszystkich nowych testów pozostaje w `test/nowe_testy/`.
+- **93 testy przechodzą**: 37 wcześniejszych nowych testów i 56 scenariuszy etapu 2. Uruchamiano wyłącznie `test/nowe_testy/`.
+- Analiza zmienionego zakresu `lib` oraz nowych testów: **bez uwag**. Kompilacja `flutter build bundle --debug --no-pub`: **exit code 0**, zaktualizowany `build/flutter_assets/kernel_blob.bin`. To lokalny debug bundle; nie wykonywano instalacji, wdrożenia, budowania APK ani pomiarów profilu na urządzeniu.
+- `SaveSchema.currentVersion` wynosi **25**, podniesiony w części pośredniej ze względu na stabilny kontrakt odtwarzania dat. Review wykonujemy na nowych karierach. Starych zapisów nie usunięto ani nie migrowano.
+- Nie zmieniano implementacji w `core/ai` i `core/simulation`, plików generowanych, assets ani starych testów. Testy integracji dostarczają gotowe wyniki zamiast uruchamiać silnik meczu.
 
+### Zmiany zachowania I04–I10
+
+1. **I04 / F15:** odpowiedzi kontraktowe pokazują warunki rzeczywistej kontroferty. Usunięto wymaganie dodatkowych warunków i uzasadnienia odmowy, których model nie przechowuje; zapewniono rolę sztabu w odpowiedziach. QO potwierdza już złożoną ofertę i nie tworzy ponownej decyzji z fikcyjnym terminem. Walidacja PL/EN pozostaje aktywna.
+2. **Zaakceptowane rozszerzenie I04:** wiadomości rozwoju i emerytur sztabu otrzymują rzeczywiste dane osoby, klubu i oceny; payload rozwoju zawiera zmienione atrybuty. Tekst emerytury opisuje wykonane odejście. Analogiczny brak argumentu w wiadomości emerytury zawodnika uzupełniono rokiem rozstrzyganego sezonu.
+3. **I05 / F04:** dni spotkań pochodzą ze stabilnego hasha, z osobnym znacznikiem kalendarza. Publiczny helper i wspólne źródło dat pozostają zachowane. Obecni odbiorcy kalendarza nadal używają dotychczasowego domyślnego seeda `0`; nie zmieniano tego na osobny terminarz każdej kariery. Referencyjne daty dla kilku seedów chronią regułę odtwarzania.
+4. **I06 / F08:** dokładnie jeden wybrany klub otrzymuje `ai: null`; nieznane ID jest odrzucane. Ponowne tworzenie kariery i wyświetlenie podglądu klubów nie zmieniają deterministycznych ID sztabu.
+5. **I07 / F10:** oddzielne strumienie generacji rosterów, klasy draftu, początkowego sztabu i wolnych agentów; klasa i istniejący mock są odtwarzalne. Interaktywna loteria otrzymuje seed kariery. Rozwój/emerytury sztabu i emerytury zawodników korzystają z seeda sezonu, rodzaju zdarzenia i ID osoby; przestawienie osób nie przesuwa ich niezależnych losowań. Zachowano wstrzykiwanie RNG i dotychczasowe prawdopodobieństwa.
+6. **I08 / F05:** FA II rozpoczęta pod koniec roku kończy się w kolejnym roku. Ostatni slot dzienny tygodnia 45 działa; pierwszą zamkniętą chwilą jest początek tygodnia 46. Waiting ani pominięcie indywidualnego deadline nie omija zamknięcia okna. Porównania rozróżniają godzinę 10 od godziny 0 następnego dnia. Po meczu gracza rynek rozstrzygany jest na dacie meczu, przed przesunięciem daty.
+7. **I09 / F07:** postseason powstaje po wszystkich wynikach sezonu regularnego, także po ostatnim wyniku gracza. Ponowienie zachowuje istniejące mecze i rozstawienie; niekompletna inicjalizacja zgłasza jawny błąd. Walidacja uwzględnia zarówno trwający play-in, jak i jego zakończony wynik. Nie dodano flagi do save'a.
+8. **I10 / F14:** wspólne mapowanie dat obejmuje 52 tygodnie w kalendarzu i jego widoku na Home. Przeszłe i niesupportowane daty mają wyłączoną symulację.
+
+### Scenariusze etapu 2
+
+- `contract_messages_test.dart` — 11: counter/reject/accept, finalizacja gracza i sztabu, QO oraz odpowiedzi po waiting; rzeczywiste serwisy ofert i teksty PL/EN.
+- `staff_season_messages_test.dart` — 2: rozwój i emerytura, teksty obu języków i rzeczywista zmiana oceny/atrybutów.
+- `seeded_generation_test.dart` — 9: wybór klubu, nieznane ID, ponowne użycie fabryki i podglądu, klasy draftu niezależne od historii serwisu, referencyjne dni i odstęp meczów, osobne procesy Dart przed i po save/load.
+- `support/determinism_process.dart` — pomocniczy punkt wejścia osobnej VM używany przez powyższy test. Zwraca dane domenowe; nie jest plikiem aplikacji ani próbą poza folderem nowych testów.
+- `season_randomness_test.dart` — 3: rozwój/emerytury sztabu oraz emerytury zawodników po save/restart i zmianie kolejności, seeded loteria i możliwość wstrzyknięcia RNG.
+- `phase_two_window_test.dart` — 13: tygodnie 45/46/47/48/52/1, finalny slot i waiting, początek nowego roku, indywidualne expiry i rekord terminalny.
+- `postseason_finalization_test.dart` — 8: wynik zmieniający miejsca 6/7 i 10/11, równoważność pauzy/wznowienia i ścieżki automatycznej z podanym wynikiem, niepełny sezon, idempotencja, stan częściowy, zakończony play-in jednej/obu konferencji i data rozstrzygania rynku po meczu.
+- `calendar_screen_test.dart` — 9: mapowanie, wybór tygodni 47–52, stany rzeczywistego przycisku oraz kliknięcie uruchamiające kontrolowany krok symulacji do przyszłej daty.
+- `match_date_replay_test.dart` — 1: rzeczywisty zapis do katalogu tymczasowego dzień przed spotkaniem, load i zatrzymanie obu ścieżek na tym samym meczu bez pominięcia kolejki.
+
+### Odbiór i ręczne review
+
+Polecenia:
+
+```powershell
+dart analyze lib/app lib/data lib/core/services lib/core/random/seeds.dart lib/core/models/seed_data_generator.dart lib/core/models/game_save.dart lib/core/balance/message_catalog.dart lib/core/balance/message_templates_pl.dart lib/core/balance/message_templates_en.dart lib/main.dart test/nowe_testy
+flutter test --no-pub test/nowe_testy --concurrency=1 --reporter expanded
+flutter build bundle --debug --no-pub
+```
+
+Ręcznie, na nowej karierze:
+
+1. Wybierz inny klub europejski niż pierwszy albo klub drugiej konferencji. Sprawdź nazwę swojego klubu w grze i skład po utworzeniu kariery.
+2. W kalendarzu zanotuj datę najbliższego meczu swojego zespołu. Zapisz dzień przed nim, wyjdź do menu i wczytaj. Data i rywal mają pozostać takie same; symulacja ma doprowadzić do tego spotkania.
+3. Na rynku złóż ofertę, odczytaj odpowiedź w skrzynce i — przy akceptacji — sfinalizuj umowę. Sprawdź także wiadomość kontroferty, jeśli ją otrzymasz. Przełącz PL/EN: szczegóły mają być widoczne bez tekstu zastępczego. Rozwój i emerytury są dodatkowo sprawdzane automatycznie, bez potrzeby ręcznego rozgrywania całego sezonu.
+4. W kalendarzu przejdź do dat końca cyklu (tygodnie 48–52); wybierz przyszły dzień. Wybór i przycisk symulacji mają działać. Sprawdź też datę sprzed aktualnego dnia — symulacja ma być wyłączona. Pełne wykonanie symulacji przez te tygodnie oraz granice FA II/play-in sprawdzają nowe testy.
+
+Logi: `reports/lib-audit-2026-10-13/stage-2-final-analyze.txt`, `stage-2-final-tests.txt`, `stage-2-final-build.txt`. Raport audytu pozostaje zamknięty; aktualny status wykonania jest w planie i tym README.
 ## Wynik etapu 1
 
 - **37 testów przechodzi**, w tym wszystkie trzy wcześniejsze regresje F01–F03.

@@ -146,20 +146,25 @@ class SeasonService {
     if (conferences.isEmpty) return league;
     if (season.postseasonFixtures.isNotEmpty ||
         season.playInProgress.isNotEmpty ||
+        season.playInResults.isNotEmpty ||
         season.playoffBrackets.isNotEmpty) {
       final ids = season.postseasonFixtures.map((m) => m.id).toSet();
       var complete =
           ids.length == season.postseasonFixtures.length &&
-          season.playInProgress.length == conferences.length &&
+          season.playInProgress.length + season.playInResults.length ==
+              conferences.length &&
           season.playoffBrackets.length == conferences.length;
       for (final conference in conferences) {
         final progress = season.playInProgress.where(
           (p) => p.conference == conference,
         );
+        final results = season.playInResults.where(
+          (r) => r.conference == conference,
+        );
         final brackets = season.playoffBrackets.where(
           (b) => b.conference == conference,
         );
-        if (progress.length != 1 ||
+        if (progress.length + results.length != 1 ||
             brackets.length != 1 ||
             brackets.single.quarterFinals.length != 4) {
           complete = false;
@@ -1371,22 +1376,23 @@ class SeasonService {
 
   /// Emerytury (śr tyg. 44): wyłącznie tabela bazowa
   /// `BalanceConfig.retirement.baseChanceForAge(age)`, bez modyfikatorów.
-  LeagueState runPlayerRetirements(LeagueState league, {int saveSeed = 0}) {
+  LeagueState runPlayerRetirements(LeagueState league, {int? saveSeed}) {
     final retired = <({String id, String name, String teamId})>[];
     final teams = league.teams.map((t) {
       final keep = <Player>[];
       final retiredIds = <String>{};
       for (final p in t.roster) {
         final chance = balance.retirement.baseChanceForAge(p.age);
-        final rng = Random(
-          playerEventSeed(
-            saveSeed,
-            league.currentSeason.year,
-            league.currentWeek,
-            p.id,
-            'retirement',
-          ),
-        );
+        final rng = saveSeed == null
+            ? _random
+            : Random(
+                seasonEventSeed(
+                  saveSeed,
+                  league.currentSeason.year,
+                  'player-retire',
+                  subjectId: p.id,
+                ),
+              );
         if (chance > 0 && rng.nextDouble() < chance) {
           retired.add((id: p.id, name: p.name, teamId: t.id));
           retiredIds.add(p.id);
@@ -1414,7 +1420,11 @@ class SeasonService {
         state,
         type: MessageType.retirementPlayer,
         domain: MessageDomain.roster,
-        args: {'playerName': record.name, 'ownClub': true},
+        args: {
+          'playerName': record.name,
+          'ownClub': true,
+          'seasonLabel': '${state.currentSeason.year}',
+        },
         payload: {
           'playerId': record.id,
           'teamId': record.teamId,
@@ -1451,7 +1461,7 @@ class SeasonService {
 
     return rosterManagement.replenishAfterRetirements(
       state,
-      saveSeed: saveSeed,
+      saveSeed: saveSeed ?? 0,
     );
   }
 

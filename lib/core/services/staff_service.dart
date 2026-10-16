@@ -396,11 +396,17 @@ class StaffService {
           final chance = balance.staff.retireChanceForAge(member.age);
           if (retireRng.nextDouble() < chance) {
             staff = staff.withMember(role, null);
-            state = _msg(
+            state = _messages.send(
               state,
-              MessageType.retirementStaff,
-              'Odejście sztabu: ${member.name}',
-              '${team.name}: ${member.role.name} (${member.age} lat) kończy pracę.',
+              type: MessageType.retirementStaff,
+              domain: MessageDomain.staff,
+              args: {
+                'staffName': member.name,
+                'staffRole': member.role.name,
+                'teamName': team.name,
+                'age': member.age,
+              },
+              payload: {'staffId': member.id, 'teamId': team.id},
             );
             continue;
           }
@@ -418,11 +424,39 @@ class StaffService {
               ),
             );
             staff = staff.withMember(role, grown);
-            state = _msg(
+            state = _messages.send(
               state,
-              MessageType.staffGrowth,
-              'Rozwój sztabu: ${member.name}',
-              '${team.name}: ${member.role.name} zyskuje ★.',
+              type: MessageType.staffGrowth,
+              domain: MessageDomain.staff,
+              args: {
+                'subjectName': member.name,
+                'teamName': team.name,
+                'previousRating': _rawOverall(member),
+                'rating': _rawOverall(grown),
+              },
+              payload: {
+                'staffId': member.id,
+                'teamId': team.id,
+                'attributeChanges': [
+                  for (final key in StaffRatingSystem.keysForRole(member.role))
+                    if (StaffRatingSystem.attributeValue(
+                          member.attributes,
+                          key,
+                        ) !=
+                        StaffRatingSystem.attributeValue(grown.attributes, key))
+                      {
+                        'attribute': key.name,
+                        'before': StaffRatingSystem.attributeValue(
+                          member.attributes,
+                          key,
+                        ),
+                        'after': StaffRatingSystem.attributeValue(
+                          grown.attributes,
+                          key,
+                        ),
+                      },
+                ],
+              },
             );
           }
         }
@@ -468,21 +502,5 @@ class StaffService {
             : a.copyWith(care: up(a.care)),
       StaffRole.cfo => a.copyWith(negotiation: up(a.negotiation)),
     };
-  }
-
-  LeagueState _msg(
-    LeagueState league,
-    MessageType type,
-    String title,
-    String body,
-  ) {
-    return _messages.send(
-      league,
-      type: type,
-      domain: MessageDomain.staff,
-      titleKey: 'msg_${type.name}_title',
-      bodyKey: 'msg_${type.name}_body',
-      args: {'_legacyTitle': title, '_legacyBody': body},
-    );
   }
 }

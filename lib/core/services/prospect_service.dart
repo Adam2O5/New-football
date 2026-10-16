@@ -23,7 +23,7 @@ class ProspectService {
   /// Generates a [DraftState] for the next year's draft class, including the
   /// mock wstępny (`draft.md` §"Mock wstępny (po generacji klasy)") that
   /// establishes the initial displayed board. `seed` should be the save's
-  /// deterministic root when available, so the mock is reproducible; falls
+  /// deterministic root when available, so both class and mock are reproducible; falls
   /// back to the injected `_random` for legacy/test callers.
   /// Used both at league creation (seed) and during mid-season calendar event.
   DraftState generateNextDraftClass({required int currentYear, int? seed}) {
