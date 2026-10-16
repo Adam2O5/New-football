@@ -1,11 +1,18 @@
+import 'dart:async';
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:isolate';
+import 'dart:ui' show IsolateNameServer, RootIsolateToken;
 
+import 'package:crypto/crypto.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/core/models/save_record.dart';
 import 'package:new_football/data/staff_data_compatibility.dart';
+
+part 'save_directory_coordinator.dart';
+part 'save_recovery.dart';
 
 class SaveRepositoryException implements Exception {
   SaveRepositoryException(this.message, {this.cause});
@@ -18,7 +25,7 @@ class SaveRepositoryException implements Exception {
       'SaveRepositoryException: $message${cause != null ? ' ($cause)' : ''}';
 }
 
-/// Raised when a failed save could not be reconciled to the previous state.
+/// Raised when a transaction could not be reconciled to a verified file pair.
 ///
 /// Callers must not treat this exception as a successful save. The repository
 /// leaves its recovery artifacts in place so a later reconciliation can inspect
@@ -35,6 +42,18 @@ class SaveAmbiguousWriteException extends SaveRepositoryException {
 }
 
 enum SaveRepositoryWriteStage { gameFile, indexFile }
+
+enum SaveRepositoryCheckpoint {
+  prepared,
+  gameDisplaced,
+  indexDisplaced,
+  gamePublished,
+  indexPublished,
+  committed,
+}
+
+typedef SaveRepositoryCheckpointHook =
+    Future<void> Function(SaveRepositoryCheckpoint checkpoint);
 
 typedef SaveRepositoryPublishHook =
     Future<void> Function(SaveRepositoryWriteStage stage);
@@ -83,13 +102,16 @@ class SaveRepository {
   SaveRepository({
     Directory? overrideDirectory,
     SaveRepositoryPublishHook? beforePublish,
+    SaveRepositoryCheckpointHook? onCheckpoint,
     this.verifyTypedCommit = false,
     this.saveInIsolate = true,
   }) : _overrideDirectory = overrideDirectory,
-       _beforePublish = beforePublish;
+       _beforePublish = beforePublish,
+       _onCheckpoint = onCheckpoint;
 
   final Directory? _overrideDirectory;
   final SaveRepositoryPublishHook? _beforePublish;
+  final SaveRepositoryCheckpointHook? _onCheckpoint;
 
   /// Re-decodes the committed game file into a [GameSave] and compares it to
   /// what was written. That is a second full model graph on top of the one
@@ -99,11 +121,14 @@ class SaveRepository {
   final bool verifyTypedCommit;
 
   /// Runs [save] in a background isolate so serializing and writing the save
-  /// never blocks the UI. Ignored when a publish hook is installed, because a
+  /// never blocks the UI. Ignored when a test hook is installed, because a
   /// closure cannot be sent to another isolate.
   final bool saveInIsolate;
 
   static int _transactionSequence = 0;
+
+  /// Establishes the root-isolate coordinator before background clients start.
+  static void initializeCoordinator() => _SaveDirectoryCoordinator._port();
 
   /// Keep this alias stable for callers; the source of truth is [SaveSchema].
   static const currentSchemaVersion = SaveSchema.currentVersion;
@@ -147,7 +172,10 @@ class SaveRepository {
   /// distinction with [SaveFileInfo.sizeUnavailable] rather than reporting a
   /// misleading zero-byte file. Temporary, backup, and displaced files are
   /// never considered by this method.
-  Future<SaveFileInfo> inspectFile(String id) async {
+  Future<SaveFileInfo> inspectFile(String id) =>
+      _withAccess(() => _inspectFile(id));
+
+  Future<SaveFileInfo> _inspectFile(String id) async {
     final file = await _saveFile(id);
     if (!await file.exists()) return const SaveFileInfo.missing();
 
@@ -163,8 +191,11 @@ class SaveRepository {
   ///
   /// [listSaves] is deliberately called for every invocation so a caller
   /// cannot make an availability decision from a stale index snapshot.
-  Future<bool> isSaveIdAvailable(String id) async {
-    final indexed = (await listSaves()).any((meta) => meta.id == id);
+  Future<bool> isSaveIdAvailable(String id) =>
+      _withAccess(() => _isSaveIdAvailable(id));
+
+  Future<bool> _isSaveIdAvailable(String id) async {
+    final indexed = (await _listSaves()).any((meta) => meta.id == id);
     if (indexed) return false;
 
     final canonicalFile = await _saveFile(id);
@@ -177,7 +208,7 @@ class SaveRepository {
   /// so callers can inspect older or newer schemas without changing the
   /// existing [load] compatibility contract.
   Future<Map<String, dynamic>> readRawSave(String sourceId) {
-    return _readRawSaveJson(sourceId);
+    return _withAccess(() => _readRawSaveJson(sourceId));
   }
 
   /// Creates a duplicate from the canonical raw snapshot for [sourceId].
@@ -190,6 +221,13 @@ class SaveRepository {
   /// transaction used by [save], and success is returned only after the raw
   /// snapshot and exact-one index entry have been verified.
   Future<GameSaveMeta> duplicateRaw({
+    required String sourceId,
+    required GameSaveMeta duplicateMeta,
+  }) => _withAccess(
+    () => _duplicateRaw(sourceId: sourceId, duplicateMeta: duplicateMeta),
+  );
+
+  Future<GameSaveMeta> _duplicateRaw({
     required String sourceId,
     required GameSaveMeta duplicateMeta,
   }) async {
@@ -208,7 +246,7 @@ class SaveRepository {
       'meta': duplicateRawMeta,
     };
 
-    final currentMetas = await listSaves();
+    final currentMetas = await _listSaves();
     if (duplicateMeta.id == sourceId ||
         currentMetas.any((meta) => meta.id == duplicateMeta.id)) {
       throw SaveRepositoryException(
@@ -223,7 +261,7 @@ class SaveRepository {
       );
     }
 
-    final transaction = _prepareTwoFileTransaction(
+    final transaction = await _prepareTwoFileTransaction(
       saveId: duplicateMeta.id,
       gameFile: duplicateFile,
       indexFile: await _indexFile(),
@@ -251,14 +289,12 @@ class SaveRepository {
       );
       return duplicateMeta;
     } catch (e) {
+      await _recoverAfterFailure(transaction);
       if (e is SaveRepositoryException) rethrow;
       throw SaveRepositoryException(
         'Failed to duplicate save ${duplicateMeta.id}',
         cause: e,
       );
-    } finally {
-      await _deleteIfExists(gameTemporary);
-      await _deleteIfExists(indexTemporary);
     }
   }
 
@@ -279,6 +315,11 @@ class SaveRepository {
   Future<GameSaveMeta> renameRaw({
     required String id,
     required String newName,
+  }) => _withAccess(() => _renameRaw(id: id, newName: newName));
+
+  Future<GameSaveMeta> _renameRaw({
+    required String id,
+    required String newName,
   }) async {
     // Read only the canonical file at operation time. This intentionally
     // avoids GameSave.fromJson so older/newer schemas remain manageable.
@@ -292,7 +333,7 @@ class SaveRepository {
       );
     }
 
-    final currentMetas = await listSaves();
+    final currentMetas = await _listSaves();
     final indexedMetas = currentMetas.where((meta) => meta.id == id).toList();
     if (indexedMetas.isEmpty) {
       throw SaveRepositoryException('Save index does not contain save $id');
@@ -318,7 +359,7 @@ class SaveRepository {
       'meta': renamedRawMeta,
     };
 
-    final transaction = _prepareTwoFileTransaction(
+    final transaction = await _prepareTwoFileTransaction(
       saveId: id,
       gameFile: await _saveFile(id),
       indexFile: await _indexFile(),
@@ -344,11 +385,9 @@ class SaveRepository {
       );
       return renamedMeta;
     } catch (e) {
+      await _recoverAfterFailure(transaction);
       if (e is SaveRepositoryException) rethrow;
       throw SaveRepositoryException('Failed to rename save $id', cause: e);
-    } finally {
-      await _deleteIfExists(gameTemporary);
-      await _deleteIfExists(indexTemporary);
     }
   }
 
@@ -426,7 +465,9 @@ class SaveRepository {
     return json;
   }
 
-  Future<List<GameSaveMeta>> listSaves() async {
+  Future<List<GameSaveMeta>> listSaves() => _withAccess(_listSaves);
+
+  Future<List<GameSaveMeta>> _listSaves() async {
     final file = await _indexFile();
     if (!await file.exists()) return [];
     try {
@@ -463,7 +504,9 @@ class SaveRepository {
     }
   }
 
-  Future<GameSave> load(String id) async {
+  Future<GameSave> load(String id) => _withAccess(() => _load(id));
+
+  Future<GameSave> _load(String id) async {
     _lastStaffDiagnostics = const [];
     final file = await _saveFile(id);
     if (!await file.exists()) {
@@ -495,11 +538,14 @@ class SaveRepository {
     }
   }
 
-  Future<void> save(GameSave gameSave) async {
+  Future<void> save(GameSave gameSave) =>
+      _withAccess(() => _saveLocked(gameSave));
+
+  Future<void> _saveLocked(GameSave gameSave) async {
     // The directory has to be resolved here: `getApplicationDocumentsDirectory`
     // is a platform channel call and does not work in a plain isolate.
     final directory = await _savesDir();
-    if (!saveInIsolate || _beforePublish != null) {
+    if (!saveInIsolate || _beforePublish != null || _onCheckpoint != null) {
       return _saveInPlace(gameSave);
     }
     final path = directory.path;
@@ -521,7 +567,7 @@ class SaveRepository {
         updatedAt: DateTime.now(),
       ),
     );
-    final transaction = _prepareTwoFileTransaction(
+    final transaction = await _prepareTwoFileTransaction(
       saveId: stamped.meta.id,
       gameFile: await _saveFile(stamped.meta.id),
       indexFile: await _indexFile(),
@@ -530,7 +576,7 @@ class SaveRepository {
     final indexTemporary = transaction.indexFile.temporary;
 
     try {
-      final metas = await listSaves();
+      final metas = await _listSaves();
       final filtered = metas.where((m) => m.id != stamped.meta.id).toList();
       final indexJson = const JsonEncoder.withIndent(
         '  ',
@@ -553,40 +599,50 @@ class SaveRepository {
         ),
       );
     } catch (e) {
+      await _recoverAfterFailure(transaction);
       if (e is SaveRepositoryException) rethrow;
       throw SaveRepositoryException(
         'Failed to write save ${stamped.meta.id}',
         cause: e,
       );
-    } finally {
-      await _deleteIfExists(gameTemporary);
-      await _deleteIfExists(indexTemporary);
     }
   }
 
-  _PreparedSaveTransaction _prepareTwoFileTransaction({
+  Future<T> _withAccess<T>(Future<T> Function() operation) async {
+    final directory = await _savesDir();
+    return _SaveDirectoryCoordinator.run(directory, () async {
+      await _SaveRecovery.recover(directory);
+      return operation();
+    });
+  }
+
+  Future<void> _recoverAfterFailure(_PreparedSaveTransaction transaction) =>
+      _SaveRecovery.recover(transaction.journal.parent);
+
+  Future<_PreparedSaveTransaction> _prepareTwoFileTransaction({
     required String saveId,
     required File gameFile,
     required File indexFile,
-  }) {
-    final transactionId =
-        '${DateTime.now().microsecondsSinceEpoch}-'
-        '${_transactionSequence++}';
-    return _PreparedSaveTransaction(
+  }) async {
+    _SaveRecovery.validateId(saveId);
+    final id =
+        '$pid-${DateTime.now().microsecondsSinceEpoch}-${_transactionSequence++}';
+    final transaction = _PreparedSaveTransaction(
+      id: id,
       saveId: saveId,
       gameFile: _PreparedSaveFile(
         destination: gameFile,
-        temporary: File('${gameFile.path}.tmp-$transactionId-game'),
-        backup: File('${gameFile.path}.bak-$transactionId-game'),
+        transactionId: id,
         stage: SaveRepositoryWriteStage.gameFile,
       ),
       indexFile: _PreparedSaveFile(
         destination: indexFile,
-        temporary: File('${indexFile.path}.tmp-$transactionId-index'),
-        backup: File('${indexFile.path}.bak-$transactionId-index'),
+        transactionId: id,
         stage: SaveRepositoryWriteStage.indexFile,
       ),
     );
+    await _SaveRecovery.begin(transaction);
+    return transaction;
   }
 
   Future<void> _writeTemporary(File file, String contents) async {
@@ -621,81 +677,47 @@ class SaveRepository {
     _PreparedSaveTransaction transaction, {
     required Future<void> Function() verify,
   }) async {
-    final files = transaction.files;
-    var committed = false;
-    var rolledBack = false;
-
-    try {
-      // The order is part of the transaction contract: publish the game file
-      // first and the index second. The index is never allowed to advertise a
-      // snapshot whose game file has not been published and verified.
-      for (final file in files) {
-        if (await file.destination.exists()) {
-          await file.destination.copy(file.backup.path);
-          file.backupCreated = true;
-        }
-
-        await _beforePublish?.call(file.stage);
-        await _publish(file);
-      }
-
-      await verify();
-      committed = true;
-    } catch (e) {
-      try {
-        await _rollback(files);
-        rolledBack = true;
-      } catch (rollbackError) {
-        throw SaveAmbiguousWriteException(
-          saveId: transaction.saveId,
-          cause: SaveRepositoryException(
-            'Save failed and rollback failed',
-            cause: rollbackError,
-          ),
-        );
-      }
-      rethrow;
-    } finally {
-      // A successful commit or a completed rollback has a known safe state.
-      // If rollback itself failed, retain recovery artifacts for inspection.
-      if (committed || rolledBack) {
-        for (final file in files) {
-          await _deleteIfExists(file.backup);
-          await _deleteIfExists(file.displaced);
+    // Both originals must be secured before either canonical file is changed.
+    for (final file in transaction.files) {
+      if (file.original != null) {
+        await file.destination.copy(file.backup.path);
+        if (!await file.original!.matches(file.backup)) {
+          throw SaveRepositoryException('Backup does not match the original');
         }
       }
     }
+    await _onCheckpoint?.call(SaveRepositoryCheckpoint.prepared);
+    for (final file in transaction.files) {
+      await _beforePublish?.call(file.stage);
+      await _publish(file);
+      await _onCheckpoint?.call(
+        file.stage == SaveRepositoryWriteStage.gameFile
+            ? SaveRepositoryCheckpoint.gamePublished
+            : SaveRepositoryCheckpoint.indexPublished,
+      );
+    }
+    await verify();
+    await _SaveRecovery.commit(transaction);
+    await _onCheckpoint?.call(SaveRepositoryCheckpoint.committed);
+    await _SaveRecovery.cleanup(transaction);
   }
 
   Future<void> _publish(_PreparedSaveFile file) async {
-    try {
-      // On POSIX this is an atomic replacement. The backup copy allows the
-      // complete two-file operation to be rolled back if the next publish
-      // fails.
-      await file.temporary.rename(file.destination.path);
-      file.published = true;
-      return;
-    } on FileSystemException {
-      // Windows does not replace an existing file with rename. Move the old
-      // destination aside and publish into the now-free path instead.
-      if (!file.backupCreated) rethrow;
+    if (!Platform.isWindows || !await file.destination.exists()) {
+      try {
+        await file.temporary.rename(file.destination.path);
+        return;
+      } on FileSystemException {
+        if (file.original == null || !await file.destination.exists()) rethrow;
+      }
     }
-
-    final displaced = File(
-      '${file.destination.path}.old-${file.backup.path.hashCode}',
+    await file.destination.rename(file.displaced.path);
+    await _onCheckpoint?.call(
+      file.stage == SaveRepositoryWriteStage.gameFile
+          ? SaveRepositoryCheckpoint.gameDisplaced
+          : SaveRepositoryCheckpoint.indexDisplaced,
     );
-    file.displaced = displaced;
-    await file.destination.rename(displaced.path);
-    try {
-      await file.temporary.rename(file.destination.path);
-      file.published = true;
-    } catch (_) {
-      // Restore the original immediately so the transaction rollback sees the
-      // same state even when this individual replacement fails.
-      await displaced.rename(file.destination.path);
-      file.displaced = null;
-      rethrow;
-    }
+    await file.temporary.rename(file.destination.path);
   }
 
   Future<_CommittedSaveJson> _readCommittedJson(
@@ -823,46 +845,12 @@ class SaveRepository {
     return left == right;
   }
 
-  Future<void> _rollback(List<_PreparedSaveFile> files) async {
-    Object? firstError;
-    for (final file in files.reversed) {
-      try {
-        if (file.published && await file.destination.exists()) {
-          await file.destination.delete();
-        }
-        final displaced = file.displaced;
-        if (displaced != null && await displaced.exists()) {
-          await displaced.rename(file.destination.path);
-          file.displaced = null;
-        } else if (file.backupCreated && await file.backup.exists()) {
-          if (await file.destination.exists()) {
-            await file.destination.delete();
-          }
-          await file.backup.rename(file.destination.path);
-          file.backupCreated = false;
-        }
-      } catch (e) {
-        firstError ??= e;
-      }
-    }
-    final error = firstError;
-    if (error != null) throw error;
-  }
+  Future<void> delete(String id) => _withAccess(() => _delete(id));
 
-  static Future<void> _deleteIfExists(File? file) async {
-    if (file == null) return;
-    try {
-      if (await file.exists()) await file.delete();
-    } catch (_) {
-      // Cleanup must never hide the original save result. On an ambiguous
-      // transaction the backup is intentionally not cleaned up by the caller.
-    }
-  }
-
-  Future<void> delete(String id) async {
+  Future<void> _delete(String id) async {
     final file = await _saveFile(id);
     if (await file.exists()) await file.delete();
-    final metas = await listSaves();
+    final metas = await _listSaves();
     await _writeIndex(metas.where((m) => m.id != id).toList());
   }
 }
@@ -876,32 +864,39 @@ class _CommittedSaveJson {
 
 class _PreparedSaveTransaction {
   _PreparedSaveTransaction({
+    required this.id,
     required this.saveId,
     required this.gameFile,
     required this.indexFile,
   });
 
+  final String id;
   final String saveId;
   final _PreparedSaveFile gameFile;
   final _PreparedSaveFile indexFile;
-
+  File get journal =>
+      File('${indexFile.destination.parent.path}/${_SaveRecovery.journalName}');
+  File get commitMarker => File('${journal.path}.commit');
   List<_PreparedSaveFile> get files => [gameFile, indexFile];
 }
 
 class _PreparedSaveFile {
   _PreparedSaveFile({
     required this.destination,
-    required this.temporary,
-    required this.backup,
+    required String transactionId,
     required this.stage,
-  });
+  }) : temporary = File('${destination.path}.tmp-$transactionId-${stage.name}'),
+       backup = File('${destination.path}.bak-$transactionId-${stage.name}'),
+       displaced = File('${destination.path}.old-$transactionId-${stage.name}'),
+       restoring = File(
+         '${destination.path}.restore-$transactionId-${stage.name}',
+       );
 
   final File destination;
   final File temporary;
   final File backup;
+  final File displaced;
+  final File restoring;
   final SaveRepositoryWriteStage stage;
-
-  bool backupCreated = false;
-  bool published = false;
-  File? displaced;
+  _SaveFingerprint? original;
 }

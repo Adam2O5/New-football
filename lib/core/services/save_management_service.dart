@@ -183,6 +183,8 @@ class SaveManagementService {
   Future<SaveFileInfo> _inspectForList(String id) async {
     try {
       return await _repository.inspectFile(id);
+    } on SaveAmbiguousWriteException catch (error) {
+      throw _mapRepositoryFailure(error);
     } catch (_) {
       // The repository normally converts File.length failures to this value.
       // Keep the service resilient to repository doubles and platform-specific

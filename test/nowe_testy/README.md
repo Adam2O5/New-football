@@ -1,6 +1,64 @@
-# Nowe testy — etapy 0, 1, 2, 3 i 4
+# Nowe testy — etapy 0–5
 
-Etapy 0–3 zostały zaakceptowane i zapisane przez użytkownika: `dc6e454`, `b4048fb`, `553198c`, `f8e45e1` oraz końcowy etap 3 w `5762f4f`. **Etap 4 (R01–R03) jest ukończony i przygotowany do review, bez commita.** Etapu 5 nie rozpoczęto. Wyniki wcześniejszych etapów poniżej są historycznym punktem odniesienia.
+Etapy 0–4 zostały zaakceptowane i zapisane przez użytkownika: `dc6e454`, `b4048fb`, `553198c`, `f8e45e1`, `5762f4f` oraz końcowy etap 4 w `0f2fd43`. **Etap 5 (I16 / O08) — odzyskiwanie transakcji zapisu — jest ukończony i przygotowany do review.** Diff pozostaje bez commita. Etapu 6 nie rozpoczęto. Wyniki wcześniejszych etapów poniżej są historycznym punktem odniesienia.
+
+## Wynik etapu 5 — 16 października 2026
+
+- **168 scenariuszy przechodzi:** pełny przebieg `test/nowe_testy/` zakończył się wynikiem 166/166; uzupełniający odbiór komunikatu ekranu listy zakończył się wynikiem 2/2 (PL/EN). Łącznie to 131 wcześniejszych i 37 nowych scenariuszy. Starych testów nie uruchamiano.
+- Analiza `lib/app`, `lib/data`, `lib/core/services`, `lib/main.dart` i nowych testów: **bez uwag**.
+- Kompilacja `flutter build bundle --debug --no-pub`: **exit code 0**, zaktualizowany `build/flutter_assets/kernel_blob.bin`. To lokalny debug bundle; wynik w `stage-5-final-build.txt`.
+- Schemat zapisu nadal **26**. Diff pozostaje bez commita; etap 6 nie został rozpoczęty.
+
+Punkt wyjścia: `0f2fd43`, czyste repozytorium. Przed zmianami odtworzono różnicę między obsługiwanym wyjątkiem a śmiercią procesu: zwykły wyjątek przy publikacji indeksu przywracał poprzednią parę, natomiast zabicie procesu pozostawiało nowy payload i stare metadane indeksu. Worker zapisuje własny PID przy barierze; test kończy rzeczywisty proces i sprawdza, że jego `finally` nie wykonało się.
+
+Użytkownik zaakceptował uzupełnienie I16 o wspólny koordynator, ponieważ na Linuxie/Androidzie standardowa blokada pliku Dart działa na poziomie procesu i sama nie wyklucza drugiej izolaty tego samego procesu. Reguła odzyskiwania: bez trwałego potwierdzenia transakcji przywracamy poprzednią parę; po potwierdzeniu zachowujemy zweryfikowaną nową parę. Niejednoznaczność kończy się błędem i zachowaniem plików.
+
+### Implementacja I16
+
+- `lib/data/save_directory_coordinator.dart` jest częścią biblioteki repozytorium. Główna izolata utrzymuje wspólny koordynator uprawnień do katalogu, dostępny przez `IsolateNameServer`. Klucz pochodzi z rozwiązanego katalogu, z normalizacją wielkości liter na Windows. Dopiero właściciel uprawnienia otwiera `.save.lock` i uzyskuje wyłączną blokadę systemową. To zapobiega równoległemu odzyskiwaniu/zapisowi między instancjami, izolatami i procesami korzystającymi z repozytorium.
+- `lib/main.dart` inicjalizuje koordynator przed uruchomieniem klientów w tle. Nowa główna izolata zastępuje nieaktualną rejestrację portu po poprzedniej instancji. Zwykły zapis nadal wykonuje serializację i operacje transakcji w `Isolate.run`; uprawnienie i blokadę utrzymuje jego wywołujący. Kolejka mutacji `GameController` pozostaje zachowana.
+- `lib/data/save_recovery.dart` zawiera dziennik i odzyskiwanie. Dziennik `.save-transaction-v1.json` powstaje przed zapisem plików tymczasowych i zmianą plików kanonicznych. Zapisuje ID transakcji, ID save'a, istnienie oryginałów, rozmiary i SHA-256. Nazwy `.tmp-*`, `.bak-*`, `.old-*`, `.restore-*` są jednoznacznie wyprowadzane z tej transakcji i roli pliku, bez używania `hashCode` ścieżki lub czasu modyfikacji do wyboru kopii.
+- Najpierw zabezpieczane i sprawdzane są oba oryginały, następnie publikowany jest payload i indeks. Na Windows istniejący plik jest jawnie odsuwany przed publikacją; ten przedział jest objęty dziennikiem i testami przerwania. Potwierdzenie `.save-transaction-v1.json.commit` powstaje po dotychczasowej weryfikacji publikacji i zawiera skróty nowej pary. Dopiero wtedy sprzątane są kopie, dziennik i potwierdzenie.
+- Jedna procedura odzyskiwania działa przed `listSaves`, `load`, odczytem raw, inspekcją, sprawdzaniem dostępności ID oraz operacjami zapisu, rename, duplicate i delete. Wewnętrzne wywołania pozostają pod już uzyskaną blokadą i nie próbują ponownie wejść do koordynatora.
+- Przy cofnięciu procedura najpierw odnajduje i sprawdza oba oryginały, a dopiero potem przywraca pliki. Kopia źródłowa pozostaje do końca odzyskiwania, dzięki czemu ponowienie częściowo wykonanej naprawy jest możliwe. Przy potwierdzeniu sprawdzana jest nowa para. Pozostawione samo potwierdzenie po usunięciu dziennika również jest weryfikowane przed sprzątaniem.
+- Brak zweryfikowanego oryginału, uszkodzony dziennik, niewłaściwe potwierdzenie lub uszkodzona potwierdzona para powodują `SaveAmbiguousWriteException`. Repozytorium zachowuje artefakty. `SaveManagementService` mapuje to na istniejące `ambiguousWrite`; inspekcja listy nie ukrywa tego stanu jako niedostępnego rozmiaru. Istniejący provider przekazuje ten typ błędu; ekran listy otrzymał brakującą obsługę `ambiguousWrite` i korzysta z istniejącego komunikatu PL/EN.
+- `crypto ^3.0.7` jest teraz bezpośrednią zależnością dla strumieniowego SHA-256. Ta sama wersja była już obecna w lokalnym cache i grafie zależności; wykonano `pub get --offline`, bez aktualizacji pozostałych pakietów.
+
+### Granice zakresu
+
+Schemat payloadu pozostaje **26**; dziennik ma własną wersję 1. Dotychczasowe poprawne zapisy schematu 26 nadal działają. Odzyskiwanie dotyczy transakcji tworzonych przez nową procedurę. Historyczne kopie bez dziennika nie są zgadywane ani usuwane. Nie zmieniano kodowania rename/duplicate, modelu gry, implementacji AI/silnika, generowanych modeli, assets ani starych testów.
+
+Delete uzyskuje ten sam wyłączny dostęp i uruchamia odzyskiwanie wcześniejszej transakcji, ale nie został przebudowany na osobną transakcję odporną na przerwanie. Obsługa awarii pojedynczej, ręcznie zabitej izolaty będącej samodzielnym klientem repozytorium pozostaje poza odbiorem; zwykły zapis aplikacji trzyma uprawnienie w wywołującym i zwalnia je po błędzie workera.
+
+Testy przerwania procesu wykonano na Windows. Test ponowienia odzyskiwania dodatkowo odtwarza stan częściowo przywróconych plików. Fizyczna utrata zasilania i testy na Androidzie/Linuxie pozostają niezweryfikowane. Nie wprowadzano celowych awarii do zapisów użytkownika.
+
+### Nowe testy i helpery
+
+- `save_transaction_recovery_test.dart` — 23 scenariusze na Windows: zwykły wyjątek przed publikacją indeksu; rzeczywiste przerwania save/rename/duplicate przed publikacją, pomiędzy plikami, po publikacji obu i po potwierdzeniu; odsunięcie pliku gry/indeksu; wyjątki w sześciu checkpointach; pierwszy zapis w pustym katalogu.
+- `save_directory_lock_test.dart` — 3: drugi obiekt repozytorium nie odzyskuje aktywnego zapisu; dwie niezależne izolaty zachowują oba wpisy indeksu; drugi proces czeka na blokadę do śmierci zapisującego, po czym odzyskuje poprzednią parę.
+- `save_recovery_integrity_test.dart` — 8: zachowanie wszystkich plików przy niejednoznaczności, propagacja do dostawcy listy, brak oryginału indeksu, uszkodzenie o identycznym rozmiarze, zweryfikowana kopia odsunięta zamiast nowszego uszkodzonego backupu, powtórzenie częściowej naprawy, sprzątanie pozostałego potwierdzenia i rozróżnienie niedokończonego dziennika od historycznych kopii.
+- `save_recovery_screen_test.dart` — 2: rzeczywisty ekran listy wyświetla istniejący komunikat `ambiguousWrite` po polsku i angielsku; oba testy odtwarzały brak obsługi przed zmianą.
+- `save_coordinator_startup_test.dart` — 1: zastąpienie martwej rejestracji koordynatora przy uruchomieniu oraz idempotencja inicjalizacji.
+- `support/save_crash_worker.dart` — pomocniczy test uruchamiany w osobnym procesie, z kontrolowanym zatrzymaniem w checkpointach. Nie jest automatycznie odkrywanym plikiem `*_test.dart` i nie należy do aplikacji.
+- `support/save_process_control.dart` — uruchamia worker, odbiera jego PID i kończy wyłącznie ten proces. Współdzielony helper pozostaje w folderze nowych testów; wszystkie operacje na zapisach dotyczą katalogów tymczasowych.
+
+Checkpointy i dotychczasowy hook publikacji są wyłącznie punktami kontrolnymi odbioru. Aplikacja nie instaluje tych callbacków. Przy testowym callbacku operacja odbywa się w wywołującej izolacie, aby nie przesyłać callbacku do workera.
+
+Logi w `reports/lib-audit-2026-10-13/`: `stage-5-before-tests.txt`, `stage-5-dependencies.txt`, `stage-5-recovery-tests.txt`, `stage-5-integrity-tests.txt`, `stage-5-coordinator-tests.txt`, `stage-5-final-analyze.txt`, `stage-5-final-tests.txt`, `stage-5-ui-before-tests.txt`, `stage-5-ui-tests.txt`, `stage-5-final-build.txt`.
+
+### Ręczne review etapu 5
+
+1. Wczytaj poprawny zapis schematu 26, przejdź kilka dni, zapisz i wróć do menu. Wczytaj ponownie; data i stan drużyny powinny odpowiadać zapisowi.
+2. Zmień nazwę zapisu i sprawdź ją na liście oraz po wczytaniu. Utwórz duplikat; oba wpisy powinny być dostępne, a kopia zawierać ten sam stan kariery z odrębnym ID/nazwą.
+3. Wykonaj ponowny zapis oraz wyjście do menu w trakcie symulacji kalendarza, jak w odbiorze etapu 1. Zapis w tle i jego bariery nadal mają działać.
+
+Przerwania procesu i niejednoznaczne stany sprawdza zestaw nowych testów, bez ręcznego uszkadzania karier. Odbiór automatyczny:
+
+```powershell
+dart analyze lib/app lib/data lib/core/services lib/main.dart test/nowe_testy
+flutter test --no-pub test/nowe_testy --concurrency=1 --reporter expanded
+flutter build bundle --debug --no-pub
+```
 
 ## Wynik etapu 4 — 16 października 2026
 

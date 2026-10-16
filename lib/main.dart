@@ -8,10 +8,12 @@ import 'package:new_football/app/providers/settings_provider.dart';
 import 'package:new_football/app/router.dart';
 import 'package:new_football/app/theme/app_theme.dart';
 import 'package:new_football/core/services/simulation_worker.dart';
+import 'package:new_football/data/save_repository.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  SaveRepository.initializeCoordinator();
   final prefs = await SharedPreferences.getInstance();
   runApp(
     ProviderScope(

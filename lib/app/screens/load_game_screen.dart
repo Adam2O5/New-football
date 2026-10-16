@@ -625,6 +625,10 @@ class _LoadGameScreenState extends ConsumerState<LoadGameScreen> {
 
   String _readErrorMessage(AppLocalizations l10n, Object error) {
     if (error is SaveManagementException &&
+        error.code == SaveManagementFailure.ambiguousWrite) {
+      return l10n.loadGame_ambiguousWrite;
+    }
+    if (error is SaveManagementException &&
         error.code == SaveManagementFailure.indexReadFailed) {
       return l10n.loadGame_indexReadFailed;
     }
