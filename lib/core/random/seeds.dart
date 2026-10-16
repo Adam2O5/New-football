@@ -1,5 +1,15 @@
 import 'dart:convert';
 
+int calendarSeed(int saveSeed, int week) =>
+    _stableHash(['calendar', saveSeed, week]);
+
+int seasonEventSeed(
+  int saveSeed,
+  int seasonYear,
+  String eventKind, {
+  String subjectId = '',
+}) => _stableHash(['season', saveSeed, seasonYear, eventKind, subjectId]);
+
 /// Kinds of deterministic AI decisions.
 enum DecisionType {
   lineup,

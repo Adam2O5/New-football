@@ -11,6 +11,25 @@ class CalendarService {
 
   CalendarBalance get _c => balance.calendar;
 
+  DateTime week1StartForSeason(int seasonYear) {
+    var date = DateTime(seasonYear, 8, 1);
+    while (date.weekday != DateTime.monday) {
+      date = date.add(const Duration(days: 1));
+    }
+    return date;
+  }
+
+  DateTime dateForWeekDay(int seasonYear, int week, int day) =>
+      week1StartForSeason(
+        seasonYear,
+      ).add(Duration(days: (week - 1) * 7 + day - 1));
+
+  ({int week, int day})? weekDayForDate(DateTime date, int seasonYear) {
+    final diff = date.difference(week1StartForSeason(seasonYear)).inDays;
+    if (diff < 0 || diff >= _c.seasonCycleWeeks * 7) return null;
+    return (week: diff ~/ 7 + 1, day: diff % 7 + 1);
+  }
+
   SeasonPhase phaseForWeek(int week) {
     if (week < 1) {
       return SeasonPhase.preseason;
@@ -56,6 +75,17 @@ class CalendarService {
     return (week > _c.freeAgencyWeek && week <= _c.seasonCycleWeeks) ||
         (week >= 1 && week <= _c.freeAgencyPhaseIIEndWeek);
   }
+
+  /// First closed instant: midnight after the final daily market slot.
+  ({int seasonYear, int week, int day, int hour}) phaseIIWindowEnd(
+    int originSeasonYear,
+    int originWeek,
+  ) => (
+    seasonYear: originSeasonYear + (originWeek > _c.freeAgencyWeek ? 1 : 0),
+    week: _c.freeAgencyPhaseIIEndWeek + 1,
+    day: 1,
+    hour: 0,
+  );
 
   /// True when any contract market window accepts a submission on the date.
   bool isActiveContractWindow(int week, int day) =>

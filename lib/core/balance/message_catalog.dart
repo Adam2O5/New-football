@@ -85,13 +85,8 @@ class MessageCatalog {
     _template(
       MessageType.contractOffer,
       MessageDomain.contracts,
-      MessagePriority.urgent,
+      MessagePriority.normal,
       kind: 'rfaQualifyingOffer',
-      decision: _decision(MessageType.contractOffer, const [
-        'submit',
-        'decline',
-      ], 'decline'),
-      expiresAt: 'extensionWindowEnd',
     ),
     _template(
       MessageType.trade,

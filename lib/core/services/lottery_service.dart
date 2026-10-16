@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:new_football/core/random/seeds.dart';
 
 import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/draft_models.dart';
@@ -25,8 +26,14 @@ class LotteryService {
   static List<LotteryResult> computeResults(
     List<Standing> lotteryTeams, {
     Random? random,
+    int? saveSeed,
+    int seasonYear = 0,
   }) {
-    final rng = random ?? Random();
+    final rng =
+        random ??
+        (saveSeed == null
+            ? Random()
+            : Random(seasonEventSeed(saveSeed, seasonYear, 'lottery')));
     final weights = DraftBalance.lotteryWeights;
     if (lotteryTeams.length < weights.length) return const [];
     final remaining = List<Standing>.from(lotteryTeams.take(weights.length));

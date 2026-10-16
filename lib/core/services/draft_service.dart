@@ -20,8 +20,9 @@ class DraftService {
   /// skonsumowanymi pickami usuniętymi z `ownedPicks` drużyn.
   LeagueState buildDraftOrder(
     LeagueState league,
-    List<LotteryResult> lotteryResults,
-  ) {
+    List<LotteryResult> lotteryResults, {
+    int? saveSeed,
+  }) {
     final currentYear = league.currentSeason.year;
     final (order, consumedPickIds) = _buildDraftOrder(
       league,
@@ -44,10 +45,11 @@ class DraftService {
     }
 
     final existingClass = league.currentSeason.draftState?.draftClass;
-    final draftClass = existingClass ??
+    final draftClass =
+        existingClass ??
         SeedDataGenerator(
           random: _random,
-        ).generateDraftClass(year: currentYear);
+        ).generateDraftClass(year: currentYear, seed: saveSeed);
 
     final draftState = DraftState(
       year: currentYear,
@@ -58,9 +60,7 @@ class DraftService {
 
     return league.copyWith(
       teams: teams,
-      currentSeason: league.currentSeason.copyWith(
-        draftState: draftState,
-      ),
+      currentSeason: league.currentSeason.copyWith(draftState: draftState),
     );
   }
 

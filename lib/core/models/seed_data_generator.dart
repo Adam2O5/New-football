@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:new_football/core/random/seeds.dart';
 
 import 'package:new_football/core/models/assigned_role.dart';
 import 'package:new_football/core/models/contract.dart';
@@ -39,7 +40,10 @@ class SeedDataGenerator {
     String? playerTeamId,
     int? seed,
   }) {
-    final rng = seed != null ? Random(seed) : Random();
+    final rng = seed != null
+        ? Random(seasonEventSeed(seed, year, 'rosters'))
+        : _random;
+    _staffCounter = 0;
     final teams = <Team>[];
 
     for (var i = 0; i < europeTeams.length; i++) {
@@ -51,7 +55,7 @@ class SeedDataGenerator {
           conference: Conference.europe,
           index: i,
           rng: rng,
-          isPlayer: playerTeamId != null && i == 0,
+          isPlayer: false,
           seasonYear: year,
         ),
       );
@@ -72,16 +76,12 @@ class SeedDataGenerator {
       );
     }
 
-    if (playerTeamId != null) {
-      final idx = teams.indexWhere((t) => t.id == playerTeamId);
-      if (idx >= 0) {
-        teams[idx] = teams[idx].copyWith(ai: null);
-      }
-    } else {
-      teams[0] = teams[0].copyWith(ai: null);
-    }
-
     final actualPlayerTeamId = playerTeamId ?? teams[0].id;
+    final playerIndex = teams.indexWhere((t) => t.id == actualPlayerTeamId);
+    if (playerIndex < 0) {
+      throw ArgumentError.value(playerTeamId, 'playerTeamId', 'Unknown team');
+    }
+    teams[playerIndex] = teams[playerIndex].copyWith(ai: null);
 
     final standings = [
       ConferenceStandings(
@@ -100,7 +100,7 @@ class SeedDataGenerator {
       ),
     ];
 
-    final year0Class = generateDraftClass(year: year);
+    final year0Class = generateDraftClass(year: year, seed: seed);
     final trueBoard = _mockDraftService.trueBoard(year0Class.prospects);
     final draftState = DraftState(
       year: year,
@@ -611,7 +611,14 @@ class SeedDataGenerator {
     (27, 58, 79, 2.0, 5.0),
   ];
 
-  DraftClass generateDraftClass({required int year, int prospectCount = 120}) {
+  DraftClass generateDraftClass({
+    required int year,
+    int prospectCount = 120,
+    int? seed,
+  }) {
+    final rng = seed == null
+        ? _random
+        : Random(seasonEventSeed(seed, year, 'draft-class'));
     final ovrTargets =
         <(int ovrMin, int ovrMax, double starMin, double starMax)>[];
     for (final (count, ovrMin, ovrMax, starMin, starMax)
@@ -625,7 +632,7 @@ class SeedDataGenerator {
         'zgodnie z data_generation.md.',
       );
     }
-    ovrTargets.shuffle(_random);
+    ovrTargets.shuffle(rng);
 
     final prospects = <Prospect>[];
     for (var i = 0; i < prospectCount; i++) {
@@ -633,33 +640,33 @@ class SeedDataGenerator {
       if (i < 3) {
         positions.insert(0, Position.gk);
       }
-      final pos = positions[_random.nextInt(positions.length)];
+      final pos = positions[rng.nextInt(positions.length)];
 
       final (ovrMin, ovrMax, starMin, starMax) = ovrTargets[i];
-      final ovr = ovrMin + _random.nextInt(ovrMax - ovrMin + 1);
-      final stars = starMin + _random.nextDouble() * (starMax - starMin);
+      final ovr = ovrMin + rng.nextInt(ovrMax - ovrMin + 1);
+      final stars = starMin + rng.nextDouble() * (starMax - starMin);
       final roundedStars = (stars * 2).round() / 2.0;
 
       final nationality =
-          Nationality.values[_random.nextInt(Nationality.values.length)];
+          Nationality.values[rng.nextInt(Nationality.values.length)];
 
       prospects.add(
         Prospect(
           id: 'prospect_${year}_$i',
           personality: PlayerPersonality
-              .values[_random.nextInt(PlayerPersonality.values.length)],
-          name: _generateName(_random, nationality),
+              .values[rng.nextInt(PlayerPersonality.values.length)],
+          name: _generateName(rng, nationality),
           nationality: nationality,
           position: pos,
-          age: 18 + _random.nextInt(3),
-          optimalRole: _randomRoleFor(pos, _random),
-          attributes: _attributesForOvr(pos, ovr, _random),
-          scoutGrade: (ovr + _random.nextInt(8) - 4).clamp(30, 99),
-          combineScore: (ovr + _random.nextInt(12) - 6).clamp(30, 99),
+          age: 18 + rng.nextInt(3),
+          optimalRole: _randomRoleFor(pos, rng),
+          attributes: _attributesForOvr(pos, ovr, rng),
+          scoutGrade: (ovr + rng.nextInt(8) - 4).clamp(30, 99),
+          combineScore: (ovr + rng.nextInt(12) - 6).clamp(30, 99),
           potentialStars: roundedStars,
-          heightCm: _heightCmFor(pos, _random),
-          injuryProne: 1 + _random.nextInt(10),
-          determination: 1 + _random.nextInt(10),
+          heightCm: _heightCmFor(pos, rng),
+          injuryProne: 1 + rng.nextInt(10),
+          determination: 1 + rng.nextInt(10),
         ),
       );
     }

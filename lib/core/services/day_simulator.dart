@@ -150,7 +150,10 @@ class DaySimulator {
         league,
         saveSeed: saveSeed,
       ),
-      CalendarEventId.staffGrowth => season.runStaffGrowthAndRetire(league),
+      CalendarEventId.staffGrowth => season.runStaffGrowthAndRetire(
+        league,
+        saveSeed: saveSeed,
+      ),
       CalendarEventId.awards => season.runAwards(league),
       CalendarEventId.retirements => season.runPlayerRetirements(
         league,
@@ -244,16 +247,6 @@ class DaySimulator {
       );
     }
 
-    // Eager postseason fixtures, per `game_calendar.md`: pairings are written
-    // to the calendar as soon as they're known, not lazily on match day.
-    // Generated the moment the regular season ends (one day before the break
-    // week itself starts) — standings are already final by then, so there's
-    // no reason to wait. Seed 7 and the play-in final's real matchup reveal
-    // themselves the instant the relevant games resolve (see
-    // `SeasonService._maybeRevealPlayInProgress`), not on a fixed day.
-    if (week == balance.calendar.regularSeasonWeeks && day == 7) {
-      state = season.generatePostseasonFixtures(state);
-    }
     if (week == balance.calendar.playInWeek && day == 7) {
       state = season.revealPlayoffSeed8(state);
     }
@@ -372,6 +365,8 @@ class DaySimulator {
         }
       }
     }
+
+    state = season.finalizeRegularSeason(state);
 
     // Recover stamina lightly each day. Administrative participants are
     // excluded: a walkover/DSQ has no matchday recovery side effect.
@@ -629,6 +624,7 @@ class DaySimulator {
             saveSeed: saveSeed,
           )
         : _applyResult(league, match, result, saveSeed: saveSeed);
+    state = season.finalizeRegularSeason(state);
     final (nextWeek, nextDay) = calendar.advanceDay(
       state.currentWeek,
       state.currentDay,
@@ -1107,7 +1103,8 @@ class DaySimulator {
     // published. Rebuilding the league team by team would copy the whole
     // 30-team list once per team, every single day.
     final teams = <Team>[];
-    final recoveryReturns = <({String teamId, Player player, String injuryId})>[];
+    final recoveryReturns =
+        <({String teamId, Player player, String injuryId})>[];
 
     for (final team in league.teams) {
       if (excludedTeamIds.contains(team.id)) {

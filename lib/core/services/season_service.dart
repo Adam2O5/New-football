@@ -119,8 +119,13 @@ class SeasonService {
   final Random _random;
   final _uuid = const Uuid();
 
-  /// Called once, at the Monday of the pre-play-in break week (per
-  /// `game_calendar.md`: `week == breakWeek`, day 1). Writes the two
+  /// Finalizes standings only after every regular-season result is stored.
+  LeagueState finalizeRegularSeason(LeagueState league) {
+    if (league.currentWeek < balance.calendar.regularSeasonWeeks) return league;
+    return generatePostseasonFixtures(league);
+  }
+
+  /// Writes the two
   /// already-decided play-in games (7v8, 9v10 — seeding is final the moment
   /// the regular season ends) and creates all 4 quarterfinal series per
   /// conference: 3v6 and 4v5 are fully known now, while 1v8 and 2v7 are
@@ -129,6 +134,51 @@ class SeasonService {
   /// play-in final and the 1v8/2v7 placeholders are filled in later by
   /// [revealPlayInFinal]/[revealPlayoffSeed8].
   LeagueState generatePostseasonFixtures(LeagueState league) {
+    final season = league.currentSeason;
+    if (season.schedule.isEmpty ||
+        season.schedule.any((m) => m.result == null)) {
+      return league;
+    }
+    final conferences = season.standings
+        .where((s) => s.standings.length >= 10)
+        .map((s) => s.conference)
+        .toSet();
+    if (conferences.isEmpty) return league;
+    if (season.postseasonFixtures.isNotEmpty ||
+        season.playInProgress.isNotEmpty ||
+        season.playoffBrackets.isNotEmpty) {
+      final ids = season.postseasonFixtures.map((m) => m.id).toSet();
+      var complete =
+          ids.length == season.postseasonFixtures.length &&
+          season.playInProgress.length == conferences.length &&
+          season.playoffBrackets.length == conferences.length;
+      for (final conference in conferences) {
+        final progress = season.playInProgress.where(
+          (p) => p.conference == conference,
+        );
+        final brackets = season.playoffBrackets.where(
+          (b) => b.conference == conference,
+        );
+        if (progress.length != 1 ||
+            brackets.length != 1 ||
+            brackets.single.quarterFinals.length != 4) {
+          complete = false;
+          continue;
+        }
+        for (final slot in ['7v8', '9v10', 'final']) {
+          complete =
+              complete && ids.contains('playIn:${conference.name}:$slot');
+        }
+        for (final series in brackets.single.quarterFinals) {
+          final count = series.isComplete ? series.games.length : 5;
+          for (var i = 0; i < count; i++) {
+            complete = complete && ids.contains('playoff:${series.id}:$i');
+          }
+        }
+      }
+      if (!complete) throw StateError('Incomplete postseason initialization');
+      return league;
+    }
     final fixtures = <ScheduledMatch>[
       ...league.currentSeason.postseasonFixtures,
     ];
@@ -1281,8 +1331,8 @@ class SeasonService {
     return state;
   }
 
-  LeagueState runStaffGrowthAndRetire(LeagueState league) {
-    final state = staffService.growthAndRetireTick(league);
+  LeagueState runStaffGrowthAndRetire(LeagueState league, {int saveSeed = 0}) {
+    final state = staffService.growthAndRetireTick(league, saveSeed: saveSeed);
     return state.copyWith(
       currentSeason: state.currentSeason.copyWith(staffGrowthDone: true),
     );
@@ -1328,7 +1378,16 @@ class SeasonService {
       final retiredIds = <String>{};
       for (final p in t.roster) {
         final chance = balance.retirement.baseChanceForAge(p.age);
-        if (chance > 0 && _random.nextDouble() < chance) {
+        final rng = Random(
+          playerEventSeed(
+            saveSeed,
+            league.currentSeason.year,
+            league.currentWeek,
+            p.id,
+            'retirement',
+          ),
+        );
+        if (chance > 0 && rng.nextDouble() < chance) {
           retired.add((id: p.id, name: p.name, teamId: t.id));
           retiredIds.add(p.id);
         } else {
@@ -1396,14 +1455,14 @@ class SeasonService {
     );
   }
 
-  LeagueState runLottery(LeagueState league) {
-    final lottery = _computeLotteryResults(league);
+  LeagueState runLottery(LeagueState league, {int saveSeed = 0}) {
+    final lottery = _computeLotteryResults(league, saveSeed: saveSeed);
     final existingClass = league.currentSeason.draftState?.draftClass;
     final draftClass =
         existingClass ??
         SeedDataGenerator(
           random: _random,
-        ).generateDraftClass(year: league.currentSeason.year);
+        ).generateDraftClass(year: league.currentSeason.year, seed: saveSeed);
     final currentYear = league.currentSeason.year;
     final (order, consumedPickIds) = _buildDraftOrder(
       league,
@@ -2291,7 +2350,7 @@ class SeasonService {
           type: MessageType.playoffMissed,
           domain: MessageDomain.season,
           priority: MessagePriority.urgent,
-            args: {
+          args: {
             'teamName': playerTeam?.name ?? playerId,
             'seasonLabel': '${league.currentSeason.year}',
             'atmosphereDelta': playerDelta,
@@ -3371,7 +3430,6 @@ class SeasonService {
     return null;
   }
 
-
   _AwardCandidate? _bestCandidate(
     Iterable<_AwardCandidate> candidates,
     double Function(_AwardCandidate) score,
@@ -3614,7 +3672,13 @@ class SeasonService {
     return bestTeamId;
   }
 
-  List<LotteryResult> _computeLotteryResults(LeagueState league) {
+  List<LotteryResult> _computeLotteryResults(
+    LeagueState league, {
+    required int saveSeed,
+  }) {
+    final rng = Random(
+      seasonEventSeed(saveSeed, league.currentSeason.year, 'lottery'),
+    );
     final all = <Standing>[];
     for (final cs in league.currentSeason.standings) {
       all.addAll(cs.standings);
@@ -3634,7 +3698,7 @@ class SeasonService {
 
     for (var pick = 1; pick <= 10; pick++) {
       final total = remainingWeights.fold<int>(0, (s, w) => s + w);
-      var roll = _random.nextInt(total);
+      var roll = rng.nextInt(total);
       var idx = 0;
       for (var i = 0; i < remainingWeights.length; i++) {
         roll -= remainingWeights[i];

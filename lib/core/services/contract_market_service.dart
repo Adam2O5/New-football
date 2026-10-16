@@ -299,15 +299,11 @@ class ContractMarketService {
       kind: reaction.name,
       domain: MessageDomain.contracts,
       hour: hour,
-      // TODO(subjectName-migration): kind == reject needs {reason} and
-      // kind == counter needs {extraTerms}; neither is tracked on
-      // ContractNegotiation yet, so resolve() still throws for those two
-      // kinds. See chat decision.
       args: {
         'subjectName': player.name,
         'playerName': player.name,
-        'salary': record.lastOffer.salary,
-        'years': record.lastOffer.years,
+        'salary': (record.counterOffer ?? record.lastOffer).salary,
+        'years': (record.counterOffer ?? record.lastOffer).years,
         'score': record.offerScore,
         'phase': phase.name,
       },
@@ -507,14 +503,12 @@ class ContractMarketService {
       kind: reaction.name,
       domain: MessageDomain.staff,
       hour: hour,
-      // TODO(subjectName-migration): kind == reject needs {reason} and
-      // kind == counter needs {extraTerms}; see chat decision (same gap as
-      // contractOfferResponse above).
       args: {
         'subjectName': actualCandidate.name,
         'staffName': actualCandidate.name,
-        'salary': record.lastOffer.salary,
-        'years': record.lastOffer.years,
+        'staffRole': actualCandidate.role.name,
+        'salary': (record.counterOffer ?? record.lastOffer).salary,
+        'years': (record.counterOffer ?? record.lastOffer).years,
         'score': record.offerScore,
         'phase': phase.name,
       },
@@ -1220,8 +1214,6 @@ class ContractMarketService {
         'playerName': player.name,
         'salary': amount,
         'years': years,
-        // TODO(subjectName-migration): {extensionWindowEnd} still unresolved -
-        // no deadline is computed at this call site yet. See chat decision.
       },
       payload: {
         'playerId': player.id,
@@ -2139,17 +2131,19 @@ class ContractMarketService {
               ? MessageDomain.contracts
               : MessageDomain.staff,
           hour: hour,
-          // TODO(subjectName-migration): kind == reject needs {reason} and
-          // kind == counter needs {extraTerms}; see chat decision (same gap
-          // as the two call sites above).
           args: {
             'subjectName': subjectName,
             negotiation.subjectKind == NegotiationSubjectKind.player
                     ? 'playerName'
                     : 'staffName':
                 subjectName,
-            'salary': next.lastOffer.salary,
-            'years': next.lastOffer.years,
+            if (negotiation.subjectKind == NegotiationSubjectKind.staff)
+              'staffRole': _findStaffForNegotiation(
+                state,
+                negotiation,
+              )!.role.name,
+            'salary': (next.counterOffer ?? next.lastOffer).salary,
+            'years': (next.counterOffer ?? next.lastOffer).years,
             'score': next.offerScore,
             'phase': phase.name,
           },
@@ -2617,11 +2611,11 @@ class ContractMarketService {
   ) {
     final a =
         (((seasonA * balance.calendar.seasonCycleWeeks + weekA) * 7 + dayA) *
-            balance.contracts.hoursPerDay) +
+            (balance.contracts.hoursPerDay + 1)) +
         hourA;
     final b =
         (((seasonB * balance.calendar.seasonCycleWeeks + weekB) * 7 + dayB) *
-            balance.contracts.hoursPerDay) +
+            (balance.contracts.hoursPerDay + 1)) +
         hourB;
     return a.compareTo(b);
   }

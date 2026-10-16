@@ -300,10 +300,8 @@ class MessageTemplatesEn {
       key: 'msg_contractOffer_rfaQualifyingOffer_title',
       title: 'RFA Qualifying Offer',
       body:
-          'You must decide whether to submit a qualifying offer for '
-          '{subjectName} before the {extensionWindowEnd} window closes. '
-          'Submitting the offer will let you retain control over their '
-          'RFA status.',
+          'A qualifying offer has been submitted for {subjectName}: '
+          '{salary}, {years} year(s). The offer preserves the club’s RFA rights.',
     ),
     'msg_contractOfferResponse_title': MessageTextTemplate(
       key: 'msg_contractOfferResponse_title',
@@ -322,9 +320,7 @@ class MessageTemplatesEn {
     'msg_contractOfferResponse_reject_title': MessageTextTemplate(
       key: 'msg_contractOfferResponse_reject_title',
       title: 'Contract Response Rejected',
-      body:
-          '{subjectName} has rejected the latest proposal. Reason: '
-          '{reason}.',
+      body: '{subjectName} has rejected the latest proposal.',
     ),
     'msg_contractOfferResponse_hardReject_title': MessageTextTemplate(
       key: 'msg_contractOfferResponse_hardReject_title',
@@ -346,7 +342,7 @@ class MessageTemplatesEn {
       title: 'New Counter-Offer',
       body:
           '{subjectName} has come back with a new proposal: {years} '
-          'year(s), {salary}, additional terms: {extraTerms}.',
+          'year(s), {salary}.',
     ),
     'msg_contractSigned_title': MessageTextTemplate(
       key: 'msg_contractSigned_title',
@@ -426,7 +422,7 @@ class MessageTemplatesEn {
       title: 'Staff Rejected the Offer',
       body:
           '{subjectName} has rejected the job offer for the {staffRole} '
-          'position. Reason: {reason}.',
+          'position.',
     ),
     'msg_staffOfferResponse_hardReject_title': MessageTextTemplate(
       key: 'msg_staffOfferResponse_hardReject_title',
@@ -447,7 +443,7 @@ class MessageTemplatesEn {
       title: 'Staff Counter-Offer',
       body:
           '{subjectName} has sent a counter-offer for the {staffRole} '
-          'role. Expected terms: {salary} and {extraTerms}.',
+          'role. Expected terms: {salary}, {years} year(s).',
     ),
     'msg_staffOfferResponse_lostToRival_title': MessageTextTemplate(
       key: 'msg_staffOfferResponse_lostToRival_title',

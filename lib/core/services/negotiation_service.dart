@@ -2,6 +2,7 @@ import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/contract_negotiation.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/services/negotiation_rules.dart';
+import 'package:new_football/core/services/calendar_service.dart';
 
 /// State and date helpers shared by player and staff negotiation flows.
 class NegotiationService {
@@ -227,10 +228,9 @@ class NegotiationService {
     final next = <ContractNegotiation>[];
     final blocks = [...league.negotiationBlocks];
     for (final negotiation in league.negotiations) {
-      if (skipNegotiationIds.contains(negotiation.id)) {
-        next.add(negotiation);
-        continue;
-      }
+      final windowEnd = CalendarService(
+        balance: balance,
+      ).phaseIIWindowEnd(negotiation.seasonYear, negotiation.week);
       final phaseIIWindowEnded =
           negotiation.phase == NegotiationPhase.freeAgencyPhaseII &&
           _compare(
@@ -238,12 +238,16 @@ class NegotiationService {
                 week,
                 day,
                 hour,
-                seasonYear,
-                balance.calendar.freeAgencyPhaseIIEndWeek,
-                7,
-                balance.contracts.hoursPerDay,
+                windowEnd.seasonYear,
+                windowEnd.week,
+                windowEnd.day,
+                windowEnd.hour,
               ) >=
               0;
+      if (skipNegotiationIds.contains(negotiation.id) && !phaseIIWindowEnded) {
+        next.add(negotiation);
+        continue;
+      }
       final rivalSelection =
           negotiation.selectedByRival && !negotiation.rivalFinalized;
       final waitingTimerActive =
@@ -262,8 +266,8 @@ class NegotiationService {
               0;
       final cancelled = phaseIIWindowEnded || rivalSelection;
       final expired =
-          !waitingTimerActive &&
-          (phaseIIWindowEnded ||
+          phaseIIWindowEnded ||
+          (!waitingTimerActive &&
               _compare(
                     seasonYear,
                     week,
@@ -418,11 +422,11 @@ class NegotiationService {
   ) {
     final a =
         (((seasonA * balance.calendar.seasonCycleWeeks + weekA) * 7 + dayA) *
-            balance.contracts.hoursPerDay) +
+            (balance.contracts.hoursPerDay + 1)) +
         hourA;
     final b =
         (((seasonB * balance.calendar.seasonCycleWeeks + weekB) * 7 + dayB) *
-            balance.contracts.hoursPerDay) +
+            (balance.contracts.hoursPerDay + 1)) +
         hourB;
     return a.compareTo(b);
   }

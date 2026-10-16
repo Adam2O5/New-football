@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:new_football/core/random/seeds.dart';
 
 import 'package:uuid/uuid.dart';
 
@@ -61,7 +62,9 @@ class GameFactory {
     final ai = TeamAiService();
     var teams = league.teams.map(ai.autoSelectLineup).toList();
 
-    final staffRng = Random(saveSeed);
+    final staffRng = Random(
+      seasonEventSeed(saveSeed, request.seasonYear, 'initial-staff'),
+    );
     teams = teams.map((t) => _seedInitialStaff(t, staffRng)).toList();
     final staffPool = _seedGenerator
         .generateStaffPool(90, random: staffRng)
@@ -72,9 +75,9 @@ class GameFactory {
         )
         .toList();
 
-    // Osobne ziarno (nie `saveSeed` wprost) — inaczej dałby dokładnie ten sam
-    // strumień liczb co `staffRng`, korelując pulę wolnych agentów ze sztabem.
-    final freeAgentRng = Random(saveSeed + 1);
+    final freeAgentRng = Random(
+      seasonEventSeed(saveSeed, request.seasonYear, 'free-agents'),
+    );
     final freeAgentPlayers = _seedGenerator.generateFreeAgentPlayers(
       rng: freeAgentRng,
     );

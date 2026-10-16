@@ -1,6 +1,16 @@
-# Nowe testy — etapy 0 i 1
+# Nowe testy — etapy 0, 1 i rozpoczęty etap 2
 
-Etap 0 został zaakceptowany i zapisany przez użytkownika w commicie `dc6e454` (`refactor etap 0`). **Etap 1 (I01–I03) jest przygotowany do review.** Nie wykonano automatycznego commita ani prac etapu 2. Poniższe dane etapu 0 zachowują punkt odniesienia sprzed napraw.
+Etapy 0 i 1 zostały zaakceptowane i zapisane przez użytkownika w commitach `dc6e454` i `b4048fb`. **Etap 2 jest rozpoczęty i zatrzymany do decyzji użytkownika z powodu dodatkowego błędu wiadomości sztabu.** Nie wykonano automatycznego commita. Poniższe wyniki etapów 0 i 1 pozostają historycznym punktem odniesienia.
+
+## Etap 2 — stan częściowy, 15 października 2026
+
+- Pełny nowy zestaw: **51 testów przechodzi, 2 nie przechodzą**. Analiza zmienionego zakresu i nowych testów nie zgłasza uwag. Nie wykonywano jeszcze kompilacji bundle ani końcowego odbioru etapu.
+- Dwa nieprzechodzące scenariusze w `staff_season_messages_test.dart` odtwarzają istniejący błąd: `StaffService._msg` przesyła tylko `_legacyTitle`/`_legacyBody`, podczas gdy szablony `msg_staffGrowth_title` oraz `msg_retirementStaff_title` wymagają danych domenowych. Pierwszy zgłasza brak `subjectName`, drugi brak `staffName`. Nie zmieniono tego nadawcy ani tych szablonów w rozpoczętym wdrożeniu.
+- Proponowane rozszerzenie I04: przekazać rzeczywiste dane członka sztabu i zmiany atrybutów; dopasować PL/EN do faktycznego momentu emerytury. Zachować walidację tekstu. Naprawa czeka na decyzję użytkownika, zgodnie z jego poleceniem zatrzymania przy nieprzewidzianych komplikacjach.
+- `phase_two_window_test.dart`: 11 scenariuszy dostępności tygodni, początku w 48/52/1/45, indywidualnego deadline i zamknięcia pomimo waiting. `postseason_finalization_test.dart`: 3 scenariusze końcowego wyniku gracza, nieukończonego sezonu i idempotencji/walidacji stanu częściowego. Te 14 scenariuszy przechodzi.
+- Rozpoczęty diff obejmuje I04–I10: treść wiadomości kontraktowych i QO, stabilny seed terminarza, wybór klubu, część strumieni RNG, granicę FA II, finalizację postseason i mapowanie 52 tygodni. **Nie oznacza to zakończenia żadnego pełnego odbioru etapu.** W szczególności pozostają: testy generatorów i dwóch osobnych procesów, referencyjne daty, odtwarzalność zdarzeń sezonowych, pełne scenariusze wiadomości/rynku, miejsce 10/11 i porównanie ścieżek postseason oraz testy przycisków kalendarza.
+- Rozpoczęte I05 podnosi schemat z 24 do **25**. Po wznowieniu i ukończeniu etapu review wymaga nowych karier, zgodnie z przyjętą polityką braku migracji. Dotychczasowych zapisów nie usunięto.
+- Logi diagnostyczne: `reports/lib-audit-2026-10-13/stage-2-staff-blocker.txt`, `stage-2-partial-analyze.txt`, `stage-2-partial-tests.txt`. Kod wszystkich nowych testów pozostaje w `test/nowe_testy/`.
 
 ## Wynik etapu 1
 

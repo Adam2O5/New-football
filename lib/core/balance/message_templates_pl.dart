@@ -249,7 +249,7 @@ class MessageTemplatesPl {
       key: 'msg_contractOffer_rfaQualifyingOffer_title',
       title: 'Kwalifikująca oferta dla RFA',
       body:
-          'Musisz zdecydować, czy złożyć qualifying offer dla {subjectName} przed końcem okna {extensionWindowEnd}. Złożenie oferty pozwoli zachować kontrolę nad statusem RFA.',
+          'Złożono qualifying offer dla {subjectName}: {salary}, {years} lat(a). Oferta zachowuje prawa klubu do RFA.',
     ),
     'msg_contractOfferResponse_title': MessageTextTemplate(
       key: 'msg_contractOfferResponse_title',
@@ -266,7 +266,7 @@ class MessageTemplatesPl {
     'msg_contractOfferResponse_reject_title': MessageTextTemplate(
       key: 'msg_contractOfferResponse_reject_title',
       title: 'Odrzucenie odpowiedzi kontraktowej',
-      body: '{subjectName} odrzucił ostatnią propozycję. Powód: {reason}.',
+      body: '{subjectName} odrzucił ostatnią propozycję.',
     ),
     'msg_contractOfferResponse_hardReject_title': MessageTextTemplate(
       key: 'msg_contractOfferResponse_hardReject_title',
@@ -283,8 +283,7 @@ class MessageTemplatesPl {
     'msg_contractOfferResponse_counter_title': MessageTextTemplate(
       key: 'msg_contractOfferResponse_counter_title',
       title: 'Nowa kontroferta',
-      body:
-          '{subjectName} wrócił z nową propozycją: {years} lat(a), {salary}, warunki dodatkowe: {extraTerms}.',
+      body: '{subjectName} wrócił z nową propozycją: {years} lat(a), {salary}.',
     ),
     'msg_contractSigned_title': MessageTextTemplate(
       key: 'msg_contractSigned_title',
@@ -349,8 +348,7 @@ class MessageTemplatesPl {
     'msg_staffOfferResponse_reject_title': MessageTextTemplate(
       key: 'msg_staffOfferResponse_reject_title',
       title: 'Sztab odrzucił ofertę',
-      body:
-          '{subjectName} odrzucił ofertę pracy na stanowisku {staffRole}. Powód: {reason}.',
+      body: '{subjectName} odrzucił ofertę pracy na stanowisku {staffRole}.',
     ),
     'msg_staffOfferResponse_hardReject_title': MessageTextTemplate(
       key: 'msg_staffOfferResponse_hardReject_title',
@@ -368,7 +366,7 @@ class MessageTemplatesPl {
       key: 'msg_staffOfferResponse_counter_title',
       title: 'Kontroferta członka sztabu',
       body:
-          '{subjectName} przesłał kontrofertę dotyczącą roli {staffRole}. Oczekiwane warunki: {salary} oraz {extraTerms}.',
+          '{subjectName} przesłał kontrofertę dotyczącą roli {staffRole}: {salary}, {years} lat(a).',
     ),
     'msg_staffOfferResponse_lostToRival_title': MessageTextTemplate(
       key: 'msg_staffOfferResponse_lostToRival_title',

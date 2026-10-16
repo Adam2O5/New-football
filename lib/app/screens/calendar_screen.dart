@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:new_football/core/services/calendar_service.dart';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
@@ -13,7 +15,6 @@ import 'package:new_football/app/widgets/screen_background.dart';
 import 'package:new_football/app/l10n/enum_labels.dart';
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/app/screens/shell_screen.dart';
-import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/match_models.dart';
 import 'package:new_football/core/models/message.dart';
@@ -26,35 +27,14 @@ final calendarCursorMonthProvider = StateProvider<DateTime?>((ref) => null);
 /// Currently selected day in the calendar grid, driving the info panel.
 final calendarSelectedDayProvider = StateProvider<DateTime?>((ref) => null);
 
-DateTime _week1StartForSeason(int seasonYear) {
-  // Docs: week #1 starts at the first full Mon–Sun week inside August.
-  DateTime d = DateTime(seasonYear, 8, 1);
-  while (d.weekday != DateTime.monday) {
-    d = d.add(const Duration(days: 1));
-  }
-  while (d.month != 8 || d.add(const Duration(days: 6)).month != 8) {
-    d = d.add(const Duration(days: 7));
-  }
-  return DateTime(d.year, d.month, d.day);
-}
+DateTime _week1StartForSeason(int seasonYear) =>
+    const CalendarService().week1StartForSeason(seasonYear);
 
-DateTime _dateForInGameWeekDay(int seasonYear, int week, int day) {
-  final week1Start = _week1StartForSeason(seasonYear);
-  final offsetDays = (week - 1) * 7 + (day - 1);
-  return week1Start.add(Duration(days: offsetDays));
-}
+DateTime _dateForInGameWeekDay(int seasonYear, int week, int day) =>
+    const CalendarService().dateForWeekDay(seasonYear, week, day);
 
-({int week, int day})? _inGameWeekDayForDate(DateTime date, int seasonYear) {
-  final week1Start = _week1StartForSeason(seasonYear);
-  final diffDays = date.difference(week1Start).inDays;
-  if (diffDays < 0) return null;
-  final week = diffDays ~/ 7 + 1;
-  final day = diffDays % 7 + 1;
-  final endWeek = BalanceConfig.defaults.calendar.freeAgencyWeek;
-  if (week < 1 || week > endWeek) return null;
-  return (week: week, day: day);
-}
-
+({int week, int day})? _inGameWeekDayForDate(DateTime date, int seasonYear) =>
+    const CalendarService().weekDayForDate(date, seasonYear);
 DateTime _monthForInGame(LeagueState league) {
   final d = _dateForInGameWeekDay(
     league.currentSeason.year,

@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:new_football/core/random/seeds.dart';
 
 import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/contract_negotiation.dart';
@@ -358,7 +359,7 @@ class StaffService {
 
   /// Rozwój ★ (35–45) i emerytury (55–60), raz na sezon, po finale przed
   /// Awards (`docs/staff_rules.md` §6–7).
-  LeagueState growthAndRetireTick(LeagueState league) {
+  LeagueState growthAndRetireTick(LeagueState league, {int? saveSeed}) {
     var state = league;
     for (final team in league.teams) {
       var staff = team.staff;
@@ -366,6 +367,26 @@ class StaffService {
       for (final role in StaffRole.values) {
         final member = staff.canonicalMember(role);
         if (member == null) continue;
+        final retireRng = saveSeed == null
+            ? _random
+            : Random(
+                seasonEventSeed(
+                  saveSeed,
+                  league.currentSeason.year,
+                  'staff-retire',
+                  subjectId: member.id,
+                ),
+              );
+        final growthRng = saveSeed == null
+            ? _random
+            : Random(
+                seasonEventSeed(
+                  saveSeed,
+                  league.currentSeason.year,
+                  'staff-growth',
+                  subjectId: member.id,
+                ),
+              );
 
         final baseline = member.copyWith(previousAttributes: member.attributes);
         staff = staff.withMember(role, baseline);
@@ -373,7 +394,7 @@ class StaffService {
 
         if (member.age >= balance.staff.retireAgeMin) {
           final chance = balance.staff.retireChanceForAge(member.age);
-          if (_random.nextDouble() < chance) {
+          if (retireRng.nextDouble() < chance) {
             staff = staff.withMember(role, null);
             state = _msg(
               state,
@@ -388,9 +409,13 @@ class StaffService {
         if (member.age >= balance.staff.growthAgeMin &&
             member.age <= balance.staff.growthAgeMax) {
           final chance = balance.staff.growthChanceForAge(member.age);
-          if (_random.nextDouble() < chance) {
+          if (growthRng.nextDouble() < chance) {
             final grown = baseline.copyWith(
-              attributes: _bumpAttribute(baseline.attributes, baseline.role),
+              attributes: _bumpAttribute(
+                baseline.attributes,
+                baseline.role,
+                growthRng,
+              ),
             );
             staff = staff.withMember(role, grown);
             state = _msg(
@@ -409,7 +434,11 @@ class StaffService {
     return state;
   }
 
-  StaffAttributes _bumpAttribute(StaffAttributes a, StaffRole role) {
+  StaffAttributes _bumpAttribute(
+    StaffAttributes a,
+    StaffRole role,
+    Random rng,
+  ) {
     double up(double v) => (v + balance.staff.starStep).clamp(
       balance.staff.starMin,
       balance.staff.starMax,
@@ -418,23 +447,23 @@ class StaffService {
       // `docs/staff.md` §5: only Tactics and Motivation are role-relevant for
       // the head coach, so growth never touches the legacy `development` field.
       StaffRole.headCoach =>
-        _random.nextBool()
+        rng.nextBool()
             ? a.copyWith(tactics: up(a.tactics))
             : a.copyWith(motivation: up(a.motivation)),
       StaffRole.youthCoach =>
-        _random.nextBool()
+        rng.nextBool()
             ? a.copyWith(development: up(a.development))
             : a.copyWith(mentoring: up(a.mentoring)),
       StaffRole.scout =>
-        _random.nextBool()
+        rng.nextBool()
             ? a.copyWith(coverage: up(a.coverage))
             : a.copyWith(evaluation: up(a.evaluation)),
       StaffRole.physio =>
-        _random.nextBool()
+        rng.nextBool()
             ? a.copyWith(rehabilitation: up(a.rehabilitation))
             : a.copyWith(regenaration: up(a.regenaration)),
       StaffRole.doctor =>
-        _random.nextBool()
+        rng.nextBool()
             ? a.copyWith(prevention: up(a.prevention))
             : a.copyWith(care: up(a.care)),
       StaffRole.cfo => a.copyWith(negotiation: up(a.negotiation)),

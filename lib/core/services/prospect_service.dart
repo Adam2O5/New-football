@@ -29,7 +29,7 @@ class ProspectService {
   DraftState generateNextDraftClass({required int currentYear, int? seed}) {
     final draftClass = SeedDataGenerator(
       random: _random,
-    ).generateDraftClass(year: currentYear + 1);
+    ).generateDraftClass(year: currentYear + 1, seed: seed);
     final trueBoard = _mockDraftService.trueBoard(draftClass.prospects);
     final initialMock = _mockDraftService.generateInitialMock(
       trueBoard,

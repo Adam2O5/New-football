@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:new_football/core/random/seeds.dart';
 
 import 'package:new_football/core/models/match_models.dart';
 
@@ -96,7 +97,7 @@ int scheduleRoundForWeekSlot(int week, int slot) {
     throw ArgumentError('Invalid week=$week');
   }
 
-  final rng = Random(Object.hash(seed, week));
+  final rng = Random(calendarSeed(seed, week));
   final midweekDay = rng.nextBool() ? 3 : 4;
   final weekendDay = midweekDay == 4 ? 7 : (rng.nextBool() ? 6 : 7);
 

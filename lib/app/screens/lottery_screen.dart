@@ -247,7 +247,11 @@ class _LotteryScreenState extends ConsumerState<LotteryScreen> {
 
   void _startLottery(LeagueState league) {
     final lotteryTeams = _getLotteryTeams(league);
-    final results = LotteryService.computeResults(lotteryTeams);
+    final results = LotteryService.computeResults(
+      lotteryTeams,
+      saveSeed: ref.read(gameControllerProvider).value!.saveSeed,
+      seasonYear: league.currentSeason.year,
+    );
     setState(() {
       _results = results;
       _phase = LotteryPhase.inProgress;
@@ -289,7 +293,11 @@ class _LotteryScreenState extends ConsumerState<LotteryScreen> {
       final draftService = ref.read(draftServiceProvider);
       await ref.read(gameControllerProvider.notifier).updateLeague((league) {
         // Zapisz wyniki loterii i zbuduj pełną kolejność draftu
-        return draftService.buildDraftOrder(league, _results);
+        return draftService.buildDraftOrder(
+          league,
+          _results,
+          saveSeed: ref.read(gameControllerProvider).value!.saveSeed,
+        );
       });
     } catch (e) {
       if (!mounted) return;
