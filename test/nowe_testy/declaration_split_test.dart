@@ -46,7 +46,7 @@ void main() {
         expect(jsonDecode(jsonEncode(restored)), json, reason: entry.key);
       }
       expect(identical(BalanceConfig.defaults, const BalanceConfig()), isTrue);
-      expect(SaveSchema.currentVersion, 26);
+      expect(SaveSchema.currentVersion, 27);
     },
   );
   test('complete save reads the model sections recorded before the split', () {

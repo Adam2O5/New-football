@@ -69,7 +69,7 @@ class SeedDataGenerator {
           city: city,
           name: name,
           conference: Conference.restOfTheWorld,
-          index: i + 15,
+          index: i + europeTeams.length,
           rng: rng,
           isPlayer: false,
           seasonYear: year,
@@ -139,7 +139,7 @@ class SeedDataGenerator {
     required bool isPlayer,
     required int seasonYear,
   }) {
-    final teamId = 'team_${conference.name}_$index';
+    final teamId = seedTeamId(conference, index);
     final formation = Formation.values[rng.nextInt(Formation.values.length)];
     final roster = _generateRoster(teamId, rng, formation: formation);
 

@@ -32,6 +32,7 @@ import 'package:new_football/core/random/seeds.dart';
 import 'package:new_football/core/services/calendar_service.dart';
 import 'package:new_football/core/services/draft_trade_service.dart';
 import 'package:new_football/core/services/contract_market_service.dart';
+import 'package:new_football/core/services/negotiation_service.dart';
 import 'package:new_football/core/services/development_service.dart';
 import 'package:new_football/core/services/discipline_service.dart';
 import 'package:new_football/core/services/prospect_service.dart';
@@ -2521,6 +2522,9 @@ class SeasonService {
       ),
     );
     nextLeague = expireContracts(nextLeague);
+    nextLeague = NegotiationService(
+      balance: balance,
+    ).pruneHistory(nextLeague, seasonYear: newYear, week: 1, day: 1);
     return rosterManagement.ensurePreseasonRoster(
       nextLeague,
       saveSeed: saveSeed,

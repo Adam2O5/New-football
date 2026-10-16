@@ -120,9 +120,9 @@ class SaveRepository {
   /// specifically test the write transaction can turn it back on.
   final bool verifyTypedCommit;
 
-  /// Runs [save] in a background isolate so serializing and writing the save
-  /// never blocks the UI. Ignored when a test hook is installed, because a
-  /// closure cannot be sent to another isolate.
+  /// Runs save, load, rename and duplicate work in a background isolate so
+  /// JSON processing does not block the UI. Test hooks keep work in the calling
+  /// isolate so callbacks observe the test's own state.
   final bool saveInIsolate;
 
   static int _transactionSequence = 0;
@@ -224,8 +224,27 @@ class SaveRepository {
     required String sourceId,
     required GameSaveMeta duplicateMeta,
   }) => _withAccess(
-    () => _duplicateRaw(sourceId: sourceId, duplicateMeta: duplicateMeta),
+    () => _duplicateLocked(sourceId: sourceId, duplicateMeta: duplicateMeta),
   );
+
+  bool get _runWorkInIsolate =>
+      saveInIsolate && _beforePublish == null && _onCheckpoint == null;
+
+  Future<GameSaveMeta> _duplicateLocked({
+    required String sourceId,
+    required GameSaveMeta duplicateMeta,
+  }) async {
+    if (!_runWorkInIsolate) {
+      return _duplicateRaw(sourceId: sourceId, duplicateMeta: duplicateMeta);
+    }
+    final path = (await _savesDir()).path;
+    return Isolate.run(
+      () => SaveRepository(
+        overrideDirectory: Directory(path),
+        saveInIsolate: false,
+      )._duplicateRaw(sourceId: sourceId, duplicateMeta: duplicateMeta),
+    );
+  }
 
   Future<GameSaveMeta> _duplicateRaw({
     required String sourceId,
@@ -273,11 +292,7 @@ class SaveRepository {
       final indexJson = const JsonEncoder.withIndent('  ').convert(
         [...currentMetas, duplicateMeta].map((m) => m.toJson()).toList(),
       );
-      final gameJson = const JsonEncoder.withIndent(
-        '  ',
-      ).convert(duplicateJson);
-
-      await _writeTemporary(gameTemporary, gameJson);
+      await _writeJsonTemporary(gameTemporary, duplicateJson);
       await _writeTemporary(indexTemporary, indexJson);
       await _commitPreparedFiles(
         transaction,
@@ -315,7 +330,21 @@ class SaveRepository {
   Future<GameSaveMeta> renameRaw({
     required String id,
     required String newName,
-  }) => _withAccess(() => _renameRaw(id: id, newName: newName));
+  }) => _withAccess(() => _renameLocked(id: id, newName: newName));
+
+  Future<GameSaveMeta> _renameLocked({
+    required String id,
+    required String newName,
+  }) async {
+    if (!_runWorkInIsolate) return _renameRaw(id: id, newName: newName);
+    final path = (await _savesDir()).path;
+    return Isolate.run(
+      () => SaveRepository(
+        overrideDirectory: Directory(path),
+        saveInIsolate: false,
+      )._renameRaw(id: id, newName: newName),
+    );
+  }
 
   Future<GameSaveMeta> _renameRaw({
     required String id,
@@ -368,12 +397,11 @@ class SaveRepository {
     final indexTemporary = transaction.indexFile.temporary;
 
     try {
-      final gameJson = const JsonEncoder.withIndent('  ').convert(renamedJson);
       final indexJson = const JsonEncoder.withIndent(
         '  ',
       ).convert(renamedIndex.map((meta) => meta.toJson()).toList());
 
-      await _writeTemporary(gameTemporary, gameJson);
+      await _writeJsonTemporary(gameTemporary, renamedJson);
       await _writeTemporary(indexTemporary, indexJson);
       await _commitPreparedFiles(
         transaction,
@@ -504,10 +532,33 @@ class SaveRepository {
     }
   }
 
-  Future<GameSave> load(String id) => _withAccess(() => _load(id));
+  Future<GameSave> load(String id) => _withAccess(() => _loadLocked(id));
 
-  Future<GameSave> _load(String id) async {
+  Future<GameSave> _loadLocked(String id) async {
     _lastStaffDiagnostics = const [];
+    final path = (await _savesDir()).path;
+    final result = _runWorkInIsolate
+        ? await Isolate.run(
+            () => SaveRepository(
+              overrideDirectory: Directory(path),
+              saveInIsolate: false,
+            )._loadInPlace(id),
+          )
+        : await _loadInPlace(id);
+    _lastStaffDiagnostics = result.diagnostics;
+    if (result.error != null) throw result.error!;
+    return result.save!;
+  }
+
+  Future<
+    ({
+      GameSave? save,
+      List<StaffDataDiagnostic> diagnostics,
+      SaveRepositoryException? error,
+    })
+  >
+  _loadInPlace(String id) async {
+    var diagnostics = const <StaffDataDiagnostic>[];
     final file = await _saveFile(id);
     if (!await file.exists()) {
       throw SaveRepositoryException('Save not found: $id');
@@ -528,13 +579,22 @@ class SaveRepository {
       // Generated StaffMember decoders use enum decoding for role. Normalize
       // only the staff subtrees after schema validation and before any
       // generated model decoder is invoked. The player/save transaction flow
-      // remains untouched, and valid non-staff JSON is copied verbatim.
+      // remains untouched; valid non-staff JSON subtrees are shared read-only.
       final staffResult = StaffDataCompatibility.sanitizeGameSaveJson(json);
-      _lastStaffDiagnostics = staffResult.diagnostics;
-      return GameSave.fromJson(staffResult.sanitizedJson);
+      diagnostics = staffResult.diagnostics;
+      return (
+        save: GameSave.fromJson(staffResult.sanitizedJson),
+        diagnostics: diagnostics,
+        error: null,
+      );
     } catch (e) {
-      if (e is SaveRepositoryException) rethrow;
-      throw SaveRepositoryException('Failed to load save $id', cause: e);
+      return (
+        save: null,
+        diagnostics: diagnostics,
+        error: e is SaveRepositoryException
+            ? e
+            : SaveRepositoryException('Failed to load save $id', cause: e),
+      );
     }
   }
 
@@ -545,7 +605,7 @@ class SaveRepository {
     // The directory has to be resolved here: `getApplicationDocumentsDirectory`
     // is a platform channel call and does not work in a plain isolate.
     final directory = await _savesDir();
-    if (!saveInIsolate || _beforePublish != null || _onCheckpoint != null) {
+    if (!_runWorkInIsolate) {
       return _saveInPlace(gameSave);
     }
     final path = directory.path;
@@ -652,7 +712,8 @@ class SaveRepository {
   /// Streams [json] to [file] as compact UTF-8 and returns the byte count.
   ///
   /// [JsonUtf8Encoder] emits fixed-size chunks, so the encoded document never
-  /// exists in memory as a whole — only the map graph being encoded does.
+  /// exists as a single allocation. IOSink may still queue multiple chunks;
+  /// this is not a guarantee of constant memory for the entire save pipeline.
   Future<int> _writeJsonTemporary(File file, Object? json) async {
     const chunkBytes = 64 * 1024;
     final sink = file.openWrite();

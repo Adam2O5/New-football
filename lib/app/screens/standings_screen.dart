@@ -13,13 +13,65 @@ import 'package:new_football/core/models/match_models.dart';
 import 'package:new_football/core/models/standing.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
+class _StandingsSelection {
+  _StandingsSelection(LeagueState league)
+    : season = league.currentSeason,
+      playerTeamId = league.playerTeamId,
+      clubs = [for (final team in league.teams) (team.id, team.name)];
+
+  final Season season;
+  final String? playerTeamId;
+  final List<(String, String)> clubs;
+
+  static bool _sameItems<T>(List<T> a, List<T> b) {
+    if (identical(a, b)) return true;
+    if (a.length != b.length) return false;
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
+
+  @override
+  bool operator ==(Object other) {
+    if (other is! _StandingsSelection ||
+        playerTeamId != other.playerTeamId ||
+        season.championTeamId != other.season.championTeamId) {
+      return false;
+    }
+    return _sameItems(clubs, other.clubs) &&
+        _sameItems(season.standings, other.season.standings) &&
+        _sameItems(season.playInResults, other.season.playInResults) &&
+        _sameItems(season.playInProgress, other.season.playInProgress) &&
+        _sameItems(season.playoffBrackets, other.season.playoffBrackets);
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    playerTeamId,
+    season.championTeamId,
+    Object.hashAll(clubs),
+    Object.hashAll(season.standings),
+    Object.hashAll(season.playInResults),
+    Object.hashAll(season.playInProgress),
+    Object.hashAll(season.playoffBrackets),
+  );
+}
+
 class StandingsScreen extends ConsumerWidget {
   const StandingsScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final league = ref.watch(activeLeagueProvider);
+    // These are the only league values used by the table and bracket below.
+    // List value equality also works after a worker transfers a fresh graph.
+    ref.watch(
+      activeLeagueProvider.select(
+        (league) => league == null ? null : _StandingsSelection(league),
+      ),
+    );
+    final league = ref.read(activeLeagueProvider);
     if (league == null) {
       return ScreenBackground(
         child: Center(child: Text(l10n.standings_noLeague)),

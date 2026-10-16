@@ -73,7 +73,8 @@ final class StaffDataDiagnostic {
 
 /// Result of normalizing a raw save or league-state JSON map.
 ///
-/// [sanitizedJson] is a deep copy of the input. The normalizer never mutates
+/// [sanitizedJson] copies the branches it changes. Unchanged JSON subtrees are
+/// shared and should be treated as read-only. The normalizer never mutates
 /// the caller's map, so a result can safely be retained for diagnostics or
 /// compared with the original input. [diagnostics] is immutable and ordered
 /// by the traversal order of the source JSON.
@@ -119,7 +120,7 @@ final class StaffCompatibilityResult<T extends Map<String, dynamic>> {
 /// * unknown attribute names are preserved and ignored by the typed model;
 /// * the legacy `headCoach.development` field is never rewritten or promoted
 ///   into a head-coach role attribute;
-/// * all outputs are deep copies, making the operation non-mutating and
+/// * modified branches are copied, making the operation non-mutating and
 ///   idempotent on an already sanitized JSON tree.
 abstract final class StaffDataCompatibility {
   /// The only role names accepted by the current [StaffRole] model.
@@ -178,7 +179,7 @@ abstract final class StaffDataCompatibility {
   static StaffCompatibilityResult<Map<String, dynamic>> sanitizeGameSaveJson(
     Map<String, dynamic> json,
   ) {
-    final copy = _cloneMap(json);
+    final copy = Map<String, dynamic>.from(json);
     final diagnostics = <StaffDataDiagnostic>[];
     final leagueState = copy['leagueState'];
 
@@ -203,8 +204,10 @@ abstract final class StaffDataCompatibility {
       );
     }
 
+    final leagueCopy = _copyStaffBranches(leagueStateMap);
+    copy['leagueState'] = leagueCopy;
     _sanitizeLeagueState(
-      leagueStateMap,
+      leagueCopy,
       rootPath: 'leagueState',
       diagnostics: diagnostics,
     );
@@ -223,7 +226,7 @@ abstract final class StaffDataCompatibility {
   static StaffCompatibilityResult<Map<String, dynamic>> sanitizeLeagueStateJson(
     Map<String, dynamic> json,
   ) {
-    final copy = _cloneMap(json);
+    final copy = _copyStaffBranches(json);
     final diagnostics = <StaffDataDiagnostic>[];
     _sanitizeLeagueState(copy, diagnostics: diagnostics);
     return StaffCompatibilityResult(
@@ -529,22 +532,27 @@ abstract final class StaffDataCompatibility {
     return null;
   }
 
-  static Map<String, dynamic> _cloneMap(Map<String, dynamic> source) =>
-      _cloneJsonValue(source) as Map<String, dynamic>;
-
-  static Object? _cloneJsonValue(Object? value) {
-    if (value is Map) {
-      final result = <String, dynamic>{};
-      for (final entry in value.entries) {
-        if (entry.key is String) {
-          result[entry.key as String] = _cloneJsonValue(entry.value);
-        }
-      }
-      return result;
+  // Only team/staff maps are edited in place; the free-agent list is replaced.
+  // Rosters, fixtures, history and staff records are only read by normalization.
+  static Map<String, dynamic> _copyStaffBranches(Map<String, dynamic> source) {
+    final copy = Map<String, dynamic>.from(source);
+    final teams = source['teams'];
+    if (teams is List) {
+      copy['teams'] = [
+        for (final team in teams)
+          if (team is Map<String, dynamic> && team['staff'] != null)
+            {
+              ...team,
+              'staff': team['staff'] is Map<String, dynamic>
+                  ? Map<String, dynamic>.from(
+                      team['staff'] as Map<String, dynamic>,
+                    )
+                  : team['staff'],
+            }
+          else
+            team,
+      ];
     }
-    if (value is List) {
-      return [for (final item in value) _cloneJsonValue(item)];
-    }
-    return value;
+    return copy;
   }
 }

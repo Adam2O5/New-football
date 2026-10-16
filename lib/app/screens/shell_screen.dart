@@ -32,6 +32,7 @@ class ShellScreen extends ConsumerStatefulWidget {
 class _ShellScreenState extends ConsumerState<ShellScreen> {
   bool _leaving = false;
   bool _saving = false;
+  ThemeData? _clubTheme;
 
   Future<void> _leaveGame() async {
     if (_leaving) return;
@@ -98,8 +99,19 @@ class _ShellScreenState extends ConsumerState<ShellScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final league = ref.watch(activeLeagueProvider);
-    if (league == null) {
+    final shell = ref.watch(
+      activeLeagueProvider.select(
+        (league) => league == null
+            ? null
+            : (
+                teamId: league.playerTeamId,
+                teamName: league.teamById(league.playerTeamId ?? '')?.name,
+                unreadCount: league.inbox.unread.length,
+                urgent: league.inbox.pendingUrgent.isNotEmpty,
+              ),
+      ),
+    );
+    if (shell == null) {
       return Scaffold(
         body: ScreenBackground(
           child: Center(
@@ -120,11 +132,8 @@ class _ShellScreenState extends ConsumerState<ShellScreen> {
     }
 
     final index = ref.watch(shellTabIndexProvider).clamp(0, _tabs.length - 1);
-    final activeTeamId = league.playerTeamId;
-    final activeTeam = activeTeamId == null
-        ? null
-        : league.teamById(activeTeamId);
-    final teamName = activeTeam?.name ?? l10n.shell_defaultCareerName;
+    final activeTeamId = shell.teamId;
+    final teamName = shell.teamName ?? l10n.shell_defaultCareerName;
     final branding = ref
         .watch(clubBrandingProvider)
         .resolve(activeTeamId ?? '');
@@ -198,13 +207,13 @@ class _ShellScreenState extends ConsumerState<ShellScreen> {
           ),
           NavigationDestination(
             icon: _InboxBadge(
-              unreadCount: league.inbox.unread.length,
-              urgent: league.inbox.pendingUrgent.isNotEmpty,
+              unreadCount: shell.unreadCount,
+              urgent: shell.urgent,
               icon: Icons.mail_outline,
             ),
             selectedIcon: _InboxBadge(
-              unreadCount: league.inbox.unread.length,
-              urgent: league.inbox.pendingUrgent.isNotEmpty,
+              unreadCount: shell.unreadCount,
+              urgent: shell.urgent,
               icon: Icons.mail,
             ),
             label: l10n.shell_tab_inbox,
@@ -214,13 +223,15 @@ class _ShellScreenState extends ConsumerState<ShellScreen> {
     );
 
     if (useLegacyColorTheme) return scaffold;
-    return Theme(
-      data: AppTheme.forClub(
+    // Updating the inbox badge must not invalidate the theme of every tab.
+    if (_clubTheme?.colorScheme.primary != branding.primaryColor ||
+        _clubTheme?.colorScheme.secondary != branding.secondaryColor) {
+      _clubTheme = AppTheme.forClub(
         primary: branding.primaryColor,
         secondary: branding.secondaryColor,
-      ),
-      child: scaffold,
-    );
+      );
+    }
+    return Theme(data: _clubTheme!, child: scaffold);
   }
 }
 

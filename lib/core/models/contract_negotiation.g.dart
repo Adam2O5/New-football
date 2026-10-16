@@ -60,6 +60,7 @@ _ContractNegotiation _$ContractNegotiationFromJson(Map<String, dynamic> json) =>
       status:
           $enumDecodeNullable(_$NegotiationStatusEnumMap, json['status']) ??
           NegotiationStatus.active,
+      terminalSeasonYear: (json['terminalSeasonYear'] as num?)?.toInt(),
       seasonYear: (json['seasonYear'] as num).toInt(),
       week: (json['week'] as num).toInt(),
       day: (json['day'] as num?)?.toInt() ?? 1,
@@ -91,6 +92,7 @@ Map<String, dynamic> _$ContractNegotiationToJson(
   'lastOffer': instance.lastOffer,
   'counterOffer': instance.counterOffer,
   'status': _$NegotiationStatusEnumMap[instance.status]!,
+  'terminalSeasonYear': instance.terminalSeasonYear,
   'seasonYear': instance.seasonYear,
   'week': instance.week,
   'day': instance.day,

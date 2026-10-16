@@ -51,6 +51,10 @@ abstract class ContractNegotiation with _$ContractNegotiation {
     required NegotiationOffer lastOffer,
     NegotiationOffer? counterOffer,
     @Default(NegotiationStatus.active) NegotiationStatus status,
+
+    /// Set when the record becomes terminal, independently of its start year.
+    /// Retained through the following season, longer while referenced.
+    int? terminalSeasonYear,
     required int seasonYear,
     required int week,
     @Default(1) int day,

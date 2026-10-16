@@ -75,8 +75,9 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final league = ref.watch(activeLeagueProvider);
-    final team = league?.playerTeam;
+    final team = ref.watch(
+      activeLeagueProvider.select((league) => league?.playerTeam),
+    );
     if (team == null) {
       return ScreenBackground(child: Center(child: Text(l10n.squad_noTeam)));
     }

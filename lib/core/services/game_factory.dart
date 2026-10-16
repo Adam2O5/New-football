@@ -9,6 +9,7 @@ import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/seed_data_generator.dart';
+import 'package:new_football/core/models/seed_clubs.dart';
 import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/services/league_strength_service.dart';
 import 'package:new_football/core/services/contract_period_service.dart';
@@ -37,15 +38,7 @@ class GameFactory {
   final _uuid = const Uuid();
 
   List<({String id, String name, String city, Conference conference})>
-  previewTeams() {
-    final league = _seedGenerator.generateLeague(year: 2026, seed: 1);
-    return league.teams
-        .map(
-          (t) =>
-              (id: t.id, name: t.name, city: t.city, conference: t.conference),
-        )
-        .toList();
-  }
+  previewTeams() => seedTeamCatalog;
 
   GameSave create(NewGameRequest request) {
     // Generate the seed once so the initial world and every later match share

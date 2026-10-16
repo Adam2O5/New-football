@@ -1,5 +1,6 @@
 import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/contract_negotiation.dart';
+import 'package:new_football/core/models/contract_market_models.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/services/negotiation_rules.dart';
 import 'package:new_football/core/services/calendar_service.dart';
@@ -196,10 +197,6 @@ class NegotiationService {
     ContractNegotiation negotiation, {
     NegotiationBlock? block,
   }) {
-    final negotiations = [
-      ...league.negotiations.where((item) => item.id != negotiation.id),
-      negotiation,
-    ];
     final blocks = block == null
         ? league.negotiationBlocks
         : [
@@ -211,10 +208,9 @@ class NegotiationService {
             ),
             block,
           ];
-    return league.copyWith(
-      negotiations: negotiations,
-      negotiationBlocks: blocks,
-    );
+    return league
+        .upsertNegotiation(negotiation)
+        .copyWith(negotiationBlocks: blocks);
   }
 
   LeagueState expireAt({
@@ -286,7 +282,9 @@ class NegotiationService {
       final status = cancelled
           ? NegotiationStatus.cancelled
           : NegotiationStatus.hardRejected;
-      next.add(negotiation.copyWith(status: status));
+      next.add(
+        negotiation.copyWith(status: status, terminalSeasonYear: seasonYear),
+      );
       if (!cancelled) {
         blocks.add(
           blockFor(
@@ -301,8 +299,71 @@ class NegotiationService {
         );
       }
     }
+    return pruneHistory(
+      league.copyWith(negotiations: next, negotiationBlocks: blocks),
+      seasonYear: seasonYear,
+      week: week,
+      day: day,
+      hour: hour,
+    );
+  }
+
+  /// Keeps terminal records through the next season and for as long as an
+  /// inbox entry (including scheduled/archive) or unresolved RFA needs them.
+  /// Active/waiting/counter/pending-finalization records are never evicted.
+  LeagueState pruneHistory(
+    LeagueState league, {
+    required int seasonYear,
+    required int week,
+    required int day,
+    int hour = 0,
+  }) {
+    final referenced = <String>{
+      for (final message in [
+        ...league.inbox.messages,
+        ...league.inbox.scheduled,
+        ...league.inbox.archive,
+      ])
+        if (message.payload['negotiationId'] is String)
+          message.payload['negotiationId'] as String,
+    };
+    final rfaPlayers = {
+      for (final sheet in league.rfaOfferSheets)
+        if (!sheet.isTerminal) sheet.playerId,
+    };
+    final retained = <ContractNegotiation>[];
+    for (final record in league.negotiations) {
+      if (!record.isTerminal) {
+        retained.add(record);
+        continue;
+      }
+      // A record without a terminal date starts its retention now; its start
+      // date cannot safely stand in for a later completion date.
+      final terminalYear = record.terminalSeasonYear ?? seasonYear;
+      if (seasonYear <= terminalYear + 1 ||
+          referenced.contains(record.id) ||
+          rfaPlayers.contains(record.subjectId)) {
+        retained.add(record.copyWith(terminalSeasonYear: terminalYear));
+      }
+    }
+    final blocks = league.negotiationBlocks
+        .where(
+          (block) =>
+              _compare(
+                seasonYear,
+                week,
+                day,
+                hour,
+                block.untilSeasonYear,
+                block.untilWeek,
+                block.untilDay,
+                block.untilHour,
+              ) <=
+              0,
+        )
+        .toList();
     return league.copyWith(
-      negotiations: next,
+      negotiations: retained,
       negotiationBlocks: _deduplicateBlocks(blocks),
     );
   }

@@ -129,10 +129,15 @@ extension LeagueStateX on LeagueState {
   }
 
   LeagueState upsertNegotiation(ContractNegotiation negotiation) {
+    final dated = negotiation.copyWith(
+      terminalSeasonYear: negotiation.isTerminal
+          ? negotiation.terminalSeasonYear ?? currentSeason.year
+          : null,
+    );
     return copyWith(
       negotiations: [
         ...negotiations.where((item) => item.id != negotiation.id),
-        negotiation,
+        dated,
       ],
     );
   }

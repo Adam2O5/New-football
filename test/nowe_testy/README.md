@@ -1,6 +1,56 @@
-# Nowe testy — etapy 0–5
+# Nowe testy — etapy 0–6
 
-Etapy 0–4 zostały zaakceptowane i zapisane przez użytkownika: `dc6e454`, `b4048fb`, `553198c`, `f8e45e1`, `5762f4f` oraz końcowy etap 4 w `0f2fd43`. **Etap 5 (I16 / O08) — odzyskiwanie transakcji zapisu — jest ukończony i przygotowany do review.** Diff pozostaje bez commita. Etapu 6 nie rozpoczęto. Wyniki wcześniejszych etapów poniżej są historycznym punktem odniesienia.
+Etapy 0–5 zostały zaakceptowane i zapisane przez użytkownika: `dc6e454`, `b4048fb`, `553198c`, `f8e45e1`, `5762f4f`, `0f2fd43` oraz etap 5 w `5598811`. **Etap 6 (I17–I23) jest ukończony i przygotowany do review.** Zmiany pozostają bez commita. Etapu 7 nie rozpoczęto. Wyniki wcześniejszych etapów poniżej są historycznym punktem odniesienia.
+
+## Wynik etapu 6 — 16 października 2026
+
+Punkt wyjścia: `5598811`, czyste repozytorium. Użytkownik zatwierdził lokalne pomiary w testach bez urządzenia oraz retencję zakończonych negocjacji przez jeden sezon. Nie zmieniano zamkniętego raportu audytu ani starych testów.
+
+- **185 scenariuszy przechodzi:** pełny przebieg 185/185; po uzupełnieniu optymalizacji motywu i selekcji danych tabeli ponownie przeszedł rozszerzony test UI (1/1). To 168 wcześniejszych i 17 nowych scenariuszy, wyłącznie w `test/nowe_testy/`.
+- Analiza statyczna dozwolonych obszarów aplikacji, zmienionych modeli i nowych testów: **bez uwag**.
+- `flutter build bundle --debug --no-pub`: **exit code 0**; to debug bundle, bez profilowania lub uruchamiania na telefonie.
+- `git diff --check`: bez uwag. Zmiany pozostają bez commita, etap 7 nie został rozpoczęty.
+
+### Implementacja i rozstrzygnięcia I17–I23
+
+- **I17:** stały, niemutowalny katalog 30 klubów w `seed_clubs.dart`; `previewTeams` nie uruchamia generatora ligi, osób ani draftu. Generator i katalog współdzielą `seedTeamId`; offset drugiej konferencji wynika z długości pierwszej. Kolejność i ID są zgodne z dotychczasowym światem, co potwierdza także historyczny snapshot etapu 4.
+- **I18:** save, rename i duplicate używają tego samego kompaktowego kodowania UTF-8. Rename i duplicate nadal operują na surowej mapie i weryfikują kompletny payload oraz metadane indeksu, bez drugiego grafu modeli domenowych. Odczyt, kodowanie, zapis i weryfikacja tych dwóch operacji działają w izolacie. Uprawnienie do katalogu i blokadę systemową trzyma wywołujący do końca workera; procedura odzyskiwania z etapu 5 pozostaje wspólna. Test równoległych workerów zachowuje wszystkie trzy wpisy indeksu.
+- **I19:** sanitizer kopiuje korzeń, ligę, listę drużyn oraz modyfikowane mapy drużyny/sztabu. Nie kopiuje rosterów, terminarza ani historii. Publiczna operacja nie zmienia wejścia; współdzielone, niezmienione gałęzie wyniku należy traktować jako read-only. Load wykonuje odczyt, decode, walidację obu wersji schematu, sanityzację i jedną budowę modelu w izolacie. Wracają model i diagnostyka; typ `SaveSchemaMismatchException` oraz diagnostyka sprzed ewentualnego błędu dekodera pozostają dostępne.
+- **I20 — pozostawiono implementację strumieniowania:** dla fixture'a 4,87 MB pomiar obejmuje przekazanie modelu do izolaty, wywołanie `toJson` korzenia, kodowanie z zagnieżdżonymi `toJson`, kolejkowanie i opróżnienie sinka. 75 fragmentów po najwyżej 64 KiB, opróżnienie około 6 ms; w samodzielnym przebiegu RSS wzrósł podczas kodowania/kolejkowania o około 5,8 MB. RSS nie pozwala oddzielić kolejki od przejściowych map, a GC istotnie zmienia wynik kolejnych pomiarów. Nie wykazano tu istotnego wąskiego gardła uzasadniającego dodatkowy backpressure lub flush każdego fragmentu. Komentarz repozytorium nie obiecuje już stałej pamięci całego pipeline'u. Wynik nie dowodzi odporności dowolnie dużych karier na brak pamięci w telefonie.
+- **I21:** model negocjacji ma `terminalSeasonYear`, zapisywany przy zakończeniu przez oba miejsca upsert oraz przy wygaśnięciu. Retencja oznacza sezon zakończenia + cały następny sezon; np. rekord zakończony w 2026 można usunąć od 2028. Pole nie jest przesuwane przy późniejszym przeglądzie. Aktywne/waiting/counter/pending-finalization nigdy nie są usuwane. Odwołanie `negotiationId` w inboxie, archiwum lub zaplanowanej wiadomości oraz niezakończona offer sheet RFA chronią rekord dłużej. Modele historii sezonu i wymian nie przechowują odwołań ID do negocjacji; nie zmieniano implementacji wymian. Zakończony przegrany rekord z `selectedByRival` nie stanowi sam w sobie oczekującej finalizacji. Blokada pozostaje do włącznie z ostatnią obowiązującą godziną, potem jest usuwana. Przegląd działa przy `expireAt` i rolloverze sezonu. Pełne delty transportu workera nie zostały dodane bez potwierdzonego wąskiego gardła.
+- **I22:** shell obserwuje nazwę/ID klubu i liczniki inboxa, skład — drużynę gracza, tabela — standings/play-in/brackets/championa, ID gracza i wartości ID/nazw klubów. Zmiany innych pól sezonu nie przebudowują tabeli. Motyw shella jest ponownie używany, dopóki nie zmienią się kolory klubu, więc aktualizacja licznika inboxa nie unieważnia motywu wszystkich zakładek. Własne porównanie danych tabeli uwzględnia zawartość listy, także po otrzymaniu nowego grafu z workera. `IndexedStack` pozostaje; test zachowuje elementy obu zakładek i wybraną zakładkę taktyki, a zmiana nazwy klubu odświeża ukryte widoki. Home nadal reaguje na datę, którą wyświetla; nie dodawano indeksów ani cache'y bez pomiaru ich konkretnego kosztu.
+- **I23 — zachowano pacing i popup 500 ms:** observer ekranu czeka na zamknięcie popupu, a pacer odlicza jedynie pozostały czas cyklu. Kontrolowany zegar: dzień 300 ms + reszta pacera 200 ms + końcowy zapis batcha 50 ms = 550 ms; z wynikiem dzień 300 ms + observer 500 ms + końcowy zapis 50 ms = 850 ms, bez kolejnego oczekiwania pacera. Anulowanie przerywa oczekiwanie observera. To weryfikacja kolejności na sztucznym zegarze, nie pomiar rzeczywistej prędkości silnika.
+
+**Schemat zapisu: 27** (wcześniej 26), zgodnie z kontraktem wersjonowania zmienionego modelu negocjacji. Regenerowano wyłącznie jego `.freezed.dart` i `.g.dart`, bez ręcznej analizy lub edycji generatorów. Nie ma migracji ani automatycznego usuwania starszych save'ów. Test historycznego podziału deklaracji otrzymał jedynie aktualny oczekiwany numer schematu; jego snapshot JSON pozostał bez zmian.
+
+### Pomiary porównawcze i ich ograniczenia
+
+Flutter 3.41.4 / Dart 3.11.1, Windows, `flutter test` JIT/debug, seed 123, ta sama syntetyczna kariera: 30 klubów, 780 zawodników, 870 fixtures i pięć sezonów historii. To uzgodniony odbiór bez telefonu. Poniższe czasy są wall-clock, nie odczyt licznika czasu CPU. Trzy powtórzenia; mediana pozwala ograniczyć wpływ pierwszej kompilacji JIT, ale nie zastępuje profilowania urządzenia.
+
+- Dziesięć wywołań preview: mediana **48,2 ms → 0,217 ms**. Pierwsze wywołanie nowego katalogu zawiera jego inicjalizację.
+- Load: mediana **181,7 ms → 137,7 ms**; najdłuższa przerwa pętli zdarzeń podczas load **175–242 ms → 8,5–9,5 ms**. Powrót pełnego modelu z izolaty i wznowienie odbiorcy w osobnym rozbiciu faz: **7,5–9,7 ms** — transfer nadal kosztuje.
+- Staff normalization w rozbiciu faz: **41,9–52,8 ms → 0,279–0,314 ms**. Po zmianie odczyt wyniósł 16,6–24,2 ms, decode 71,7–95,0 ms, budowa modelu 22,5–31,6 ms.
+- Rename: mediana **762,0 ms → 518,0 ms**; duplicate **643,3 ms → 389,4 ms**. Plik po rename **9 951 624 → 4 865 691 bajtów**; kompaktowy oryginał ma 4 865 690 bajtów. Różnica jednego bajta odpowiada zmianie nazwy.
+- RSS całego procesu jest próbkowany co 2 ms z osobnej izolaty, również podczas blokady głównej. Rename: szczyty **274,1–278,1 MB → 229,2–268,3 MB**, duplicate **304,7–309,0 MB → 240,4–266,1 MB**. To próbki pamięci całego procesu z Flutterem/JIT i poprzednimi operacjami, zależne od GC; nie jest to precyzyjna alokacja pojedynczej operacji ani gwarantowany limit pamięci Androida. Pełny save zachowuje dotychczasową ścieżkę; nie przypisujemy jej nowej poprawy na podstawie rozrzutu JIT.
+- Pięć aktualizacji samej daty przy widocznym kalendarzu: przebudowy składu **5 → 0**, tabeli **5 → 0**. Test sprawdza również nowy, równoważny graf po serializacji oraz faktyczną zmianę danych. Pomocniczy czas pięciu aktualizacji/pump spadł z około 1,02 s do 0,35–0,40 s; punkt odniesienia obejmował pierwsze wyrównanie lineupów, dlatego porównanie czasu jest orientacyjne. To nie pomiar klatek GPU/telefonu.
+- Kontrolowany rynek: co sezon 100 odrębnych terminalnych rekordów i blokad, bez wiadomości, AI i silnika. Po 1 sezonie: **100 → 100 negocjacji**, **100 → 0 blokad**, payload 96 617 → 83 528 B. Po 5: **500 → 200**, **500 → 0**, 386 897 → 143 008 B. Po 10: **1000 → 200**, **1000 → 0**, 749 747 → 143 008 B. To izolowany scenariusz wzrostu rynku, nie symulacja dziesięciu pełnych karier. Rekordy referencjonowane mogą pozostać dłużej; nie ma twardego globalnego limitu ich liczby.
+
+Logi odniesienia: `stage-6-before-save.txt`, `stage-6-before-measurements.txt`, `stage-6-before-rebuilds.txt`. Logi po zmianach: `stage-6-after-measurements.txt`, `stage-6-final-targeted-tests.txt`, `stage-6-final-tests.txt`, `stage-6-inbox-rebuilds.txt`, `stage-6-final-analyze.txt`, `stage-6-final-build.txt`. Wynik pierwszego pełnego odbioru: 184/184; po dodaniu testu współbieżnych workerów końcowy pełny odbiór: 185/185. Po ostatnim uzupełnieniu shella/tabeli: rozszerzony test UI 1/1 oraz ponowny analyzer i build.
+
+### Nowe testy i review
+
+- `stage_six_persistence_test.dart` — 7 scenariuszy: katalog bez generacji, selektywne kopiowanie i niezmienione wejście, kompaktowe operacje raw, diagnostyka/błędy load w obu trybach oraz współbieżność workerów.
+- `negotiation_retention_test.dart` — 5: prawdziwy sezon zakończenia i round-trip, wszystkie trzy kolekcje wiadomości/RFA/aktywny stan, dokładna godzina blokady, nieprzesuwanie daty po expiry i kontrolowany wzrost 1/5/10.
+- `calendar_pacing_phases_test.dart` — 3: zwykły dzień, dzień z observerem 500 ms i anulowanie. Istniejące nowe testy nadal sprawdzają cele kalendarza, urgent, bariery i lifecycle.
+- `stage_six_rebuilds_test.dart` — 1: rzeczywisty shell z ukrytymi widokami, liczniki rebuildów, zmiana inboxa bez unieważniania motywu, pominięcie nieużywanego pola sezonu, równość po transferze, świeże dane i zachowanie kontrolera zakładki.
+- `stage_six_measurements_test.dart` — 1: pomiary czasów, przerw pętli zdarzeń, RSS i rozmiarów wyłącznie w katalogu tymczasowym. Test nie stawia progów szybkości zależnych od maszyny. Nie jest częścią aplikacji.
+
+Ręczny odbiór (nowa kariera schematu 27):
+
+1. Otwórz tworzenie nowej gry oraz listę zapisów kilka razy; kluby, ich nazwy i konferencje powinny być takie same.
+2. Utwórz karierę, zapisz ją, zmień nazwę i zduplikuj. Sprawdź podobny rozmiar obu plików oraz tę samą datę/roster po wczytaniu każdego.
+3. W składzie wybierz zakładkę taktyki, w tabeli zmień zakładkę konferencji. Przejdź do kalendarza, zasymuluj kilka dni, wróć do obu widoków. Zakładki mają zachować wybór, a dane odzwierciedlać rozegrane mecze i zmiany w drużynie.
+4. Sprawdź popup wyniku oraz anulowanie batcha i wyjście do menu. Nadal wymagany jest skuteczny zapis przy zamknięciu kariery; testy przerwań procesu używają wyłącznie katalogów tymczasowych.
 
 ## Wynik etapu 5 — 16 października 2026
 
