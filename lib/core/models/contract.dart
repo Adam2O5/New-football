@@ -9,6 +9,11 @@ abstract class Contract with _$Contract {
   const factory Contract({
     required int salary,
     required int yearsRemaining,
+
+    /// Canonical covered seasons. Null only for an unsigned FA or a new
+    /// placeholder contract awaiting normalization at the league boundary.
+    int? firstSeason,
+    int? lastSeason,
     @Default(false) bool hasBirdRights,
     @Default(false) bool isRookieScale,
     @Default(0) int rookiePickSlot,

@@ -115,6 +115,7 @@ abstract class Team with _$Team {
     required TeamFinance finance,
     @Default(TacticsSetup()) TacticsSetup tactics,
     @Default([]) List<String> lineupPlayerIds,
+    @Default({}) Map<String, String> lineupSlots,
     @Default([]) List<String> benchPlayerIds,
     @Default(50) int atmosphere,
     @Default(50.0) double chemistry,

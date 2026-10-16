@@ -1,6 +1,55 @@
-# Nowe testy — etapy 0, 1 i 2
+# Nowe testy — etapy 0, 1, 2 i 3
 
-Etapy 0 i 1 zostały zaakceptowane i zapisane przez użytkownika w commitach `dc6e454` i `b4048fb`. Część pośrednia etapu 2 została zapisana przez użytkownika w `553198c`. **Etap 2 (I04–I10) jest ukończony i przygotowany do review.** Uzupełniający diff nie został zacommitowany. Wyniki wcześniejszych etapów poniżej zachowują historyczny punkt odniesienia.
+Etapy 0, 1 i 2 zostały zaakceptowane i zapisane przez użytkownika: `dc6e454`, `b4048fb`, `553198c` oraz końcowy etap 2 w `f8e45e1`. **Etap 3 (I11–I15) jest ukończony i przygotowany do review, bez commita.** Etapu 4 nie rozpoczęto. Wyniki wcześniejszych etapów poniżej są historycznym punktem odniesienia.
+
+## Wynik etapu 3 — 16 października 2026
+
+- **125 testów przechodzi:** 93 scenariusze wcześniejszych etapów oraz 32 scenariusze etapu 3. Uruchamiano wyłącznie `test/nowe_testy/`. Dotychczasowy nowy test komunikatu QO dostosowano do zaakceptowanego terminu złożenia oferty; nadal sprawdza te same wymagania komunikatu.
+- Analiza zmienionego zakresu `lib` i nowych testów: **bez uwag**. Kompilacja `flutter build bundle --debug --no-pub`: **exit code 0**, zaktualizowany `build/flutter_assets/kernel_blob.bin`. To lokalny debug bundle.
+- Schemat zapisu wynosi **26**. Review na nowej karierze; wcześniejsze pliki pozostają na dysku bez migracji. Zregenerowano Freezed/JSON kontraktu zawodnika, kontraktu sztabu i drużyny, bez ręcznych zmian lub analizy treści wygenerowanych plików.
+- Nie zmieniano wyłączonych implementacji AI/silnika, assets ani starych testów. Wyniki meczów w testach integracji są dostarczane przez fixture. Zapis na granicach sezonów testowano rzeczywistym `SaveRepository` w katalogu tymczasowym; interakcję boiska z kontrolerem i reload testowano repozytorium w pamięci. Nie wykonano instalacji, wdrożenia ani profilu na urządzeniu.
+
+### Zmiany zachowania I11–I15
+
+1. **I11 / F06:** umowy zawodników i sztabu mają kanoniczne `firstSeason` / `lastSeason`. `yearsRemaining` jest projekcją tych dat, aktualizowaną przez `ContractPeriodService`. Roczny podpis z tygodni 44–52 obejmuje następny sezon i nie wygasa przy najbliższym rolloverze. Podpis z tygodni 1–43 obejmuje bieżący sezon. Początkowe umowy obejmują bieżący sezon. Kontrakty bez dat są dopuszczone na granicy placeholdera, dla niepodpisanych FA i oczekujących praw draftowych; nie stanowi to migracji starych save'ów.
+2. **Zaakceptowane reguły I11:** QO składa się w oknie przedłużeń tygodnia 46 dla kończącej się skali rookie, gdy zawodnik nadal jest w klubie. QO zachowuje prawa po wygaśnięciu i nie zastępuje aktywnej umowy. Stare umowy wygasają po zamknięciu przedłużeń, na przejściu 46→47, przed tygodniowym rozstrzyganiem rynku. Nowe podpisy rynku, przedłużenia, rookie, offer sheet i podpis awaryjny otrzymują kontekst daty. Rollover nie odejmuje kolejnego roku.
+3. **I12 / F12:** podpis i przedłużenie przeliczają wycenę końcowego obiektu tym samym balansem, a następnie payroll. Konwersja prospecta stosuje przekazany balans do OVR, wyceny i rozwoju. Testy liczą losowania, aby wykryć powtórny roll NTC lub developmentu.
+4. **I13 / F11:** rollover zwiększa wiek rosterów, zawodników FA, zatrudnionego sztabu i sztabu FA, raz na ID. FA korzystają z bazowego leczenia i regeneracji, tygodniowego rozwoju bez bonusów klubu i bez przeniesionych minut meczowych oraz sezonowych emerytur. Sztab FA podlega własnym regułom rozwoju i emerytur. Ponowienie zamkniętego eventu sezonowego jest bezczynne. Zwykły dzień i wznowienie po gotowym wyniku naliczają FA ten sam pojedynczy tick.
+5. **I14 / F13:** naturalny awans na tier 5 ujawnia flagi i przedziały cech. Wspólna ścieżka zachowuje dokładniejsze zakresy zdobyte wcześniej przez Combine. Nie zmieniano mechaniki na asymetryczne oszacowania.
+6. **I15 / F09:** drużyna zapisuje `lineupSlots` (`slot.key → playerId`). Czysty helper zachowuje poprawne ręczne obsadzenie i uzupełnia brakujące sloty dotychczasowym algorytmem. Zamiany są walidowane na aktualnej drużynie w kolejce; XI i ławka pozostają rozłączne, a nieaktualny gest nie przywraca usuniętego gracza. Zmiana formacji zachowuje pasujące sloty, pozostałe obsadza ponownie. Niedostępne i usunięte ID są usuwane z przypisań. Renderer i projekcja pozycji korzystają z zapisanej mapy. Wpływ slotów na algorytm wyniku meczu pozostaje poza zakresem wyłączonego silnika.
+7. **Zaakceptowana naprawa konfliktu gestów:** na boisku składu przytrzymanie rozpoczyna przeciąganie. Profil otwiera istniejąca ikona informacji przy zawodniku na liście. W zakładce taktyki, gdzie przeciąganie jest wyłączone, przytrzymanie nadal otwiera profil. Test UI wykonuje rzeczywisty gest, sprawdza feedback przeciągania, zmianę wyświetlonego slotu oraz trwałość po reload.
+
+### Testy dodane w etapie 3
+
+- `contract_period_test.dart` — 11: granice tygodni podpisu, serializacja, projekcja dat, wygaśnięcie i rollover.
+- `contract_boundary_save_test.dart` — 1: rzeczywisty zapis/restart przed i po granicach 46→47 oraz 52→1, okresy zawodników i sztabu, sloty oraz kolejność wygaśnięcia przed tygodniowym rynkiem.
+- `contract_market_period_test.dart` — 3: QO → wygaśnięcie → offer sheet → match, podpis rookie right i podpis awaryjny.
+- `signing_valuation_test.dart` — 3: nowy podpis, przedłużenie oraz konwersja prospecta z niedomyślnym balansem i kontrolą liczby losowań.
+- `people_lifecycle_test.dart` — 5: cztery pule wieku, leczenie/regeneracja FA i zachowanie liczników po podpisie, bazowy rozwój FA, emerytury i idempotencja oraz zwykły dzień kontra wznowienie po meczu.
+- `scouting_tier_five_test.dart` — 2: naturalny tier 5, serializacja i Combine przed/po awansie.
+- `lineup_slots_test.dart` — 5: kolejka z usunięciem zawodnika, LB/RB i JSON, XI/ławka, formacje oraz niedostępny starter.
+- `squad_slot_interaction_test.dart` — 2: rzeczywisty drag LB/RB, render i reload oraz zachowanie przytrzymania przy wyłączonym drag.
+
+### Odbiór i ręczne review etapu 3
+
+Polecenia:
+
+```powershell
+dart analyze lib/app lib/data lib/core/services lib/core/tactics lib/core/models/contract.dart lib/core/models/staff.dart lib/core/models/team.dart lib/core/models/draft_models.dart lib/core/models/seed_data_generator.dart lib/core/models/game_save.dart test/nowe_testy
+flutter test --no-pub test/nowe_testy --concurrency=1 --reporter expanded
+flutter build bundle --debug --no-pub
+```
+
+Ręcznie, na nowej karierze:
+
+1. W składzie ustaw formację z LB/RB, np. 4-3-3, i obsadź te miejsca. Przytrzymaj marker lewego obrońcy, przeciągnij go na prawego i puść. Markery mają zamienić miejsca, bez otwierania profilu i automatycznego powrotu na naturalne pozycje. Zapisz, wyjdź do menu i wczytaj — zamiana ma pozostać.
+2. Zamień zawodnika XI z ławką. Sprawdź, że występuje w jednej grupie. Zmień formację i obejrzyj XI; przypisania mają pasować do dostępnych slotów. Ponownie zapisz i wczytaj.
+3. Otwórz profil ikoną informacji na liście składu, wróć i sprawdź przytrzymanie zawodnika w zakładce taktyki — oba wejścia mają otwierać profil.
+4. Po dojściu do tygodni 44–45 podpisz roczną umowę z FA, zapisz i wczytaj. Przejdź przez koniec roku do tygodnia 1, rozstrzygając wymagane decyzje. Zawodnik ma pozostać w klubie z jednym rokiem umowy. Analogicznie sprawdź roczny podpis sztabu w końcówce roku.
+5. W tygodniu 46 sprawdź kończące się umowy. Nieprzedłużone powinny zwolnić osoby do FA na początku tygodnia 47. Jeśli klub ma rookie w ostatnim roku skali, złóż QO w oknie przedłużeń i sprawdź zachowanie praw RFA po przejściu do FA I. Testy obejmują ten przypadek niezależnie od tego, czy występuje w danej karierze.
+6. Przy dostępności odpowiednich osób porównaj leczenie kontuzjowanego FA po kilku dniach i wiek zawodnika/sztabu po zmianie roku. Naturalny awans skautingu do tier 5 ma ujawnić cechy; Combine nie powinien pogarszać wiedzy.
+
+Logi etapu 3: `reports/lib-audit-2026-10-13/stage-3-generation.txt`, `stage-3-final-analyze.txt`, `stage-3-final-tests.txt`, `stage-3-final-build.txt`. Wcześniejsze logi `stage-3-partial-*` dokumentują stan sprzed zaakceptowanej naprawy gestów i nie są wynikiem końcowego odbioru.
 
 ## Wynik etapu 2 — 16 października 2026
 

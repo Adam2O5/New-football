@@ -132,14 +132,23 @@ void main() {
     'submitted QO confirms the recorded terms without a second decision',
     () {
       final base = controllerSave().leagueState;
-      final player = base.freeAgents.single.copyWith(
-        contract: base.freeAgents.single.contract.copyWith(
+      final player = base.playerTeam!.roster.first.copyWith(
+        contract: base.playerTeam!.roster.first.contract.copyWith(
           isRookieScale: true,
           salary: 1000000,
           rookiePickSlot: 1,
+          yearsRemaining: 1,
+          firstSeason: 2026,
+          lastSeason: 2026,
         ),
       );
-      final league = base.copyWith(freeAgents: [player]);
+      final league = base
+          .updateTeam(
+            base.playerTeam!.copyWith(
+              roster: [player, ...base.playerTeam!.roster.skip(1)],
+            ),
+          )
+          .copyWith(currentWeek: 46, currentDay: 2);
       final result = ContractMarketService().submitQualifyingOffer(
         league: league,
         ownerTeamId: league.playerTeamId!,

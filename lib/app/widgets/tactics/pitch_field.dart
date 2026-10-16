@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:new_football/core/tactics/lineup_slots.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/tactics/formation_layout.dart';
-import 'package:new_football/core/tactics/position_group.dart';
 
 class PlacedPlayer {
   const PlacedPlayer({required this.slot, required this.player});
@@ -78,39 +78,17 @@ List<PlacedPlayer> placePlayersOnSlots({
   required List<AssignedSlot> slots,
   required List<String> lineupPlayerIds,
   required Map<String, Player> playersById,
+  Map<String, String> lineupSlots = const {},
 }) {
-  final pending = [
-    for (final id in lineupPlayerIds)
-      if (playersById[id] != null) playersById[id]!,
-  ];
-  final remainingSlots = [...slots];
-  final placements = <String, Player>{};
-
-  void takeMatches(bool Function(AssignedSlot slot, Player player) matches) {
-    for (var i = pending.length - 1; i >= 0; i--) {
-      final player = pending[i];
-      final slotIndex = remainingSlots.indexWhere(
-        (slot) => matches(slot, player),
-      );
-      if (slotIndex == -1) continue;
-      final slot = remainingSlots.removeAt(slotIndex);
-      placements[slot.key] = player;
-      pending.removeAt(i);
-    }
-  }
-
-  takeMatches((slot, player) => slot.position == player.position);
-  takeMatches((slot, player) => slot.group == positionGroupOf(player.position));
-
-  for (final player in pending) {
-    if (remainingSlots.isEmpty) break;
-    final slot = remainingSlots.removeAt(0);
-    placements[slot.key] = player;
-  }
-
+  final assignments = assignLineupSlots(
+    slots: slots,
+    lineupPlayerIds: lineupPlayerIds,
+    playersById: playersById,
+    saved: lineupSlots,
+  );
   return [
     for (final slot in slots)
-      PlacedPlayer(slot: slot, player: placements[slot.key]),
+      PlacedPlayer(slot: slot, player: playersById[assignments[slot.key]]),
   ];
 }
 
@@ -119,6 +97,7 @@ class PitchField extends StatelessWidget {
     super.key,
     required this.formation,
     required this.lineupPlayerIds,
+    this.lineupSlots = const {},
     required this.playersById,
     required this.selectedId,
     required this.onTap,
@@ -131,6 +110,7 @@ class PitchField extends StatelessWidget {
 
   final Formation formation;
   final List<String> lineupPlayerIds;
+  final Map<String, String> lineupSlots;
   final Map<String, Player> playersById;
   final String? selectedId;
   final void Function(Player player) onTap;
@@ -160,6 +140,7 @@ class PitchField extends StatelessWidget {
         placePlayersOnSlots(
           slots: FormationLayout.of(formation).slots,
           lineupPlayerIds: lineupPlayerIds,
+          lineupSlots: lineupSlots,
           playersById: playersById,
         );
 
@@ -201,7 +182,9 @@ class PitchField extends StatelessWidget {
       player: player,
       selected: player.id == selectedId,
       onTap: () => onTap(player),
-      onLongPress: onLongPress == null ? null : () => onLongPress!(player),
+      onLongPress: enableDragDrop || onLongPress == null
+          ? null
+          : () => onLongPress!(player),
       style: style,
     );
 

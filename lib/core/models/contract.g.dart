@@ -9,6 +9,8 @@ part of 'contract.dart';
 _Contract _$ContractFromJson(Map<String, dynamic> json) => _Contract(
   salary: (json['salary'] as num).toInt(),
   yearsRemaining: (json['yearsRemaining'] as num).toInt(),
+  firstSeason: (json['firstSeason'] as num?)?.toInt(),
+  lastSeason: (json['lastSeason'] as num?)?.toInt(),
   hasBirdRights: json['hasBirdRights'] as bool? ?? false,
   isRookieScale: json['isRookieScale'] as bool? ?? false,
   rookiePickSlot: (json['rookiePickSlot'] as num?)?.toInt() ?? 0,
@@ -27,6 +29,8 @@ _Contract _$ContractFromJson(Map<String, dynamic> json) => _Contract(
 Map<String, dynamic> _$ContractToJson(_Contract instance) => <String, dynamic>{
   'salary': instance.salary,
   'yearsRemaining': instance.yearsRemaining,
+  'firstSeason': instance.firstSeason,
+  'lastSeason': instance.lastSeason,
   'hasBirdRights': instance.hasBirdRights,
   'isRookieScale': instance.isRookieScale,
   'rookiePickSlot': instance.rookiePickSlot,

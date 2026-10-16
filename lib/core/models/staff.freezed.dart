@@ -308,7 +308,7 @@ as double,
 /// @nodoc
 mixin _$StaffContract {
 
- int get salary; int get yearsRemaining;
+ int get salary; int get yearsRemaining; int? get firstSeason; int? get lastSeason;
 /// Create a copy of StaffContract
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -321,16 +321,16 @@ $StaffContractCopyWith<StaffContract> get copyWith => _$StaffContractCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is StaffContract&&(identical(other.salary, salary) || other.salary == salary)&&(identical(other.yearsRemaining, yearsRemaining) || other.yearsRemaining == yearsRemaining));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is StaffContract&&(identical(other.salary, salary) || other.salary == salary)&&(identical(other.yearsRemaining, yearsRemaining) || other.yearsRemaining == yearsRemaining)&&(identical(other.firstSeason, firstSeason) || other.firstSeason == firstSeason)&&(identical(other.lastSeason, lastSeason) || other.lastSeason == lastSeason));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,salary,yearsRemaining);
+int get hashCode => Object.hash(runtimeType,salary,yearsRemaining,firstSeason,lastSeason);
 
 @override
 String toString() {
-  return 'StaffContract(salary: $salary, yearsRemaining: $yearsRemaining)';
+  return 'StaffContract(salary: $salary, yearsRemaining: $yearsRemaining, firstSeason: $firstSeason, lastSeason: $lastSeason)';
 }
 
 
@@ -341,7 +341,7 @@ abstract mixin class $StaffContractCopyWith<$Res>  {
   factory $StaffContractCopyWith(StaffContract value, $Res Function(StaffContract) _then) = _$StaffContractCopyWithImpl;
 @useResult
 $Res call({
- int salary, int yearsRemaining
+ int salary, int yearsRemaining, int? firstSeason, int? lastSeason
 });
 
 
@@ -358,11 +358,13 @@ class _$StaffContractCopyWithImpl<$Res>
 
 /// Create a copy of StaffContract
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? salary = null,Object? yearsRemaining = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? salary = null,Object? yearsRemaining = null,Object? firstSeason = freezed,Object? lastSeason = freezed,}) {
   return _then(_self.copyWith(
 salary: null == salary ? _self.salary : salary // ignore: cast_nullable_to_non_nullable
 as int,yearsRemaining: null == yearsRemaining ? _self.yearsRemaining : yearsRemaining // ignore: cast_nullable_to_non_nullable
-as int,
+as int,firstSeason: freezed == firstSeason ? _self.firstSeason : firstSeason // ignore: cast_nullable_to_non_nullable
+as int?,lastSeason: freezed == lastSeason ? _self.lastSeason : lastSeason // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 
@@ -447,10 +449,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int salary,  int yearsRemaining)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int salary,  int yearsRemaining,  int? firstSeason,  int? lastSeason)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _StaffContract() when $default != null:
-return $default(_that.salary,_that.yearsRemaining);case _:
+return $default(_that.salary,_that.yearsRemaining,_that.firstSeason,_that.lastSeason);case _:
   return orElse();
 
 }
@@ -468,10 +470,10 @@ return $default(_that.salary,_that.yearsRemaining);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int salary,  int yearsRemaining)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int salary,  int yearsRemaining,  int? firstSeason,  int? lastSeason)  $default,) {final _that = this;
 switch (_that) {
 case _StaffContract():
-return $default(_that.salary,_that.yearsRemaining);case _:
+return $default(_that.salary,_that.yearsRemaining,_that.firstSeason,_that.lastSeason);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -488,10 +490,10 @@ return $default(_that.salary,_that.yearsRemaining);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int salary,  int yearsRemaining)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int salary,  int yearsRemaining,  int? firstSeason,  int? lastSeason)?  $default,) {final _that = this;
 switch (_that) {
 case _StaffContract() when $default != null:
-return $default(_that.salary,_that.yearsRemaining);case _:
+return $default(_that.salary,_that.yearsRemaining,_that.firstSeason,_that.lastSeason);case _:
   return null;
 
 }
@@ -503,11 +505,13 @@ return $default(_that.salary,_that.yearsRemaining);case _:
 @JsonSerializable()
 
 class _StaffContract implements StaffContract {
-  const _StaffContract({required this.salary, required this.yearsRemaining});
+  const _StaffContract({required this.salary, required this.yearsRemaining, this.firstSeason, this.lastSeason});
   factory _StaffContract.fromJson(Map<String, dynamic> json) => _$StaffContractFromJson(json);
 
 @override final  int salary;
 @override final  int yearsRemaining;
+@override final  int? firstSeason;
+@override final  int? lastSeason;
 
 /// Create a copy of StaffContract
 /// with the given fields replaced by the non-null parameter values.
@@ -522,16 +526,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _StaffContract&&(identical(other.salary, salary) || other.salary == salary)&&(identical(other.yearsRemaining, yearsRemaining) || other.yearsRemaining == yearsRemaining));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _StaffContract&&(identical(other.salary, salary) || other.salary == salary)&&(identical(other.yearsRemaining, yearsRemaining) || other.yearsRemaining == yearsRemaining)&&(identical(other.firstSeason, firstSeason) || other.firstSeason == firstSeason)&&(identical(other.lastSeason, lastSeason) || other.lastSeason == lastSeason));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,salary,yearsRemaining);
+int get hashCode => Object.hash(runtimeType,salary,yearsRemaining,firstSeason,lastSeason);
 
 @override
 String toString() {
-  return 'StaffContract(salary: $salary, yearsRemaining: $yearsRemaining)';
+  return 'StaffContract(salary: $salary, yearsRemaining: $yearsRemaining, firstSeason: $firstSeason, lastSeason: $lastSeason)';
 }
 
 
@@ -542,7 +546,7 @@ abstract mixin class _$StaffContractCopyWith<$Res> implements $StaffContractCopy
   factory _$StaffContractCopyWith(_StaffContract value, $Res Function(_StaffContract) _then) = __$StaffContractCopyWithImpl;
 @override @useResult
 $Res call({
- int salary, int yearsRemaining
+ int salary, int yearsRemaining, int? firstSeason, int? lastSeason
 });
 
 
@@ -559,11 +563,13 @@ class __$StaffContractCopyWithImpl<$Res>
 
 /// Create a copy of StaffContract
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? salary = null,Object? yearsRemaining = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? salary = null,Object? yearsRemaining = null,Object? firstSeason = freezed,Object? lastSeason = freezed,}) {
   return _then(_StaffContract(
 salary: null == salary ? _self.salary : salary // ignore: cast_nullable_to_non_nullable
 as int,yearsRemaining: null == yearsRemaining ? _self.yearsRemaining : yearsRemaining // ignore: cast_nullable_to_non_nullable
-as int,
+as int,firstSeason: freezed == firstSeason ? _self.firstSeason : firstSeason // ignore: cast_nullable_to_non_nullable
+as int?,lastSeason: freezed == lastSeason ? _self.lastSeason : lastSeason // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 

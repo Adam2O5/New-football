@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:new_football/core/services/contract_period_service.dart';
 
 import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/contract.dart';
@@ -511,6 +512,8 @@ class ContractService {
     required Player player,
     required ContractOffer offer,
     Random? ntcRandom,
+    int? seasonYear,
+    int week = 1,
   }) {
     final validation = validateOffer(team: team, player: player, offer: offer);
     if (!validation.ok) return null;
@@ -532,7 +535,7 @@ class ContractService {
     final receivesNtc =
         isNtcEligible(player, offer) &&
         (ntcRandom ?? _random).nextDouble() < 0.20;
-    final signed = player.copyWith(
+    var signed = player.copyWith(
       contract: Contract(
         salary: offer.salary,
         yearsRemaining: offer.years,
@@ -554,6 +557,14 @@ class ContractService {
           : player.state.copyWith(seasonsWithTeam: 0),
     );
 
+    if (seasonYear != null) {
+      signed = signed.copyWith(
+        contract: ContractPeriodService(
+          balance: balance,
+        ).playerContract(signed.contract, seasonYear: seasonYear, week: week),
+      );
+    }
+    signed = signed.recalculatePointValue(balance);
     final roster = List<Player>.from(team.roster);
     if (existingIndex >= 0) {
       roster[existingIndex] = signed;

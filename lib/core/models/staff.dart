@@ -165,6 +165,8 @@ abstract class StaffContract with _$StaffContract {
   const factory StaffContract({
     required int salary,
     required int yearsRemaining,
+    int? firstSeason,
+    int? lastSeason,
   }) = _StaffContract;
 
   factory StaffContract.fromJson(Map<String, dynamic> json) =>

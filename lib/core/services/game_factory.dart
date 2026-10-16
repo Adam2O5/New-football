@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:new_football/core/tactics/lineup_slots.dart';
 import 'package:new_football/core/random/seeds.dart';
 
 import 'package:uuid/uuid.dart';
@@ -10,6 +11,7 @@ import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/seed_data_generator.dart';
 import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/services/league_strength_service.dart';
+import 'package:new_football/core/services/contract_period_service.dart';
 import 'package:new_football/core/services/schedule_generator.dart';
 import 'package:new_football/core/models/staff.dart';
 
@@ -99,6 +101,11 @@ class GameFactory {
     final strengthService = const LeagueStrengthService();
     final strengthTable = strengthService.calculate(league, week: 1, day: 1);
     league = league.copyWith(strengthTable: strengthTable);
+    league = const ContractPeriodService().normalizeLeague(
+      league,
+      initial: true,
+    );
+    league = reconcileLeagueLineups(league);
 
     final playerTeam = league.playerTeam;
     final now = DateTime.now();

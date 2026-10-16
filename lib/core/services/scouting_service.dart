@@ -409,19 +409,32 @@ class ScoutingService {
         : tier.index >= ScoutingTier.tier3.index
         ? 3
         : 5;
-    return knowledge.copyWith(
+    final evidence = knowledge.copyWith(
       estimatedOvrMin: tier.index >= ScoutingTier.tier2.index
-          ? (overall - span).clamp(0, 99)
+          ? max(knowledge.estimatedOvrMin ?? 0, (overall - span).clamp(0, 99))
           : null,
       estimatedOvrMax: tier.index >= ScoutingTier.tier2.index
-          ? (overall + span).clamp(0, 99)
+          ? min(knowledge.estimatedOvrMax ?? 99, (overall + span).clamp(0, 99))
           : null,
       estimatedPotentialMin: tier.index >= ScoutingTier.tier4.index
-          ? max(0.5, prospect.potentialStars - 1.0)
+          ? max(
+              knowledge.estimatedPotentialMin ?? 0.5,
+              max(0.5, prospect.potentialStars - 1.0),
+            )
           : null,
       estimatedPotentialMax: tier.index >= ScoutingTier.tier4.index
-          ? min(5.0, prospect.potentialStars + 1.0)
+          ? min(
+              knowledge.estimatedPotentialMax ?? 5.0,
+              min(5.0, prospect.potentialStars + 1.0),
+            )
           : null,
+    );
+    if (tier != ScoutingTier.tier5) return evidence;
+    return _withTraitRange(
+      evidence.copyWith(injuryProneKnown: true, determinationKnown: true),
+      prospect,
+      injuryKnown: true,
+      determinationKnown: true,
     );
   }
 
@@ -434,16 +447,25 @@ class ScoutingService {
     if (prospect == null) return knowledge;
     return knowledge.copyWith(
       injuryProneMin: injuryKnown
-          ? max(1, prospect.injuryProne - 2)
+          ? max(knowledge.injuryProneMin ?? 1, max(1, prospect.injuryProne - 2))
           : knowledge.injuryProneMin,
       injuryProneMax: injuryKnown
-          ? min(10, prospect.injuryProne + 2)
+          ? min(
+              knowledge.injuryProneMax ?? 10,
+              min(10, prospect.injuryProne + 2),
+            )
           : knowledge.injuryProneMax,
       determinationMin: determinationKnown
-          ? max(1, prospect.determination - 2)
+          ? max(
+              knowledge.determinationMin ?? 1,
+              max(1, prospect.determination - 2),
+            )
           : knowledge.determinationMin,
       determinationMax: determinationKnown
-          ? min(10, prospect.determination + 2)
+          ? min(
+              knowledge.determinationMax ?? 10,
+              min(10, prospect.determination + 2),
+            )
           : knowledge.determinationMax,
     );
   }

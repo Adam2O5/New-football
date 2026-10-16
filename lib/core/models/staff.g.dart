@@ -40,12 +40,16 @@ _StaffContract _$StaffContractFromJson(Map<String, dynamic> json) =>
     _StaffContract(
       salary: (json['salary'] as num).toInt(),
       yearsRemaining: (json['yearsRemaining'] as num).toInt(),
+      firstSeason: (json['firstSeason'] as num?)?.toInt(),
+      lastSeason: (json['lastSeason'] as num?)?.toInt(),
     );
 
 Map<String, dynamic> _$StaffContractToJson(_StaffContract instance) =>
     <String, dynamic>{
       'salary': instance.salary,
       'yearsRemaining': instance.yearsRemaining,
+      'firstSeason': instance.firstSeason,
+      'lastSeason': instance.lastSeason,
     };
 
 _StaffMember _$StaffMemberFromJson(Map<String, dynamic> json) => _StaffMember(

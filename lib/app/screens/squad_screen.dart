@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:new_football/core/tactics/lineup_slots.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -194,6 +195,7 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
     final placements = placePlayersOnSlots(
       slots: formationLayout.slots,
       lineupPlayerIds: team.lineupPlayerIds,
+      lineupSlots: team.lineupSlots,
       playersById: playersById,
     );
     final assignmentIndex = PositionAssignmentIndex.fromPlacements(placements);
@@ -449,6 +451,7 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
           child: PitchField(
             formation: formation!,
             lineupPlayerIds: team.lineupPlayerIds,
+            lineupSlots: team.lineupSlots,
             playersById: byId,
             selectedId: null,
             onTap: (p) => showRolePickerSheet(
@@ -697,40 +700,8 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
         return league;
       }
 
-      final lineup = [...currentTeam.lineupPlayerIds];
-      final bench = [...currentTeam.benchPlayerIds];
-
-      void removeFromZone(RosterZone zone, String id) {
-        switch (zone) {
-          case RosterZone.xi:
-            lineup.remove(id);
-          case RosterZone.bench:
-            bench.remove(id);
-          case RosterZone.reserve:
-            break;
-        }
-      }
-
-      void addToZone(RosterZone zone, String id) {
-        switch (zone) {
-          case RosterZone.xi:
-            lineup.add(id);
-          case RosterZone.bench:
-            bench.add(id);
-          case RosterZone.reserve:
-            break;
-        }
-      }
-
-      removeFromZone(zoneA, idA);
-      removeFromZone(zoneB, idB);
-      addToZone(zoneB, idA);
-      addToZone(zoneA, idB);
-
-      final newTeam = currentTeam.copyWith(
-        lineupPlayerIds: lineup,
-        benchPlayerIds: bench,
-      );
+      final newTeam = swapLineupPlayers(currentTeam, idA, idB);
+      if (identical(newTeam, currentTeam)) return league;
       swapped = true;
       return league.updateTeam(newTeam);
     });

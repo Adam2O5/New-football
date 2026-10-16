@@ -374,6 +374,7 @@ class PositionAssignmentIndex {
     final placements = placePlayersOnSlots(
       slots: layout.slots,
       lineupPlayerIds: team.lineupPlayerIds,
+      lineupSlots: team.lineupSlots,
       playersById: playersById,
     );
     return PositionAssignmentIndex.fromPlacements(placements);

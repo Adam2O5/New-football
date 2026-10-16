@@ -15,7 +15,9 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Contract {
 
- int get salary; int get yearsRemaining; bool get hasBirdRights; bool get isRookieScale; int get rookiePickSlot; CapExceptionType? get exceptionType; bool get noTradeClause; List<String> get blockedTeamIds;
+ int get salary; int get yearsRemaining;/// Canonical covered seasons. Null only for an unsigned FA or a new
+/// placeholder contract awaiting normalization at the league boundary.
+ int? get firstSeason; int? get lastSeason; bool get hasBirdRights; bool get isRookieScale; int get rookiePickSlot; CapExceptionType? get exceptionType; bool get noTradeClause; List<String> get blockedTeamIds;
 /// Create a copy of Contract
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +30,16 @@ $ContractCopyWith<Contract> get copyWith => _$ContractCopyWithImpl<Contract>(thi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Contract&&(identical(other.salary, salary) || other.salary == salary)&&(identical(other.yearsRemaining, yearsRemaining) || other.yearsRemaining == yearsRemaining)&&(identical(other.hasBirdRights, hasBirdRights) || other.hasBirdRights == hasBirdRights)&&(identical(other.isRookieScale, isRookieScale) || other.isRookieScale == isRookieScale)&&(identical(other.rookiePickSlot, rookiePickSlot) || other.rookiePickSlot == rookiePickSlot)&&(identical(other.exceptionType, exceptionType) || other.exceptionType == exceptionType)&&(identical(other.noTradeClause, noTradeClause) || other.noTradeClause == noTradeClause)&&const DeepCollectionEquality().equals(other.blockedTeamIds, blockedTeamIds));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Contract&&(identical(other.salary, salary) || other.salary == salary)&&(identical(other.yearsRemaining, yearsRemaining) || other.yearsRemaining == yearsRemaining)&&(identical(other.firstSeason, firstSeason) || other.firstSeason == firstSeason)&&(identical(other.lastSeason, lastSeason) || other.lastSeason == lastSeason)&&(identical(other.hasBirdRights, hasBirdRights) || other.hasBirdRights == hasBirdRights)&&(identical(other.isRookieScale, isRookieScale) || other.isRookieScale == isRookieScale)&&(identical(other.rookiePickSlot, rookiePickSlot) || other.rookiePickSlot == rookiePickSlot)&&(identical(other.exceptionType, exceptionType) || other.exceptionType == exceptionType)&&(identical(other.noTradeClause, noTradeClause) || other.noTradeClause == noTradeClause)&&const DeepCollectionEquality().equals(other.blockedTeamIds, blockedTeamIds));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,salary,yearsRemaining,hasBirdRights,isRookieScale,rookiePickSlot,exceptionType,noTradeClause,const DeepCollectionEquality().hash(blockedTeamIds));
+int get hashCode => Object.hash(runtimeType,salary,yearsRemaining,firstSeason,lastSeason,hasBirdRights,isRookieScale,rookiePickSlot,exceptionType,noTradeClause,const DeepCollectionEquality().hash(blockedTeamIds));
 
 @override
 String toString() {
-  return 'Contract(salary: $salary, yearsRemaining: $yearsRemaining, hasBirdRights: $hasBirdRights, isRookieScale: $isRookieScale, rookiePickSlot: $rookiePickSlot, exceptionType: $exceptionType, noTradeClause: $noTradeClause, blockedTeamIds: $blockedTeamIds)';
+  return 'Contract(salary: $salary, yearsRemaining: $yearsRemaining, firstSeason: $firstSeason, lastSeason: $lastSeason, hasBirdRights: $hasBirdRights, isRookieScale: $isRookieScale, rookiePickSlot: $rookiePickSlot, exceptionType: $exceptionType, noTradeClause: $noTradeClause, blockedTeamIds: $blockedTeamIds)';
 }
 
 
@@ -48,7 +50,7 @@ abstract mixin class $ContractCopyWith<$Res>  {
   factory $ContractCopyWith(Contract value, $Res Function(Contract) _then) = _$ContractCopyWithImpl;
 @useResult
 $Res call({
- int salary, int yearsRemaining, bool hasBirdRights, bool isRookieScale, int rookiePickSlot, CapExceptionType? exceptionType, bool noTradeClause, List<String> blockedTeamIds
+ int salary, int yearsRemaining, int? firstSeason, int? lastSeason, bool hasBirdRights, bool isRookieScale, int rookiePickSlot, CapExceptionType? exceptionType, bool noTradeClause, List<String> blockedTeamIds
 });
 
 
@@ -65,11 +67,13 @@ class _$ContractCopyWithImpl<$Res>
 
 /// Create a copy of Contract
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? salary = null,Object? yearsRemaining = null,Object? hasBirdRights = null,Object? isRookieScale = null,Object? rookiePickSlot = null,Object? exceptionType = freezed,Object? noTradeClause = null,Object? blockedTeamIds = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? salary = null,Object? yearsRemaining = null,Object? firstSeason = freezed,Object? lastSeason = freezed,Object? hasBirdRights = null,Object? isRookieScale = null,Object? rookiePickSlot = null,Object? exceptionType = freezed,Object? noTradeClause = null,Object? blockedTeamIds = null,}) {
   return _then(_self.copyWith(
 salary: null == salary ? _self.salary : salary // ignore: cast_nullable_to_non_nullable
 as int,yearsRemaining: null == yearsRemaining ? _self.yearsRemaining : yearsRemaining // ignore: cast_nullable_to_non_nullable
-as int,hasBirdRights: null == hasBirdRights ? _self.hasBirdRights : hasBirdRights // ignore: cast_nullable_to_non_nullable
+as int,firstSeason: freezed == firstSeason ? _self.firstSeason : firstSeason // ignore: cast_nullable_to_non_nullable
+as int?,lastSeason: freezed == lastSeason ? _self.lastSeason : lastSeason // ignore: cast_nullable_to_non_nullable
+as int?,hasBirdRights: null == hasBirdRights ? _self.hasBirdRights : hasBirdRights // ignore: cast_nullable_to_non_nullable
 as bool,isRookieScale: null == isRookieScale ? _self.isRookieScale : isRookieScale // ignore: cast_nullable_to_non_nullable
 as bool,rookiePickSlot: null == rookiePickSlot ? _self.rookiePickSlot : rookiePickSlot // ignore: cast_nullable_to_non_nullable
 as int,exceptionType: freezed == exceptionType ? _self.exceptionType : exceptionType // ignore: cast_nullable_to_non_nullable
@@ -160,10 +164,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int salary,  int yearsRemaining,  bool hasBirdRights,  bool isRookieScale,  int rookiePickSlot,  CapExceptionType? exceptionType,  bool noTradeClause,  List<String> blockedTeamIds)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int salary,  int yearsRemaining,  int? firstSeason,  int? lastSeason,  bool hasBirdRights,  bool isRookieScale,  int rookiePickSlot,  CapExceptionType? exceptionType,  bool noTradeClause,  List<String> blockedTeamIds)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Contract() when $default != null:
-return $default(_that.salary,_that.yearsRemaining,_that.hasBirdRights,_that.isRookieScale,_that.rookiePickSlot,_that.exceptionType,_that.noTradeClause,_that.blockedTeamIds);case _:
+return $default(_that.salary,_that.yearsRemaining,_that.firstSeason,_that.lastSeason,_that.hasBirdRights,_that.isRookieScale,_that.rookiePickSlot,_that.exceptionType,_that.noTradeClause,_that.blockedTeamIds);case _:
   return orElse();
 
 }
@@ -181,10 +185,10 @@ return $default(_that.salary,_that.yearsRemaining,_that.hasBirdRights,_that.isRo
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int salary,  int yearsRemaining,  bool hasBirdRights,  bool isRookieScale,  int rookiePickSlot,  CapExceptionType? exceptionType,  bool noTradeClause,  List<String> blockedTeamIds)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int salary,  int yearsRemaining,  int? firstSeason,  int? lastSeason,  bool hasBirdRights,  bool isRookieScale,  int rookiePickSlot,  CapExceptionType? exceptionType,  bool noTradeClause,  List<String> blockedTeamIds)  $default,) {final _that = this;
 switch (_that) {
 case _Contract():
-return $default(_that.salary,_that.yearsRemaining,_that.hasBirdRights,_that.isRookieScale,_that.rookiePickSlot,_that.exceptionType,_that.noTradeClause,_that.blockedTeamIds);case _:
+return $default(_that.salary,_that.yearsRemaining,_that.firstSeason,_that.lastSeason,_that.hasBirdRights,_that.isRookieScale,_that.rookiePickSlot,_that.exceptionType,_that.noTradeClause,_that.blockedTeamIds);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -201,10 +205,10 @@ return $default(_that.salary,_that.yearsRemaining,_that.hasBirdRights,_that.isRo
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int salary,  int yearsRemaining,  bool hasBirdRights,  bool isRookieScale,  int rookiePickSlot,  CapExceptionType? exceptionType,  bool noTradeClause,  List<String> blockedTeamIds)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int salary,  int yearsRemaining,  int? firstSeason,  int? lastSeason,  bool hasBirdRights,  bool isRookieScale,  int rookiePickSlot,  CapExceptionType? exceptionType,  bool noTradeClause,  List<String> blockedTeamIds)?  $default,) {final _that = this;
 switch (_that) {
 case _Contract() when $default != null:
-return $default(_that.salary,_that.yearsRemaining,_that.hasBirdRights,_that.isRookieScale,_that.rookiePickSlot,_that.exceptionType,_that.noTradeClause,_that.blockedTeamIds);case _:
+return $default(_that.salary,_that.yearsRemaining,_that.firstSeason,_that.lastSeason,_that.hasBirdRights,_that.isRookieScale,_that.rookiePickSlot,_that.exceptionType,_that.noTradeClause,_that.blockedTeamIds);case _:
   return null;
 
 }
@@ -216,11 +220,15 @@ return $default(_that.salary,_that.yearsRemaining,_that.hasBirdRights,_that.isRo
 @JsonSerializable()
 
 class _Contract implements Contract {
-  const _Contract({required this.salary, required this.yearsRemaining, this.hasBirdRights = false, this.isRookieScale = false, this.rookiePickSlot = 0, this.exceptionType, this.noTradeClause = false, final  List<String> blockedTeamIds = const []}): _blockedTeamIds = blockedTeamIds;
+  const _Contract({required this.salary, required this.yearsRemaining, this.firstSeason, this.lastSeason, this.hasBirdRights = false, this.isRookieScale = false, this.rookiePickSlot = 0, this.exceptionType, this.noTradeClause = false, final  List<String> blockedTeamIds = const []}): _blockedTeamIds = blockedTeamIds;
   factory _Contract.fromJson(Map<String, dynamic> json) => _$ContractFromJson(json);
 
 @override final  int salary;
 @override final  int yearsRemaining;
+/// Canonical covered seasons. Null only for an unsigned FA or a new
+/// placeholder contract awaiting normalization at the league boundary.
+@override final  int? firstSeason;
+@override final  int? lastSeason;
 @override@JsonKey() final  bool hasBirdRights;
 @override@JsonKey() final  bool isRookieScale;
 @override@JsonKey() final  int rookiePickSlot;
@@ -247,16 +255,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Contract&&(identical(other.salary, salary) || other.salary == salary)&&(identical(other.yearsRemaining, yearsRemaining) || other.yearsRemaining == yearsRemaining)&&(identical(other.hasBirdRights, hasBirdRights) || other.hasBirdRights == hasBirdRights)&&(identical(other.isRookieScale, isRookieScale) || other.isRookieScale == isRookieScale)&&(identical(other.rookiePickSlot, rookiePickSlot) || other.rookiePickSlot == rookiePickSlot)&&(identical(other.exceptionType, exceptionType) || other.exceptionType == exceptionType)&&(identical(other.noTradeClause, noTradeClause) || other.noTradeClause == noTradeClause)&&const DeepCollectionEquality().equals(other._blockedTeamIds, _blockedTeamIds));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Contract&&(identical(other.salary, salary) || other.salary == salary)&&(identical(other.yearsRemaining, yearsRemaining) || other.yearsRemaining == yearsRemaining)&&(identical(other.firstSeason, firstSeason) || other.firstSeason == firstSeason)&&(identical(other.lastSeason, lastSeason) || other.lastSeason == lastSeason)&&(identical(other.hasBirdRights, hasBirdRights) || other.hasBirdRights == hasBirdRights)&&(identical(other.isRookieScale, isRookieScale) || other.isRookieScale == isRookieScale)&&(identical(other.rookiePickSlot, rookiePickSlot) || other.rookiePickSlot == rookiePickSlot)&&(identical(other.exceptionType, exceptionType) || other.exceptionType == exceptionType)&&(identical(other.noTradeClause, noTradeClause) || other.noTradeClause == noTradeClause)&&const DeepCollectionEquality().equals(other._blockedTeamIds, _blockedTeamIds));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,salary,yearsRemaining,hasBirdRights,isRookieScale,rookiePickSlot,exceptionType,noTradeClause,const DeepCollectionEquality().hash(_blockedTeamIds));
+int get hashCode => Object.hash(runtimeType,salary,yearsRemaining,firstSeason,lastSeason,hasBirdRights,isRookieScale,rookiePickSlot,exceptionType,noTradeClause,const DeepCollectionEquality().hash(_blockedTeamIds));
 
 @override
 String toString() {
-  return 'Contract(salary: $salary, yearsRemaining: $yearsRemaining, hasBirdRights: $hasBirdRights, isRookieScale: $isRookieScale, rookiePickSlot: $rookiePickSlot, exceptionType: $exceptionType, noTradeClause: $noTradeClause, blockedTeamIds: $blockedTeamIds)';
+  return 'Contract(salary: $salary, yearsRemaining: $yearsRemaining, firstSeason: $firstSeason, lastSeason: $lastSeason, hasBirdRights: $hasBirdRights, isRookieScale: $isRookieScale, rookiePickSlot: $rookiePickSlot, exceptionType: $exceptionType, noTradeClause: $noTradeClause, blockedTeamIds: $blockedTeamIds)';
 }
 
 
@@ -267,7 +275,7 @@ abstract mixin class _$ContractCopyWith<$Res> implements $ContractCopyWith<$Res>
   factory _$ContractCopyWith(_Contract value, $Res Function(_Contract) _then) = __$ContractCopyWithImpl;
 @override @useResult
 $Res call({
- int salary, int yearsRemaining, bool hasBirdRights, bool isRookieScale, int rookiePickSlot, CapExceptionType? exceptionType, bool noTradeClause, List<String> blockedTeamIds
+ int salary, int yearsRemaining, int? firstSeason, int? lastSeason, bool hasBirdRights, bool isRookieScale, int rookiePickSlot, CapExceptionType? exceptionType, bool noTradeClause, List<String> blockedTeamIds
 });
 
 
@@ -284,11 +292,13 @@ class __$ContractCopyWithImpl<$Res>
 
 /// Create a copy of Contract
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? salary = null,Object? yearsRemaining = null,Object? hasBirdRights = null,Object? isRookieScale = null,Object? rookiePickSlot = null,Object? exceptionType = freezed,Object? noTradeClause = null,Object? blockedTeamIds = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? salary = null,Object? yearsRemaining = null,Object? firstSeason = freezed,Object? lastSeason = freezed,Object? hasBirdRights = null,Object? isRookieScale = null,Object? rookiePickSlot = null,Object? exceptionType = freezed,Object? noTradeClause = null,Object? blockedTeamIds = null,}) {
   return _then(_Contract(
 salary: null == salary ? _self.salary : salary // ignore: cast_nullable_to_non_nullable
 as int,yearsRemaining: null == yearsRemaining ? _self.yearsRemaining : yearsRemaining // ignore: cast_nullable_to_non_nullable
-as int,hasBirdRights: null == hasBirdRights ? _self.hasBirdRights : hasBirdRights // ignore: cast_nullable_to_non_nullable
+as int,firstSeason: freezed == firstSeason ? _self.firstSeason : firstSeason // ignore: cast_nullable_to_non_nullable
+as int?,lastSeason: freezed == lastSeason ? _self.lastSeason : lastSeason // ignore: cast_nullable_to_non_nullable
+as int?,hasBirdRights: null == hasBirdRights ? _self.hasBirdRights : hasBirdRights // ignore: cast_nullable_to_non_nullable
 as bool,isRookieScale: null == isRookieScale ? _self.isRookieScale : isRookieScale // ignore: cast_nullable_to_non_nullable
 as bool,rookiePickSlot: null == rookiePickSlot ? _self.rookiePickSlot : rookiePickSlot // ignore: cast_nullable_to_non_nullable
 as int,exceptionType: freezed == exceptionType ? _self.exceptionType : exceptionType // ignore: cast_nullable_to_non_nullable

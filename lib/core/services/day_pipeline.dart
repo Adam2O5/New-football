@@ -7,6 +7,8 @@ import 'package:new_football/core/services/calendar_event_registry.dart';
 import 'package:new_football/core/services/calendar_service.dart';
 import 'package:new_football/core/services/contract_market_service.dart';
 import 'package:new_football/core/services/day_simulator.dart';
+import 'package:new_football/core/tactics/lineup_slots.dart';
+import 'package:new_football/core/services/contract_period_service.dart';
 import 'package:new_football/core/services/draft_trade_service.dart';
 import 'package:new_football/core/services/negotiation_service.dart';
 import 'package:new_football/core/services/player_event_service.dart';
@@ -171,7 +173,9 @@ class DayPipeline {
       resolveContractMarket: resolveContractMarket,
     );
     final advanced = deliverStartOfDay(
-      result.league,
+      reconcileLeagueLineups(
+        ContractPeriodService(balance: balance).normalizeLeague(result.league),
+      ),
       hour: result.league.currentHour,
       saveSeed: saveSeed,
       resolveExpired: false,

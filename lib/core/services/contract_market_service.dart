@@ -564,6 +564,8 @@ class ContractMarketService {
       final player = _findPlayer(league, negotiation.subjectId);
       if (player == null) return null;
       final signed = contracts.signPlayer(
+        seasonYear: league.currentSeason.year,
+        week: league.currentWeek,
         team: team,
         player: player,
         offer: ContractOffer(
@@ -611,6 +613,8 @@ class ContractMarketService {
     final member = _findStaffForNegotiation(league, negotiation);
     if (member == null) return null;
     final hired = staff.sign(
+      seasonYear: league.currentSeason.year,
+      week: league.currentWeek,
       team: team,
       member: member,
       offer: StaffOffer(
@@ -1173,14 +1177,24 @@ class ContractMarketService {
   }) {
     final team = league.teamById(ownerTeamId);
     final player = _findPlayer(league, playerId);
-    if (team == null || player == null || !player.contract.isRookieScale) {
+    if (team == null ||
+        player == null ||
+        !player.contract.isRookieScale ||
+        !calendar.isContractExtensionWindow(
+          league.currentWeek,
+          league.currentDay,
+        ) ||
+        !team.roster.any((p) => p.id == player.id) ||
+        player.contract.lastSeason != league.currentSeason.year) {
       return null;
     }
-    if (player.contract.yearsRemaining > 0) return null;
     final amount = salary ?? qualifyingOfferMinimum(player);
     final validation = contracts.validateOffer(
       team: team,
-      player: player,
+      // QO is a conditional rights proposal, effective after this scale ends.
+      player: player.copyWith(
+        contract: player.contract.copyWith(yearsRemaining: 0),
+      ),
       offer: ContractOffer(
         salary: amount,
         years: years,
@@ -1349,6 +1363,8 @@ class ContractMarketService {
     final player = _findPlayer(league, sheet.playerId);
     if (team == null || player == null) return null;
     final signed = contracts.signPlayer(
+      seasonYear: league.currentSeason.year,
+      week: league.currentWeek,
       team: team,
       player: player,
       offer: ContractOffer(
@@ -1464,6 +1480,8 @@ class ContractMarketService {
         );
         if (!validation.ok) continue;
         final signed = contracts.signPlayer(
+          seasonYear: league.currentSeason.year,
+          week: league.currentWeek,
           team: team,
           player: player,
           offer: offer,
@@ -1532,6 +1550,8 @@ class ContractMarketService {
       rookiePickSlot: right.pickNumber,
     );
     final signed = contracts.signPlayer(
+      seasonYear: league.currentSeason.year,
+      week: league.currentWeek,
       team: team,
       player: right.player,
       offer: offer,
@@ -2305,6 +2325,8 @@ class ContractMarketService {
       final player = _findPlayer(league, negotiation.subjectId);
       if (player == null) return null;
       final signed = contracts.signPlayer(
+        seasonYear: league.currentSeason.year,
+        week: league.currentWeek,
         team: team,
         player: player,
         offer: ContractOffer(
@@ -2342,6 +2364,8 @@ class ContractMarketService {
     final member = _findStaffForNegotiation(league, negotiation);
     if (member == null) return null;
     final hired = staff.sign(
+      seasonYear: league.currentSeason.year,
+      week: league.currentWeek,
       team: team,
       member: member,
       offer: StaffOffer(

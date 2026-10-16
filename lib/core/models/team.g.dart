@@ -104,6 +104,11 @@ _Team _$TeamFromJson(Map<String, dynamic> json) => _Team(
           ?.map((e) => e as String)
           .toList() ??
       const [],
+  lineupSlots:
+      (json['lineupSlots'] as Map<String, dynamic>?)?.map(
+        (k, e) => MapEntry(k, e as String),
+      ) ??
+      const {},
   benchPlayerIds:
       (json['benchPlayerIds'] as List<dynamic>?)
           ?.map((e) => e as String)
@@ -159,6 +164,7 @@ Map<String, dynamic> _$TeamToJson(_Team instance) => <String, dynamic>{
   'finance': instance.finance,
   'tactics': instance.tactics,
   'lineupPlayerIds': instance.lineupPlayerIds,
+  'lineupSlots': instance.lineupSlots,
   'benchPlayerIds': instance.benchPlayerIds,
   'atmosphere': instance.atmosphere,
   'chemistry': instance.chemistry,

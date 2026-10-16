@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'package:new_football/core/tactics/lineup_slots.dart';
+import 'package:new_football/core/services/contract_period_service.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
@@ -480,7 +482,11 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>> {
     if (generation != _saveGeneration) return;
     final current = save;
     if (current == null) return;
-    final league = transform(current.leagueState);
+    final league = reconcileLeagueLineups(
+      const ContractPeriodService().normalizeLeague(
+        transform(current.leagueState),
+      ),
+    );
     if (skipIfUnchanged && league == current.leagueState) return;
     final next = current.copyWith(
       leagueState: league,

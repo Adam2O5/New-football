@@ -515,7 +515,21 @@ class DaySimulator {
       }
       return tick.team;
     }).toList();
-    state = state.copyWith(teams: developedTeams);
+    state = state.copyWith(
+      teams: developedTeams,
+      freeAgents: state.freeAgents
+          .map(
+            (player) => development
+                .developPlayerWithContext(
+                  player.copyWith(
+                    state: player.state.copyWith(minutesThisWeek: 0),
+                  ),
+                  atmosphere: 50,
+                )
+                .player,
+          )
+          .toList(),
+    );
 
     for (final change in developmentChanges) {
       state = messages.send(
@@ -565,6 +579,10 @@ class DaySimulator {
           );
         }).toList(),
       );
+    }
+
+    if (week == balance.calendar.draftWeek) {
+      state = season.expireContracts(state);
     }
 
     // The market runs once at the same Sunday → Monday boundary as the
@@ -1126,7 +1144,12 @@ class DaySimulator {
       teams.add(team.copyWith(roster: roster));
     }
 
-    var state = league.copyWith(teams: teams);
+    var state = league.copyWith(
+      teams: teams,
+      freeAgents: league.freeAgents
+          .map((player) => player.recoverBetweenMatches(balance))
+          .toList(),
+    );
     for (final returned in recoveryReturns) {
       if (state.playerTeamId != returned.teamId) continue;
       final definition = InjuryCatalog.byId(returned.injuryId);

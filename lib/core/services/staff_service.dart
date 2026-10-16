@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:new_football/core/services/contract_period_service.dart';
 import 'package:new_football/core/random/seeds.dart';
 
 import 'package:new_football/core/balance/balance_config.dart';
@@ -319,6 +320,8 @@ class StaffService {
     required Team team,
     required StaffMember member,
     required StaffOffer offer,
+    int? seasonYear,
+    int week = 1,
   }) {
     final existing = team.staff.canonicalMember(member.role);
     if (existing != null && existing.id != member.id) return null;
@@ -326,12 +329,19 @@ class StaffService {
     if (!canHire(team, offer.salary, replacingSalary: replacingSalary)) {
       return null;
     }
-    final signed = member.copyWith(
+    var signed = member.copyWith(
       contract: StaffContract(
         salary: offer.salary,
         yearsRemaining: offer.years,
       ),
     );
+    if (seasonYear != null) {
+      signed = signed.copyWith(
+        contract: ContractPeriodService(
+          balance: balance,
+        ).staffContract(signed.contract!, seasonYear: seasonYear, week: week),
+      );
+    }
     return team.copyWith(staff: team.staff.withMember(member.role, signed));
   }
 
@@ -465,7 +475,52 @@ class StaffService {
         state = state.updateTeam(team.copyWith(staff: staff));
       }
     }
-    return state;
+    final employed = {
+      for (final team in state.teams) ...team.staff.members.map((m) => m.id),
+    };
+    final freeAgents = <StaffMember>[];
+    for (final member in league.canonicalStaffFreeAgents) {
+      if (employed.contains(member.id)) continue;
+      final retireRng = saveSeed == null
+          ? _random
+          : Random(
+              seasonEventSeed(
+                saveSeed,
+                league.currentSeason.year,
+                'staff-retire',
+                subjectId: member.id,
+              ),
+            );
+      if (member.age >= balance.staff.retireAgeMin &&
+          retireRng.nextDouble() <
+              balance.staff.retireChanceForAge(member.age)) {
+        continue;
+      }
+      final growthRng = saveSeed == null
+          ? _random
+          : Random(
+              seasonEventSeed(
+                saveSeed,
+                league.currentSeason.year,
+                'staff-growth',
+                subjectId: member.id,
+              ),
+            );
+      var attributes = member.attributes;
+      if (member.age >= balance.staff.growthAgeMin &&
+          member.age <= balance.staff.growthAgeMax &&
+          growthRng.nextDouble() <
+              balance.staff.growthChanceForAge(member.age)) {
+        attributes = _bumpAttribute(attributes, member.role, growthRng);
+      }
+      freeAgents.add(
+        member.copyWith(
+          previousAttributes: member.attributes,
+          attributes: attributes,
+        ),
+      );
+    }
+    return state.copyWith(staffFreeAgents: freeAgents);
   }
 
   StaffAttributes _bumpAttribute(

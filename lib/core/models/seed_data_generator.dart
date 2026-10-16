@@ -18,6 +18,7 @@ import 'package:new_football/core/models/staff.dart';
 import 'package:new_football/core/models/standing.dart';
 import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/services/mock_draft_service.dart';
+import 'package:new_football/core/services/contract_period_service.dart';
 import 'package:new_football/core/services/salary_cap_service.dart';
 import 'package:new_football/core/tactics/tactics_setup.dart';
 import 'package:new_football/core/tactics/formation_layout.dart';
@@ -113,16 +114,19 @@ class SeedDataGenerator {
     );
     final tvSchedule = tvCapScheduleFor(currentYear: year, saveSeed: seed ?? 0);
 
-    return LeagueState(
-      teams: teams,
-      currentSeason: Season(
-        year: year,
-        standings: standings,
-        draftState: draftState,
-        nextTvCapResetSeason: tvSchedule.nextTvCapResetSeason,
-        nextTvCapIncreasePct: tvSchedule.nextTvCapIncreasePct,
+    return ContractPeriodService(balance: balance).normalizeLeague(
+      LeagueState(
+        teams: teams,
+        currentSeason: Season(
+          year: year,
+          standings: standings,
+          draftState: draftState,
+          nextTvCapResetSeason: tvSchedule.nextTvCapResetSeason,
+          nextTvCapIncreasePct: tvSchedule.nextTvCapIncreasePct,
+        ),
+        playerTeamId: actualPlayerTeamId,
       ),
-      playerTeamId: actualPlayerTeamId,
+      initial: true,
     );
   }
 

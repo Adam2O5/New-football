@@ -52,8 +52,9 @@ extension ProspectX on Prospect {
     required Contract contract,
     required Random rng,
     int? draftYear,
+    BalanceConfig balance = BalanceConfig.defaults,
   }) {
-    final outcome = rollDevelopmentOutcome(determination, rng);
+    final outcome = rollDevelopmentOutcome(determination, rng, balance);
     final player = Player(
       id: id,
       name: name,
@@ -77,9 +78,7 @@ extension ProspectX on Prospect {
         injuryProne: injuryProne,
         determination: determination,
         overallProgress: (40 + rng.nextInt(50)).toDouble(),
-        growthRate: BalanceConfig.defaults.development.baseGrowthRateFor(
-          determination,
-        ),
+        growthRate: balance.development.baseGrowthRateFor(determination),
         developmentOutcome: outcome,
         developmentCeilingStars: rollDevelopmentCeilingStars(
           potentialStars,
@@ -88,7 +87,9 @@ extension ProspectX on Prospect {
         ),
       ),
     );
-    return player.copyWith(seasonStartOvr: player.overall());
+    return player
+        .copyWith(seasonStartOvr: player.overall(balance))
+        .recalculatePointValue(balance);
   }
 }
 

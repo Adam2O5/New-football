@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:new_football/core/services/contract_period_service.dart';
 
 import 'package:uuid/uuid.dart';
 
@@ -1337,6 +1338,7 @@ class SeasonService {
   }
 
   LeagueState runStaffGrowthAndRetire(LeagueState league, {int saveSeed = 0}) {
+    if (league.currentSeason.staffGrowthDone) return league;
     final state = staffService.growthAndRetireTick(league, saveSeed: saveSeed);
     return state.copyWith(
       currentSeason: state.currentSeason.copyWith(staffGrowthDone: true),
@@ -1377,23 +1379,28 @@ class SeasonService {
   /// Emerytury (śr tyg. 44): wyłącznie tabela bazowa
   /// `BalanceConfig.retirement.baseChanceForAge(age)`, bez modyfikatorów.
   LeagueState runPlayerRetirements(LeagueState league, {int? saveSeed}) {
+    if (league.currentSeason.playerRetirementsDone) return league;
     final retired = <({String id, String name, String teamId})>[];
+    final rolls = <String, bool>{};
+    bool retires(Player player) => rolls.putIfAbsent(player.id, () {
+      final chance = balance.retirement.baseChanceForAge(player.age);
+      final rng = saveSeed == null
+          ? _random
+          : Random(
+              seasonEventSeed(
+                saveSeed,
+                league.currentSeason.year,
+                'player-retire',
+                subjectId: player.id,
+              ),
+            );
+      return chance > 0 && rng.nextDouble() < chance;
+    });
     final teams = league.teams.map((t) {
       final keep = <Player>[];
       final retiredIds = <String>{};
       for (final p in t.roster) {
-        final chance = balance.retirement.baseChanceForAge(p.age);
-        final rng = saveSeed == null
-            ? _random
-            : Random(
-                seasonEventSeed(
-                  saveSeed,
-                  league.currentSeason.year,
-                  'player-retire',
-                  subjectId: p.id,
-                ),
-              );
-        if (chance > 0 && rng.nextDouble() < chance) {
+        if (retires(p)) {
           retired.add((id: p.id, name: p.name, teamId: t.id));
           retiredIds.add(p.id);
         } else {
@@ -1409,8 +1416,13 @@ class SeasonService {
       return capService.applyPayroll(updated);
     }).toList();
 
+    final freeAgents = [
+      for (final player in league.freeAgents)
+        if (!retires(player)) player,
+    ];
     var state = league.copyWith(
       teams: teams,
+      freeAgents: freeAgents,
       currentSeason: league.currentSeason.copyWith(playerRetirementsDone: true),
     );
 
@@ -1728,6 +1740,7 @@ class SeasonService {
             ),
             draftYear: draft.year,
             rng: _random,
+            balance: balance,
           )
           .recalculatePointValue(balance);
       if (!freeAgentIds.add(player.id)) continue;
@@ -2008,6 +2021,7 @@ class SeasonService {
             ),
             draftYear: draft.year,
             rng: _random,
+            balance: balance,
           )
           .recalculatePointValue(balance);
 
@@ -2137,6 +2151,7 @@ class SeasonService {
           ),
           draftYear: draft.year,
           rng: _random,
+          balance: balance,
         )
         .recalculatePointValue(balance);
 
@@ -2179,6 +2194,7 @@ class SeasonService {
   /// operation is idempotent, so the season rollover can call it exactly once
   /// without duplicating free-agent entries.
   LeagueState expireContracts(LeagueState league) {
+    league = ContractPeriodService(balance: balance).normalizeLeague(league);
     final freeAgents = List<Player>.from(league.freeAgents);
     final staffFreeAgents = List<StaffMember>.from(
       league.canonicalStaffFreeAgents,
@@ -2189,7 +2205,9 @@ class SeasonService {
       final keep = <Player>[];
       final expiredIds = <String>{};
       for (final p in t.roster) {
-        if (t.id == playerTeamId && p.contract.yearsRemaining == 1) {
+        if (t.id == playerTeamId &&
+            p.contract.yearsRemaining == 1 &&
+            p.contract.lastSeason == league.currentSeason.year) {
           state = _messages.send(
             state,
             type: MessageType.contractExpiring,
@@ -2251,7 +2269,9 @@ class SeasonService {
         if (member == null || memberId == null || contract == null) {
           continue;
         }
-        if (t.id == playerTeamId && contract.yearsRemaining == 1) {
+        if (t.id == playerTeamId &&
+            contract.yearsRemaining == 1 &&
+            contract.lastSeason == league.currentSeason.year) {
           state = _messages.send(
             state,
             type: MessageType.contractExpiring,
@@ -2323,6 +2343,13 @@ class SeasonService {
   }
 
   LeagueState rolloverSeason(LeagueState league, {int saveSeed = 0}) {
+    league = ContractPeriodService(balance: balance).normalizeLeague(league);
+    final playerAges = <String, int>{};
+    final staffAges = <String, int>{};
+    int playerAge(Player player) =>
+        playerAges.putIfAbsent(player.id, () => player.age + 1);
+    int staffAge(StaffMember member) =>
+        staffAges.putIfAbsent(member.id, () => member.age + 1);
     if (!league.currentSeason.playoffMissAtmosphereApplied) {
       final table = league.strengthTable;
       final qualified = _playoffQualifiedTeamIds(league);
@@ -2398,11 +2425,9 @@ class SeasonService {
 
     var teams = league.teams.map((t) {
       final roster = t.roster.map((p) {
-        final years = (p.contract.yearsRemaining - 1).clamp(0, 10);
         return p
             .copyWith(
-              age: p.age + 1,
-              contract: p.contract.copyWith(yearsRemaining: years),
+              age: playerAge(p),
               state: p.state.copyWith(
                 seasonsWithTeam: p.state.seasonsWithTeam + 1,
                 stamina: 90,
@@ -2413,20 +2438,12 @@ class SeasonService {
             .recalculatePointValue(balance);
       }).toList();
 
-      var staff = t.staff;
-      for (final role in StaffRole.values) {
+      final staff = StaffRole.values.fold<TeamStaff>(t.staff, (staff, role) {
         final member = staff.canonicalMember(role);
-        final contract = member?.contract;
-        if (member == null || contract == null) continue;
-        staff = staff.withMember(
-          role,
-          member.copyWith(
-            contract: contract.copyWith(
-              yearsRemaining: (contract.yearsRemaining - 1).clamp(0, 10),
-            ),
-          ),
-        );
-      }
+        return member == null
+            ? staff
+            : staff.withMember(role, member.copyWith(age: staffAge(member)));
+      });
 
       // Player development ticks weekly in `DaySimulator`, not here — avoid
       // double-applying growth on top of the season's weekly ticks.
@@ -2470,6 +2487,16 @@ class SeasonService {
 
     var nextLeague = league.copyWith(
       teams: teams,
+      freeAgents: [
+        for (final player in league.freeAgents)
+          player
+              .copyWith(age: playerAge(player))
+              .recalculatePointValue(balance),
+      ],
+      staffFreeAgents: [
+        for (final member in league.canonicalStaffFreeAgents)
+          member.copyWith(age: staffAge(member)),
+      ],
       history: [...league.history, history],
       currentWeek: 1,
       currentDay: 1,

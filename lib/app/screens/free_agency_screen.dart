@@ -1018,7 +1018,7 @@ class _FreeAgencyScreenState extends ConsumerState<FreeAgencyScreen> {
         .where(
           (player) =>
               player.contract.isRookieScale &&
-              player.contract.yearsRemaining <= 0 &&
+              player.contract.lastSeason == league.currentSeason.year &&
               !activeIds.contains(player.id),
         )
         .toList()

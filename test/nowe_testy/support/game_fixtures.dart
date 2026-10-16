@@ -87,7 +87,12 @@ LeagueState beforeRollover() {
   final league = controllerSave().leagueState;
   final team = league.playerTeam!;
   final signed = team.roster.first.copyWith(
-    contract: const Contract(salary: 1000000, yearsRemaining: 1),
+    contract: const Contract(
+      salary: 1000000,
+      yearsRemaining: 1,
+      firstSeason: 2026,
+      lastSeason: 2026,
+    ),
   );
   const scout = StaffMember(
     id: 'employed-scout',

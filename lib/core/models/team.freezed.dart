@@ -885,7 +885,7 @@ as int,
 /// @nodoc
 mixin _$Team {
 
- String get id; String get name; String get city; Conference get conference; List<Player> get roster; TeamFinance get finance; TacticsSetup get tactics; List<String> get lineupPlayerIds; List<String> get benchPlayerIds; int get atmosphere; double get chemistry; List<TeamWeeklyHistory> get weeklyHistory; List<TeamSeasonStats> get seasonStats; List<int> get recentMatchResults; Map<String, int> get chemistryAppearances; TeamEventState get eventState; TeamStaff get staff; TeamScouting get scouting;/// Picki draftowe (własne i nabyte) — bieżący rocznik oraz przyszłe,
+ String get id; String get name; String get city; Conference get conference; List<Player> get roster; TeamFinance get finance; TacticsSetup get tactics; List<String> get lineupPlayerIds; Map<String, String> get lineupSlots; List<String> get benchPlayerIds; int get atmosphere; double get chemistry; List<TeamWeeklyHistory> get weeklyHistory; List<TeamSeasonStats> get seasonStats; List<int> get recentMatchResults; Map<String, int> get chemistryAppearances; TeamEventState get eventState; TeamStaff get staff; TeamScouting get scouting;/// Picki draftowe (własne i nabyte) — bieżący rocznik oraz przyszłe,
 /// handlowalne (`docs/trade_rules.md`, `DraftPick`).
  List<DraftPick> get ownedPicks;/// `null` = drużyna gracza; ustawione = drużyna AI.
  TeamAiConfig? get ai;
@@ -901,16 +901,16 @@ $TeamCopyWith<Team> get copyWith => _$TeamCopyWithImpl<Team>(this as Team, _$ide
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Team&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.city, city) || other.city == city)&&(identical(other.conference, conference) || other.conference == conference)&&const DeepCollectionEquality().equals(other.roster, roster)&&(identical(other.finance, finance) || other.finance == finance)&&(identical(other.tactics, tactics) || other.tactics == tactics)&&const DeepCollectionEquality().equals(other.lineupPlayerIds, lineupPlayerIds)&&const DeepCollectionEquality().equals(other.benchPlayerIds, benchPlayerIds)&&(identical(other.atmosphere, atmosphere) || other.atmosphere == atmosphere)&&(identical(other.chemistry, chemistry) || other.chemistry == chemistry)&&const DeepCollectionEquality().equals(other.weeklyHistory, weeklyHistory)&&const DeepCollectionEquality().equals(other.seasonStats, seasonStats)&&const DeepCollectionEquality().equals(other.recentMatchResults, recentMatchResults)&&const DeepCollectionEquality().equals(other.chemistryAppearances, chemistryAppearances)&&(identical(other.eventState, eventState) || other.eventState == eventState)&&(identical(other.staff, staff) || other.staff == staff)&&(identical(other.scouting, scouting) || other.scouting == scouting)&&const DeepCollectionEquality().equals(other.ownedPicks, ownedPicks)&&(identical(other.ai, ai) || other.ai == ai));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Team&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.city, city) || other.city == city)&&(identical(other.conference, conference) || other.conference == conference)&&const DeepCollectionEquality().equals(other.roster, roster)&&(identical(other.finance, finance) || other.finance == finance)&&(identical(other.tactics, tactics) || other.tactics == tactics)&&const DeepCollectionEquality().equals(other.lineupPlayerIds, lineupPlayerIds)&&const DeepCollectionEquality().equals(other.lineupSlots, lineupSlots)&&const DeepCollectionEquality().equals(other.benchPlayerIds, benchPlayerIds)&&(identical(other.atmosphere, atmosphere) || other.atmosphere == atmosphere)&&(identical(other.chemistry, chemistry) || other.chemistry == chemistry)&&const DeepCollectionEquality().equals(other.weeklyHistory, weeklyHistory)&&const DeepCollectionEquality().equals(other.seasonStats, seasonStats)&&const DeepCollectionEquality().equals(other.recentMatchResults, recentMatchResults)&&const DeepCollectionEquality().equals(other.chemistryAppearances, chemistryAppearances)&&(identical(other.eventState, eventState) || other.eventState == eventState)&&(identical(other.staff, staff) || other.staff == staff)&&(identical(other.scouting, scouting) || other.scouting == scouting)&&const DeepCollectionEquality().equals(other.ownedPicks, ownedPicks)&&(identical(other.ai, ai) || other.ai == ai));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,id,name,city,conference,const DeepCollectionEquality().hash(roster),finance,tactics,const DeepCollectionEquality().hash(lineupPlayerIds),const DeepCollectionEquality().hash(benchPlayerIds),atmosphere,chemistry,const DeepCollectionEquality().hash(weeklyHistory),const DeepCollectionEquality().hash(seasonStats),const DeepCollectionEquality().hash(recentMatchResults),const DeepCollectionEquality().hash(chemistryAppearances),eventState,staff,scouting,const DeepCollectionEquality().hash(ownedPicks),ai]);
+int get hashCode => Object.hashAll([runtimeType,id,name,city,conference,const DeepCollectionEquality().hash(roster),finance,tactics,const DeepCollectionEquality().hash(lineupPlayerIds),const DeepCollectionEquality().hash(lineupSlots),const DeepCollectionEquality().hash(benchPlayerIds),atmosphere,chemistry,const DeepCollectionEquality().hash(weeklyHistory),const DeepCollectionEquality().hash(seasonStats),const DeepCollectionEquality().hash(recentMatchResults),const DeepCollectionEquality().hash(chemistryAppearances),eventState,staff,scouting,const DeepCollectionEquality().hash(ownedPicks),ai]);
 
 @override
 String toString() {
-  return 'Team(id: $id, name: $name, city: $city, conference: $conference, roster: $roster, finance: $finance, tactics: $tactics, lineupPlayerIds: $lineupPlayerIds, benchPlayerIds: $benchPlayerIds, atmosphere: $atmosphere, chemistry: $chemistry, weeklyHistory: $weeklyHistory, seasonStats: $seasonStats, recentMatchResults: $recentMatchResults, chemistryAppearances: $chemistryAppearances, eventState: $eventState, staff: $staff, scouting: $scouting, ownedPicks: $ownedPicks, ai: $ai)';
+  return 'Team(id: $id, name: $name, city: $city, conference: $conference, roster: $roster, finance: $finance, tactics: $tactics, lineupPlayerIds: $lineupPlayerIds, lineupSlots: $lineupSlots, benchPlayerIds: $benchPlayerIds, atmosphere: $atmosphere, chemistry: $chemistry, weeklyHistory: $weeklyHistory, seasonStats: $seasonStats, recentMatchResults: $recentMatchResults, chemistryAppearances: $chemistryAppearances, eventState: $eventState, staff: $staff, scouting: $scouting, ownedPicks: $ownedPicks, ai: $ai)';
 }
 
 
@@ -921,7 +921,7 @@ abstract mixin class $TeamCopyWith<$Res>  {
   factory $TeamCopyWith(Team value, $Res Function(Team) _then) = _$TeamCopyWithImpl;
 @useResult
 $Res call({
- String id, String name, String city, Conference conference, List<Player> roster, TeamFinance finance, TacticsSetup tactics, List<String> lineupPlayerIds, List<String> benchPlayerIds, int atmosphere, double chemistry, List<TeamWeeklyHistory> weeklyHistory, List<TeamSeasonStats> seasonStats, List<int> recentMatchResults, Map<String, int> chemistryAppearances, TeamEventState eventState, TeamStaff staff, TeamScouting scouting, List<DraftPick> ownedPicks, TeamAiConfig? ai
+ String id, String name, String city, Conference conference, List<Player> roster, TeamFinance finance, TacticsSetup tactics, List<String> lineupPlayerIds, Map<String, String> lineupSlots, List<String> benchPlayerIds, int atmosphere, double chemistry, List<TeamWeeklyHistory> weeklyHistory, List<TeamSeasonStats> seasonStats, List<int> recentMatchResults, Map<String, int> chemistryAppearances, TeamEventState eventState, TeamStaff staff, TeamScouting scouting, List<DraftPick> ownedPicks, TeamAiConfig? ai
 });
 
 
@@ -938,7 +938,7 @@ class _$TeamCopyWithImpl<$Res>
 
 /// Create a copy of Team
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? city = null,Object? conference = null,Object? roster = null,Object? finance = null,Object? tactics = null,Object? lineupPlayerIds = null,Object? benchPlayerIds = null,Object? atmosphere = null,Object? chemistry = null,Object? weeklyHistory = null,Object? seasonStats = null,Object? recentMatchResults = null,Object? chemistryAppearances = null,Object? eventState = null,Object? staff = null,Object? scouting = null,Object? ownedPicks = null,Object? ai = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? city = null,Object? conference = null,Object? roster = null,Object? finance = null,Object? tactics = null,Object? lineupPlayerIds = null,Object? lineupSlots = null,Object? benchPlayerIds = null,Object? atmosphere = null,Object? chemistry = null,Object? weeklyHistory = null,Object? seasonStats = null,Object? recentMatchResults = null,Object? chemistryAppearances = null,Object? eventState = null,Object? staff = null,Object? scouting = null,Object? ownedPicks = null,Object? ai = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -948,7 +948,8 @@ as Conference,roster: null == roster ? _self.roster : roster // ignore: cast_nul
 as List<Player>,finance: null == finance ? _self.finance : finance // ignore: cast_nullable_to_non_nullable
 as TeamFinance,tactics: null == tactics ? _self.tactics : tactics // ignore: cast_nullable_to_non_nullable
 as TacticsSetup,lineupPlayerIds: null == lineupPlayerIds ? _self.lineupPlayerIds : lineupPlayerIds // ignore: cast_nullable_to_non_nullable
-as List<String>,benchPlayerIds: null == benchPlayerIds ? _self.benchPlayerIds : benchPlayerIds // ignore: cast_nullable_to_non_nullable
+as List<String>,lineupSlots: null == lineupSlots ? _self.lineupSlots : lineupSlots // ignore: cast_nullable_to_non_nullable
+as Map<String, String>,benchPlayerIds: null == benchPlayerIds ? _self.benchPlayerIds : benchPlayerIds // ignore: cast_nullable_to_non_nullable
 as List<String>,atmosphere: null == atmosphere ? _self.atmosphere : atmosphere // ignore: cast_nullable_to_non_nullable
 as int,chemistry: null == chemistry ? _self.chemistry : chemistry // ignore: cast_nullable_to_non_nullable
 as double,weeklyHistory: null == weeklyHistory ? _self.weeklyHistory : weeklyHistory // ignore: cast_nullable_to_non_nullable
@@ -1102,10 +1103,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String city,  Conference conference,  List<Player> roster,  TeamFinance finance,  TacticsSetup tactics,  List<String> lineupPlayerIds,  List<String> benchPlayerIds,  int atmosphere,  double chemistry,  List<TeamWeeklyHistory> weeklyHistory,  List<TeamSeasonStats> seasonStats,  List<int> recentMatchResults,  Map<String, int> chemistryAppearances,  TeamEventState eventState,  TeamStaff staff,  TeamScouting scouting,  List<DraftPick> ownedPicks,  TeamAiConfig? ai)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String city,  Conference conference,  List<Player> roster,  TeamFinance finance,  TacticsSetup tactics,  List<String> lineupPlayerIds,  Map<String, String> lineupSlots,  List<String> benchPlayerIds,  int atmosphere,  double chemistry,  List<TeamWeeklyHistory> weeklyHistory,  List<TeamSeasonStats> seasonStats,  List<int> recentMatchResults,  Map<String, int> chemistryAppearances,  TeamEventState eventState,  TeamStaff staff,  TeamScouting scouting,  List<DraftPick> ownedPicks,  TeamAiConfig? ai)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Team() when $default != null:
-return $default(_that.id,_that.name,_that.city,_that.conference,_that.roster,_that.finance,_that.tactics,_that.lineupPlayerIds,_that.benchPlayerIds,_that.atmosphere,_that.chemistry,_that.weeklyHistory,_that.seasonStats,_that.recentMatchResults,_that.chemistryAppearances,_that.eventState,_that.staff,_that.scouting,_that.ownedPicks,_that.ai);case _:
+return $default(_that.id,_that.name,_that.city,_that.conference,_that.roster,_that.finance,_that.tactics,_that.lineupPlayerIds,_that.lineupSlots,_that.benchPlayerIds,_that.atmosphere,_that.chemistry,_that.weeklyHistory,_that.seasonStats,_that.recentMatchResults,_that.chemistryAppearances,_that.eventState,_that.staff,_that.scouting,_that.ownedPicks,_that.ai);case _:
   return orElse();
 
 }
@@ -1123,10 +1124,10 @@ return $default(_that.id,_that.name,_that.city,_that.conference,_that.roster,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String city,  Conference conference,  List<Player> roster,  TeamFinance finance,  TacticsSetup tactics,  List<String> lineupPlayerIds,  List<String> benchPlayerIds,  int atmosphere,  double chemistry,  List<TeamWeeklyHistory> weeklyHistory,  List<TeamSeasonStats> seasonStats,  List<int> recentMatchResults,  Map<String, int> chemistryAppearances,  TeamEventState eventState,  TeamStaff staff,  TeamScouting scouting,  List<DraftPick> ownedPicks,  TeamAiConfig? ai)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String city,  Conference conference,  List<Player> roster,  TeamFinance finance,  TacticsSetup tactics,  List<String> lineupPlayerIds,  Map<String, String> lineupSlots,  List<String> benchPlayerIds,  int atmosphere,  double chemistry,  List<TeamWeeklyHistory> weeklyHistory,  List<TeamSeasonStats> seasonStats,  List<int> recentMatchResults,  Map<String, int> chemistryAppearances,  TeamEventState eventState,  TeamStaff staff,  TeamScouting scouting,  List<DraftPick> ownedPicks,  TeamAiConfig? ai)  $default,) {final _that = this;
 switch (_that) {
 case _Team():
-return $default(_that.id,_that.name,_that.city,_that.conference,_that.roster,_that.finance,_that.tactics,_that.lineupPlayerIds,_that.benchPlayerIds,_that.atmosphere,_that.chemistry,_that.weeklyHistory,_that.seasonStats,_that.recentMatchResults,_that.chemistryAppearances,_that.eventState,_that.staff,_that.scouting,_that.ownedPicks,_that.ai);case _:
+return $default(_that.id,_that.name,_that.city,_that.conference,_that.roster,_that.finance,_that.tactics,_that.lineupPlayerIds,_that.lineupSlots,_that.benchPlayerIds,_that.atmosphere,_that.chemistry,_that.weeklyHistory,_that.seasonStats,_that.recentMatchResults,_that.chemistryAppearances,_that.eventState,_that.staff,_that.scouting,_that.ownedPicks,_that.ai);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1143,10 +1144,10 @@ return $default(_that.id,_that.name,_that.city,_that.conference,_that.roster,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String city,  Conference conference,  List<Player> roster,  TeamFinance finance,  TacticsSetup tactics,  List<String> lineupPlayerIds,  List<String> benchPlayerIds,  int atmosphere,  double chemistry,  List<TeamWeeklyHistory> weeklyHistory,  List<TeamSeasonStats> seasonStats,  List<int> recentMatchResults,  Map<String, int> chemistryAppearances,  TeamEventState eventState,  TeamStaff staff,  TeamScouting scouting,  List<DraftPick> ownedPicks,  TeamAiConfig? ai)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String city,  Conference conference,  List<Player> roster,  TeamFinance finance,  TacticsSetup tactics,  List<String> lineupPlayerIds,  Map<String, String> lineupSlots,  List<String> benchPlayerIds,  int atmosphere,  double chemistry,  List<TeamWeeklyHistory> weeklyHistory,  List<TeamSeasonStats> seasonStats,  List<int> recentMatchResults,  Map<String, int> chemistryAppearances,  TeamEventState eventState,  TeamStaff staff,  TeamScouting scouting,  List<DraftPick> ownedPicks,  TeamAiConfig? ai)?  $default,) {final _that = this;
 switch (_that) {
 case _Team() when $default != null:
-return $default(_that.id,_that.name,_that.city,_that.conference,_that.roster,_that.finance,_that.tactics,_that.lineupPlayerIds,_that.benchPlayerIds,_that.atmosphere,_that.chemistry,_that.weeklyHistory,_that.seasonStats,_that.recentMatchResults,_that.chemistryAppearances,_that.eventState,_that.staff,_that.scouting,_that.ownedPicks,_that.ai);case _:
+return $default(_that.id,_that.name,_that.city,_that.conference,_that.roster,_that.finance,_that.tactics,_that.lineupPlayerIds,_that.lineupSlots,_that.benchPlayerIds,_that.atmosphere,_that.chemistry,_that.weeklyHistory,_that.seasonStats,_that.recentMatchResults,_that.chemistryAppearances,_that.eventState,_that.staff,_that.scouting,_that.ownedPicks,_that.ai);case _:
   return null;
 
 }
@@ -1158,7 +1159,7 @@ return $default(_that.id,_that.name,_that.city,_that.conference,_that.roster,_th
 @JsonSerializable()
 
 class _Team implements Team {
-  const _Team({required this.id, required this.name, required this.city, required this.conference, required final  List<Player> roster, required this.finance, this.tactics = const TacticsSetup(), final  List<String> lineupPlayerIds = const [], final  List<String> benchPlayerIds = const [], this.atmosphere = 50, this.chemistry = 50.0, final  List<TeamWeeklyHistory> weeklyHistory = const [], final  List<TeamSeasonStats> seasonStats = const [], final  List<int> recentMatchResults = const [], final  Map<String, int> chemistryAppearances = const {}, this.eventState = const TeamEventState(), this.staff = const TeamStaff(), this.scouting = const TeamScouting(), final  List<DraftPick> ownedPicks = const [], this.ai}): _roster = roster,_lineupPlayerIds = lineupPlayerIds,_benchPlayerIds = benchPlayerIds,_weeklyHistory = weeklyHistory,_seasonStats = seasonStats,_recentMatchResults = recentMatchResults,_chemistryAppearances = chemistryAppearances,_ownedPicks = ownedPicks;
+  const _Team({required this.id, required this.name, required this.city, required this.conference, required final  List<Player> roster, required this.finance, this.tactics = const TacticsSetup(), final  List<String> lineupPlayerIds = const [], final  Map<String, String> lineupSlots = const {}, final  List<String> benchPlayerIds = const [], this.atmosphere = 50, this.chemistry = 50.0, final  List<TeamWeeklyHistory> weeklyHistory = const [], final  List<TeamSeasonStats> seasonStats = const [], final  List<int> recentMatchResults = const [], final  Map<String, int> chemistryAppearances = const {}, this.eventState = const TeamEventState(), this.staff = const TeamStaff(), this.scouting = const TeamScouting(), final  List<DraftPick> ownedPicks = const [], this.ai}): _roster = roster,_lineupPlayerIds = lineupPlayerIds,_lineupSlots = lineupSlots,_benchPlayerIds = benchPlayerIds,_weeklyHistory = weeklyHistory,_seasonStats = seasonStats,_recentMatchResults = recentMatchResults,_chemistryAppearances = chemistryAppearances,_ownedPicks = ownedPicks;
   factory _Team.fromJson(Map<String, dynamic> json) => _$TeamFromJson(json);
 
 @override final  String id;
@@ -1179,6 +1180,13 @@ class _Team implements Team {
   if (_lineupPlayerIds is EqualUnmodifiableListView) return _lineupPlayerIds;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_lineupPlayerIds);
+}
+
+ final  Map<String, String> _lineupSlots;
+@override@JsonKey() Map<String, String> get lineupSlots {
+  if (_lineupSlots is EqualUnmodifiableMapView) return _lineupSlots;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_lineupSlots);
 }
 
  final  List<String> _benchPlayerIds;
@@ -1248,16 +1256,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Team&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.city, city) || other.city == city)&&(identical(other.conference, conference) || other.conference == conference)&&const DeepCollectionEquality().equals(other._roster, _roster)&&(identical(other.finance, finance) || other.finance == finance)&&(identical(other.tactics, tactics) || other.tactics == tactics)&&const DeepCollectionEquality().equals(other._lineupPlayerIds, _lineupPlayerIds)&&const DeepCollectionEquality().equals(other._benchPlayerIds, _benchPlayerIds)&&(identical(other.atmosphere, atmosphere) || other.atmosphere == atmosphere)&&(identical(other.chemistry, chemistry) || other.chemistry == chemistry)&&const DeepCollectionEquality().equals(other._weeklyHistory, _weeklyHistory)&&const DeepCollectionEquality().equals(other._seasonStats, _seasonStats)&&const DeepCollectionEquality().equals(other._recentMatchResults, _recentMatchResults)&&const DeepCollectionEquality().equals(other._chemistryAppearances, _chemistryAppearances)&&(identical(other.eventState, eventState) || other.eventState == eventState)&&(identical(other.staff, staff) || other.staff == staff)&&(identical(other.scouting, scouting) || other.scouting == scouting)&&const DeepCollectionEquality().equals(other._ownedPicks, _ownedPicks)&&(identical(other.ai, ai) || other.ai == ai));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Team&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.city, city) || other.city == city)&&(identical(other.conference, conference) || other.conference == conference)&&const DeepCollectionEquality().equals(other._roster, _roster)&&(identical(other.finance, finance) || other.finance == finance)&&(identical(other.tactics, tactics) || other.tactics == tactics)&&const DeepCollectionEquality().equals(other._lineupPlayerIds, _lineupPlayerIds)&&const DeepCollectionEquality().equals(other._lineupSlots, _lineupSlots)&&const DeepCollectionEquality().equals(other._benchPlayerIds, _benchPlayerIds)&&(identical(other.atmosphere, atmosphere) || other.atmosphere == atmosphere)&&(identical(other.chemistry, chemistry) || other.chemistry == chemistry)&&const DeepCollectionEquality().equals(other._weeklyHistory, _weeklyHistory)&&const DeepCollectionEquality().equals(other._seasonStats, _seasonStats)&&const DeepCollectionEquality().equals(other._recentMatchResults, _recentMatchResults)&&const DeepCollectionEquality().equals(other._chemistryAppearances, _chemistryAppearances)&&(identical(other.eventState, eventState) || other.eventState == eventState)&&(identical(other.staff, staff) || other.staff == staff)&&(identical(other.scouting, scouting) || other.scouting == scouting)&&const DeepCollectionEquality().equals(other._ownedPicks, _ownedPicks)&&(identical(other.ai, ai) || other.ai == ai));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hashAll([runtimeType,id,name,city,conference,const DeepCollectionEquality().hash(_roster),finance,tactics,const DeepCollectionEquality().hash(_lineupPlayerIds),const DeepCollectionEquality().hash(_benchPlayerIds),atmosphere,chemistry,const DeepCollectionEquality().hash(_weeklyHistory),const DeepCollectionEquality().hash(_seasonStats),const DeepCollectionEquality().hash(_recentMatchResults),const DeepCollectionEquality().hash(_chemistryAppearances),eventState,staff,scouting,const DeepCollectionEquality().hash(_ownedPicks),ai]);
+int get hashCode => Object.hashAll([runtimeType,id,name,city,conference,const DeepCollectionEquality().hash(_roster),finance,tactics,const DeepCollectionEquality().hash(_lineupPlayerIds),const DeepCollectionEquality().hash(_lineupSlots),const DeepCollectionEquality().hash(_benchPlayerIds),atmosphere,chemistry,const DeepCollectionEquality().hash(_weeklyHistory),const DeepCollectionEquality().hash(_seasonStats),const DeepCollectionEquality().hash(_recentMatchResults),const DeepCollectionEquality().hash(_chemistryAppearances),eventState,staff,scouting,const DeepCollectionEquality().hash(_ownedPicks),ai]);
 
 @override
 String toString() {
-  return 'Team(id: $id, name: $name, city: $city, conference: $conference, roster: $roster, finance: $finance, tactics: $tactics, lineupPlayerIds: $lineupPlayerIds, benchPlayerIds: $benchPlayerIds, atmosphere: $atmosphere, chemistry: $chemistry, weeklyHistory: $weeklyHistory, seasonStats: $seasonStats, recentMatchResults: $recentMatchResults, chemistryAppearances: $chemistryAppearances, eventState: $eventState, staff: $staff, scouting: $scouting, ownedPicks: $ownedPicks, ai: $ai)';
+  return 'Team(id: $id, name: $name, city: $city, conference: $conference, roster: $roster, finance: $finance, tactics: $tactics, lineupPlayerIds: $lineupPlayerIds, lineupSlots: $lineupSlots, benchPlayerIds: $benchPlayerIds, atmosphere: $atmosphere, chemistry: $chemistry, weeklyHistory: $weeklyHistory, seasonStats: $seasonStats, recentMatchResults: $recentMatchResults, chemistryAppearances: $chemistryAppearances, eventState: $eventState, staff: $staff, scouting: $scouting, ownedPicks: $ownedPicks, ai: $ai)';
 }
 
 
@@ -1268,7 +1276,7 @@ abstract mixin class _$TeamCopyWith<$Res> implements $TeamCopyWith<$Res> {
   factory _$TeamCopyWith(_Team value, $Res Function(_Team) _then) = __$TeamCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name, String city, Conference conference, List<Player> roster, TeamFinance finance, TacticsSetup tactics, List<String> lineupPlayerIds, List<String> benchPlayerIds, int atmosphere, double chemistry, List<TeamWeeklyHistory> weeklyHistory, List<TeamSeasonStats> seasonStats, List<int> recentMatchResults, Map<String, int> chemistryAppearances, TeamEventState eventState, TeamStaff staff, TeamScouting scouting, List<DraftPick> ownedPicks, TeamAiConfig? ai
+ String id, String name, String city, Conference conference, List<Player> roster, TeamFinance finance, TacticsSetup tactics, List<String> lineupPlayerIds, Map<String, String> lineupSlots, List<String> benchPlayerIds, int atmosphere, double chemistry, List<TeamWeeklyHistory> weeklyHistory, List<TeamSeasonStats> seasonStats, List<int> recentMatchResults, Map<String, int> chemistryAppearances, TeamEventState eventState, TeamStaff staff, TeamScouting scouting, List<DraftPick> ownedPicks, TeamAiConfig? ai
 });
 
 
@@ -1285,7 +1293,7 @@ class __$TeamCopyWithImpl<$Res>
 
 /// Create a copy of Team
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? city = null,Object? conference = null,Object? roster = null,Object? finance = null,Object? tactics = null,Object? lineupPlayerIds = null,Object? benchPlayerIds = null,Object? atmosphere = null,Object? chemistry = null,Object? weeklyHistory = null,Object? seasonStats = null,Object? recentMatchResults = null,Object? chemistryAppearances = null,Object? eventState = null,Object? staff = null,Object? scouting = null,Object? ownedPicks = null,Object? ai = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? city = null,Object? conference = null,Object? roster = null,Object? finance = null,Object? tactics = null,Object? lineupPlayerIds = null,Object? lineupSlots = null,Object? benchPlayerIds = null,Object? atmosphere = null,Object? chemistry = null,Object? weeklyHistory = null,Object? seasonStats = null,Object? recentMatchResults = null,Object? chemistryAppearances = null,Object? eventState = null,Object? staff = null,Object? scouting = null,Object? ownedPicks = null,Object? ai = freezed,}) {
   return _then(_Team(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
@@ -1295,7 +1303,8 @@ as Conference,roster: null == roster ? _self._roster : roster // ignore: cast_nu
 as List<Player>,finance: null == finance ? _self.finance : finance // ignore: cast_nullable_to_non_nullable
 as TeamFinance,tactics: null == tactics ? _self.tactics : tactics // ignore: cast_nullable_to_non_nullable
 as TacticsSetup,lineupPlayerIds: null == lineupPlayerIds ? _self._lineupPlayerIds : lineupPlayerIds // ignore: cast_nullable_to_non_nullable
-as List<String>,benchPlayerIds: null == benchPlayerIds ? _self._benchPlayerIds : benchPlayerIds // ignore: cast_nullable_to_non_nullable
+as List<String>,lineupSlots: null == lineupSlots ? _self._lineupSlots : lineupSlots // ignore: cast_nullable_to_non_nullable
+as Map<String, String>,benchPlayerIds: null == benchPlayerIds ? _self._benchPlayerIds : benchPlayerIds // ignore: cast_nullable_to_non_nullable
 as List<String>,atmosphere: null == atmosphere ? _self.atmosphere : atmosphere // ignore: cast_nullable_to_non_nullable
 as int,chemistry: null == chemistry ? _self.chemistry : chemistry // ignore: cast_nullable_to_non_nullable
 as double,weeklyHistory: null == weeklyHistory ? _self._weeklyHistory : weeklyHistory // ignore: cast_nullable_to_non_nullable
