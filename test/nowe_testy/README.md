@@ -1,6 +1,70 @@
 # Nowe testy — etapy 0–8
 
-Etapy 0–7 zostały zaakceptowane i zapisane przez użytkownika: `dc6e454`, `b4048fb`, `553198c`, `f8e45e1`, `5762f4f`, `0f2fd43`, `5598811`, `6e9cea2` oraz etap 7 w `8293be2`. R04 etapu 8 zapisano w `d010cec`, R05 w `c567d39`, R06 w `4677f98`, R07 w `1fd485b`, R08 w `eef0c73`. **Etap 8 jest w toku: R09 (rynek kontraktów) jest ukończone i gotowe do review.** Zmiany R09 pozostają bez commita. R10–R13 nie zostały rozpoczęte. Wyniki wcześniejszych grup/etapów poniżej są historycznym punktem odniesienia.
+Etapy 0–7 zostały zaakceptowane i zapisane przez użytkownika: `dc6e454`, `b4048fb`, `553198c`, `f8e45e1`, `5762f4f`, `0f2fd43`, `5598811`, `6e9cea2` oraz etap 7 w `8293be2`. R04 etapu 8 zapisano w `d010cec`, R05 w `c567d39`, R06 w `4677f98`, R07 w `1fd485b`, R08 w `eef0c73`, R09 w `5cacf87`. **Etap 8 jest w toku: R10 (eventy drużyn i zawodników) jest ukończone i gotowe do review.** Zmiany R10 pozostają bez commita. R11–R13 nie zostały rozpoczęte. Wyniki wcześniejszych grup/etapów poniżej są historycznym punktem odniesienia.
+
+## Etap 8 — R10: zdarzenia drużyn i zawodników — 17 października 2026
+
+Punkt wyjścia: `5cacf87` (R09), czyste repozytorium. Najpierw podzielono `TeamEventService` i sprawdzono testy, następnie `PlayerEventService`. Wydzielono łącznie **69 metod do dziewięciu prywatnych miksinów**. Wszystkie części pozostają w `lib/core/services/` i tworzą dotychczasowe biblioteki przez `part`/`part of`. Publiczne metody nadal są metodami instancji serwisów, dostępnymi przez stare importy. Odbiór następuje po całej grupie; agent nie wykonuje commitów.
+
+### Podział TeamEventService
+
+- **`team_event_service.dart`: 1543 → 446 linii.** Pozostają konstruktor, cztery zależności, dwa pola cache, `afterMatch`, zapis minut, tick tygodnia, obsługa końca playoffów, publiczne aliasy, rozstrzygnięcie/wygaśnięcie decyzji i data logiczna (17 dotychczasowych elementów). W tym samym pliku jest kontrakt `_TeamEventShared`.
+- **`team_event_triggers.dart` (316):** pięć metod kwalifikacji i uruchamiania próśb o minuty/transfer, konfliktu, wsparcia lidera i publicznej krytyki.
+- **`team_event_promises.dart` (170):** dwie metody rozliczania obietnic i sytuacji transferowych.
+- **`team_event_decisions.dart` (247):** całe `_applyDecision`, ze wszystkimi wariantami i efektami.
+- **`team_event_messages.dart` (244):** osiem metod kolejki próśb/decyzji, odmowy przedłużenia, komunikatów automatycznych oraz istniejącego wyboru opcji dla pozostałych klubów.
+- **`team_event_helpers.dart` (331):** 21 metod delt/stanu, cooldownów, modyfikatorów, wyceny, minut i rankingów, losowań, wyszukiwania i klucza tygodnia. `_eventOverall` przeniesiono w całości wraz z dotychczasową obsługą typu atrybutów.
+
+Wszystkie miksiny mają `on _TeamEventShared`. Kontrakt zawiera **32 deklaracje abstrakcyjne**: sześć getterów, dwa settery cache i 24 metody; dodano 30 adnotacji `@override`. Nie ma własnego stanu ani implementacji. `_valueThresholdCache` i `_valueThresholdReady` nadal należą do jednej instancji serwisu, z identycznymi inicjalizatorami i resetami przed oraz w `finally` po obsłudze meczu. W abstrakcyjnej deklaracji `_random` wystawiono tylko argumenty używane między częściami; oryginalna implementacja zachowuje opcjonalny `salt = 0`.
+
+### Podział PlayerEventService
+
+- **`player_event_service.dart`: 1426 → 443 linie.** Pozostają konstruktor/zależności, trzy pola robocze, publiczne ticki i aliasy, powołanie do reprezentacji, dispatch/wygaśnięcie decyzji, data logiczna, całe `_tickPlayer` oraz statyczny `_pendingKey` (17 elementów). W tym samym pliku jest kontrakt `_PlayerEventShared`.
+- **`player_event_triggers.dart` (472):** dziewięć dotychczasowych metod od breakthrough do plateau.
+- **`player_event_decisions.dart` (296):** sześć resolverów decyzji wraz z ich pełnymi efektami.
+- **`player_event_messages.dart` (143):** trzy metody emitowania decyzji/wiadomości i istniejącego automatycznego wyboru.
+- **`player_event_helpers.dart` (196):** 14 metod losowań, indeksów decyzji i dolnej połowy tabeli, wyszukiwania, publikacji składów i podmiany zawodnika.
+
+Kontrakt `_PlayerEventShared` zawiera **19 deklaracji abstrakcyjnych**: pięć getterów i 14 metod; dodano 19 adnotacji `@override`. Miksiny tylko odczytują referencje pól roboczych; przypisania i czyszczenie pozostają w głównej klasie. Nie dodano setterów ani dodatkowych map. Abstrakcyjne `_emit` i `_roll` wystawiają tylko argumenty używane między częściami; pełne dotychczasowe sygnatury implementacji zachowano.
+
+`_pendingKey` pozostaje prywatną metodą statyczną klasy. Trzy wywołania w przeniesionych metodach zapisano jako `PlayerEventService._pendingKey(...)`. Formatter rozwinął jedno z nich, a przy drugim dodano klamry wokół istniejącego wczesnego `return`, zgodnie z lintem dla wielowierszowego `if`. Ponadto formatter skompaktował istniejący literał zbioru w `_indexBottomHalf` i wyrażenie logiczne w `weeklyTick`. Są to jawnie uwzględnione różnice struktury/zapisu.
+
+### Zachowanie i nowe testy
+
+Nie zmieniono kolejności skanowania zawodników i wywoływania eventów, warunków kwalifikacji, prawdopodobieństw, seedów i kolejności losowań, terminów decyzji ani deduplikacji. `_tickTeams`, `_pendingDecisionKeys` i `_bottomHalfTeamIds` nadal mają tego samego właściciela i zakres życia, a publikacja rosterów następuje w tych samych miejscach. Całe `try/finally` pozostają w głównych serwisach. Nie dodano wrapperów, extension zastępujących metody instancji, nowych zależności ani pomocniczych serwisów ze stanem.
+
+Dodano tylko **`test/nowe_testy/event_services_test.dart`**, z czterema scenariuszami zachowania:
+
+1. Akceptacja prośby o minuty nie powiela obietnicy/modyfikatora; tick rozlicza niedotrzymaną obietnicę i nie nalicza jej ponownie.
+2. Zmiany kolejnych zawodników są opublikowane przed dostarczeniem wiadomości; ponowienie na tych samych wejściach daje te same efekty, oczekujące decyzje nie generują kolejnych komunikatów, a akceptacja plateau aktualizuje bieżący roster.
+3. Błąd wysyłania wiadomości podczas ticka zwalnia mapę roboczą: powołanie na innym wejściu używa nowego stanu, a ponowiony tick odpowiada świeżej instancji.
+4. Istniejąca automatyczna decyzja dla klubu bez gracza aktualizuje współdzielony roster i nie trafia do inboxu menedżera.
+
+Fixture wymusza plateau i wyłącza pozostałe losowe eventy **wyłącznie w teście**. Porównanie wiadomości normalizuje tylko losowy UUID. Helper przechwytujący wiadomości jest prywatny i znajduje się w tym samym pliku testu; nie dodano osobnych probes ani narzędzi do aplikacji.
+
+### Weryfikacja
+
+- **Przed podziałem 20/20:** nowy `event_services_test.dart` i istniejące `people_lifecycle_test.dart`, `postseason_finalization_test.dart`, `season_randomness_test.dart`.
+- **Po podziale serwisu drużyn 20/20** tych samych scenariuszy; analiza sześciu plików biblioteki bez uwag.
+- Jednorazowe porównanie z `5cacf87`: **54/54** elementy `TeamEventService` (37 przeniesionych, 17 pozostawionych) i **49/49** elementów `PlayerEventService` (32 przeniesione, 17 pozostawionych) zachowały implementacje. Porównanie SHA-256 obejmuje sygnatury, ciała, komentarze i inicjalizatory; normalizuje tylko końce/zewnętrzne puste linie, 49 nowych adnotacji oraz jawnie wymienione powyżej kwalifikacje/zmiany formatowania.
+- Sprawdzono kompletność, unikalność i kolejność elementów w każdej części, zachowanie importów/komentarzy klas i brak dodatkowych implementacji/stanu w kontraktach. Manifesty i wynik są wyłącznie w ignorowanym folderze raportów; nie dodano trwałych testów układu źródeł ani skryptów w aplikacji.
+- Formatowanie 12 zmienionych/nowych plików Dart: bez dalszych zmian. Analiza `lib/app`, obu bibliotek eventów i `test/nowe_testy/`: **bez uwag**.
+- **Po podziale 211/211:** pełny folder `test/nowe_testy/`, w tym cztery nowe scenariusze eventów. Nie uruchamiano starych testów.
+- `flutter build bundle --debug --no-pub`: **exit code 0**, zaktualizowany kernel bundle; weryfikacja debug bez podłączonego urządzenia. `git diff --check`: bez uwag.
+- Test odświeżeń nadal wskazuje Home: 5, Squad: 0, Standings: 0 przy pięciu zmianach daty. Organizacyjny podział nie stanowi nowej optymalizacji wykonania.
+
+Schemat zapisu nadal **27**, bez migracji. Nie analizowano ani nie zmieniano wyłączonych AI/simulation, plików generowanych, assets i starych testów. Istniejące automatyczne decyzje eventów przeniesiono bez zmian; test nie wprowadza implementacji AI przeciwnika. Zamrożony raport audytu pozostał bez zmian.
+
+Logi w `reports/lib-audit-2026-10-13/`: `stage-8-r10-before-tests.txt`, `stage-8-r10-team-tests.txt`, `stage-8-r10-team-analyze.txt`, `stage-8-r10-player-analyze.txt`, `stage-8-r10-all-tests.txt`, `stage-8-r10-analyze.txt`, `stage-8-r10-build.txt`, dwa `stage-8-r10-*-movement-baseline.json` i `stage-8-r10-movement-check.txt`.
+
+### Ręczne review R10
+
+1. **Granica tygodnia:** w karierze z grubsza znanej z poprzedniej wersji przejdź kalendarzem przez koniec tygodnia. Sprawdź aktualny roster, formę/kondycję, modyfikatory i inbox. Losowy event nie musi się pojawić w danym tygodniu — nie trzeba wymuszać go wielokrotną symulacją.
+2. **Decyzja eventu:** jeśli masz aktywną wiadomość zdarzenia zawodnika/drużyny, wybierz opcję i sprawdź jej efekt w aktualnych danych. Zapisz, wróć do menu i wczytaj; wiadomość oraz skutki decyzji mają pozostać. Scenariusze wymuszone i błędy wysyłania pokrywają testy w pamięci.
+3. **Obietnica minut:** jeśli pojawi się prośba i ją przyjmiesz, sprawdź obietnicę/bonus, a przy późniejszym rozliczeniu — pojedynczy skutek. Test automatyczny pokrywa rozliczenie bez potrzeby ręcznego przechodzenia kilku tygodni.
+4. **Review diffu:** główne przepływy, pola i `try/finally` pozostają w obu serwisach; dziewięć nowych plików zawiera przeniesione grupy metod. Nie powinno być zmian balansu, serializacji ani kodu poza zakresem R10.
+
+Grupa **R10** jest gotowa do review; prace zatrzymano na tej granicy. R11 (generacja danych) wymaga kolejnej zgody. Nie wykonano commitów ani dalszych grup.
 
 ## Etap 8 — R09: rynek kontraktów — 17 października 2026
 
