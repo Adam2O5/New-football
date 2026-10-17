@@ -1,6 +1,48 @@
-# Nowe testy — etapy 0–7
+# Nowe testy — etapy 0–8
 
-Etapy 0–6 zostały zaakceptowane i zapisane przez użytkownika: `dc6e454`, `b4048fb`, `553198c`, `f8e45e1`, `5762f4f`, `0f2fd43`, `5598811` oraz etap 6 w `6e9cea2`. **Etap 7 (I24–I27) jest ukończony i przygotowany do review.** Zmiany pozostają bez commita. Etapu 8 nie rozpoczęto. Wyniki wcześniejszych etapów poniżej są historycznym punktem odniesienia.
+Etapy 0–7 zostały zaakceptowane i zapisane przez użytkownika: `dc6e454`, `b4048fb`, `553198c`, `f8e45e1`, `5762f4f`, `0f2fd43`, `5598811`, `6e9cea2` oraz etap 7 w `8293be2`. **Etap 8 jest w toku: cała grupa R04 (S04, S11, S12, S18, S19, S21) jest ukończona i przygotowana do review.** Zmiany pozostają bez commita. R05–R13 nie zostały rozpoczęte. Wyniki wcześniejszych etapów poniżej są historycznym punktem odniesienia.
+
+## Etap 8 — R04: samodzielne widgety i funkcje — 17 października 2026
+
+Punkt wyjścia: `8293be2`, czyste repozytorium. Zgodnie z decyzją użytkownika przerwa do review następuje **po całej grupie R04**. Każdy źródłowy plik zachowuje osobny zakres przeniesień, co pozwala użytkownikowi utworzyć osobne commity. Agent nie wykonuje commitów.
+
+### Mechaniczny podział
+
+Wszystkie nowe części znajdują się w folderze swojego pliku wejściowego. Każdy z sześciu podziałów tworzy jedną bibliotekę Dart przez `part`/`part of`, więc dotychczasowe importy udostępniają te same publiczne deklaracje. Nie dodano nowych właścicieli stanu ani parametrów widgetów. Przeniesiono całe deklaracje, zachowując klucze, kolejność drzewa, callbacki i lifecycle.
+
+- **S04 — `lib/app/screens/matchday_screen.dart`: 1843 → 704 linie.** Pozostają ekran i cały jego State (start, timer, pauza/prędkość, akcje, zakończenie, główny build) oraz pięć krótkich wspólnych funkcji. Części: `matchday_status_widgets.dart` (369), `matchday_lineup_widgets.dart` (175), `matchday_action_sheets.dart` (307), `matchday_auto_pause_sheet.dart` (98), `matchday_summary_dialog.dart` (201). Arkusze przeniesiono razem z ich dotychczasowymi State.
+- **S11 — `lib/app/screens/home_screen.dart`: 1047 → 438 linii.** Pozostaje cały `HomeScreen`. `home_calendar_actions.dart` (388) zawiera istniejące funkcje dat, nawigacji, symulacji i prezentacji wyniku; `home_action_widgets.dart` (227) zawiera `_buildNextActionSection` oraz `_HomeDashboardHeader`. Nie łączono helperów dat z kalendarzem.
+- **S12 — `lib/app/screens/inbox_screen.dart`: 1051 → 681 linii.** Pozostają cały ekran/State, otwieranie szczegółów, sortowanie, filtracja, ustawienia i lokalizacja. `inbox_message_details.dart` (373) zawiera enumy fazy/operacji oraz cały widget szczegółów i jego State, wraz z retry. Tokeny rodzica i `closeSheetOnce` pozostają przy dotychczasowych właścicielach.
+- **S18 — `lib/app/screens/search_filters_screen.dart`: 855 → 188 linii.** Pozostają ekran/State, `_groupOrder`, TabController i reset. Części: `search_filter_controls.dart` (302), `search_filter_dropdowns.dart` (92), `search_filter_tabs.dart` (280, wraz z `_formatMoney`). Nie zmieniono powiązań filtrów, kroków suwaków ani opcji lokalizacji.
+- **S19 — `lib/app/widgets/tactics/player_list_tile.dart`: 852 → 323 linie.** Pozostają cały `PlayerListTile` i `_NameAndForm`. `player_tile_badges.dart` (278) zawiera ramkę, odznaki, potencjał, rolę i `_zoneLabel`; `player_tile_metrics.dart` (171) zawiera wskaźniki, podpis i formatowanie formy/kondycji; `player_tile_status_icons.dart` (87) zawiera cały `StatusIcons` z etykietami. Publiczne komponenty nadal dostępne przez dotychczasowy import.
+- **S21 — `lib/app/utils/squad_presentation.dart`: 661 → 222 linie.** Pozostają `PlayerPresentation`, `PlayerSemanticSnapshot`, składanie projekcji i formatowanie semantycznej formy. Części: `squad_roster_presentation.dart` (154), `squad_name_presentation.dart` (54), `squad_status_presentation.dart` (125), `squad_position_assignment.dart` (115). Przypisania pozycji, kolory, niezmienność kolekcji i semantyka zachowane.
+
+Jednorazowe porównanie SHA-256 z `8293be2` potwierdza identyczną treść **123/123 deklaracji**: odpowiednio 28, 17, 10, 16, 14 i 38. Porównano również zachowane importy oraz kompletność/unikalność deklaracji i przypisanie nowych części do bibliotek. Normalizowano tylko końce linii oraz zewnętrzne puste linie; komentarze i adnotacje są uwzględnione. Formatter nie zmienił żadnego z **24 plików aplikacji**. Wyniki zapisano w `stage-8-r04-movement-check.txt`, a manifest pięciu późniejszych podziałów w `stage-8-r04-movement-baseline.json`. To jednorazowe artefakty weryfikacji w katalogu raportów; nie dodawano trwałych testów porównujących kod źródłowy ani skryptów typu probes poza nim.
+
+### Weryfikacja
+
+- **S04: 6/6 przed i po podziale** — trzy nowe scenariusze meczu oraz trzy testy nawigacji/bariery zapisu z `career_navigation_test.dart`.
+- **Pozostałe R04: 13/13 przed i po podziale** — `search_filters_interaction_test.dart`, `search_filter_boundaries_test.dart`, `stage_six_rebuilds_test.dart`, `message_locale_switch_test.dart`, `squad_slot_interaction_test.dart`.
+- `matchday_split_interaction_test.dart` sprawdza autopauzę PL/EN (zapis i ponowne otwarcie), zachowanie elementu ekranu i zegara zatrzymanego na 0', wybór graczy i reset arkusza oraz zastosowanie/odczyt tempa taktyki. Używa istniejących API uruchomienia meczu, bez symulowania minut i oceniania implementacji silnika/AI; zapis odbywa się w pamięci.
+- `search_filters_interaction_test.dart` sprawdza PL/EN: anulowanie tymczasowego wyboru klubu, zatwierdzenie wyboru, aktualizację pozycji i zakresu, zmianę rundy na innej zakładce, anulowanie i zatwierdzenie resetu, zachowanie elementu ekranu/TabControllera i wyjście przyciskiem wyszukiwania.
+- Test odświeżeń zachowuje przed i po podziale **Home: 5, Squad: 0, Standings: 0** przy pięciu zmianach samej daty. Czasy debug nie są podstawą twierdzenia o przyspieszeniu; ten zakres nie optymalizuje wykonania.
+- Pełny odbiór `test/nowe_testy/`: **207/207**, czyli 202 wcześniejsze i 5 nowych scenariuszy.
+- Analiza `lib/app` i `test/nowe_testy/`: **bez uwag**. `git diff --check`: bez uwag.
+- `flutter build bundle --debug --no-pub`: **exit code 0**, zaktualizowany kernel bundle. To kompilacja lokalna debug, bez odbioru na telefonie.
+
+Dodano łącznie **5 scenariuszy** w dwóch plikach testowych. Starych testów, wyłączonych modułów, generatorów i assets nie analizowano ani nie zmieniano. Schemat zapisu nadal **27**, bez migracji. Oryginalny raport audytu pozostał bez zmian.
+
+Logi bieżącej grupy w `reports/lib-audit-2026-10-13/`: `stage-8-r04-before-tests.txt`, `stage-8-r04-after-tests.txt`, `stage-8-r04-all-tests.txt`, `stage-8-r04-movement-check.txt`, `stage-8-r04-movement-baseline.json`, `stage-8-r04-analyze.txt`, `stage-8-r04-build.txt`. Wcześniejsze logi S04 zachowano pod prefiksem `stage-8-r04-s04-`.
+
+### Ręczne review R04
+
+1. **Home:** sprawdź datę, nagłówek i kolejną akcję; przejdź do wydarzenia lub przesuń dzień, sprawdź aktualizację Home oraz kalendarza. Zachowanie powinno odpowiadać wersji sprzed podziału.
+2. **Inbox:** otwórz wiadomość, zamknij szczegóły, zmień zakładkę i ustawienia; sprawdź tekst po zmianie PL ↔ EN. Dla dostępnej akcji/decyzji sprawdź potwierdzenie i zamknięcie szczegółów.
+3. **Filtry:** zmień pozycję, klub, zakres i zakładkę; zamknij wybór klubu bez zapisu i sprawdź brak zmiany, potem zatwierdź. Anuluj reset, następnie wykonaj reset. Wybrana zakładka powinna pozostać aktywna.
+4. **Skład:** sprawdź nazwiska, strefy XI/ławka/rezerwy, OVR, formę/kondycję i statusy dostępnych zawodników. Przeciągnij zawodnika między slotami i otwórz profil; sprawdź zachowanie po powrocie.
+5. **Mecz:** sprawdź nagłówek, składy i statystyki, zapis/ponowne otwarcie autopauzy, arkusze zmian/taktyki (formacja przed przerwą zablokowana), wznowienie/pauzę, prędkość oraz zakończenie/podsumowanie. To odbiór zachowania UI przy istniejącym placeholderze silnika.
+
+Grupa **R04** jest gotowa do review użytkownika; prace zatrzymano na tej granicy. Następna grupa **R05** wymaga jego zgody; R05–R13 pozostają do wykonania. Nie traktować ukończenia R04 jako ukończenia całego etapu 8. Nie wykonano commita automatycznie.
 
 ## Wynik etapu 7 — 17 października 2026
 
