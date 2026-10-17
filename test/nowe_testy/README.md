@@ -1,6 +1,55 @@
 # Nowe testy — etapy 0–8
 
-Etapy 0–7 zostały zaakceptowane i zapisane przez użytkownika: `dc6e454`, `b4048fb`, `553198c`, `f8e45e1`, `5762f4f`, `0f2fd43`, `5598811`, `6e9cea2` oraz etap 7 w `8293be2`. R04 etapu 8 zapisano w `d010cec`, R05 w `c567d39`, R06 w `4677f98`, R07 w `1fd485b`, R08 w `eef0c73`, R09 w `5cacf87`, R10 w `e6ee6aa`, R11 w `a454528`. **Etap 8 jest w toku: R12 (duże klasy State ekranów) jest ukończone i gotowe do review.** Naprawiono oba dialogi counter za zgodą użytkownika; dziesięć nowych testów i cała grupa pozostają bez commita. R13 nie rozpoczęto. Wyniki wcześniejszych grup/etapów poniżej są historycznym punktem odniesienia.
+Etapy 0–7 zostały zaakceptowane i zapisane przez użytkownika: `dc6e454`, `b4048fb`, `553198c`, `f8e45e1`, `5762f4f`, `0f2fd43`, `5598811`, `6e9cea2` oraz etap 7 w `8293be2`. R04 etapu 8 zapisano w `d010cec`, R05 w `c567d39`, R06 w `4677f98`, R07 w `1fd485b`, R08 w `eef0c73`, R09 w `5cacf87`, R10 w `e6ee6aa`, R11 w `a454528`, R12 w `14d5906`. **R13 (repozytorium zapisów) jest ukończone i gotowe do review.** Zrealizowano podziały R04–R13 etapu 8; zmiany R13 pozostają bez commita. Etap 9 nie został rozpoczęty. Wyniki wcześniejszych grup/etapów poniżej są historycznym punktem odniesienia.
+
+## Etap 8 — R13: repozytorium zapisów — 17 października 2026
+
+Punkt wyjścia: `14d5906` (R12), czyste repozytorium. Wydzielono **19 metod do dwóch prywatnych miksinów** w `lib/data/`, połączonych z dotychczasową biblioteką przez `part`/`part of`. Publiczne operacje pozostają metodami instancji `SaveRepository`, dostępnymi przez dotychczasowy import i możliwymi do nadpisania. Nie wykonano commitów.
+
+### Podział
+
+- **`save_repository.dart`: 836 → 375 linii.** Pozostają konstruktor, konfiguracja i wszystkie pola, statyczny licznik/alias schematu/inicjalizacja koordynatora, diagnostyka sztabu, rozwiązywanie ścieżek, list/inspect/dostępność ID/load/save/delete oraz całe `_withAccess` (34 dotychczasowe elementy). W tym samym pliku znajduje się kontrakt `_SaveRepositoryShared`.
+- **`save_repository_raw_operations.dart` (291):** dziewięć metod: `readRawSave`, `duplicateRaw`, `_duplicateLocked`, `_duplicateRaw`, `renameRaw`, `_renameLocked`, `_renameRaw`, `_readRawSaveJson`, `_validateRawSaveJson`. Przeniesiono całe ścieżki odczytu, przejścia do izolatu, walidacji, publikacji i odzyskiwania po błędzie, bez nowych wrapperów.
+- **`save_repository_transaction.dart` (239):** dziesięć metod: `_recoverAfterFailure`, `_prepareTwoFileTransaction`, `_writeTemporary`, `_writeJsonTemporary`, `_commitPreparedFiles`, `_publish`, `_readCommittedJson`, `_verifyRawCommit`, `_verifyCommittedSave`, `_jsonValuesEqual`. Zapis UTF-8 pozostawiono razem z transakcją zgodnie z opcją S14; nie tworzono krótkiego osobnego pliku encodera.
+
+Istniejące `save_directory_coordinator.dart`, `save_recovery.dart` i `save_repository_types.dart` pozostały **identyczne bajtowo**. Nie przenoszono ponownie typów z R05 ani nie rozbijano gotowej implementacji odzyskiwania.
+
+### Jeden właściciel dostępu i ten sam protokół
+
+Kontrakt `_SaveRepositoryShared` zawiera **15 deklaracji abstrakcyjnych**: cztery gettery i 11 metod, bez stanu ani implementacji. Oba miksiny mają `on _SaveRepositoryShared`; dodano **15 adnotacji `@override`**. Nie dodano nowego repozytorium, kolejki, koordynatora ani warstwy transportu. Zależności, hooki, diagnostyka i wszystkie inicjalizatory pozostają w jednej instancji.
+
+`_transactionSequence` nadal jest jednym statycznym polem `SaveRepository`. W przeniesionym `_prepareTwoFileTransaction` zapisano jego dotychczasowe użycie jako `SaveRepository._transactionSequence++`; zachowano wartość początkową, moment inkrementacji i konstrukcję ID z pid/czasu. Nie dodano kopii licznika w miksinie.
+
+Całe `_withAccess` pozostaje w głównym pliku: wywołuje ten sam koordynator i recovery przed operacją. Obszar blokady, dostęp z izolatu i ścieżki `saveInIsolate` pozostają takie same. Przeniesione operacje workerów nadal korzystają z istniejących prywatnych metod, bez ponownego wchodzenia w zewnętrzną blokadę. Hooki nadal wymuszają pracę w izolacie wywołującym.
+
+Zachowano kolejność: przygotowanie journalu, zabezpieczenie obu oryginałów, publikacja game/index, weryfikacja, commit marker, checkpoint i cleanup. Windows nadal korzysta z tej samej ścieżki displaced. Całe zakresy try/catch/finally, błędy, rollback i reguły zachowywania artefaktów pozostały bez zmian. Obsługa `SaveAmbiguousWriteException`, fingerprinty i blokady są nadal w tych samych istniejących implementacjach.
+
+`_writeJsonTemporary` zachowuje compact UTF-8, chunk 64 KiB, zliczanie bajtów, flush i close w finally. `verifyTypedCommit` nadal domyślnie false, `saveInIsolate` true. Nie optymalizowano encodera, nie zmieniano schematu, formatu plików ani datowania metadanych. Rename/duplicate nadal zachowują nieznane pola raw i używają tej samej transakcji dwóch plików.
+
+### Weryfikacja
+
+- **Przed podziałem 50/50:** `save_transaction_recovery_test.dart`, `save_recovery_integrity_test.dart`, `save_directory_lock_test.dart`, `save_coordinator_startup_test.dart`, `save_management_boundary_test.dart`, `save_repository_baseline_test.dart`, `save_recovery_screen_test.dart`, `stage_six_persistence_test.dart`, `contract_boundary_save_test.dart`.
+- Macierz obejmuje save/rename/duplicate, wyjątki I/O, przerwanie procesu w fazach prepared/publikacji/commit i displaced na Windows, pierwszy zapis, uszkodzony/niejednoznaczny journal lub parę plików, ponowienie odzyskiwania, wiele instancji/workerów i zwalnianie blokad, raw payload, diagnostykę sztabu, tryby z/bez izolatu i granice kontraktów po load.
+- Jednorazowe porównanie SHA-256 z `14d5906`: **53/53 elementy klasy zachowały implementacje** — 19 przeniesionych, 34 pozostawione. Obejmuje sygnatury, ciała, komentarze i inicjalizatory; normalizacja dotyczy wyłącznie końców/zewnętrznych pustych linii, 15 nowych adnotacji oraz jednej kwalifikacji statycznego licznika.
+- Sprawdzono kompletność, unikalność i kolejność elementów, importy, istniejące i nowe części, połączenia miksinów oraz brak implementacji/stanu w kontrakcie. Trzy dotychczasowe części zweryfikowano osobno SHA-256 plików, bez normalizacji bajtów.
+- Nie dodano testów ani helperów; użyto istniejących scenariuszy zachowania w `test/nowe_testy/`. Nie dodano trwałych testów układu źródeł ani narzędzi w aplikacji. Manifest i wynik porównania znajdują się wyłącznie w ignorowanym folderze raportów.
+- Formatowanie trzech plików Dart: bez dalszych zmian. Analiza `lib/app`, `lib/data` i `test/nowe_testy`: **bez uwag**.
+- **Po podziale 221/221:** cały folder `test/nowe_testy/`, w tym wszystkie 50 scenariuszy bazowych. Nie uruchamiano starych testów.
+- `flutter build bundle --debug --no-pub`: **exit code 0**, zaktualizowany kernel bundle; odbiór debug bez podłączonego urządzenia. `git diff --check`: bez uwag.
+- Test odświeżeń nadal wskazuje Home: 5, Squad: 0, Standings: 0 przy pięciu zmianach daty. Organizacyjny podział nie stanowi nowej optymalizacji wykonania.
+
+Schemat zapisu nadal **27**, bez migracji. Testy awarii modyfikują wyłącznie własne katalogi tymczasowe; nie używano rzeczywistych zapisów gracza. Nie analizowano ani nie zmieniano wyłączonych AI/simulation, plików generowanych, assets ani starych testów. Zamrożony raport audytu pozostał bez zmian.
+
+Logi w `reports/lib-audit-2026-10-13/`: `stage-8-r13-before-tests.txt`, `stage-8-r13-repository-analyze.txt`, `stage-8-r13-all-tests.txt`, `stage-8-r13-analyze.txt`, `stage-8-r13-build.txt`, `stage-8-r13-movement-baseline.json`, `stage-8-r13-movement-check.txt`.
+
+### Ręczne review R13
+
+1. **Zapis i load:** w karierze zmień datę lub wykonaj operację, zapisz ręcznie, wróć do menu i wczytaj. Sprawdź aktualną datę i stan kariery; lista zapisów ma pokazywać odpowiadające metadane.
+2. **Rename i duplicate:** zmień nazwę zapisu i utwórz kopię. Oryginał i kopia powinny być osobno widoczne i wczytywalne; zmiana nazwy nie powinna zmieniać danych gry. Można wykonać te operacje blisko siebie.
+3. **Świeża kariera:** utwórz nową karierę, zapisz ją i ponownie wczytaj. Sprawdź również powrót do menu po autosave; dotychczasowe bariery zapisu nadal obowiązują.
+4. **Review diffu:** jeden licznik i właściciel dostępu pozostają w `SaveRepository`, a recovery/koordynator/typy są nietknięte. Nie trzeba celowo przerywać aplikacji ani uszkadzać zapisów — pełną macierz awarii odtwarzają automatyczne testy na danych tymczasowych.
+
+Grupa **R13** jest ukończona i gotowa do review. Zrealizowano wszystkie grupy organizacyjne R04–R13 etapu 8; zatrzymano pracę na tej granicy, bez commitów. Nie rozpoczęto etapu 9 (odbioru całego zakresu).
 
 ## Etap 8 — R12: duże klasy State ekranów i poprawka dialogów — 17 października 2026
 
