@@ -1,6 +1,46 @@
 # Nowe testy — etapy 0–8
 
-Etapy 0–7 zostały zaakceptowane i zapisane przez użytkownika: `dc6e454`, `b4048fb`, `553198c`, `f8e45e1`, `5762f4f`, `0f2fd43`, `5598811`, `6e9cea2` oraz etap 7 w `8293be2`. R04 etapu 8 został zapisany przez użytkownika w `d010cec`. **Etap 8 jest w toku: cała grupa R05 (części A S03, S08, S14, S15 i S16) jest ukończona i gotowa do review.** Zmiany R05 pozostają bez commita. R06–R13 nie zostały rozpoczęte. Wyniki wcześniejszych grup/etapów poniżej są historycznym punktem odniesienia.
+Etapy 0–7 zostały zaakceptowane i zapisane przez użytkownika: `dc6e454`, `b4048fb`, `553198c`, `f8e45e1`, `5762f4f`, `0f2fd43`, `5598811`, `6e9cea2` oraz etap 7 w `8293be2`. R04 etapu 8 został zapisany w `d010cec`, R05 w `c567d39`. **Etap 8 jest w toku: R06 (metody kontrolera) jest ukończone i gotowe do review.** Zmiany R06 pozostają bez commita. R07–R13 nie zostały rozpoczęte. Wyniki wcześniejszych grup/etapów poniżej są historycznym punktem odniesienia.
+
+## Etap 8 — R06: metody GameController — 17 października 2026
+
+Punkt wyjścia: `c567d39` (R05), czyste repozytorium. Wydzielono 56 istniejących metod do pięciu prywatnych miksinów we wspólnej bibliotece `game_provider.dart`. Nie dodano klasy bazowej, instancji serwisów, extension ani osobnego obiektu koordynatora. `GameController` zachowuje konstruktor, dziedziczenie po `StateNotifier` i wszystkie pola; metody miksinów są jego metodami instancji. Odbiór następuje po całej grupie. Agent nie wykonuje commitów.
+
+### Podział i współdzielony stan
+
+- **`lib/app/providers/game_provider.dart`: 1872 → 517 linii.** Pozostają 52 dotychczasowe elementy: konstruktor, wszystkie pola i gettery zależności, kolejka, generacja/rewizje, autosave, load/create/persist/clear, operacje zarządzania save'ami oraz cztery dotychczasowe polecenia wymian. Providery na końcu pliku zachowały treść. Cztery nowe dyrektywy `part` i pięć wpisów `with` łączą bibliotekę.
+- **`game_controller_simulation.dart` (779 linii):** `_GameControllerSimulation`, 26 metod sesji/anulowania, dnia/godziny, następnej akcji, zdarzeń kalendarza, zastosowania meczu i batcha. Zachowano całe `_simulateUntil` i `_simulateUntilInternal`, ich `try/finally`, sprawdzanie generacji i kolejność awaitów.
+- **`game_controller_calendar_feedback.dart` (190):** `_GameControllerCalendarFeedback`, cztery metody publikowania dnia, scalania wyników, budowania feedbacku i wyboru meczów z daty. Symulacja ma ograniczenie `on _GameControllerCalendarFeedback`, więc korzysta z tej samej implementacji feedbacku. Obie części odwołują się do jednej sesji kontrolera.
+- **`game_controller_messages.dart` (19 → 214):** zachowano wcześniejsze typy klucza/rodzaju operacji i dodano `_GameControllerMessages` z siedmioma metodami deduplikacji, wyszukiwania wiadomości, markRead/acknowledge/decision oraz dispatchera. Mapa operacji nadal jest jednym polem kontrolera; blok integracji wymian w dispatcherze przeniesiono bez zmiany.
+- **`game_controller_contracts.dart` (230):** `_GameControllerContracts`, 14 metod ofert, counterów, finalizacji, QO/RFA, praw draftowych i zatrudniania/zwalniania sztabu. Nadal korzystają z tych samych `_mutateSave` i `_publishLeagueInQueue`.
+- **`game_controller_draft_scouting.dart` (108):** `_GameControllerDraftScouting`, pięć metod draftu, watchlisty i przypisań Combine. Nadal korzystają z tej samej aktualizacji ligi, kolejki, generacji i metody symulacji dnia.
+
+Miksiny nie mają pól z przechowywanym stanem ani własnych konstruktorów. Zawierają łącznie **38 deklaracji abstrakcyjnych** potrzebnych do dostępu do istniejących pól/metod kontrolera (w tym gettery/settery dwóch pól sesji). Nie są to dodatkowe implementacje ani magazyny danych. Kontrakty prywatnych metod deklarują tylko parametry potrzebne danej grupie; wszystkie oryginalne sygnatury i wartości domyślne konkretnych metod zachowano. Dopisano **23 adnotacje `@override`** przy implementacjach tych kontraktów, zgodnie z analizatorem.
+
+Wszystkie pola — `_mutationQueue`, `_saveGeneration`, rewizje, `_pendingAutosave`, błędy zapisu, `_careerTransition`, `_activeSimulationSession`, `_nextSimulationRunId` oraz `_inFlightMessageOperations` — pozostają w jednym `GameController`, z dotychczasowymi inicjalizatorami i kolejnością deklaracji. Nie ma przekazywania skopiowanych snapshotów do nowych obiektów.
+
+### Weryfikacja
+
+- Jednorazowe porównanie SHA-256 z `c567d39`: **108/108 dotychczasowych elementów klasy bez zmiany implementacji** — 56 przeniesionych metod i 52 pozostawione elementy. Uwzględniono ciała, sygnatury, komentarze i inicjalizatory; normalizowano końce linii/zewnętrzne puste linie i usunięto z porównania wyłącznie 23 jawnie wskazane nowe adnotacje `@override`.
+- Porównanie sprawdza kompletność, brak powielonych implementacji, kolejność elementów w każdej grupie, brak nowej logiki/pól w miksinach oraz zgodność importów, providerów i wcześniej wydzielonych typów. Nowe elementy poza oryginalnymi implementacjami to deklaracje miksinów, kontrakty abstrakcyjne i połączenia biblioteki. Wynik i manifest znajdują się w folderze raportów; nie dodano trwałych testów kodu źródłowego ani dodatkowych skryptów w aplikacji.
+- **43/43 testy przed i po podziale:** `game_controller_lifecycle_test.dart`, `game_controller_mutations_test.dart`, `game_controller_persistence_test.dart`, `career_navigation_test.dart`, `calendar_screen_test.dart`, `calendar_pacing_phases_test.dart`.
+- Obejmują I01–I03: kolejkę ofert i symulacji, zachowanie metadata, oczekiwanie na autosave, ponawianie po błędzie I/O, menu i wejście do meczu, zmianę kariery podczas kroku oraz anulowanie observera/pacera. Pacing na kontrolowanym zegarze pozostaje 550/850 ms w wariantach bez/z popupem.
+- Analiza `lib/app` i `test/nowe_testy/`: **bez uwag**. Formatter: żaden z sześciu plików nie wymagał zmian. `git diff --check`: bez uwag.
+- Pełny odbiór `test/nowe_testy/`: **207/207**. Użyto istniejących testów aktualnego zachowania; nie dodano nowych testów ani helperów. Test odświeżeń zachowuje Home: 5, Squad: 0, Standings: 0 przy pięciu zmianach daty. Czasy debug nie są podstawą twierdzeń o przyspieszeniu.
+- `flutter build bundle --debug --no-pub`: **exit code 0**, zaktualizowany kernel bundle. Weryfikacja lokalna bez podłączonego urządzenia.
+
+Schemat zapisu nadal **27**. Nie analizowano ani nie zmieniano wyłączonych modułów AI/simulation, generatorów, assets ani starych testów. Nie zmieniano implementacji rynku, silnika, pipeline'u dnia ani reguł balansu. Oryginalny raport audytu pozostał bez zmian.
+
+Logi w `reports/lib-audit-2026-10-13/`: `stage-8-r06-before-tests.txt`, `stage-8-r06-after-tests.txt`, `stage-8-r06-all-tests.txt`, `stage-8-r06-controller-analyze.txt`, `stage-8-r06-analyze.txt`, `stage-8-r06-build.txt`, `stage-8-r06-movement-baseline.json`, `stage-8-r06-movement-check.txt`.
+
+### Ręczne review R06
+
+1. **Symulacja i menu:** uruchom dłuższy przebieg kalendarza, anuluj go albo wyjdź do menu w trakcie. Wczytaj ponownie tę samą karierę i sprawdź zachowanie ostatniej zakończonej daty. Kalendarz powinien pozostać responsywny, a ukończone dni nie powinny znikać po load.
+2. **Kolejka operacji rynku:** wykonaj dwie różne oferty blisko siebie; sprawdź obie negocjacje, datę i skład po zakończeniu operacji. Zapisz ręcznie, wyjdź do menu i wczytaj karierę. Testy w pamięci kontrolują równoczesne operacje i błędy bez uszkadzania rzeczywistych zapisów.
+3. **Wiadomości:** otwórz pilną wiadomość, oznacz jako przeczytaną/potwierdź lub podejmij dostępną decyzję. Powtórne kliknięcie nie powinno powielać efektu, a potwierdzenie ma zwolnić odpowiednią pauzę symulacji.
+4. **Draft/skauting i mecz:** w odpowiedniej fazie zmień watchlistę lub przypisania Combine, wykonaj wybór draftowy; sprawdź ich zachowanie po ponownym load. Wejdź do meczu z zapisanej kariery. Widoki i wywołania nadal korzystają z publicznego `GameController` przez dotychczasowy import.
+
+Grupa **R06** jest gotowa do review użytkownika; prace zatrzymano na tej granicy. R07 (organizacja dnia) wymaga kolejnej zgody. Nie wykonano commitów ani dalszych grup.
 
 ## Etap 8 — R05: samodzielne deklaracje w plikach mieszanych — 17 października 2026
 
@@ -35,7 +75,7 @@ Logi w `reports/lib-audit-2026-10-13/`: `stage-8-r05-before-tests.txt`, `stage-8
 2. **Kontroler/zapis:** zapisz ręcznie, wyjdź do menu i ponownie wczytaj karierę. Sprawdź ostatnią datę i zmiany w składzie; typy i providery pozostają dostępne przez stare importy. Testy I/O używają własnych katalogów tymczasowych, a nie zapisów użytkownika.
 3. **Prospekci:** otwórz szczegóły zawodnika bez rozpoznania i z rozpoznaniem, przewiń arkusz i zamknij go; sprawdź powrót do tej samej pozycji listy. Sprawdź watchlistę oraz dostępne dane Combine. Nie powinny pojawić się nowe dane, których skaut wcześniej nie znał.
 
-Grupa **R05** jest gotowa do review; prace zatrzymano na tej granicy. R06 (wydzielanie metod kontrolera) wymaga kolejnej zgody użytkownika. Nie wykonano commitów ani części B.
+R05 został następnie zapisany przez użytkownika w `c567d39`, a użytkownik pozwolił kontynuować R06. Powyższe wyniki dokumentują odbiór R05; bieżący postęp opisano na początku pliku. Agent nie wykonywał commitów.
 
 ## Etap 8 — R04: samodzielne widgety i funkcje — 17 października 2026
 
