@@ -1,6 +1,54 @@
 # Nowe testy — etapy 0–8
 
-Etapy 0–7 zostały zaakceptowane i zapisane przez użytkownika: `dc6e454`, `b4048fb`, `553198c`, `f8e45e1`, `5762f4f`, `0f2fd43`, `5598811`, `6e9cea2` oraz etap 7 w `8293be2`. R04 etapu 8 zapisano w `d010cec`, R05 w `c567d39`, R06 w `4677f98`, R07 w `1fd485b`, R08 w `eef0c73`, R09 w `5cacf87`. **Etap 8 jest w toku: R10 (eventy drużyn i zawodników) jest ukończone i gotowe do review.** Zmiany R10 pozostają bez commita. R11–R13 nie zostały rozpoczęte. Wyniki wcześniejszych grup/etapów poniżej są historycznym punktem odniesienia.
+Etapy 0–7 zostały zaakceptowane i zapisane przez użytkownika: `dc6e454`, `b4048fb`, `553198c`, `f8e45e1`, `5762f4f`, `0f2fd43`, `5598811`, `6e9cea2` oraz etap 7 w `8293be2`. R04 etapu 8 zapisano w `d010cec`, R05 w `c567d39`, R06 w `4677f98`, R07 w `1fd485b`, R08 w `eef0c73`, R09 w `5cacf87`, R10 w `e6ee6aa`. **Etap 8 jest w toku: R11 (generacja danych) jest ukończone i gotowe do review.** Zmiany R11 pozostają bez commita. R12–R13 nie zostały rozpoczęte. Wyniki wcześniejszych grup/etapów poniżej są historycznym punktem odniesienia.
+
+## Etap 8 — R11: generacja danych — 17 października 2026
+
+Punkt wyjścia: `e6ee6aa` (R10), czyste repozytorium. Wydzielono **20 metod i pięć tabel stałych do czterech prywatnych miksinów**. Wszystkie części pozostają w `lib/core/models/`, połączone przez `part`/`part of`. Publiczne metody nadal są metodami instancji `SeedDataGenerator`, dostępnymi przez dotychczasowy import. Odbiór następuje po całej grupie; agent nie wykonuje commitów.
+
+### Podział
+
+- **`seed_data_generator.dart`: 818 → 184 linie.** Pozostają konstruktor, `_random`, `balance`, `_mockDraftService`, całe `generateLeague`, `_staffCounter` i `_generateName` (siedem dotychczasowych elementów). W tym samym pliku znajduje się kontrakt `_SeedGenerationShared`.
+- **`seed_team_generation.dart` (138):** pięć metod generacji drużyny, przyszłych picków, rosteru i pozycji dla formacji oraz `_seedRosterOvrAgeTable`.
+- **`seed_player_generation.dart` (340):** 11 metod generacji zawodnika klubowego i FA, atrybutów/OVR, potencjału, pensji, wzrostu i roli; tabele `_attrOffsetRangeForWeight` i `_potentialTable`.
+- **`seed_draft_generation.dart` (83):** całe `generateDraftClass` i `_draftClassOvrTable`, z dotychczasowym tasowaniem, kolejnością losowań, ID i sortowaniem prospektów.
+- **`seed_staff_generation.dart` (132):** całe `generateStaffMember`, `generateStaffMemberAtStars`, `generateStaffPool` i `_staffStarWeights`. Licznik sztabu nadal jest polem głównego generatora.
+
+### Wspólny stan i zachowanie
+
+Każdy miksin ma `on _SeedGenerationShared`. Wspólny kontrakt zawiera **osiem deklaracji abstrakcyjnych**: dwa gettery, setter licznika i pięć metod, bez własnego stanu ani implementacji. Dopisano **siedem adnotacji `@override`** do istniejących pól/metod realizujących kontrakt. Nie dodano klasy bazowej, wrapperów, extension zastępujących API, dodatkowych generatorów ani RNG.
+
+`_random`, `_mockDraftService` i `_staffCounter` mają tego samego właściciela, inicjalizatory i zakres życia. Reset licznika pozostaje w `generateLeague`. Pięć prywatnych tabel statycznych przeniesiono w całości do części, które ich używają; nie są stanem instancji. Wspólne generowanie nazw pozostaje w głównej klasie.
+
+Zachowano kolejność klubów, składów i wywołań RNG, wartości tabel, generowanie ID, picków i kontraktów oraz rozróżnienie jawnego seeda, wstrzykniętego RNG i RNG podawanego do metod. `generateFreeAgentPlayers` i trzy publiczne metody sztabu zachowują dotychczasowe sygnatury. Nie zmieniono implementacji `GameFactory`, katalogu klubów, rozkładów danych, balansu ani serializacji.
+
+### Weryfikacja
+
+- **Przed podziałem 29/29:** `seeded_generation_test.dart`, `game_fixtures_test.dart`, `staff_season_messages_test.dart`, `declaration_split_test.dart`, `stage_six_persistence_test.dart`.
+- Istniejące scenariusze obejmują wybór jednego klubu gracza, odrzucenie nieznanego ID, zgodność katalogu, powtarzalność po preview i ponownym użyciu fabryki, unikalność ID sztabu, bieżącą/kolejną klasę draftu oraz niezależne procesy Dart i save/load.
+- Jednorazowe porównanie SHA-256 z `e6ee6aa`: **32/32 elementy zachowały treść** — 25 przeniesionych (20 metod i pięć tabel), siedem pozostawionych. Porównanie obejmuje pełne sygnatury, ciała, komentarze, tabele i inicjalizatory; normalizuje tylko końce/zewnętrzne puste linie oraz siedem wskazanych nowych adnotacji.
+- Sprawdzono kompletność, unikalność i kolejność elementów w każdej części, importy, dyrektywy `part`, kolejność miksinów i brak implementacji/stanu w kontrakcie. Nie dodano trwałych testów układu źródeł.
+- Jednorazowe porównanie danych sprzed i po podziale: **cztery zestawy wejść, po 12 sekcji**. Seedy 0 i 987654 sprawdzono dla 2026, 1 i 123 dla 2032. Porównano ligę, draft, FA, wszystkie role sztabu, pulę sztabu z własnym/zewnętrznym RNG, reset ID po kolejnej lidze oraz pełne ligi z `GameFactory` i ich ponowienia po preview. Sekwencje **87 326 wywołań wstrzykniętych RNG i 2626 wywołań zewnętrznych RNG**, wraz z argumentami i wynikami, są identyczne.
+- Ograniczenie jednorazowego porównania: tylko w wywołaniu `generateLeague` **bez seeda** pominięto `mockDraftBoard`, ponieważ użyty domyślny `MockDraftService` ma własny niewstrzyknięty RNG. Dla ligi z seedem i obu wyników fabryki porównano komplet danych, również mock board. Nie zmieniano tej istniejącej semantyki. Z metadanych save'a nie porównywano UUID/czasu; przedmiotem porównania był stan ligi.
+- Formatowanie pięciu plików Dart: bez dalszych zmian. Analiza `lib/app`, pięciu plików biblioteki generatora i `test/nowe_testy/`: **bez uwag**.
+- **Po podziale 211/211:** pełny folder `test/nowe_testy/`, w tym wszystkie 29 scenariuszy bazowych. Starych testów nie uruchamiano.
+- `flutter build bundle --debug --no-pub`: **exit code 0**, zaktualizowany kernel bundle, weryfikacja debug bez podłączonego urządzenia. `git diff --check`: bez uwag.
+- Test odświeżeń nadal wskazuje Home: 5, Squad: 0, Standings: 0 przy pięciu zmianach daty. Ten organizacyjny podział nie stanowi nowej optymalizacji wykonania.
+
+Nie dodano nowych testów ani stałych helperów; wykorzystano istniejące testy zachowania w `test/nowe_testy/`. Jednorazowy skrypt porównania i duże surowe snapshoty znajdowały się wyłącznie w ignorowanym folderze raportów i zostały usunięte po sprawdzeniu; pozostawiono podsumowanie/hash poszczególnych sekcji i logi.
+
+Schemat zapisu nadal **27**, bez migracji. Nie analizowano ani nie zmieniano wyłączonych AI/simulation, plików generowanych, assets ani starych testów. Istniejąca integracja fabryki z placeholderem AI była tylko wykonywana przez testy; kod modułu AI pozostał poza analizą. Zamrożony raport audytu pozostał bez zmian.
+
+Logi w `reports/lib-audit-2026-10-13/`: `stage-8-r11-before-tests.txt`, `stage-8-r11-generator-analyze.txt`, `stage-8-r11-all-tests.txt`, `stage-8-r11-analyze.txt`, `stage-8-r11-build.txt`, `stage-8-r11-movement-baseline.json`, `stage-8-r11-movement-check.txt`, `stage-8-r11-domain-check.json` i `stage-8-r11-domain-check.txt`.
+
+### Ręczne review R11
+
+1. **Nowa kariera:** utwórz ją dla wybranego klubu. Sprawdź, czy to jedyny klub gracza, a lista klubów i wybór drużyny działają. Obejrzyj skład, pozycje/formację i startowe picki.
+2. **Zawodnicy i sztab:** sprawdź pulę FA, zatrudniony sztab i kandydatów oraz bieżącą klasę draftu/mock board. Dane i dostępne akcje powinny wyglądać tak jak przed podziałem.
+3. **Zapis/wczytanie:** zapisz nową karierę, wróć do menu i wczytaj ją. Wybrany klub, skład, FA, sztab i draft mają pozostać. Powtarzalność konkretnych seedów i wielokrotne użycie generatora są sprawdzone automatycznie — nie trzeba ręcznie odtwarzać tych samych losowań w UI.
+4. **Review diffu:** konstruktor, cztery pola instancji, `generateLeague` i `_generateName` pozostają w głównym pliku; cztery nowe części zawierają przeniesione metody i ich tabele. Nie powinno być zmian wartości balansu, algorytmów, serializacji ani kodu fabryki.
+
+Grupa **R11** jest gotowa do review; prace zatrzymano na tej granicy. R12 (duże stany ekranów) wymaga kolejnej zgody. Nie wykonano commitów ani dalszych grup.
 
 ## Etap 8 — R10: zdarzenia drużyn i zawodników — 17 października 2026
 
