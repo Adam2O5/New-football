@@ -1,6 +1,56 @@
 # Nowe testy — etapy 0–8
 
-Etapy 0–7 zostały zaakceptowane i zapisane przez użytkownika: `dc6e454`, `b4048fb`, `553198c`, `f8e45e1`, `5762f4f`, `0f2fd43`, `5598811`, `6e9cea2` oraz etap 7 w `8293be2`. R04 etapu 8 zapisano w `d010cec`, R05 w `c567d39`, R06 w `4677f98`. **Etap 8 jest w toku: R07 (organizacja dnia) jest ukończone i gotowe do review.** Zmiany R07 pozostają bez commita. R08–R13 nie zostały rozpoczęte. Wyniki wcześniejszych grup/etapów poniżej są historycznym punktem odniesienia.
+Etapy 0–7 zostały zaakceptowane i zapisane przez użytkownika: `dc6e454`, `b4048fb`, `553198c`, `f8e45e1`, `5762f4f`, `0f2fd43`, `5598811`, `6e9cea2` oraz etap 7 w `8293be2`. R04 etapu 8 zapisano w `d010cec`, R05 w `c567d39`, R06 w `4677f98`, R07 w `1fd485b`. **Etap 8 jest w toku: R08 (sezon) jest ukończone i gotowe do review.** Zmiany R08 pozostają bez commita. R09–R13 nie zostały rozpoczęte. Wyniki wcześniejszych grup/etapów poniżej są historycznym punktem odniesienia.
+
+## Etap 8 — R08: organizacja sezonu — 17 października 2026
+
+Punkt wyjścia: `1fd485b` (R07), czyste repozytorium. Wydzielono 70 metod do dziesięciu prywatnych miksinów i przeniesiono trzy istniejące klasy pomocnicze nagród. Wszystkie części znajdują się w `lib/core/services/` i tworzą jedną bibliotekę przez `part`/`part of`. Publiczne metody są nadal metodami instancji `SeasonService`, dostępnymi przez dotychczasowy import. Odbiór następuje po całej grupie; agent nie wykonuje commitów.
+
+### Podział
+
+- **`season_service.dart`: 3971 → 373 linie.** Pozostają 28 dotychczasowych elementów: konstruktor, wszystkie 19 pól, `finalizeRegularSeason`, publiczne `stakeForPendingMatch` oraz wspólne `_winnerId`, `_series`, `_placeholderToken`, `_stakeForSeries`, `_teamName`, `_msg`. W tym samym pliku znajduje się prywatny kontrakt `_SeasonServiceShared`.
+- **`season_fixtures.dart` (413):** osiem metod tworzenia i uzupełniania fixtures postseason, ujawniania placeholderów, kalendarza slotów, zapisu wyniku i planowania kolejnych rund.
+- **`season_play_in.dart` (444):** siedem metod datowanego play-in, wznowienia meczu, budowania wyniku, seedów, dotychczasowego atomowego `setupPlayIn` i wiadomości.
+- **`season_playoffs.dart` (407):** dziesięć metod setupu i awansu rund, wznowienia, zapisu/uzgadniania serii, `_playOneGame` i koronacji mistrza.
+- **`season_post_match.dart` (524):** siedem metod `_sim`/`_simPostseason`, określania stawki fazy, zmęczenia, rozstrzygnięcia remisu/dogrywki i dyscypliny postseason. Integracje AI/silnika przeniesiono jako całe, niezmienione bloki; nie analizowano ich wnętrza.
+- **`season_offseason_events.dart` (222):** cztery obecne zdarzenia: cap/TV, rozwój/emerytury sztabu, emerytury zawodników i otwarcie FA.
+- **`season_lottery.dart` (164):** trzy metody losowania i materializacji kolejności picków. Źródłem wag pozostaje zaakceptowany wcześniej `DraftBalance`.
+- **`season_scouting.dart` (145):** trzy metody Scout Report, Combine i finalnego mocka.
+- **`season_draft.dart` (520):** dziesięć metod generacji klasy, wyborów draftowych, finalizacji FA i istniejących integracji wyborów/wymian AI. Nie zmieniono ich decyzji, liczników ani kolejności wywołań.
+- **`season_rollover.dart` (361):** trzy metody wygasania kontraktów, rolloveru i ustalania kwalifikacji playoff dla historii/awards.
+- **`season_awards.dart` (595):** piętnaście metod nagród, rankingów, XI sezonu, trenera roku, etykiet i podsumowania oraz całe `_AwardCandidate`, `_AwardStats`, `_TeamOfSeasonOption`.
+
+### Wspólne zależności i zachowanie
+
+Postseason ma wzajemne wywołania między fixtures, play-in i post-match. Każdy miksin ma `on _SeasonServiceShared`, a serwis łączy kontrakt i dziesięć miksinów. Ten jeden wspólny kontrakt zawiera **32 deklaracje abstrakcyjne** (16 getterów zależności i 16 metod), bez pól, konstruktorów i implementacji. Pozwala zachować dotychczasowe wzajemne wywołania bez tworzenia cyklicznej hierarchii części, nowych serwisów lub delegowania przez kopię stanu. Dodano **32 wymagane adnotacje `@override`** do istniejących implementacji kontraktu.
+
+Cały stan pozostaje w jednym `SeasonService`: te same pola `_random`, `_uuid` i wstrzyknięte zależności, z tymi samymi inicjalizatorami i kolejnością deklaracji. Miksiny nie dodają instancji RNG, kopii ligi ani własnego lifecycle. Nie dodano wrapperów ani extension zastępujących publiczne metody. Zachowano daty, kolejność operacji i losowań, pełne zakresy `try/finally` oraz rozróżnienie lokalnych pełnych wyników i zapisanych projekcji.
+
+**Nagrody zachowują obecne ograniczenia.** `_AwardStats` nadal bazuje na istniejących przybliżeniach; cały komentarz TODO oraz obliczenia przeniesiono bez zmian. Ten zakres nie wprowadza akumulatorów statystyk ani nie poprawia ocen bramkarzy/minut na pozycji.
+
+### Weryfikacja
+
+- **Przed podziałem 26/26:** `postseason_finalization_test.dart`, `season_randomness_test.dart`, `people_lifecycle_test.dart`, `stage_seven_balance_test.dart`, `staff_season_messages_test.dart`, `scouting_tier_five_test.dart`, `contract_boundary_save_test.dart`.
+- Najpierw wydzielono cztery części postseason. Po tym kroku ponownie przeszło **8/8** testów finalizacji, rozstawienia i wznowienia. Następnie przeniesiono offseason, loterię, skauting, draft, rollover i awards.
+- Jednorazowe porównanie SHA-256 z `1fd485b`: **98/98 elementów klasy i 3/3 klasy pomocnicze zachowały implementacje** — 70 metod przeniesionych, 28 elementów pozostawionych. Porównanie obejmuje sygnatury, ciała, komentarze i inicjalizatory; normalizacja dotyczy tylko końców linii/zewnętrznych pustych linii oraz 32 jawnie wskazanych nowych adnotacji `@override`.
+- Sprawdzono kompletność/unikalność, kolejność elementów każdej części, zachowanie importów i komentarza serwisu oraz brak nowego stanu/logiki w kontrakcie/miksinach. Wynik i manifest znajdują się w katalogu raportów. Nie dodano trwałych testów porównujących źródła ani skryptów w aplikacji.
+- Analiza `lib/app`, jedenastu plików biblioteki sezonu i `test/nowe_testy/`: **bez uwag**. Formatter nie zmienił żadnego z jedenastu plików. `git diff --check`: bez uwag.
+- **Po podziale 207/207:** pełny folder `test/nowe_testy/`, w tym wszystkie 26 scenariuszy bazowych. Użyto istniejących testów zachowania; nie dodano nowych testów ani helperów.
+- `flutter build bundle --debug --no-pub`: **exit code 0**, zaktualizowany kernel bundle. Odbiór lokalny debug bez podłączonego urządzenia.
+- Test odświeżeń nadal wskazuje Home: 5, Squad: 0, Standings: 0 przy pięciu zmianach daty. Czasy debug nie są dowodem przyspieszenia tego organizacyjnego podziału.
+
+Schemat zapisu nadal **27**, bez migracji. Nie analizowano ani nie zmieniano `lib/core/ai/`, `lib/core/simulation/`, generatorów, assets ani starego zestawu testów. Nie zmieniono balansu ani implementacji pozostałych serwisów. Oryginalny raport audytu pozostał bez zmian.
+
+Logi w `reports/lib-audit-2026-10-13/`: `stage-8-r08-before-tests.txt`, `stage-8-r08-postseason-tests.txt`, `stage-8-r08-season-analyze.txt`, `stage-8-r08-all-tests.txt`, `stage-8-r08-analyze.txt`, `stage-8-r08-build.txt`, `stage-8-r08-movement-baseline.json`, `stage-8-r08-movement-check.txt`.
+
+### Ręczne review R08
+
+1. **Postseason:** na dostępnej karierze testowej dokończ sezon zasadniczy i sprawdź utworzenie fixtures/seedów. Przejdź przez play-in oraz mecz playoff gracza, a potem sprawdź uzupełnienie terminarza i awans serii. Zapisz i wczytaj przed wznowieniem; ukończone wyniki powinny pozostać.
+2. **Nagrody i offseason:** w odpowiedniej fazie sprawdź nagrody, wiadomości, zmiany cap/TV i emerytury. Oczekiwane zachowanie jest takie samo jak przed podziałem, włącznie z obecnymi przybliżeniami nagród.
+3. **Loteria/skauting/draft:** uruchom dostępne zdarzenia, sprawdź kolejność picków, Scout Report/Combine/finalny mock oraz wybór gracza i symulację wyborów do kolejnej tury. Sprawdź roster i przypisane prawa po zapisie/wczytaniu.
+4. **Rollover:** na końcu cyklu sprawdź nowy rok, historię, wiek i kontrakty, a następnie zapis/wczytanie. Nie trzeba ręcznie tworzyć wszystkich faz od zera — kontrolowane fixture'y testów odtwarzają granice umów i roku.
+
+Grupa **R08** jest gotowa do review; prace zatrzymano na tej granicy. R09 (rynek kontraktów) wymaga kolejnej zgody użytkownika. Nie wykonano commitów ani dalszych grup.
 
 ## Etap 8 — R07: organizacja dnia — 17 października 2026
 
@@ -40,7 +90,7 @@ Logi w `reports/lib-audit-2026-10-13/`: `stage-8-r07-before-tests.txt`, `stage-8
 3. **Granice sezonu/rynku:** na dostępnych karierach testowych sprawdź koniec draftu i tydzień 47 oraz rollover 52 → 1: datę, kontrakty, wiek i wiadomości. Automatyczne testy odtwarzają te granice w kontrolowanych fixture'ach; nie trzeba ręcznie przygotowywać każdej fazy, aby powtórzyć wszystkie scenariusze.
 4. **Kalendarz i zapis:** zasymuluj kilka dni z meczami, zapisz ręcznie i wczytaj. Sprawdź zachowanie wyników i daty. Testy persystencji używają pamięci/katalogów tymczasowych, bez celowego uszkadzania zapisów użytkownika.
 
-Grupa **R07** jest gotowa do review; prace zatrzymano na tej granicy. R08 (organizacja sezonu) wymaga kolejnej zgody użytkownika. Nie wykonano commitów ani dalszych grup.
+R07 został następnie zapisany przez użytkownika w `1fd485b`, a użytkownik pozwolił kontynuować R08. Powyższe wyniki dokumentują odbiór R07; bieżący postęp opisano na początku pliku. Agent nie wykonywał commitów.
 
 ## Etap 8 — R06: metody GameController — 17 października 2026
 
