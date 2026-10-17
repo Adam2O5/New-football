@@ -1,6 +1,41 @@
 # Nowe testy — etapy 0–8
 
-Etapy 0–7 zostały zaakceptowane i zapisane przez użytkownika: `dc6e454`, `b4048fb`, `553198c`, `f8e45e1`, `5762f4f`, `0f2fd43`, `5598811`, `6e9cea2` oraz etap 7 w `8293be2`. **Etap 8 jest w toku: cała grupa R04 (S04, S11, S12, S18, S19, S21) jest ukończona i przygotowana do review.** Zmiany pozostają bez commita. R05–R13 nie zostały rozpoczęte. Wyniki wcześniejszych etapów poniżej są historycznym punktem odniesienia.
+Etapy 0–7 zostały zaakceptowane i zapisane przez użytkownika: `dc6e454`, `b4048fb`, `553198c`, `f8e45e1`, `5762f4f`, `0f2fd43`, `5598811`, `6e9cea2` oraz etap 7 w `8293be2`. R04 etapu 8 został zapisany przez użytkownika w `d010cec`. **Etap 8 jest w toku: cała grupa R05 (części A S03, S08, S14, S15 i S16) jest ukończona i gotowa do review.** Zmiany R05 pozostają bez commita. R06–R13 nie zostały rozpoczęte. Wyniki wcześniejszych grup/etapów poniżej są historycznym punktem odniesienia.
+
+## Etap 8 — R05: samodzielne deklaracje w plikach mieszanych — 17 października 2026
+
+Punkt wyjścia: `d010cec` (R04), czyste repozytorium. Zakres obejmuje wyłącznie samodzielne deklaracje części A. Wszystkie nowe pliki pozostają w folderach swoich bibliotek i używają `part of`; publiczne typy/providery są nadal dostępne przez dotychczasowe importy. Odbiór następuje po całej grupie. Agent nie wykonuje commitów.
+
+### Mechaniczny podział
+
+- **S03 — `lib/app/providers/game_provider.dart`: 2078 → 1872 linie.** `GameController` pozostał w całości, wraz z jedną kolejką, autosave, generacją i sesją. Przy nim pozostają `gameControllerProvider`, `activeLeagueProvider`, `nextGameEventProvider`. `game_service_providers.dart` (113) zawiera 23 istniejące deklaracje zależności i listy zapisów, w ich dotychczasowej kolejności. `game_simulation_types.dart` (81) zawiera `SimulationStopReason`, `BatchSimulationResult`, `UpcomingAction` i `_SimulationSession`. `game_controller_messages.dart` (19) zawiera na razie wyłącznie `_MessageOperationKind` i `_MessageOperationKey`; metody wiadomości są częścią R06. Nie utworzono drugich instancji providerów ani nowego kontrolera.
+- **S08 — `lib/core/services/day_simulator.dart`: 1297 → 1263 linie.** Cały `DaySimulator` pozostał bez zmian. `day_simulation_result.dart` (37) zawiera `DaySimulationStopReason`, `DaySimulationMoment` i `DaySimulationResult`. Przebieg dnia, granice tygodnia i zastosowanie meczu nie były dzielone (R07).
+- **S14 — `lib/data/save_repository.dart`: 963 → 835 linii.** `save_repository_types.dart` (131) zawiera istniejące wyjątki, etapy/checkpointy zapisu, dwa typedefy hooków i trzy prywatne rekordy transakcji. `SaveRepository` pozostało w całości. Dotychczasowe `save_directory_coordinator.dart` oraz `save_recovery.dart` nie zmieniły treści. Protokół publikacji, kolejność i zakresy `try/catch/finally` nie były modyfikowane (pozostałe wydzielenia w R13).
+- **S15 — `lib/app/screens/prospects_screen.dart`: 906 → 765 linii.** `prospect_detail_content.dart` (144) zawiera cały `_ProspectDetailContent`, łącznie z `_detailRow`. Ekran i jego State, kontroler przewijania, klucze, `_persistOnExit`, Combine, watchlista i funkcje formatowania pozostają w pliku wejściowym. Nie wykonywano opcjonalnej części B z tabelą.
+- **S16 — `lib/app/screens/calendar_screen.dart`: 879 → 804 linie.** `calendar_screen_helpers.dart` (79) zawiera siedem istniejących funkcji: mapowanie dat/miesiąca, rozmiar komórki, format wyniku i sprawdzenie konferencji play-in. Providery kursora/wyboru i cały ekran/State pozostają w pliku wejściowym, wraz z timerami, anulowaniem, `runId` i `_feedbackDismissalCompleter`. Nie dzielono renderowania (R12).
+
+Jednorazowe porównanie SHA-256 z `d010cec` potwierdza **71/71 deklaracji bez zmian**: S03 33, S08 4, S14 13, S15 10 i S16 11. Obejmuje całe duże klasy, przeniesione deklaracje, komentarze i adnotacje; normalizacja dotyczy tylko końców linii i zewnętrznych pustych linii. Sprawdzono kompletność/unikalność deklaracji, ich docelowe pliki, zachowanie importów i dwóch wcześniejszych części repozytorium. Formatter nie zmienił żadnego z **12 plików aplikacji**. Manifest i wynik porównania znajdują się w katalogu raportów; nie dodano skryptów ani trwałych testów porównujących źródła.
+
+### Weryfikacja
+
+- **Przed podziałem: 51/51 testów** w `game_controller_lifecycle_test.dart`, `game_controller_mutations_test.dart`, `game_controller_persistence_test.dart`, `calendar_screen_test.dart`, `postseason_finalization_test.dart`, `save_management_boundary_test.dart` i `scouting_tier_five_test.dart`.
+- **Po podziale: 207/207 testów**, pełny folder `test/nowe_testy/`, w tym wszystkie 51 scenariuszy sprzed podziału. Nie dodano nowych testów.
+- Analiza `lib/app`, `lib/core/services/day_simulator.dart`, `lib/core/services/day_simulation_result.dart`, `lib/data` oraz `test/nowe_testy/`: **bez uwag**.
+- `flutter build bundle --debug --no-pub`: **exit code 0**, zaktualizowany kernel bundle. Kompilacja lokalna debug, bez odbioru na urządzeniu.
+- `git diff --check`: **bez uwag**.
+- Wykorzystano istniejące testy aktualnego zachowania, bez dokładania testów odtwarzających układ deklaracji. Stary zestaw testów pozostaje poza zakresem.
+
+Schemat zapisu nadal **27**, bez migracji. Nie analizowano ani nie zmieniano `lib/core/ai/`, `lib/core/simulation/`, generatorów ani assets. Deklaracje providerów integrujących placeholdery przeniesiono w całości, bez zmiany ich wywołań i bez oceny implementacji wyłączonych modułów. Oryginalny raport audytu pozostaje bez zmian.
+
+Logi w `reports/lib-audit-2026-10-13/`: `stage-8-r05-before-tests.txt`, `stage-8-r05-all-tests.txt`, `stage-8-r05-analyze.txt`, `stage-8-r05-build.txt`, `stage-8-r05-movement-baseline.json`, `stage-8-r05-movement-check.txt`.
+
+### Ręczne review R05
+
+1. **Kalendarz:** wybierz przyszły dzień, uruchom symulację, sprawdź odświeżenie daty i wyników oraz anulowanie. Przełącz miesiąc i sprawdź zachowanie zaznaczenia. UI powinno działać jak przed podziałem.
+2. **Kontroler/zapis:** zapisz ręcznie, wyjdź do menu i ponownie wczytaj karierę. Sprawdź ostatnią datę i zmiany w składzie; typy i providery pozostają dostępne przez stare importy. Testy I/O używają własnych katalogów tymczasowych, a nie zapisów użytkownika.
+3. **Prospekci:** otwórz szczegóły zawodnika bez rozpoznania i z rozpoznaniem, przewiń arkusz i zamknij go; sprawdź powrót do tej samej pozycji listy. Sprawdź watchlistę oraz dostępne dane Combine. Nie powinny pojawić się nowe dane, których skaut wcześniej nie znał.
+
+Grupa **R05** jest gotowa do review; prace zatrzymano na tej granicy. R06 (wydzielanie metod kontrolera) wymaga kolejnej zgody użytkownika. Nie wykonano commitów ani części B.
 
 ## Etap 8 — R04: samodzielne widgety i funkcje — 17 października 2026
 
@@ -42,7 +77,7 @@ Logi bieżącej grupy w `reports/lib-audit-2026-10-13/`: `stage-8-r04-before-tes
 4. **Skład:** sprawdź nazwiska, strefy XI/ławka/rezerwy, OVR, formę/kondycję i statusy dostępnych zawodników. Przeciągnij zawodnika między slotami i otwórz profil; sprawdź zachowanie po powrocie.
 5. **Mecz:** sprawdź nagłówek, składy i statystyki, zapis/ponowne otwarcie autopauzy, arkusze zmian/taktyki (formacja przed przerwą zablokowana), wznowienie/pauzę, prędkość oraz zakończenie/podsumowanie. To odbiór zachowania UI przy istniejącym placeholderze silnika.
 
-Grupa **R04** jest gotowa do review użytkownika; prace zatrzymano na tej granicy. Następna grupa **R05** wymaga jego zgody; R05–R13 pozostają do wykonania. Nie traktować ukończenia R04 jako ukończenia całego etapu 8. Nie wykonano commita automatycznie.
+R04 został następnie zapisany przez użytkownika w `d010cec`, a użytkownik pozwolił kontynuować R05. Powyższe wyniki dokumentują odbiór R04; dalszy postęp opisano na początku pliku. Agent nie wykonywał commitów.
 
 ## Wynik etapu 7 — 17 października 2026
 
