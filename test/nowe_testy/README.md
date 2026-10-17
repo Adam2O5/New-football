@@ -1,6 +1,46 @@
 # Nowe testy — etapy 0–8
 
-Etapy 0–7 zostały zaakceptowane i zapisane przez użytkownika: `dc6e454`, `b4048fb`, `553198c`, `f8e45e1`, `5762f4f`, `0f2fd43`, `5598811`, `6e9cea2` oraz etap 7 w `8293be2`. R04 etapu 8 został zapisany w `d010cec`, R05 w `c567d39`. **Etap 8 jest w toku: R06 (metody kontrolera) jest ukończone i gotowe do review.** Zmiany R06 pozostają bez commita. R07–R13 nie zostały rozpoczęte. Wyniki wcześniejszych grup/etapów poniżej są historycznym punktem odniesienia.
+Etapy 0–7 zostały zaakceptowane i zapisane przez użytkownika: `dc6e454`, `b4048fb`, `553198c`, `f8e45e1`, `5762f4f`, `0f2fd43`, `5598811`, `6e9cea2` oraz etap 7 w `8293be2`. R04 etapu 8 zapisano w `d010cec`, R05 w `c567d39`, R06 w `4677f98`. **Etap 8 jest w toku: R07 (organizacja dnia) jest ukończone i gotowe do review.** Zmiany R07 pozostają bez commita. R08–R13 nie zostały rozpoczęte. Wyniki wcześniejszych grup/etapów poniżej są historycznym punktem odniesienia.
+
+## Etap 8 — R07: organizacja dnia — 17 października 2026
+
+Punkt wyjścia: `4677f98` (R06), czyste repozytorium. Dziesięć istniejących prywatnych metod `DaySimulator` przeniesiono do czterech miksinów we wspólnej bibliotece. Publiczne API i import pozostają te same. Odbiór następuje po całej grupie; agent nie wykonuje commitów.
+
+### Podział i kolejność wykonania
+
+- **`lib/core/services/day_simulator.dart`: 1263 → 475 linii.** Pozostają konstruktor, wszystkie 16 pól zależności oraz całe `resolveCalendarEvent`, `simulateDay` i `applyPlayerMatchResult` (20 dotychczasowych elementów). Do biblioteki dodano cztery dyrektywy `part`, a do klasy cztery miksiny. Główne ścieżki dnia i wznowienia po meczu nadal są widoczne razem.
+- **`day_weekly_boundary.dart` (226):** `_DayWeeklyBoundary`, całe `_runWeeklyBoundary`. Zachowano kolejność: wskaźniki drużyn/atmosfera, eventy drużynowe, rozwój, eventy zawodników, skauting, wygasanie kontraktów po drafcie, tick rynku, integracja wymian, wiadomość i rollover.
+- **`day_round_resolution.dart` (106):** `_DayRoundResolution`, całe `_resolveRound`, w tym wybór fixtures, przekazanie meczu gracza, istniejące wywołania symulacji i przygotowanie kontekstu/walidacji. Miksin ma `on _DayMatchResultApplication` i korzysta z tej samej metody `_applyResult`, bez nowej ścieżki post-match.
+- **`day_match_result_application.dart` (417):** `_DayMatchResultApplication`, pięć metod: `_applyResult`, `_applyFatigue`, `_recoverTeam`, `_notifyStrengthTableChanges`, `_notifyWalkover`. Pełny wynik pozostaje lokalnym wejściem post-match, a zapis dostaje dotychczasowe `slimForStorage()`. Nie usuwano ani nie zmieniano istniejącego `_recoverTeam`.
+- **`day_world_updates.dart` (116):** `_DayWorldUpdates`, całe `_dailyRecovery`, `_isMonthlyScoutingReport` i `_runMonthlyScoutingReport`. Zachowano kolejność odzyskiwania kondycji/kontuzji, obsługę FA i wykluczeń administracyjnych, sortowanie prospektów oraz grupowanie/deduplikację raportu.
+
+Miksiny nie tworzą nowych obiektów ani nie przechowują pól. Łącznie **21 abstrakcyjnych getterów** udostępnia dotychczasowe zależności; **14 adnotacji `@override`** wskazuje ich implementację przez niezmienione finalne pola w `DaySimulator`. Konstruktor zachowuje wszystkie parametry, wartości domyślne, inicjalizatory i kolejność tworzenia zależności. Nie zmieniono `SeasonService`, pipeline'u dnia, balansu ani istniejących wywołań AI/silnika.
+
+Przesunięcia daty i wywołania granicy niedziela → poniedziałek pozostają w dotychczasowych publicznych metodach. Nie przeniesiono żadnej operacji pomiędzy dniem meczu, końcem dnia, granicą tygodnia i rolloverem. Nie dodano drugiej implementacji post-match ani innego pipeline'u.
+
+### Weryfikacja
+
+- Jednorazowe porównanie SHA-256 z `4677f98`: **30/30 dotychczasowych elementów bez zmiany implementacji** — 10 przeniesionych metod oraz 20 pozostawionych elementów. Obejmuje ciała, sygnatury, komentarze i inicjalizatory, z normalizacją końców linii/zewnętrznych pustych linii oraz pominięciem wyłącznie 14 jawnie wskazanych nowych adnotacji `@override`.
+- Sprawdzono kompletność, brak powielenia implementacji, kolejność w każdej grupie, brak nowych pól/logiki w miksinach, importy i komentarz klasy. `day_simulation_result.dart` pozostał identyczny. Manifest i wynik znajdują się w katalogu raportów; nie dodano trwałych testów porównujących źródła ani skryptów w aplikacji.
+- **Przed podziałem 33/33:** `match_date_replay_test.dart`, `people_lifecycle_test.dart`, `postseason_finalization_test.dart`, `contract_market_period_test.dart`, `phase_two_window_test.dart`, `contract_boundary_save_test.dart`, `scouting_tier_five_test.dart`.
+- Te scenariusze obejmują wznowienie na dacie meczu, zwykły dzień wobec powrotu po meczu, pojedynczy tick FA, rozwój/zdrowie, kontrakty i RFA, końcową datę FA II, granice 46/47 i 52/1, rollover oraz rozstawienie/idempotencję postseason. Testy skautingu sprawdzają zachowanie poziomu wiedzy i serializacji.
+- Analiza `lib/app`, pięciu plików biblioteki dnia i `test/nowe_testy/`: **bez uwag**. Formatowanie sprawdzono; porównanie źródeł potwierdza niezmienione implementacje. `git diff --check`: bez uwag.
+- **Po podziale 207/207:** pełny folder `test/nowe_testy/`, w tym wszystkie 33 scenariusze bazowe. Użyto istniejących testów aktualnego zachowania; nie dodano nowych testów ani helperów.
+- `flutter build bundle --debug --no-pub`: **exit code 0**, zaktualizowany kernel bundle. Odbiór lokalny debug bez podłączonego urządzenia.
+- Test odświeżeń nadal wskazuje Home: 5, Squad: 0, Standings: 0 przy pięciu zmianach daty. Ten podział zachowuje zachowanie; czasy debug nie są dowodem optymalizacji.
+
+Schemat zapisu nadal **27**, bez migracji. Stare testy, assets, generatory, `lib/core/ai/` i `lib/core/simulation/` pozostają poza zakresem analizy i zmian. Integracje wyłączonych placeholderów przeniesiono w całości; nie oceniano ich implementacji ani balansu. Oryginalny raport audytu pozostał bez zmian.
+
+Logi w `reports/lib-audit-2026-10-13/`: `stage-8-r07-before-tests.txt`, `stage-8-r07-all-tests.txt`, `stage-8-r07-day-analyze.txt`, `stage-8-r07-analyze.txt`, `stage-8-r07-build.txt`, `stage-8-r07-movement-baseline.json`, `stage-8-r07-movement-check.txt`.
+
+### Ręczne review R07
+
+1. **Dzień meczu:** zapisz przed meczem, wczytaj i przejdź do spotkania. Zakończ je, sprawdź wynik, wiadomości oraz datę następnego dnia. Porównaj z symulacją z kalendarza na oddzielnym zapisie testowym. Zachowanie powinno odpowiadać wersji sprzed podziału.
+2. **Koniec tygodnia:** przejdź przez niedzielę do poniedziałku — zwykłą symulacją oraz, jeżeli terminarz pozwala, kończąc własny mecz w niedzielę. Sprawdź wiadomość nowego tygodnia, aktualizacje rozwoju i skautingu. Nie powinny pojawić się podwójne skutki tego samego tygodnia.
+3. **Granice sezonu/rynku:** na dostępnych karierach testowych sprawdź koniec draftu i tydzień 47 oraz rollover 52 → 1: datę, kontrakty, wiek i wiadomości. Automatyczne testy odtwarzają te granice w kontrolowanych fixture'ach; nie trzeba ręcznie przygotowywać każdej fazy, aby powtórzyć wszystkie scenariusze.
+4. **Kalendarz i zapis:** zasymuluj kilka dni z meczami, zapisz ręcznie i wczytaj. Sprawdź zachowanie wyników i daty. Testy persystencji używają pamięci/katalogów tymczasowych, bez celowego uszkadzania zapisów użytkownika.
+
+Grupa **R07** jest gotowa do review; prace zatrzymano na tej granicy. R08 (organizacja sezonu) wymaga kolejnej zgody użytkownika. Nie wykonano commitów ani dalszych grup.
 
 ## Etap 8 — R06: metody GameController — 17 października 2026
 
@@ -40,7 +80,7 @@ Logi w `reports/lib-audit-2026-10-13/`: `stage-8-r06-before-tests.txt`, `stage-8
 3. **Wiadomości:** otwórz pilną wiadomość, oznacz jako przeczytaną/potwierdź lub podejmij dostępną decyzję. Powtórne kliknięcie nie powinno powielać efektu, a potwierdzenie ma zwolnić odpowiednią pauzę symulacji.
 4. **Draft/skauting i mecz:** w odpowiedniej fazie zmień watchlistę lub przypisania Combine, wykonaj wybór draftowy; sprawdź ich zachowanie po ponownym load. Wejdź do meczu z zapisanej kariery. Widoki i wywołania nadal korzystają z publicznego `GameController` przez dotychczasowy import.
 
-Grupa **R06** jest gotowa do review użytkownika; prace zatrzymano na tej granicy. R07 (organizacja dnia) wymaga kolejnej zgody. Nie wykonano commitów ani dalszych grup.
+R06 został następnie zapisany przez użytkownika w `4677f98`, a użytkownik pozwolił kontynuować R07. Powyższe wyniki dokumentują odbiór R06; bieżący postęp opisano na początku pliku. Agent nie wykonywał commitów.
 
 ## Etap 8 — R05: samodzielne deklaracje w plikach mieszanych — 17 października 2026
 
