@@ -1,6 +1,57 @@
 # Nowe testy — etapy 0–8
 
-Etapy 0–7 zostały zaakceptowane i zapisane przez użytkownika: `dc6e454`, `b4048fb`, `553198c`, `f8e45e1`, `5762f4f`, `0f2fd43`, `5598811`, `6e9cea2` oraz etap 7 w `8293be2`. R04 etapu 8 zapisano w `d010cec`, R05 w `c567d39`, R06 w `4677f98`, R07 w `1fd485b`, R08 w `eef0c73`, R09 w `5cacf87`, R10 w `e6ee6aa`. **Etap 8 jest w toku: R11 (generacja danych) jest ukończone i gotowe do review.** Zmiany R11 pozostają bez commita. R12–R13 nie zostały rozpoczęte. Wyniki wcześniejszych grup/etapów poniżej są historycznym punktem odniesienia.
+Etapy 0–7 zostały zaakceptowane i zapisane przez użytkownika: `dc6e454`, `b4048fb`, `553198c`, `f8e45e1`, `5762f4f`, `0f2fd43`, `5598811`, `6e9cea2` oraz etap 7 w `8293be2`. R04 etapu 8 zapisano w `d010cec`, R05 w `c567d39`, R06 w `4677f98`, R07 w `1fd485b`, R08 w `eef0c73`, R09 w `5cacf87`, R10 w `e6ee6aa`, R11 w `a454528`. **Etap 8 jest w toku: R12 (duże klasy State ekranów) jest ukończone i gotowe do review.** Naprawiono oba dialogi counter za zgodą użytkownika; dziesięć nowych testów i cała grupa pozostają bez commita. R13 nie rozpoczęto. Wyniki wcześniejszych grup/etapów poniżej są historycznym punktem odniesienia.
+
+## Etap 8 — R12: duże klasy State ekranów i poprawka dialogów — 17 października 2026
+
+Punkt wyjścia: `a454528` (R11). Prace wznowiono z dziesięcioma nowymi testami i opisem błędu z poprzedniego podejścia, bez wcześniejszych zmian produkcyjnych R12. Użytkownik polecił naprawić dialogi i dokończyć całą grupę. Wykonano kolejno FA, sztab, kontrakty, kalendarz i opcjonalną tabelę prospektów. Nie wykonano commitów.
+
+### Poprawka cyklu życia kontrpropozycji
+
+Przed podziałem oba `_counterDialog` kończyły `await showDialog(...)` i od razu zwalniały kontrolery w `finally`, chociaż animacja zamykania nadal używała pól tekstowych. Dwa izolowane testy odtwarzały `A TextEditingController was used after being disposed.`. Po autoryzowanej poprawce każdy dialog ma własny prywatny `StatefulWidget`/`State`: kontrolery są inicjalizowane w `initState` i zwalniane w `dispose` zawartości dialogu.
+
+Zachowano osobne implementacje zawodnika i sztabu, treści, wartości domyślne i walidację: zawodnik nadal wymaga co najmniej jednego roku, sztab od jednego do czterech; nie zmieniano dodatkowo dopuszczalnych kwot. `ContractOffer` nadal przenosi `exception` i `rookiePickSlot`. Anulowanie zwraca null, zapis ten sam typ oferty. Nie dodano wspólnego formularza, opóźnień czasowych ani wyciszania wyjątków.
+
+Nowy State dotyczy wyłącznie obu naprawianych dialogów. Właściciele głównych formularzy, zaznaczeń, kontrolerów ekranów i ich dispose pozostają bez zmian. Klasy dialogów są prywatne i znajdują się w częściach swoich ekranów.
+
+### Podział
+
+- **`free_agency_screen.dart`: 1146 → 587 linii.** Pozostają widget/State, wszystkie 12 pól, dispose/build, komendy i predykaty dostępności. `free_agency_market_sections.dart` (311) zawiera pięć sekcji rynku/podsumowania/sztabu/praw draftowych/finalizacji; `free_agency_rfa_section.dart` (139) dwie metody RFA/offer sheet; `free_agency_player_sections.dart` (258) cztery metody filtrów, sortowania, kafelka i formularza zawodnika.
+- **`staff_screen.dart`: 1140 → 612 linii.** Pozostają osiem pól, główny build/dispose, status rynku, wybór osoby, walidacja i komendy. `staff_screen_slots.dart` (208) zawiera trzy metody slotów/atrybutów/etykiet; `staff_screen_offer_editor.dart` (248) edytor i wywołanie dialogu oraz dwie klasy naprawionego dialogu; `staff_screen_negotiations.dart` (217) siedem metod listy/kart/statusów/opisu i terminów.
+- **`contract_screen.dart`: 884 → 500 linii.** Pozostają osiem pól, główny build/dispose, wybór celu, walidacja i komendy. `contract_screen_offer_sections.dart` (133) zawiera status rynku i podgląd oferty; `contract_screen_negotiations.dart` (240) siedem metod listy/kart/etykiet/opisu i terminów; `contract_screen_counter_dialog.dart` (107) wywołanie dialogu i dwie klasy jego zawartości.
+- **`calendar_screen.dart`: 804 → 373 linie.** Pozostają providery, widget/State, wszystkie siedem pól instancji, czas feedbacku, dispose, timery, completer, generacje i cały przepływ symulacji/anulowania. `calendar_screen_body.dart` (452) zawiera całe niezmienione build i trzy stałe kluczy UI. Przeniesiono renderowanie wraz z lokalnymi danymi i funkcją dayInfo; nie rozbijano domknięć ani nie dodawano modelu dat.
+- **`prospects_screen.dart`: 765 → 573 linie.** Pozostają watchlista/Combine, 12 pól instancji, init/dependencies/dispose, `_persistOnExit`, scroll/keye i wyróżnienie oraz sterowanie ekranem. `prospects_table.dart` (233) zawiera trzy metody renderowania tabeli, `_tableWidth` i 13 stałych szerokości. Wcześniejszy `prospect_detail_content.dart` pozostał bez zmian.
+
+Łącznie wydzielono **38 metod i 16 stałych do 11 części** w dotychczasowym folderze `lib/app/screens/`. Wszystkie tworzą istniejące biblioteki przez `part`/`part of`. Główne State nadal dziedziczą po tych samych `ConsumerState<Screen>` i zachowują ten sam obiekt widgetu, ref, context, setState oraz lifecycle. Podział nie wprowadza dodatkowego State sekcji ekranu.
+
+Każda biblioteka ma prywatny kontrakt dostępu bez stanu i implementacji, a miksiny mają ograniczenia `on ConsumerState<Screen>, Shared`. Pięć kontraktów zawiera łącznie **83 deklaracje abstrakcyjne**; dodano **80 adnotacji `@override`**. Gettery/settery udostępniają istniejące pola tego samego State; nie tworzą kopii kontrolerów, zaznaczeń, timerów ani providerów. Dla zapisywanych wyłącznie pól FA wystawiono tylko setter. Publiczne widgety i dotychczasowe importy pozostały takie same.
+
+### Weryfikacja
+
+- Przed poprawką: **34/34** scenariusze poza dwoma dialogami; oba dialogi odtwarzały błąd w osobnych procesach. Historyczne czerwone logi są dowodem regresji sprzed poprawki.
+- Po poprawce, jeszcze przed podziałami: **36/36** z `state_screen_split_interaction_test.dart`, `calendar_screen_test.dart`, `game_controller_lifecycle_test.dart`, `calendar_pacing_phases_test.dart`. Dodatkowo **2/2** testy dialogów po rozszerzeniu sprawdzenia o zapis po ponownym otwarciu.
+- Po kolejnych podziałach: FA **2/2**, sztab **3/3**, kontrakty **3/3**, kalendarz/lifecycle/pacing **26/26**, tabela prospektów i wiedza skautingu **4/4**. Każda biblioteka przechodziła osobną analizę przed przejściem do następnego ekranu.
+- Nowy `test/nowe_testy/state_screen_split_interaction_test.dart` zawiera dziesięć scenariuszy: sześć formularzy FA/sztab/kontrakty w PL/EN (filtr, wybór, tożsamość kontrolerów i wartości po zmianie języka), dwa dialogi (walidacja, anulowanie, ponowne otwarcie, zapis bez błędu) oraz dwa scenariusze zapisu watchlisty i Combine przy wyjściu. Fixture'y/helpery są prywatne w tym samym pliku; repozytorium zapisów działa w pamięci.
+- Porównanie źródeł z `a454528` potwierdza, że jedynymi celowo zmienionymi metodami dawnych State są dwa `_counterDialog`; dodano cztery klasy zawartości dialogów. Pozostałe **191/193** elementy zachowały treść.
+- Następnie porównanie SHA-256 z zapisanym stanem po poprawce i przed podziałem potwierdziło **193/193** elementy State oraz całe cztery klasy dialogów: 54 elementy State przeniesiono, 139 pozostawiono. Obejmuje sygnatury, ciała, komentarze, stałe i inicjalizatory, z normalizacją tylko końców/zewnętrznych pustych linii i wskazanych nowych adnotacji. Połączenia miksinów, kompletność, unikalność, kolejność, importy i abstrakcyjne kontrakty sprawdzono osobno; formatter może usuwać końcowe przecinki w nowych abstrakcyjnych sygnaturach.
+- Nie dodano trwałych testów układu źródeł ani narzędzi do aplikacji. Manifesty i jednorazowe porównania są wyłącznie w ignorowanym folderze raportów.
+- Formatowanie **17 plików Dart**: bez dalszych zmian. Analiza całego `lib/app` i `test/nowe_testy`: **bez uwag**.
+- **Po pełnym podziale 221/221:** cały folder `test/nowe_testy/`, w tym wszystkie dziesięć nowych scenariuszy i oba wcześniej czerwone testy. Nie uruchamiano starych testów.
+- `flutter build bundle --debug --no-pub`: **exit code 0**, zaktualizowany kernel bundle; sprawdzenie debug bez podłączonego urządzenia. `git diff --check`: bez uwag.
+- Test odświeżeń zachowuje Home: 5, Squad: 0, Standings: 0 przy pięciu zmianach daty. Podział nie stanowi nowej optymalizacji wykonania.
+
+Schemat zapisu nadal **27**, bez migracji; bez zmian balansu, modeli danych i protokołu zapisu. Nie analizowano ani nie zmieniano wyłączonych AI/simulation, plików generowanych, assets ani starych testów. Zamrożony raport audytu pozostał bez zmian.
+
+Logi w `reports/lib-audit-2026-10-13/`: `stage-8-r12-after-dialog-fix-tests.txt`, `stage-8-r12-dialog-save-tests.txt`, pliki `stage-8-r12-{free-agency,staff,contract,calendar,prospects}-tests.txt` i odpowiadające analizy, `stage-8-r12-movement-check.txt`, pięć manifestów `*-movement-baseline.json`, `stage-8-r12-post-fix-baseline.json`, `stage-8-r12-all-tests.txt`, `stage-8-r12-analyze.txt`, `stage-8-r12-build.txt`. Wcześniejsze logi izolowanych repro dotyczą kodu sprzed naprawy.
+
+### Ręczne review R12
+
+1. **Dialogi counter:** przy dostępnej kontrpropozycji zawodnika lub sztabu otwórz edycję, wpisz nieprawidłowe lata, anuluj i otwórz ponownie. Wartości powinny wrócić do aktualnej oferty. Zapisz prawidłową edycję. Zamknięcie ma przebiegać bez błędu kontrolera. Testy odtwarzają te przypadki bez potrzeby czekania na losowy counter.
+2. **FA, sztab, kontrakty:** wybierz podmiot i zmień kwotę/lata; sprawdź filtr FA, podgląd i dostępność akcji. Przebudowa ekranu lub zmiana języka ma zachować wybór i wpisane wartości. W dostępnym oknie można sprawdzić wysłanie/finalizację oferty; reguły rynku nie zostały zmienione.
+3. **Kalendarz:** wybierz dzień i zmień miesiąc, rozpocznij symulację oraz anuluj ją; sprawdź wynik/feedback i powrót do ekranu po wyjściu. Nie powinny pozostawać nakładka ani działający timer starego przebiegu.
+4. **Prospekty:** zaznacz watchlistę lub Combine, wyjdź i wróć; wybór powinien być zapisany. Otwórz szczegóły oraz, jeśli korzystasz z wejścia z wyszukiwarki, sprawdź przewinięcie i wyróżnienie wiersza.
+
+Grupa **R12** jest ukończona i gotowa do review; prace zatrzymano na tej granicy. Nie wykonano commitów ani R13.
 
 ## Etap 8 — R11: generacja danych — 17 października 2026
 

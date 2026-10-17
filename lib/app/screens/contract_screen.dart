@@ -16,6 +16,10 @@ import 'package:new_football/core/services/contract_service.dart';
 import 'package:new_football/core/models/league_strength.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
+part 'contract_screen_offer_sections.dart';
+part 'contract_screen_negotiations.dart';
+part 'contract_screen_counter_dialog.dart';
+
 enum _Target { none, ownExpiring, freeAgent }
 
 class ContractScreen extends ConsumerStatefulWidget {
@@ -25,14 +29,25 @@ class ContractScreen extends ConsumerStatefulWidget {
   ConsumerState<ContractScreen> createState() => _ContractScreenState();
 }
 
-class _ContractScreenState extends ConsumerState<ContractScreen> {
+class _ContractScreenState extends ConsumerState<ContractScreen>
+    with
+        _ContractScreenShared,
+        _ContractScreenOfferSections,
+        _ContractScreenNegotiations,
+        _ContractScreenCounterDialog {
+  @override
   final _salaryCtrl = TextEditingController();
+  @override
   final _yearsCtrl = TextEditingController(text: '3');
+  @override
   final _contractService = ContractService();
+  @override
   final _marketService = ContractMarketService();
   String? _selectedId;
+  @override
   _Target _target = _Target.none;
   String? _status;
+  @override
   bool _isAdvancingHour = false;
 
   @override
@@ -205,351 +220,7 @@ class _ContractScreenState extends ConsumerState<ContractScreen> {
     );
   }
 
-  Widget _marketStatusCard(
-    BuildContext context,
-    AppLocalizations l10n,
-    LeagueState league,
-  ) {
-    final window = _marketService.windowAt(league);
-    final phaseLabel = switch (window) {
-      ContractMarketWindow.closed => l10n.market_closed,
-      ContractMarketWindow.extensions => l10n.market_extensions,
-      ContractMarketWindow.freeAgencyPhaseI => l10n.market_phaseI,
-      ContractMarketWindow.freeAgencyPhaseII => l10n.market_phaseII,
-    };
-    final hourly =
-        window == ContractMarketWindow.extensions ||
-        window == ContractMarketWindow.freeAgencyPhaseI;
-    final hour = (league.currentHour ?? 1).clamp(
-      1,
-      BalanceConfig.defaults.contracts.hoursPerDay,
-    );
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.schedule),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    l10n.market_status,
-                    style: Theme.of(context).textTheme.titleMedium,
-                  ),
-                ),
-                Chip(label: Text(phaseLabel)),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Text(
-              '${l10n.market_date(league.currentDay, league.currentWeek)}'
-              '${hourly ? '\n${l10n.market_hour(hour, BalanceConfig.defaults.contracts.hoursPerDay)}' : ''}',
-            ),
-            if (hourly) ...[
-              const SizedBox(height: 10),
-              FilledButton.tonalIcon(
-                onPressed: _isAdvancingHour ? null : () => _advanceHour(l10n),
-                icon: _isAdvancingHour
-                    ? const SizedBox(
-                        width: 16,
-                        height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      )
-                    : const Icon(Icons.skip_next),
-                label: Text(l10n.market_advanceHour),
-              ),
-            ] else if (window == ContractMarketWindow.closed) ...[
-              const SizedBox(height: 6),
-              Text(
-                l10n.market_noWindow,
-                style: TextStyle(color: Theme.of(context).colorScheme.error),
-              ),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _offerPreviewCard(
-    BuildContext context,
-    AppLocalizations l10n,
-    LeagueState league,
-    Team team,
-    Player player,
-  ) {
-    final isExtension = _target == _Target.ownExpiring;
-    final currentStatus = _teamStatus(league, team.id);
-    final expectedSalary = _expectedSalary(
-      league,
-      team,
-      player,
-      isExtension: isExtension,
-    );
-    final expectedLength = _contractService.expectedLength(
-      player,
-      currentTeamStatus: isExtension ? currentStatus : TeamStatus.pretender,
-    );
-    final salary = int.tryParse(_salaryCtrl.text.trim());
-    final years = int.tryParse(_yearsCtrl.text.trim());
-    final score = salary == null || years == null || years < 1
-        ? null
-        : _contractService.playerOfferScore(
-            player,
-            ContractOffer(salary: salary, years: years),
-            offeringTeamStatus: currentStatus,
-            currentTeamStatus: isExtension
-                ? currentStatus
-                : TeamStatus.pretender,
-            cfo: team.staff.cfo,
-          );
-
-    return Card(
-      color: Theme.of(context).colorScheme.surfaceContainerHigh,
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              '${l10n.market_offerPreview}: ${player.name}',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 6),
-            Text(
-              l10n.market_expectedSalary(formatMoney(context, expectedSalary)),
-            ),
-            Text(l10n.market_expectedLength(expectedLength)),
-            Text(
-              score == null
-                  ? l10n.contract_invalidOffer
-                  : l10n.market_score(score.toStringAsFixed(1)),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _negotiationsSection(
-    BuildContext context,
-    AppLocalizations l10n,
-    LeagueState league,
-    String teamId,
-  ) {
-    final negotiations =
-        league.negotiations
-            .where(
-              (item) =>
-                  item.teamId == teamId &&
-                  item.subjectKind == NegotiationSubjectKind.player,
-            )
-            .toList()
-          ..sort(
-            (a, b) => _negotiationClock(b).compareTo(_negotiationClock(a)),
-          );
-    if (negotiations.isEmpty) {
-      return Card(
-        margin: const EdgeInsets.only(top: 12),
-        child: ListTile(
-          leading: const Icon(Icons.handshake_outlined),
-          title: Text(l10n.market_negotiations),
-          subtitle: Text(l10n.market_noNegotiations),
-        ),
-      );
-    }
-    return Card(
-      margin: const EdgeInsets.only(top: 12),
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              l10n.market_negotiations,
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 8),
-            ...negotiations.map(
-              (negotiation) =>
-                  _negotiationCard(context, l10n, league, negotiation),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _negotiationCard(
-    BuildContext context,
-    AppLocalizations l10n,
-    LeagueState league,
-    ContractNegotiation negotiation,
-  ) {
-    final deadlinePassed = _deadlinePassed(league, negotiation);
-    final canFinalize =
-        negotiation.status == NegotiationStatus.pendingFinalization &&
-        !deadlinePassed;
-    final canRespond =
-        negotiation.status == NegotiationStatus.counter &&
-        !deadlinePassed &&
-        _marketService.phaseAt(league) == negotiation.phase;
-    final offer = negotiation.counterOffer ?? negotiation.lastOffer;
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        border: Border.all(color: Theme.of(context).dividerColor),
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  _subjectName(league, negotiation.subjectId),
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-              ),
-              Chip(label: Text(_statusLabel(l10n, negotiation.status))),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(_negotiationSubtitle(context, l10n, league, negotiation)),
-          if (negotiation.status == NegotiationStatus.waiting &&
-              negotiation.waitingUntilWeek != null &&
-              negotiation.waitingUntilDay != null) ...[
-            const SizedBox(height: 4),
-            Text(
-              '${l10n.contract_waiting} · ${l10n.market_deadline(negotiation.waitingUntilDay!, negotiation.waitingUntilHour ?? 0, negotiation.waitingUntilWeek!)}',
-            ),
-          ],
-          if (deadlinePassed && !negotiation.isTerminal) ...[
-            const SizedBox(height: 4),
-            Text(
-              l10n.market_statusExpired,
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
-            ),
-          ],
-          if (canFinalize) ...[
-            const SizedBox(height: 8),
-            Align(
-              alignment: Alignment.centerRight,
-              child: FilledButton.tonal(
-                onPressed: () => _finalize(l10n, negotiation.id),
-                child: Text(l10n.contract_finalize),
-              ),
-            ),
-          ],
-          if (canRespond) ...[
-            const SizedBox(height: 8),
-            Wrap(
-              alignment: WrapAlignment.end,
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                TextButton(
-                  onPressed: () =>
-                      _respondToCounter(l10n, negotiation, accept: false),
-                  child: Text(l10n.inbox_actionReject),
-                ),
-                OutlinedButton(
-                  onPressed: () => _editCounter(l10n, negotiation),
-                  child: Text(l10n.contract_counterEdit),
-                ),
-                FilledButton.tonal(
-                  onPressed: () => _respondToCounter(
-                    l10n,
-                    negotiation,
-                    accept: true,
-                    offer: ContractOffer(
-                      salary: offer.salary,
-                      years: offer.years,
-                      exception: offer.exception,
-                      rookiePickSlot: offer.rookiePickSlot,
-                    ),
-                  ),
-                  child: Text(l10n.inbox_actionAccept),
-                ),
-              ],
-            ),
-          ],
-        ],
-      ),
-    );
-  }
-
-  String _statusLabel(AppLocalizations l10n, NegotiationStatus status) {
-    return switch (status) {
-      NegotiationStatus.active => l10n.market_statusActive,
-      NegotiationStatus.waiting => l10n.contract_waiting,
-      NegotiationStatus.pendingFinalization =>
-        l10n.contract_pendingFinalization,
-      NegotiationStatus.counter => l10n.market_statusCounter,
-      NegotiationStatus.rejected => l10n.contract_rejected,
-      NegotiationStatus.hardRejected => l10n.market_statusHardRejected,
-      NegotiationStatus.completed => l10n.market_statusCompleted,
-      NegotiationStatus.cancelled => l10n.market_statusCancelled,
-    };
-  }
-
-  String _subjectName(LeagueState league, String id) {
-    for (final player in league.freeAgents) {
-      if (player.id == id) return player.name;
-    }
-    for (final player in league.playerTeam?.roster ?? const <Player>[]) {
-      if (player.id == id) return player.name;
-    }
-    return id;
-  }
-
-  String _negotiationSubtitle(
-    BuildContext context,
-    AppLocalizations l10n,
-    LeagueState league,
-    ContractNegotiation negotiation,
-  ) {
-    final player = _playerById(league, negotiation.subjectId);
-    final expectedSalary = player == null
-        ? null
-        : _contractService.expectedSalary(
-            player,
-            currentTeamStatus:
-                negotiation.phase == NegotiationPhase.contractExtension
-                ? _teamStatus(league, negotiation.teamId)
-                : TeamStatus.pretender,
-          );
-    final expectedLength = player == null
-        ? null
-        : _contractService.expectedLength(
-            player,
-            currentTeamStatus:
-                negotiation.phase == NegotiationPhase.contractExtension
-                ? _teamStatus(league, negotiation.teamId)
-                : TeamStatus.pretender,
-          );
-    final details = <String>[
-      l10n.market_round(negotiation.round),
-      l10n.market_score(negotiation.offerScore.toStringAsFixed(1)),
-      l10n.market_deadline(
-        negotiation.expiryDay,
-        negotiation.expiryHour,
-        negotiation.expiryWeek,
-      ),
-      if (expectedSalary != null)
-        l10n.market_expectedSalary(formatMoney(context, expectedSalary)),
-      if (expectedLength != null) l10n.market_expectedLength(expectedLength),
-      '${l10n.market_currentOffer}: ${formatMoney(context, negotiation.lastOffer.salary)} × ${negotiation.lastOffer.years}',
-    ];
-    return details.join(' · ');
-  }
-
+  @override
   Future<void> _advanceHour(AppLocalizations l10n) async {
     if (_isAdvancingHour) return;
     setState(() => _isAdvancingHour = true);
@@ -652,6 +323,7 @@ class _ContractScreenState extends ConsumerState<ContractScreen> {
     );
   }
 
+  @override
   Future<void> _finalize(AppLocalizations l10n, String negotiationId) async {
     final ok = await ref
         .read(gameControllerProvider.notifier)
@@ -664,6 +336,7 @@ class _ContractScreenState extends ConsumerState<ContractScreen> {
     );
   }
 
+  @override
   Future<void> _respondToCounter(
     AppLocalizations l10n,
     ContractNegotiation negotiation, {
@@ -681,6 +354,7 @@ class _ContractScreenState extends ConsumerState<ContractScreen> {
     );
   }
 
+  @override
   Future<void> _editCounter(
     AppLocalizations l10n,
     ContractNegotiation negotiation,
@@ -689,88 +363,6 @@ class _ContractScreenState extends ConsumerState<ContractScreen> {
     final offer = await _counterDialog(l10n, current);
     if (offer == null || !mounted) return;
     await _respondToCounter(l10n, negotiation, accept: true, offer: offer);
-  }
-
-  Future<ContractOffer?> _counterDialog(
-    AppLocalizations l10n,
-    NegotiationOffer current,
-  ) async {
-    final salaryController = TextEditingController(
-      text: current.salary.toString(),
-    );
-    final yearsController = TextEditingController(
-      text: current.years.toString(),
-    );
-    try {
-      return await showDialog<ContractOffer>(
-        context: context,
-        builder: (dialogContext) {
-          String? error;
-          return StatefulBuilder(
-            builder: (context, setDialogState) => AlertDialog(
-              title: Text(l10n.contract_editCounterTitle),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  TextField(
-                    controller: salaryController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: l10n.contract_offerSalary,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    controller: yearsController,
-                    keyboardType: TextInputType.number,
-                    decoration: InputDecoration(
-                      labelText: l10n.contract_offerYears,
-                    ),
-                  ),
-                  if (error != null) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      error!,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(dialogContext).pop(),
-                  child: Text(l10n.common_cancel),
-                ),
-                FilledButton(
-                  onPressed: () {
-                    final salary = int.tryParse(salaryController.text.trim());
-                    final years = int.tryParse(yearsController.text.trim());
-                    if (salary == null || years == null || years < 1) {
-                      setDialogState(() => error = l10n.contract_invalidOffer);
-                      return;
-                    }
-                    Navigator.of(dialogContext).pop(
-                      ContractOffer(
-                        salary: salary,
-                        years: years,
-                        exception: current.exception,
-                        rookiePickSlot: current.rookiePickSlot,
-                      ),
-                    );
-                  },
-                  child: Text(l10n.common_save),
-                ),
-              ],
-            ),
-          );
-        },
-      );
-    } finally {
-      salaryController.dispose();
-      yearsController.dispose();
-    }
   }
 
   void _selectPlayer(
@@ -813,6 +405,7 @@ class _ContractScreenState extends ConsumerState<ContractScreen> {
     return null;
   }
 
+  @override
   Player? _playerById(LeagueState league, String id) {
     for (final player in league.freeAgents) {
       if (player.id == id) return player;
@@ -823,10 +416,12 @@ class _ContractScreenState extends ConsumerState<ContractScreen> {
     return null;
   }
 
+  @override
   TeamStatus _teamStatus(LeagueState league, String teamId) =>
       league.strengthTable?.entryFor(teamId)?.teamStatus ??
       TeamStatus.pretender;
 
+  @override
   int _expectedSalary(
     LeagueState league,
     Team team,
@@ -861,24 +456,45 @@ class _ContractScreenState extends ConsumerState<ContractScreen> {
     }
     return !_isAdvancingHour;
   }
+}
 
-  int _negotiationClock(ContractNegotiation negotiation) =>
-      (((negotiation.seasonYear * 60 + negotiation.week) * 7 +
-              negotiation.day) *
-          BalanceConfig.defaults.contracts.hoursPerDay) +
-      negotiation.hour;
+mixin _ContractScreenShared on ConsumerState<ContractScreen> {
+  TextEditingController get _salaryCtrl;
 
-  bool _deadlinePassed(LeagueState league, ContractNegotiation negotiation) {
-    final current =
-        (((league.currentSeason.year * 60 + league.currentWeek) * 7 +
-                league.currentDay) *
-            BalanceConfig.defaults.contracts.hoursPerDay) +
-        (league.currentHour ?? 0);
-    final deadline =
-        (((negotiation.expirySeasonYear * 60 + negotiation.expiryWeek) * 7 +
-                negotiation.expiryDay) *
-            BalanceConfig.defaults.contracts.hoursPerDay) +
-        negotiation.expiryHour;
-    return current > deadline;
-  }
+  TextEditingController get _yearsCtrl;
+
+  ContractService get _contractService;
+
+  ContractMarketService get _marketService;
+
+  _Target get _target;
+
+  bool get _isAdvancingHour;
+
+  Future<void> _advanceHour(AppLocalizations l10n);
+
+  Future<void> _finalize(AppLocalizations l10n, String negotiationId);
+
+  Future<void> _respondToCounter(
+    AppLocalizations l10n,
+    ContractNegotiation negotiation, {
+    required bool accept,
+    ContractOffer? offer,
+  });
+
+  Future<void> _editCounter(
+    AppLocalizations l10n,
+    ContractNegotiation negotiation,
+  );
+
+  Player? _playerById(LeagueState league, String id);
+
+  TeamStatus _teamStatus(LeagueState league, String teamId);
+
+  int _expectedSalary(
+    LeagueState league,
+    Team team,
+    Player player, {
+    required bool isExtension,
+  });
 }

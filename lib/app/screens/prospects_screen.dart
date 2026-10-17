@@ -15,6 +15,7 @@ import 'package:new_football/core/models/scouting.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
 part 'prospect_detail_content.dart';
+part 'prospects_table.dart';
 
 /// Placeholder shown for any scouted attribute the scout has not yet
 /// estimated (or, for a range, has not yet narrowed enough to display).
@@ -126,19 +127,25 @@ class ProspectsScreen extends ConsumerStatefulWidget {
   ConsumerState<ProspectsScreen> createState() => _ProspectsScreenState();
 }
 
-class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
+class _ProspectsScreenState extends ConsumerState<ProspectsScreen>
+    with _ProspectsScreenShared, _ProspectsTable {
+  @override
   final Set<String> _selectedIds = {};
+  @override
   final Set<String> _combineIds = {};
   Position? _positionFilter;
   bool _watchOnly = false;
+  @override
   bool _combineMode = false;
   bool _initialized = false;
   bool _combineInitialized = false;
 
   // Scroll-to-row support for arriving from the search screen with a
   // specific prospect to highlight.
+  @override
   final ScrollController _tableScrollController = ScrollController();
   final Map<String, GlobalKey> _rowKeys = {};
+  @override
   String? _highlightedProspectId;
   bool _didScrollToHighlight = false;
 
@@ -149,39 +156,6 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
   // available here — it only needs to expose `setScoutWatchlist` and
   // `setCombineAssignments`, both already used by the rest of this screen.
   dynamic _gameController;
-
-  // Column widths shared between the header row and data rows so they stay
-  // pixel-aligned inside the horizontally scrollable table (styled after
-  // development_screen.dart's players tab).
-  static const double _colCheckboxWidth = 40;
-  static const double _colNameWidth = 110;
-  static const double _colFlagWidth = 32;
-  static const double _colAgeWidth = 32;
-  static const double _colPositionWidth = 32;
-  static const double _colMockRankWidth = 40;
-  static const double _colTierWidth = 32;
-  static const double _colOvrRangeWidth = 64;
-  static const double _colProjWidth = 48;
-  static const double _colPotentialWidth = 70;
-  static const double _colInjWidth = 48;
-  static const double _colDetWidth = 48;
-  static const double _colRoleWidth = 96;
-
-  double _tableWidth(bool withRoleColumn) =>
-      _colCheckboxWidth +
-      _colNameWidth +
-      _colFlagWidth +
-      _colAgeWidth +
-      _colPositionWidth +
-      _colMockRankWidth +
-      _colTierWidth +
-      _colOvrRangeWidth +
-      _colProjWidth +
-      _colPotentialWidth +
-      _colInjWidth +
-      _colDetWidth +
-      (withRoleColumn ? _colRoleWidth : 0) +
-      8; //padding
 
   @override
   void initState() {
@@ -287,6 +261,7 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
     });
   }
 
+  @override
   GlobalKey _rowKey(String prospectId) =>
       _rowKeys.putIfAbsent(prospectId, () => GlobalKey());
 
@@ -498,202 +473,7 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
     return filtered;
   }
 
-  Widget _buildProspectsTable(
-    BuildContext context,
-    AppLocalizations l10n,
-    List<Prospect> prospects,
-    TeamScouting? scouting,
-    MockDraftBoard? mockBoard,
-    int watchlistLimit,
-    int combineLimit,
-    bool combineAvailable,
-  ) {
-    final showRoleColumn = _combineIds.isNotEmpty;
-    return SingleChildScrollView(
-      controller: _tableScrollController,
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: SizedBox(
-          width: _tableWidth(showRoleColumn),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildHeaderRow(l10n, showRoleColumn),
-              const Divider(height: 1),
-              for (final prospect in prospects)
-                _buildProspectRow(
-                  context,
-                  l10n,
-                  prospect,
-                  scouting,
-                  mockBoard,
-                  watchlistLimit,
-                  combineLimit,
-                  combineAvailable,
-                  showRoleColumn,
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildHeaderRow(AppLocalizations l10n, bool showRoleColumn) {
-    const headerStyle = TextStyle(fontWeight: FontWeight.bold, fontSize: 12);
-    Widget cell(double width, String text) => SizedBox(
-      width: width,
-      child: Text(text, textAlign: TextAlign.center, style: headerStyle),
-    );
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
-      child: Row(
-        children: [
-          const SizedBox(width: _colCheckboxWidth),
-          SizedBox(
-            width: _colNameWidth,
-            child: Text(l10n.prospects_name, style: headerStyle),
-          ),
-          cell(_colFlagWidth, ''),
-          cell(_colAgeWidth, l10n.prospects_age),
-          cell(_colPositionWidth, l10n.prospects_positionShort),
-          cell(_colMockRankWidth, l10n.prospects_mockRank),
-          cell(_colTierWidth, l10n.prospects_tier),
-          cell(_colOvrRangeWidth, l10n.prospects_overallRange),
-          cell(_colProjWidth, l10n.prospects_slot),
-          cell(_colPotentialWidth, l10n.prospects_stars),
-          cell(_colInjWidth, l10n.prospects_injuryShort),
-          cell(_colDetWidth, l10n.prospects_determinationShort),
-          if (showRoleColumn) cell(_colRoleWidth, l10n.scouting_combineRole),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProspectRow(
-    BuildContext context,
-    AppLocalizations l10n,
-    Prospect prospect,
-    TeamScouting? scouting,
-    MockDraftBoard? mockBoard,
-    int watchlistLimit,
-    int combineLimit,
-    bool combineAvailable,
-    bool showRoleColumn,
-  ) {
-    final knowledge = scouting?.forProspect(prospect.id);
-    final mockRank = mockBoard?.displayedRank[prospect.id];
-    final previousMockRank = mockBoard?.previousDisplayedRank[prospect.id];
-    final watched = _selectedIds.contains(prospect.id);
-    final assigned = _combineIds.contains(prospect.id);
-    final canSelect = _combineMode
-        ? assigned || _combineIds.length < combineLimit
-        : watched || _selectedIds.length < watchlistLimit;
-    final showCombinedRole = !combineAvailable && assigned;
-    final textStyle = Theme.of(context).textTheme.bodySmall;
-    final isHighlighted = prospect.id == _highlightedProspectId;
-
-    Widget cell(double width, String text) => SizedBox(
-      width: width,
-      child: Text(text, textAlign: TextAlign.center, style: textStyle),
-    );
-
-    return Material(
-      key: _rowKey(prospect.id),
-      color: isHighlighted
-          ? Theme.of(
-              context,
-            ).colorScheme.primaryContainer.withValues(alpha: 0.5)
-          : Colors.transparent,
-      child: InkWell(
-        onTap: () => _showProspectDetail(
-          context,
-          l10n,
-          prospect,
-          scouting,
-          showOptimalRole: showCombinedRole,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 4),
-          child: Row(
-            children: [
-              SizedBox(
-                width: _colCheckboxWidth,
-                child: Checkbox(
-                  value: _combineMode ? assigned : watched,
-                  onChanged: _combineMode
-                      ? (!combineAvailable || !canSelect)
-                            ? null
-                            : (value) => _toggleCombine(prospect.id, value)
-                      : canSelect
-                      ? (value) => _toggleWatchlist(prospect.id, value)
-                      : null,
-                ),
-              ),
-              SizedBox(
-                width: _colNameWidth,
-                child: Text(
-                  prospect.name,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ),
-              SizedBox(
-                width: _colFlagWidth,
-                child: Center(child: NationalityFlagIcon(prospect.nationality)),
-              ),
-              cell(_colAgeWidth, '${prospect.age}'),
-              cell(_colPositionWidth, prospect.position.code),
-              SizedBox(
-                width: _colMockRankWidth,
-                child: _buildMockRankCell(mockRank, previousMockRank),
-              ),
-              cell(_colTierWidth, _tierLabel(knowledge?.tier)),
-              cell(
-                _colOvrRangeWidth,
-                _rangeLabel(
-                  knowledge?.estimatedOvrMin,
-                  knowledge?.estimatedOvrMax,
-                ),
-              ),
-              cell(_colProjWidth, _slotLabel(l10n, knowledge?.estimatedSlot)),
-              SizedBox(
-                width: _colPotentialWidth,
-                child: _buildPotentialEstimate(l10n, prospect, knowledge),
-              ),
-              cell(
-                _colInjWidth,
-                knowledge?.injuryProneKnown == true
-                    ? _rangeLabel(
-                        knowledge?.injuryProneMin,
-                        knowledge?.injuryProneMax,
-                      )
-                    : _unknownValue,
-              ),
-              cell(
-                _colDetWidth,
-                knowledge?.determinationKnown == true
-                    ? _rangeLabel(
-                        knowledge?.determinationMin,
-                        knowledge?.determinationMax,
-                      )
-                    : _unknownValue,
-              ),
-              if (showRoleColumn)
-                cell(
-                  _colRoleWidth,
-                  showCombinedRole
-                      ? assignedRoleLabel(context, prospect.optimalRole)
-                      : _unknownValue,
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
+  @override
   void _toggleWatchlist(String id, bool? selected) {
     setState(() {
       if (selected == true) {
@@ -704,6 +484,7 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
     });
   }
 
+  @override
   void _toggleCombine(String id, bool? selected) {
     setState(() {
       if (selected == true) {
@@ -736,6 +517,7 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
     });
   }
 
+  @override
   void _showProspectDetail(
     BuildContext context,
     AppLocalizations l10n,
@@ -762,4 +544,30 @@ class _ProspectsScreenState extends ConsumerState<ProspectsScreen> {
       ),
     );
   }
+}
+
+mixin _ProspectsScreenShared on ConsumerState<ProspectsScreen> {
+  Set<String> get _selectedIds;
+
+  Set<String> get _combineIds;
+
+  bool get _combineMode;
+
+  ScrollController get _tableScrollController;
+
+  String? get _highlightedProspectId;
+
+  GlobalKey _rowKey(String prospectId);
+
+  void _toggleWatchlist(String id, bool? selected);
+
+  void _toggleCombine(String id, bool? selected);
+
+  void _showProspectDetail(
+    BuildContext context,
+    AppLocalizations l10n,
+    Prospect prospect,
+    TeamScouting? scouting, {
+    required bool showOptimalRole,
+  });
 }
