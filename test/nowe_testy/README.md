@@ -1,6 +1,61 @@
-# Nowe testy — etapy 0–6
+# Nowe testy — etapy 0–7
 
-Etapy 0–5 zostały zaakceptowane i zapisane przez użytkownika: `dc6e454`, `b4048fb`, `553198c`, `f8e45e1`, `5762f4f`, `0f2fd43` oraz etap 5 w `5598811`. **Etap 6 (I17–I23) jest ukończony i przygotowany do review.** Zmiany pozostają bez commita. Etapu 7 nie rozpoczęto. Wyniki wcześniejszych etapów poniżej są historycznym punktem odniesienia.
+Etapy 0–6 zostały zaakceptowane i zapisane przez użytkownika: `dc6e454`, `b4048fb`, `553198c`, `f8e45e1`, `5762f4f`, `0f2fd43`, `5598811` oraz etap 6 w `6e9cea2`. **Etap 7 (I24–I27) jest ukończony i przygotowany do review.** Zmiany pozostają bez commita. Etapu 8 nie rozpoczęto. Wyniki wcześniejszych etapów poniżej są historycznym punktem odniesienia.
+
+## Wynik etapu 7 — 17 października 2026
+
+Punkt wyjścia: `6e9cea2`, czyste repozytorium. Użytkownik rozstrzygnął konflikt wag loterii: wspólnym źródłem jest **`DraftBalance.lotteryWeights`**, czyli `[140, 140, 140, 125, 105, 90, 75, 60, 45, 30]`. To jawnie zaakceptowana zmiana dotychczasowego balansu losowania kariery, które wcześniej używało `[140, 120, 100, 90, 80, 70, 60, 50, 40, 30]`. Pozostałe przeniesione wartości zachowują dotychczasowe domyślne liczby.
+
+- **202 scenariusze przechodzą:** pełny odbiór `test/nowe_testy/` 202/202; po doprecyzowaniu zgodności porównania zbiorów dodatkowy odbiór filtrów 5/5. To 185 wcześniejszych i 17 nowych scenariuszy.
+- Analiza statyczna dozwolonych obszarów aplikacji, modeli filtrów, balansu i nowych testów: **bez uwag**.
+- Zwykły Dart CLI: **exit code 0**, oba serwisy core działają bez Fluttera.
+- `flutter build bundle --debug --no-pub`: **exit code 0**, zaktualizowany kernel bundle. `git diff --check`: bez uwag.
+- Zmiany pozostają bez commita, etap 8 nie został rozpoczęty.
+
+### I24 — neutralne filtry
+
+`SearchGroup`, `RangeFilter` i cztery stany filtrów są w `lib/core/models/search_filters.dart`. Dotychczasowy provider eksportuje te same typy, zachowuje notifier, rodzinę według saveSeed i komendy. Matcher importuje tylko modele core. Porównanie zbiorów jest lokalne i niezależne od kolejności, bez Flutterowego `setEquals`; hash i kontrakt `copyWith` pozostają takie same. Testy sprawdzają równość/hash wszystkich stanów, granice zakresów i zaokrąglenia wyświetlanych wartości, FA, nieznane dane prospektów, picki oraz stan Riverpoda.
+
+### I25 — granica zarządzania zapisami
+
+`SaveManagementRepository` w core ma tylko pięć potrzebnych operacji: list, inspect, dostępność ID, rename i duplicate. W tym samym neutralnym pliku jest dotychczasowy kontrakt `SaveManagementException`; serwis eksportuje go zgodnie ze starym importem. Serwis wymaga interfejsu przez konstruktor i korzysta z `SaveSchema.currentVersion`, bez importowania lub tworzenia konkretnego repozytorium.
+
+`SaveManagementRepositoryAdapter` w data deleguje do istniejącego repozytorium i mapuje jego wyjątki na dotychczasowe kody domenowe, zachowując przyczynę. Provider app wstrzykuje adapter z `saveRepositoryProvider`. Właścicielem kolejki nadal jest kontroler; transakcje, blokady i odzyskiwanie pozostają w repozytorium. Niejednoznacznego odzyskiwania nie wolno zamienić na niedostępny rozmiar wiersza. Jeden wcześniejszy nowy test otrzymał adapter w miejscu bezpośredniego przekazywania konkretnego repozytorium.
+
+Testy obejmują nazwy i kolizje ID, zegar, projekcję listy, walidację nazw, macierz pięciu operacji × pięciu rodzajów błędów oraz rzeczywisty rename/duplicate w katalogu tymczasowym. Dodatkowy helper `support/stage_seven_core_probe.dart`, uruchamiany jawnie zwykłym Dartem, importuje oba serwisy core i wykonuje ich podstawowy przebieg. Potwierdza, że nie wymagają Fluttera; nie należy do aplikacji ani do automatycznie odkrywanego zestawu testów.
+
+### I26 — reguły i lokalizacja
+
+- Losowanie sezonu deleguje do istniejącego `LotteryService.computeResults`, używanego także przez ceremonię. Dla trzech seedów wynik, kolejność picków i zapisane prawdopodobieństwa są zgodne z `DraftBalance`. Zachowano dotychczasowe sortowanie tabel przed losowaniem.
+- Zduplikowane progi minut nagród i `58 * 90` korzystają z istniejącego `AwardsBalance`; okno ostatnich ośmiu wyników ma jedną stałą w `ChemistryBalance`, a limit tygodni historii pochodzi z `CalendarBalance.seasonCycleWeeks`. Test zachowuje wyniki domyślnego balansu i sprawdza, że wstrzyknięte progi nagród faktycznie działają. Król strzelców/asyst nadal korzysta z dotychczasowej reguły bez nowego progu minut.
+- Inbox najpierw próbuje kompletnego katalogu w aktualnym języku. `tryResolve` zwraca brak wyniku dla nieznanego klucza lub niepełnych argumentów; wtedy działają legacy, inline i ogólny fallback. Ścisłe `resolve`, używane do walidacji komunikatów w debug, nadal zgłasza błąd brakującego argumentu.
+- Uzupełniono argumenty komunikatu loterii i wyboru draftowego. Dla otwarcia FA, raportu przed Combine, zakończenia Combine i wybranego gracza dodano cztery konkretne warianty w obecnym katalogu oraz ręcznych szablonach PL/EN. Finalny mock korzysta z istniejącego wariantu `final`. Dzięki temu obecne zdarzenia nie muszą pokazywać zapisanych polskich tekstów; nowy komunikat wyboru zachowuje też pozycję gracza. Testy tych zdarzeń używają kontrolowanego stanu bez rozgrywania meczu i bez oceny AI.
+- Widget test przełącza PL → EN przy otwartych szczegółach wiadomości. Tytuł listy i treść szczegółów aktualizują się bez zmiany zapisanych argumentów, a nieznany i niekompletny historyczny komunikat zachowują treść legacy.
+
+Pierwszy test loterii ujawnił również brak `teamName`/`pickNumber` w wiadomości, który przerywał `runLottery` w debug. Uzupełnienie argumentów zamyka ten problem w ramach I26. Cztery nowe warianty tekstów powstały w istniejącym mechanizmie `message_templates_pl/en.dart`; nie ma migracji całego katalogu do ARB ani ręcznych zmian wygenerowanych lokalizacji.
+
+### I27 — rzeczywisty status nagród
+
+**Nagrody są obecnie przybliżeniem, a nie ukończonym modelem oceny występów.** Podpięcie `AwardsBalance` nie naprawia jakości danych `_AwardStats`:
+
+- Wszystkie minuty sezonu są przypisywane naturalnej pozycji gracza, bez akumulacji rzeczywistego czasu w poszczególnych slotach. Minuty bramkarza zależą od naturalnej pozycji GK.
+- `goalsPrevented` jest nadal wyliczane z `shotsFaced - własne gole gracza`, z dotychczasowym ograniczeniem zakresu. To zastępnik, nie wiarygodna miara obronionych goli ani goli straconych podczas gry.
+- Brakuje udziału w punktach drużyny podczas przebywania na boisku i bonusu za postseason, wskazanych w komentarzach obecnych formuł.
+
+Formuły i źródła tych metryk pozostają bez zmian. Docelowe akumulatory należy zaprojektować wraz z wiarygodnymi zdarzeniami silnika. Nie przywracano pełnych snapshotów zawodników do wyników. To ograniczenie opisano tutaj; aktualizacja szerszych materiałów projektu pozostaje późniejszym krokiem redakcyjnym.
+
+### Odbiór i review
+
+Schemat zapisu nadal **27** — zmieniły się zależności, wybór tekstu i zaakceptowane wagi, nie deklaracje persystowanych modeli. Starszych save'ów nie migrowano ani nie usuwano. Wyłączone moduły, generowane pliki, assets i stary zestaw testów pozostają poza analizą i zmianami. Oryginalny raport audytu pozostał bez zmian.
+
+Nowe testy: `search_filter_boundaries_test.dart` (5), `save_management_boundary_test.dart` (4), `stage_seven_balance_test.dart` (5), `message_locale_switch_test.dart` (3). Razem 17 nowych scenariuszy. Logi odbioru: `stage-7-before-balance.txt`, `stage-7-balance-tests.txt`, `stage-7-boundary-locale-tests.txt`, `stage-7-core-dart.txt`, `stage-7-final-tests.txt`, `stage-7-final-filter-tests.txt`, `stage-7-final-analyze.txt`, `stage-7-final-build.txt`.
+
+Ręczne review:
+
+1. W wyszukiwarce ustaw klub/FA, zakres OVR, filtry prospektów i picków. Wyjdź z ekranu i wróć; ustawienia powinny pozostać. Przywrócenie domyślnych czyści je jak wcześniej.
+2. Zmień nazwę save'a i utwórz kopię; sprawdź nazwy, listę i stan po wczytaniu. Kolejka i bariera wyjścia do menu nadal mają obowiązywać.
+3. Sprawdź nowe wiadomości loterii, Combine i otwarcia FA po przełączeniu PL ↔ EN, również z otwartymi szczegółami. Niekompletne dawne wiadomości mogą nadal używać legacy.
+4. Dla jeszcze nierozstrzygniętej loterii porównaj wynik ceremonii z kolejnością draftu zapisaną w karierze. Obie ścieżki używają teraz wag `DraftBalance`; wcześniej zapisane wyniki nie są automatycznie przeliczane.
 
 ## Wynik etapu 6 — 16 października 2026
 

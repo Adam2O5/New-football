@@ -53,6 +53,9 @@ class CalendarBalance {
 }
 
 class ChemistryBalance {
+  /// Shared rolling window for the stored results and the team-form display.
+  static const recentResultsWindow = 8;
+
   const ChemistryBalance({
     this.multMin = 0.92,
     this.multMax = 1.08,

@@ -76,6 +76,32 @@ class MessageCatalog {
         escalateIf: _escalations[type] ?? const [],
       ),
 
+    _template(
+      MessageType.calendar,
+      MessageDomain.system,
+      MessagePriority.normal,
+      kind: 'freeAgencyOpen',
+    ),
+    _template(
+      MessageType.scoutReport,
+      MessageDomain.draft,
+      MessagePriority.normal,
+      kind: 'preCombine',
+    ),
+    _template(
+      MessageType.combine,
+      MessageDomain.draft,
+      MessagePriority.normal,
+      kind: 'completed',
+    ),
+    _template(
+      MessageType.draftPick,
+      MessageDomain.draft,
+      MessagePriority.urgent,
+      kind: 'selected',
+      args: const ['pickNumber', 'playerName', 'teamName', 'position'],
+    ),
+
     // Player events (C): six decisions and five automatic events.
     ..._playerEventTemplates,
     // Team events (D): five decisions and four automatic events.

@@ -4,6 +4,7 @@ import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/app/providers/settings_provider.dart';
 import 'package:new_football/core/models/save_record.dart';
 import 'package:new_football/core/services/save_management_service.dart';
+import 'package:new_football/data/save_management_repository_adapter.dart';
 
 /// Domain service used by the save-management list and coordinator.
 ///
@@ -11,7 +12,11 @@ import 'package:new_football/core/services/save_management_service.dart';
 /// other application environments can replace persistence without bypassing
 /// the provider graph.
 final saveManagementServiceProvider = Provider<SaveManagementService>((ref) {
-  return SaveManagementService(repository: ref.watch(saveRepositoryProvider));
+  return SaveManagementService(
+    repository: SaveManagementRepositoryAdapter(
+      ref.watch(saveRepositoryProvider),
+    ),
+  );
 });
 
 /// The index-backed, runtime-enriched save list consumed by the UI.

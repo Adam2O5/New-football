@@ -2,6 +2,26 @@ import 'package:new_football/core/balance/message_templates_pl.dart';
 
 class MessageTemplatesEn {
   static const Map<String, MessageTextTemplate> templates = {
+    'msg_calendar_freeAgencyOpen_title': MessageTextTemplate(
+      key: 'msg_calendar_freeAgencyOpen_title',
+      title: 'Free agency is open',
+      body: 'You can now make offers to players and staff without a club.',
+    ),
+    'msg_scoutReport_preCombine_title': MessageTextTemplate(
+      key: 'msg_scoutReport_preCombine_title',
+      title: 'Scouting report',
+      body: 'The staff have prepared scouting reports and Combine assignments.',
+    ),
+    'msg_combine_completed_title': MessageTextTemplate(
+      key: 'msg_combine_completed_title',
+      title: 'Draft Combine',
+      body: 'Physical tests and the showcase match are complete.',
+    ),
+    'msg_draftPick_selected_title': MessageTextTemplate(
+      key: 'msg_draftPick_selected_title',
+      title: 'Draft: {playerName} selected',
+      body: 'Pick {pickNumber}: {position}. Club: {teamName}.',
+    ),
     'msg_walkover_title': MessageTextTemplate(
       key: 'msg_walkover_title',
       title: 'Risk of Forfeit',

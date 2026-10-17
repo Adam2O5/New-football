@@ -1,3 +1,4 @@
+import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/assigned_role.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
@@ -91,9 +92,11 @@ class TeamManagementService {
   /// Form of the last eight results as a points ratio in [0, 1].
   static double teamForm(Iterable<int> results) {
     final allValues = results.toList();
-    final values = allValues.length <= 8
+    final values = allValues.length <= ChemistryBalance.recentResultsWindow
         ? allValues
-        : allValues.sublist(allValues.length - 8);
+        : allValues.sublist(
+            allValues.length - ChemistryBalance.recentResultsWindow,
+          );
     if (values.isEmpty) return 0.5;
     final points = values.fold<int>(
       0,
@@ -205,9 +208,9 @@ class TeamManagementService {
         ? -1
         : 0;
     final recent = [...team.recentMatchResults, outcome];
-    final recentResults = recent.length <= 8
+    final recentResults = recent.length <= ChemistryBalance.recentResultsWindow
         ? recent
-        : recent.sublist(recent.length - 8);
+        : recent.sublist(recent.length - ChemistryBalance.recentResultsWindow);
 
     // Walkovers and no-GK results are recorded as results, but do not count
     // as a normal XI chemistry appearance.
@@ -346,9 +349,12 @@ class TeamManagementService {
         losses: losses,
       ),
     ];
-    final retainedHistory = history.length <= 52
+    final retainedHistory =
+        history.length <= BalanceConfig.defaults.calendar.seasonCycleWeeks
         ? history
-        : history.sublist(history.length - 52);
+        : history.sublist(
+            history.length - BalanceConfig.defaults.calendar.seasonCycleWeeks,
+          );
 
     return TeamWeeklyUpdate(
       team: team.copyWith(

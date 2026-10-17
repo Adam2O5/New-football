@@ -8,6 +8,19 @@ import 'package:new_football/core/models/message.dart';
 /// lookup, since a single template entry already carries both `title` and
 /// `body`.
 class MessageTextService {
+  /// Catalog text is usable only when both title and body have all arguments.
+  /// Incomplete or unknown historical messages retain their UI fallbacks.
+  static ({String title, String body})? tryResolve(
+    GameMessage message, {
+    String languageCode = 'pl',
+  }) {
+    try {
+      return resolve(message, languageCode: languageCode);
+    } on StateError {
+      return null;
+    }
+  }
+
   /// Registered template catalogs by language code. An unrecognized
   /// [languageCode] passed to [resolve] falls back to `'en'`, matching the
   /// app's existing localization fallback behavior.

@@ -3,38 +3,16 @@ import 'package:uuid/uuid.dart';
 import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/core/models/save_record.dart';
 import 'package:new_football/core/services/save_name_policy.dart';
-import 'package:new_football/data/save_repository.dart';
+import 'package:new_football/core/services/save_management_repository.dart';
+
+export 'save_management_repository.dart'
+    show SaveManagementException, SaveManagementFailureException;
 
 /// Supplies the timestamp used by a save-management operation.
 typedef SaveManagementClock = DateTime Function();
 
 /// Supplies candidate IDs for duplicated saves.
 typedef SaveIdGenerator = String Function();
-
-/// A locale-independent failure raised by a save-management operation.
-///
-/// [code] is the only value the presentation layer should use for localized
-/// feedback. [cause] keeps the repository exception (when one exists) for
-/// logging and diagnostics without making repository text part of the domain
-/// contract.
-class SaveManagementException implements Exception {
-  const SaveManagementException(this.code, {this.cause});
-
-  final SaveManagementFailure code;
-  final Object? cause;
-
-  /// Alias that makes the domain nature of [code] explicit at call sites.
-  SaveManagementFailure get failure => code;
-
-  @override
-  String toString() {
-    return 'SaveManagementException: ${code.name}'
-        '${cause == null ? '' : ' ($cause)'}';
-  }
-}
-
-/// Compatibility alias for callers that use the failure-oriented name.
-typedef SaveManagementFailureException = SaveManagementException;
 
 /// Coordinates save-list inspection and raw duplicate/rename operations.
 ///
@@ -45,14 +23,14 @@ typedef SaveManagementFailureException = SaveManagementException;
 /// projection, and domain-level failure mapping.
 class SaveManagementService {
   SaveManagementService({
-    SaveRepository? repository,
+    required SaveManagementRepository repository,
     SaveManagementClock? clock,
     SaveIdGenerator? idGenerator,
-  }) : _repository = repository ?? SaveRepository(),
+  }) : _repository = repository,
        _clock = clock ?? DateTime.now,
        _idGenerator = idGenerator ?? _defaultId;
 
-  final SaveRepository _repository;
+  final SaveManagementRepository _repository;
   final SaveManagementClock _clock;
   final SaveIdGenerator _idGenerator;
 
@@ -73,9 +51,7 @@ class SaveManagementService {
       records.add(
         SaveRecord(
           meta: meta,
-          compatibility: meta.compatibilityWith(
-            SaveRepository.currentSchemaVersion,
-          ),
+          compatibility: meta.compatibilityWith(SaveSchema.currentVersion),
           serializedFileAvailable: fileInfo.exists,
           sizeBytes: fileInfo.sizeBytes,
         ),
@@ -88,7 +64,7 @@ class SaveManagementService {
   /// Creates a raw duplicate of the source save without decoding its payload.
   ///
   /// The index and source metadata are read at operation time. The repository
-  /// then re-reads the canonical source inside [SaveRepository.duplicateRaw],
+  /// then re-reads the canonical source inside [SaveManagementRepository.duplicateRaw],
   /// which preserves management support for older and newer schemas.
   Future<SaveManagementResult> duplicate(
     String sourceId, {
@@ -183,8 +159,9 @@ class SaveManagementService {
   Future<SaveFileInfo> _inspectForList(String id) async {
     try {
       return await _repository.inspectFile(id);
-    } on SaveAmbiguousWriteException catch (error) {
-      throw _mapRepositoryFailure(error);
+    } on SaveManagementException catch (error) {
+      if (error.code == SaveManagementFailure.ambiguousWrite) rethrow;
+      return const SaveFileInfo.sizeUnavailable();
     } catch (_) {
       // The repository normally converts File.length failures to this value.
       // Keep the service resilient to repository doubles and platform-specific
@@ -250,24 +227,6 @@ class SaveManagementService {
     SaveManagementFailure fallback = SaveManagementFailure.writeFailed,
   }) {
     if (error is SaveManagementException) return error;
-    if (error is SaveAmbiguousWriteException) {
-      return SaveManagementException(
-        SaveManagementFailure.ambiguousWrite,
-        cause: error,
-      );
-    }
-    if (error is SaveFileNotFoundException) {
-      return SaveManagementException(
-        SaveManagementFailure.sourceUnavailable,
-        cause: error,
-      );
-    }
-    if (error is InvalidSerializedSaveException) {
-      return SaveManagementException(
-        SaveManagementFailure.invalidSerializedSave,
-        cause: error,
-      );
-    }
     return SaveManagementException(fallback, cause: error);
   }
 }

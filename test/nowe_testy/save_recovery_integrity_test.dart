@@ -9,6 +9,7 @@ import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/core/models/save_record.dart';
 import 'package:new_football/core/services/save_management_service.dart';
 import 'package:new_football/data/save_repository.dart';
+import 'package:new_football/data/save_management_repository_adapter.dart';
 
 import 'support/game_fixtures.dart';
 import 'support/save_process_control.dart';
@@ -90,7 +91,9 @@ void main() {
     'inspection cannot hide an ambiguous recovery as unavailable size',
     () async {
       final service = SaveManagementService(
-        repository: _AmbiguousInspection(controllerSave().meta),
+        repository: SaveManagementRepositoryAdapter(
+          _AmbiguousInspection(controllerSave().meta),
+        ),
       );
       await expectLater(
         service.listRecords(),

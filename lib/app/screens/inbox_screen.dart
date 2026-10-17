@@ -306,31 +306,23 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
     GameMessage message,
   ) {
     final languageCode = Localizations.localeOf(context).languageCode;
-    try {
-      return MessageTextService.resolve(message, languageCode: languageCode);
-    } catch (error, stackTrace) {
-      debugPrint(
-        'MessageTextService.resolve failed for message ${message.id} '
-        '(titleKey: ${message.titleKey}): $error\n$stackTrace',
-      );
-      return null;
-    }
+    return MessageTextService.tryResolve(message, languageCode: languageCode);
   }
 
   String _messageTitle(BuildContext context, GameMessage message) {
-    final legacy = message.args['_legacyTitle'];
-    if (legacy is String && legacy.isNotEmpty) return legacy;
     final resolved = _resolvedMessageText(context, message);
     if (resolved != null) return resolved.title;
+    final legacy = message.args['_legacyTitle'];
+    if (legacy is String && legacy.isNotEmpty) return legacy;
     return messageTypeLabel(context, message.type);
   }
 
   String _messageBody(BuildContext context, GameMessage message) {
     final l10n = _inboxLocalizations(context);
-    final legacy = message.args['_legacyBody'];
-    if (legacy is String && legacy.isNotEmpty) return legacy;
     final resolved = _resolvedMessageText(context, message);
     if (resolved != null) return resolved.body;
+    final legacy = message.args['_legacyBody'];
+    if (legacy is String && legacy.isNotEmpty) return legacy;
     final inline = message.args['message'];
     if (inline != null) return inline.toString();
     return l10n.inbox_bodyFallback(messageTypeLabel(context, message.type));

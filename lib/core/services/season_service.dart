@@ -33,6 +33,7 @@ import 'package:new_football/core/services/calendar_service.dart';
 import 'package:new_football/core/services/draft_trade_service.dart';
 import 'package:new_football/core/services/contract_market_service.dart';
 import 'package:new_football/core/services/negotiation_service.dart';
+import 'package:new_football/core/services/lottery_service.dart';
 import 'package:new_football/core/services/development_service.dart';
 import 'package:new_football/core/services/discipline_service.dart';
 import 'package:new_football/core/services/prospect_service.dart';
@@ -1526,6 +1527,7 @@ class SeasonService {
       MessageType.lottery,
       'Loteria draftu',
       'Pick 1: ${_teamName(state, first.teamId)}',
+      args: {'teamName': _teamName(state, first.teamId), 'pickNumber': 1},
       urgent: true,
     );
   }
@@ -1566,6 +1568,7 @@ class SeasonService {
       MessageType.calendar,
       'Rynek wolnych agentów otwarty',
       'Możesz teraz składać oferty zawodnikom i sztabowi bez klubu.',
+      kind: 'freeAgencyOpen',
     );
   }
 
@@ -1624,6 +1627,7 @@ class SeasonService {
       MessageType.scoutReport,
       'Raport skautingowy',
       'Sztab przygotował raporty z obserwacji i przydział na Combine.',
+      kind: 'preCombine',
     );
   }
 
@@ -1652,6 +1656,7 @@ class SeasonService {
       MessageType.combine,
       'Draft Combine',
       'Testy fizyczne i mecz pokazowy zakończone.',
+      kind: 'completed',
     );
   }
 
@@ -1705,6 +1710,7 @@ class SeasonService {
       MessageType.mockDraft,
       'Mock Draft finalny',
       'Scouci opublikowali estymowane sloty draftu.',
+      kind: 'final',
     );
   }
 
@@ -2085,6 +2091,13 @@ class SeasonService {
           MessageType.draftPick,
           'Draft: wybrano ${chosen.name}',
           'Pick $overallPick: ${chosen.position.code}',
+          kind: 'selected',
+          args: {
+            'pickNumber': overallPick,
+            'playerName': chosen.name,
+            'teamName': _teamName(state, pick.teamId),
+            'position': chosen.position.code,
+          },
           urgent: true,
         );
         playerPickProspectId = null;
@@ -3265,7 +3278,7 @@ class SeasonService {
   }
 
   SeasonAwards _computeAwards(LeagueState league) {
-    const possibleMinutes = 58 * 90;
+    final possibleMinutes = balance.awards.possibleMinutes;
     final playersById = <String, Player>{};
     final currentTeamByPlayerId = <String, String>{};
     for (final team in league.teams) {
@@ -3293,14 +3306,17 @@ class SeasonService {
     }
 
     final mvpPool = candidates.where(
-      (candidate) => candidate.stats.minutes >= possibleMinutes * 0.40,
+      (candidate) =>
+          candidate.stats.minutes >=
+          possibleMinutes * balance.awards.mvpMinutesPct,
     );
     final mvp = _bestCandidate(mvpPool, (candidate) => _mvpScore(candidate));
 
     final rotyPool = candidates.where(
       (candidate) =>
           candidate.player.draftYear == league.currentSeason.year - 1 &&
-          candidate.stats.minutes >= possibleMinutes * 0.25,
+          candidate.stats.minutes >=
+              possibleMinutes * balance.awards.rotyMinutesPct,
     );
     final roty = _bestCandidate(
       rotyPool,
@@ -3308,7 +3324,9 @@ class SeasonService {
     );
 
     final dpoyPool = candidates.where(
-      (candidate) => candidate.stats.minutes >= possibleMinutes * 0.40,
+      (candidate) =>
+          candidate.stats.minutes >=
+          possibleMinutes * balance.awards.dpoyMinutesPct,
     );
     final dpoy = _bestDefender(dpoyPool);
 
@@ -3324,7 +3342,9 @@ class SeasonService {
     );
 
     final gkPool = candidates.where(
-      (candidate) => candidate.stats.gkMinutes >= possibleMinutes * 0.40,
+      (candidate) =>
+          candidate.stats.gkMinutes >=
+          possibleMinutes * balance.awards.bestGkMinutesPct,
     );
     final bestGk = _bestGoalkeeper(gkPool);
 
@@ -3618,7 +3638,9 @@ class SeasonService {
           (sum, position) =>
               sum + (candidate.stats.positionMinutes[position] ?? 0),
         );
-        if (minutes < possibleMinutes * 0.30) continue;
+        if (minutes < possibleMinutes * balance.awards.totsSlotMinutesPct) {
+          continue;
+        }
         final score = _teamOfSeasonScore(candidate, minutes);
         options.add(
           _TeamOfSeasonOption(
@@ -3717,9 +3739,6 @@ class SeasonService {
     LeagueState league, {
     required int saveSeed,
   }) {
-    final rng = Random(
-      seasonEventSeed(saveSeed, league.currentSeason.year, 'lottery'),
-    );
     final all = <Standing>[];
     for (final cs in league.currentSeason.standings) {
       all.addAll(cs.standings);
@@ -3729,38 +3748,11 @@ class SeasonService {
       if (pts != 0) return pts;
       return a.goalDifference.compareTo(b.goalDifference);
     });
-    final lotteryTeams = all.take(10).toList();
-    if (lotteryTeams.length < 10) return [];
-    final weights = [140, 120, 100, 90, 80, 70, 60, 50, 40, 30];
-    final remaining = List<Standing>.from(lotteryTeams);
-    final remainingWeights = List<int>.from(weights);
-    final results = <LotteryResult>[];
-    final totalOdds = weights.fold<int>(0, (s, w) => s + w);
-
-    for (var pick = 1; pick <= 10; pick++) {
-      final total = remainingWeights.fold<int>(0, (s, w) => s + w);
-      var roll = rng.nextInt(total);
-      var idx = 0;
-      for (var i = 0; i < remainingWeights.length; i++) {
-        roll -= remainingWeights[i];
-        if (roll < 0) {
-          idx = i;
-          break;
-        }
-      }
-      results.add(
-        LotteryResult(
-          teamId: remaining[idx].teamId,
-          originalRank:
-              all.indexWhere((s) => s.teamId == remaining[idx].teamId) + 1,
-          assignedPick: pick,
-          oddsForFirstPick: remainingWeights[idx] / totalOdds,
-        ),
-      );
-      remaining.removeAt(idx);
-      remainingWeights.removeAt(idx);
-    }
-    return results;
+    return LotteryService.computeResults(
+      all,
+      saveSeed: saveSeed,
+      seasonYear: league.currentSeason.year,
+    );
   }
 
   /// Buduje kolejność draftu na [currentYear]. Dla każdego slotu próbuje
@@ -3891,14 +3883,18 @@ class SeasonService {
     String title,
     String body, {
     bool urgent = false,
+    String? kind,
+    Map<String, dynamic> args = const {},
   }) {
+    final suffix = kind == null ? '' : '_$kind';
     return _messages.send(
       league,
       type: type,
       priority: urgent ? MessagePriority.urgent : MessagePriority.normal,
-      titleKey: 'msg_${type.name}_title',
-      bodyKey: 'msg_${type.name}_body',
-      args: {'_legacyTitle': title, '_legacyBody': body},
+      kind: kind,
+      titleKey: 'msg_${type.name}${suffix}_title',
+      bodyKey: 'msg_${type.name}${suffix}_body',
+      args: {'_legacyTitle': title, '_legacyBody': body, ...args},
     );
   }
 }

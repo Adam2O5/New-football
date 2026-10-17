@@ -1,4 +1,4 @@
-import 'package:new_football/app/providers/search_filters_provider.dart';
+import 'package:new_football/core/models/search_filters.dart';
 import 'package:new_football/core/models/assigned_role.dart';
 import 'package:new_football/core/models/enums.dart';
 

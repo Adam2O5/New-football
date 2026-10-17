@@ -12,6 +12,26 @@ class MessageTextTemplate {
 
 class MessageTemplatesPl {
   static const Map<String, MessageTextTemplate> templates = {
+    'msg_calendar_freeAgencyOpen_title': MessageTextTemplate(
+      key: 'msg_calendar_freeAgencyOpen_title',
+      title: 'Rynek wolnych agentów otwarty',
+      body: 'Możesz teraz składać oferty zawodnikom i sztabowi bez klubu.',
+    ),
+    'msg_scoutReport_preCombine_title': MessageTextTemplate(
+      key: 'msg_scoutReport_preCombine_title',
+      title: 'Raport skautingowy',
+      body: 'Sztab przygotował raporty z obserwacji i przydział na Combine.',
+    ),
+    'msg_combine_completed_title': MessageTextTemplate(
+      key: 'msg_combine_completed_title',
+      title: 'Draft Combine',
+      body: 'Testy fizyczne i mecz pokazowy zakończone.',
+    ),
+    'msg_draftPick_selected_title': MessageTextTemplate(
+      key: 'msg_draftPick_selected_title',
+      title: 'Draft: wybrano {playerName}',
+      body: 'Pick {pickNumber}: {position}. Klub: {teamName}.',
+    ),
     'msg_walkover_title': MessageTextTemplate(
       key: 'msg_walkover_title',
       title: 'Zagrożenie walkowerem',
