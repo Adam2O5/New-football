@@ -1,6 +1,55 @@
 # Nowe testy — etapy 0–8
 
-Etapy 0–7 zostały zaakceptowane i zapisane przez użytkownika: `dc6e454`, `b4048fb`, `553198c`, `f8e45e1`, `5762f4f`, `0f2fd43`, `5598811`, `6e9cea2` oraz etap 7 w `8293be2`. R04 etapu 8 zapisano w `d010cec`, R05 w `c567d39`, R06 w `4677f98`, R07 w `1fd485b`. **Etap 8 jest w toku: R08 (sezon) jest ukończone i gotowe do review.** Zmiany R08 pozostają bez commita. R09–R13 nie zostały rozpoczęte. Wyniki wcześniejszych grup/etapów poniżej są historycznym punktem odniesienia.
+Etapy 0–7 zostały zaakceptowane i zapisane przez użytkownika: `dc6e454`, `b4048fb`, `553198c`, `f8e45e1`, `5762f4f`, `0f2fd43`, `5598811`, `6e9cea2` oraz etap 7 w `8293be2`. R04 etapu 8 zapisano w `d010cec`, R05 w `c567d39`, R06 w `4677f98`, R07 w `1fd485b`, R08 w `eef0c73`. **Etap 8 jest w toku: R09 (rynek kontraktów) jest ukończone i gotowe do review.** Zmiany R09 pozostają bez commita. R10–R13 nie zostały rozpoczęte. Wyniki wcześniejszych grup/etapów poniżej są historycznym punktem odniesienia.
+
+## Etap 8 — R09: rynek kontraktów — 17 października 2026
+
+Punkt wyjścia: `eef0c73` (R08), czyste repozytorium. Wydzielono 46 metod `ContractMarketService` do dziewięciu prywatnych miksinów. Wszystkie części pozostają w `lib/core/services/`, połączone przez `part`/`part of`. Dotychczasowe publiczne metody nadal są metodami instancji serwisu, dostępnymi przez stary import. Odbiór następuje po całej grupie; agent nie wykonuje commitów.
+
+### Podział
+
+- **`contract_market_service.dart`: 2646 → 265 linii.** Pozostają `ContractMarketWindow`, konstruktor, dziewięć pól zależności, `windowAt`, `phaseAt` i cztery pola indeksu zawodników (16 dotychczasowych elementów klasy). W tym samym pliku znajduje się kontrakt `_ContractMarketShared`.
+- **`contract_market_player_offers.dart` (231):** całe `submitPlayerOffer`, łącznie z walidacją i tworzeniem rekordu/odpowiedzi.
+- **`contract_market_staff_offers.dart` (206):** całe `submitStaffOffer`, łącznie z walidacją podmiotu i tworzeniem negocjacji sztabu.
+- **`contract_market_finalization.dart` (335):** całe `finalizeNegotiation` i `resolveCounterResponse`, bez zmiany walidacji terminu, kontraktu, obsługi odpowiedzi czy przeniesienia podmiotu do właściwej kolekcji.
+- **`contract_market_resolution.dart` (392):** pięć metod `resolveHour`, `resolveDay`, `_resolveSlot`, `_resolveWaiting`, `_resolveSubjectOffers`. Nadal jest to jedna implementacja resolvera godziny/dnia, z tą samą kolejnością dodawania ofert, waiting, odpowiedzi na counter, wyboru ofert i wygaśnięć. Zbiór `resolvedWaitingIds` pozostaje lokalny i zachowuje zakres życia.
+- **`contract_market_rfa.dart` (284):** siedem metod minimum i złożenia/odmowy QO, offer sheet, match/decline oraz wygaśnięcia arkuszy.
+- **`contract_market_draft_rights.dart` (300):** siedem metod ticka tygodniowego, odroczonych praw, ofert dla świeżych niedraftowanych, liczników/limitów i `signDraftedRight`.
+- **`contract_market_signing.dart` (191):** trzy metody podpisu awaryjnego, zabezpieczenia rosteru i `_finalizeAi`. Nadal używają tych samych `ContractService` i `StaffService`.
+- **`contract_market_ai_bridge.dart` (408):** osiem istniejących bloków integracji polityki ofert, planów przedłużeń, rekordów zawodnika/sztabu, deduplikacji, RFA i odpowiedzi na counter. To mechaniczne przeniesienie obecnego kodu integracji; nie jest analizą wyłączonego `lib/core/ai/`.
+- **`contract_market_helpers.dart` (246):** dwanaście metod counter/score, upsert, porównań terminu, usuwania oznaczenia niedraftowanego, wyszukiwania zawodnika/sztabu i seedowania. `_findPlayer` nadal odświeża indeks na podstawie tożsamości tych samych trzech list.
+
+### Jedna instancja i resolver
+
+Każdy miksin ma `on _ContractMarketShared`. Wspólny kontrakt nie przechowuje stanu ani implementacji; zawiera **37 deklaracji abstrakcyjnych**: 12 getterów, cztery settery cache i 21 metod. Dopisano **33 adnotacje `@override`** do istniejących pól/metod realizujących ten kontrakt. Nie dodano klasy bazowej, wrapperów, extension ani drugiego serwisu/zbioru negocjacji.
+
+Pola `_indexedTeams`, `_indexedFreeAgents`, `_indexedDraftedRights` i `_playerIndex` pozostają w jednym `ContractMarketService` z dotychczasowymi inicjalizatorami. Kod budowania/odczytu indeksu przeniesiono w całości; abstrakcyjne gettery/settery wskazują na te same pola, bez kopiowania i dodatkowego resetowania cache. Wszystkie zależności, argumenty i inicjalizatory konstruktora zachowano, łącznie z dotychczasowym sposobem tworzenia domyślnej polityki AI.
+
+Nie zmieniono limitów godzinowych/tygodniowych, znaczenia godziny 0 w FA II, dat ofert i podpisów, kolejności rozstrzygnięć ani warunków wygaśnięcia. Nie przeniesiono żadnej operacji do nowej kolejki. Nie zmieniano modeli negocjacji, ich serializacji ani reguł balansu.
+
+### Weryfikacja
+
+- **Przed podziałem 48/48:** `contract_messages_test.dart`, `contract_period_test.dart`, `contract_market_period_test.dart`, `phase_two_window_test.dart`, `contract_boundary_save_test.dart`, `game_controller_mutations_test.dart`, `signing_valuation_test.dart`.
+- Scenariusze obejmują accept/reject/counter i finalizację zawodnika/sztabu, wiadomości PL/EN, QO/RFA, daty podpisu, prawa draftowe/podpis awaryjny, końcowy slot FA II, granice 46/47 i 52/1, payroll/wycenę oraz bliskie operacje w jednej kolejce.
+- Jednorazowe porównanie SHA-256 z `eef0c73`: **62/62 elementy klasy oraz cały enum `ContractMarketWindow` zachowały implementację** — 46 metod przeniesiono, 16 elementów pozostawiono. Porównanie obejmuje sygnatury, ciała, komentarze i inicjalizatory; normalizuje tylko końce linii/zewnętrzne puste linie oraz 33 jawnie wskazane nowe adnotacje `@override`.
+- Sprawdzono kompletność/unikalność, kolejność w każdej części, brak dodatkowych implementacji i stanów w miksinach/kontrakcie, importy i enum. Manifest i wynik porównania znajdują się w folderze raportów. Nie dodano trwałych testów układu źródeł ani skryptów w aplikacji.
+- Analiza `lib/app`, dziesięciu plików biblioteki rynku i `test/nowe_testy/`: **bez uwag**. Formatowanie sprawdzono, zachowanie implementacji potwierdza porównanie źródeł. `git diff --check`: bez uwag.
+- **Po podziale 207/207:** pełny folder `test/nowe_testy/`, w tym wszystkie 48 scenariuszy bazowych. Użyto istniejących testów zachowania; nie dodano nowych testów ani helperów.
+- `flutter build bundle --debug --no-pub`: **exit code 0**, zaktualizowany kernel bundle. Odbiór lokalny debug bez podłączonego urządzenia.
+- Test odświeżeń zachowuje Home: 5, Squad: 0, Standings: 0 przy pięciu zmianach daty. Ten organizacyjny podział nie stanowi nowej optymalizacji wykonania.
+
+Schemat zapisu nadal **27**, bez migracji. Nie analizowano ani nie zmieniano wyłączonych AI/simulation, generatorów, assets i starych testów. Integracje placeholderów przeniesiono bez oceniania lub zmiany ich decyzji. Oryginalny raport audytu pozostał bez zmian.
+
+Logi w `reports/lib-audit-2026-10-13/`: `stage-8-r09-before-tests.txt`, `stage-8-r09-market-analyze.txt`, `stage-8-r09-all-tests.txt`, `stage-8-r09-analyze.txt`, `stage-8-r09-build.txt`, `stage-8-r09-movement-baseline.json`, `stage-8-r09-movement-check.txt`.
+
+### Ręczne review R09
+
+1. **Oferty zawodnika i sztabu:** w dostępnym oknie złóż ofertę FA/przedłużenia i ofertę sztabu. Sprawdź reakcję, wiadomość, oczekującą finalizację/counter oraz jawne zatwierdzenie podpisu. Zapisz i wczytaj; negocjacje oraz podpisy mają pozostać.
+2. **Godzina/dzień rynku:** wykonaj dwie różne operacje blisko siebie, przesuń godzinę albo dzień i sprawdź oba rekordy. Zweryfikuj działanie kolejnego slotu oraz ograniczeń; dzień/roster nie powinny się cofać. Zachowanie ma odpowiadać wersji sprzed podziału.
+3. **RFA i prawa draftowe:** jeżeli kariera jest już w odpowiedniej fazie, sprawdź dostępne QO, offer sheet i match/decline albo podpis prawa draftowego. Automatyczne fixture'y odtwarzają granice faz/terminów; nie trzeba ręcznie przechodzić całego sezonu dla każdego wariantu.
+4. **Podpis i aktualność danych:** po finalizacji sprawdź właściwy roster/listę FA/sztab, payroll i wycenę oraz ponowny odczyt ekranu negocjacji po load. Testy I/O używają własnych katalogów tymczasowych, bez celowego uszkadzania zapisów użytkownika.
+
+Grupa **R09** jest gotowa do review; prace zatrzymano na tej granicy. R10 (eventy drużyn i zawodników) wymaga kolejnej zgody. Nie wykonano commitów ani dalszych grup.
 
 ## Etap 8 — R08: organizacja sezonu — 17 października 2026
 
@@ -50,7 +99,7 @@ Logi w `reports/lib-audit-2026-10-13/`: `stage-8-r08-before-tests.txt`, `stage-8
 3. **Loteria/skauting/draft:** uruchom dostępne zdarzenia, sprawdź kolejność picków, Scout Report/Combine/finalny mock oraz wybór gracza i symulację wyborów do kolejnej tury. Sprawdź roster i przypisane prawa po zapisie/wczytaniu.
 4. **Rollover:** na końcu cyklu sprawdź nowy rok, historię, wiek i kontrakty, a następnie zapis/wczytanie. Nie trzeba ręcznie tworzyć wszystkich faz od zera — kontrolowane fixture'y testów odtwarzają granice umów i roku.
 
-Grupa **R08** jest gotowa do review; prace zatrzymano na tej granicy. R09 (rynek kontraktów) wymaga kolejnej zgody użytkownika. Nie wykonano commitów ani dalszych grup.
+R08 został następnie zapisany przez użytkownika w `eef0c73`, a użytkownik pozwolił kontynuować R09. Powyższe wyniki dokumentują odbiór R08; bieżący postęp opisano na początku pliku. Agent nie wykonywał commitów.
 
 ## Etap 8 — R07: organizacja dnia — 17 października 2026
 
