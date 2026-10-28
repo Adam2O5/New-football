@@ -1,3 +1,6 @@
+@Tags(['unit'])
+library;
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:new_football/core/ai/ai_matchday_service.dart';
 import 'package:new_football/core/models/enums.dart';

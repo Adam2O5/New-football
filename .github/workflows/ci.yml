@@ -9,17 +9,24 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
       - uses: subosito/flutter-action@v2
         with:
-          channel: stable
+          flutter-version: '3.41.4'
           cache: true
       - name: Disable analytics/telemetry prompts
         run: |
           flutter config --no-analytics
           dart --disable-analytics
       - run: flutter pub get
+      - name: Verify test selection and process limits
+        shell: pwsh
+        run: |
+          ./scripts/verify/test_runner_dry_run.Tests.ps1
+          ./scripts/verify/test_runner_exit_codes.Tests.ps1
+          ./scripts/test.ps1 -Profile standard -DryRun
       - name: Verify core has no Flutter imports
         run: bash ./scripts/check_core_no_flutter.sh
       - name: Build runner
@@ -27,4 +34,12 @@ jobs:
         timeout-minutes: 10
       - run: flutter analyze --no-fatal-infos
       - name: Run tests
-        run: pwsh -NoProfile -NonInteractive -File ./scripts/test.ps1
+        timeout-minutes: 15
+        run: pwsh -NoProfile -NonInteractive -File ./scripts/test.ps1 -Profile standard
+      - name: Upload test diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: build/test-results/
+          if-no-files-found: ignore

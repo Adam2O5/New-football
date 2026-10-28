@@ -45,8 +45,11 @@ void main() {
           if (bracket.leagueFinal != null) bracket.leagueFinal!,
         ])
           ...series.games,
-      for (final playIn in season.playInResults)
-        ...[playIn.game7v8, playIn.game9v10, playIn.gameFinal],
+      for (final playIn in season.playInResults) ...[
+        playIn.game7v8,
+        playIn.game9v10,
+        playIn.gameFinal,
+      ],
       for (final playIn in season.playInProgress)
         ...[
           playIn.game7v8,

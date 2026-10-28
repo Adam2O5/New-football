@@ -48,7 +48,6 @@ mixin _CalendarScreenBody
     final daysInMonth = monthEnd.day;
     final leading = monthStart.weekday - 1; // Mon=1 → leading 0
     final totalCells = ((leading + daysInMonth + 6) ~/ 7) * 7;
-    final gridStart = monthStart.subtract(Duration(days: leading));
 
     final teamNameById = {for (final t in league.teams) t.id: t.name};
     final matchesByRound = <int, List<ScheduledMatch>>{};
@@ -329,7 +328,11 @@ mixin _CalendarScreenBody
                                     mainAxisExtent: tileExtent,
                                   ),
                               itemBuilder: (context, i) {
-                                final date = gridStart.add(Duration(days: i));
+                                final date = DateTime(
+                                  month.year,
+                                  month.month,
+                                  1 - leading + i,
+                                );
                                 final info = dayInfo(date);
                                 final isInMonth = date.month == month.month;
                                 final isEnabled =

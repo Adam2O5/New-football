@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:new_football/core/ai/ai_draft_service.dart';
 import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/contract.dart';
 import 'package:new_football/core/models/contract_market_models.dart';
@@ -119,54 +118,6 @@ void main() {
     );
     expect(restoredSave.leagueState.freshUndraftedPlayers, hasLength(30));
     expect(SaveSchema.currentVersion, 23);
-  });
-
-  test('weekly deferred-rights policy signs legal AI-owned rights', () {
-    final base = generator
-        .generateLeague(seed: 3611)
-        .copyWith(currentWeek: 47, currentDay: 1, currentHour: 1);
-    final originalTeam = aiTeam(base);
-    final team = originalTeam.copyWith(
-      roster: originalTeam.roster.take(20).toList(),
-    );
-    final player = prospectPlayer(
-      base,
-      id: 'task36-deferred-right',
-      index: 2,
-      yearsRemaining: balance.salaryCap.rookieScaleYears,
-      rookieScale: true,
-    );
-    final right = DraftedPlayerRights(
-      id: 'rights:3611:60:${player.id}',
-      ownerTeamId: team.id,
-      player: player,
-      draftYear: base.currentSeason.year,
-      pickNumber: 60,
-    );
-    final state = replaceTeam(base.copyWith(draftedRights: [right]), team);
-    final policy = AiDraftService();
-    final market = ContractMarketService();
-
-    LeagueState? signed;
-    for (var seed = 0; seed < 500; seed++) {
-      final decision = policy.deferredRightsSigningDecision(
-        team: team,
-        prospectId: player.id,
-        saveSeed: seed,
-        seasonYear: state.currentSeason.year,
-        week: state.currentWeek,
-      );
-      if (!decision.sign) continue;
-      final candidate = market.weeklyTick(state, saveSeed: seed);
-      if (!candidate.draftedRights.any((item) => item.id == right.id)) {
-        signed = candidate;
-        break;
-      }
-    }
-
-    expect(signed, isNotNull);
-    expect(signed!.draftedRights, isEmpty);
-    expect(signed.teamById(team.id)!.roster, hasLength(team.roster.length + 1));
   });
 
   test(

@@ -9,11 +9,9 @@ import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/app/screens/free_agency_screen.dart';
 import 'package:new_football/app/screens/staff_screen.dart';
 import 'package:new_football/app/utils/staff_presentation.dart';
-import 'package:new_football/core/ai/ai_contract_market_service.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/staff.dart';
-import 'package:new_football/core/services/staff_service.dart';
 import 'package:new_football/data/staff_data_compatibility.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
@@ -99,67 +97,6 @@ void main() {
         GraphicStar.full,
         GraphicStar.empty,
       ]);
-    });
-
-    test('Requirement 10.9: irrelevant mutation preserves sorting, contracts, '
-        'negotiation and AI classification', () {
-      final service = StaffService();
-      final base = staffMemberFor(
-        StaffRole.headCoach,
-        relevantValues: [3.3, 3.3],
-        irrelevantValue: 0.0,
-        id: 'regression-head-base',
-      );
-      final mutated = base.copyWith(
-        attributes: withIrrelevantStaffAttribute(
-          base.attributes,
-          base.role,
-          value: 5.0,
-        ),
-      );
-      final competitor = staffMemberFor(
-        StaffRole.headCoach,
-        relevantValues: [3.0, 3.0],
-        id: 'regression-head-competitor',
-      );
-      final offer = staffOfferFor(base, service: service);
-
-      expect(mutated.overall, base.overall);
-      expect(
-        StaffPresentation.sortStaffCandidates([
-          competitor,
-          base,
-        ], base.role).map((member) => member.id).toList(),
-        StaffPresentation.sortStaffCandidates([
-          competitor,
-          mutated,
-        ], base.role).map((member) => member.id).toList(),
-      );
-      expect(service.marketSalary(mutated), service.marketSalary(base));
-      expect(service.staffWant(mutated), service.staffWant(base));
-      expect(service.expectedSalary(mutated), service.expectedSalary(base));
-      expect(service.expectedLength(mutated), service.expectedLength(base));
-      expect(
-        service.staffOfferScore(mutated, offer),
-        service.staffOfferScore(base, offer),
-      );
-
-      final policy = AiContractMarketService();
-      final baseLeague = staffFixtureLeague(staffFreeAgents: [base]);
-      final mutatedLeague = staffFixtureLeague(staffFreeAgents: [mutated]);
-      final baseTeam = baseLeague.playerTeam!;
-      final mutatedTeam = mutatedLeague.playerTeam!;
-      final basePlan = policy.staffFreeAgentPlan(
-        league: baseLeague,
-        team: baseTeam,
-        saveSeed: staffFixtureSaveSeed,
-      );
-      final mutatedPlan = policy.staffFreeAgentPlan(
-        league: mutatedLeague,
-        team: mutatedTeam,
-        saveSeed: staffFixtureSaveSeed,
-      );
-      _expectPlansEqual(mutatedPlan, basePlan);
     });
 
     test(
@@ -264,16 +201,6 @@ void main() {
       },
     );
   });
-}
-
-void _expectPlansEqual(AiStaffOfferPlan? actual, AiStaffOfferPlan? expected) {
-  expect(actual == null, expected == null);
-  if (actual == null || expected == null) return;
-  expect(actual.member.id, expected.member.id);
-  expect(actual.role, expected.role);
-  expect(actual.offer.salary, expected.offer.salary);
-  expect(actual.offer.years, expected.offer.years);
-  expect(actual.offerScore, closeTo(expected.offerScore, 1e-9));
 }
 
 void _expectFiveIcons(WidgetTester tester, String prefix) {

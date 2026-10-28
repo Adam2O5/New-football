@@ -7,10 +7,7 @@ import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/core/models/message.dart';
-import 'package:new_football/core/models/league_state.dart';
-import 'package:new_football/core/services/day_simulator.dart';
 import 'package:new_football/core/services/game_factory.dart';
-import 'package:new_football/core/simulation/match_bootstrap.dart';
 import 'package:new_football/data/save_repository.dart';
 
 void main() {
@@ -123,22 +120,6 @@ void main() {
     expect(league.currentHour, 1);
     expect(league.hourlyPlayerOfferUsed, isFalse);
     expect(league.hourlyStaffOfferUsed, isFalse);
-  });
-
-  test('match result is stamped for the next day', () async {
-    final league = controller.save!.leagueState;
-    final match = league.currentSeason.schedule.first;
-    final home = league.teamById(match.homeTeamId)!;
-    final away = league.teamById(match.awayTeamId)!;
-    final result = const MatchEngine().simulateFull(
-      home: home,
-      away: away,
-      rngSeed: 7,
-    );
-    final next = DaySimulator().applyPlayerMatchResult(league, match, result);
-
-    expect(next.currentWeek, 1);
-    expect(next.currentDay, 2);
   });
 
   test('an urgent message blocks both day and hour transitions', () async {

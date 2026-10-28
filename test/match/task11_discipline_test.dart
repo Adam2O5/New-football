@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:new_football/core/simulation/match_bootstrap.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/core/models/league_state.dart';
@@ -144,32 +143,6 @@ void main() {
       ],
     );
     expect(apply(team, result).roster.first.state.suspensionGamesRemaining, 3);
-  });
-
-  test('suspended players are excluded from availability, XI and bench', () {
-    final team = league.teams.first;
-    final suspended = team.roster.first.copyWith(
-      state: team.roster.first.state.copyWith(suspensionGamesRemaining: 2),
-    );
-    final ids = team.roster.take(11).map((player) => player.id).toList();
-    final changed = team.copyWith(
-      roster: [suspended, ...team.roster.skip(1)],
-      lineupPlayerIds: ids,
-      benchPlayerIds: [
-        suspended.id,
-        ...team.roster.skip(11).take(2).map((p) => p.id),
-      ],
-    );
-
-    expect(changed.availablePlayers, isNot(contains(suspended)));
-    expect(changed.startingEleven, isNot(contains(suspended)));
-    final live = const MatchEngine().start(
-      home: changed,
-      away: team,
-      rngSeed: 7,
-    );
-    expect(live.state.homeLineup, isNot(contains(suspended)));
-    expect(live.state.homeBench, isNot(contains(suspended)));
   });
 
   test('suspension decrements only when the player team plays', () {

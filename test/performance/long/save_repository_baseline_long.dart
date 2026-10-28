@@ -1,3 +1,6 @@
+@Tags(['long', 'slow', 'benchmark'])
+library;
+
 import 'dart:convert';
 import 'dart:io';
 
@@ -6,7 +9,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/data/save_repository.dart';
 
-import 'support/game_fixtures.dart';
+import '../../nowe_testy/support/game_fixtures.dart';
 
 void main() {
   test(

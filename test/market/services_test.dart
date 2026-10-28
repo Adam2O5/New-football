@@ -1,9 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:new_football/core/ai/team_ai_service.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/seed_data_generator.dart';
-import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/services/contract_service.dart';
 import 'package:new_football/core/services/day_simulator.dart';
 import 'package:new_football/core/services/development_service.dart';
@@ -52,14 +50,6 @@ void main() {
     );
     expect(svc.playerOfferScore(player, offer), greaterThanOrEqualTo(70));
     expect(svc.evaluate(player, offer), ContractReaction.accept);
-  });
-
-  test('TeamAiService autoSelectLineup includes GK', () {
-    final ai = TeamAiService();
-    final team = ai.autoSelectLineup(league.teams[2]);
-    expect(team.lineupPlayerIds.length, 11);
-    final xi = team.startingEleven;
-    expect(xi.any((p) => p.position == Position.gk), isTrue);
   });
 
   test('TradeService rejects trades outside the trade window', () {

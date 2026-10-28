@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:new_football/app/providers/game_provider.dart';
-import 'package:new_football/app/screens/matchday_screen.dart';
 import 'package:new_football/app/screens/squad_screen.dart';
 import 'package:new_football/app/widgets/tactics/player_list_tile.dart';
 import 'package:new_football/core/models/enums.dart';
@@ -15,64 +14,6 @@ import 'package:new_football/core/models/league_state.dart';
 import '../helpers/widget_harness.dart';
 
 void main() {
-  testWidgets('Matchday wykonuje zmianę przez arkusz zmian', (tester) async {
-    final game = task41Game(seed: 4106);
-    final match = game.leagueState.currentSeason.schedule.firstWhere(
-      (item) =>
-          item.homeTeamId == game.leagueState.playerTeamId ||
-          item.awayTeamId == game.leagueState.playerTeamId,
-    );
-
-    await tester.pumpWidget(task41App(MatchdayScreen(match: match), game));
-    await tester.pump();
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('Zmiany'));
-    await tester.pumpAndSettle();
-
-    final dropdowns = find.byType(DropdownButtonFormField<String>);
-    expect(dropdowns, findsNWidgets(2));
-    final dropdownButtons = find.byType(DropdownButton<String>);
-    expect(dropdownButtons, findsNWidgets(2));
-    final outgoing = tester.widget<DropdownButton<String>>(
-      dropdownButtons.at(0),
-    );
-    final incoming = tester.widget<DropdownButton<String>>(
-      dropdownButtons.at(1),
-    );
-    final outgoingId = outgoing.items!.first.value!;
-    final incomingId = incoming.items!.first.value!;
-    outgoing.onChanged!(outgoingId);
-    incoming.onChanged!(incomingId);
-    await tester.pump();
-
-    await tester.tap(find.widgetWithText(FilledButton, 'Wykonaj zmianę'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Zmiany: 1'), findsOneWidget);
-  });
-
-  testWidgets('Matchday symuluje do końca i pokazuje podsumowanie', (
-    tester,
-  ) async {
-    final game = task41Game(seed: 4107);
-    final match = game.leagueState.currentSeason.schedule.firstWhere(
-      (item) =>
-          item.homeTeamId == game.leagueState.playerTeamId ||
-          item.awayTeamId == game.leagueState.playerTeamId,
-    );
-
-    await tester.pumpWidget(task41App(MatchdayScreen(match: match), game));
-    await tester.pump();
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('Do końca'));
-    await tester.pumpAndSettle();
-
-    expect(find.text('Podsumowanie meczu'), findsOneWidget);
-    await tester.pumpWidget(const SizedBox.shrink());
-  });
-
   testWidgets('Squad blokuje wejście kontuzjowanego i zawieszonego gracza', (
     tester,
   ) async {

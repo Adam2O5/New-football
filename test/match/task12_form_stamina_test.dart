@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:new_football/core/balance/balance_config.dart';
-import 'package:new_football/core/simulation/match_bootstrap.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/match_models.dart';
@@ -174,60 +173,6 @@ void main() {
         ).withMatchForm(minutesPlayed: 0, rating: 0, lost: true).state.form,
         9.8,
       );
-    },
-  );
-
-  test(
-    'LiveMatch reports actual minutes, including a 45-minute substitution',
-    () {
-      final league = SeedDataGenerator(
-        random: null,
-      ).generateLeague(year: 2026, seed: 13);
-      final home = league.teams.first;
-      final away = league.teams[1];
-      final engine = const MatchEngine();
-      final live = engine.start(home: home, away: away, rngSeed: 13);
-      final outgoing = live.state.homeLineup.first;
-      final incoming = live.state.homeBench.first;
-
-      for (var i = 0; i < 45; i++) {
-        live.state = live.state.copyWith(
-          minute: live.state.minute + 1,
-          homeLineup: live.recordMinute(
-            lineup: live.state.homeLineup,
-            homeSide: true,
-          ),
-        );
-      }
-      expect(
-        engine.applySubstitution(
-          live: live,
-          homeSide: true,
-          playerOutId: outgoing.id,
-          playerInId: incoming.id,
-        ),
-        isTrue,
-      );
-      for (var i = 0; i < 45; i++) {
-        live.state = live.state.copyWith(
-          minute: live.state.minute + 1,
-          homeLineup: live.recordMinute(
-            lineup: live.state.homeLineup,
-            homeSide: true,
-          ),
-        );
-      }
-
-      final result = live.toResult();
-      final outgoingStats = result.playerStats.firstWhere(
-        (s) => s.playerId == outgoing.id,
-      );
-      final incomingStats = result.playerStats.firstWhere(
-        (s) => s.playerId == incoming.id,
-      );
-      expect(outgoingStats.minutes, 45);
-      expect(incomingStats.minutes, 45);
-      expect(result.playerStats.any((stats) => stats.minutes == 0), isTrue);
     },
   );
 

@@ -1,253 +1,84 @@
+#Requires -Version 7.0
 [CmdletBinding()]
 param()
-
 $ErrorActionPreference = 'Stop'
-
-# Validates: Requirements 2.2, 3.2, 3.3, 3.4, 3.5
-# Property 6: -Fast reproduces presets.fast.exclude_tags.
-# Property 7: every valid area maps to exactly one test/<area> path.
-$repoRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..\..')).Path
-$runnerPath = Join-Path $repoRoot 'scripts\test.ps1'
-$configPath = Join-Path $repoRoot 'dart_test.yaml'
-$powerShellExecutable = (Get-Command powershell.exe -ErrorAction Stop).Source
-
-function Get-FastExcludedTags {
-    $lines = [System.IO.File]::ReadAllLines($configPath)
-    $inPresets = $false
-    $inFast = $false
-    $rawValue = $null
-
-    foreach ($line in $lines) {
-        if ($line -match '^\s*presets:\s*(?:#.*)?$') {
-            $inPresets = $true
-            $inFast = $false
-            continue
-        }
-
-        if ($inPresets -and ($line -match '^\s*fast:\s*(?:#.*)?$')) {
-            $inFast = $true
-            continue
-        }
-
-        if ($inFast) {
-            $excludeMatch = [regex]::Match($line, '^\s*exclude_tags:\s*(?<value>[^#]+?)(?:\s+#.*)?$')
-            if ($excludeMatch.Success) {
-                $rawValue = $excludeMatch.Groups['value'].Value.Trim()
-                break
-            }
-
-            if (($line -match '^\S') -and ($line -notmatch '^\s*#')) {
-                $inFast = $false
-            }
-        }
-    }
-
-    if ([string]::IsNullOrWhiteSpace($rawValue)) {
-        throw "Could not read presets.fast.exclude_tags from '$configPath'."
-    }
-
-    if ((($rawValue.StartsWith('"')) -and ($rawValue.EndsWith('"'))) -or
-        (($rawValue.StartsWith("'")) -and ($rawValue.EndsWith("'")))) {
-        $rawValue = $rawValue.Substring(1, $rawValue.Length - 2)
-    }
-
-    $tags = @(
-        $rawValue -split '\s*\|\|\s*' |
-            ForEach-Object { $_.Trim() } |
-            Where-Object { -not [string]::IsNullOrWhiteSpace($_) }
-    )
-
-    if ($tags.Count -eq 0) {
-        throw "presets.fast.exclude_tags in '$configPath' did not contain any tags."
-    }
-
-    return $tags
+$repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+. (Join-Path $repoRoot 'scripts/test_support.ps1')
+$runner = Join-Path $repoRoot 'scripts/test.ps1'
+$pwsh = (Get-Process -Id $PID).Path
+function Assert([bool] $Condition, [string] $Message) { if (!$Condition) { throw $Message } }
+function Assert-Rejected([scriptblock] $Action) {
+    $rejected = $false
+    try { & $Action | Out-Null } catch { $rejected = $true }
+    Assert $rejected 'Expected invalid selection/manifest to be rejected.'
 }
-
-function Invoke-TestRunnerDryRun {
-    param(
-        [Parameter(Mandatory = $true)]
-        [string] $ArgumentsText
-    )
-
-    # Use a child PowerShell process because scripts/test.ps1 intentionally calls
-    # exit; invoking it in this Pester process would terminate the test run.
-    $escapedRunnerPath = $runnerPath.Replace("'", "''")
-    $childCommand = "& '$escapedRunnerPath' $ArgumentsText"
-    $output = @(
-        & $powerShellExecutable -NoProfile -ExecutionPolicy Bypass -Command $childCommand 2>&1
-    )
-    $exitCode = $LASTEXITCODE
-    $textOutput = @($output | ForEach-Object { [string] $_ })
-    $commandLines = @($textOutput | Where-Object { $_ -match '^\s*flutter test(?:\s|$)' })
-
-    if ($commandLines.Count -ne 1) {
-        $outputText = if ($textOutput.Count -gt 0) { $textOutput -join [Environment]::NewLine } else { '(no output)' }
-        throw "Expected exactly one echoed flutter command for '$ArgumentsText'; found $($commandLines.Count). Output: $outputText"
-    }
-
-    return [pscustomobject]@{
-        ExitCode = $exitCode
-        Output = $textOutput
-        CommandLine = $commandLines[0].Trim()
-    }
+function Invoke-Runner([string[]] $RunnerArguments) {
+    $output = @(& $pwsh -NoProfile -NonInteractive -File $runner @RunnerArguments 2>&1)
+    [pscustomobject]@{ Code = $LASTEXITCODE; Text = ($output -join [Environment]::NewLine) }
 }
-
-function Convert-CommandLineToArguments {
-    param(
-        [Parameter(Mandatory = $true)]
-        [string] $CommandLine
-    )
-
-    $tokens = New-Object 'System.Collections.Generic.List[string]'
-    $matches = [regex]::Matches($CommandLine, '"(?:\\.|[^"])*"|[^\s]+')
-
-    foreach ($match in $matches) {
-        $token = $match.Value
-        if (($token.Length -ge 2) -and $token.StartsWith('"') -and $token.EndsWith('"')) {
-            $token = $token.Substring(1, $token.Length - 2).Replace('\"', '"')
-        }
-
-        [void] $tokens.Add($token)
+$tempRoot = [IO.Path]::GetFullPath([IO.Path]::GetTempPath())
+$fixture = Join-Path $tempRoot ("football-runner-selection-" + [guid]::NewGuid())
+try {
+    foreach ($path in @('test/data/value_test.dart', 'test/data/long/value_long.dart', 'test/ai/disabled/ai_test.dart.disabled')) {
+        $full = Join-Path $fixture $path
+        [IO.Directory]::CreateDirectory((Split-Path -Parent $full)) | Out-Null
+        [IO.File]::WriteAllText($full, 'void main() {}')
     }
-
-    return $tokens.ToArray()
-}
-
-function Assert-ExitCodeIsZero {
-    param(
-        [Parameter(Mandatory = $true)]
-        [pscustomobject] $Result,
-        [Parameter(Mandatory = $true)]
-        [string] $Invocation
-    )
-
-    if ($Result.ExitCode -ne 0) {
-        throw "Expected '$Invocation' to exit 0, got $($Result.ExitCode). Output: $($Result.Output -join [Environment]::NewLine)"
+    $entry = [pscustomobject]@{ path = 'test/ai/disabled/ai_test.dart.disabled'; originalPath = 'test/ai/ai_test.dart'; area = 'ai'; reason = 'AI deferred'; reactivateWhen = 'AI implemented'; long = $false }
+    $manifestPath = Join-Path $fixture 'test/blacklist.json'
+    function Set-Manifest($Entries) {
+        @{ version = 1; entries = @($Entries) } | ConvertTo-Json -Depth 5 | Set-Content -LiteralPath $manifestPath
     }
-}
+    Set-Manifest @($entry)
+    $standard = Get-TestSelection -Root $fixture
+    Assert ($standard.Files.Count -eq 1 -and $standard.Files[0] -eq 'test/data/value_test.dart') 'Standard must select only active files.'
+    Assert ($standard.LongCount -eq 1 -and $standard.BlacklistedCount -eq 1) 'Excluded counts must remain visible.'
+    $long = Get-TestSelection -Root $fixture -Profile long
+    Assert ($long.Files.Count -eq 1 -and $long.Files[0] -eq 'test/data/long/value_long.dart') 'Long must select only explicit long files.'
+    Assert ((Get-TestSelection -Root $fixture -Area ai).Files.Count -eq 0) 'Blacklisted-only area must be empty.'
+    Assert-Rejected { Get-TestSelection -Root $fixture -Area helpers }
+    Assert-Rejected { Get-TestSelection -Root $fixture -Area '../data' }
+    Set-Manifest @($entry, $entry)
+    Assert-Rejected { Get-TestSelection -Root $fixture }
+    Set-Manifest @()
+    Assert-Rejected { Get-TestSelection -Root $fixture }
+    $invalid = $entry | Select-Object *
+    $invalid.path = 'test/ai/../outside.dart.disabled'
+    Set-Manifest @($invalid)
+    Assert-Rejected { Get-TestSelection -Root $fixture }
+    $invalid.path = 'test/ai/disabled/missing_test.dart.disabled'
+    Set-Manifest @($invalid)
+    Assert-Rejected { Get-TestSelection -Root $fixture }
+    Set-Manifest @($entry)
+    $discovered = Join-Path $fixture 'test/data/long/leaked_test.dart'
+    [IO.File]::WriteAllText($discovered, 'void main() {}')
+    Assert-Rejected { Get-TestSelection -Root $fixture }
 
-function Assert-ArgumentsEqual {
-    param(
-        [Parameter(Mandatory = $true)]
-        [string[]] $Actual,
-        [Parameter(Mandatory = $true)]
-        [string[]] $Expected,
-        [Parameter(Mandatory = $true)]
-        [string] $Invocation
-    )
-
-    if ($Actual.Count -ne $Expected.Count) {
-        throw "Unexpected argument count for '$Invocation'. Expected [$($Expected -join ', ')], actual [$($Actual -join ', ')]."
+    $real = Get-TestSelection -Root $repoRoot
+    $discovery = @(Get-ChildItem -LiteralPath (Join-Path $repoRoot 'test') -Filter '*_test.dart' -File -Recurse)
+    Assert ($real.Files.Count -eq $discovery.Count) 'Wrapper and default filename discovery must agree.'
+    foreach ($area in @('ai', 'app', 'balance', 'branding', 'calendar', 'core', 'data', 'integration', 'l10n', 'market', 'match', 'messages', 'nowe_testy', 'performance', 'search', 'staff', 'ui')) {
+        $selection = Get-TestSelection -Root $repoRoot -Area $area
+        Assert (@($selection.Files | Where-Object { !$_.StartsWith("test/$area/") }).Count -eq 0) "Area leaked other files: $area"
     }
-
-    for ($index = 0; $index -lt $Expected.Count; $index++) {
-        if ($Actual[$index] -cne $Expected[$index]) {
-            throw "Unexpected argument at index $index for '$Invocation'. Expected '$($Expected[$index])', actual '$($Actual[$index])'. Full command: $($Actual -join ' | ')"
-        }
-    }
-}
-
-function Get-ArgumentValue {
-    param(
-        [Parameter(Mandatory = $true)]
-        [string[]] $Arguments,
-        [Parameter(Mandatory = $true)]
-        [string] $Name,
-        [Parameter(Mandatory = $true)]
-        [string] $Invocation
-    )
-
-    $index = [Array]::IndexOf($Arguments, $Name)
-    if ($index -lt 0) {
-        throw "Expected argument '$Name' for '$Invocation'. Actual arguments: [$($Arguments -join ', ')]."
-    }
-
-    if (($index + 1) -ge $Arguments.Count) {
-        throw "Argument '$Name' has no value for '$Invocation'."
-    }
-
-    return $Arguments[$index + 1]
-}
-
-Describe 'scripts/test.ps1 -DryRun command construction' {
-    It 'Property 6: uses exactly presets.fast.exclude_tags for -Fast' {
-        $fastExcludedTags = @(Get-FastExcludedTags)
-        $expectedExpression = $fastExcludedTags -join ' || '
-        $invocation = '-Fast -DryRun'
-        $result = Invoke-TestRunnerDryRun -ArgumentsText $invocation
-        Assert-ExitCodeIsZero -Result $result -Invocation $invocation
-
-        $arguments = @(Convert-CommandLineToArguments -CommandLine $result.CommandLine)
-        Assert-ArgumentsEqual -Actual $arguments -Expected @('flutter', 'test', '-x', $expectedExpression) -Invocation $invocation
-
-        $actualExcludedTags = @((Get-ArgumentValue -Arguments $arguments -Name '-x' -Invocation $invocation) -split '\s*\|\|\s*' | ForEach-Object { $_.Trim() })
-        $actualExcludedTags = @($actualExcludedTags | Sort-Object -Unique)
-        $expectedExcludedTags = @($fastExcludedTags | Sort-Object -Unique)
-        Assert-ArgumentsEqual -Actual $actualExcludedTags -Expected $expectedExcludedTags -Invocation $invocation
-    }
-
-    It 'Property 7: maps every valid area to one path and preserves it with -Fast' {
-        $domains = @('match', 'ai', 'market', 'calendar', 'staff', 'messages', 'data', 'ui', 'balance')
-        $fastExcludedTags = @(Get-FastExcludedTags)
-        $expectedExpression = $fastExcludedTags -join ' || '
-
-        foreach ($domain in $domains) {
-            $expectedAreaPath = Join-Path -Path 'test' -ChildPath $domain
-
-            $plainInvocation = "-Area $domain -DryRun"
-            $plainResult = Invoke-TestRunnerDryRun -ArgumentsText $plainInvocation
-            Assert-ExitCodeIsZero -Result $plainResult -Invocation $plainInvocation
-            $plainArguments = @(Convert-CommandLineToArguments -CommandLine $plainResult.CommandLine)
-            Assert-ArgumentsEqual -Actual $plainArguments -Expected @('flutter', 'test', $expectedAreaPath) -Invocation $plainInvocation
-
-            $plainPaths = @($plainArguments | Where-Object { $_ -match '^test[/\\]' })
-            $normalizedPlainPath = if ($plainPaths.Count -eq 1) { $plainPaths[0] -replace '\\', '/' } else { $null }
-            if (($plainPaths.Count -ne 1) -or ($normalizedPlainPath -cne "test/$domain")) {
-                throw "Expected exactly one path test/$domain for '$plainInvocation'; actual paths: [$($plainPaths -join ', ')]."
-            }
-
-            $fastInvocation = "-Area $domain -Fast -DryRun"
-            $fastResult = Invoke-TestRunnerDryRun -ArgumentsText $fastInvocation
-            Assert-ExitCodeIsZero -Result $fastResult -Invocation $fastInvocation
-            $fastArguments = @(Convert-CommandLineToArguments -CommandLine $fastResult.CommandLine)
-            Assert-ArgumentsEqual -Actual $fastArguments -Expected @('flutter', 'test', '-x', $expectedExpression, $expectedAreaPath) -Invocation $fastInvocation
-
-            $fastPaths = @($fastArguments | Where-Object { $_ -match '^test[/\\]' })
-            $normalizedFastPath = if ($fastPaths.Count -eq 1) { $fastPaths[0] -replace '\\', '/' } else { $null }
-            if (($fastPaths.Count -ne 1) -or ($normalizedFastPath -cne "test/$domain")) {
-                throw "Expected exactly one path test/$domain for '$fastInvocation'; actual paths: [$($fastPaths -join ', ')]."
-            }
-        }
-    }
-
-    It 'builds tag, exclusion, and coverage options together with the documented ordering' {
-        $fastExcludedTags = @(Get-FastExcludedTags)
-        $fastExpression = $fastExcludedTags -join ' || '
-        $cases = @(
-            [pscustomobject]@{
-                Invocation = '-Tags ui -DryRun'
-                Expected = @('flutter', 'test', '-t', 'ui')
-            },
-            [pscustomobject]@{
-                Invocation = '-Tags ui,property -DryRun'
-                Expected = @('flutter', 'test', '-t', 'ui || property')
-            },
-            [pscustomobject]@{
-                Invocation = '-Fast -ExcludeTags ui -DryRun'
-                Expected = @('flutter', 'test', '-x', "$fastExpression || ui")
-            },
-            [pscustomobject]@{
-                Invocation = '-Area ai -Coverage -DryRun'
-                Expected = @('flutter', 'test', '--coverage', (Join-Path -Path 'test' -ChildPath 'ai'))
-            }
-        )
-
-        foreach ($case in $cases) {
-            $result = Invoke-TestRunnerDryRun -ArgumentsText $case.Invocation
-            Assert-ExitCodeIsZero -Result $result -Invocation $case.Invocation
-            $arguments = @(Convert-CommandLineToArguments -CommandLine $result.CommandLine)
-            Assert-ArgumentsEqual -Actual $arguments -Expected $case.Expected -Invocation $case.Invocation
-        }
-    }
+    $dry = Invoke-Runner @('-Area', 'search', '-Fast', '-Coverage', '-Tags', 'unit', '-ExcludeTags', 'asset', '-DryRun')
+    Assert ($dry.Code -eq 0 -and $dry.Text.Contains('slow || benchmark || integration || asset')) 'Fast/exclusions must compose.'
+    Assert ($dry.Text.Contains('--coverage') -and $dry.Text.Contains('-t unit')) 'Coverage and tags must be preserved.'
+    $yaml = Get-Content -LiteralPath (Join-Path $repoRoot 'dart_test.yaml') -Raw
+    Assert ($yaml.Contains('slow || benchmark || integration')) 'Fast preset must agree with wrapper.'
+    Assert ((Invoke-Runner @('-Area', 'ai', '-DryRun')).Code -eq 0) 'Empty dry run should explain selection.'
+    Assert ((Invoke-Runner @('-Area', 'ai')).Code -ne 0) 'Empty selection must never fall back to all tests.'
+    Assert ((Invoke-Runner @('-Fast', '-Profile', 'standard', '-DryRun')).Code -ne 0) 'Conflicting options must fail.'
+    Assert ((Invoke-Runner @('-Area', 'unknown', '-DryRun')).Code -ne 0) 'Unknown area must fail.'
+    $previousCI = $env:CI
+    try {
+        $env:CI = 'true'
+        $blocked = Invoke-Runner @('-Profile', 'long', '-DryRun')
+        Assert ($blocked.Code -ne 0 -and $blocked.Text.Contains('cannot run in CI')) 'CI must reject long, even during dry run.'
+    } finally { $env:CI = $previousCI }
+    Write-Host 'PASS: selection, blacklist validation, discovery, CLI options and CI guard.'
+} finally {
+    $resolvedFixture = [IO.Path]::GetFullPath($fixture)
+    if (!$resolvedFixture.StartsWith($tempRoot) -or !(Split-Path -Leaf $resolvedFixture).StartsWith('football-runner-selection-')) { throw 'Unsafe fixture cleanup target.' }
+    if (Test-Path -LiteralPath $resolvedFixture) { Remove-Item -LiteralPath $resolvedFixture -Recurse -Force }
 }

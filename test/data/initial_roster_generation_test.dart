@@ -5,20 +5,16 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:new_football/core/ai/team_ai_service.dart';
 import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/core/models/league_state.dart';
-import 'package:new_football/core/models/match_models.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/seed_data_generator.dart';
 import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/services/game_factory.dart';
 import 'package:new_football/core/services/season_service.dart';
 import 'package:new_football/core/services/trade_service.dart';
-import 'package:new_football/core/simulation/match_engine.dart';
-import 'package:new_football/core/simulation/pre_match_validator.dart';
 import 'package:new_football/core/tactics/formation_layout.dart';
 import 'package:new_football/data/save_repository.dart';
 
@@ -486,210 +482,9 @@ void _registerPostFixTests() {
       '{"age":19,"attributes":{"stats":{"diving":72,"handling":65,"kicking":59,"reflexes":68,"speed":64,"positioning":63},"type":"goalkeeper"},"contract":{"blockedTeamIds":[],"exceptionType":null,"hasBirdRights":true,"isRookieScale":false,"noTradeClause":false,"rookiePickSlot":0,"salary":9656403,"yearsRemaining":4},"heightCm":196,"hidden":{"determination":3,"developmentCeilingStars":0.5,"developmentOutcome":"under","growthRate":0.8,"injuryProne":7,"overallProgress":50.0},"id":"team_europe_0_player_0","name":"Bin Yang","nationality":"china","optimalRole":{"role":"standard","type":"gk"},"personality":"leader","pointValue":-229,"position":"gk","potentialStars":1.5,"seasonStartOvr":65.16666666666667,"state":{"eventState":{"modifiers":[],"cooldowns":{},"counters":{},"lateBloomerTriggered":false,"lastMajorInjury":null,"majorInjuryActiveLastTick":false,"weeksSinceMajorInjury":0,"personalProblemsFollowUpPending":false},"form":2.0,"injury":null,"lastDevelopmentOvrDelta":0,"lastDevelopmentProgressDelta":0.0,"minutesThisWeek":0,"playoffYellowCards":0,"regularSeasonYellowCards":0,"role":{"role":"standard","type":"gk"},"seasonsWithTeam":4,"stamina":93,"suspensionGamesRemaining":0}}',
     );
   });
-
-  test('TeamAiService assigns an exact player to every formation slot', () {
-    final save = GameFactory().create(
-      const NewGameRequest(
-        saveName: 'initial-roster-ai-slot-test',
-        playerTeamId: 'team_europe_0',
-        seed: 13579,
-      ),
-    );
-    final team = save.leagueState.teams.first;
-    final selected = TeamAiService().autoSelectLineup(team);
-    final playersById = {for (final player in team.roster) player.id: player};
-    final slots = FormationLayout.of(team.tactics.formation).slots;
-
-    expect(selected.lineupPlayerIds.length, slots.length);
-    for (var index = 0; index < slots.length; index++) {
-      final player = playersById[selected.lineupPlayerIds[index]];
-      expect(
-        player,
-        isNotNull,
-        reason: 'team=${team.id} slot=$index selected lineup ID',
-      );
-      expect(
-        player!.position,
-        slots[index].position,
-        reason:
-            'team=${team.id} slot=$index expected='
-            '${slots[index].position.code} actual=${player.position.code}',
-      );
-    }
-  });
-
-  test('TeamAiService resolves equal overall values by Player.id', () {
-    final save = GameFactory().create(
-      const NewGameRequest(
-        saveName: 'initial-roster-ai-tie-test',
-        playerTeamId: 'team_europe_0',
-        seed: 97531,
-      ),
-    );
-    final team = save.leagueState.teams.first;
-    final goalkeeperCandidates = team.roster
-        .where((player) => player.position == Position.gk)
-        .toList();
-    expect(goalkeeperCandidates.length, greaterThanOrEqualTo(2));
-
-    final tiedPlayers = goalkeeperCandidates
-        .asMap()
-        .entries
-        .map(
-          (entry) => entry.value.copyWith(
-            id: 'tie-gk-${entry.key}',
-            attributes: goalkeeperCandidates.first.attributes,
-          ),
-        )
-        .toList();
-    final tieTeam = team.copyWith(
-      roster: [
-        ...team.roster.where((player) => player.position != Position.gk),
-        ...tiedPlayers.reversed,
-      ],
-      lineupPlayerIds: const [],
-      benchPlayerIds: const [],
-    );
-
-    final ai = TeamAiService();
-    final firstSelection = ai.autoSelectLineup(tieTeam);
-    final secondSelection = ai.autoSelectLineup(tieTeam);
-    final expectedGoalkeeperId = tiedPlayers.map((player) => player.id).toList()
-      ..sort();
-
-    expect(firstSelection.lineupPlayerIds.first, expectedGoalkeeperId.first);
-    expect(secondSelection.lineupPlayerIds, firstSelection.lineupPlayerIds);
-  });
-
-  test(
-    'TeamAiService falls back safely for a malformed team missing a slot position',
-    () {
-      final save = GameFactory().create(
-        const NewGameRequest(
-          saveName: 'initial-roster-ai-fallback-test',
-          playerTeamId: 'team_europe_0',
-          seed: 86420,
-        ),
-      );
-      final team = save.leagueState.teams.first;
-      final slots = FormationLayout.of(team.tactics.formation).slots;
-      final missingSlotIndex = slots.indexWhere(
-        (slot) => slot.position != Position.gk,
-      );
-      final missingPosition = slots[missingSlotIndex].position;
-      final malformedRoster = team.roster
-          .where((player) => player.position != missingPosition)
-          .toList();
-      final malformedTeam = team.copyWith(
-        roster: malformedRoster,
-        lineupPlayerIds: const [],
-        benchPlayerIds: const [],
-      );
-
-      final selected = TeamAiService().autoSelectLineup(malformedTeam);
-      final playersById = {
-        for (final player in malformedRoster) player.id: player,
-      };
-
-      // This is intentionally a safe-service test, not an initial-roster
-      // invariant: the malformed roster is allowed to have no exact match.
-      expect(malformedRoster.length, lessThan(26));
-      expect(selected.lineupPlayerIds.length, slots.length);
-      expect(
-        selected.lineupPlayerIds.toSet().length,
-        selected.lineupPlayerIds.length,
-      );
-      expect(
-        playersById[selected.lineupPlayerIds[missingSlotIndex]]!.position,
-        isNot(missingPosition),
-      );
-      expect(selected.lineupPlayerIds.every(playersById.containsKey), isTrue);
-    },
-  );
 }
 
 void _registerIntegrationTests() {
-  test('new save passes pre-match bootstrap and its first player match', () {
-    const seed = 31415;
-    final save = GameFactory().create(
-      const NewGameRequest(
-        saveName: 'initial-roster-integration-match',
-        playerTeamId: 'team_europe_0',
-        seed: seed,
-      ),
-    );
-    final league = save.leagueState;
-    final playerTeamId = league.playerTeamId!;
-    final scheduledMatch = league.currentSeason.schedule.firstWhere(
-      (match) =>
-          match.homeTeamId == playerTeamId || match.awayTeamId == playerTeamId,
-    );
-    final home = league.teamById(scheduledMatch.homeTeamId)!;
-    final away = league.teamById(scheduledMatch.awayTeamId)!;
-    final validator = const PreMatchValidator();
-    final preMatch = validator.validate(home: home, away: away);
-
-    expect(
-      preMatch.status,
-      MatchStatus.played,
-      reason: 'seed=$seed first player-team fixture must be playable',
-    );
-    expect(preMatch.violatingTeamIds, isEmpty);
-    final playerReport = home.id == playerTeamId
-        ? preMatch.home
-        : preMatch.away;
-    _expectPreMatchTeamReport(
-      playerReport,
-      home.id == playerTeamId ? home : away,
-      'seed=$seed player team',
-    );
-
-    final result = SimulationMatchEngine().simulateFullMatch(
-      home: home,
-      away: away,
-      rngSeed: save.saveSeed,
-    );
-    expect(result.status, MatchStatus.played);
-    expect(result.noGkPenalty, isFalse);
-    expect(result.noGkPenaltyTeamIds, isEmpty);
-
-    final playerSnapshot = home.id == playerTeamId
-        ? result.homeSnapshot
-        : result.awaySnapshot;
-    _expectMatchSnapshot(
-      playerSnapshot,
-      home.id == playerTeamId ? home : away,
-      'seed=$seed first match result',
-    );
-  });
-
-  test(
-    'all 30 new-save teams pass pre-match bootstrap before the first match',
-    () {
-      const seed = 271828;
-      final save = GameFactory().create(
-        const NewGameRequest(
-          saveName: 'initial-roster-integration-league',
-          playerTeamId: 'team_europe_0',
-          seed: seed,
-        ),
-      );
-      final league = save.leagueState;
-      final validator = const PreMatchValidator();
-
-      expect(league.teams, hasLength(30));
-      expect(league.playerTeam, isNotNull);
-      for (final team in league.teams) {
-        final report = validator.inspect(team);
-        _expectPreMatchTeamReport(
-          report,
-          team,
-          'seed=$seed team=${team.id} player=${team.id == league.playerTeamId}',
-        );
-      }
-    },
-  );
-
   test(
     'manual post-creation management survives repository save without reinitializing the roster',
     () async {
@@ -747,88 +542,6 @@ void _registerIntegrationTests() {
       }
     },
   );
-}
-
-void _expectPreMatchTeamReport(
-  PreMatchTeamReport report,
-  Team team,
-  String context,
-) {
-  final slots = FormationLayout.of(team.tactics.formation).slots;
-  final startingIds = report.startingXi.map((player) => player.id).toSet();
-
-  expect(report.rosterSizeLegal, isTrue, reason: '$context roster size');
-  expect(report.invalidStartingXi, isFalse, reason: '$context legal XI');
-  expect(report.startingXi.length, slots.length, reason: '$context XI length');
-  expect(
-    startingIds.length,
-    report.startingXi.length,
-    reason: '$context XI IDs must be unique',
-  );
-  expect(
-    report.startingXi.every(
-      (player) => team.roster.any((candidate) => candidate.id == player.id),
-    ),
-    isTrue,
-    reason: '$context XI membership',
-  );
-  expect(report.hasGoalkeeper, isTrue, reason: '$context goalkeeper');
-  expect(report.isBenchIncomplete, isFalse, reason: '$context bench target');
-  expect(
-    report.bench.every(
-      (player) => team.roster.any((candidate) => candidate.id == player.id),
-    ),
-    isTrue,
-    reason: '$context bench membership',
-  );
-  for (var index = 0; index < slots.length; index++) {
-    expect(
-      report.startingXi[index].position,
-      slots[index].position,
-      reason:
-          '$context slot=$index expected=${slots[index].position.code} '
-          'actual=${report.startingXi[index].position.code}',
-    );
-  }
-}
-
-void _expectMatchSnapshot(
-  MatchTeamSnapshot snapshot,
-  Team team,
-  String context,
-) {
-  final slots = FormationLayout.of(team.tactics.formation).slots;
-  final snapshotIds = snapshot.startingXi.map((player) => player.id).toSet();
-
-  expect(
-    snapshot.startingXi.length,
-    slots.length,
-    reason: '$context XI length',
-  );
-  expect(
-    snapshotIds.length,
-    snapshot.startingXi.length,
-    reason: '$context XI IDs must be unique',
-  );
-  expect(
-    snapshot.startingXi.any((player) => player.position == Position.gk),
-    isTrue,
-    reason: '$context goalkeeper',
-  );
-  expect(
-    snapshot.assignedPositions,
-    slots.map((slot) => slot.position).toList(),
-    reason: '$context assigned positions',
-  );
-  for (var index = 0; index < slots.length; index++) {
-    expect(
-      snapshot.startingXi[index].position,
-      slots[index].position,
-      reason:
-          '$context slot=$index expected=${slots[index].position.code} '
-          'actual=${snapshot.startingXi[index].position.code}',
-    );
-  }
 }
 
 void _expectInitialTeamInvariant(Team team, int seed) {

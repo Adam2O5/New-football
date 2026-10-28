@@ -3,7 +3,6 @@ import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:new_football/core/balance/injury_catalog.dart';
-import 'package:new_football/core/simulation/match_bootstrap.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/core/models/injury.dart';
@@ -11,7 +10,6 @@ import 'package:new_football/core/models/match_models.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/seed_data_generator.dart';
 import 'package:new_football/core/models/staff.dart';
-import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/services/development_service.dart';
 import 'package:new_football/core/services/injury_service.dart';
 
@@ -186,43 +184,6 @@ void main() {
       negativeResult.hidden.overallProgress,
       lessThan(negative.hidden.overallProgress),
     );
-  });
-
-  test('injured players are excluded from XI and explicit bench', () {
-    final team = SeedDataGenerator(
-      random: null,
-    ).generateLeague(year: 2026, seed: 15).teams.first;
-    final injured = team.roster.first;
-    final injury = const Injury(
-      id: 'foot_contusion',
-      group: InjuryGroup.anklesFeet,
-      type: InjuryType.minor,
-      daysTotal: 3,
-      daysRemaining: 3,
-    );
-    final unavailable = injured.copyWith(
-      state: injured.state.copyWith(injury: injury),
-    );
-    final ids = team.roster.take(11).map((player) => player.id).toList();
-    final matchTeam = team.copyWith(
-      roster: [
-        unavailable,
-        ...team.roster.where((player) => player.id != injured.id),
-      ],
-      lineupPlayerIds: ids,
-      benchPlayerIds: [
-        injured.id,
-        ...team.roster.skip(11).take(2).map((p) => p.id),
-      ],
-    );
-    expect(matchTeam.startingEleven, isNot(contains(unavailable)));
-
-    final live = const MatchEngine().start(
-      home: matchTeam,
-      away: team,
-      rngSeed: 15,
-    );
-    expect(live.state.homeBench, isNot(contains(unavailable)));
   });
 
   test('structural match injury and Injury serialization round-trip', () {

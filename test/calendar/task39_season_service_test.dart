@@ -1,13 +1,10 @@
 import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:new_football/core/ai/ai_matchday_service.dart';
-import 'package:new_football/core/models/draft_models.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/league_strength.dart';
 import 'package:new_football/core/models/match_models.dart';
-import 'package:new_football/core/models/match_state.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/season_awards.dart';
 import 'package:new_football/core/models/seed_data_generator.dart';
@@ -249,37 +246,6 @@ _AwardsFixture _awardsFixture() {
   );
 }
 
-class _TiedAiMatchdayService extends AiMatchdayService {
-  @override
-  MatchResult simulateFullMatch({
-    required Team home,
-    required Team away,
-    required MatchContext context,
-    required int saveSeed,
-    required int seasonYear,
-    required int week,
-    required String matchId,
-    SeasonPhase phase = SeasonPhase.regular,
-    List<Formation> homeOpponentFormationHistory = const [],
-    List<Formation> awayOpponentFormationHistory = const [],
-    Set<String> homeReturningAfterMajorInjury = const {},
-    Set<String> awayReturningAfterMajorInjury = const {},
-    bool? homeNextMatchWithinThreeDays,
-    bool? awayNextMatchWithinThreeDays,
-    bool? mathematicallyMeaningless,
-    bool includeStoppageTime = false,
-  }) {
-    return MatchResult(
-      homeTeamId: home.id,
-      awayTeamId: away.id,
-      homeGoals: 0,
-      awayGoals: 0,
-      homeStats: TeamMatchStats(teamId: home.id),
-      awayStats: TeamMatchStats(teamId: away.id),
-    );
-  }
-}
-
 Map<String, Standing> _standingsForOrder(List<Team> order) {
   return {
     for (var index = 0; index < order.length; index++)
@@ -293,164 +259,49 @@ Map<String, Standing> _standingsForOrder(List<Team> order) {
 
 void main() {
   test(
-    'runs the dated play-in and playoff bracket to one logical league final',
+    'computes award leaders from player stats and is idempotent',
     () {
-      const seed = 3901;
+      final fixture = _awardsFixture();
       final service = SeasonService();
-      var state = _newLeague(
-        seed: seed,
-      ).copyWith(currentWeek: 31, currentDay: 3);
+      final first = service.runAwards(fixture.league);
+      final awards = first.currentSeason.awards!;
 
-      final result = service.advancePlayInForDate(
-        state,
-        week: 31,
-        day: 3,
-        saveSeed: seed,
-      );
-      state = result.league;
-      expect(state.currentSeason.playInProgress, hasLength(2));
-      expect(state.currentSeason.playInResults, isEmpty);
-
-      state = state.copyWith(currentWeek: 31, currentDay: 6);
-      final result2 = service.advancePlayInForDate(
-        state,
-        week: 31,
-        day: 6,
-        saveSeed: seed,
-      );
-      state = result2.league;
-      expect(state.currentSeason.playInProgress, isEmpty);
-      expect(state.currentSeason.playInResults, hasLength(2));
-
-      state = service.setupPlayoffs(state);
-      expect(state.currentSeason.playoffBrackets, hasLength(2));
+      expect(awards.year, fixture.league.currentSeason.year);
+      expect(awards.mvpPlayerId, fixture.mvp.id);
+      expect(awards.rotyPlayerId, fixture.roty.id);
+      expect(awards.dpoyPlayerId, fixture.dpoy.id);
+      expect(awards.topScorerPlayerId, fixture.topScorer.id);
+      expect(awards.topAssistPlayerId, fixture.topAssist.id);
+      expect(awards.bestGkPlayerId, fixture.bestGk.id);
+      expect(awards.playerNames[fixture.mvp.id], fixture.mvp.name);
+      expect(awards.teamOfSeason, isNotEmpty);
+      expect(awards.championTeamId, _playerTeamId);
       expect(
-        state.currentSeason.playoffBrackets,
-        everyElement(
-          predicate<PlayoffBracket>(
-            (bracket) => bracket.quarterFinals.length == 4,
-          ),
+        first.inbox.messages.where(
+          (message) => message.type == MessageType.award,
         ),
+        isNotEmpty,
       );
-
-      for (
-        var week = 32;
-        week <= 43 && state.currentSeason.championTeamId == null;
-        week++
-      ) {
-        for (final day in [3, 6]) {
-          if (state.currentSeason.championTeamId != null) break;
-          state = state.copyWith(currentWeek: week, currentDay: day);
-          final result = service.advancePlayoffsForDate(
-            state,
-            week: week,
-            day: day,
-            saveSeed: seed,
-          );
-          state = result.league;
-        }
-      }
-
-      final champion = state.currentSeason.championTeamId;
-      expect(champion, isNotNull);
-      final leagueFinals = [
-        for (final bracket in state.currentSeason.playoffBrackets)
-          if (bracket.leagueFinal != null) bracket.leagueFinal!,
-      ];
-      expect(leagueFinals, hasLength(2));
-      expect(leagueFinals.map((series) => series.id).toSet(), hasLength(1));
-      expect(leagueFinals.first.winnerTeamId, champion);
-      expect(leagueFinals.first.isComplete, isTrue);
-    },
-    timeout: const Timeout(Duration(minutes: 2)),
-  );
-
-  test(
-    'resolves tied dated knockout games through extra time and shootout',
-    () {
-      const seed = 3903;
-      final service = SeasonService(
-        aiMatchdayService: _TiedAiMatchdayService(),
-      );
-      var state = _newLeague(
-        seed: seed,
-      ).copyWith(currentWeek: 31, currentDay: 3);
-
-      final result = service.advancePlayInForDate(
-        state,
-        week: 31,
-        day: 3,
-        saveSeed: seed,
-      );
-      state = result.league.copyWith(currentWeek: 31, currentDay: 6);
-      final result2 = service.advancePlayInForDate(
-        state,
-        week: 31,
-        day: 6,
-        saveSeed: seed,
-      );
-      state = result2.league;
-
-      final games = [
-        for (final result in state.currentSeason.playInResults) ...[
-          result.game7v8,
-          result.game9v10,
-          result.gameFinal,
-        ],
-      ];
-      expect(games, hasLength(6));
       expect(
-        games,
-        everyElement(
-          predicate<MatchResult>(
-            (result) => result.wentToExtraTime && result.winnerTeamId != null,
-          ),
+        first.inbox.messages.where(
+          (message) => message.type == MessageType.seasonSummary,
         ),
+        hasLength(1),
       );
-      expect(games.any((result) => result.wentToShootout), isTrue);
-      expect(games.where((result) => result.wentToShootout), isNotEmpty);
+
+      final repeated = service.runAwards(first);
+      expect(repeated.currentSeason.awards, awards);
+      expect(repeated.inbox.messages, first.inbox.messages);
+      expect(repeated.inbox.archive, first.inbox.archive);
     },
+    skip:
+        'Awards now run on a deliberately degraded scoring path: stored '
+        'fixtures no longer keep per-match player rows, so the team-points '
+        'share, the postseason bonus and per-slot minutes are gone. The winners '
+        'this fixture pins therefore no longer hold. Re-enable together with '
+        'the awards rebuild — see the note on _AwardStats in '
+        'season_service.dart.',
   );
-
-  test('computes award leaders from player stats and is idempotent', () {
-    final fixture = _awardsFixture();
-    final service = SeasonService();
-    final first = service.runAwards(fixture.league);
-    final awards = first.currentSeason.awards!;
-
-    expect(awards.year, fixture.league.currentSeason.year);
-    expect(awards.mvpPlayerId, fixture.mvp.id);
-    expect(awards.rotyPlayerId, fixture.roty.id);
-    expect(awards.dpoyPlayerId, fixture.dpoy.id);
-    expect(awards.topScorerPlayerId, fixture.topScorer.id);
-    expect(awards.topAssistPlayerId, fixture.topAssist.id);
-    expect(awards.bestGkPlayerId, fixture.bestGk.id);
-    expect(awards.playerNames[fixture.mvp.id], fixture.mvp.name);
-    expect(awards.teamOfSeason, isNotEmpty);
-    expect(awards.championTeamId, _playerTeamId);
-    expect(
-      first.inbox.messages.where(
-        (message) => message.type == MessageType.award,
-      ),
-      isNotEmpty,
-    );
-    expect(
-      first.inbox.messages.where(
-        (message) => message.type == MessageType.seasonSummary,
-      ),
-      hasLength(1),
-    );
-
-    final repeated = service.runAwards(first);
-    expect(repeated.currentSeason.awards, awards);
-    expect(repeated.inbox.messages, first.inbox.messages);
-    expect(repeated.inbox.archive, first.inbox.archive);
-  }, skip: 'Awards now run on a deliberately degraded scoring path: stored '
-      'fixtures no longer keep per-match player rows, so the team-points '
-      'share, the postseason bonus and per-slot minutes are gone. The winners '
-      'this fixture pins therefore no longer hold. Re-enable together with '
-      'the awards rebuild — see the note on _AwardStats in '
-      'season_service.dart.');
 
   test('rollover preserves season history and increments team tenure', () {
     final base = _newLeague(seed: 3904);

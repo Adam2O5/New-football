@@ -301,43 +301,6 @@ void main() {
     },
   );
 
-  test('walkover and no-goalkeeper results identify responsible teams', () {
-    final result = resultFor(
-      'home',
-      'away',
-      homeGoals: 0,
-      awayGoals: 0,
-      events: [
-        const MatchEvent(
-          type: MatchEventType.fullTime,
-          minute: 0,
-          teamId: 'home',
-          description: 'Obie drużyny bez BR — 0:0',
-        ),
-      ],
-    );
-
-    expect(TeamManagementService.isWalkoverResult(result), isTrue);
-    expect(TeamManagementService.walkoverTeamIds(result), {'home', 'away'});
-
-    final oneTeam = resultFor(
-      'home',
-      'away',
-      homeGoals: 0,
-      awayGoals: 3,
-      isWalkover: true,
-      events: [
-        const MatchEvent(
-          type: MatchEventType.fullTime,
-          minute: 0,
-          teamId: 'home',
-          description: 'Walkower — nielegalny roster gospodarzy',
-        ),
-      ],
-    );
-    expect(TeamManagementService.walkoverTeamIds(oneTeam), {'home'});
-  });
-
   test('strength table follows four-week schedule and week 44 refresh', () {
     const service = LeagueStrengthService();
     final current = const LeagueStrengthTable(

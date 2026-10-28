@@ -1,0 +1,379 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "path": "test/ai/disabled/staff_ai_contract_market_integration_test.dart.disabled",
+      "originalPath": "test/ai/staff_ai_contract_market_integration_test.dart",
+      "area": "ai",
+      "reason": "Deferred AI or match-engine requirements.",
+      "reactivateWhen": "Implement and review the mechanic; restore only deferred cases, then run with an external time limit.",
+      "long": false
+    },
+    {
+      "path": "test/ai/disabled/staff_ai_raw_property_test.dart.disabled",
+      "originalPath": "test/ai/staff_ai_raw_property_test.dart",
+      "area": "ai",
+      "reason": "Deferred AI or match-engine requirements.",
+      "reactivateWhen": "Implement and review the mechanic; restore only deferred cases, then run with an external time limit.",
+      "long": false
+    },
+    {
+      "path": "test/ai/disabled/staff_ai_raw_rating_test.dart.disabled",
+      "originalPath": "test/ai/staff_ai_raw_rating_test.dart",
+      "area": "ai",
+      "reason": "Deferred AI or match-engine requirements.",
+      "reactivateWhen": "Implement and review the mechanic; restore only deferred cases, then run with an external time limit.",
+      "long": false
+    },
+    {
+      "path": "test/ai/disabled/task32_ai_evaluation_test.dart.disabled",
+      "originalPath": "test/ai/task32_ai_evaluation_test.dart",
+      "area": "ai",
+      "reason": "Deferred AI or match-engine requirements.",
+      "reactivateWhen": "Implement and review the mechanic; restore only deferred cases, then run with an external time limit.",
+      "long": false
+    },
+    {
+      "path": "test/ai/disabled/task33_ai_matchday_test.dart.disabled",
+      "originalPath": "test/ai/task33_ai_matchday_test.dart",
+      "area": "ai",
+      "reason": "Deferred AI or match-engine requirements.",
+      "reactivateWhen": "Implement and review the mechanic; restore only deferred cases, then run with an external time limit.",
+      "long": false
+    },
+    {
+      "path": "test/ai/disabled/task34_ai_trade_test.dart.disabled",
+      "originalPath": "test/ai/task34_ai_trade_test.dart",
+      "area": "ai",
+      "reason": "Deferred AI or match-engine requirements.",
+      "reactivateWhen": "Implement and review the mechanic; restore only deferred cases, then run with an external time limit.",
+      "long": false
+    },
+    {
+      "path": "test/ai/disabled/task35_ai_contract_market_test.dart.disabled",
+      "originalPath": "test/ai/task35_ai_contract_market_test.dart",
+      "area": "ai",
+      "reason": "Deferred AI or match-engine requirements.",
+      "reactivateWhen": "Implement and review the mechanic; restore only deferred cases, then run with an external time limit.",
+      "long": false
+    },
+    {
+      "path": "test/ai/disabled/task36_ai_draft_test.dart.disabled",
+      "originalPath": "test/ai/task36_ai_draft_test.dart",
+      "area": "ai",
+      "reason": "Deferred AI or match-engine requirements.",
+      "reactivateWhen": "Implement and review the mechanic; restore only deferred cases, then run with an external time limit.",
+      "long": false
+    },
+    {
+      "path": "test/ai/disabled/task37_ai_events_test.dart.disabled",
+      "originalPath": "test/ai/task37_ai_events_test.dart",
+      "area": "ai",
+      "reason": "Deferred AI or match-engine requirements.",
+      "reactivateWhen": "Implement and review the mechanic; restore only deferred cases, then run with an external time limit.",
+      "long": false
+    },
+    {
+      "path": "test/ai/disabled/task37_ai_roster_test.dart.disabled",
+      "originalPath": "test/ai/task37_ai_roster_test.dart",
+      "area": "ai",
+      "reason": "Deferred AI or match-engine requirements.",
+      "reactivateWhen": "Implement and review the mechanic; restore only deferred cases, then run with an external time limit.",
+      "long": false
+    },
+    {
+      "path": "test/ai/long/task35_ai_contract_market_benchmark_long.dart.disabled",
+      "originalPath": "test/ai/task35_ai_contract_market_benchmark_test.dart",
+      "area": "ai",
+      "reason": "Deferred AI or match-engine requirements.",
+      "reactivateWhen": "Implement and review the mechanic; restore only deferred cases, then run with an external time limit.",
+      "long": true
+    },
+    {
+      "path": "test/ai/long/task38_ai_season_calibration_long.dart.disabled",
+      "originalPath": "test/ai/task38_ai_season_calibration_test.dart",
+      "area": "ai",
+      "reason": "Deferred AI or match-engine requirements.",
+      "reactivateWhen": "Implement and review the mechanic; restore only deferred cases, then run with an external time limit.",
+      "long": true
+    },
+    {
+      "path": "test/balance/long/balance_season_long.dart.disabled",
+      "originalPath": "test/balance/balance_season_test.dart",
+      "area": "balance",
+      "reason": "Deferred AI or match-engine requirements.",
+      "reactivateWhen": "Implement and review the mechanic; restore only deferred cases, then run with an external time limit.",
+      "long": true
+    },
+    {
+      "path": "test/balance/long/task24_calibration_long.dart.disabled",
+      "originalPath": "test/balance/task24_calibration_test.dart",
+      "area": "balance",
+      "reason": "Deferred AI or match-engine requirements.",
+      "reactivateWhen": "Implement and review the mechanic; restore only deferred cases, then run with an external time limit.",
+      "long": true
+    },
+    {
+      "path": "test/market/disabled/staff_negotiation_property_test.dart.disabled",
+      "originalPath": "test/market/staff_negotiation_property_test.dart",
+      "area": "market",
+      "reason": "Deferred AI or match-engine requirements.",
+      "reactivateWhen": "Implement and review the mechanic; restore only deferred cases, then run with an external time limit.",
+      "long": false,
+      "recoverInStage": 6,
+      "recoverScenarios": "Restore independent domain, presentation, market or UI scenarios before final acceptance."
+    },
+    {
+      "path": "test/match/disabled/match_engine_test.dart.disabled",
+      "originalPath": "test/match/match_engine_test.dart",
+      "area": "match",
+      "reason": "Deferred AI or match-engine requirements.",
+      "reactivateWhen": "Implement and review the mechanic; restore only deferred cases, then run with an external time limit.",
+      "long": false
+    },
+    {
+      "path": "test/match/disabled/task10_injury_test_deferred.dart.disabled",
+      "originalPath": "test/match/task10_injury_test.dart",
+      "area": "match",
+      "reason": "Deferred AI or match-engine requirements.",
+      "reactivateWhen": "Implement and review the mechanic; restore only deferred cases, then run with an external time limit.",
+      "long": false,
+      "deferredCases": [
+        "injured players are excluded from XI and explicit bench"
+      ]
+    },
+    {
+      "path": "test/match/disabled/task11_discipline_test_deferred.dart.disabled",
+      "originalPath": "test/match/task11_discipline_test.dart",
+      "area": "match",
+      "reason": "Deferred AI or match-engine requirements.",
+      "reactivateWhen": "Implement and review the mechanic; restore only deferred cases, then run with an external time limit.",
+      "long": false,
+      "deferredCases": [
+        "suspended players are excluded from availability, XI and bench"
+      ]
+    },
+    {
+      "path": "test/match/disabled/task12_form_stamina_test_deferred.dart.disabled",
+      "originalPath": "test/match/task12_form_stamina_test.dart",
+      "area": "match",
+      "reason": "Deferred AI or match-engine requirements.",
+      "reactivateWhen": "Implement and review the mechanic; restore only deferred cases, then run with an external time limit.",
+      "long": false,
+      "deferredCases": [
+        "LiveMatch reports actual minutes, including a 45-minute substitution"
+      ]
+    },
+    {
+      "path": "test/match/disabled/task14_team_management_test_deferred.dart.disabled",
+      "originalPath": "test/match/task14_team_management_test.dart",
+      "area": "match",
+      "reason": "Deferred AI or match-engine requirements.",
+      "reactivateWhen": "Implement and review the mechanic; restore only deferred cases, then run with an external time limit.",
+      "long": false,
+      "deferredCases": [
+        "walkover and no-goalkeeper results identify responsible teams"
+      ]
+    },
+    {
+      "path": "test/match/disabled/task15_pre_match_simulation_test.dart.disabled",
+      "originalPath": "test/match/task15_pre_match_simulation_test.dart",
+      "area": "match",
+      "reason": "Deferred AI or match-engine requirements.",
+      "reactivateWhen": "Implement and review the mechanic; restore only deferred cases, then run with an external time limit.",
+      "long": false
+    },
+    {
+      "path": "test/match/disabled/task16_team_shape_test.dart.disabled",
+      "originalPath": "test/match/task16_team_shape_test.dart",
+      "area": "match",
+      "reason": "Deferred AI or match-engine requirements.",
+      "reactivateWhen": "Implement and review the mechanic; restore only deferred cases, then run with an external time limit.",
+      "long": false
+    },
+    {
+      "path": "test/match/disabled/task17_match_loop_test.dart.disabled",
+      "originalPath": "test/match/task17_match_loop_test.dart",
+      "area": "match",
+      "reason": "Deferred AI or match-engine requirements.",
+      "reactivateWhen": "Implement and review the mechanic; restore only deferred cases, then run with an external time limit.",
+      "long": false
+    },
+    {
+      "path": "test/match/disabled/task18_shot_pipeline_test.dart.disabled",
+      "originalPath": "test/match/task18_shot_pipeline_test.dart",
+      "area": "match",
+      "reason": "Deferred AI or match-engine requirements.",
+      "reactivateWhen": "Implement and review the mechanic; restore only deferred cases, then run with an external time limit.",
+      "long": false
+    },
+    {
+      "path": "test/match/disabled/task19_live_match_test.dart.disabled",
+      "originalPath": "test/match/task19_live_match_test.dart",
+      "area": "match",
+      "reason": "Deferred AI or match-engine requirements.",
+      "reactivateWhen": "Implement and review the mechanic; restore only deferred cases, then run with an external time limit.",
+      "long": false
+    },
+    {
+      "path": "test/match/disabled/task20_incidents_test.dart.disabled",
+      "originalPath": "test/match/task20_incidents_test.dart",
+      "area": "match",
+      "reason": "Deferred AI or match-engine requirements.",
+      "reactivateWhen": "Implement and review the mechanic; restore only deferred cases, then run with an external time limit.",
+      "long": false
+    },
+    {
+      "path": "test/match/disabled/task21_momentum_context_test.dart.disabled",
+      "originalPath": "test/match/task21_momentum_context_test.dart",
+      "area": "match",
+      "reason": "Deferred AI or match-engine requirements.",
+      "reactivateWhen": "Implement and review the mechanic; restore only deferred cases, then run with an external time limit.",
+      "long": false
+    },
+    {
+      "path": "test/match/disabled/task22_match_result_test.dart.disabled",
+      "originalPath": "test/match/task22_match_result_test.dart",
+      "area": "match",
+      "reason": "Deferred AI or match-engine requirements.",
+      "reactivateWhen": "Implement and review the mechanic; restore only deferred cases, then run with an external time limit.",
+      "long": false
+    },
+    {
+      "path": "test/match/disabled/task23_matchday_test.dart.disabled",
+      "originalPath": "test/match/task23_matchday_test.dart",
+      "area": "match",
+      "reason": "Deferred AI or match-engine requirements.",
+      "reactivateWhen": "Implement and review the mechanic; restore only deferred cases, then run with an external time limit.",
+      "long": false,
+      "recoverInStage": 8,
+      "recoverScenarios": "Restore independent domain, presentation, market or UI scenarios before final acceptance."
+    },
+    {
+      "path": "test/match/disabled/task41_matchday_squad_ui_test_deferred.dart.disabled",
+      "originalPath": "test/match/task41_matchday_squad_ui_test.dart",
+      "area": "match",
+      "reason": "Deferred AI or match-engine requirements.",
+      "reactivateWhen": "Implement and review the mechanic; restore only deferred cases, then run with an external time limit.",
+      "long": false,
+      "deferredCases": [
+        "Matchday symuluje do ko\u0144ca i pokazuje podsumowanie",
+        "Matchday wykonuje zmian\u0119 przez arkusz zmian"
+      ]
+    },
+    {
+      "path": "test/staff/disabled/staff_empty_slot_property_test.dart.disabled",
+      "originalPath": "test/staff/staff_empty_slot_property_test.dart",
+      "area": "staff",
+      "reason": "Deferred AI or match-engine requirements.",
+      "reactivateWhen": "Implement and review the mechanic; restore only deferred cases, then run with an external time limit.",
+      "long": false,
+      "recoverInStage": 6,
+      "recoverScenarios": "Restore independent domain, presentation, market or UI scenarios before final acceptance."
+    },
+    {
+      "path": "test/staff/disabled/staff_raw_display_separation_property_test.dart.disabled",
+      "originalPath": "test/staff/staff_raw_display_separation_property_test.dart",
+      "area": "staff",
+      "reason": "Deferred AI or match-engine requirements.",
+      "reactivateWhen": "Implement and review the mechanic; restore only deferred cases, then run with an external time limit.",
+      "long": false,
+      "recoverInStage": 6,
+      "recoverScenarios": "Restore independent domain, presentation, market or UI scenarios before final acceptance."
+    },
+    {
+      "path": "test/staff/disabled/staff_attribute_effect_preservation_test_deferred.dart.disabled",
+      "originalPath": "test/staff/staff_attribute_effect_preservation_test.dart",
+      "area": "staff",
+      "reason": "Mixed file; listed AI/engine cases are deferred, remaining scenarios stay active.",
+      "reactivateWhen": "Extract only deferredCases from archived context after implementing and reviewing the mechanic.",
+      "long": false,
+      "deferredCases": [
+        "AI draft watchlist remains Coverage-driven and ignores Evaluation",
+        "SeasonService forwards scout Coverage to the AI scouting plan"
+      ]
+    },
+    {
+      "path": "test/staff/disabled/staff_regression_suite_test_deferred.dart.disabled",
+      "originalPath": "test/staff/staff_regression_suite_test.dart",
+      "area": "staff",
+      "reason": "Mixed file; listed AI/engine cases are deferred, remaining scenarios stay active.",
+      "reactivateWhen": "Extract only deferredCases from archived context after implementing and reviewing the mechanic.",
+      "long": false,
+      "deferredCases": [
+        "Requirement 10.9: irrelevant mutation preserves sorting, contracts, "
+      ]
+    },
+    {
+      "path": "test/market/disabled/services_test_deferred.dart.disabled",
+      "originalPath": "test/market/services_test.dart",
+      "area": "market",
+      "reason": "Mixed file; listed AI/engine cases are deferred, remaining scenarios stay active.",
+      "reactivateWhen": "Extract only deferredCases from archived context after implementing and reviewing the mechanic.",
+      "long": false,
+      "deferredCases": [
+        "TeamAiService autoSelectLineup includes GK"
+      ]
+    },
+    {
+      "path": "test/market/disabled/task36_contract_lifecycle_test_deferred.dart.disabled",
+      "originalPath": "test/market/task36_contract_lifecycle_test.dart",
+      "area": "market",
+      "reason": "Mixed file; listed AI/engine cases are deferred, remaining scenarios stay active.",
+      "reactivateWhen": "Extract only deferredCases from archived context after implementing and reviewing the mechanic.",
+      "long": false,
+      "deferredCases": [
+        "weekly deferred-rights policy signs legal AI-owned rights"
+      ]
+    },
+    {
+      "path": "test/data/disabled/initial_roster_generation_test_deferred.dart.disabled",
+      "originalPath": "test/data/initial_roster_generation_test.dart",
+      "area": "data",
+      "reason": "Mixed file; listed AI/engine cases are deferred, remaining scenarios stay active.",
+      "reactivateWhen": "Extract only deferredCases from archived context after implementing and reviewing the mechanic.",
+      "long": false,
+      "deferredCases": [
+        "TeamAiService assigns an exact player to every formation slot",
+        "TeamAiService resolves equal overall values by Player.id",
+        "TeamAiService falls back safely for a malformed team missing a slot position",
+        "new save passes pre-match bootstrap and its first player match",
+        "all 30 new-save teams pass pre-match bootstrap before the first match"
+      ]
+    },
+    {
+      "path": "test/data/disabled/staff_data_compatibility_integration_test_deferred.dart.disabled",
+      "originalPath": "test/data/staff_data_compatibility_integration_test.dart",
+      "area": "data",
+      "reason": "Mixed file; listed AI/engine cases are deferred, remaining scenarios stay active.",
+      "reactivateWhen": "Extract only deferredCases from archived context after implementing and reviewing the mechanic.",
+      "long": false,
+      "deferredCases": [
+        "loads a realistic legacy save and keeps downstream staff boundaries canonical"
+      ]
+    },
+    {
+      "path": "test/calendar/disabled/task39_season_service_test_deferred.dart.disabled",
+      "originalPath": "test/calendar/task39_season_service_test.dart",
+      "area": "calendar",
+      "reason": "Mixed file; listed AI/engine cases are deferred, remaining scenarios stay active.",
+      "reactivateWhen": "Extract only deferredCases from archived context after implementing and reviewing the mechanic.",
+      "long": false,
+      "deferredCases": [
+        "runs the dated play-in and playoff bracket to one logical league final",
+        "resolves tied dated knockout games through extra time and shootout"
+      ]
+    },
+    {
+      "path": "test/calendar/disabled/task6_hourly_flow_test_deferred.dart.disabled",
+      "originalPath": "test/calendar/task6_hourly_flow_test.dart",
+      "area": "calendar",
+      "reason": "Mixed file; listed AI/engine cases are deferred, remaining scenarios stay active.",
+      "reactivateWhen": "Extract only deferredCases from archived context after implementing and reviewing the mechanic.",
+      "long": false,
+      "deferredCases": [
+        "match result is stamped for the next day"
+      ]
+    }
+  ]
+}

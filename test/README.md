@@ -1,0 +1,75 @@
+# Testy — profile i wyłączenia
+
+Wymagania: Flutter **3.41.4**, PowerShell **7+**, wcześniej wykonane `flutter pub get`.
+
+## Uruchamianie
+
+```powershell
+pwsh -File scripts/test.ps1
+pwsh -File scripts/test.ps1 -Area search
+pwsh -File scripts/test.ps1 -Profile fast
+pwsh -File scripts/test.ps1 -Profile standard -DryRun
+pwsh -File scripts/test.ps1 -Profile long -Area data
+```
+
+- **standard**: wszystkie aktywne `*_test.dart`, w tym krótkie integracje; bez długich i wyłączonych plików. Domyślny limit całego procesu: 600 s.
+- **fast** lub **-Fast**: ten sam wybór plików, z wykluczeniem tagów `slow`, `benchmark`, `integration`. Filtr tagów ogranicza wykonywane przypadki; nie zastępuje fizycznego wydzielenia long/disabled.
+- **long**: wyłącznie jawnie wybrane `test/<obszar>/long/*_long.dart`, każdy plik w osobnym procesie. Domyślny limit 900 s na plik. Profil jest odrzucany przy `CI=true` i nie jest uruchamiany przez CI/CD.
+- **-DryRun**: walidacja blacklisty, liczby plików oraz dokładna lista wyboru bez uruchamiania Fluttera. Pusty wybór jest widoczny w dry run; próba jego wykonania kończy się błędem, bez przejścia do całego katalogu.
+- **-TimeoutSeconds N**: jawny zewnętrzny budżet procesu, w long osobno dla każdego pliku. Runner Fluttera otrzymuje dodatkowo timeout 30 s na przypadek; lokalne dłuższe deklaracje w testach nadal obowiązują.
+- Obsługiwane są również `-Tags`, `-ExcludeTags` i `-Coverage`. Coverage dotyczy aktywnych testów; `long -Coverage` jest odrzucane.
+
+`-Area` obsługuje: `ai`, `app`, `balance`, `branding`, `calendar`, `core`, `data`, `integration`, `l10n`, `market`, `match`, `messages`, `nowe_testy`, `performance`, `search`, `staff`, `ui`. `helpers` zawiera wyłącznie kod pomocniczy. `nowe_testy` pozostaje obszarem tymczasowym do kolejnych etapów refaktoru.
+
+Zwykłe `flutter test` także pomija long/disabled dzięki nazwom plików. **Twardy limit całego procesu i zakończenie jego drzewa zapewnia wrapper**, dlatego jest zalecanym wejściem lokalnie i w CI.
+
+## Struktura
+
+Zachowujemy obszary dotychczasowych podfolderów. Aktywne testy kończą się `_test.dart`; długie testy w podfolderach `long/` kończą się `_long.dart`. Workery mają inne nazwy i nie są samodzielnie odkrywane.
+
+W etapie 0 wydzielono:
+
+- `data/long`: procesowe crash/recovery, integralność po przerwaniu zapisu, blokadę OS do śmierci writera oraz replay w niezależnych procesach;
+- `performance/long`: powtarzane pomiary persystencji i pamięci oraz duży guard rozmiaru zapisu;
+- `calendar/long`: kosztowne przebiegi rzeczywistej symulacji przez UI i macierze feedbacku;
+- `messages/long`: historyczną macierz exploration wielokliku.
+
+Krótkie checkpointy wyjątków, walidacja uszkodzonych danych, blokady między instancjami/izolatami oraz szybka generacja pozostają aktywne. Wydzielenie nie zmienia ich asercji ani modelu gry. Kolejne etapy zmniejszą koszt i konsolidują scenariusze.
+
+## Tymczasowa blacklista AI i silnika
+
+Jedynym rejestrem jest [blacklist.json](blacklist.json). Pliki `*.dart.disabled` nie biorą udziału w discovery ani analizie Dart. Taki plik musi mieć dokładny wpis z pierwotną ścieżką, powodem oraz warunkiem reaktywacji. Wrapper odrzuca brak pliku, duplikat, ścieżkę poza obszarem, brak wpisu i nazwę testu omijającą izolację.
+
+- Wszystkie testy `ai/` są odroczone. Task 38 i benchmark Task 35 pozostają w `ai/long/` jako wyłączone źródła; profil long ich nie uruchamia.
+- W `match/` odroczono testy docelowej mechaniki silnika. Test generatora terminarza odzyskano w `data/schedule_generator_test.dart`.
+- W prostych plikach mieszanych usunięto z aktywnej rejestracji wyłącznie przypadki AI/silnika, zachowując pozostałe testy domeny i Squad UI. Kopia całego oryginału w `disabled/` stanowi kontekst; **przy reaktywacji należy odzyskać tylko `deferredCases` z manifestu**, bez ponownego dodawania nadal aktywnych scenariuszy.
+- Cztery większe pliki mieszane wymagają późniejszego odzyskania niezależnych przypadków: `staff_empty_slot_property`, `staff_raw_display_separation_property`, `staff_negotiation_property` — etap 6; `task23_matchday` — etap 8. Manifest zawiera `recoverInStage` i wymagany zakres. To przejściowe odroczenia, które nie mogą pozostać po końcowym odbiorze niezależnej domeny/UI.
+- Zakomentowany harness Task 24 oraz smoke całego sezonu oparty na silniku zachowano jako odroczone źródła `balance/long/`. Pustego `main` nie liczymy jako testu.
+
+Nie istnieje opcja automatycznie włączająca blacklistę. Reaktywacja wymaga przywrócenia odpowiednich źródeł/importów i asercji po wdrożeniu mechaniki, bounded run oraz usunięcia wpisu w tej samej zmianie. Blacklista nie wyłącza produkcyjnego `lib/` z analizy i nie służy do ukrywania innych czerwonych testów.
+
+## Wyniki, logi i kontrola wrappera
+
+Każde rzeczywiste uruchomienie zapisuje `selected-files.txt`, `summary.json` oraz `run-N/stdout.log`, `stderr.log`, `result.json` pod `build/test-results/<czas>-<PID>/`. Logi procesu można czytać podczas wykonania, np. `Get-Content <ścieżka>/stdout.log -Wait`. Konsola pokazuje wybór, lokalizację logów, wynik i końcówkę wyjścia.
+
+- `PASS` — proces zwrócił 0; `FAIL` — zachowano jego niezerowy exit code.
+- `TIMEOUT` — przekroczono budżet; zakończono uruchomione drzewo, wrapper zwraca **124**.
+- Błąd konfiguracji/manifestu/brak testów — kod **2**.
+- `LONG_NOT_RUN` i `BLACKLISTED` opisują pliki poza wykonaniem, nie udane lub pominięte przypadki runnera. Platformowe SKIP są widoczne w logu Fluttera.
+
+Kontrole wrappera nie wymagają Pester ani pełnej symulacji:
+
+```powershell
+pwsh -File scripts/verify/test_runner_dry_run.Tests.ps1
+pwsh -File scripts/verify/test_runner_exit_codes.Tests.ps1
+```
+
+Pierwsza sprawdza selekcję, walidację manifestu, discovery, parametry i blokadę CI. Druga sprawdza exit codes, argumenty ze spacjami, stdout/stderr i timeout na kontrolowanym procesie z dzieckiem. Nie uruchamia Task 38.
+
+## Stan po etapie 0
+
+159 aktywnych plików testowych, 10 plików long i 40 wpisów blacklisty. Wpisy mogą przechowywać kontekst pliku mieszanego; te liczby nie są liczbą zarejestrowanych przypadków.
+
+Znane błędy typu `SaveRepository` → `SaveManagementRepository` w pięciu plikach oraz nieaktualne oczekiwania autosave/pacingu pozostają jawne. Ich naprawa jest zaplanowana na kolejne etapy. Etap 0 nie oznacza zielonego całego zestawu ani CI.
+
+Weryfikacja podziału: 21/21 zachowanych testów persystencji i generacji, 79/79 testów `search`, wybrane replay i crash smoke przeszły. W zachowanej starej domenie: 64 PASS, 17 FAIL i 1 SKIP; wszystkie 17 porażek odtworzono na kopiach oryginalnych źródeł. Obejmują m.in. wersję schematu 23 zamiast 27, stare fixture'y/oczekiwania oraz teardown ścigający się z autosave. Nie dopisano tych problemów do blacklisty AI/silnika. Analizator zgłasza te same 21 błędów typów i jedną informację stylistyczną co w audycie, bez nowych ostrzeżeń.

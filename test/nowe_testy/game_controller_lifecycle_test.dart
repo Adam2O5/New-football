@@ -1,3 +1,6 @@
+@Tags(['unit'])
+library;
+
 import 'dart:async';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -5,6 +8,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/app/providers/save_management_provider.dart';
 import 'package:new_football/app/services/calendar_simulation_pacer.dart';
+import 'package:new_football/core/models/league_state.dart';
+import 'package:new_football/core/services/contract_service.dart';
 import 'package:new_football/core/services/game_factory.dart';
 
 import 'support/controlled_simulation_runner.dart';
@@ -31,6 +36,45 @@ void main() {
   });
 
   tearDown(() => container.dispose());
+
+  test(
+    'two offers during an in-flight day survive persist and reload',
+    () async {
+      await controller.updateLeague(
+        (league) => league.copyWith(
+          freeAgents: [
+            league.freeAgents.single,
+            league.freeAgents.single.copyWith(id: 'second-free-agent'),
+          ],
+        ),
+        autosave: false,
+      );
+      final roster = controller.save!.leagueState.playerTeam!.roster;
+      runner.dayGate = Completer<void>();
+      final day = controller.advanceOneDay();
+      await runner.dayStarted.future;
+      const offer = ContractOffer(salary: 60000000, years: 2);
+      final first = controller.offerFreeAgent(fixtureFreeAgentId, offer);
+      final second = controller.offerFreeAgent('second-free-agent', offer);
+      runner.dayGate!.complete();
+      await day;
+      expect(await first, ContractReaction.accept);
+      expect(await second, ContractReaction.accept);
+      await controller.persist();
+      final id = controller.save!.meta.id;
+      await controller.clear();
+      await controller.loadGame(id);
+      final league = controller.save!.leagueState;
+      expect((league.currentWeek, league.currentDay), (1, 2));
+      expect(league.playerTeam!.roster, roster);
+      expect(
+        league.negotiations.map((record) => record.subjectId),
+        unorderedEquals([fixtureFreeAgentId, 'second-free-agent']),
+      );
+      expect(repository.game.leagueState, league);
+      expect(runner.daysCalled, 1);
+    },
+  );
 
   test('failed leave keeps the active career and can be retried', () async {
     await controller.updateLeague(

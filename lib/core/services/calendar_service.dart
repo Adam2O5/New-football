@@ -12,20 +12,28 @@ class CalendarService {
   CalendarBalance get _c => balance.calendar;
 
   DateTime week1StartForSeason(int seasonYear) {
-    var date = DateTime(seasonYear, 8, 1);
-    while (date.weekday != DateTime.monday) {
-      date = date.add(const Duration(days: 1));
-    }
-    return date;
+    final augustStart = DateTime(seasonYear, 8, 1);
+    final daysUntilMonday = (DateTime.monday - augustStart.weekday + 7) % 7;
+    return DateTime(seasonYear, 8, 1 + daysUntilMonday);
   }
 
-  DateTime dateForWeekDay(int seasonYear, int week, int day) =>
-      week1StartForSeason(
-        seasonYear,
-      ).add(Duration(days: (week - 1) * 7 + day - 1));
+  DateTime dateForWeekDay(int seasonYear, int week, int day) {
+    final start = week1StartForSeason(seasonYear);
+    return DateTime(
+      start.year,
+      start.month,
+      start.day + (week - 1) * 7 + day - 1,
+    );
+  }
 
   ({int week, int day})? weekDayForDate(DateTime date, int seasonYear) {
-    final diff = date.difference(week1StartForSeason(seasonYear)).inDays;
+    final start = week1StartForSeason(seasonYear);
+    // Count civil days, independent of clock changes and the input time of day.
+    final diff = DateTime.utc(
+      date.year,
+      date.month,
+      date.day,
+    ).difference(DateTime.utc(start.year, start.month, start.day)).inDays;
     if (diff < 0 || diff >= _c.seasonCycleWeeks * 7) return null;
     return (week: diff ~/ 7 + 1, day: diff % 7 + 1);
   }

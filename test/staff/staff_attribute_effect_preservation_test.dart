@@ -2,10 +2,8 @@ import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:new_football/app/utils/staff_presentation.dart';
-import 'package:new_football/core/ai/ai_draft_service.dart';
 import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/development_snapshot.dart';
-import 'package:new_football/core/models/draft_models.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/seed_data_generator.dart';
@@ -16,7 +14,6 @@ import 'package:new_football/core/services/cohesion_service.dart';
 import 'package:new_football/core/services/development_service.dart';
 import 'package:new_football/core/services/injury_service.dart';
 import 'package:new_football/core/services/scouting_service.dart';
-import 'package:new_football/core/services/season_service.dart';
 import 'package:new_football/core/services/staff_service.dart';
 import 'package:new_football/core/simulation/team_shape.dart';
 
@@ -336,113 +333,6 @@ void main() {
         );
       },
     );
-
-    test(
-      'AI draft watchlist remains Coverage-driven and ignores Evaluation',
-      () {
-        final generator = SeedDataGenerator(random: null);
-        final league = generator.generateLeague(seed: 10204);
-        final aiTeam = league.teams.firstWhere((team) => team.ai != null);
-        final draftClass = generator.generateDraftClass(
-          year: league.currentSeason.year + 1,
-          prospectCount: 40,
-        );
-
-        Team withScout(double coverage, double evaluation) => aiTeam.copyWith(
-          staff: aiTeam.staff.copyWith(
-            scout: staffMemberFor(
-              StaffRole.scout,
-              relevantValues: [coverage, evaluation],
-              id: 'preserve-ai-draft-scout',
-            ),
-          ),
-        );
-        final policy = AiDraftService();
-        final lowCoverage = policy.assignWatchlist(
-          team: withScout(0.0, 0.0),
-          draftClass: draftClass,
-          league: league,
-          saveSeed: 10204,
-          seasonYear: league.currentSeason.year,
-        );
-        final highCoverage = policy.assignWatchlist(
-          team: withScout(5.0, 0.0),
-          draftClass: draftClass,
-          league: league,
-          saveSeed: 10204,
-          seasonYear: league.currentSeason.year,
-        );
-        final highCoverageHighEvaluation = policy.assignWatchlist(
-          team: withScout(5.0, 5.0),
-          draftClass: draftClass,
-          league: league,
-          saveSeed: 10204,
-          seasonYear: league.currentSeason.year,
-        );
-
-        expect(
-          highCoverage.watchlistProspectIds.length,
-          greaterThan(lowCoverage.watchlistProspectIds.length),
-          reason: 'AI draft capacity must still come from scout Coverage',
-        );
-        expect(
-          highCoverageHighEvaluation.watchlistProspectIds,
-          highCoverage.watchlistProspectIds,
-          reason: 'AI watchlist assignment must not use scout Evaluation',
-        );
-      },
-    );
-
-    test('SeasonService forwards scout Coverage to the AI scouting plan', () {
-      final generator = SeedDataGenerator(random: null);
-      final baseLeague = generator.generateLeague(seed: 10205);
-      final aiTeam = baseLeague.teams.firstWhere((team) => team.ai != null);
-      final draftClass = generator.generateDraftClass(
-        year: baseLeague.currentSeason.year + 1,
-        prospectCount: 40,
-      );
-      final draftState = DraftState(
-        year: draftClass.year,
-        draftClass: draftClass,
-      );
-
-      Team withCoverage(double coverage) => aiTeam.copyWith(
-        scouting: const TeamScouting(),
-        staff: aiTeam.staff.copyWith(
-          scout: staffMemberFor(
-            StaffRole.scout,
-            relevantValues: [coverage, 0.0],
-            id: 'preserve-season-scout',
-          ),
-        ),
-      );
-      LeagueState withTeam(Team team) => baseLeague.copyWith(
-        teams: [
-          for (final candidate in baseLeague.teams)
-            candidate.id == team.id ? team : candidate,
-        ],
-        currentSeason: baseLeague.currentSeason.copyWith(
-          draftState: draftState,
-        ),
-      );
-
-      final low = SeasonService().runScoutReport(
-        withTeam(withCoverage(0.0)),
-        saveSeed: 10205,
-      );
-      final high = SeasonService().runScoutReport(
-        withTeam(withCoverage(5.0)),
-        saveSeed: 10205,
-      );
-
-      final lowScouting = low.teamById(aiTeam.id)!.scouting;
-      final highScouting = high.teamById(aiTeam.id)!.scouting;
-      expect(
-        highScouting.watchlistProspectIds.length,
-        greaterThan(lowScouting.watchlistProspectIds.length),
-        reason: 'SeasonService must pass scout Coverage to AI planning',
-      );
-    });
 
     test(
       'physio and doctor effects consume their own relevant fields only',

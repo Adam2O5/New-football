@@ -1,3 +1,6 @@
+@Tags(['ui'])
+library;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -64,53 +67,103 @@ void main() {
     );
   }
 
-  test(
-    'date mapping covers weeks 47–52 and rejects dates outside the cycle',
-    () {
-      for (final year in [2026, 2027, 2031]) {
-        for (var week = 47; week <= 52; week++) {
-          for (final day in [1, 7]) {
-            expect(
-              calendar.weekDayForDate(
-                calendar.dateForWeekDay(year, week, day),
-                year,
-              ),
-              (week: week, day: day),
-            );
-          }
+  test('date mapping covers all 364 days, leap years and cycle boundaries', () {
+    for (final year in [2026, 2027, 2028, 2031]) {
+      final start = calendar.week1StartForSeason(year);
+      for (var week = 1; week <= 52; week++) {
+        for (var day = 1; day <= 7; day++) {
+          final civilDate = DateTime(
+            start.year,
+            start.month,
+            start.day + (week - 1) * 7 + day - 1,
+          );
+          expect(
+            calendar.dateForWeekDay(year, week, day),
+            civilDate,
+            reason: 'Civil date for season $year, week $week, day $day',
+          );
+          expect(calendar.weekDayForDate(civilDate, year), (
+            week: week,
+            day: day,
+          ));
+          expect(
+            calendar.weekDayForDate(
+              DateTime(civilDate.year, civilDate.month, civilDate.day, 23, 59),
+              year,
+            ),
+            (week: week, day: day),
+          );
         }
-        expect(
-          calendar.weekDayForDate(
-            calendar
-                .dateForWeekDay(year, 1, 1)
-                .subtract(const Duration(days: 1)),
-            year,
-          ),
-          isNull,
-        );
-        expect(
-          calendar.weekDayForDate(
-            calendar.dateForWeekDay(year, 52, 7).add(const Duration(days: 1)),
-            year,
-          ),
-          isNull,
-        );
-        expect(calendar.advanceDay(52, 7), (1, 1));
-        expect(
-          calendar.weekDayForDate(
-            calendar.dateForWeekDay(year + 1, 1, 1),
-            year + 1,
-          ),
-          (week: 1, day: 1),
-        );
       }
-    },
-  );
-  for (var week = 47; week <= 52; week++) {
+      expect(
+        calendar.weekDayForDate(
+          calendar.dateForWeekDay(year, 1, 1).subtract(const Duration(days: 1)),
+          year,
+        ),
+        isNull,
+      );
+      expect(
+        calendar.weekDayForDate(
+          calendar.dateForWeekDay(year, 52, 7).add(const Duration(days: 1)),
+          year,
+        ),
+        isNull,
+      );
+      expect(calendar.advanceDay(52, 7), (1, 1));
+      expect(
+        calendar.weekDayForDate(
+          calendar.dateForWeekDay(year + 1, 1, 1),
+          year + 1,
+        ),
+        (week: 1, day: 1),
+      );
+    }
+  });
+  for (final month in [
+    (2026, 10),
+    (2026, 11),
+    (2027, 3),
+    (2028, 3),
+    (2028, 10),
+  ]) {
+    testWidgets('month $month shows civil dates in weekday columns', (
+      tester,
+    ) async {
+      container.read(calendarCursorMonthProvider.notifier).state = DateTime(
+        month.$1,
+        month.$2,
+      );
+      await showCalendar(tester);
+      final dates = tester
+          .widgetList<CalendarDayTile>(find.byType(CalendarDayTile))
+          .map((tile) => tile.date)
+          .toList();
+      final inMonth = dates.where(
+        (date) => date.year == month.$1 && date.month == month.$2,
+      );
+      final daysInMonth = DateTime(month.$1, month.$2 + 1, 0).day;
+      expect(
+        inMonth.map((date) => date.day),
+        List.generate(daysInMonth, (index) => index + 1),
+      );
+      for (var index = 0; index < dates.length; index++) {
+        expect(dates[index].hour, 0);
+        expect(dates[index].weekday, index % 7 + 1);
+      }
+    });
+  }
+
+  for (var week = 1; week <= 52; week++) {
     testWidgets('week $week can be selected and enables simulation', (
       tester,
     ) async {
-      final date = calendar.dateForWeekDay(2026, week, 3);
+      final start = calendar.week1StartForSeason(2026);
+      // A calendar day is a civil date, independent of elapsed DST hours.
+      final date = DateTime(
+        start.year,
+        start.month,
+        start.day + (week - 1) * 7 + 2,
+      );
       await tester.runAsync(
         () => controller.updateLeague(
           (league) => league.copyWith(currentWeek: week),

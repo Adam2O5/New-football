@@ -1,6 +1,65 @@
-# Nowe testy — etapy 0–8
+# Nowe testy — etapy 0–9
 
-Etapy 0–7 zostały zaakceptowane i zapisane przez użytkownika: `dc6e454`, `b4048fb`, `553198c`, `f8e45e1`, `5762f4f`, `0f2fd43`, `5598811`, `6e9cea2` oraz etap 7 w `8293be2`. R04 etapu 8 zapisano w `d010cec`, R05 w `c567d39`, R06 w `4677f98`, R07 w `1fd485b`, R08 w `eef0c73`, R09 w `5cacf87`, R10 w `e6ee6aa`, R11 w `a454528`, R12 w `14d5906`. **R13 (repozytorium zapisów) jest ukończone i gotowe do review.** Zrealizowano podziały R04–R13 etapu 8; zmiany R13 pozostają bez commita. Etap 9 nie został rozpoczęty. Wyniki wcześniejszych grup/etapów poniżej są historycznym punktem odniesienia.
+Etapy 0–7 zostały zaakceptowane i zapisane przez użytkownika: `dc6e454`, `b4048fb`, `553198c`, `f8e45e1`, `5762f4f`, `0f2fd43`, `5598811`, `6e9cea2` oraz etap 7 w `8293be2`. R04 etapu 8 zapisano w `d010cec`, R05 w `c567d39`, R06 w `4677f98`, R07 w `1fd485b`, R08 w `eef0c73`, R09 w `5cacf87`, R10 w `e6ee6aa`, R11 w `a454528`, R12 w `14d5906`, R13 w `0000a42`. **Etap 9: odbiór automatyczny ukończony; naprawa dat i wyniki są gotowe do ręcznego review, bez commita.** Wyniki wcześniejszych grup/etapów poniżej są historycznym punktem odniesienia.
+
+## Etap 9 — zakończony odbiór automatyczny, do review — 17 października 2026
+
+Punkt wyjścia: `0000a42` (R13). Po wykryciu błędu zmiany czasu prace zatrzymano; użytkownik zaakceptował naprawę i dokończenie odbioru. **273/273 testy przechodzą**, analiza statyczna i debug bundle są poprawne. Odbiór wykonano bez urządzenia, zgodnie z ustaleniem. Etap zatrzymano do ręcznego review; agent nie wykonał commitów.
+
+### Naprawa dat — przyczyna, zmiana i dowód
+
+Przed poprawką `CalendarService.dateForWeekDay(2026, 13, 1)` zwracał lokalnie **25 października 2026, 23:00**, zamiast **26 października, 00:00**. Test widoku potwierdził dwie komórki z dniem 25 w październiku. Powodem było liczenie kolejnych dat przez dodawanie odcinków po 24 godziny do lokalnego `DateTime`. Wcześniejsza odwracalność testowała wynik tej samej metody, a wybór daty obejmował tylko tygodnie 47–52.
+
+W [CalendarService](C:/Users/dadam/New-football/lib/core/services/calendar_service.dart:14) początek sezonu i daty tygodnia powstają teraz z cywilnych składowych roku/miesiąca/dnia. Odwrotne mapowanie odejmuje reprezentacje UTC samych składowych dat, pomijając godzinę i długość lokalnej doby; nie przelicza strefy wejściowej. W [siatce kalendarza](C:/Users/dadam/New-football/lib/app/screens/calendar_screen_body.dart:331) każda komórka powstaje bezpośrednio z daty miesiąca i indeksu, bez dodawania lub odejmowania lokalnych odcinków 24 godzin.
+
+Oba czerwone przypadki przechodzą po poprawce. Rozszerzony [calendar_screen_test.dart](C:/Users/dadam/New-football/test/nowe_testy/calendar_screen_test.dart) obejmuje **60 scenariuszy**: 364 dni w każdym z sezonów 2026, 2027, 2028 i 2031, oba kierunki mapowania również o 23:59, granice cyklu, pięć siatek miesięcy przy jesiennej/wiosennej zmianie czasu (w tym rok przestępny), zgodność dat z kolumnami, wybór w każdym z 52 tygodni, blokadę niepoprawnej daty i wykonanie celu symulacji. Testy wykonano w lokalnej strefie Windows ze zmianą czasu; nie zmieniano ustawień strefy systemu.
+
+Logiczne tygodnie/dni sezonu, RNG i zapisane modele pozostają takie same. **Schemat nadal 27**, bez migracji. Zmiana produkcyjna obejmuje tylko dwa wymienione pliki.
+
+### Uzupełnienia testów i wynik końcowy
+
+- Nowy scenariusz w [game_controller_lifecycle_test.dart](C:/Users/dadam/New-football/test/nowe_testy/game_controller_lifecycle_test.dart) zleca dwie oferty w trakcie zatrzymanego kroku dnia. Po jego zakończeniu, persist, clear i load zachowuje obie negocjacje, nową datę i roster. Korzysta z istniejącego kontrolowanego runnera i repozytorium w pamięci.
+- [seeded_generation_test.dart](C:/Users/dadam/New-football/test/nowe_testy/seeded_generation_test.dart) oraz istniejący [determinism_process.dart](C:/Users/dadam/New-football/test/nowe_testy/support/determinism_process.dart) porównują dodatkowo loterię, kolejność 90 picków i decyzje emerytalne zawodników klubowych/FA w osobnych procesach Dart, także po odczycie zapisu sprzed zdarzeń. Wiek emerytalny jest kontrolowany (35–39); porównanie pomija UUID/czas wiadomości. Nie wykonuje tur AI ani meczów.
+- Względem R13 dodano **52 scenariusze**: 46 dodatkowych tygodni wyboru, pięć siatek miesięcy i jeden przypadek kolejki. Istniejące testy mapowania oraz deterministyczności rozszerzono. Nie dodano nowych plików testów ani helperów.
+- Pełne `test/nowe_testy/`: **273/273**, około 3 min 48 s. Osobno kalendarz **60/60**, wcześniej lifecycle/generacja **24/24**. Stary zestaw nie był uruchamiany.
+- Analiza `lib/main.dart`, `lib/app`, `lib/data`, nowych testów oraz 148 jawnie wskazanych, ręcznie pisanych plików core poza AI/simulation: **bez uwag**. Plików generowanych nie wskazywano jako celów analizy.
+- Odbiór granic filtrów/zarządzania zapisami w zwykłym Darcie: **exit code 0**. `flutter build bundle --debug --no-pub`: **exit code 0**, zaktualizowany kernel bundle. Formatter zmienionych plików i `git diff --check`: bez uwag.
+
+### Pokrycie kryteriów rozdziału 9 planu
+
+1. **Kolejka i nawigacja:** testy mutacji, persistence, lifecycle i career navigation obejmują dwie oferty podczas kroku, aktualny snapshot, powtórzenia, błąd/ponowienie, autosave w kolejce i w trakcie zapisu, menu, zmianę kariery oraz barierę wejścia do meczu.
+2. **Deterministyczność:** test osobnych procesów porównuje generację, klasy, daty, loterię i emerytury. `season_randomness_test.dart` sprawdza także historię usług/kolejność osób i sztab; `match_date_replay_test.dart` sprawdza zapis przed meczem i identyczną pauzę po load, bez oceny wyniku silnika.
+3. **Rynek 45 → 46 → 47 → 48 → 52 → 1 → 45:** `phase_two_window_test.dart`, `contract_market_period_test.dart`, `contract_boundary_save_test.dart` oraz `contract_messages_test.dart` pokrywają okna, terminy, waiting/counter/finalizację, podpisy i komunikaty PL/EN. To macierz kontrolowanych granic, nie nieprzerwana symulacja całego sezonu.
+4. **Sezon i ludzie:** `postseason_finalization_test.dart`, `contract_period_test.dart`, `people_lifecycle_test.dart` i `signing_valuation_test.dart` obejmują ręcznie podany ostatni wynik, pauzę/wznowienie, idempotencję, rollover, okresy umów, cztery pule osób, FA po kontuzji/emeryturę, payroll i wycenę.
+5. **Skład i skauting:** testy slotów domeny i drag/drop UI sprawdzają restart, zmianę formacji i rozłączność XI/ławki; testy tier 5 i ekranów sprawdzają wiedzę, Combine/watchlistę, zapis przy wyjściu i ID.
+6. **Persystencja:** macierz repozytorium obejmuje bieżący save/load/rename/duplicate, niezgodny schemat, I/O, przerwania rzeczywistych procesów, recovery, integralność, koordynację i blokady. Awarii nie wywoływano na danych użytkownika.
+7. **UI/język:** kalendarz obejmuje cały cykl; test odświeżeń sprawdza też powrót do zakładek po rzeczywistej zmianie ich danych. PL/EN, formularze, kontrolery, anulowanie dialogów, selekcje i lifecycle mają scenariusze widgetowe.
+8. **Wydajność:** poniższe lokalne pomiary i kontrolowane testy retencji/pacingu są uzgodnionym odbiorem bez urządzenia. Ręcznego odbioru aplikacji oraz telefonu w profile nie oznaczono jako wykonanych.
+
+### Aktualne pomiary — Windows, Flutter test / JIT
+
+Dart 3.11.1, seed 123, schemat 27, ten sam fixture co w etapie 6: 30 klubów, 780 zawodników, 870 fixtures i pięć syntetycznych sezonów historii. Trzy powtórzenia operacji; wszystkie czasy są wall-clock, nie czasem CPU. To charakterystyka aktualnej wersji. Rozrzut JIT/GC i warunki hosta nie pozwalają przypisać różnic względem dawnych uruchomień nowej regresji lub przyspieszeniu.
+
+- Mediany (zakres trzech prób): preview ×10 **0,279 ms** (0,177–6,457), save **368,7 ms** (331,2–373,7), load **152,3 ms** (151,4–247,3), rename **636,8 ms** (613,1–1041,5), duplicate **505,3 ms** (503,7–737,2).
+- Przerwy pętli zdarzeń podczas load: maksima **12,6–20,8 ms**; rename **12,5–50,0 ms**, duplicate **20,1–120,4 ms**. Nie jest to pomiar czasu klatek telefonu ani gwarancja płynności UI.
+- Osobne fazy load: odczyt **17,4–29,4 ms**, decode **88,3–118,4 ms**, sanityzacja **0,31–0,93 ms**, budowa modelu **24,5–43,1 ms**, powrót z izolaty wraz z planowaniem odbiorcy **5,6–15,0 ms**.
+- Save **4 865 690 B**, rename **4 865 691 B**, duplicate **4 865 688 B** we wszystkich trzech próbach. Różnice odpowiadają metadanym. Pomiar zapisu strumienia: 75 fragmentów do 64 KiB, kodowanie/kolejkowanie około **83,1 ms**, drain/flush **8,95 ms**.
+- Próbkowany szczyt RSS całego procesu: save **183,4–254,5 MiB**, load **211,8–281,4 MiB**, rename **249,4–360,1 MiB**, duplicate **250,6–293,0 MiB**. Próbkowanie co 2 ms obejmuje Flutter/JIT i wcześniejsze operacje; to nie alokacja jednej operacji ani limit pamięci aplikacji na Androidzie.
+- Kontrolowana retencja po 1/5/10 sezonach ponownie daje **100/200/200** negocjacji i **0/0/0** wygasłych blokad; payload po przeglądzie **83 528 / 143 008 / 143 008 B**. Każdego roku dodawano 100 terminalnych negocjacji i blokad. Referencje nadal chronią rekordy. To izolowany test wzrostu rynku, nie dziesięć pełnych sezonów silnika.
+- Pięć zmian samej daty: **Home 5, Squad 0, Standings 0, tabela regularna 0** przebudów. Kontrolowany zegar pacingu: zwykły dzień 300 ms + 200 ms oczekiwania + 50 ms zapisu = **550 ms**; z popupem 300 + 500 + 50 = **850 ms**, bez drugiego oczekiwania. To test sekwencji, nie rzeczywisty benchmark symulacji.
+
+### Końcowe ręczne review
+
+Po wcześniejszych review etapów wystarczy wykonać skrócony przebieg:
+
+1. **Daty:** otwórz październik 2026 i marzec 2027. Dzień 25 października występuje raz w niedzielę, 26 w poniedziałek; 28 marca jest niedzielą, 29 poniedziałkiem. Wybierz datę i sprawdź zgodność zaznaczenia/nagłówka, także po zmianie miesiąca. Cel symulacji powinien odpowiadać wybranej dacie; pilne zdarzenie może zatrzymać ją wcześniej.
+2. **Symulacja i zapis:** rozpocznij dłuższy przebieg, anuluj lub wyjdź do menu; po load sprawdź ostatnią ukończoną datę i brak pozostawionej nakładki. Następnie zapisz ręcznie i wejdź do meczu.
+3. **Rynek i skład:** w dostępnym oknie wyślij dwie oferty blisko siebie, sprawdź obie negocjacje i datę. Po dostępnej finalizacji oraz zmianie slotów składu zapisz/wczytaj i sprawdź kontrakty oraz ustawienie.
+4. **Zarządzanie i język:** zmień nazwę save'a, utwórz kopię i wczytaj ją. Przełącz PL ↔ EN przy otwartej wiadomości lub formularzu; tekst ma się odświeżyć, a wybór i wpisane wartości pozostać.
+
+Nie trzeba uszkadzać zapisów ani celowo zabijać aplikacji — te przypadki obejmuje macierz automatyczna. Znane ograniczenia pozostają jawne: I27 (przybliżone nagrody), placeholdery AI/silnika/wymian, brak profilu urządzenia i osobno zaplanowany refaktor starego zestawu testów. Nie analizowano wyłączonych modułów, generatorów ani assets. Zamrożony raport audytu pozostał bez zmian.
+
+Logi w `reports/lib-audit-2026-10-13/`: `stage-9-calendar-after-fix.txt`, `stage-9-all-tests.txt`, `stage-9-final-analyze.txt`, `stage-9-core-dart.txt`, `stage-9-build.txt`. `stage-9-calendar-dst-repro.txt` i `stage-9-calendar-grid-repro.txt` dokumentują stan sprzed naprawy. Wcześniejsze `stage-9-targeted-tests.txt`/`stage-9-analyze.txt` obejmują także poprawione już własne błędy nowego testu (import extension i oczekiwanie 60 zamiast 90 picków).
 
 ## Etap 8 — R13: repozytorium zapisów — 17 października 2026
 

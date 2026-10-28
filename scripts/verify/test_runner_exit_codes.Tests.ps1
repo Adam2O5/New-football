@@ -1,215 +1,49 @@
+#Requires -Version 7.0
 [CmdletBinding()]
 param()
-
 $ErrorActionPreference = 'Stop'
-
-# Validates: Requirements 3.7 and 3.8
-# Property 8: every representative invalid Area is rejected with the complete
-# allowed-value list.
-$script:task93RepoRoot = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..\..')).Path
-$script:task93RunnerPath = Join-Path $script:task93RepoRoot 'scripts\test.ps1'
-$script:task93AllowedAreas = @(
-    'match',
-    'ai',
-    'market',
-    'calendar',
-    'staff',
-    'messages',
-    'data',
-    'ui',
-    'balance'
-)
-
-function Get-Task93PowerShellPath {
-    $command = Get-Command powershell.exe -ErrorAction SilentlyContinue
-    if ($null -ne $command) {
-        return $command.Source
+$repoRoot = Split-Path -Parent (Split-Path -Parent $PSScriptRoot)
+. (Join-Path $repoRoot 'scripts/test_support.ps1')
+$pwsh = (Get-Process -Id $PID).Path
+function Assert([bool] $Condition, [string] $Message) { if (!$Condition) { throw $Message } }
+$tempRoot = [IO.Path]::GetFullPath([IO.Path]::GetTempPath())
+$fixture = Join-Path $tempRoot ("football-runner-process-" + [guid]::NewGuid())
+[IO.Directory]::CreateDirectory($fixture) | Out-Null
+try {
+    foreach ($code in @(0, 7)) {
+        $result = Invoke-BoundedTestProcess -Executable $pwsh -Arguments @('-NoProfile', '-Command', "Write-Output 'literal space'; [Console]::Error.WriteLine('stderr'); exit $code") -WorkingDirectory $fixture -LogDirectory (Join-Path $fixture "exit-$code") -TimeoutSeconds 10
+        Assert ($result.ExitCode -eq $code) 'Child exit code was lost.'
+        Assert ($result.Status -eq $(if ($code -eq 0) { 'PASS' } else { 'FAIL' })) 'Incorrect status.'
+        Assert ((Get-Content -LiteralPath (Join-Path $fixture "exit-$code/stdout.log") -Raw).Contains('literal space')) 'stdout was lost.'
+        Assert ((Get-Content -LiteralPath (Join-Path $fixture "exit-$code/stderr.log") -Raw).Contains('stderr')) 'stderr was lost.'
     }
-
-    $command = Get-Command pwsh.exe -ErrorAction SilentlyContinue
-    if ($null -ne $command) {
-        return $command.Source
+    $worker = Join-Path $fixture 'parent with spaces.ps1'
+    @'
+param([string] $ChildPidPath)
+$start = [Diagnostics.ProcessStartInfo]::new()
+$start.FileName = (Get-Process -Id $PID).Path
+$start.UseShellExecute = $false
+$start.CreateNoWindow = $true
+foreach ($arg in @('-NoProfile', '-Command', 'Start-Sleep -Seconds 60')) { $start.ArgumentList.Add($arg) }
+$child = [Diagnostics.Process]::Start($start)
+[IO.File]::WriteAllText($ChildPidPath, [string]$child.Id)
+Write-Output 'child started'
+Start-Sleep -Seconds 60
+'@ | Set-Content -LiteralPath $worker
+    $marker = Join-Path $fixture 'child.pid'
+    $result = Invoke-BoundedTestProcess -Executable $pwsh -Arguments @('-NoProfile', '-File', $worker, $marker) -WorkingDirectory $fixture -LogDirectory (Join-Path $fixture 'timeout') -TimeoutSeconds 4
+    Assert ($result.ExitCode -eq 124 -and $result.Status -eq 'TIMEOUT') 'Timeout must be distinguishable from a test failure.'
+    Assert (Test-Path -LiteralPath $marker) 'Fixture did not start its child before the deadline.'
+    $childId = [int](Get-Content -LiteralPath $marker -Raw)
+    foreach ($processId in @($result.ProcessId, $childId)) {
+        $remaining = Get-Process -Id $processId -ErrorAction SilentlyContinue
+        Assert ($null -eq $remaining -or $remaining.HasExited) "Timed-out process survived: $processId"
     }
-
-    throw 'Unable to locate PowerShell for runner exit-code tests.'
-}
-
-function ConvertTo-Task93ProcessArgument {
-    param(
-        [Parameter()]
-        [AllowEmptyString()]
-        [string] $Argument
-    )
-
-    if ($null -eq $Argument) {
-        $Argument = ''
-    }
-
-    # Quote every argument and escape backslashes before embedded quotes and at
-    # the end, preserving empty and whitespace-only -Area values in Windows PS.
-    $builder = New-Object System.Text.StringBuilder
-    [void] $builder.Append('"')
-    $backslashCount = 0
-    foreach ($character in $Argument.ToCharArray()) {
-        if ($character -eq '\\') {
-            $backslashCount++
-            continue
-        }
-
-        if ($character -eq '"') {
-            for ($index = 0; $index -lt (($backslashCount * 2) + 1); $index++) {
-                [void] $builder.Append('\\')
-            }
-            [void] $builder.Append('"')
-            $backslashCount = 0
-            continue
-        }
-
-        for ($index = 0; $index -lt $backslashCount; $index++) {
-            [void] $builder.Append('\\')
-        }
-        [void] $builder.Append($character)
-        $backslashCount = 0
-    }
-
-    for ($index = 0; $index -lt ($backslashCount * 2); $index++) {
-        [void] $builder.Append('\\')
-    }
-    [void] $builder.Append('"')
-    return $builder.ToString()
-}
-
-function Invoke-Task93Runner {
-    param(
-        [Parameter(Mandatory = $true)]
-        [string] $ScriptPath,
-
-        [Parameter()]
-        [AllowEmptyCollection()]
-        [string[]] $RunnerArguments = @()
-    )
-
-    $processArguments = @(
-        '-NoLogo',
-        '-NoProfile',
-        '-NonInteractive',
-        '-ExecutionPolicy',
-        'Bypass',
-        '-File',
-        $ScriptPath
-    )
-    if ($null -ne $RunnerArguments) {
-        $processArguments += $RunnerArguments
-    }
-
-    $startInfo = New-Object System.Diagnostics.ProcessStartInfo
-    $startInfo.FileName = Get-Task93PowerShellPath
-    $startInfo.Arguments = (@($processArguments | ForEach-Object {
-        ConvertTo-Task93ProcessArgument -Argument ([string] $_)
-    }) -join ' ')
-    $startInfo.UseShellExecute = $false
-    $startInfo.CreateNoWindow = $true
-    $startInfo.RedirectStandardOutput = $true
-    $startInfo.RedirectStandardError = $true
-
-    $process = New-Object System.Diagnostics.Process
-    $process.StartInfo = $startInfo
-    try {
-        if (-not $process.Start()) {
-            throw "Unable to start child PowerShell for '$ScriptPath'."
-        }
-
-        $stdoutTask = $process.StandardOutput.ReadToEndAsync()
-        $stderrTask = $process.StandardError.ReadToEndAsync()
-        $process.WaitForExit()
-
-        return [pscustomobject]@{
-            ExitCode = $process.ExitCode
-            Output = $stdoutTask.Result + [Environment]::NewLine + $stderrTask.Result
-        }
-    }
-    finally {
-        $process.Dispose()
-    }
-}
-
-$allowedListPattern = [regex]::Escape('Allowed:' + ($script:task93AllowedAreas -join ','))
-
-Describe 'scripts/test.ps1 validation and exit codes' {
-    BeforeAll {
-        if (-not (Test-Path -LiteralPath $script:task93RunnerPath -PathType Leaf)) {
-            throw "Runner script does not exist: '$script:task93RunnerPath'."
-        }
-    }
-
-    It 'Property 8: rejects empty, whitespace, mixed-case, and random Area values with the complete allowed list' {
-        $invalidAreas = @('', ' ', 'Market', 'nope')
-
-        foreach ($invalidArea in $invalidAreas) {
-            $result = Invoke-Task93Runner -ScriptPath $script:task93RunnerPath -RunnerArguments @('-Area', $invalidArea)
-            $label = if ($invalidArea.Length -eq 0) { '<empty>' } elseif ($invalidArea -match '^\s+$') { '<whitespace>' } else { $invalidArea }
-
-            $result.ExitCode | Should Not Be 0
-            $normalizedOutput = $result.Output -replace '\s+', ''
-            $normalizedOutput | Should Match $allowedListPattern
-        }
-    }
-
-    It 'returns a nonzero exit code for a deliberately failing temporary test and removes the fixture' {
-        $marketDirectory = Join-Path $script:task93RepoRoot 'test\market'
-        $temporaryFailurePath = Join-Path $marketDirectory ('task93_runner_failure_{0}_test.dart' -f ([guid]::NewGuid().ToString('N')))
-        $marker = 'TASK93_TEMP_FAILURE_MARKER'
-        $temporaryFailureSource = @"
-import 'package:flutter_test/flutter_test.dart';
-
-void main() {
-  test('task 9.3 deliberate runner failure', () {
-    print('$marker');
-    expect(false, isTrue);
-  });
-}
-"@
-
-        try {
-            [System.IO.File]::WriteAllText(
-                $temporaryFailurePath,
-                $temporaryFailureSource,
-                (New-Object System.Text.UTF8Encoding($false))
-            )
-
-            $result = Invoke-Task93Runner -ScriptPath $script:task93RunnerPath -RunnerArguments @('-Area', 'market')
-            $result.ExitCode | Should Not Be 0
-            $result.Output | Should Match ([regex]::Escape($marker))
-        }
-        finally {
-            if (Test-Path -LiteralPath $temporaryFailurePath -PathType Leaf) {
-                Remove-Item -LiteralPath $temporaryFailurePath -Force
-            }
-        }
-
-        Test-Path -LiteralPath $temporaryFailurePath | Should Be $false
-    }
-
-    It 'runs correctly when the repository path contains spaces' {
-        $spaceRepositoryRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('new football runner test {0}' -f ([guid]::NewGuid().ToString('N')))
-        $spaceRunnerPath = Join-Path $spaceRepositoryRoot 'scripts\test.ps1'
-        $spaceMarketDirectory = Join-Path $spaceRepositoryRoot 'test\market'
-
-        try {
-            New-Item -ItemType Directory -Path (Split-Path -Parent $spaceRunnerPath) -Force | Out-Null
-            New-Item -ItemType Directory -Path $spaceMarketDirectory -Force | Out-Null
-            Copy-Item -LiteralPath $script:task93RunnerPath -Destination $spaceRunnerPath -Force
-
-            $result = Invoke-Task93Runner -ScriptPath $spaceRunnerPath -RunnerArguments @('-Area', 'market', '-DryRun')
-            $result.ExitCode | Should Be 0
-            $result.Output | Should Match '(?m)^flutter\s+test\s+test[/\\]market\s*$'
-        }
-        finally {
-            if (Test-Path -LiteralPath $spaceRepositoryRoot) {
-                Remove-Item -LiteralPath $spaceRepositoryRoot -Recurse -Force
-            }
-        }
-
-        Test-Path -LiteralPath $spaceRepositoryRoot | Should Be $false
-    }
+    $saved = Get-Content -LiteralPath (Join-Path $fixture 'timeout/result.json') -Raw | ConvertFrom-Json
+    Assert ($saved.Status -eq 'TIMEOUT') 'Persisted timeout diagnostics are missing.'
+    Write-Host 'PASS: exit codes, stdout/stderr, spaced arguments and timeout of parent/child tree.'
+} finally {
+    $resolvedFixture = [IO.Path]::GetFullPath($fixture)
+    if (!$resolvedFixture.StartsWith($tempRoot) -or !(Split-Path -Leaf $resolvedFixture).StartsWith('football-runner-process-')) { throw 'Unsafe fixture cleanup target.' }
+    if (Test-Path -LiteralPath $resolvedFixture) { Remove-Item -LiteralPath $resolvedFixture -Recurse -Force }
 }
