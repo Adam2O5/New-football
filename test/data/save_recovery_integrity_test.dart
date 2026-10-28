@@ -1,6 +1,7 @@
 @Tags(['integration'])
 library;
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,13 +15,14 @@ import 'package:new_football/data/save_repository.dart';
 import 'package:new_football/data/save_management_repository_adapter.dart';
 
 import '../helpers/fixtures/game_fixtures.dart';
+import '../helpers/persistence/no_disk_save_repository.dart';
 
 Future<Map<String, List<int>>> _snapshot(Directory directory) async => {
   for (final file in (await directory.list().toList()).whereType<File>())
     file.uri.pathSegments.last: await file.readAsBytes(),
 };
 
-class _AmbiguousInspection extends SaveRepository {
+class _AmbiguousInspection extends NoDiskSaveRepository {
   _AmbiguousInspection(this.meta);
   final GameSaveMeta meta;
   @override
@@ -31,6 +33,70 @@ class _AmbiguousInspection extends SaveRepository {
 }
 
 void main() {
+  for (final corruption in [
+    'missing original',
+    'same-size committed payload',
+  ]) {
+    test('$corruption blocks recovery without consuming evidence', () async {
+      final directory = await Directory.systemTemp.createTemp(
+        'football-integrity-',
+      );
+      addTearDown(() => directory.delete(recursive: true));
+      final repository = SaveRepository(overrideDirectory: directory);
+      final fixture = controllerSave();
+      await repository.save(fixture);
+      var injected = false;
+      final checkpoint = corruption == 'missing original'
+          ? SaveRepositoryCheckpoint.gamePublished
+          : SaveRepositoryCheckpoint.committed;
+      final failing = SaveRepository(
+        overrideDirectory: directory,
+        onCheckpoint: (point) async {
+          if (point != checkpoint) return;
+          injected = true;
+          if (corruption == 'missing original') {
+            for (final file
+                in (await directory.list().toList()).whereType<File>()) {
+              final name = file.uri.pathSegments.last;
+              if (name == 'saves_index.json' ||
+                  name.startsWith('saves_index.json.bak-') ||
+                  name.startsWith('saves_index.json.old-')) {
+                await file.writeAsString('broken');
+              }
+            }
+          } else {
+            final file = File('${directory.path}/${fixture.meta.id}.json');
+            final original = await file.readAsString();
+            final changed = original.replaceFirst(
+              '"name":"changed"',
+              '"name":"damaged"',
+            );
+            expect(changed, isNot(original));
+            expect(utf8.encode(changed).length, utf8.encode(original).length);
+            await file.writeAsString(changed);
+          }
+          throw const FileSystemException('controlled corruption');
+        },
+      );
+      await expectLater(
+        failing.save(
+          fixture.copyWith(meta: fixture.meta.copyWith(name: 'changed')),
+        ),
+        throwsA(isA<SaveAmbiguousWriteException>()),
+      );
+      expect(injected, isTrue);
+      final evidence = await _snapshot(directory);
+      expect(evidence.keys, contains('.save-transaction-v1.json'));
+      for (final retry in [
+        repository.listSaves,
+        () => repository.load(fixture.meta.id),
+      ]) {
+        await expectLater(retry(), throwsA(isA<SaveAmbiguousWriteException>()));
+        expect(await _snapshot(directory), evidence);
+      }
+    });
+  }
+
   test(
     'malformed journal blocks operations and reaches the management provider',
     () async {

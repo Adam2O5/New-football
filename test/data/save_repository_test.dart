@@ -3,12 +3,13 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:new_football/core/models/game_save.dart';
-import 'package:new_football/core/services/game_factory.dart';
 import 'package:new_football/data/save_repository.dart';
 
+import '../helpers/fixtures/game_fixtures.dart';
 import '../helpers/persistence/controlled_save_repository.dart';
 
 void main() {
+  final fixture = controllerSave();
   late Directory tempDir;
   late SaveRepository repo;
 
@@ -22,33 +23,25 @@ void main() {
   });
 
   test('save and load roundtrip', () async {
-    final game = GameFactory().create(
-      const NewGameRequest(
-        saveName: 'Test',
-        playerTeamId: 'team_europe_0',
-        seed: 99,
-      ),
-    );
+    final game = fixture.copyWith(meta: fixture.meta.copyWith(name: 'Test'));
     await repo.save(game);
     final list = await repo.listSaves();
     expect(list, isNotEmpty);
     expect(list.first.name, 'Test');
 
     final loaded = await repo.load(game.meta.id);
-    expect(loaded.leagueState.teams.length, 30);
-    expect(loaded.leagueState.currentSeason.schedule.length, 870);
-    expect(loaded.leagueState.playerTeamId, 'team_europe_0');
-    expect(loaded.saveSeed, 99);
+    expect(
+      loaded == game.copyWith(meta: loaded.meta),
+      isTrue,
+      reason: 'The complete current payload must round-trip.',
+    );
+    expect(loaded.meta, list.single);
     expect(loaded.schemaVersion, SaveRepository.currentSchemaVersion);
   });
 
   test('commits one stamped snapshot to the game file and index', () async {
-    final game = GameFactory().create(
-      const NewGameRequest(
-        saveName: 'Consistent',
-        playerTeamId: 'team_europe_0',
-        seed: 103,
-      ),
+    final game = fixture.copyWith(
+      meta: fixture.meta.copyWith(name: 'Consistent'),
     );
 
     await repo.save(game);
@@ -82,12 +75,8 @@ void main() {
   });
 
   test('controlled repository supports zero and delayed gated saves', () async {
-    final game = GameFactory().create(
-      const NewGameRequest(
-        saveName: 'Controlled',
-        playerTeamId: 'team_europe_0',
-        seed: 104,
-      ),
+    final game = fixture.copyWith(
+      meta: fixture.meta.copyWith(name: 'Controlled'),
     );
 
     for (final delay in const [Duration.zero, Duration(milliseconds: 300)]) {
@@ -97,6 +86,10 @@ void main() {
         waitForRelease: true,
       );
       final saveFuture = controlled.save(game);
+      addTearDown(() async {
+        controlled.release();
+        await saveFuture;
+      });
       await Future<void>.delayed(Duration.zero);
 
       expect(controlled.saveCount, 1);
@@ -109,7 +102,11 @@ void main() {
       final loaded = await repo.load(game.meta.id);
       expect(loaded.meta.id, game.meta.id);
       expect(loaded.saveSeed, game.saveSeed);
-      expect(loaded.leagueState, game.leagueState);
+      expect(
+        loaded.leagueState == game.leagueState,
+        isTrue,
+        reason: 'Complete league payload must survive the write.',
+      );
       expect(loaded.schemaVersion, SaveRepository.currentSchemaVersion);
       expect(loaded.meta.schemaVersion, SaveRepository.currentSchemaVersion);
 
@@ -121,12 +118,8 @@ void main() {
   });
 
   test('failure before write leaves the previous snapshot untouched', () async {
-    final game = GameFactory().create(
-      const NewGameRequest(
-        saveName: 'Before failure',
-        playerTeamId: 'team_europe_0',
-        seed: 105,
-      ),
+    final game = fixture.copyWith(
+      meta: fixture.meta.copyWith(name: 'Before failure'),
     );
     await repo.save(game);
     final gameFile = File('${tempDir.path}/${game.meta.id}.json');
@@ -154,12 +147,8 @@ void main() {
   });
 
   test('failure after game publication rolls both files back', () async {
-    final game = GameFactory().create(
-      const NewGameRequest(
-        saveName: 'Partial failure',
-        playerTeamId: 'team_europe_0',
-        seed: 106,
-      ),
+    final game = fixture.copyWith(
+      meta: fixture.meta.copyWith(name: 'Partial failure'),
     );
     await repo.save(game);
     final gameFile = File('${tempDir.path}/${game.meta.id}.json');
@@ -198,13 +187,7 @@ void main() {
   });
 
   test('rejects a save with an older schema version', () async {
-    final game = GameFactory().create(
-      const NewGameRequest(
-        saveName: 'Older',
-        playerTeamId: 'team_europe_0',
-        seed: 100,
-      ),
-    );
+    final game = fixture.copyWith(meta: fixture.meta.copyWith(name: 'Older'));
     await repo.save(game);
 
     final file = File('${tempDir.path}/${game.meta.id}.json');
@@ -227,13 +210,7 @@ void main() {
   });
 
   test('rejects a save with a newer schema version', () async {
-    final game = GameFactory().create(
-      const NewGameRequest(
-        saveName: 'Newer',
-        playerTeamId: 'team_europe_0',
-        seed: 101,
-      ),
-    );
+    final game = fixture.copyWith(meta: fixture.meta.copyWith(name: 'Newer'));
     await repo.save(game);
 
     final file = File('${tempDir.path}/${game.meta.id}.json');
@@ -254,13 +231,7 @@ void main() {
   });
 
   test('lists incompatible saves with their schema versions', () async {
-    final game = GameFactory().create(
-      const NewGameRequest(
-        saveName: 'Current',
-        playerTeamId: 'team_europe_0',
-        seed: 102,
-      ),
-    );
+    final game = fixture.copyWith(meta: fixture.meta.copyWith(name: 'Current'));
     await repo.save(game);
 
     final indexFile = File('${tempDir.path}/saves_index.json');
@@ -317,12 +288,8 @@ void main() {
   });
 
   test('deletes the canonical save and removes its index entry', () async {
-    final game = GameFactory().create(
-      const NewGameRequest(
-        saveName: 'Delete me',
-        playerTeamId: 'team_europe_0',
-        seed: 107,
-      ),
+    final game = fixture.copyWith(
+      meta: fixture.meta.copyWith(name: 'Delete me'),
     );
     await repo.save(game);
 
@@ -347,12 +314,8 @@ void main() {
   test(
     'keeps exact index entries and lists saves by descending updatedAt',
     () async {
-      final first = GameFactory().create(
-        const NewGameRequest(
-          saveName: 'Sort first',
-          playerTeamId: 'team_europe_0',
-          seed: 108,
-        ),
+      final first = fixture.copyWith(
+        meta: fixture.meta.copyWith(name: 'Sort first'),
       );
       await repo.save(first);
       await Future<void>.delayed(const Duration(milliseconds: 20));
@@ -399,12 +362,8 @@ void main() {
   );
 
   test('retains recovery artifacts for an ambiguous rollback', () async {
-    final game = GameFactory().create(
-      const NewGameRequest(
-        saveName: 'Ambiguous before',
-        playerTeamId: 'team_europe_0',
-        seed: 109,
-      ),
+    final game = fixture.copyWith(
+      meta: fixture.meta.copyWith(name: 'Ambiguous before'),
     );
     await repo.save(game);
 

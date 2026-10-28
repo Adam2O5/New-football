@@ -7,6 +7,7 @@ import 'dart:isolate';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:new_football/data/save_repository.dart';
+import 'package:new_football/core/models/game_save.dart';
 
 import '../helpers/fixtures/game_fixtures.dart';
 
@@ -17,6 +18,8 @@ void main() {
     );
     final ready = Completer<void>();
     final release = Completer<void>();
+    Future<void>? writing;
+    Future<GameSave>? reading;
     try {
       final repository = SaveRepository(overrideDirectory: directory);
       await repository.save(controllerSave());
@@ -30,12 +33,10 @@ void main() {
           }
         },
       );
-      final writing = writer.save(
-        old.copyWith(meta: old.meta.copyWith(name: 'new')),
-      );
+      writing = writer.save(old.copyWith(meta: old.meta.copyWith(name: 'new')));
       await ready.future;
       var completed = false;
-      final reading = repository.load('stage-zero').then((value) {
+      reading = repository.load('stage-zero').then((value) {
         completed = true;
         return value;
       });
@@ -50,7 +51,12 @@ void main() {
       expect((await reading).meta.name, 'new');
     } finally {
       if (!release.isCompleted) release.complete();
-      await directory.delete(recursive: true);
+      try {
+        await writing;
+        await reading;
+      } finally {
+        await directory.delete(recursive: true);
+      }
     }
   });
   test('independent isolates serialize updates to the same index', () async {

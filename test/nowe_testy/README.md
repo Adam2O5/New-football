@@ -1,3 +1,5 @@
+> Refaktor testów, etap 2 (28 października 2026): krótkie testy startup/lock/recovery/transakcji przeniesiono do `test/data/`. Mieszany `stage_six_persistence_test` zastąpiono `test/data/save_repository_workers_test.dart` oraz `test/core/services/game_factory_preview_test.dart`. Funkcjonalna kontrola większego payloadu jest w `test/data/save_repository_payload_test.dart`; pomiary i procesowe crash/recovery nadal wymagają profilu long. Bieżący wykaz i wyniki: [test/README.md](../README.md). Poniższe opisy wcześniejszych etapów są historyczne i mogą zawierać dawne ścieżki.
+
 # Nowe testy — etapy 0–9
 
 Etapy 0–7 zostały zaakceptowane i zapisane przez użytkownika: `dc6e454`, `b4048fb`, `553198c`, `f8e45e1`, `5762f4f`, `0f2fd43`, `5598811`, `6e9cea2` oraz etap 7 w `8293be2`. R04 etapu 8 zapisano w `d010cec`, R05 w `c567d39`, R06 w `4677f98`, R07 w `1fd485b`, R08 w `eef0c73`, R09 w `5cacf87`, R10 w `e6ee6aa`, R11 w `a454528`, R12 w `14d5906`, R13 w `0000a42`. **Etap 9: odbiór automatyczny ukończony; naprawa dat i wyniki są gotowe do ręcznego review, bez commita.** Wyniki wcześniejszych grup/etapów poniżej są historycznym punktem odniesienia.

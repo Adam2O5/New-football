@@ -74,7 +74,7 @@ Znane błędy typu `SaveRepository` → `SaveManagementRepository` w pięciu pli
 
 Weryfikacja podziału: 21/21 zachowanych testów persystencji i generacji, 79/79 testów `search`, wybrane replay i crash smoke przeszły. W zachowanej starej domenie: 64 PASS, 17 FAIL i 1 SKIP; wszystkie 17 porażek odtworzono na kopiach oryginalnych źródeł. Obejmują m.in. wersję schematu 23 zamiast 27, stare fixture'y/oczekiwania oraz teardown ścigający się z autosave. Nie dopisano tych problemów do blacklisty AI/silnika. Analizator zgłasza te same 21 błędów typów i jedną informację stylistyczną co w audycie, bez nowych ostrzeżeń.
 
-## Etap 1 — stan do review
+## Etap 1 — zaakceptowany zakres
 
 Naprawiono 21 błędów typów. Analiza aktywnych i długich źródeł nie zgłasza błędów ani ostrzeżeń; pozostaje wcześniejsza informacja stylistyczna w `task26_team_events_test.dart`.
 
@@ -90,6 +90,23 @@ Helpery znajdują się obecnie w:
 
 Ścieżki importów, workery i odczyt snapshotu w aktywnych źródłach zostały zaktualizowane. Zamrożone `.disabled` pozostają bez zmian; podczas reaktywacji należy dostosować ich stare importy helperów do powyższych katalogów.
 
-Obecny wybór: **161 aktywnych plików, 11 long, 40 wpisów blacklisty**. Nowy ręczny `data/long/process_cleanup_long.dart` sprawdza timeout oraz sprzątanie drzewa po błędzie; pomocniczy `waiting_worker.dart` jest celowo bezczynny i nie jest samodzielnie odkrywany.
+Wybór po etapie 1: **161 aktywnych plików, 11 long, 40 wpisów blacklisty**. Nowy ręczny `data/long/process_cleanup_long.dart` sprawdza timeout oraz sprzątanie drzewa po błędzie; pomocniczy `waiting_worker.dart` jest celowo bezczynny i nie jest samodzielnie odkrywany.
 
-Etap nie uzyskał jeszcze pełnego odbioru: po przywróceniu kompilacji `save_management_flow_test` ujawnił dwa niezgodne oczekiwania dotyczące ambiguous recovery i błędu `loadGame`. W property testach macierz 120 operacji indeksu przekroczyła limit 25 s zastosowany w próbnej weryfikacji. Nie zmieniano tych oczekiwań, kodu gry ani globalnych limitów; dalszy zakres wymaga review użytkownika.
+Etap 1 zaakceptowano w zakresie API i helperów (commit użytkownika `7a77b65`). Po przywróceniu kompilacji `save_management_flow_test` ujawnił dwa niezgodne oczekiwania: ambiguous recovery pozostaje do etapu 2, błąd `loadGame` do etapu 3. Macierz 120 operacji indeksu przekroczyła próbny limit 25 s; jej koszt zostanie uporządkowany w etapie 2. Nie zmieniano tych oczekiwań, kodu gry ani globalnych limitów. Akceptacja etapu nie oznacza zielonego wyniku całego zestawu.
+
+## Etap 2 — persystencja i zarządzanie zapisami, do review
+
+Obecny wybór: **165 aktywnych plików, 11 long, 40 wpisów blacklisty**. Kod `lib/`, blacklista i globalne limity pozostały bez zmian.
+
+- `data/save_repository_test.dart` używa małego wspólnego fixture'a do zwykłych operacji. Pełny większy payload przechodzi dokładny save/load/rename/duplicate w `data/save_repository_payload_test.dart`. Trzykrotne pomiary nadal są wyłącznie w `performance/long/save_repository_baseline_long.dart`.
+- `data/save_repository_management_test.dart` przejął unikalne walidacje z dawnych `save_repository_duplicate_raw_test` i `save_repository_rename_raw_test`. Ich powtórzone kontrole payloadu i rollbacku usunięto; pozostają odpowiedniki w tym pliku, property tests i macierzy checkpointów.
+- Krótkie `save_coordinator_startup`, `save_directory_lock`, `save_recovery_integrity` i `save_transaction_recovery` przeniesiono z `nowe_testy` do `data`. Macierz transakcji obejmuje pierwszy zapis, nadpisanie, rename i duplicate: 21 właściwych kombinacji checkpointów w Windows, 16 na platformach bez Windows displacement. Niewystępujące punkty bez poprzedniego pliku nie są rejestrowane. Delete zachowuje osobny test pliku i indeksu; nie jest operacją dwuplikowego protokołu checkpointów.
+- `data/save_recovery_integrity_test.dart` sprawdza także brak poprawnego oryginału oraz uszkodzenie zatwierdzonego payloadu o niezmienionej długości, wstrzykiwane przez publiczny hook. Dowody pozostają nienaruszone przy kolejnych odmowach recovery. Procesowe odpowiedniki nadal są ręczne w `data/long/`.
+- Błąd niejednoznacznego zapisu oznacza zachowanie opublikowanej kopii, staged index i dziennika, jeśli przywrócenie indeksu jest zablokowane. Test repozytorium sprawdza odmowę kolejnej operacji, a po usunięciu kontrolowanej przeszkody — przywrócenie starej pary i cleanup. Oczekiwanie tego samego przepływu poprawiono w `integration/save_management_flow_test.dart`.
+- Dawną bibliotekę `save_management_property_test.dart` (2158 linii) rozbito na `core/services/save_name_policy_property_test.dart`, `save_copy_name_property_test.dart`, `save_size_formatter_property_test.dart` oraz `data/save_raw_operations_property_test.dart` i `save_index_property_test.dart`. Niezależne generatory/oracle znajdują się w `helpers/persistence/save_management_property_cases.dart` i sześciu częściach `properties/`; nie rejestrują testów i nie otwierają katalogu zapisów.
+- Property 5 zachowuje 120 przypadków w 12 deterministycznych partiach po 10, z seedami 5–16 i zakresami rozmiaru od 8 do 127. Każdy przypadek nadal sprawdza pełne raw JSON i indeks przed duplicate, po duplicate oraz po rename. Pozostałe pięć properties zachowuje po 120 przypadków. Schematy generatora ograniczono do bieżącego oraz sąsiednich niezgodnych wersji; nie wymagamy migracji historycznych formatów.
+- Z mieszanego `stage_six_persistence_test.dart` wydzielono `data/save_repository_workers_test.dart` (wspólny indeks, kompaktowy JSON, izolaty i diagnostyka sztabu) oraz `core/services/game_factory_preview_test.dart` (katalog klubów bez generowania ludzi).
+
+Weryfikacja: **119/119** testów w 17 plikach persystencji i bezpośrednich usług. Osobno **1/1** poprawionego przepływu integration i **1/1** ręcznego smoke restartu po zabiciu writera. Property 5 wykonał wszystkie 120 wejść bez timeoutu, około 16 s w lokalnym przebiegu; nie jest to gwarancja czasu na innych maszynach. Analiza całego `test/`: 0 błędów i ostrzeżeń; pozostaje wcześniejsza informacja stylistyczna w `task26_team_events_test.dart`. Discovery/walidacja wrappera przechodzą. Pełnego standard ani całego long nie uruchamiano.
+
+Logi są w `build/test-results/stage-two-*`. Znane oczekiwanie obsługi błędu `loadGame` w integration pozostaje do etapu 3; ten etap nie deklaruje zielonego wyniku całej kolekcji. Szczegółowa mapa zachowanych scenariuszy i ograniczenia odbioru znajdują się w `reports/test-audit-2026-10-21/etap-2-wdrozenie.md` (katalog raportów jest ignorowany przez Git).

@@ -7,23 +7,10 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/core/models/league_state.dart';
-import 'package:new_football/core/models/seed_data_generator.dart';
-import 'package:new_football/core/services/game_factory.dart';
 import 'package:new_football/data/save_repository.dart';
 import 'package:new_football/data/staff_data_compatibility.dart';
 
 import '../helpers/fixtures/game_fixtures.dart';
-
-class _NoGeneration extends SeedDataGenerator {
-  @override
-  LeagueState generateLeague({
-    int year = 2026,
-    String? playerTeamId,
-    int? seed,
-  }) {
-    throw StateError('Preview must not generate a league.');
-  }
-}
 
 void main() {
   test(
@@ -57,30 +44,14 @@ void main() {
       for (final meta in index) {
         final loaded = await second.load(meta.id);
         expect(loaded.meta, meta);
-        expect(loaded.leagueState, game.leagueState);
+        expect(
+          loaded.leagueState == game.leagueState,
+          isTrue,
+          reason: 'The entire concurrent-write payload must remain intact.',
+        );
       }
     },
   );
-  test('club catalog agrees with generated IDs without generating people', () {
-    final factory = GameFactory(seedGenerator: _NoGeneration());
-    final preview = factory.previewTeams();
-    expect(factory.previewTeams(), same(preview));
-    expect(
-      preview,
-      seededLeague().teams
-          .map(
-            (team) => (
-              id: team.id,
-              name: team.name,
-              city: team.city,
-              conference: team.conference,
-            ),
-          )
-          .toList(),
-    );
-    expect(() => preview.clear(), throwsUnsupportedError);
-  });
-
   test(
     'staff normalization copies only edited branches and preserves input',
     () {

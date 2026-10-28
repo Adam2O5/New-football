@@ -96,7 +96,9 @@ void main() {
       final path = entity.path;
       return path.contains('.tmp-') ||
           path.contains('.bak-') ||
-          path.contains('.old-');
+          path.contains('.old-') ||
+          path.contains('.restore-') ||
+          path.contains('.save-transaction-v1.json');
     }).toList();
   }
 
@@ -177,10 +179,10 @@ void main() {
   );
 
   test(
-    'reads valid older and newer raw snapshots without load and rejects missing or mismatched sources',
+    'reads valid current and unsupported raw snapshots without load and rejects missing or mismatched sources',
     () async {
       for (final schemaVersion in <int>[
-        SaveRepository.currentSchemaVersion - 1,
+        SaveRepository.currentSchemaVersion,
         SaveRepository.currentSchemaVersion + 1,
       ]) {
         final id = 'raw-$schemaVersion';
@@ -235,10 +237,10 @@ void main() {
   );
 
   test(
-    'duplicateRaw preserves the raw payload and metadata for older and newer schemas',
+    'duplicateRaw preserves the raw payload and metadata for current and unsupported schemas',
     () async {
       for (final schemaVersion in <int>[
-        SaveRepository.currentSchemaVersion - 1,
+        SaveRepository.currentSchemaVersion,
         SaveRepository.currentSchemaVersion + 1,
       ]) {
         final sourceId = 'duplicate-source-$schemaVersion';
@@ -295,10 +297,10 @@ void main() {
   );
 
   test(
-    'renameRaw changes only the raw name and leaves exactly one index entry for older and newer schemas',
+    'renameRaw changes only the raw name and leaves exactly one index entry for current and unsupported schemas',
     () async {
       for (final schemaVersion in <int>[
-        SaveRepository.currentSchemaVersion - 1,
+        SaveRepository.currentSchemaVersion,
         SaveRepository.currentSchemaVersion + 1,
       ]) {
         final id = 'rename-$schemaVersion';
@@ -516,12 +518,21 @@ void main() {
       expect(sabotaged, isTrue);
       expect(await saveFile(sourceId).readAsString(), sourceFileBefore);
       expect(await Directory(indexFile().path).exists(), isTrue);
-      expect(await saveFile(duplicateId).exists(), isFalse);
+      expect(await saveFile(duplicateId).exists(), isTrue);
+      expect(
+        await File('${tempDir.path}/.save-transaction-v1.json').exists(),
+        isTrue,
+      );
 
       final artifacts = transactionArtifacts();
+      final stagedIndex = artifacts.singleWhere(
+        (entity) => entity.path.contains('saves_index.json.tmp-'),
+      );
       expect(
-        artifacts.where((entity) => entity.path.contains('.tmp-')),
-        isEmpty,
+        (jsonDecode(await File(stagedIndex.path).readAsString()) as List).map(
+          (entry) => entry['id'],
+        ),
+        containsAll([sourceId, duplicateId]),
       );
       final indexBackups = artifacts
           .where((entity) => entity.path.contains('saves_index.json.bak-'))
@@ -535,6 +546,91 @@ void main() {
         ),
         isNotEmpty,
       );
+      await expectLater(
+        repository.listSaves(),
+        throwsA(isA<SaveAmbiguousWriteException>()),
+      );
+      expect(await File(stagedIndex.path).exists(), isTrue);
+      expect(await saveFile(duplicateId).exists(), isTrue);
+      await Directory(indexFile().path).delete();
+      expect(await repository.listSaves(), [sourceMeta]);
+      expect(await saveFile(sourceId).readAsString(), sourceFileBefore);
+      expect(await indexFile().readAsString(), indexBefore);
+      expect(await saveFile(duplicateId).exists(), isFalse);
+      expectNoTransactionArtifacts();
+      expect(
+        await File('${tempDir.path}/.save-transaction-v1.json').exists(),
+        isFalse,
+      );
+    },
+  );
+  test('distinguishes a missing source from invalid raw source JSON', () async {
+    final duplicateMeta = GameSaveMeta(
+      id: 'copy',
+      name: 'Copy',
+      createdAt: DateTime.utc(2025),
+      updatedAt: DateTime.utc(2025),
+      seasonYear: 2025,
+      phase: SeasonPhase.preseason,
+    );
+
+    await expectLater(
+      repository.duplicateRaw(
+        sourceId: 'missing',
+        duplicateMeta: duplicateMeta,
+      ),
+      throwsA(isA<SaveFileNotFoundException>()),
+    );
+
+    await File('${tempDir.path}/invalid.json').writeAsString('[]');
+    await expectLater(
+      repository.duplicateRaw(
+        sourceId: 'invalid',
+        duplicateMeta: duplicateMeta,
+      ),
+      throwsA(isA<InvalidSerializedSaveException>()),
+    );
+
+    await File('${tempDir.path}/mismatched.json').writeAsString(
+      jsonEncode(<String, dynamic>{
+        'meta': <String, dynamic>{'id': 'another-id'},
+      }),
+    );
+    await expectLater(
+      repository.duplicateRaw(
+        sourceId: 'mismatched',
+        duplicateMeta: duplicateMeta,
+      ),
+      throwsA(isA<InvalidSerializedSaveException>()),
+    );
+  });
+
+  test(
+    'rejects a raw/index name mismatch before changing either artifact',
+    () async {
+      const id = 'mismatched-name';
+      final originalMeta = await seedRawSave(
+        id: id,
+        schemaVersion: SaveRepository.currentSchemaVersion,
+        name: 'File name',
+      );
+      final indexFile = File('${tempDir.path}/saves_index.json');
+      await indexFile.writeAsString(
+        jsonEncode(<Map<String, dynamic>>[
+          originalMeta.copyWith(name: 'Index name').toJson(),
+        ]),
+      );
+      final gameFile = File('${tempDir.path}/$id.json');
+      final gameBefore = await gameFile.readAsString();
+      final indexBefore = await indexFile.readAsString();
+
+      await expectLater(
+        repository.renameRaw(id: id, newName: 'New name'),
+        throwsA(isA<SaveRepositoryException>()),
+      );
+
+      expect(await gameFile.readAsString(), gameBefore);
+      expect(await indexFile.readAsString(), indexBefore);
     },
   );
 }

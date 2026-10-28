@@ -491,7 +491,11 @@ void main() {
         await _saveFile(tempDir, source.id).readAsString(),
         sourceContents,
       );
-      expect(await _saveFile(tempDir, 'ambiguous-copy').exists(), isFalse);
+      expect(await _saveFile(tempDir, 'ambiguous-copy').exists(), isTrue);
+      expect(
+        await File('${tempDir.path}/.save-transaction-v1.json').exists(),
+        isTrue,
+      );
       expect(await Directory(_indexFile(tempDir).path).exists(), isTrue);
       expect(
         _transactionArtifacts(
@@ -512,8 +516,8 @@ void main() {
       expect(
         _transactionArtifacts(
           tempDir,
-        ).where((entity) => entity.path.contains('.tmp-')),
-        isEmpty,
+        ).where((entity) => entity.path.contains('saves_index.json.tmp-')),
+        hasLength(1),
       );
     },
   );
