@@ -43,6 +43,7 @@ import 'package:new_football/data/save_repository.dart';
 part 'game_service_providers.dart';
 part 'game_simulation_types.dart';
 part 'game_controller_messages.dart';
+part 'message_confirmation.dart';
 part 'game_controller_calendar_feedback.dart';
 part 'game_controller_simulation.dart';
 part 'game_controller_contracts.dart';
@@ -375,6 +376,7 @@ class GameController extends StateNotifier<AsyncValue<GameSave?>>
   ///
   /// An unsaved revision's failure remains visible until a successful write;
   /// a newer successfully persisted revision supersedes an older failure.
+  @override
   Future<void> flushPendingSave() {
     final generation = _saveGeneration;
     return _enqueueMutation(() async {

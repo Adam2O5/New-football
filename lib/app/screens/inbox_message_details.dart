@@ -136,6 +136,12 @@ class _MessageDetailsState extends State<_MessageDetails> {
   }
 
   String _operationErrorMessage(AppLocalizations l10n) {
+    final error = _error;
+    if (error is MessageConfirmationSaveException) {
+      return error.cause is SaveAmbiguousWriteException
+          ? l10n.inbox_saveUncertain
+          : l10n.inbox_confirmationSaveError;
+    }
     if (_error is SaveAmbiguousWriteException) {
       return l10n.inbox_saveUncertain;
     }
@@ -183,7 +189,11 @@ class _MessageDetailsState extends State<_MessageDetails> {
               TextButton.icon(
                 onPressed: _retry,
                 icon: const Icon(Icons.refresh),
-                label: Text(l10n.inbox_retry),
+                label: Text(
+                  _error is MessageConfirmationSaveException
+                      ? l10n.inbox_retrySave
+                      : l10n.inbox_retry,
+                ),
               ),
             ],
           ),

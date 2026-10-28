@@ -1614,6 +1614,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'We couldn\'t acknowledge this message. Try again.';
 
   @override
+  String get inbox_confirmationSaveError =>
+      'Your change was applied, but could not be saved. Retry saving.';
+
+  @override
+  String get inbox_retrySave => 'Retry saving';
+
+  @override
   String get inbox_markReadError =>
       'We couldn\'t open this message. Try again.';
 
@@ -4407,6 +4414,41 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String msg_ovrDigest_digest_body(int count, int week) {
     return '$count players improved their OVR in week $week.';
+  }
+
+  @override
+  String get msg_calendar_freeAgencyOpen_title => 'Free agency is open';
+
+  @override
+  String get msg_calendar_freeAgencyOpen_body =>
+      'You can now make offers to players and staff without a club.';
+
+  @override
+  String get msg_scoutReport_preCombine_title => 'Scouting report';
+
+  @override
+  String get msg_scoutReport_preCombine_body =>
+      'The staff have prepared scouting reports and Combine assignments.';
+
+  @override
+  String get msg_combine_completed_title => 'Draft Combine';
+
+  @override
+  String get msg_combine_completed_body =>
+      'Physical tests and the showcase match are complete.';
+
+  @override
+  String msg_draftPick_selected_title(String playerName) {
+    return 'Draft: $playerName selected';
+  }
+
+  @override
+  String msg_draftPick_selected_body(
+    int pickNumber,
+    String position,
+    String teamName,
+  ) {
+    return 'Pick $pickNumber: $position. Club: $teamName.';
   }
 
   @override

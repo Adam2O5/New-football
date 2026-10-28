@@ -35,6 +35,32 @@ mixin _GameControllerMessages {
 
   Future<T> _enqueueMutation<T>(Future<T> Function() operation);
 
+  Future<void> flushPendingSave();
+
+  Future<void> persist();
+
+  /// Captures the session now, including when the same save ID is reloaded.
+  MessageConfirmation createMessageConfirmation(String messageId) {
+    final generation = _saveGeneration;
+    final saveId = save?.meta.id;
+    bool sameCareer() =>
+        saveId != null &&
+        generation == _saveGeneration &&
+        save?.meta.id == saveId;
+
+    return MessageConfirmation._(
+      isCurrent: () => sameCareer() && _careerTransition == null,
+      acknowledge: () => acknowledgeMessage(messageId),
+      decide: (optionId) => resolveMessageDecision(messageId, optionId),
+      flush: () async {
+        if (sameCareer()) await flushPendingSave();
+      },
+      persist: () async {
+        if (sameCareer()) await persist();
+      },
+    );
+  }
+
   Future<void> _updateLeagueInQueue(
     LeagueState Function(LeagueState) transform, {
     required int generation,

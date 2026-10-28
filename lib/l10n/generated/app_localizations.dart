@@ -2962,6 +2962,18 @@ abstract class AppLocalizations {
   /// **'Nie udało się potwierdzić wiadomości. Spróbuj ponownie.'**
   String get inbox_confirmationError;
 
+  /// No description provided for @inbox_confirmationSaveError.
+  ///
+  /// In pl, this message translates to:
+  /// **'Zmiana została zastosowana, ale nie udało się jej zapisać. Ponów zapis.'**
+  String get inbox_confirmationSaveError;
+
+  /// No description provided for @inbox_retrySave.
+  ///
+  /// In pl, this message translates to:
+  /// **'Ponów zapis'**
+  String get inbox_retrySave;
+
   /// Błąd oznaczenia wiadomości jako przeczytanej przed otwarciem szczegółów.
   ///
   /// In pl, this message translates to:
@@ -7878,6 +7890,58 @@ abstract class AppLocalizations {
   /// In pl, this message translates to:
   /// **'{count} zawodników poprawiło OVR w tygodniu {week}.'**
   String msg_ovrDigest_digest_body(int count, int week);
+
+  /// No description provided for @msg_calendar_freeAgencyOpen_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Rynek wolnych agentów otwarty'**
+  String get msg_calendar_freeAgencyOpen_title;
+
+  /// No description provided for @msg_calendar_freeAgencyOpen_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Możesz teraz składać oferty zawodnikom i sztabowi bez klubu.'**
+  String get msg_calendar_freeAgencyOpen_body;
+
+  /// No description provided for @msg_scoutReport_preCombine_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Raport skautingowy'**
+  String get msg_scoutReport_preCombine_title;
+
+  /// No description provided for @msg_scoutReport_preCombine_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Sztab przygotował raporty z obserwacji i przydział na Combine.'**
+  String get msg_scoutReport_preCombine_body;
+
+  /// No description provided for @msg_combine_completed_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Draft Combine'**
+  String get msg_combine_completed_title;
+
+  /// No description provided for @msg_combine_completed_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Testy fizyczne i mecz pokazowy zakończone.'**
+  String get msg_combine_completed_body;
+
+  /// No description provided for @msg_draftPick_selected_title.
+  ///
+  /// In pl, this message translates to:
+  /// **'Draft: wybrano {playerName}'**
+  String msg_draftPick_selected_title(String playerName);
+
+  /// No description provided for @msg_draftPick_selected_body.
+  ///
+  /// In pl, this message translates to:
+  /// **'Pick {pickNumber}: {position}. Klub: {teamName}.'**
+  String msg_draftPick_selected_body(
+    int pickNumber,
+    String position,
+    String teamName,
+  );
 
   /// No description provided for @msg_calendar_newWeek_title.
   ///

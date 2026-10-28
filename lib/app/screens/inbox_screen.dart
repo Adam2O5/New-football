@@ -362,6 +362,8 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
     Object token,
   ) async {
     try {
+      final controller = ref.read(gameControllerProvider.notifier);
+      final confirmation = controller.createMessageConfirmation(message.id);
       if (!message.read && _bucket == _InboxBucket.inbox) {
         try {
           await ref
@@ -379,7 +381,11 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
         }
         if (!context.mounted || !_ownsDetailsAttempt(token, message.id)) return;
       }
-      if (!context.mounted || !_ownsDetailsAttempt(token, message.id)) return;
+      if (!context.mounted ||
+          !_ownsDetailsAttempt(token, message.id) ||
+          !confirmation.isCurrent) {
+        return;
+      }
 
       final league = ref.read(activeLeagueProvider);
       GameMessage? currentMessage;
@@ -420,7 +426,14 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
         sheetClosed = true;
         final currentSheetContext = sheetContext;
         if (currentSheetContext != null && currentSheetContext.mounted) {
-          Navigator.of(currentSheetContext).pop();
+          final route = ModalRoute.of(currentSheetContext);
+          if (route == null || !route.isActive) return;
+          final navigator = Navigator.of(currentSheetContext);
+          if (route.isCurrent) {
+            navigator.pop();
+          } else {
+            navigator.removeRoute(route);
+          }
         }
       }
 
@@ -447,19 +460,20 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
                   ?.toString();
               if (isTradeCounter && offerId != null) {
                 closeSheetOnce();
-                if (context.mounted) {
+                if (context.mounted && confirmation.isCurrent) {
                   context.push('/game/trade?tradeOfferId=$offerId');
                 }
                 return;
               }
-              await ref
-                  .read(gameControllerProvider.notifier)
-                  .resolveMessageDecision(detailsMessage.id, optionId);
+              await confirmation.decide(optionId);
             },
-            onAcknowledge: () => ref
-                .read(gameControllerProvider.notifier)
-                .acknowledgeMessage(detailsMessage.id),
-            onAction: (action) => _runAction(context, detailsMessage, action),
+            onAcknowledge: confirmation.acknowledge,
+            onAction: (action) => _runAction(
+              context,
+              detailsMessage,
+              action,
+              isCurrent: () => confirmation.isCurrent,
+            ),
             onCloseSheet: closeSheetOnce,
             digestMembers: digestMembers,
           );
@@ -502,10 +516,13 @@ class _InboxScreenState extends ConsumerState<InboxScreen> {
   Future<void> _runAction(
     BuildContext context,
     GameMessage message,
-    MessageAction action,
-  ) async {
+    MessageAction action, {
+    required bool Function() isCurrent,
+  }) async {
+    if (!isCurrent()) return;
     final controller = ref.read(gameControllerProvider.notifier);
     await controller.markMessageRead(message.id);
+    if (!context.mounted || !isCurrent()) return;
     final payload = message.payload;
     final playerId = payload['playerId']?.toString();
     if (playerId != null && playerId.isNotEmpty) {

@@ -145,3 +145,37 @@ Obecny wybór: **167 aktywnych plików, 13 long, 41 wpisów blacklisty**. Nie zm
 Weryfikacja: **158/158 testów w 22 plikach**, około 81 s całego ograniczonego procesu. Analiza całego `test/`: zero błędów i ostrzeżeń, pozostaje wcześniejsza informacja stylistyczna w `task26_team_events_test.dart`. Formatter, `git diff --check` i walidacja wyboru przechodzą. Logi: `build/test-results/stage-four-*`.
 
 Nie uruchamiano pełnego standard ani long. `calendar/task39_season_service_test.dart` pozostaje aktywny, lecz nie był częścią tego odbioru: dotyczy nagród/rollover i znanego problemu oczekiwania okresu kontraktu, zaplanowanego w domenie etapu 6. Nie dodano go do blacklisty. Szczegółowa mapa i odroczenia: `reports/test-audit-2026-10-21/etap-4-wdrozenie.md` (ignorowany przez Git). Etap zatrzymany do review, bez commita.
+
+
+## Etap 5 — poprawka trwałości Inbox, część pośrednia do review
+
+Na bazie `e05a995` rozpoczęto etap 5. Użytkownik osobno zatwierdził naprawę produkcyjnego kontraktu potwierdzania wiadomości. Etap refaktoru testów nie jest jeszcze zakończony. Obecny wybór: **170 aktywnych plików, 13 long, 41 wpisów blacklisty**.
+
+- Inbox zamyka potwierdzenie/decyzję dopiero po zakończeniu zapisu. Stan gry nadal jest publikowany przed I/O; błąd zapisu nie cofa efektu domenowego.
+- Jedna operacja potwierdzania zachowuje pierwszą opcję i współdzieli Future podczas wielokliku. Błąd domenowy pozwala ponowić komendę; błąd persystencji wyświetla osobny komunikat PL/EN i przycisk „Ponów zapis”, który wykonuje `persist` bieżącego stanu bez powtarzania efektu.
+- Operacja wiąże się z sesją kariery z chwili otwarcia arkusza. Reload tego samego ID, zmiana kariery i trwające przejście uniemożliwiają użycie starego potwierdzenia. Spóźnione zamknięcie usuwa wyłącznie własny arkusz, także gdy nad nim otwarto inną trasę.
+- Nowe regresje mają docelowe miejsca: `app/providers/message_confirmation_test.dart`, `messages/inbox_persistence_boundary_test.dart` oraz `integration/message_confirmation_save_test.dart`. Nie wracamy do przejściowego `nowe_testy` podczas jego migracji.
+- Weryfikacja: **57/57 testów w 7 plikach** (nowy kontrakt oraz dotychczasowe komendy, persystencja, lifecycle i mutacje kontrolera). Wśród nowych przypadków: blokowane I/O, PL/EN, niejednoznaczny zapis, wieloklik, błąd domenowy, powtarzany błąd zapisu, nowsza mutacja przed retry, zmiana kariery, unmount i trasa nad arkuszem. Integracja wykonuje rzeczywisty rollback po publikacji pliku i odczyt po restarcie providera; efekt decyzji pozostaje pojedynczy.
+- Dodatkowo **4/4** istniejących przypadków preservation potwierdza mark-read zwykłej wiadomości, stan już odczytany/potwierdzony, dostępność zakładek oraz sześć tras przycisków nawigacyjnych. Analiza zmienionych źródeł: **0 problemów**. Logi w `build/test-results/stage-five-confirmation-*`. Testy używają wyłącznie repozytoriów w pamięci i własnych katalogów tymczasowych, bez urządzenia i bez zapisów użytkownika. Nie uruchomiono całego standard ani long.
+
+Wstępny przebieg etapu 5 przed poprawką (11 plików): 168 zaliczeń i 13 niepowodzeń. Dziewięć dotyczy ogólnych wpisów `MessageCatalog` bez szablonów PL/EN; pozostałe obejmują ich pokrycie ARB oraz stare fixture’y/brakujące argumenty i numer schematu. Nie usunięto ani nie osłabiono tych testów. Osobną decyzję o uzupełnieniu ogólnych szablonów przedstawiono użytkownikowi; konsolidacja starych testów Inbox, przeniesienia i ustawienia nadal należą do dalszej części etapu 5. Nie wykonano commita.
+
+
+### Uzupełnienie dziewięciu ogólnych szablonów PL/EN
+
+Po zgodzie użytkownika dodano brakujące wpisy w `MessageTemplatesPl` i `MessageTemplatesEn`: playerEvent, teamEvent, retirementLeagueDigest, contractExpiring, contractLostToRival, contractExpired, tradeWindowEvent, draftPickLeague i ovrDigest. Użyto istniejących tekstów z ARB, bez nowych wymagań dotyczących danych ani zmian w dispatcherze/katalogu. Wzorce kontraktowe nadal wymagają swoich argumentów. Szczegółowe raporty digest zachowują pierwszeństwo przy resolve; ogólne klucze tych raportów również można bezpośrednio odczytać.
+
+`l10n/message_template_fallbacks_test.dart` obejmuje 18 przypadków (9 wzorców × PL/EN): zgodność tekstów z ARB, interpolację, brak nierozwiniętych placeholderów, brakujące argumenty, domyślny/nieznany kind i pierwszeństwo digest. Przed poprawką wszystkie 18 odtwarzały brak wpisów. Po poprawce **171/171** testów w 7 plikach: nowa regresja, pełna spójność katalogu, MessageTextService, przełączenie języka w otwartym Inbox, komunikaty kontraktowe/sztabu i granica trwałości Inbox. Logi: `build/test-results/stage-five-template-fallbacks-*`. Pełny etap 5 nadal nie jest zakończony; nie uruchamiano całego standard ani long i nie wykonano commita.
+
+Doprecyzowanie wcześniejszej diagnostyki: dziewięć ogólnych wzorców już miało teksty w ARB — brakowało ich tylko w katalogach MessageTextService. Osobne niepowodzenie `task8_message_l10n_test` dotyczy ośmiu kluczy ARB dla czterech wariantów szczegółowych (`calendar/freeAgencyOpen`, `scoutReport/preCombine`, `combine/completed`, `draftPick/selected`), których teksty są już w MessageTextService. Tej odrębnej niespójności nie zmieniono w poprawce dziewięciu wzorców. Nowy plik daje obecnie 171 aktywnych plików; 13 long i 41 wpisów blacklisty pozostaje bez zmian.
+
+Weryfikacja uzupełnienia szablonów: analyzer trzech zmienionych źródeł — **0 problemów**; formatter i `git diff --check` przechodzą.
+
+
+### Synchronizacja czterech szczegółowych wariantów z ARB
+
+Po kolejnej zgodzie użytkownika uzupełniono po osiem kluczy title/body w PL i EN dla `calendar/freeAgencyOpen`, `scoutReport/preCombine`, `combine/completed` i `draftPick/selected`. Treści są identyczne z istniejącymi katalogami MessageTextService; dla draftu dodano typy placeholderów (playerName/position/teamName: String, pickNumber: int). Lokalizacje wygenerowano przez gen-l10n, bez ręcznej edycji wygenerowanych plików.
+
+Weryfikacja: **151/151 testów w 4 plikach** — pokrycie MessageCatalog przez obie wersje ARB i zgodność placeholderów (`task8_message_l10n_test`), pełna spójność katalogów tekstowych, regresje dziewięciu ogólnych wzorców i przełączanie języka Inbox. Dodatkowe porównanie potwierdza zgodność wszystkich ośmiu dodanych tekstów z katalogiem w każdym języku. Gen-l10n i `git diff --check` przechodzą. Logi: `build/test-results/stage-five-arb-sync-*`.
+
+Obie zgłoszone niespójności katalogów są rozwiązane. Pozostała konsolidacja i migracja testów etapu 5; cały etap nadal nie jest zakończony. Bez commita, pełnego standard ani long. Wybór testów pozostaje bez zmian: 171 aktywnych plików, 13 long, 41 wpisów blacklisty.

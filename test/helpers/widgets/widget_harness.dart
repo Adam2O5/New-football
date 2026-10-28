@@ -35,6 +35,7 @@ Widget task41App(
   SaveRepository? saveRepository,
   List<NavigatorObserver> navigatorObservers = const [],
   List<Override> extraOverrides = const [],
+  Locale locale = const Locale('pl'),
 }) {
   final overrides = <Override>[
     ...extraOverrides,
@@ -57,7 +58,7 @@ Widget task41App(
   return ProviderScope(
     overrides: overrides,
     child: MaterialApp(
-      locale: const Locale('pl'),
+      locale: locale,
       localizationsDelegates: const [
         AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,

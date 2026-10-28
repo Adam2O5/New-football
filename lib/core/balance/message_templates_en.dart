@@ -2,6 +2,52 @@ import 'package:new_football/core/balance/message_templates_pl.dart';
 
 class MessageTemplatesEn {
   static const Map<String, MessageTextTemplate> templates = {
+    // Generic fallbacks for messages without a registered kind.
+    'msg_playerEvent_title': MessageTextTemplate(
+      key: 'msg_playerEvent_title',
+      title: 'Player event',
+      body: 'The manager\'s attention is required.',
+    ),
+    'msg_teamEvent_title': MessageTextTemplate(
+      key: 'msg_teamEvent_title',
+      title: 'Team event',
+      body: 'An event affecting the team has occurred.',
+    ),
+    'msg_retirementLeagueDigest_title': MessageTextTemplate(
+      key: 'msg_retirementLeagueDigest_title',
+      title: 'League retirements',
+      body: 'League retirement information.',
+    ),
+    'msg_contractExpiring_title': MessageTextTemplate(
+      key: 'msg_contractExpiring_title',
+      title: 'Contract expiring',
+      body: '{playerName}\'s contract expires after this season.',
+    ),
+    'msg_contractLostToRival_title': MessageTextTemplate(
+      key: 'msg_contractLostToRival_title',
+      title: 'Lost target',
+      body: '{subjectName} signed with {rivalTeam}.',
+    ),
+    'msg_contractExpired_title': MessageTextTemplate(
+      key: 'msg_contractExpired_title',
+      title: 'Expired contract',
+      body: '{playerName}\'s contract has expired.',
+    ),
+    'msg_tradeWindowEvent_title': MessageTextTemplate(
+      key: 'msg_tradeWindowEvent_title',
+      title: 'Trade window',
+      body: 'Trade window information was updated.',
+    ),
+    'msg_draftPickLeague_title': MessageTextTemplate(
+      key: 'msg_draftPickLeague_title',
+      title: 'Another team\'s pick',
+      body: 'Another team made a draft selection.',
+    ),
+    'msg_ovrDigest_title': MessageTextTemplate(
+      key: 'msg_ovrDigest_title',
+      title: 'OVR development',
+      body: 'A summary of player development.',
+    ),
     'msg_calendar_freeAgencyOpen_title': MessageTextTemplate(
       key: 'msg_calendar_freeAgencyOpen_title',
       title: 'Free agency is open',

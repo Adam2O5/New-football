@@ -900,6 +900,8 @@
   "@inbox_confirmationError": {
     "description": "Błąd potwierdzenia wiadomości po rozpoczęciu operacji; nie komunikuje sukcesu."
   },
+  "inbox_confirmationSaveError": "Zmiana została zastosowana, ale nie udało się jej zapisać. Ponów zapis.",
+  "inbox_retrySave": "Ponów zapis",
   "inbox_markReadError": "Nie udało się otworzyć wiadomości. Spróbuj ponownie.",
   "@inbox_markReadError": {
     "description": "Błąd oznaczenia wiadomości jako przeczytanej przed otwarciem szczegółów."
@@ -2002,6 +2004,17 @@
   "msg_ovrDigest_digest_title": "Rozwój OVR",
   "msg_ovrDigest_digest_body": "{count} zawodników poprawiło OVR w tygodniu {week}.",
   "@msg_ovrDigest_digest_body": {"placeholders": {"count": {"type": "int"}, "week": {"type": "int"}}},
+
+  "msg_calendar_freeAgencyOpen_title": "Rynek wolnych agentów otwarty",
+  "msg_calendar_freeAgencyOpen_body": "Możesz teraz składać oferty zawodnikom i sztabowi bez klubu.",
+  "msg_scoutReport_preCombine_title": "Raport skautingowy",
+  "msg_scoutReport_preCombine_body": "Sztab przygotował raporty z obserwacji i przydział na Combine.",
+  "msg_combine_completed_title": "Draft Combine",
+  "msg_combine_completed_body": "Testy fizyczne i mecz pokazowy zakończone.",
+  "msg_draftPick_selected_title": "Draft: wybrano {playerName}",
+  "@msg_draftPick_selected_title": {"placeholders": {"playerName": {"type": "String"}}},
+  "msg_draftPick_selected_body": "Pick {pickNumber}: {position}. Klub: {teamName}.",
+  "@msg_draftPick_selected_body": {"placeholders": {"pickNumber": {"type": "int"}, "position": {"type": "String"}, "teamName": {"type": "String"}}},
 
   "msg_calendar_newWeek_title": "Nowy tydzień",
   "msg_calendar_newWeek_body": "Rozpoczął się tydzień {week}.",

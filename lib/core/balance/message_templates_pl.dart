@@ -12,6 +12,52 @@ class MessageTextTemplate {
 
 class MessageTemplatesPl {
   static const Map<String, MessageTextTemplate> templates = {
+    // Generic fallbacks for messages without a registered kind.
+    'msg_playerEvent_title': MessageTextTemplate(
+      key: 'msg_playerEvent_title',
+      title: 'Wydarzenie zawodnika',
+      body: 'Wymagana jest uwaga menedżera.',
+    ),
+    'msg_teamEvent_title': MessageTextTemplate(
+      key: 'msg_teamEvent_title',
+      title: 'Wydarzenie zespołu',
+      body: 'Wystąpiło wydarzenie dotyczące zespołu.',
+    ),
+    'msg_retirementLeagueDigest_title': MessageTextTemplate(
+      key: 'msg_retirementLeagueDigest_title',
+      title: 'Emerytury w lidze',
+      body: 'Podsumowanie emerytur ligowych.',
+    ),
+    'msg_contractExpiring_title': MessageTextTemplate(
+      key: 'msg_contractExpiring_title',
+      title: 'Wygasający kontrakt',
+      body: 'Kontrakt {playerName} wygasa po tym sezonie.',
+    ),
+    'msg_contractLostToRival_title': MessageTextTemplate(
+      key: 'msg_contractLostToRival_title',
+      title: 'Utracony cel',
+      body: '{subjectName} podpisał kontrakt z {rivalTeam}.',
+    ),
+    'msg_contractExpired_title': MessageTextTemplate(
+      key: 'msg_contractExpired_title',
+      title: 'Wygasły kontrakt',
+      body: 'Kontrakt {playerName} wygasł.',
+    ),
+    'msg_tradeWindowEvent_title': MessageTextTemplate(
+      key: 'msg_tradeWindowEvent_title',
+      title: 'Okno wymian',
+      body: 'Zaktualizowano informacje o oknie wymian.',
+    ),
+    'msg_draftPickLeague_title': MessageTextTemplate(
+      key: 'msg_draftPickLeague_title',
+      title: 'Wybór innej drużyny',
+      body: 'Inna drużyna dokonała wyboru w drafcie.',
+    ),
+    'msg_ovrDigest_title': MessageTextTemplate(
+      key: 'msg_ovrDigest_title',
+      title: 'Rozwój OVR',
+      body: 'Podsumowanie rozwoju zawodników.',
+    ),
     'msg_calendar_freeAgencyOpen_title': MessageTextTemplate(
       key: 'msg_calendar_freeAgencyOpen_title',
       title: 'Rynek wolnych agentów otwarty',
