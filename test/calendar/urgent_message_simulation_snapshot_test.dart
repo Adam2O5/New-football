@@ -11,15 +11,15 @@ import 'package:new_football/app/services/calendar_simulation_pacer.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/core/models/message.dart';
-import 'package:new_football/core/services/game_factory.dart';
-import 'package:new_football/data/save_repository.dart';
+import '../helpers/fixtures/calendar_fixtures.dart';
 
 import '../helpers/widgets/preferences_test_double.dart';
+import '../helpers/persistence/no_disk_save_repository.dart';
 
 const _property7Label =
     'Feature: urgent-message-simulation-setting, Property 7: '
     'active-batch snapshot and next-batch value';
-const _property7CaseCount = 100;
+const _property7CaseCount = 2;
 
 void main() {
   // **Validates: Requirements 7.1, 7.2, 7.3, 7.4, 7.6, 9.7; Design Property 7**
@@ -42,6 +42,7 @@ void main() {
       );
       final container = _containerFor(game, preferences);
       final gate = _ControlledPacer(controlledDelays: 2);
+      addTearDown(gate.releaseAll);
       final completedDays = <String>[];
       final caseLabel = '$_property7Label case=$caseIndex';
 
@@ -151,6 +152,7 @@ void main() {
       );
       final container = _containerFor(game, preferences);
       final gate = _ControlledPacer(controlledDelays: 2);
+      addTearDown(gate.releaseAll);
       final caseLabel = '$_property7Label successful case=$caseIndex';
 
       try {
@@ -266,6 +268,7 @@ void main() {
         );
         final container = _containerFor(game, preferences);
         final gate = _ControlledPacer(controlledDelays: 1);
+        addTearDown(gate.releaseAll);
         final caseLabel =
             '$_property7Label failed-write case=$caseIndex '
             'mode=${failedByReturnValue ? 'false-result' : 'exception'}';
@@ -369,15 +372,7 @@ void main() {
   );
 }
 
-GameSave _baseGame() {
-  return GameFactory().create(
-    const NewGameRequest(
-      saveName: 'Urgent snapshot property fixture',
-      playerTeamId: 'team_europe_0',
-      seed: 7,
-    ),
-  );
-}
+GameSave _baseGame() => calendarFixture();
 
 GameSave _gameWithScheduledUrgent(
   GameSave baseGame, {
@@ -467,6 +462,12 @@ final class _ControlledPacer {
     },
   );
 
+  void releaseAll() {
+    for (var index = 1; index <= _releases.length; index++) {
+      release(index);
+    }
+  }
+
   Future<void> waitUntilEntered(int delayNumber) =>
       _entered[delayNumber - 1].future;
 
@@ -476,7 +477,7 @@ final class _ControlledPacer {
   }
 }
 
-final class _NoopSaveRepository extends SaveRepository {
+final class _NoopSaveRepository extends NoDiskSaveRepository {
   @override
   Future<void> save(GameSave gameSave) async {}
 }

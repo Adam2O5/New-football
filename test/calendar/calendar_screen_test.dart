@@ -23,10 +23,10 @@ import 'package:new_football/core/models/message.dart';
 import 'package:new_football/core/services/calendar_event_registry.dart';
 import 'package:new_football/core/services/day_simulator.dart';
 import 'package:new_football/core/services/game_factory.dart';
-import 'package:new_football/data/save_repository.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
 import '../helpers/widgets/preferences_test_double.dart';
+import '../helpers/persistence/no_disk_save_repository.dart';
 
 void main() {
   testWidgets('owns progress and cancellation in the route state', (
@@ -339,6 +339,7 @@ void main() {
     expect(find.byType(CalendarDayResultPopup), findsNothing);
     expect(find.byKey(_feedbackHostKey), findsNothing);
     expect(find.byKey(_progressKey), findsNothing);
+    await _confirmDraftDialog(tester);
     expect(
       harness.destinationUris.map((uri) => uri.path),
       contains('/game/draft'),
@@ -371,6 +372,7 @@ void main() {
 
     expect(find.byType(CalendarDayResultPopup), findsNothing);
     expect(find.byKey(_feedbackHostKey), findsNothing);
+    await _confirmDraftDialog(tester);
     expect(
       harness.destinationUris.map((uri) => uri.path),
       contains('/game/draft'),
@@ -541,6 +543,7 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      await _confirmDraftDialog(tester);
       expect(find.text('calendar draft destination'), findsOneWidget);
       expect(find.byKey(_progressKey), findsNothing);
       expect(
@@ -589,7 +592,7 @@ CalendarDaySimulationFeedback _feedback({
     results: [
       const CalendarMatchFeedback(
         matchId: 'calendar-test-match',
-        homeTeamId: 'team-europe-0',
+        homeTeamId: 'team_europe_0',
         homeTeamName: 'North London United',
         awayTeamId: 'team-america-0',
         awayTeamName: 'South Coast City',
@@ -807,7 +810,19 @@ class _FakeCalendarRun {
   }
 }
 
-class _NoopSaveRepository extends SaveRepository {
+class _NoopSaveRepository extends NoDiskSaveRepository {
   @override
   Future<void> save(GameSave gameSave) async {}
+}
+
+Future<void> _confirmDraftDialog(WidgetTester tester) async {
+  expect(find.byType(AlertDialog), findsOneWidget);
+  final context = tester.element(find.byType(AlertDialog));
+  await tester.tap(
+    find.widgetWithText(
+      TextButton,
+      MaterialLocalizations.of(context).okButtonLabel,
+    ),
+  );
+  await tester.pumpAndSettle();
 }

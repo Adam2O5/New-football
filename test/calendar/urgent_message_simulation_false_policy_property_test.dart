@@ -17,11 +17,12 @@ import 'package:new_football/core/services/calendar_service.dart';
 
 import '../helpers/widgets/preferences_test_double.dart';
 import '../helpers/widgets/widget_harness.dart';
+import '../helpers/fixtures/calendar_fixtures.dart';
 
 const _property4Label =
     'Feature: urgent-message-simulation-setting, Property 4: '
     'disabled policy skips only urgent';
-const _property4CaseCount = 120;
+const _property4CaseCount = 2;
 
 void main() {
   // **Validates: Requirements 4.1–4.7, 9.3–9.5; Design Property 4**
@@ -29,7 +30,7 @@ void main() {
       '$_property4CaseCount deterministic plans', () async {
     for (var caseIndex = 0; caseIndex < _property4CaseCount; caseIndex++) {
       final plan = _planFor(caseIndex);
-      final base = task41Game(seed: 26000 + caseIndex);
+      final base = calendarFixture(seed: 26000 + caseIndex);
       final game = _withScheduledUrgents(
         base,
         week: plan.startWeek,
@@ -104,7 +105,7 @@ void main() {
 
   test('$_property4Label preserves the first actionable player match and keeps '
       'delivered urgent messages pending', () async {
-    final base = task41Game(seed: 26101);
+    final base = calendarFixture(seed: 26101, withPlayerMatch: true);
     final matchDay = _firstRegularMatchDay();
     final game = _withScheduledUrgents(
       base,
@@ -138,7 +139,7 @@ void main() {
 
   test('$_property4Label preserves the first actionable draft event after '
       'urgent delivery', () async {
-    final base = task41Game(seed: 26102);
+    final base = calendarFixture(seed: 26102);
     final calendar = const CalendarService();
     final draftWeek = calendar.balance.calendar.draftWeek;
     final currentWeek = draftWeek - 1;

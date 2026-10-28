@@ -26,7 +26,7 @@ void main() {
     expect(calendar.isBreakWeek(30), isTrue);
   });
 
-  test('exposes canonical play-in and playoff slots', () {
+  test('exposes fixed play-in slots and playoff round boundaries', () {
     expect(calendar.playInSlotForDay(31, 3), 0);
     expect(calendar.playInSlotForDay(31, 6), 2);
     expect(calendar.playInSlotsForDay(31, 3), [0, 1]);
@@ -41,8 +41,6 @@ void main() {
     expect(calendar.playoffRoundForWeek(40), 3);
     expect(calendar.playoffRoundForWeek(41), 4);
     expect(calendar.playoffRoundForWeek(43), 4);
-    expect(calendar.postseasonSlotForDay(32, 3), 0);
-    expect(calendar.postseasonSlotForDay(32, 6), 1);
 
     expect(calendar.higherSeedHomeForGame(0), isTrue);
     expect(calendar.higherSeedHomeForGame(1), isFalse);
@@ -50,6 +48,49 @@ void main() {
     expect(calendar.higherSeedHomeForGame(3), isTrue);
     expect(calendar.higherSeedHomeForGame(4), isTrue);
   });
+
+  test(
+    'playoff dates vary while the seed-zero week-32 example is Thursday/Sunday',
+    () {
+      expect(calendar.playoffRoundSlotDates(1, seed: 0).take(2), [
+        (32, 4),
+        (32, 7),
+      ]);
+      expect(calendar.postseasonSlotForDay(32, 4, seed: 0), 0);
+      expect(calendar.postseasonSlotForDay(32, 7, seed: 0), 1);
+      expect(calendar.postseasonSlotForDay(32, 3, seed: 0), isNull);
+      expect(calendar.postseasonSlotForDay(32, 6, seed: 0), isNull);
+      for (final seed in [0, 7, 42]) {
+        for (var round = 1; round <= 4; round++) {
+          final dates = calendar.playoffRoundSlotDates(round, seed: seed);
+          expect(dates, hasLength(6));
+          expect(dates.toSet(), hasLength(6));
+          final firstWeek = 32 + (round - 1) * 3;
+          for (var offset = 0; offset < 3; offset++) {
+            final week = firstWeek + offset;
+            final mid = dates[offset * 2];
+            final end = dates[offset * 2 + 1];
+            expect(mid.$1, week);
+            expect(end.$1, week);
+            expect(mid.$2, anyOf(3, 4));
+            expect(end.$2, anyOf(6, 7));
+            expect(mid.$2, lessThan(end.$2));
+            for (var day = 1; day <= 7; day++) {
+              expect(
+                calendar.postseasonSlotForDay(week, day, seed: seed),
+                day == mid.$2
+                    ? 0
+                    : day == end.$2
+                    ? 1
+                    : null,
+                reason: 'seed=$seed round=$round week=$week day=$day',
+              );
+            }
+          }
+        }
+      }
+    },
+  );
 
   test('registers week 44-47 events on canonical dates', () {
     final slots = CalendarEventRegistry.build(calendar.balance.calendar);

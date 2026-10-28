@@ -10,232 +10,163 @@ import 'package:new_football/app/widgets/calendar_day_result_popup.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
 void main() {
-  testWidgets(
-    'renders one bounded popup with every result and stable row keys',
-    (tester) async {
-      final feedback = _day(
-        runId: 7,
-        sequence: 3,
-        results: [
-          _match(
-            id: 'match-1',
-            position: 0,
-            home: 'North London United',
-            away: 'South Coast City',
-            homeGoals: 2,
-            awayGoals: 1,
-          ),
-          _match(
-            id: 'match-2',
-            position: 1,
-            home: 'Riverside Athletic',
-            away: 'Old Town Rovers',
-            homeGoals: 0,
-            awayGoals: 3,
-          ),
-        ],
-      );
-
-      await tester.pumpWidget(
-        _app(CalendarDayResultPopup(feedback: feedback, teamId: 'team-1')),
-      );
-      await tester.pump();
-
-      final popupKey = const ValueKey<String>('calendar-day-result-popup-7-3');
-      expect(find.byKey(popupKey), findsOneWidget);
-      expect(
-        find.byKey(const ValueKey<String>('calendar-day-result-row-7-3-0')),
-        findsOneWidget,
-      );
-      expect(
-        find.byKey(const ValueKey<String>('calendar-day-result-row-7-3-1')),
-        findsOneWidget,
-      );
-      expect(find.byType(Card), findsOneWidget);
-      expect(find.byType(SingleChildScrollView), findsOneWidget);
-      expect(find.text('Match results · Week 4, day 2'), findsOneWidget);
-      expect(find.text('North London United'), findsOneWidget);
-      expect(find.text('South Coast City'), findsOneWidget);
-      expect(find.text('2:1'), findsOneWidget);
-      expect(find.text('Riverside Athletic'), findsOneWidget);
-      expect(find.text('Old Town Rovers'), findsOneWidget);
-      expect(find.text('0:3'), findsOneWidget);
-      for (final result in feedback.results) {
-        final accessibleResult =
-            '${result.homeTeamName} ${result.homeGoals}:${result.awayGoals} '
-            '${result.awayTeamName}';
-        expect(find.byTooltip(accessibleResult), findsOneWidget);
-        expect(find.bySemanticsLabel(accessibleResult), findsOneWidget);
-      }
-
-      // The popup has no row-level timer or delay and is therefore still
-      // present when time is advanced by the test harness.
-      await tester.pump(const Duration(seconds: 1));
-      expect(find.byKey(popupKey), findsOneWidget);
-      expect(tester.takeException(), isNull);
-    },
-  );
-
-  testWidgets('an empty completed day does not create a result popup', (
-    tester,
-  ) async {
-    final feedback = _day(runId: 1, sequence: 0, results: const []);
-
-    await tester.pumpWidget(
-      _app(CalendarDayResultPopup(feedback: feedback, teamId: 'team-1')),
-    );
-    await tester.pump();
-
-    expect(find.byType(Card), findsNothing);
-    expect(find.byType(SingleChildScrollView), findsNothing);
-    expect(find.byType(Scrollable), findsNothing);
-    expect(tester.takeException(), isNull);
-  });
-
-  testWidgets(
-    'wraps long names in bounded scrollable content on a small viewport',
-    (tester) async {
-      addTearDown(tester.view.reset);
-      tester.view.physicalSize = const Size(320, 220);
-      tester.view.devicePixelRatio = 1;
-
-      final feedback = _day(
-        runId: 12,
-        sequence: 5,
-        results: [
-          for (var index = 0; index < 8; index++)
-            _match(
-              id: 'long-$index',
-              position: index,
-              home:
-                  'Very Long Home Club Name ${index + 1} With A Descriptive Suffix',
-              away:
-                  'Very Long Away Club Name ${index + 1} With A Descriptive Suffix',
-              homeGoals: index % 4,
-              awayGoals: (index + 1) % 4,
+  for (final locale in [const Locale('pl'), const Locale('en')]) {
+    testWidgets(
+      'only the player match is shown with localized semantics ($locale)',
+      (tester) async {
+        final semantics = tester.ensureSemantics();
+        try {
+          final own = _match('ours', 'opponent', 2, 1);
+          final other = _match('unrelated-home', 'unrelated-away', 0, 3);
+          final feedback = _day([other, own]);
+          await tester.pumpWidget(
+            _app(
+              CalendarDayResultPopup(feedback: feedback, teamId: 'ours'),
+              locale: locale,
             ),
-        ],
-      );
-
+          );
+          await tester.pump();
+          final l10n = await AppLocalizations.delegate.load(locale);
+          expect(
+            find.byKey(const ValueKey('calendar-day-result-popup-7-3')),
+            findsOneWidget,
+          );
+          expect(
+            find.text(l10n.calendar_simulationResults_title(4, 2)),
+            findsOneWidget,
+          );
+          expect(find.text('ours'), findsOneWidget);
+          expect(find.text('opponent'), findsOneWidget);
+          expect(find.text('2:1'), findsOneWidget);
+          expect(find.text('unrelated-home'), findsNothing);
+          expect(find.text('unrelated-away'), findsNothing);
+          final label = l10n.calendar_simulationResults_match(
+            'ours',
+            'opponent',
+            2,
+            1,
+          );
+          expect(find.byTooltip(label), findsOneWidget);
+          expect(find.bySemanticsLabel(label), findsOneWidget);
+          await tester.pump(const Duration(seconds: 1));
+          expect(find.byType(Card), findsOneWidget);
+          expect(tester.takeException(), isNull);
+        } finally {
+          semantics.dispose();
+        }
+      },
+    );
+  }
+  for (final teamId in <String?>[null, 'missing']) {
+    testWidgets('no result popup when player team is $teamId', (tester) async {
       await tester.pumpWidget(
-        _app(CalendarDayResultPopup(feedback: feedback, teamId: 'team-1')),
+        _app(
+          CalendarDayResultPopup(
+            feedback: _day([_match('home', 'away', 1, 0)]),
+            teamId: teamId,
+          ),
+        ),
       );
-      await tester.pump();
-
-      final popup = find.byKey(
-        const ValueKey<String>('calendar-day-result-popup-12-5'),
+      expect(find.byType(Card), findsNothing);
+    });
+  }
+  testWidgets('an empty completed day has no popup', (tester) async {
+    await tester.pumpWidget(
+      _app(CalendarDayResultPopup(feedback: _day([]), teamId: 'ours')),
+    );
+    expect(find.byType(Card), findsNothing);
+  });
+  for (final isHome in [false, true]) {
+    for (final score in [
+      (2, 1, Colors.green),
+      (1, 1, Colors.yellow),
+      (0, 1, Colors.red),
+    ]) {
+      testWidgets(
+        'result border reflects player score ${score.$1}:${score.$2} (home: $isHome)',
+        (tester) async {
+          final match = isHome
+              ? _match('ours', 'other', score.$1, score.$2)
+              : _match('other', 'ours', score.$2, score.$1);
+          await tester.pumpWidget(
+            _app(
+              CalendarDayResultPopup(feedback: _day([match]), teamId: 'ours'),
+            ),
+          );
+          final card = tester.widget<Card>(find.byType(Card));
+          expect((card.shape! as RoundedRectangleBorder).side.color, score.$3);
+        },
       );
-      final popupRect = tester.getRect(popup);
-      const viewport = Rect.fromLTWH(0, 0, 320, 220);
-
-      expect(viewport.contains(popupRect.topLeft), isTrue);
-      expect(viewport.contains(popupRect.bottomRight), isTrue);
-      expect(popupRect.width, lessThanOrEqualTo(320));
-      expect(popupRect.height, lessThanOrEqualTo(220));
+    }
+  }
+  testWidgets(
+    'long player-match names remain scrollable within a small viewport',
+    (tester) async {
+      tester.view.physicalSize = const Size(320, 360);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.reset);
+      final home = List.filled(12, 'Long Home Club').join(' ');
+      final away = List.filled(12, 'Long Away Club').join(' ');
+      final match = CalendarMatchFeedback(
+        matchId: 'long-names',
+        schedulePosition: 0,
+        homeTeamId: 'ours',
+        homeTeamName: home,
+        awayTeamId: 'other',
+        awayTeamName: away,
+        homeGoals: 1,
+        awayGoals: 0,
+      );
+      await tester.pumpWidget(
+        _app(
+          MediaQuery(
+            data: const MediaQueryData(
+              size: Size(320, 360),
+              textScaler: TextScaler.linear(2),
+            ),
+            child: CalendarDayResultPopup(
+              feedback: _day([match]),
+              teamId: 'ours',
+            ),
+          ),
+        ),
+      );
       expect(find.byType(SingleChildScrollView), findsOneWidget);
-      expect(
-        find.byKey(const ValueKey<String>('calendar-day-result-row-12-5-7')),
-        findsOneWidget,
-      );
-      for (var index = 0; index < 8; index++) {
-        expect(
-          find.text(
-            'Very Long Home Club Name ${index + 1} '
-            'With A Descriptive Suffix',
-          ),
-          findsOneWidget,
-        );
-        expect(
-          find.text(
-            'Very Long Away Club Name ${index + 1} '
-            'With A Descriptive Suffix',
-          ),
-          findsOneWidget,
-        );
-      }
-      expect(tester.takeException(), isNull);
-
-      await tester.drag(
-        find.byKey(const ValueKey<String>('calendar-day-result-scroll-12-5')),
-        const Offset(0, -150),
-      );
+      final card = tester.getRect(find.byType(Card));
+      expect(card.width, lessThanOrEqualTo(320));
+      expect(card.height, lessThanOrEqualTo(360));
+      expect(find.text(home), findsOneWidget);
+      expect(find.text(away), findsOneWidget);
+      await tester.ensureVisible(find.text(away));
       await tester.pump();
       expect(tester.takeException(), isNull);
     },
   );
+}
 
-  testWidgets('keeps full names in localized tooltip and semantics labels', (
-    tester,
-  ) async {
-    final feedback = _day(
-      runId: 2,
-      sequence: 4,
-      week: 9,
-      day: 6,
-      results: [
-        _match(
-          id: 'semantic-match',
-          position: 0,
-          home: 'Gospodarze Z Bardzo Długą Nazwą',
-          away: 'Goście Z Bardzo Długą Nazwą',
-          homeGoals: 4,
-          awayGoals: 2,
-        ),
-      ],
+CalendarDaySimulationFeedback _day(List<CalendarMatchFeedback> results) =>
+    CalendarDaySimulationFeedback(
+      runId: 7,
+      sequence: 3,
+      week: 4,
+      day: 2,
+      results: results,
     );
-
-    await tester.pumpWidget(
-      _app(
-        CalendarDayResultPopup(feedback: feedback, teamId: 'team-1'),
-        locale: const Locale('pl'),
-      ),
-    );
-    await tester.pump();
-
-    const accessibleResult =
-        'Gospodarze Z Bardzo Długą Nazwą 4:2 Goście Z Bardzo Długą Nazwą';
-    expect(find.text('Wyniki meczów · tydzień 9, dzień 6'), findsOneWidget);
-    expect(find.byTooltip(accessibleResult), findsOneWidget);
-    expect(find.bySemanticsLabel(accessibleResult), findsOneWidget);
-    expect(tester.takeException(), isNull);
-  });
-}
-
-CalendarDaySimulationFeedback _day({
-  required int runId,
-  required int sequence,
-  required List<CalendarMatchFeedback> results,
-  int week = 4,
-  int day = 2,
-}) {
-  return CalendarDaySimulationFeedback(
-    runId: runId,
-    sequence: sequence,
-    week: week,
-    day: day,
-    results: results,
-  );
-}
-
-CalendarMatchFeedback _match({
-  required String id,
-  required int position,
-  required String home,
-  required String away,
-  required int homeGoals,
-  required int awayGoals,
-}) {
-  return CalendarMatchFeedback(
-    matchId: id,
-    homeTeamId: '$id-home',
-    homeTeamName: home,
-    awayTeamId: '$id-away',
-    awayTeamName: away,
-    homeGoals: homeGoals,
-    awayGoals: awayGoals,
-    schedulePosition: position,
-  );
-}
+CalendarMatchFeedback _match(
+  String home,
+  String away,
+  int homeGoals,
+  int awayGoals,
+) => CalendarMatchFeedback(
+  matchId: '$home-$away',
+  schedulePosition: 0,
+  homeTeamId: home,
+  homeTeamName: home,
+  awayTeamId: away,
+  awayTeamName: away,
+  homeGoals: homeGoals,
+  awayGoals: awayGoals,
+);
 
 Widget _app(Widget child, {Locale locale = const Locale('en')}) {
   return MaterialApp(

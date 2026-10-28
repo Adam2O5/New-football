@@ -1,5 +1,6 @@
 import 'dart:convert';
-import 'dart:io';
+import '../helpers/persistence/memory_save_repository.dart';
+import '../helpers/fixtures/calendar_fixtures.dart';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -7,36 +8,22 @@ import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/core/models/message.dart';
-import 'package:new_football/core/services/game_factory.dart';
-import 'package:new_football/data/save_repository.dart';
 
 void main() {
-  late Directory tempDir;
   late ProviderContainer container;
   late GameController controller;
-
+  late MemorySaveRepository repository;
   setUp(() async {
-    tempDir = await Directory.systemTemp.createTemp('nf_task6_');
+    repository = MemorySaveRepository(calendarFixture());
     container = ProviderContainer(
-      overrides: [
-        saveRepositoryProvider.overrideWithValue(
-          SaveRepository(overrideDirectory: tempDir),
-        ),
-      ],
+      overrides: [saveRepositoryProvider.overrideWithValue(repository)],
     );
     controller = container.read(gameControllerProvider.notifier);
-    await controller.createNewGame(
-      const NewGameRequest(
-        saveName: 'Task 6',
-        playerTeamId: 'team_europe_0',
-        seed: 7,
-      ),
-    );
+    await controller.loadGame(repository.game.meta.id);
   });
-
   tearDown(() async {
+    await controller.enqueueSaveManagement(() async {});
     container.dispose();
-    if (await tempDir.exists()) await tempDir.delete(recursive: true);
   });
 
   Future<void> setDate(int week, int day, {int? hour}) async {
@@ -62,7 +49,8 @@ void main() {
     );
 
     expect(restored.leagueState.currentHour, 7);
-    expect(SaveSchema.currentVersion, 23);
+    expect(restored.schemaVersion, SaveSchema.currentVersion);
+    expect(restored.meta.schemaVersion, SaveSchema.currentVersion);
   });
 
   test('hourly mode is limited to extensions and FA phase I', () async {

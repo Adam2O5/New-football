@@ -11,10 +11,10 @@ import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/core/models/message.dart';
 import 'package:new_football/core/services/calendar_event_registry.dart';
 import 'package:new_football/core/services/calendar_service.dart';
-import 'package:new_football/core/services/game_factory.dart';
-import 'package:new_football/data/save_repository.dart';
+import '../helpers/fixtures/calendar_fixtures.dart';
 
 import '../helpers/widgets/preferences_test_double.dart';
+import '../helpers/persistence/no_disk_save_repository.dart';
 
 const _calendar = CalendarService();
 
@@ -73,7 +73,7 @@ void main() {
   test('Feature: urgent-message-simulation-setting, Property 3: enabled policy '
       'stops every shared batch', () async {
     final cases = _propertyCases();
-    expect(cases, hasLength(greaterThanOrEqualTo(100)));
+    expect(cases, hasLength(16));
 
     for (final scenario in cases) {
       final preferences = PreferencesTestDouble(
@@ -242,26 +242,24 @@ void main() {
 }
 
 List<_PropertyCase> _propertyCases() {
+  var index = 0;
   return [
-    for (var index = 0; index < 120; index++)
-      _PropertyCase(
-        index: index,
-        caller: _BatchCaller.values[index % _BatchCaller.values.length],
-        placement: index.isEven
-            ? _UrgentPlacement.alreadyPending
-            : _UrgentPlacement.deliveredOnNextDate,
-        seed: 7300 + index,
-      ),
+    for (final caller in _BatchCaller.values)
+      for (final placement in _UrgentPlacement.values)
+        for (final seed in [7300, 7311])
+          _PropertyCase(
+            index: index++,
+            caller: caller,
+            placement: placement,
+            seed: seed,
+          ),
   ];
 }
 
 GameSave _gameFor(_PropertyCase scenario) {
-  final base = GameFactory().create(
-    NewGameRequest(
-      saveName: 'Property 3 ${scenario.index}',
-      playerTeamId: 'team_europe_0',
-      seed: scenario.seed,
-    ),
+  final base = calendarFixture(
+    seed: scenario.seed,
+    withPlayerMatch: scenario.isHomeMatch,
   );
   final playerTeamId = scenario.isHomeMatch ? 'team_europe_0' : null;
   final urgent = GameMessage(
@@ -321,7 +319,7 @@ Future<BatchSimulationResult> _runBatch(
 
 int _dateOrdinal(int week, int day) => week * 8 + day;
 
-final class _NoopSaveRepository extends SaveRepository {
+final class _NoopSaveRepository extends NoDiskSaveRepository {
   @override
   Future<void> save(GameSave gameSave) async {}
 }

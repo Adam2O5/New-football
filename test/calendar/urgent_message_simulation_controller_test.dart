@@ -8,11 +8,11 @@ import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/core/models/message.dart';
 import 'package:new_football/core/services/calendar_event_registry.dart';
 import 'package:new_football/core/services/day_simulator.dart';
-import 'package:new_football/core/services/game_factory.dart';
+import '../helpers/fixtures/calendar_fixtures.dart';
 import 'package:new_football/core/services/schedule_generator.dart';
-import 'package:new_football/data/save_repository.dart';
 
 import '../helpers/widgets/preferences_test_double.dart';
+import '../helpers/persistence/no_disk_save_repository.dart';
 
 void main() {
   test('simulateToDate keeps the enabled urgent stop before the next day and '
@@ -212,24 +212,24 @@ void main() {
   test('Home simulateToEvent keeps the ordinary calendar event when urgent is '
       'disabled', () async {
     final game = _scheduleUrgent(
-      _combineEventGame(),
+      _scoutEventGame(),
       id: 'home-event-urgent',
-      week: 45,
-      day: 2,
+      week: 44,
+      day: 7,
     );
     final enabled = await _runEvent(game, setting: true);
     final disabled = await _runEvent(game, setting: false);
 
     expect(enabled.result.stopReason, SimulationStopReason.urgent);
     expect(enabled.result.daysSimulated, 0);
-    _expectDate(enabled, week: 45, day: 2);
+    _expectDate(enabled, week: 44, day: 7);
     expect(enabled.result.lastResult, isNull);
     _expectPending(enabled, ['home-event-urgent']);
 
     expect(disabled.result.stopReason, SimulationStopReason.event);
-    expect(disabled.result.eventId, CalendarEventId.combine);
+    expect(disabled.result.eventId, CalendarEventId.scoutReport);
     expect(disabled.result.daysSimulated, 1);
-    _expectDate(disabled, week: 45, day: 3);
+    _expectDate(disabled, week: 45, day: 1);
     expect(disabled.result.lastResult, isNotNull);
     _expectPending(disabled, ['home-event-urgent']);
   });
@@ -237,11 +237,10 @@ void main() {
   test('hourly calendar simulation keeps the urgent stop at hour ten while the '
       'disabled policy crosses the tenth-hour day boundary', () async {
     final game = _scheduleUrgent(
-      _fixtureGame(playerTeamId: null, week: 46, day: 2, hour: 1),
+      _fixtureGame(playerTeamId: null, week: 46, day: 2, hour: 10),
       id: 'hour-ten-urgent',
       week: 46,
       day: 2,
-      hour: 10,
     );
 
     final enabled = await _runDate(
@@ -260,22 +259,17 @@ void main() {
     expect(enabled.result.stopReason, SimulationStopReason.urgent);
     expect(enabled.result.daysSimulated, 0);
     _expectDate(enabled, week: 46, day: 2, hour: 10);
-    expect(enabled.result.lastResult, isNotNull);
-    expect(enabled.result.lastResult!.league.currentHour, 10);
+    expect(enabled.result.lastResult, isNull);
     _expectPending(enabled, ['hour-ten-urgent']);
 
     expect(disabled.result.stopReason, SimulationStopReason.reachedTarget);
-    // The controller may expose the hourly step count (10) or the
-    // presentation date count (1); both represent the same ten-hour run.
-    expect(
-      disabled.result.daysSimulated == 1 || disabled.result.daysSimulated == 10,
-      isTrue,
-    );
+    // Starting at hour ten completes exactly one calendar day.
+    expect(disabled.result.daysSimulated, 1);
     _expectDate(disabled, week: 46, day: 3, hour: 1);
     expect(disabled.result.lastResult, isNotNull);
-    // The persisted save is reset to hour 1 by the day pipeline above, while
-    // lastResult deliberately retains the raw hour-10 simulation result.
-    expect(disabled.result.lastResult!.league.currentHour, 10);
+    // The completed-day result carries the same normalized next-day clock.
+    expect(disabled.result.lastResult!.league.currentHour, 1);
+    expect(disabled.result.lastResult!.league.currentDay, 3);
     _expectPending(disabled, ['hour-ten-urgent']);
   });
 }
@@ -338,12 +332,9 @@ GameSave _fixtureGame({
   int day = 1,
   int? hour,
 }) {
-  final game = GameFactory().create(
-    NewGameRequest(
-      saveName: 'Urgent simulation controller fixture $seed',
-      playerTeamId: 'team_europe_0',
-      seed: seed,
-    ),
+  final game = calendarFixture(
+    seed: seed,
+    withPlayerMatch: playerTeamId != null,
   );
   return game.copyWith(
     leagueState: game.leagueState.copyWith(
@@ -357,12 +348,12 @@ GameSave _fixtureGame({
   );
 }
 
-GameSave _combineEventGame() {
-  final game = _fixtureGame(seed: 17, playerTeamId: null, week: 45, day: 2);
+GameSave _scoutEventGame() {
+  final game = _fixtureGame(seed: 17, playerTeamId: null, week: 44, day: 7);
   return game.copyWith(
     leagueState: game.leagueState.copyWith(
       currentSeason: game.leagueState.currentSeason.copyWith(
-        scoutReportDone: true,
+        scoutReportDone: false,
         combineDone: false,
       ),
     ),
@@ -374,7 +365,6 @@ GameSave _scheduleUrgent(
   required String id,
   required int week,
   required int day,
-  int? hour,
 }) {
   final league = game.leagueState;
   final message = GameMessage(
@@ -455,7 +445,7 @@ final class _BatchOutcome {
   final GameSave save;
 }
 
-final class _NoopSaveRepository extends SaveRepository {
+final class _NoopSaveRepository extends NoDiskSaveRepository {
   @override
   Future<void> save(GameSave gameSave) async {}
 }

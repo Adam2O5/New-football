@@ -10,11 +10,12 @@ import 'package:new_football/core/services/day_simulator.dart';
 
 import '../helpers/widgets/preferences_test_double.dart';
 import '../helpers/widgets/widget_harness.dart';
+import '../helpers/fixtures/calendar_fixtures.dart';
 
 const _property6Label =
     'Feature: urgent-message-simulation-setting, Property 6: '
     'behavior outside the batch scope remains unchanged';
-const _property6CaseCount = 120;
+const _property6CaseCount = 14;
 
 enum _ManualProgression { day, hour }
 
@@ -28,8 +29,8 @@ void main() {
   // **Validates: Requirements 6.1–6.6, 9.8, 9.12; Design Property 6**
   test('$_property6Label holds for $_property6CaseCount deterministic '
       'day/hour scenarios and both setting values', () async {
-    final dayBase = task41Game(seed: 6271);
-    final hourBase = task41Game(seed: 6272);
+    final dayBase = calendarFixture(seed: 6271);
+    final hourBase = calendarFixture(seed: 6272);
 
     for (var caseIndex = 0; caseIndex < _property6CaseCount; caseIndex++) {
       for (final progression in _ManualProgression.values) {

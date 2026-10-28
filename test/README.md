@@ -111,7 +111,7 @@ Weryfikacja: **119/119** testów w 17 plikach persystencji i bezpośrednich usł
 
 Logi są w `build/test-results/stage-two-*`. Znane oczekiwanie obsługi błędu `loadGame` w integration pozostaje do etapu 3; ten etap nie deklaruje zielonego wyniku całej kolekcji. Szczegółowa mapa zachowanych scenariuszy i ograniczenia odbioru znajdują się w `reports/test-audit-2026-10-21/etap-2-wdrozenie.md` (katalog raportów jest ignorowany przez Git).
 
-## Etap 3 — kolejki i cykl życia kontrolera, do review
+## Etap 3 — kolejki i cykl życia kontrolera, zaakceptowany w `a88b32b`
 
 Obecny wybór: **165 aktywnych plików, 11 long, 40 wpisów blacklisty**. Nie zmieniono kodu `lib/`, konfiguracji CI ani globalnych limitów. Krótkie integracje pozostają w standard, długie testy nadal wymagają jawnego uruchomienia.
 
@@ -127,3 +127,21 @@ Obecny wybór: **165 aktywnych plików, 11 long, 40 wpisów blacklisty**. Nie zm
 Weryfikacja: **223/223 testów w 13 plikach**, w tym pełny dotychczasowy new-game/branding flow (6 przypadków), szczegółowe zarządzanie zapisami (9), usługa i adapter oraz większy payload z etapu 2. Analiza całego `test/`: 0 błędów i ostrzeżeń; pozostaje wcześniejsza informacja stylistyczna w `task26_team_events_test.dart`. Formatter, `git diff --check` i walidacja discovery przechodzą. Logi: `build/test-results/stage-three-*`.
 
 Nie uruchamiano pełnego standard, long ani testów z blacklisty. Etap nie deklaruje naprawy pozostałych historycznych testów kalendarza/domeny/UI. Szczegółowa mapa scenariuszy: `reports/test-audit-2026-10-21/etap-3-wdrozenie.md` (ignorowany przez Git). Kolejny etap wymaga review i osobnej zgody.
+
+## Etap 4 — kalendarz, do review
+
+Obecny wybór: **167 aktywnych plików, 13 long, 41 wpisów blacklisty**. Nie zmieniono `lib/`, ustawień systemowych ani CI.
+
+- Nowe daty i wybór dnia przeniesiono z `nowe_testy/calendar_screen_test.dart` do `calendar/calendar_dates_test.dart` i `calendar_date_selection_test.dart`. Zachowano pełne cykle czterech sezonów, rok przestępny, daty przy zmianie czasu, kolumny miesięcy i wybór we wszystkich tygodniach. Zgodnie z decyzją użytkownika nie wymagamy osobnych uruchomień runtime’u w UTC/WSL; nie wymuszamy `TZ` i nie sprawdzamy godzinowego offsetu systemu.
+- `calendar_pacing_phases_test.dart` przeniesiono do `calendar`. Kontrolowany runner i zegar mierzą dzień, observer, dodatnią resztę pacingu i końcowy zapis. Usunięto stary pomiar przez override `advanceOneDay`, którego batch nie wywołuje. Stałe pacera są nadal sprawdzane bez mierzenia rzeczywistego czasu hosta.
+- `calendar_service_test.dart` rozróżnia stałe daty play-in i zmienne daty playoffów. Zachowuje niezależny przykład: seed 0, tydzień 32 — czwartek/niedziela; sprawdza też sloty i dni wolne w każdej rundzie dla trzech seedów.
+- `game_controller_simulate_until_test.dart` używa repozytorium w pamięci, jednego mniejszego świata i sześciu klubów z pełnymi rosterami. Zachowuje kontrolę feedbacku, kolejności wyników, anulowania, zastąpienia sesji, braku zapisu i nieukończonego meczu. Wiele tygodni rzeczywistej symulacji wydzielono do `calendar/long/season_progression_long.dart`. Snapshot niezmienności rosteru zależny od placeholdera AI jest jedynym nowym `deferredCases` na blackliście; archiwum pełnego źródła nie służy do ponownego dodawania aktywnych przypadków.
+- Popup jest sprawdzany zgodnie z obecnym kontraktem: tylko mecz drużyny gracza, pełne dane dostępności PL/EN, brak karty bez własnego meczu, kolory wyniku z obu perspektyw i długie nazwy na małym ekranie. Pełne dane pozostałych meczów nadal są w feedbacku kontrolera. Testy ekranu potwierdzają dialog przed przejściem do draftu.
+- `calendar_preservation`, `calendar_simulation_bug_condition` i `calendar_tile_bug_condition` mają trwałe nazwy: `calendar_baseline`, `calendar_result_flow`, `calendar_tile_layout`. Pełna macierz 160 konfiguracji pozostaje przy samym kafelku, dodatkowa próbka 24 stanów sprawdza własności; cały ekran ma pięć reprezentatywnych konfiguracji zamiast ponawiania 160 kombinacji.
+- Ustawienie urgent nadal obejmuje oba tryby, pending i dostarczenie następnego dnia, zwykły cel, mecz/draft/zdarzenie, snapshot batcha, udane i nieudane zapisy preferencji oraz przejścia ręczne/godzinowe. Powtarzane przebiegi ograniczono do rzeczywiście różnych parametrów. Helper `helpers/fixtures/calendar_fixtures.dart` ma dwa kompletne kluby i jeden mecz zamiast pełnej ligi w każdej iteracji.
+- Poprawiono stare fixture’y: Combine jest automatyczny, więc test zatrzymania Home używa raportu skauta; `GameMessage` nie planuje dostarczenia na konkretną godzinę, więc test ostatniej godziny zaczyna się bezpośrednio o godzinie 10. Dziesięć ręcznych kliknięć nadal ma osobny test. Anulowanie z observera nie wymaga zbędnej przerwy pacera.
+- Dawną integrację 1173 linii rozdzielono na dwa aktywne smoke w `calendar_pipeline_smoke_test.dart`, ręczne `long/calendar_popup_flow_long.dart` i `calendar_navigation_flow_long.dart` oraz wspólny `helpers/calendar/real_calendar_harness.dart`. Wszystkie siedem dotychczasowych scenariuszy ma swoje miejsce. Helper domyka rozpoczęte operacje przed usunięciem katalogu tymczasowego. Duble no-op w aktywnych testach nie dziedziczą domyślnego dostępu do zapisów aplikacji.
+
+Weryfikacja: **158/158 testów w 22 plikach**, około 81 s całego ograniczonego procesu. Analiza całego `test/`: zero błędów i ostrzeżeń, pozostaje wcześniejsza informacja stylistyczna w `task26_team_events_test.dart`. Formatter, `git diff --check` i walidacja wyboru przechodzą. Logi: `build/test-results/stage-four-*`.
+
+Nie uruchamiano pełnego standard ani long. `calendar/task39_season_service_test.dart` pozostaje aktywny, lecz nie był częścią tego odbioru: dotyczy nagród/rollover i znanego problemu oczekiwania okresu kontraktu, zaplanowanego w domenie etapu 6. Nie dodano go do blacklisty. Szczegółowa mapa i odroczenia: `reports/test-audit-2026-10-21/etap-4-wdrozenie.md` (ignorowany przez Git). Etap zatrzymany do review, bez commita.

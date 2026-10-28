@@ -257,8 +257,8 @@
       "reactivateWhen": "Implement and review the mechanic; restore only deferred cases, then run with an external time limit.",
       "long": false,
       "deferredCases": [
-        "Matchday symuluje do ko\u0144ca i pokazuje podsumowanie",
-        "Matchday wykonuje zmian\u0119 przez arkusz zmian"
+        "Matchday symuluje do końca i pokazuje podsumowanie",
+        "Matchday wykonuje zmianę przez arkusz zmian"
       ]
     },
     {
@@ -373,6 +373,17 @@
       "long": false,
       "deferredCases": [
         "match result is stamped for the next day"
+      ]
+    },
+    {
+      "path": "test/calendar/disabled/game_controller_simulation_deferred.dart.disabled",
+      "originalPath": "test/calendar/game_controller_simulate_until_test.dart",
+      "area": "calendar",
+      "reason": "Mixed-source archive: the deferred roster identity assertion depends on placeholder AI roster/trade behavior. Other calendar cases have active counterparts.",
+      "reactivateWhen": "Review implemented AI roster/trade rules and restore only deferredCases, with an explicit invariant for permitted roster changes.",
+      "long": false,
+      "deferredCases": [
+        "simulateToDate preserves the seeded domain baseline while resolving one round"
       ]
     }
   ]

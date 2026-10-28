@@ -13,13 +13,13 @@ import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/match_models.dart';
 import 'package:new_football/core/services/game_factory.dart';
 import 'package:new_football/core/services/schedule_generator.dart';
-import 'package:new_football/data/save_repository.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
+import '../helpers/persistence/no_disk_save_repository.dart';
 
 void main() {
   // **Validates: Requirements 1.2, 1.3, 1.4, 1.5**
   testWidgets(
-    'pre-fix exploration: CalendarScreen shows one complete result cycle before final action',
+    'CalendarScreen shows the player result once before the final action',
     (tester) async {
       final baseGame = _fixtureGame(seed: 7);
       final matchDay = matchDaysForWeek(1).midweekDay;
@@ -57,9 +57,8 @@ void main() {
       await tester.tap(simulateButton);
       await tester.pump();
 
-      // The production path has no observer, so this pump lets the unchanged
-      // batch finish while keeping the assertion at the point where a fixed
-      // implementation must keep its per-day feedback visible.
+      // Let the real one-day pipeline publish results while the calendar
+      // observer keeps its per-day feedback visible before the final action.
       for (var i = 0; i < 10; i++) {
         if (_roundResults(controller).isNotEmpty) break;
         await tester.pump(const Duration(milliseconds: 1));
@@ -77,15 +76,14 @@ void main() {
             'target=W${target.$1}D${target.$2}, schedule=$schedulePairs',
       );
 
-      final teamNames = <String>{};
-      for (final match in persisted) {
-        teamNames.add(
-          controller.save!.leagueState.teamById(match.homeTeamId)!.name,
-        );
-        teamNames.add(
-          controller.save!.leagueState.teamById(match.awayTeamId)!.name,
-        );
-      }
+      final teamId = controller.save!.leagueState.playerTeamId!;
+      final ownMatch = persisted.singleWhere(
+        (m) => m.homeTeamId == teamId || m.awayTeamId == teamId,
+      );
+      final teamNames = {
+        controller.save!.leagueState.teamById(ownMatch.homeTeamId)!.name,
+        controller.save!.leagueState.teamById(ownMatch.awayTeamId)!.name,
+      };
       final missingNames = [
         for (final name in teamNames)
           if (find.textContaining(name).evaluate().isEmpty) name,
@@ -99,7 +97,7 @@ void main() {
         missingNames,
         isEmpty,
         reason:
-            'Pre-fix feedback counterexample: CalendarScreen emitted no '
+            'feedback counterexample: CalendarScreen emitted no '
             'complete per-day popup after committed W1D$matchDay. '
             'target=W${target.$1}D${target.$2}, persistedCount=${persisted.length}, '
             'missingNames=$missingNames, schedule=$schedulePairs',
@@ -108,7 +106,7 @@ void main() {
         duplicateNames,
         isEmpty,
         reason:
-            'Pre-fix feedback counterexample: a result row was rendered more '
+            'feedback counterexample: a result row was rendered more '
             'than once. target=W${target.$1}D${target.$2}, '
             'duplicateNames=$duplicateNames, schedule=$schedulePairs',
       );
@@ -131,7 +129,7 @@ void main() {
         staleNames,
         isEmpty,
         reason:
-            'Pre-fix lifecycle counterexample: result feedback remained visible '
+            'lifecycle counterexample: result feedback remained visible '
             'after final action. staleNames=$staleNames',
       );
     },
@@ -184,7 +182,7 @@ GameSave _fixtureGame({required int seed}) {
   );
 }
 
-class _NoopSaveRepository extends SaveRepository {
+class _NoopSaveRepository extends NoDiskSaveRepository {
   @override
   Future<void> save(GameSave gameSave) async {}
 }
