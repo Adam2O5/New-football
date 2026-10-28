@@ -10,7 +10,7 @@ import 'package:new_football/core/services/day_simulator.dart';
 import 'package:new_football/core/services/schedule_generator.dart';
 import 'package:new_football/data/save_repository.dart';
 
-import 'support/game_fixtures.dart';
+import '../helpers/fixtures/game_fixtures.dart';
 
 void main() {
   test(

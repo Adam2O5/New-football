@@ -6,7 +6,7 @@ import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/data/save_repository.dart';
 
-import '../helpers/controlled_save_repository.dart';
+import '../helpers/persistence/controlled_save_repository.dart';
 
 void main() {
   late Directory tempDir;
@@ -50,9 +50,9 @@ void main() {
     };
 
     await File('${tempDir.path}/$id.json').writeAsString(jsonEncode(raw));
-    await File('${tempDir.path}/saves_index.json').writeAsString(
-      jsonEncode(<Map<String, dynamic>>[meta.toJson()]),
-    );
+    await File(
+      '${tempDir.path}/saves_index.json',
+    ).writeAsString(jsonEncode(<Map<String, dynamic>>[meta.toJson()]));
     return meta;
   }
 
@@ -70,9 +70,7 @@ void main() {
           name: 'Original $schemaVersion',
         );
         final originalJson =
-            jsonDecode(
-                  await File('${tempDir.path}/$id.json').readAsString(),
-                )
+            jsonDecode(await File('${tempDir.path}/$id.json').readAsString())
                 as Map<String, dynamic>;
         final renamedName = 'Renamed $schemaVersion';
 
@@ -85,9 +83,7 @@ void main() {
         expect(returned, expectedMeta);
 
         final renamedJson =
-            jsonDecode(
-                  await File('${tempDir.path}/$id.json').readAsString(),
-                )
+            jsonDecode(await File('${tempDir.path}/$id.json').readAsString())
                 as Map<String, dynamic>;
         final expectedRawMeta = Map<String, dynamic>.from(
           originalJson['meta'] as Map,
@@ -114,67 +110,71 @@ void main() {
     },
   );
 
-  test('restores the old name in both artifacts when index publication fails',
-      () async {
-    const id = 'rollback-save';
-    final originalMeta = await seedRawSave(
-      id: id,
-      schemaVersion: SaveRepository.currentSchemaVersion,
-      name: 'Before rename',
-    );
-    final gameFile = File('${tempDir.path}/$id.json');
-    final indexFile = File('${tempDir.path}/saves_index.json');
-    final gameBefore = await gameFile.readAsString();
-    final indexBefore = await indexFile.readAsString();
+  test(
+    'restores the old name in both artifacts when index publication fails',
+    () async {
+      const id = 'rollback-save';
+      final originalMeta = await seedRawSave(
+        id: id,
+        schemaVersion: SaveRepository.currentSchemaVersion,
+        name: 'Before rename',
+      );
+      final gameFile = File('${tempDir.path}/$id.json');
+      final indexFile = File('${tempDir.path}/saves_index.json');
+      final gameBefore = await gameFile.readAsString();
+      final indexBefore = await indexFile.readAsString();
 
-    final failing = ControlledSaveRepository(
-      overrideDirectory: tempDir,
-      managementFailure: ControlledManagementFailure.beforeIndexPublication,
-    );
+      final failing = ControlledSaveRepository(
+        overrideDirectory: tempDir,
+        managementFailure: ControlledManagementFailure.beforeIndexPublication,
+      );
 
-    await expectLater(
-      failing.renameRaw(id: id, newName: 'Should roll back'),
-      throwsA(isA<SaveRepositoryException>()),
-    );
+      await expectLater(
+        failing.renameRaw(id: id, newName: 'Should roll back'),
+        throwsA(isA<SaveRepositoryException>()),
+      );
 
-    expect(await gameFile.readAsString(), gameBefore);
-    expect(await indexFile.readAsString(), indexBefore);
-    expect((await repository.listSaves()).single, originalMeta);
-    expect(
-      tempDir.listSync().where(
-        (entity) =>
-            entity.path.contains('.tmp-') ||
-            entity.path.contains('.bak-') ||
-            entity.path.contains('.old-'),
-      ),
-      isEmpty,
-    );
-  });
+      expect(await gameFile.readAsString(), gameBefore);
+      expect(await indexFile.readAsString(), indexBefore);
+      expect((await repository.listSaves()).single, originalMeta);
+      expect(
+        tempDir.listSync().where(
+          (entity) =>
+              entity.path.contains('.tmp-') ||
+              entity.path.contains('.bak-') ||
+              entity.path.contains('.old-'),
+        ),
+        isEmpty,
+      );
+    },
+  );
 
-  test('rejects a raw/index name mismatch before changing either artifact',
-      () async {
-    const id = 'mismatched-name';
-    final originalMeta = await seedRawSave(
-      id: id,
-      schemaVersion: SaveRepository.currentSchemaVersion,
-      name: 'File name',
-    );
-    final indexFile = File('${tempDir.path}/saves_index.json');
-    await indexFile.writeAsString(
-      jsonEncode(<Map<String, dynamic>>[
-        originalMeta.copyWith(name: 'Index name').toJson(),
-      ]),
-    );
-    final gameFile = File('${tempDir.path}/$id.json');
-    final gameBefore = await gameFile.readAsString();
-    final indexBefore = await indexFile.readAsString();
+  test(
+    'rejects a raw/index name mismatch before changing either artifact',
+    () async {
+      const id = 'mismatched-name';
+      final originalMeta = await seedRawSave(
+        id: id,
+        schemaVersion: SaveRepository.currentSchemaVersion,
+        name: 'File name',
+      );
+      final indexFile = File('${tempDir.path}/saves_index.json');
+      await indexFile.writeAsString(
+        jsonEncode(<Map<String, dynamic>>[
+          originalMeta.copyWith(name: 'Index name').toJson(),
+        ]),
+      );
+      final gameFile = File('${tempDir.path}/$id.json');
+      final gameBefore = await gameFile.readAsString();
+      final indexBefore = await indexFile.readAsString();
 
-    await expectLater(
-      repository.renameRaw(id: id, newName: 'New name'),
-      throwsA(isA<SaveRepositoryException>()),
-    );
+      await expectLater(
+        repository.renameRaw(id: id, newName: 'New name'),
+        throwsA(isA<SaveRepositoryException>()),
+      );
 
-    expect(await gameFile.readAsString(), gameBefore);
-    expect(await indexFile.readAsString(), indexBefore);
-  });
+      expect(await gameFile.readAsString(), gameBefore);
+      expect(await indexFile.readAsString(), indexBefore);
+    },
+  );
 }

@@ -20,7 +20,7 @@ import 'package:new_football/core/services/message_service.dart';
 import 'package:new_football/data/save_repository.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
-import '../helpers/widget_harness.dart';
+import '../helpers/widgets/widget_harness.dart';
 
 void main() {
   testWidgets(

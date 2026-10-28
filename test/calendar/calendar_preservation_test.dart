@@ -8,7 +8,7 @@ import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/app/screens/calendar_screen.dart';
 import 'package:new_football/core/models/game_save.dart';
 
-import '../helpers/widget_harness.dart';
+import '../helpers/widgets/widget_harness.dart';
 
 GameSave _calendarBaselineGame() {
   final game = task41Game(seed: 7);

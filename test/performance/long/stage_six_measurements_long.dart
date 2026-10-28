@@ -13,7 +13,7 @@ import 'package:new_football/core/services/game_factory.dart';
 import 'package:new_football/data/save_repository.dart';
 import 'package:new_football/data/staff_data_compatibility.dart';
 
-import '../../nowe_testy/support/game_fixtures.dart';
+import '../../helpers/fixtures/game_fixtures.dart';
 
 // RSS is sampled from another isolate, including during synchronous UI work.
 // It is process memory, including Flutter/test overhead, not Dart heap usage.

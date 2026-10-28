@@ -2,6 +2,8 @@
 library;
 
 import 'dart:async';
+
+import '../helpers/barrier_cleanup.dart';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -15,9 +17,9 @@ import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/services/day_pipeline.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'support/controlled_simulation_runner.dart';
-import 'support/game_fixtures.dart';
-import 'support/memory_save_repository.dart';
+import '../helpers/simulation/controlled_simulation_runner.dart';
+import '../helpers/fixtures/game_fixtures.dart';
+import '../helpers/persistence/memory_save_repository.dart';
 
 class _Clock {
   Duration elapsed = Duration.zero;
@@ -127,6 +129,7 @@ void main() {
       await controller.loadGame(repository.game.meta.id);
       final showing = Completer<void>();
       final dismissal = Completer<void>();
+      releaseOnTearDown(dismissal);
       final delays = <Duration>[];
       final result = controller.simulateToDate(
         1,

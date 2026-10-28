@@ -13,7 +13,7 @@ import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/message.dart';
 import 'package:new_football/core/services/negotiation_service.dart';
 
-import 'support/game_fixtures.dart';
+import '../helpers/fixtures/game_fixtures.dart';
 
 const _service = NegotiationService();
 

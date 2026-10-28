@@ -21,8 +21,8 @@ import 'package:new_football/core/services/calendar_event_registry.dart';
 import 'package:new_football/core/services/day_simulator.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
-import '../helpers/preferences_test_double.dart';
-import '../helpers/widget_harness.dart';
+import '../helpers/widgets/preferences_test_double.dart';
+import '../helpers/widgets/widget_harness.dart';
 
 const _property5Label =
     'Feature: urgent-message-simulation-setting, Property 5: '

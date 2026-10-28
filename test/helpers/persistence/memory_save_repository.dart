@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:new_football/core/models/game_save.dart';
-import 'package:new_football/data/save_repository.dart';
+import 'no_disk_save_repository.dart';
 
 /// Never reads or writes the application's save directory.
-class MemorySaveRepository extends SaveRepository {
+class MemorySaveRepository extends NoDiskSaveRepository {
   MemorySaveRepository(this.game) {
     games[game.meta.id] = game;
   }
@@ -17,6 +17,12 @@ class MemorySaveRepository extends SaveRepository {
   final games = <String, GameSave>{};
   Future<GameSave> Function(String id)? loadOperation;
   final deletedIds = <String>[];
+
+  /// Safe to call from teardown, including after an assertion before release.
+  void releasePendingWrites() {
+    final gate = writeGate;
+    if (gate != null && !gate.isCompleted) gate.complete();
+  }
 
   @override
   Future<GameSave> load(String id) async {

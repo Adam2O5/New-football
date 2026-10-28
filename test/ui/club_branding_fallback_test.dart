@@ -26,7 +26,7 @@ import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/services/game_factory.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
-import '../helpers/widget_harness.dart';
+import '../helpers/widgets/widget_harness.dart';
 
 const _fallbackTeamId = 'team_europe_0';
 const _missingMappedLogo = 'assets/images/missing-mapped-logo.png';

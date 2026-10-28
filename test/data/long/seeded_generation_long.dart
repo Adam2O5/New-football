@@ -6,7 +6,8 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
-import '../../nowe_testy/support/game_fixtures.dart';
+import '../../helpers/fixtures/game_fixtures.dart';
+import '../../helpers/processes/test_process.dart';
 
 void main() {
   test(
@@ -19,15 +20,15 @@ void main() {
       final dart =
           '$cache/dart-sdk/bin/dart${Platform.isWindows ? '.exe' : ''}';
       final probe = File(
-        'test/nowe_testy/support/determinism_process.dart',
+        'test/helpers/processes/determinism_process.dart',
       ).absolute.path;
       final packages = File('.dart_tool/package_config.json').absolute.path;
-      Future<ProcessResult> run() => Process.run(
-        dart,
-        ['--disable-dart-dev', '--packages=$packages', probe, '$fixtureSeed'],
-        stdoutEncoding: utf8,
-        stderrEncoding: utf8,
-      );
+      Future<ProcessResult> run() => runTestProcess(dart, [
+        '--disable-dart-dev',
+        '--packages=$packages',
+        probe,
+        '$fixtureSeed',
+      ]);
       final first = await run();
       final second = await run();
       expect(first.exitCode, 0, reason: '${first.stderr}');
@@ -58,23 +59,19 @@ void main() {
       try {
         final file = File('${directory.path}/game.json');
         await file.writeAsString(jsonEncode(saveForLeague(league).toJson()));
-        final loaded = await Process.run(
-          dart,
-          [
-            '--disable-dart-dev',
-            '--packages=$packages',
-            probe,
-            '$fixtureSeed',
-            file.path,
-          ],
-          stdoutEncoding: utf8,
-          stderrEncoding: utf8,
-        );
+        final loaded = await runTestProcess(dart, [
+          '--disable-dart-dev',
+          '--packages=$packages',
+          probe,
+          '$fixtureSeed',
+          file.path,
+        ]);
         expect(loaded.exitCode, 0, reason: '${loaded.stderr}');
         expect(loaded.stdout == first.stdout, isTrue);
       } finally {
         await directory.delete(recursive: true);
       }
     },
+    timeout: const Timeout(Duration(minutes: 5)),
   );
 }

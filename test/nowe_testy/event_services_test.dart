@@ -11,7 +11,7 @@ import 'package:new_football/core/services/message_service.dart';
 import 'package:new_football/core/services/player_event_service.dart';
 import 'package:new_football/core/services/team_event_service.dart';
 
-import 'support/game_fixtures.dart';
+import '../helpers/fixtures/game_fixtures.dart';
 
 const _balance = BalanceConfig(
   events: EventsBalance(

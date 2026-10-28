@@ -6,7 +6,7 @@ import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/data/save_repository.dart';
 
-import '../helpers/controlled_save_repository.dart';
+import '../helpers/persistence/controlled_save_repository.dart';
 
 void main() {
   late Directory tempDir;

@@ -10,7 +10,7 @@ import 'package:new_football/core/models/staff.dart';
 import 'package:new_football/core/services/staff_service.dart';
 import 'package:new_football/core/services/message_text_service.dart';
 
-import 'support/game_fixtures.dart';
+import '../helpers/fixtures/game_fixtures.dart';
 
 class _SuccessfulRoll implements Random {
   @override

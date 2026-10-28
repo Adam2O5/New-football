@@ -6,7 +6,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:new_football/data/save_repository.dart';
 
-import 'support/game_fixtures.dart';
+import '../helpers/fixtures/game_fixtures.dart';
 
 void main() {
   test('ordinary I/O exception rolls back both files', () async {

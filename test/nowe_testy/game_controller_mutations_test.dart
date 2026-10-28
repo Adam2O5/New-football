@@ -3,6 +3,8 @@ library;
 
 import 'dart:async';
 
+import '../helpers/barrier_cleanup.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:new_football/app/providers/game_provider.dart';
@@ -13,8 +15,8 @@ import 'package:new_football/core/models/staff.dart';
 import 'package:new_football/core/services/contract_service.dart';
 import 'package:new_football/core/services/staff_service.dart';
 
-import 'support/game_fixtures.dart';
-import 'support/memory_save_repository.dart';
+import '../helpers/fixtures/game_fixtures.dart';
+import '../helpers/persistence/memory_save_repository.dart';
 
 void main() {
   late MemorySaveRepository repository;
@@ -42,6 +44,7 @@ void main() {
       autosave: false,
     );
     final gate = Completer<void>();
+    releaseOnTearDown(gate);
     final blocking = controller.enqueueSaveManagement(() => gate.future);
     const offer = ContractOffer(salary: 60000000, years: 2);
     final first = controller.offerFreeAgent(fixtureFreeAgentId, offer);
@@ -72,6 +75,7 @@ void main() {
     repository.games[game.meta.id] = game;
     await controller.loadGame(game.meta.id);
     final gate = Completer<void>();
+    releaseOnTearDown(gate);
     final blocking = controller.enqueueSaveManagement(() => gate.future);
     final change = controller.updateLeague((league) {
       final team = league.playerTeam!;
@@ -102,6 +106,7 @@ void main() {
         autosave: false,
       );
       final gate = Completer<void>();
+      releaseOnTearDown(gate);
       final blocking = controller.enqueueSaveManagement(() => gate.future);
       final removal = controller.updateLeague(
         (league) => league.copyWith(staffFreeAgents: []),
@@ -141,6 +146,7 @@ void main() {
     repository.games[game.meta.id] = game;
     await controller.loadGame(game.meta.id);
     final gate = Completer<void>();
+    releaseOnTearDown(gate);
     final blocking = controller.enqueueSaveManagement(() => gate.future);
     final completion = controller.updateLeague(
       (league) => league.copyWith(

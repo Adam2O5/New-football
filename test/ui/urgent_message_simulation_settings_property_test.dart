@@ -13,8 +13,8 @@ import 'package:new_football/app/screens/settings_screen.dart';
 import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
-import '../helpers/preferences_test_double.dart';
-import '../helpers/widget_harness.dart';
+import '../helpers/widgets/preferences_test_double.dart';
+import '../helpers/widgets/widget_harness.dart';
 
 const _urgentControlKey = ValueKey<String>('settings-urgent-interruption');
 const _property8Label =

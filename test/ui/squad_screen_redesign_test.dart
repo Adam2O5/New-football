@@ -28,7 +28,7 @@ import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/tactics/player_sort.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
-import '../helpers/widget_harness.dart';
+import '../helpers/widgets/widget_harness.dart';
 
 void main() {
   testWidgets(

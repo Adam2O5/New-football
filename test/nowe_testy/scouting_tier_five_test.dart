@@ -9,7 +9,7 @@ import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/scouting.dart';
 import 'package:new_football/core/services/scouting_service.dart';
 
-import 'support/game_fixtures.dart';
+import '../helpers/fixtures/game_fixtures.dart';
 
 void main() {
   test('natural tier 4 to 5 reveals traits and survives serialization', () {

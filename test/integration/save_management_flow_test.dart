@@ -1,6 +1,8 @@
 @Tags(['integration'])
 library;
 
+import 'package:new_football/data/save_management_repository_adapter.dart';
+
 import 'dart:convert';
 import 'dart:io';
 
@@ -21,7 +23,7 @@ import 'package:new_football/core/services/save_name_policy.dart';
 import 'package:new_football/data/save_repository.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
-import '../helpers/controlled_save_repository.dart';
+import '../helpers/persistence/controlled_save_repository.dart';
 
 void main() {
   late Directory tempDir;
@@ -67,7 +69,7 @@ void main() {
       final fixedTimestamp = DateTime.utc(2042, 6, 7, 8, 9, 10);
       final repository = SaveRepository(overrideDirectory: tempDir);
       final service = SaveManagementService(
-        repository: repository,
+        repository: SaveManagementRepositoryAdapter(repository),
         clock: () => fixedTimestamp,
         idGenerator: () => 'duplicate-id',
       );
@@ -168,7 +170,7 @@ void main() {
         final ids = <String>['suffix-copy-1-$locale', 'suffix-copy-2-$locale'];
         final repository = SaveRepository(overrideDirectory: directory);
         final service = SaveManagementService(
-          repository: repository,
+          repository: SaveManagementRepositoryAdapter(repository),
           clock: () => DateTime.utc(2040, 1, 2),
           idGenerator: () => ids.removeAt(0),
         );
@@ -200,7 +202,9 @@ void main() {
       await _writeRawSave(tempDir, source, marker: 'rename-source');
       await _writeIndex(tempDir, [source]);
       final repository = SaveRepository(overrideDirectory: tempDir);
-      final service = SaveManagementService(repository: repository);
+      final service = SaveManagementService(
+        repository: SaveManagementRepositoryAdapter(repository),
+      );
       final before = await _readJson(_saveFile(tempDir, source.id));
       final beforeLength = await _saveFile(tempDir, source.id).length();
       const proposed = '  A substantially longer Żółć checkpoint  ';
@@ -257,7 +261,7 @@ void main() {
         final repository = SaveRepository(overrideDirectory: tempDir);
         final ids = <String>['schema-copy-$schemaVersion'];
         final service = SaveManagementService(
-          repository: repository,
+          repository: SaveManagementRepositoryAdapter(repository),
           clock: () => DateTime.utc(2041, 2, 3),
           idGenerator: () => ids.removeAt(0),
         );
@@ -336,7 +340,7 @@ void main() {
       );
 
       final records = await SaveManagementService(
-        repository: repository,
+        repository: SaveManagementRepositoryAdapter(repository),
       ).listRecords();
       final utf8Record = records.singleWhere(
         (record) => record.meta.id == utf8Meta.id,
@@ -371,7 +375,7 @@ void main() {
         unavailableId: utf8Meta.id,
       );
       final failingRecord = (await SaveManagementService(
-        repository: failingRepository,
+        repository: SaveManagementRepositoryAdapter(failingRepository),
       ).listRecords()).singleWhere((record) => record.meta.id == utf8Meta.id);
       expect(failingRecord.serializedFileAvailable, isTrue);
       expect(failingRecord.sizeReadFailed, isTrue);
@@ -404,7 +408,7 @@ void main() {
           managementFailure: failure,
         );
         final service = SaveManagementService(
-          repository: repository,
+          repository: SaveManagementRepositoryAdapter(repository),
           idGenerator: () => 'failure-copy-${failure.name}',
           clock: () => DateTime.utc(2044, 1, 1),
         );
@@ -466,7 +470,7 @@ void main() {
         },
       );
       final service = SaveManagementService(
-        repository: repository,
+        repository: SaveManagementRepositoryAdapter(repository),
         idGenerator: () => 'ambiguous-copy',
         clock: () => DateTime.utc(2045, 1, 1),
       );
@@ -523,7 +527,9 @@ void main() {
       await _writeRawSave(tempDir, other, marker: other.id);
       await _writeIndex(tempDir, [source, other]);
       final repository = SaveRepository(overrideDirectory: tempDir);
-      final service = SaveManagementService(repository: repository);
+      final service = SaveManagementService(
+        repository: SaveManagementRepositoryAdapter(repository),
+      );
       final sourceBefore = await _saveFile(tempDir, source.id).readAsString();
       final indexBefore = await _indexFile(tempDir).readAsString();
 
@@ -565,7 +571,7 @@ void main() {
         waitForManagementRelease: true,
       );
       final service = SaveManagementService(
-        repository: repository,
+        repository: SaveManagementRepositoryAdapter(repository),
         clock: () => DateTime.utc(2046, 2, 3, 4, 5),
         idGenerator: () => 'queue-pending-copy',
       );
@@ -613,7 +619,7 @@ void main() {
         waitForManagementRelease: true,
       );
       final service = SaveManagementService(
-        repository: repository,
+        repository: SaveManagementRepositoryAdapter(repository),
         clock: () => DateTime.utc(2046, 2, 3),
         idGenerator: () => 'unused-rename-id',
       );
@@ -657,7 +663,7 @@ void main() {
       );
       var nextId = 0;
       final service = SaveManagementService(
-        repository: repository,
+        repository: SaveManagementRepositoryAdapter(repository),
         clock: () => DateTime.utc(2046, 2, 3),
         idGenerator: () => 'queue-fast-copy-${nextId++}',
       );
@@ -703,7 +709,7 @@ void main() {
         managementFailure: ControlledManagementFailure.beforeWrite,
       );
       final service = SaveManagementService(
-        repository: repository,
+        repository: SaveManagementRepositoryAdapter(repository),
         idGenerator: () => 'retry-copy',
         clock: () => DateTime.utc(2047, 1, 1),
       );
@@ -777,7 +783,9 @@ void main() {
 
       final harness = await _openControllerHarness(
         repository: repository,
-        service: SaveManagementService(repository: repository),
+        service: SaveManagementService(
+          repository: SaveManagementRepositoryAdapter(repository),
+        ),
         active: active,
         locale: 'en',
       );
@@ -809,7 +817,10 @@ void main() {
   test(
     'provides distinct localized action descriptions and date/size labels in PL and EN',
     () async {
-      final source = _meta(id: 'localized-source', name: 'Localized checkpoint');
+      final source = _meta(
+        id: 'localized-source',
+        name: 'Localized checkpoint',
+      );
       for (final locale in const [Locale('pl'), Locale('en')]) {
         final l10n = await AppLocalizations.delegate.load(locale);
         final labels = [
@@ -840,21 +851,26 @@ void main() {
       await _writeRawSave(tempDir, newer, marker: newer.id);
       await _writeIndex(tempDir, [older, newer]);
       final records = await SaveManagementService(
-        repository: SaveRepository(overrideDirectory: tempDir),
+        repository: SaveManagementRepositoryAdapter(
+          SaveRepository(overrideDirectory: tempDir),
+        ),
       ).listRecords();
       expect(
-        records.singleWhere((record) => record.meta.id == older.id).compatibility,
+        records
+            .singleWhere((record) => record.meta.id == older.id)
+            .compatibility,
         SaveCompatibility.older,
       );
       expect(
-        records.singleWhere((record) => record.meta.id == newer.id).compatibility,
+        records
+            .singleWhere((record) => record.meta.id == newer.id)
+            .compatibility,
         SaveCompatibility.newer,
       );
       expect(records.every((record) => record.serializedFileAvailable), isTrue);
     },
   );
 }
-
 
 GameSaveMeta _meta({
   required String id,
@@ -1015,7 +1031,15 @@ class _ControllerHarness {
   final ProviderContainer container;
   final GameController controller;
 
-  void dispose() => container.dispose();
+  Future<void> dispose() async {
+    final repository = container.read(saveRepositoryProvider);
+    if (repository is ControlledSaveRepository) repository.release();
+    try {
+      await controller.flushPendingSave();
+    } finally {
+      container.dispose();
+    }
+  }
 }
 
 class _SizeUnavailableRepository extends SaveRepository {

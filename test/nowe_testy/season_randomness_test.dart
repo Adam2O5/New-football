@@ -14,7 +14,7 @@ import 'package:new_football/core/services/lottery_service.dart';
 import 'package:new_football/core/services/season_service.dart';
 import 'package:new_football/core/services/staff_service.dart';
 
-import 'support/game_fixtures.dart';
+import '../helpers/fixtures/game_fixtures.dart';
 
 LeagueState _reload(LeagueState league) => GameSave.fromJson(
   jsonDecode(jsonEncode(saveForLeague(league).toJson()))

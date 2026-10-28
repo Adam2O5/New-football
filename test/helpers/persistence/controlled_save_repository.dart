@@ -44,8 +44,7 @@ class ControlledSaveRepository extends SaveRepository {
       // Falling back to the existing controls keeps the helper convenient for
       // management tests while preserving the old save-only constructor API.
       managementDelay: managementDelay ?? delay,
-      waitForManagementRelease:
-          waitForManagementRelease ?? waitForRelease,
+      waitForManagementRelease: waitForManagementRelease ?? waitForRelease,
       managementFailureOverride: managementFailure,
     );
     return ControlledSaveRepository._(
@@ -98,8 +97,7 @@ class ControlledSaveRepository extends SaveRepository {
   set failure(ControlledSaveFailure value) => _control.failure = value;
 
   Duration get managementDelay => _control.managementDelay;
-  bool get waitForManagementRelease =>
-      _control.waitForManagementRelease;
+  bool get waitForManagementRelease => _control.waitForManagementRelease;
   ControlledManagementFailure get managementFailure =>
       _control.managementFailure;
   set managementFailure(ControlledManagementFailure value) =>

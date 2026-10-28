@@ -12,7 +12,7 @@ import 'package:new_football/core/services/contract_market_service.dart';
 import 'package:new_football/core/services/day_simulator.dart';
 import 'package:new_football/core/services/season_service.dart';
 
-import 'support/game_fixtures.dart';
+import '../helpers/fixtures/game_fixtures.dart';
 
 class _SundayCalendar extends CalendarService {
   @override

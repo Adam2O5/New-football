@@ -6,8 +6,8 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:new_football/data/save_repository.dart';
 
-import '../../nowe_testy/support/game_fixtures.dart';
-import '../../nowe_testy/support/save_process_control.dart';
+import '../../helpers/fixtures/game_fixtures.dart';
+import '../../helpers/processes/save_process_control.dart';
 
 void main() {
   test(

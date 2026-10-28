@@ -26,7 +26,7 @@ import 'package:new_football/core/services/game_factory.dart';
 import 'package:new_football/data/save_repository.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
-import '../helpers/preferences_test_double.dart';
+import '../helpers/widgets/preferences_test_double.dart';
 
 void main() {
   testWidgets('owns progress and cancellation in the route state', (

@@ -6,7 +6,7 @@ import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/core/services/game_factory.dart';
 import 'package:new_football/data/save_repository.dart';
 
-import '../helpers/controlled_save_repository.dart';
+import '../helpers/persistence/controlled_save_repository.dart';
 
 void main() {
   late Directory tempDir;
@@ -344,64 +344,59 @@ void main() {
     expect(jsonDecode(await indexFile.readAsString()), isEmpty);
   });
 
-  test('keeps exact index entries and lists saves by descending updatedAt',
-      () async {
-    final first = GameFactory().create(
-      const NewGameRequest(
-        saveName: 'Sort first',
-        playerTeamId: 'team_europe_0',
-        seed: 108,
-      ),
-    );
-    await repo.save(first);
-    await Future<void>.delayed(const Duration(milliseconds: 20));
-    final second = first.copyWith(
-      meta: first.meta.copyWith(id: 'sort-second', name: 'Sort second'),
-    );
-    await repo.save(second);
-
-    final indexJson =
-        jsonDecode(
-              await File('${tempDir.path}/saves_index.json').readAsString(),
-            )
-            as List<dynamic>;
-    final expectedMetas = <String, Map<String, dynamic>>{};
-    for (final id in <String>[first.meta.id, second.meta.id]) {
-      final saveJson =
-          jsonDecode(
-                await File('${tempDir.path}/$id.json').readAsString(),
-              )
-              as Map<String, dynamic>;
-      expectedMetas[id] = Map<String, dynamic>.from(
-        saveJson['meta'] as Map,
+  test(
+    'keeps exact index entries and lists saves by descending updatedAt',
+    () async {
+      final first = GameFactory().create(
+        const NewGameRequest(
+          saveName: 'Sort first',
+          playerTeamId: 'team_europe_0',
+          seed: 108,
+        ),
       );
-    }
+      await repo.save(first);
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      final second = first.copyWith(
+        meta: first.meta.copyWith(id: 'sort-second', name: 'Sort second'),
+      );
+      await repo.save(second);
 
-    expect(indexJson, hasLength(expectedMetas.length));
-    final indexIds = <String>[];
-    for (final rawEntry in indexJson) {
-      final entry = Map<String, dynamic>.from(rawEntry as Map);
-      final id = entry['id'];
-      expect(id, isA<String>());
-      expect(expectedMetas.containsKey(id), isTrue);
-      indexIds.add(id as String);
-      expect(entry, equals(expectedMetas[id]));
-    }
-    expect(indexIds.toSet(), equals(expectedMetas.keys.toSet()));
-    expect(indexIds, hasLength(expectedMetas.length));
+      final indexJson =
+          jsonDecode(
+                await File('${tempDir.path}/saves_index.json').readAsString(),
+              )
+              as List<dynamic>;
+      final expectedMetas = <String, Map<String, dynamic>>{};
+      for (final id in <String>[first.meta.id, second.meta.id]) {
+        final saveJson =
+            jsonDecode(await File('${tempDir.path}/$id.json').readAsString())
+                as Map<String, dynamic>;
+        expectedMetas[id] = Map<String, dynamic>.from(saveJson['meta'] as Map);
+      }
 
-    final listed = await repo.listSaves();
-    expect(listed, hasLength(2));
-    expect(
-      listed.map((meta) => meta.id).toSet(),
-      equals(expectedMetas.keys.toSet()),
-    );
-    expect(listed.first.id, second.meta.id);
-    expect(
-      listed.first.updatedAt.isAfter(listed.last.updatedAt),
-      isTrue,
-    );
-  });
+      expect(indexJson, hasLength(expectedMetas.length));
+      final indexIds = <String>[];
+      for (final rawEntry in indexJson) {
+        final entry = Map<String, dynamic>.from(rawEntry as Map);
+        final id = entry['id'];
+        expect(id, isA<String>());
+        expect(expectedMetas.containsKey(id), isTrue);
+        indexIds.add(id as String);
+        expect(entry, equals(expectedMetas[id]));
+      }
+      expect(indexIds.toSet(), equals(expectedMetas.keys.toSet()));
+      expect(indexIds, hasLength(expectedMetas.length));
+
+      final listed = await repo.listSaves();
+      expect(listed, hasLength(2));
+      expect(
+        listed.map((meta) => meta.id).toSet(),
+        equals(expectedMetas.keys.toSet()),
+      );
+      expect(listed.first.id, second.meta.id);
+      expect(listed.first.updatedAt.isAfter(listed.last.updatedAt), isTrue);
+    },
+  );
 
   test('retains recovery artifacts for an ambiguous rollback', () async {
     final game = GameFactory().create(

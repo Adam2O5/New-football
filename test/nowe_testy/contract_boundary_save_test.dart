@@ -14,7 +14,7 @@ import 'package:new_football/core/services/season_service.dart';
 import 'package:new_football/core/tactics/lineup_slots.dart';
 import 'package:new_football/data/save_repository.dart';
 
-import 'support/game_fixtures.dart';
+import '../helpers/fixtures/game_fixtures.dart';
 
 class _BoundaryMarket extends ContractMarketService {
   _BoundaryMarket(this.expiringPlayerId);

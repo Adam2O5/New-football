@@ -7,7 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:new_football/app/providers/settings_provider.dart';
 
-import '../../helpers/preferences_test_double.dart';
+import '../../helpers/widgets/preferences_test_double.dart';
 
 const _property1Label =
     'Feature: urgent-message-simulation-setting, Property 1: '

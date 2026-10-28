@@ -14,7 +14,7 @@ import 'package:new_football/core/services/message_text_service.dart';
 import 'package:new_football/core/services/negotiation_service.dart';
 import 'package:new_football/core/services/staff_service.dart';
 
-import 'support/game_fixtures.dart';
+import '../helpers/fixtures/game_fixtures.dart';
 
 bool _scoreFits(double score, String kind) => switch (kind) {
   'reject' => score > 24 && score <= 39,

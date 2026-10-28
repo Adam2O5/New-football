@@ -73,3 +73,23 @@ Pierwsza sprawdza selekcję, walidację manifestu, discovery, parametry i blokad
 Znane błędy typu `SaveRepository` → `SaveManagementRepository` w pięciu plikach oraz nieaktualne oczekiwania autosave/pacingu pozostają jawne. Ich naprawa jest zaplanowana na kolejne etapy. Etap 0 nie oznacza zielonego całego zestawu ani CI.
 
 Weryfikacja podziału: 21/21 zachowanych testów persystencji i generacji, 79/79 testów `search`, wybrane replay i crash smoke przeszły. W zachowanej starej domenie: 64 PASS, 17 FAIL i 1 SKIP; wszystkie 17 porażek odtworzono na kopiach oryginalnych źródeł. Obejmują m.in. wersję schematu 23 zamiast 27, stare fixture'y/oczekiwania oraz teardown ścigający się z autosave. Nie dopisano tych problemów do blacklisty AI/silnika. Analizator zgłasza te same 21 błędów typów i jedną informację stylistyczną co w audycie, bez nowych ostrzeżeń.
+
+## Etap 1 — stan do review
+
+Naprawiono 21 błędów typów. Analiza aktywnych i długich źródeł nie zgłasza błędów ani ostrzeżeń; pozostaje wcześniejsza informacja stylistyczna w `task26_team_events_test.dart`.
+
+Helpery znajdują się obecnie w:
+
+- `helpers/fixtures/` — wspólne save'y i snapshot podziału deklaracji;
+- `helpers/persistence/` — rzeczywiste kontrolowane repozytorium, pamięciowy fake oraz baza `NoDiskSaveRepository`, która odrzuca niewspierane operacje bez dostępu do dysku;
+- `helpers/simulation/` — kontrolowany krok dnia;
+- `helpers/widgets/` — harness aplikacji i dubler preferencji;
+- `helpers/processes/` — workery, replay, probe core i ograniczone czasowo zarządzanie procesami;
+- `helpers/staff/` — części biblioteki danych sztabu: fixture'y, niezależny oracle, negocjacje i JSON. Dotychczasowy import `staff_role_ratings_test_helpers.dart` pozostaje wejściem do biblioteki;
+- `helpers/barrier_cleanup.dart` — jawna rejestracja zwolnienia bariery przed teardown.
+
+Ścieżki importów, workery i odczyt snapshotu w aktywnych źródłach zostały zaktualizowane. Zamrożone `.disabled` pozostają bez zmian; podczas reaktywacji należy dostosować ich stare importy helperów do powyższych katalogów.
+
+Obecny wybór: **161 aktywnych plików, 11 long, 40 wpisów blacklisty**. Nowy ręczny `data/long/process_cleanup_long.dart` sprawdza timeout oraz sprzątanie drzewa po błędzie; pomocniczy `waiting_worker.dart` jest celowo bezczynny i nie jest samodzielnie odkrywany.
+
+Etap nie uzyskał jeszcze pełnego odbioru: po przywróceniu kompilacji `save_management_flow_test` ujawnił dwa niezgodne oczekiwania dotyczące ambiguous recovery i błędu `loadGame`. W property testach macierz 120 operacji indeksu przekroczyła limit 25 s zastosowany w próbnej weryfikacji. Nie zmieniano tych oczekiwań, kodu gry ani globalnych limitów; dalszy zakres wymaga review użytkownika.

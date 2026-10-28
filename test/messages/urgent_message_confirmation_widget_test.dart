@@ -16,7 +16,7 @@ import 'package:new_football/core/models/message.dart';
 import 'package:new_football/core/services/team_event_service.dart';
 import 'package:new_football/data/save_repository.dart';
 
-import '../helpers/widget_harness.dart';
+import '../helpers/widgets/widget_harness.dart';
 
 void main() {
   testWidgets(

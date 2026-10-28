@@ -12,7 +12,7 @@ import 'package:new_football/core/services/game_factory.dart';
 import 'package:new_football/core/services/schedule_generator.dart';
 import 'package:new_football/data/save_repository.dart';
 
-import '../helpers/preferences_test_double.dart';
+import '../helpers/widgets/preferences_test_double.dart';
 
 void main() {
   test('simulateToDate keeps the enabled urgent stop before the next day and '

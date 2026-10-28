@@ -12,9 +12,9 @@ import 'package:new_football/core/services/calendar_service.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'support/controlled_simulation_runner.dart';
-import 'support/game_fixtures.dart';
-import 'support/memory_save_repository.dart';
+import '../helpers/simulation/controlled_simulation_runner.dart';
+import '../helpers/fixtures/game_fixtures.dart';
+import '../helpers/persistence/memory_save_repository.dart';
 
 void main() {
   const calendar = CalendarService();

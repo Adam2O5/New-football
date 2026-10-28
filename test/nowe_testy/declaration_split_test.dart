@@ -9,8 +9,8 @@ import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/draft_models.dart';
 import 'package:new_football/core/models/game_save.dart';
 
-import 'support/stage_four_snapshot.dart';
-import 'support/game_fixtures.dart';
+import '../helpers/fixtures/stage_four_snapshot.dart';
+import '../helpers/fixtures/game_fixtures.dart';
 
 void main() {
   late Map<String, dynamic> baseline;

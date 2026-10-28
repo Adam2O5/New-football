@@ -4,7 +4,7 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:new_football/data/save_repository.dart';
-import 'game_fixtures.dart';
+import '../fixtures/game_fixtures.dart';
 
 void main() {
   test(

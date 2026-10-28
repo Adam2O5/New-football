@@ -3,6 +3,8 @@ library;
 
 import 'dart:async';
 
+import '../helpers/barrier_cleanup.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:new_football/app/providers/game_provider.dart';
@@ -12,9 +14,9 @@ import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/services/contract_service.dart';
 import 'package:new_football/core/services/game_factory.dart';
 
-import 'support/controlled_simulation_runner.dart';
-import 'support/game_fixtures.dart';
-import 'support/memory_save_repository.dart';
+import '../helpers/simulation/controlled_simulation_runner.dart';
+import '../helpers/fixtures/game_fixtures.dart';
+import '../helpers/persistence/memory_save_repository.dart';
 
 void main() {
   late MemorySaveRepository repository;
@@ -35,7 +37,11 @@ void main() {
     await controller.loadGame(repository.game.meta.id);
   });
 
-  tearDown(() => container.dispose());
+  tearDown(() {
+    repository.releasePendingWrites();
+    runner.releasePendingDay();
+    container.dispose();
+  });
 
   test(
     'two offers during an in-flight day survive persist and reload',
@@ -96,6 +102,7 @@ void main() {
     'leave waits for an in-flight save and shares repeated requests',
     () async {
       final gate = Completer<void>();
+      releaseOnTearDown(gate);
       final started = Completer<void>();
       repository.writeGate = gate;
       repository.writeStarted = started;
@@ -142,6 +149,7 @@ void main() {
   test('leave interrupts a pending presentation observer', () async {
     final observing = Completer<void>();
     final observerGate = Completer<void>();
+    releaseOnTearDown(observerGate);
     final batch = controller.simulateToDate(
       1,
       5,
@@ -162,6 +170,7 @@ void main() {
   test('leave interrupts a pending pacer delay', () async {
     final delaying = Completer<void>();
     final delayGate = Completer<void>();
+    releaseOnTearDown(delayGate);
     final batch = controller.simulateToDate(
       1,
       5,
@@ -186,6 +195,7 @@ void main() {
     final second = original.copyWith(meta: original.meta.copyWith(id: 'B'));
     final started = Completer<void>();
     final loadGate = Completer<void>();
+    releaseOnTearDown(loadGate);
     repository.loadOperation = (id) async {
       if (id == 'A') {
         started.complete();

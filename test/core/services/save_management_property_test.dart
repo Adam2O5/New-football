@@ -1,6 +1,8 @@
 @Tags(['property'])
 library;
 
+import 'package:new_football/data/save_management_repository_adapter.dart';
+
 import 'dart:convert';
 import 'dart:io';
 
@@ -226,7 +228,9 @@ void main() {
         );
         propertyFourDirectory = directory;
         propertyFourService = SaveManagementService(
-          repository: SaveRepository(overrideDirectory: directory),
+          repository: SaveManagementRepositoryAdapter(
+            SaveRepository(overrideDirectory: directory),
+          ),
         );
         addTearDown(() async {
           if (await directory.exists()) {
@@ -1582,7 +1586,7 @@ Future<void> _assertPropertyFive({
 
   final repository = SaveRepository(overrideDirectory: directory);
   final service = SaveManagementService(
-    repository: repository,
+    repository: SaveManagementRepositoryAdapter(repository),
     clock: () => input.duplicateTimestamp,
     idGenerator: () => input.duplicateId,
   );

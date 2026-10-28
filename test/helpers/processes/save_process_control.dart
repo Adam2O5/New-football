@@ -3,6 +3,8 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 
+import 'test_process.dart';
+
 Future<void> killInterruptedWriter(
   Directory directory, {
   String checkpoint = 'gamePublished',
@@ -14,13 +16,13 @@ Future<void> killInterruptedWriter(
   final cache = flutterRoot == null
       ? File(Platform.resolvedExecutable).parent.parent.parent.parent.path
       : '$flutterRoot/bin/cache';
-  final process = await Process.start(
+  final process = await startTestProcess(
     '$cache/dart-sdk/bin/dart${Platform.isWindows ? '.exe' : ''}',
     [
       '$cache/flutter_tools.snapshot',
       'test',
       '--no-pub',
-      'test/nowe_testy/support/save_crash_worker.dart',
+      'test/helpers/processes/save_crash_worker.dart',
       '--reporter',
       'expanded',
     ],
@@ -56,14 +58,19 @@ Future<void> killInterruptedWriter(
     final marker =
         jsonDecode(await ready.readAsString()) as Map<String, dynamic>;
     workerPid = marker['pid'] as int;
-    await whileBlocked?.call();
+    if (whileBlocked != null) {
+      await whileBlocked().timeout(const Duration(seconds: 30));
+    }
     expect(Process.killPid(workerPid, ProcessSignal.sigkill), isTrue);
     await exit.timeout(const Duration(seconds: 30));
     workerPid = null;
-    await Future.wait([stdoutDone, stderrDone]);
+    await Future.wait([
+      stdoutDone,
+      stderrDone,
+    ]).timeout(const Duration(seconds: 10));
     expect(await File('${directory.path}/worker-finally').exists(), isFalse);
   } finally {
     if (workerPid != null) Process.killPid(workerPid, ProcessSignal.sigkill);
-    process.kill();
+    await stopTestProcessTree(process);
   }
 }

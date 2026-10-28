@@ -24,7 +24,7 @@ import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/services/game_factory.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
-import '../helpers/widget_harness.dart';
+import '../helpers/widgets/widget_harness.dart';
 import 'team_selection_menu_test.dart' as selection_test;
 
 const _matrixViewports = <Size>[

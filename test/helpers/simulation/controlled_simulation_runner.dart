@@ -11,6 +11,11 @@ class ControlledSimulationRunner extends InlineSimulationRunner {
   Completer<void>? dayGate;
   var daysCalled = 0;
 
+  void releasePendingDay() {
+    final gate = dayGate;
+    if (gate != null && !gate.isCompleted) gate.complete();
+  }
+
   @override
   Future<DayStepOutput> advanceDay(
     LeagueState league, {

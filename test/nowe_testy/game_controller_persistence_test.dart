@@ -3,13 +3,15 @@ library;
 
 import 'dart:async';
 
+import '../helpers/barrier_cleanup.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/core/services/contract_service.dart';
 
-import 'support/game_fixtures.dart';
-import 'support/memory_save_repository.dart';
+import '../helpers/fixtures/game_fixtures.dart';
+import '../helpers/persistence/memory_save_repository.dart';
 
 void main() {
   late MemorySaveRepository repository;
@@ -26,6 +28,7 @@ void main() {
   });
 
   tearDown(() {
+    repository.releasePendingWrites();
     container.dispose();
   });
 
@@ -42,6 +45,7 @@ void main() {
 
   test('F02: flush waits for an autosave already writing', () async {
     final gate = Completer<void>();
+    releaseOnTearDown(gate);
     final started = Completer<void>();
     repository.writeGate = gate;
     repository.writeStarted = started;
@@ -66,6 +70,7 @@ void main() {
 
   test('F01: a queued offer preserves the preceding day change', () async {
     final gate = Completer<void>();
+    releaseOnTearDown(gate);
     final blocking = controller.enqueueSaveManagement(() => gate.future);
     final dayChange = controller.updateLeague(
       (league) => league.copyWith(currentDay: 2),
@@ -88,7 +93,9 @@ void main() {
 
   test('flush includes a mutation queued before its autosave exists', () async {
     final queueGate = Completer<void>();
+    releaseOnTearDown(queueGate);
     final writeGate = Completer<void>();
+    releaseOnTearDown(writeGate);
     final writeStarted = Completer<void>();
     repository.writeGate = writeGate;
     repository.writeStarted = writeStarted;
@@ -154,6 +161,7 @@ void main() {
     'F03: leaving the career persists a published queued autosave',
     () async {
       final gate = Completer<void>();
+      releaseOnTearDown(gate);
       final started = Completer<void>();
       final dayChange = controller.updateLeague(
         (league) => league.copyWith(currentDay: 2),

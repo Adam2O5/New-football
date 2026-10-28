@@ -3,7 +3,7 @@ import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/core/models/save_record.dart';
 import 'package:new_football/core/services/save_management_service.dart';
-import 'package:new_football/data/save_repository.dart';
+import 'package:new_football/core/services/save_management_repository.dart';
 
 void main() {
   group('SaveManagementService', () {
@@ -25,7 +25,7 @@ void main() {
           name: 'Newer',
           schemaVersion: SaveSchema.currentVersion + 1,
         );
-        final repository = _FakeSaveRepository(
+        final repository = _FakeSaveManagementRepository(
           index: [older, compatible, newer],
           inspections: {
             older.id: const SaveFileInfo.available(128),
@@ -77,7 +77,7 @@ void main() {
           _meta(id: 'copy-two', name: 'Season-copy-2'),
           _meta(id: 'copy-four', name: 'Season-copy-4'),
         ];
-        final repository = _FakeSaveRepository(
+        final repository = _FakeSaveManagementRepository(
           indexSnapshots: [indexed, indexed, indexed, indexed],
           canonicalFileIds: {'disk-id'},
         );
@@ -113,7 +113,7 @@ void main() {
       'duplicate uses the localized Polish suffix and reuses a numbering gap',
       () async {
         final source = _meta(id: 'polish-source', name: '  Łódź  ');
-        final repository = _FakeSaveRepository(
+        final repository = _FakeSaveManagementRepository(
           index: [
             source,
             _meta(id: 'polish-base', name: 'LODZ-kopia'),
@@ -141,7 +141,7 @@ void main() {
       'rename trims the stored display name and returns a rename result',
       () async {
         final source = _meta(id: 'source', name: 'Old name');
-        final repository = _FakeSaveRepository(index: [source]);
+        final repository = _FakeSaveManagementRepository(index: [source]);
 
         final result = await _service(
           repository,
@@ -161,7 +161,7 @@ void main() {
     test(
       'rename rejects an empty trimmed name before reading or writing',
       () async {
-        final repository = _FakeSaveRepository(
+        final repository = _FakeSaveManagementRepository(
           index: [_meta(id: 'source', name: 'Source')],
         );
 
@@ -182,7 +182,7 @@ void main() {
       'rename compares the proposed name with the current Name_Key',
       () async {
         final source = _meta(id: 'source', name: 'Śląsk Łódź');
-        final repository = _FakeSaveRepository(index: [source]);
+        final repository = _FakeSaveManagementRepository(index: [source]);
 
         await _expectFailure(
           () => _service(
@@ -199,7 +199,7 @@ void main() {
     test('rename rejects a collision with another indexed Name_Key', () async {
       final source = _meta(id: 'source', name: 'Home');
       final other = _meta(id: 'other', name: 'ŁÓDŹ');
-      final repository = _FakeSaveRepository(index: [source, other]);
+      final repository = _FakeSaveManagementRepository(index: [source, other]);
 
       await _expectFailure(
         () => _service(
@@ -214,7 +214,7 @@ void main() {
 
     test('duplicate and rename report an absent indexed source', () async {
       final other = _meta(id: 'other', name: 'Other');
-      final repository = _FakeSaveRepository(index: [other]);
+      final repository = _FakeSaveManagementRepository(index: [other]);
       final service = _service(
         repository,
         timestamp: DateTime.utc(2030, 5, 6),
@@ -235,33 +235,32 @@ void main() {
     });
 
     test(
-      'maps duplicate source and write exceptions without returning success',
+      'preserves duplicate domain failures without returning success',
       () async {
         final source = _meta(id: 'source', name: 'Source');
         final cases = <MapEntry<Object, SaveManagementFailure>>[
-          MapEntry(
-            SaveFileNotFoundException(saveId: source.id),
+          const MapEntry(
+            SaveManagementException(SaveManagementFailure.sourceUnavailable),
             SaveManagementFailure.sourceUnavailable,
           ),
-          MapEntry(
-            InvalidSerializedSaveException(
-              saveId: source.id,
-              reason: 'invalid JSON',
+          const MapEntry(
+            SaveManagementException(
+              SaveManagementFailure.invalidSerializedSave,
             ),
             SaveManagementFailure.invalidSerializedSave,
           ),
-          MapEntry(
-            SaveRepositoryException('write failed'),
+          const MapEntry(
+            SaveManagementException(SaveManagementFailure.writeFailed),
             SaveManagementFailure.writeFailed,
           ),
-          MapEntry(
-            SaveAmbiguousWriteException(saveId: 'duplicate-id'),
+          const MapEntry(
+            SaveManagementException(SaveManagementFailure.ambiguousWrite),
             SaveManagementFailure.ambiguousWrite,
           ),
         ];
 
         for (final entry in cases) {
-          final repository = _FakeSaveRepository(
+          final repository = _FakeSaveManagementRepository(
             index: [source],
             duplicateError: entry.key,
           );
@@ -281,33 +280,32 @@ void main() {
     );
 
     test(
-      'maps rename source and write exceptions without returning success',
+      'preserves rename domain failures without returning success',
       () async {
         final source = _meta(id: 'source', name: 'Source');
         final cases = <MapEntry<Object, SaveManagementFailure>>[
-          MapEntry(
-            SaveFileNotFoundException(saveId: source.id),
+          const MapEntry(
+            SaveManagementException(SaveManagementFailure.sourceUnavailable),
             SaveManagementFailure.sourceUnavailable,
           ),
-          MapEntry(
-            InvalidSerializedSaveException(
-              saveId: source.id,
-              reason: 'invalid JSON',
+          const MapEntry(
+            SaveManagementException(
+              SaveManagementFailure.invalidSerializedSave,
             ),
             SaveManagementFailure.invalidSerializedSave,
           ),
-          MapEntry(
-            SaveRepositoryException('write failed'),
+          const MapEntry(
+            SaveManagementException(SaveManagementFailure.writeFailed),
             SaveManagementFailure.writeFailed,
           ),
-          MapEntry(
-            SaveAmbiguousWriteException(saveId: source.id),
+          const MapEntry(
+            SaveManagementException(SaveManagementFailure.ambiguousWrite),
             SaveManagementFailure.ambiguousWrite,
           ),
         ];
 
         for (final entry in cases) {
-          final repository = _FakeSaveRepository(
+          final repository = _FakeSaveManagementRepository(
             index: [source],
             renameError: entry.key,
           );
@@ -327,8 +325,10 @@ void main() {
 
     test('maps index and ID-selection failures to indexReadFailed', () async {
       final source = _meta(id: 'source', name: 'Source');
-      final indexFailureRepository = _FakeSaveRepository(
-        listError: SaveRepositoryException('index unavailable'),
+      final indexFailureRepository = _FakeSaveManagementRepository(
+        listError: const SaveManagementException(
+          SaveManagementFailure.indexReadFailed,
+        ),
       );
       await _expectFailure(
         () => _service(
@@ -339,9 +339,11 @@ void main() {
       );
       expect(indexFailureRepository.renameCalls, isEmpty);
 
-      final availabilityFailureRepository = _FakeSaveRepository(
+      final availabilityFailureRepository = _FakeSaveManagementRepository(
         index: [source],
-        availabilityError: SaveRepositoryException('fresh index unavailable'),
+        availabilityError: const SaveManagementException(
+          SaveManagementFailure.indexReadFailed,
+        ),
       );
       await _expectFailure(
         () => _service(
@@ -355,7 +357,7 @@ void main() {
     });
 
     test('maps malformed indexed names to invalidSerializedSave', () async {
-      final repository = _FakeSaveRepository(
+      final repository = _FakeSaveManagementRepository(
         index: [_meta(id: 'source', name: '   ')],
       );
 
@@ -391,7 +393,7 @@ Future<void> _expectFailure<T>(
 }
 
 SaveManagementService _service(
-  _FakeSaveRepository repository, {
+  _FakeSaveManagementRepository repository, {
   required DateTime timestamp,
   List<String> idCandidates = const <String>[],
 }) {
@@ -427,8 +429,8 @@ GameSaveMeta _meta({
   );
 }
 
-class _FakeSaveRepository extends SaveRepository {
-  _FakeSaveRepository({
+class _FakeSaveManagementRepository implements SaveManagementRepository {
+  _FakeSaveManagementRepository({
     List<GameSaveMeta> index = const <GameSaveMeta>[],
     List<List<GameSaveMeta>>? indexSnapshots,
     Set<String> canonicalFileIds = const <String>{},
@@ -443,8 +445,7 @@ class _FakeSaveRepository extends SaveRepository {
            .toList(),
        _canonicalFileIds = Set<String>.from(canonicalFileIds),
        _inspections = Map<String, SaveFileInfo>.from(inspections),
-       _inspectionErrors = Map<String, Object>.from(inspectionErrors),
-       super();
+       _inspectionErrors = Map<String, Object>.from(inspectionErrors);
 
   final List<List<GameSaveMeta>> _indexSnapshots;
   final Set<String> _canonicalFileIds;

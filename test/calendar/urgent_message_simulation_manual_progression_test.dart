@@ -8,8 +8,8 @@ import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/message.dart';
 import 'package:new_football/core/services/day_simulator.dart';
 
-import '../helpers/preferences_test_double.dart';
-import '../helpers/widget_harness.dart';
+import '../helpers/widgets/preferences_test_double.dart';
+import '../helpers/widgets/widget_harness.dart';
 
 const _property6Label =
     'Feature: urgent-message-simulation-setting, Property 6: '

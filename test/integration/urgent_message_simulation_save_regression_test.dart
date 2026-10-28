@@ -15,7 +15,7 @@ import 'package:new_football/core/models/message.dart';
 import 'package:new_football/core/services/game_factory.dart';
 import 'package:new_football/data/save_repository.dart';
 
-import '../helpers/preferences_test_double.dart';
+import '../helpers/widgets/preferences_test_double.dart';
 
 const _property2Label =
     'Feature: urgent-message-simulation-setting, Property 2: '

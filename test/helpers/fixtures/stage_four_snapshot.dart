@@ -12,8 +12,7 @@ import 'package:new_football/core/models/season_awards.dart';
 import 'package:new_football/core/models/seed_data.dart';
 import 'package:new_football/core/models/seed_data_generator.dart';
 
-const stageFourBaselinePath =
-    'test/nowe_testy/support/stage_four_baseline.json';
+const stageFourBaselinePath = 'test/helpers/fixtures/stage_four_baseline.json';
 
 // Compact, order-sensitive fingerprints for the large generated worlds and
 // name catalog. The model JSON itself is retained below for compatibility tests.

@@ -20,7 +20,7 @@ import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
-import '../helpers/widget_harness.dart';
+import '../helpers/widgets/widget_harness.dart';
 
 const _portrait = Size(390, 844);
 const _landscape = Size(844, 390);

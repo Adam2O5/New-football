@@ -11,7 +11,7 @@ import 'package:new_football/core/services/lottery_service.dart';
 import 'package:new_football/core/services/season_service.dart';
 import 'package:new_football/core/services/team_management_service.dart';
 
-import 'support/game_fixtures.dart';
+import '../helpers/fixtures/game_fixtures.dart';
 
 void main() {
   for (final seed in [1, 123, 456]) {

@@ -24,7 +24,7 @@ import 'package:new_football/core/tactics/formation_layout.dart';
 import 'package:new_football/core/tactics/player_sort.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
-import '../helpers/widget_harness.dart';
+import '../helpers/widgets/widget_harness.dart';
 
 const _newLocalizationKeys = <String>[
   'squad_rosterCount',

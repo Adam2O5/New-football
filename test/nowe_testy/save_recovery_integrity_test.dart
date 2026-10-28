@@ -13,7 +13,7 @@ import 'package:new_football/core/services/save_management_service.dart';
 import 'package:new_football/data/save_repository.dart';
 import 'package:new_football/data/save_management_repository_adapter.dart';
 
-import 'support/game_fixtures.dart';
+import '../helpers/fixtures/game_fixtures.dart';
 
 Future<Map<String, List<int>>> _snapshot(Directory directory) async => {
   for (final file in (await directory.list().toList()).whereType<File>())

@@ -19,7 +19,7 @@ import 'package:new_football/core/models/staff.dart';
 import 'package:new_football/core/models/trade_models.dart';
 import 'package:new_football/core/models/seed_data_generator.dart';
 
-import '../helpers/widget_harness.dart';
+import '../helpers/widgets/widget_harness.dart';
 
 void main() {
   testWidgets('TradeScreen pokazuje konkretny powód odrzucenia oferty', (

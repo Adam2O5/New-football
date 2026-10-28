@@ -13,7 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:new_football/app/providers/settings_provider.dart';
 import 'package:new_football/app/screens/settings_screen.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
-import '../helpers/preferences_test_double.dart';
+import '../helpers/widgets/preferences_test_double.dart';
 
 const _propertyTag =
     'Feature: urgent-message-simulation-setting, Property 9: '
@@ -216,7 +216,11 @@ void _expectLocalizedSettingSurface(
 
   final control = find.byKey(_urgentControlKey);
   expect(control, findsOneWidget, reason: caseLabel);
-  expect(find.byType(SwitchListTile), findsAtLeastNWidgets(1), reason: caseLabel);
+  expect(
+    find.byType(SwitchListTile),
+    findsAtLeastNWidgets(1),
+    reason: caseLabel,
+  );
   expect(find.byType(Switch), findsAtLeastNWidgets(1), reason: caseLabel);
   expect(
     tester.widget<SwitchListTile>(control).title,

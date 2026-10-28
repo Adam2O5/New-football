@@ -10,7 +10,7 @@ import 'package:new_football/core/models/message.dart';
 import 'package:new_football/core/services/game_factory.dart';
 import 'package:new_football/data/save_repository.dart';
 
-import '../helpers/controlled_save_repository.dart';
+import '../helpers/persistence/controlled_save_repository.dart';
 
 void main() {
   late Directory tempDir;

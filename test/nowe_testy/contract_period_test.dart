@@ -12,7 +12,7 @@ import 'package:new_football/core/services/contract_period_service.dart';
 import 'package:new_football/core/services/contract_service.dart';
 import 'package:new_football/core/services/season_service.dart';
 
-import 'support/game_fixtures.dart';
+import '../helpers/fixtures/game_fixtures.dart';
 
 void main() {
   const periods = ContractPeriodService();

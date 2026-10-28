@@ -1,6 +1,8 @@
 @Tags(['ui'])
 library;
 
+import 'package:new_football/data/save_management_repository_adapter.dart';
+
 import 'dart:async';
 import 'dart:ui';
 
@@ -24,6 +26,8 @@ import 'package:new_football/core/services/game_factory.dart';
 import 'package:new_football/core/services/save_management_service.dart';
 import 'package:new_football/core/services/save_name_policy.dart';
 import 'package:new_football/data/save_repository.dart';
+
+import '../helpers/persistence/no_disk_save_repository.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
 void main() {
@@ -910,7 +914,7 @@ GameSave _gameFor(SaveRecord record) {
   return generated.copyWith(meta: record.meta);
 }
 
-class _WidgetSaveRepository extends SaveRepository {
+class _WidgetSaveRepository extends NoDiskSaveRepository {
   final Map<String, GameSave> loadedGames = {};
   FutureOr<void> Function(String id)? onDelete;
   Object? loadError;
@@ -944,7 +948,7 @@ class _MutableManagementService extends SaveManagementService {
     required SaveRepository repository,
     Iterable<SaveRecord> initial = const [],
   }) : records = List<SaveRecord>.from(initial),
-       super(repository: repository);
+       super(repository: SaveManagementRepositoryAdapter(repository));
 
   final List<SaveRecord> records;
   Object? listError;

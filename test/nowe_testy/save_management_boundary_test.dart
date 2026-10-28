@@ -11,7 +11,7 @@ import 'package:new_football/core/services/save_management_service.dart';
 import 'package:new_football/data/save_management_repository_adapter.dart';
 import 'package:new_football/data/save_repository.dart';
 
-import 'support/game_fixtures.dart';
+import '../helpers/fixtures/game_fixtures.dart';
 
 class _Store implements SaveManagementRepository {
   _Store(List<GameSaveMeta> initial)

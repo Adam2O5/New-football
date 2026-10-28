@@ -11,7 +11,7 @@ import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/injury.dart';
 import 'package:new_football/core/models/league_state.dart';
 
-import '../helpers/widget_harness.dart';
+import '../helpers/widgets/widget_harness.dart';
 
 void main() {
   testWidgets('Squad blokuje wejście kontuzjowanego i zawieszonego gracza', (

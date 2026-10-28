@@ -10,6 +10,8 @@ import 'package:new_football/core/services/game_factory.dart';
 import 'package:new_football/data/save_repository.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
+import '../persistence/no_disk_save_repository.dart';
+
 GameSave task41Game({required int seed}) {
   return GameFactory().create(
     NewGameRequest(
@@ -20,7 +22,7 @@ GameSave task41Game({required int seed}) {
   );
 }
 
-class Task41NoopSaveRepository extends SaveRepository {
+class Task41NoopSaveRepository extends NoDiskSaveRepository {
   @override
   Future<void> save(GameSave gameSave) async {}
 }

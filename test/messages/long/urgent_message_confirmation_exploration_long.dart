@@ -13,7 +13,7 @@ import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/core/models/message.dart';
 import 'package:new_football/data/save_repository.dart';
 
-import '../../helpers/widget_harness.dart';
+import '../../helpers/widgets/widget_harness.dart';
 
 void main() {
   testWidgets('exploration on unchanged F: 300 ms confirmation bursts 2..10 '

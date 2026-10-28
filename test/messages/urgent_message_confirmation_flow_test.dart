@@ -27,8 +27,8 @@ import 'package:new_football/core/services/trade_service.dart';
 import 'package:new_football/data/save_repository.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
-import '../helpers/controlled_save_repository.dart';
-import '../helpers/widget_harness.dart';
+import '../helpers/persistence/controlled_save_repository.dart';
+import '../helpers/widgets/widget_harness.dart';
 
 /// The project does not depend on Flutter's `integration_test` package and has
 /// no integration_test directory. These cases therefore use the equivalent

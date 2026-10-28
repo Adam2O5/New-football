@@ -9,7 +9,7 @@ import 'package:new_football/core/services/contract_service.dart';
 import 'package:new_football/core/services/day_pipeline.dart';
 import 'package:new_football/core/services/negotiation_service.dart';
 
-import 'support/game_fixtures.dart';
+import '../helpers/fixtures/game_fixtures.dart';
 
 void main() {
   const service = NegotiationService();

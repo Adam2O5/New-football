@@ -13,8 +13,8 @@ import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/tactics/formation_layout.dart';
 import 'package:new_football/core/tactics/lineup_slots.dart';
 
-import 'support/game_fixtures.dart';
-import 'support/memory_save_repository.dart';
+import '../helpers/fixtures/game_fixtures.dart';
+import '../helpers/persistence/memory_save_repository.dart';
 
 Team _team() {
   final base = controllerSave().leagueState.playerTeam!;

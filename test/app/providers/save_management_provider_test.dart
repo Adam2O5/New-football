@@ -1,3 +1,4 @@
+import 'package:new_football/data/save_management_repository_adapter.dart';
 import 'dart:io';
 
 import 'package:flutter/widgets.dart';
@@ -13,7 +14,7 @@ import 'package:new_football/core/services/save_management_service.dart';
 import 'package:new_football/data/save_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../helpers/controlled_save_repository.dart';
+import '../../helpers/persistence/controlled_save_repository.dart';
 
 void main() {
   late Directory tempDir;
@@ -26,7 +27,7 @@ void main() {
   SaveManagementService serviceFor(SaveRepository saveRepository) {
     var nextId = 0;
     return SaveManagementService(
-      repository: saveRepository,
+      repository: SaveManagementRepositoryAdapter(saveRepository),
       clock: () => DateTime.utc(2040, 1, 2, 3, 4, 5),
       idGenerator: () => 'managed-${nextId++}',
     );
@@ -69,8 +70,13 @@ void main() {
   });
 
   tearDown(() async {
-    container?.dispose();
-    if (await tempDir.exists()) await tempDir.delete(recursive: true);
+    repository.release();
+    try {
+      if (container != null) await controller.flushPendingSave();
+    } finally {
+      container?.dispose();
+      if (await tempDir.exists()) await tempDir.delete(recursive: true);
+    }
   });
 
   test(
@@ -99,10 +105,13 @@ void main() {
       await persist;
 
       expect(result.isDuplicate, isTrue);
-      expect(coordinator.isActionInFlight(
-        activeGame.meta.id,
-        SaveManagementAction.duplicate,
-      ), isFalse);
+      expect(
+        coordinator.isActionInFlight(
+          activeGame.meta.id,
+          SaveManagementAction.duplicate,
+        ),
+        isFalse,
+      );
       expect(repository.saveCount, 1);
       expect((await repository.listSaves()), hasLength(2));
     },
@@ -135,67 +144,79 @@ void main() {
 
       expect(result.isRename, isTrue);
       expect(result.meta.name, 'Renamed Active');
-      expect(coordinator.isActionInFlight(
-        activeGame.meta.id,
-        SaveManagementAction.rename,
-      ), isFalse);
-      expect((await repository.listSaves()).singleWhere(
-        (meta) => meta.id == activeGame.meta.id,
-      ).name, 'Renamed Active');
+      expect(
+        coordinator.isActionInFlight(
+          activeGame.meta.id,
+          SaveManagementAction.rename,
+        ),
+        isFalse,
+      );
+      expect(
+        (await repository.listSaves())
+            .singleWhere((meta) => meta.id == activeGame.meta.id)
+            .name,
+        'Renamed Active',
+      );
     },
   );
 
-  test('management writes are serialized with no concurrent transactions', () async {
-    final coordinator = container!.read(saveManagementCoordinatorProvider);
-    final first = coordinator.duplicate(activeGame.meta.id);
-    final second = coordinator.duplicate(activeGame.meta.id);
+  test(
+    'management writes are serialized with no concurrent transactions',
+    () async {
+      final coordinator = container!.read(saveManagementCoordinatorProvider);
+      final first = coordinator.duplicate(activeGame.meta.id);
+      final second = coordinator.duplicate(activeGame.meta.id);
 
-    await repository.firstManagementOperationStarted;
-    expect(repository.managementOperationCount, 1);
-    expect(repository.activeManagementWriteCount, 1);
-    expect(
-      coordinator.isActionInFlight(
-        activeGame.meta.id,
-        SaveManagementAction.duplicate,
-      ),
-      isTrue,
-    );
+      await repository.firstManagementOperationStarted;
+      expect(repository.managementOperationCount, 1);
+      expect(repository.activeManagementWriteCount, 1);
+      expect(
+        coordinator.isActionInFlight(
+          activeGame.meta.id,
+          SaveManagementAction.duplicate,
+        ),
+        isTrue,
+      );
 
-    repository.releaseManagement();
-    final results = await Future.wait([first, second]);
+      repository.releaseManagement();
+      final results = await Future.wait([first, second]);
 
-    expect(results.map((result) => result.meta.name).toList(), [
-      'Active Save-copy',
-      'Active Save-copy-2',
-    ]);
-    expect(repository.managementOperationCount, 2);
-    expect(repository.activeManagementWriteCount, 0);
-    expect(repository.maxConcurrentManagementWrites, 1);
-    expect(
-      coordinator.isActionInFlight(
-        activeGame.meta.id,
-        SaveManagementAction.duplicate,
-      ),
-      isFalse,
-    );
-  });
+      expect(results.map((result) => result.meta.name).toList(), [
+        'Active Save-copy',
+        'Active Save-copy-2',
+      ]);
+      expect(repository.managementOperationCount, 2);
+      expect(repository.activeManagementWriteCount, 0);
+      expect(repository.maxConcurrentManagementWrites, 1);
+      expect(
+        coordinator.isActionInFlight(
+          activeGame.meta.id,
+          SaveManagementAction.duplicate,
+        ),
+        isFalse,
+      );
+    },
+  );
 
-  test('duplicating the active save leaves the active GameSave unchanged', () async {
-    final before = controller.save!;
-    final coordinator = container!.read(saveManagementCoordinatorProvider);
-    final duplicate = coordinator.duplicate(activeGame.meta.id);
+  test(
+    'duplicating the active save leaves the active GameSave unchanged',
+    () async {
+      final before = controller.save!;
+      final coordinator = container!.read(saveManagementCoordinatorProvider);
+      final duplicate = coordinator.duplicate(activeGame.meta.id);
 
-    await repository.firstManagementOperationStarted;
-    repository.releaseManagement();
-    final result = await duplicate;
+      await repository.firstManagementOperationStarted;
+      repository.releaseManagement();
+      final result = await duplicate;
 
-    expect(result.isDuplicate, isTrue);
-    expect(controller.save, same(before));
-    expect(controller.save!.meta, same(before.meta));
-    expect(controller.save!.leagueState, same(before.leagueState));
-    expect(controller.save!.saveSeed, before.saveSeed);
-    expect((await repository.listSaves()), hasLength(2));
-  });
+      expect(result.isDuplicate, isTrue);
+      expect(controller.save, same(before));
+      expect(controller.save!.meta, same(before.meta));
+      expect(controller.save!.leagueState, same(before.leagueState));
+      expect(controller.save!.saveSeed, before.saveSeed);
+      expect((await repository.listSaves()), hasLength(2));
+    },
+  );
 
   test(
     'renaming the active save synchronizes only metadata before the next persist',
@@ -238,10 +259,7 @@ void main() {
         repository: countingRepository,
         source: activeGame.meta,
       );
-      openContainer(
-        saveRepository: countingRepository,
-        service: service,
-      );
+      openContainer(saveRepository: countingRepository, service: service);
 
       final recordsSubscription = container!.listen(
         saveRecordsProvider,
@@ -296,86 +314,97 @@ void main() {
     },
   );
 
-  test('a failed management write can be retried after the queue tail recovers', () async {
-    final coordinator = container!.read(saveManagementCoordinatorProvider);
-    repository.managementFailure = ControlledManagementFailure.beforeWrite;
+  test(
+    'a failed management write can be retried after the queue tail recovers',
+    () async {
+      final coordinator = container!.read(saveManagementCoordinatorProvider);
+      repository.managementFailure = ControlledManagementFailure.beforeWrite;
 
-    await expectLater(
-      coordinator.duplicate(activeGame.meta.id),
-      throwsA(
-        isA<SaveManagementException>().having(
-          (error) => error.code,
-          'code',
-          SaveManagementFailure.writeFailed,
+      await expectLater(
+        coordinator.duplicate(activeGame.meta.id),
+        throwsA(
+          isA<SaveManagementException>().having(
+            (error) => error.code,
+            'code',
+            SaveManagementFailure.writeFailed,
+          ),
         ),
-      ),
-    );
-    expect(
-      coordinator.isActionInFlight(
-        activeGame.meta.id,
-        SaveManagementAction.duplicate,
-      ),
-      isFalse,
-    );
-    expect(repository.activeManagementWriteCount, 0);
-    expect((await repository.listSaves()), hasLength(1));
+      );
+      expect(
+        coordinator.isActionInFlight(
+          activeGame.meta.id,
+          SaveManagementAction.duplicate,
+        ),
+        isFalse,
+      );
+      expect(repository.activeManagementWriteCount, 0);
+      expect((await repository.listSaves()), hasLength(1));
 
-    repository.managementFailure = ControlledManagementFailure.none;
-    repository.releaseManagement();
-    final retry = await coordinator.duplicate(activeGame.meta.id);
+      repository.managementFailure = ControlledManagementFailure.none;
+      repository.releaseManagement();
+      final retry = await coordinator.duplicate(activeGame.meta.id);
 
-    expect(retry.isDuplicate, isTrue);
-    expect(repository.managementOperationCount, 2);
-    expect((await repository.listSaves()), hasLength(2));
-  });
+      expect(retry.isDuplicate, isTrue);
+      expect(repository.managementOperationCount, 2);
+      expect((await repository.listSaves()), hasLength(2));
+    },
+  );
 
-  test('duplicate captures the locale at invocation before queued execution', () async {
-    final localeController = container!.read(localeProvider.notifier);
-    await localeController.setLocale(const Locale('en'));
+  test(
+    'duplicate captures the locale at invocation before queued execution',
+    () async {
+      final localeController = container!.read(localeProvider.notifier);
+      await localeController.setLocale(const Locale('en'));
 
-    final coordinator = container!.read(saveManagementCoordinatorProvider);
-    final persist = controller.persist();
-    await repository.firstSaveStarted;
-    final duplicate = coordinator.duplicate(activeGame.meta.id);
+      final coordinator = container!.read(saveManagementCoordinatorProvider);
+      final persist = controller.persist();
+      await repository.firstSaveStarted;
+      final duplicate = coordinator.duplicate(activeGame.meta.id);
 
-    await localeController.setLocale(const Locale('pl'));
-    repository.releaseSave();
-    await repository.firstManagementOperationStarted;
-    repository.releaseManagement();
+      await localeController.setLocale(const Locale('pl'));
+      repository.releaseSave();
+      await repository.firstManagementOperationStarted;
+      repository.releaseManagement();
 
-    final result = await duplicate;
-    await persist;
+      final result = await duplicate;
+      await persist;
 
-    expect(result.meta.name, 'Active Save-copy');
-    expect(result.meta.name, isNot(contains('-kopia')));
-  });
+      expect(result.meta.name, 'Active Save-copy');
+      expect(result.meta.name, isNot(contains('-kopia')));
+    },
+  );
 
-  test('two rapid duplicates read the fresh index from the previous transaction', () async {
-    final coordinator = container!.read(saveManagementCoordinatorProvider);
-    final first = coordinator.duplicate(activeGame.meta.id);
-    final second = coordinator.duplicate(activeGame.meta.id);
+  test(
+    'two rapid duplicates read the fresh index from the previous transaction',
+    () async {
+      final coordinator = container!.read(saveManagementCoordinatorProvider);
+      final first = coordinator.duplicate(activeGame.meta.id);
+      final second = coordinator.duplicate(activeGame.meta.id);
 
-    await repository.firstManagementOperationStarted;
-    repository.releaseManagement();
-    final results = await Future.wait([first, second]);
+      await repository.firstManagementOperationStarted;
+      repository.releaseManagement();
+      final results = await Future.wait([first, second]);
 
-    expect(results.map((result) => result.meta.name).toList(), [
-      'Active Save-copy',
-      'Active Save-copy-2',
-    ]);
-    expect(results.map((result) => result.meta.id).toSet(), hasLength(2));
+      expect(results.map((result) => result.meta.name).toList(), [
+        'Active Save-copy',
+        'Active Save-copy-2',
+      ]);
+      expect(results.map((result) => result.meta.id).toSet(), hasLength(2));
 
-    final index = await repository.listSaves();
-    expect(index.where((meta) => meta.id == activeGame.meta.id), hasLength(1));
-    for (final result in results) {
-      expect(index.where((meta) => meta.id == result.meta.id), hasLength(1));
-    }
-    expect(
-      index.where((meta) => meta.name.startsWith('Active Save-copy')),
-      hasLength(2),
-    );
-  });
-
+      final index = await repository.listSaves();
+      expect(
+        index.where((meta) => meta.id == activeGame.meta.id),
+        hasLength(1),
+      );
+      for (final result in results) {
+        expect(index.where((meta) => meta.id == result.meta.id), hasLength(1));
+      }
+      expect(
+        index.where((meta) => meta.name.startsWith('Active Save-copy')),
+        hasLength(2),
+      );
+    },
+  );
 }
 
 GameSave _game() {
@@ -414,7 +443,7 @@ class _CountingManagementService extends SaveManagementService {
   _CountingManagementService({
     required SaveRepository repository,
     required this.source,
-  }) : super(repository: repository);
+  }) : super(repository: SaveManagementRepositoryAdapter(repository));
 
   final GameSaveMeta source;
   int listRecordsCalls = 0;
@@ -443,10 +472,7 @@ class _CountingManagementService extends SaveManagementService {
     final failure = duplicateFailure;
     if (failure != null) throw failure;
     return SaveManagementResult.duplicate(
-      source.copyWith(
-        id: 'fake-copy',
-        name: '${source.name}-copy',
-      ),
+      source.copyWith(id: 'fake-copy', name: '${source.name}-copy'),
     );
   }
 }

@@ -10,7 +10,7 @@ import 'package:go_router/go_router.dart';
 import 'package:new_football/app/providers/settings_provider.dart';
 import 'package:new_football/app/screens/settings_screen.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
-import '../helpers/preferences_test_double.dart';
+import '../helpers/widgets/preferences_test_double.dart';
 
 const _urgentControlKey = ValueKey<String>('settings-urgent-interruption');
 

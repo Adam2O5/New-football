@@ -14,7 +14,7 @@ import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/player_attributes.dart';
 import 'package:new_football/core/services/contract_service.dart';
 
-import 'support/game_fixtures.dart';
+import '../helpers/fixtures/game_fixtures.dart';
 
 class _CountedRoll implements Random {
   int rolls = 0;

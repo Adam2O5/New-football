@@ -10,7 +10,7 @@ import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/staff.dart';
 import 'package:new_football/core/models/team.dart';
 
-import 'support/game_fixtures.dart';
+import '../helpers/fixtures/game_fixtures.dart';
 
 void main() {
   test('controller fixture is repeatable and has one player club', () {

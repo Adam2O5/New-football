@@ -17,8 +17,8 @@ import 'package:new_football/core/services/message_service.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'support/game_fixtures.dart';
-import 'support/memory_save_repository.dart';
+import '../helpers/fixtures/game_fixtures.dart';
+import '../helpers/persistence/memory_save_repository.dart';
 
 void main() {
   testWidgets('calendar date updates do not rebuild unchanged squad/table', (
