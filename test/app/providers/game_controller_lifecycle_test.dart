@@ -3,8 +3,6 @@ library;
 
 import 'dart:async';
 
-import '../helpers/barrier_cleanup.dart';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:new_football/app/providers/game_provider.dart';
@@ -14,9 +12,10 @@ import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/services/contract_service.dart';
 import 'package:new_football/core/services/game_factory.dart';
 
-import '../helpers/simulation/controlled_simulation_runner.dart';
-import '../helpers/fixtures/game_fixtures.dart';
-import '../helpers/persistence/memory_save_repository.dart';
+import '../../helpers/barrier_cleanup.dart';
+import '../../helpers/simulation/controlled_simulation_runner.dart';
+import '../../helpers/fixtures/game_fixtures.dart';
+import '../../helpers/persistence/memory_save_repository.dart';
 
 void main() {
   late MemorySaveRepository repository;
@@ -37,9 +36,10 @@ void main() {
     await controller.loadGame(repository.game.meta.id);
   });
 
-  tearDown(() {
+  tearDown(() async {
     repository.releasePendingWrites();
     runner.releasePendingDay();
+    await controller.enqueueSaveManagement(() async {});
     container.dispose();
   });
 
@@ -77,7 +77,11 @@ void main() {
         league.negotiations.map((record) => record.subjectId),
         unorderedEquals([fixtureFreeAgentId, 'second-free-agent']),
       );
-      expect(repository.game.leagueState, league);
+      expect(
+        repository.game.leagueState == league,
+        isTrue,
+        reason: 'Persist and reload preserve the complete queued result.',
+      );
       expect(runner.daysCalled, 1);
     },
   );
@@ -220,6 +224,30 @@ void main() {
     expect(publishedIds, isNot(contains('A')));
   });
 
+  test(
+    'metadata requested before reload cannot overwrite the new session with the same save ID',
+    () async {
+      final previous = controller.save!;
+      final fresh = previous.copyWith(
+        meta: previous.meta.copyWith(name: 'freshly-loaded'),
+      );
+      repository.games[fresh.meta.id] = fresh;
+      final loading = controller.loadGame(fresh.meta.id);
+      final staleRename = controller.enqueueSaveManagement(() async {
+        return controller.applyManagedMeta(
+          previous.meta.id,
+          previous.meta.copyWith(name: 'stale-rename'),
+        );
+      });
+      await loading;
+      expect(await staleRename, isFalse);
+      expect(controller.save!.meta.id, fresh.meta.id);
+      expect(controller.save!.meta.name, 'freshly-loaded');
+      await controller.persist();
+      expect(repository.games[fresh.meta.id]!.meta.name, 'freshly-loaded');
+    },
+  );
+
   test('switching career persists the previous state before loading', () async {
     final original = controller.save!;
     final target = original.copyWith(
@@ -272,6 +300,7 @@ void main() {
     );
     repository.loadOperation = (_) => Future.error(StateError('load failed'));
     await expectLater(controller.loadGame('missing'), throwsStateError);
+    expect(controller.state.hasError, isFalse);
     expect(controller.save!.leagueState.currentDay, 2);
     expect(repository.game.leagueState.currentDay, 2);
     repository.loadOperation = null;

@@ -1,3 +1,6 @@
+@Tags(['integration'])
+library;
+
 import 'package:new_football/data/save_management_repository_adapter.dart';
 import 'dart:io';
 
@@ -9,14 +12,16 @@ import 'package:new_football/app/providers/save_management_provider.dart';
 import 'package:new_football/app/providers/settings_provider.dart';
 import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/core/models/save_record.dart';
-import 'package:new_football/core/services/game_factory.dart';
 import 'package:new_football/core/services/save_management_service.dart';
 import 'package:new_football/data/save_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../helpers/persistence/controlled_save_repository.dart';
+import '../../helpers/persistence/no_disk_save_repository.dart';
+import '../../helpers/fixtures/game_fixtures.dart';
 
 void main() {
+  final activeFixture = _game();
   late Directory tempDir;
   late SharedPreferences preferences;
   late GameSave activeGame;
@@ -59,7 +64,7 @@ void main() {
     });
     preferences = await SharedPreferences.getInstance();
 
-    activeGame = _game();
+    activeGame = activeFixture;
     await SaveRepository(overrideDirectory: tempDir).save(activeGame);
     repository = ControlledSaveRepository(
       overrideDirectory: tempDir,
@@ -408,13 +413,7 @@ void main() {
 }
 
 GameSave _game() {
-  final generated = GameFactory().create(
-    const NewGameRequest(
-      saveName: 'Active Save',
-      playerTeamId: 'team_europe_0',
-      seed: 7811,
-    ),
-  );
+  final generated = controllerSave();
   final timestamp = DateTime.utc(2026, 1, 2, 3, 4, 5);
   return generated.copyWith(
     meta: generated.meta.copyWith(
@@ -426,7 +425,7 @@ GameSave _game() {
   );
 }
 
-class _CountingSaveRepository extends SaveRepository {
+class _CountingSaveRepository extends NoDiskSaveRepository {
   _CountingSaveRepository(this._metas);
 
   final List<GameSaveMeta> _metas;

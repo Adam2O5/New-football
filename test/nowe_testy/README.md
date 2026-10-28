@@ -1,3 +1,5 @@
+> Refaktor testów, etap 3 (28 października 2026): `game_controller_mutations`, `persistence` i `lifecycle` są w `test/app/providers/`. `save_management_boundary` scalono z odpowiednikami usługi, adaptera i integracji. Bieżące wyniki i mapa zmian: [test/README.md](../README.md). Dawne ścieżki poniżej stanowią zapis historyczny.
+
 > Refaktor testów, etap 2 (28 października 2026): krótkie testy startup/lock/recovery/transakcji przeniesiono do `test/data/`. Mieszany `stage_six_persistence_test` zastąpiono `test/data/save_repository_workers_test.dart` oraz `test/core/services/game_factory_preview_test.dart`. Funkcjonalna kontrola większego payloadu jest w `test/data/save_repository_payload_test.dart`; pomiary i procesowe crash/recovery nadal wymagają profilu long. Bieżący wykaz i wyniki: [test/README.md](../README.md). Poniższe opisy wcześniejszych etapów są historyczne i mogą zawierać dawne ścieżki.
 
 # Nowe testy — etapy 0–9

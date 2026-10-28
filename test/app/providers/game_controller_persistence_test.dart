@@ -3,15 +3,14 @@ library;
 
 import 'dart:async';
 
-import '../helpers/barrier_cleanup.dart';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/core/services/contract_service.dart';
 
-import '../helpers/fixtures/game_fixtures.dart';
-import '../helpers/persistence/memory_save_repository.dart';
+import '../../helpers/barrier_cleanup.dart';
+import '../../helpers/fixtures/game_fixtures.dart';
+import '../../helpers/persistence/memory_save_repository.dart';
 
 void main() {
   late MemorySaveRepository repository;
@@ -27,9 +26,74 @@ void main() {
     await controller.loadGame(repository.game.meta.id);
   });
 
-  tearDown(() {
+  tearDown(() async {
     repository.releasePendingWrites();
+    await controller.enqueueSaveManagement(() async {});
     container.dispose();
+  });
+
+  test(
+    'working state is published while its autosave is still blocked',
+    () async {
+      final started = Completer<void>();
+      final gate = Completer<void>();
+      releaseOnTearDown(gate);
+      repository.writeStarted = started;
+      repository.writeGate = gate;
+      await controller.updateLeague((league) => league.copyWith(currentDay: 2));
+      await started.future;
+      expect(controller.save!.leagueState.currentDay, 2);
+      expect(controller.state.hasError, isFalse);
+      expect(repository.game.leagueState.currentDay, 1);
+      gate.complete();
+      await controller.flushPendingSave();
+      expect(repository.game.leagueState.currentDay, 2);
+    },
+  );
+
+  test(
+    'concurrent mutations use the latest state and persist their combined result',
+    () async {
+      final gate = Completer<void>();
+      releaseOnTearDown(gate);
+      final blocking = controller.enqueueSaveManagement(() => gate.future);
+      final first = controller.updateLeague(
+        (l) => l.copyWith(currentDay: l.currentDay + 1),
+      );
+      final second = controller.updateLeague(
+        (l) => l.copyWith(currentDay: l.currentDay + 1),
+      );
+      gate.complete();
+      await blocking;
+      await Future.wait([first, second]);
+      expect(controller.save!.leagueState.currentDay, 3);
+      await controller.flushPendingSave();
+      expect(repository.game.leagueState.currentDay, 3);
+      expect(
+        repository.game.leagueState == controller.save!.leagueState,
+        isTrue,
+      );
+    },
+  );
+
+  test('manual persist waits for the earlier blocked autosave', () async {
+    final started = Completer<void>();
+    final gate = Completer<void>();
+    releaseOnTearDown(gate);
+    repository.writeStarted = started;
+    repository.writeGate = gate;
+    await controller.updateLeague((l) => l.copyWith(currentDay: 2));
+    await started.future;
+    var persisted = false;
+    final persist = controller.persist().then((_) => persisted = true);
+    await Future<void>.value();
+    await Future<void>.value();
+    expect(persisted, isFalse);
+    expect(controller.save!.leagueState.currentDay, 2);
+    expect(repository.game.leagueState.currentDay, 1);
+    gate.complete();
+    await persist;
+    expect(repository.game.leagueState.currentDay, 2);
   });
 
   test('manual save persists the latest published state', () async {
@@ -37,6 +101,9 @@ void main() {
       (league) => league.copyWith(currentDay: 2),
       autosave: false,
     );
+    expect(controller.save!.leagueState.currentDay, 2);
+    expect(repository.game.leagueState.currentDay, 1);
+    expect(repository.writes, isEmpty);
     await controller.persist();
 
     expect(repository.game.leagueState.currentDay, 2);
@@ -128,6 +195,8 @@ void main() {
 
     await expectLater(controller.flushPendingSave(), throwsA(same(error)));
     await expectLater(controller.flushPendingSave(), throwsA(same(error)));
+    expect(controller.save!.leagueState.currentDay, 2);
+    expect(controller.state.hasError, isFalse);
     expect(repository.game.leagueState.currentDay, 1);
   });
 

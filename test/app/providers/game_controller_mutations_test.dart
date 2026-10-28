@@ -3,8 +3,6 @@ library;
 
 import 'dart:async';
 
-import '../helpers/barrier_cleanup.dart';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:new_football/app/providers/game_provider.dart';
@@ -15,8 +13,9 @@ import 'package:new_football/core/models/staff.dart';
 import 'package:new_football/core/services/contract_service.dart';
 import 'package:new_football/core/services/staff_service.dart';
 
-import '../helpers/fixtures/game_fixtures.dart';
-import '../helpers/persistence/memory_save_repository.dart';
+import '../../helpers/barrier_cleanup.dart';
+import '../../helpers/fixtures/game_fixtures.dart';
+import '../../helpers/persistence/memory_save_repository.dart';
 
 void main() {
   late MemorySaveRepository repository;
@@ -31,7 +30,11 @@ void main() {
     controller = container.read(gameControllerProvider.notifier);
     await controller.loadGame(repository.game.meta.id);
   });
-  tearDown(() => container.dispose());
+  tearDown(() async {
+    repository.releasePendingWrites();
+    await controller.enqueueSaveManagement(() async {});
+    container.dispose();
+  });
 
   test('two queued player offers preserve both negotiations', () async {
     await controller.updateLeague(
