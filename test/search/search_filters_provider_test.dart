@@ -1,10 +1,104 @@
+import 'dart:collection';
+import 'package:flutter/foundation.dart' show setEquals;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:new_football/app/providers/search_filters_provider.dart' as app;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:new_football/app/providers/search_filters_provider.dart';
 import 'package:new_football/core/models/assigned_role.dart';
 import 'package:new_football/core/models/enums.dart';
 
 void main() {
+  test(
+    'filter exports, inclusive ranges and nullable copy semantics stay stable',
+    () {
+      expect(const app.SearchFiltersState(), const SearchFiltersState());
+      const range = RangeFilter(min: 18, max: 25);
+      expect([17.9, 18.0, 25.0, 25.1].map(range.matches), [
+        false,
+        true,
+        true,
+        false,
+      ]);
+      expect(range.copyWith(min: null), range);
+      const player = PlayersFilterState(nationality: Nationality.poland);
+      expect(player.copyWith(nationality: () => null).nationality, isNull);
+      expect(const RangeFilter().matches(-100), isTrue);
+    },
+  );
+
+  test(
+    'all filter sets preserve order-independent equality and hash codes',
+    () {
+      const pairs = <(Object, Object)>[
+        (
+          PlayersFilterState(clubIds: {'a', 'b'}),
+          PlayersFilterState(clubIds: {'b', 'a'}),
+        ),
+        (
+          ProspectsFilterState(scoutingTiers: {1, 3}),
+          ProspectsFilterState(scoutingTiers: {3, 1}),
+        ),
+        (
+          PicksFilterState(
+            clubIds: {'a', 'b'},
+            originalClubIds: {'c', 'd'},
+            rounds: {1, 2},
+          ),
+          PicksFilterState(
+            clubIds: {'b', 'a'},
+            originalClubIds: {'d', 'c'},
+            rounds: {2, 1},
+          ),
+        ),
+        (
+          SearchFiltersState(groups: {SearchGroup.players, SearchGroup.picks}),
+          SearchFiltersState(groups: {SearchGroup.picks, SearchGroup.players}),
+        ),
+      ];
+      for (final (a, b) in pairs) {
+        expect(a, b);
+        expect(a.hashCode, b.hashCode);
+      }
+      final custom = SplayTreeSet<String>(
+        (a, b) => a.toLowerCase().compareTo(b.toLowerCase()),
+      )..add('a');
+      final ordinary = {'A'};
+      for (final (a, b) in [(custom, ordinary), (ordinary, custom)]) {
+        expect(
+          PlayersFilterState(clubIds: a) == PlayersFilterState(clubIds: b),
+          setEquals(b, a),
+        );
+      }
+      expect(
+        const PlayersFilterState(clubIds: {'a'}),
+        isNot(const PlayersFilterState(clubIds: {'b'})),
+      );
+      expect(
+        const PicksFilterState(rounds: {1}),
+        isNot(const PicksFilterState(rounds: {2})),
+      );
+    },
+  );
+
+  test(
+    'Riverpod filters retain state within a save and isolate family keys',
+    () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final first = app.searchFiltersProvider(123);
+      final second = app.searchFiltersProvider(456);
+      container
+          .read(first.notifier)
+          .updatePlayers(const PlayersFilterState(position: Position.st));
+      expect(container.read(first).players.position, Position.st);
+      expect(container.read(second), const SearchFiltersState());
+      container.read(first.notifier).setGroups({});
+      expect(container.read(first).groups, const SearchFiltersState().groups);
+      container.read(first.notifier).resetAll();
+      expect(container.read(first), const SearchFiltersState());
+    },
+  );
+
   group('RangeFilter', () {
     test('is unset by default', () {
       const filter = RangeFilter();

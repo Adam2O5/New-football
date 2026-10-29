@@ -370,6 +370,13 @@
       "reason": "Mixed file; listed AI/engine cases are deferred, remaining scenarios stay active.",
       "reactivateWhen": "Extract only deferredCases from archived context after implementing and reviewing the mechanic.",
       "long": false,
+      "activeOwners": [
+        "test/data/initial_roster_invariants_test.dart",
+        "test/data/initial_roster_replay_test.dart",
+        "test/data/initial_roster_serialization_test.dart",
+        "test/data/initial_roster_service_boundaries_test.dart",
+        "test/data/long/initial_roster_distribution_long.dart"
+      ],
       "deferredCases": [
         "TeamAiService assigns an exact player to every formation slot",
         "TeamAiService resolves equal overall values by Player.id",

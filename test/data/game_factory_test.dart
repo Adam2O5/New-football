@@ -1,3 +1,6 @@
+import '../helpers/fixtures/game_fixtures.dart';
+import 'package:new_football/core/models/team.dart';
+import 'package:new_football/core/models/staff.dart';
 import 'package:new_football/core/services/game_factory.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -34,20 +37,45 @@ void main() {
         );
       },
     );
-
-    test('pula wolnych agentów różni się od puli sztabu (różne ziarno)', () {
-      final save = GameFactory().create(
-        const NewGameRequest(
-          saveName: 'test',
-          playerTeamId: 'team_europe_0',
-          seed: 555,
-        ),
-      );
-
-      // Regresja: freeAgentRng użyty do graczy musi być inny niż staffRng,
-      // inaczej pule korelowałyby się 1:1 dla identycznych wywołań RNG.
-      expect(save.leagueState.staffFreeAgents, isNotEmpty);
-      expect(save.leagueState.freeAgents, isNotEmpty);
-    });
   });
+  test('unknown player club is rejected by factory', () {
+    expect(
+      () => GameFactory().create(
+        const NewGameRequest(
+          saveName: 'invalid',
+          playerTeamId: 'unknown',
+          seed: fixtureSeed,
+        ),
+      ),
+      throwsArgumentError,
+    );
+  });
+  test(
+    'factory reuse and previews do not change the seeded world or staff IDs',
+    () {
+      final factory = GameFactory();
+      const request = NewGameRequest(
+        saveName: 'replay',
+        playerTeamId: 'team_europe_3',
+        seed: fixtureSeed,
+      );
+      final first = factory.create(request);
+      factory.previewTeams();
+      final replay = factory.create(request);
+      expect(first.leagueState == replay.leagueState, isTrue);
+      expect(
+        first.leagueState.teams
+            .where((t) => t.isPlayerControlled)
+            .map((t) => t.id)
+            .toList(),
+        ['team_europe_3'],
+      );
+      final ids = [
+        for (final team in replay.leagueState.teams)
+          ...team.staff.members.map((m) => m.id),
+        ...replay.leagueState.staffFreeAgents.map((m) => m.id),
+      ];
+      expect(ids.toSet().length, ids.length);
+    },
+  );
 }

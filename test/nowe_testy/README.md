@@ -943,3 +943,7 @@ Czasy obejmują całe wywołanie publicznej operacji, wraz z jej obecną weryfik
 Wzrost rozmiaru po rename/duplicate potwierdza punkt O03 dla tego wejścia. Pomiary zachowujemy do porównania z późniejszą implementacją; nie są progami czasowymi, których zwykły test ma bezwzględnie wymagać.
 
 Pełny wynik uruchomienia zapisano w [etap-0-test-results.txt](C:/Users/dadam/New-football/reports/lib-audit-2026-10-13/etap-0-test-results.txt). Folder `reports/` jest ignorowany przez Git; to README zawiera komplet najważniejszych wyników potrzebnych do review i commita.
+
+## Migracja w etapie 7 refaktoru testów
+
+`game_fixtures` oraz domenowa generacja są teraz w `test/data/`; kontrole fabryki i terminarza scalono z `game_factory_test` i `schedule_generator_test`. `search_filters_interaction` przeniesiono do `test/search/`, a przypadki `search_filter_boundaries` scalono z testami graczy/prospektów/picków i providerów. Nie ma aktywnych kopii w obu folderach. Szczegóły oraz wyniki odbioru etapu są w `test/README.md`. Dalsze migracje UI/performance pozostają w etapach 8–9.

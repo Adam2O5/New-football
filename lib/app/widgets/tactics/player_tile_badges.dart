@@ -22,7 +22,17 @@ class ZoneFrame extends StatelessWidget {
     final colors = Theme.of(context).colorScheme;
     final rowBackground = backgroundColor ?? colors.surfaceContainerHighest;
     final semanticZoneColor = frameColor ?? rosterZoneColor(zone);
-    final resolvedFrameColor = semanticZoneColor;
+    // Keep the zone hue while making its outline visible on either theme.
+    final target = foregroundForContrast(rowBackground);
+    var resolvedFrameColor = semanticZoneColor;
+    for (
+      var step = 1;
+      step <= 20 && contrastRatio(resolvedFrameColor, rowBackground) < 3;
+      step++
+    ) {
+      resolvedFrameColor = Color.lerp(semanticZoneColor, target, step / 20)!;
+    }
+    final labelColor = foregroundForContrast(rowBackground);
     final label = _zoneLabel(l10n, zone);
     final textScale = MediaQuery.textScalerOf(context).scale(1);
     final labelInset = (18 * textScale).clamp(18.0, 42.0).toDouble();
@@ -63,7 +73,7 @@ class ZoneFrame extends StatelessWidget {
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              color: resolvedFrameColor,
+                              color: labelColor,
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
                               letterSpacing: 0.2,

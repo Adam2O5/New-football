@@ -5,15 +5,13 @@ import 'package:new_football/app/widgets/squad/squad_indicators.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
 const _countKey = ValueKey<String>('squad-size-indicator-count');
-const _minimumKey = ValueKey<String>('squad-size-indicator-minimum');
-const _maximumKey = ValueKey<String>('squad-size-indicator-maximum');
 const _fillKey = ValueKey<String>('squad-size-indicator-track-fill');
 const _stateIconKey = ValueKey<String>('squad-size-indicator-state-icon');
 const _indicatorKey = ValueKey<String>('squad-size-indicator');
 
 void main() {
   testWidgets(
-    'renders separate count and endpoints with generated Polish and English labels',
+    'renders count, state and localized label without endpoint labels in PL/EN',
     (tester) async {
       final semanticsHandle = tester.ensureSemantics();
 
@@ -29,12 +27,11 @@ void main() {
         );
 
         final count = tester.widget<Text>(find.byKey(_countKey));
-        final minimum = tester.widget<Text>(find.byKey(_minimumKey));
-        final maximum = tester.widget<Text>(find.byKey(_maximumKey));
 
         expect(count.data, '25');
-        expect(minimum.data, l10n.squad_rosterMinimum(20));
-        expect(maximum.data, l10n.squad_rosterMaximum(30));
+        expect(find.text(l10n.squad_rosterSizeLabel), findsOneWidget);
+        expect(find.text(l10n.squad_rosterMinimum(20)), findsNothing);
+        expect(find.text(l10n.squad_rosterMaximum(30)), findsNothing);
         expect(find.byTooltip(l10n.squad_rosterCount(25)), findsOneWidget);
         expect(find.text(l10n.squad_sizeLabel(25, 20, 30)), findsNothing);
 
@@ -107,13 +104,16 @@ void main() {
         );
 
         final fillFinder = find.byKey(_fillKey);
-        final fill = tester.widget<FractionallySizedBox>(fillFinder);
-        final fillColor = tester.widget<ColoredBox>(
-          find.descendant(of: fillFinder, matching: find.byType(ColoredBox)),
+        final fillColor = tester.widget<ColoredBox>(fillFinder);
+        final trackFinder = find.byKey(
+          const ValueKey<String>('squad-size-indicator-track-bar'),
         );
         final stateIcon = tester.widget<Icon>(find.byKey(_stateIconKey));
 
-        expect(fill.widthFactor, closeTo(scenario.progress, 0.000001));
+        expect(
+          tester.getSize(fillFinder).width,
+          closeTo(tester.getSize(trackFinder).width * scenario.progress, 0.001),
+        );
         expect(fillColor.color, scenario.color);
         expect(stateIcon.icon, scenario.icon);
         expect(stateIcon.color, scenario.color);
@@ -228,14 +228,17 @@ void _expectState(
 }) {
   final countText = tester.widget<Text>(find.byKey(_countKey));
   final fillFinder = find.byKey(_fillKey);
-  final fill = tester.widget<FractionallySizedBox>(fillFinder);
-  final fillColor = tester.widget<ColoredBox>(
-    find.descendant(of: fillFinder, matching: find.byType(ColoredBox)),
+  final fillColor = tester.widget<ColoredBox>(fillFinder);
+  final trackFinder = find.byKey(
+    const ValueKey<String>('squad-size-indicator-track-bar'),
   );
   final stateIcon = tester.widget<Icon>(find.byKey(_stateIconKey));
 
   expect(countText.data, '$count');
-  expect(fill.widthFactor, closeTo(progress, 0.000001));
+  expect(
+    tester.getSize(fillFinder).width,
+    closeTo(tester.getSize(trackFinder).width * progress, 0.001),
+  );
   expect(fillColor.color, color);
   expect(stateIcon.color, color);
   expect(stateIcon.icon, color == Colors.green ? Icons.check : Icons.close);

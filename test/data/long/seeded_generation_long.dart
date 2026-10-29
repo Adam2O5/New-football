@@ -29,7 +29,9 @@ void main() {
         probe,
         '$fixtureSeed',
       ]);
+      stdout.writeln('seed=$fixtureSeed replay process 1/3: generate');
       final first = await run();
+      stdout.writeln('seed=$fixtureSeed replay process 2/3: generate');
       final second = await run();
       expect(first.exitCode, 0, reason: '${first.stderr}');
       expect(second.exitCode, 0, reason: '${second.stderr}');
@@ -59,6 +61,7 @@ void main() {
       try {
         final file = File('${directory.path}/game.json');
         await file.writeAsString(jsonEncode(saveForLeague(league).toJson()));
+        stdout.writeln('seed=$fixtureSeed replay process 3/3: load');
         final loaded = await runTestProcess(dart, [
           '--disable-dart-dev',
           '--packages=$packages',
