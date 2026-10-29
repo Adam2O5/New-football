@@ -1,3 +1,6 @@
+@Tags(['unit'])
+library;
+
 import 'package:new_football/core/balance/message_catalog.dart';
 import 'package:new_football/core/balance/message_templates_en.dart';
 import 'package:new_football/core/balance/message_templates_pl.dart';

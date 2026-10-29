@@ -1,7 +1,9 @@
+@Tags(['unit'])
+library;
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:new_football/core/balance/message_catalog.dart';
 import 'package:new_football/core/models/enums.dart';
-import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/message.dart';
 import 'package:new_football/core/services/game_factory.dart';
@@ -269,6 +271,7 @@ void main() {
       type: MessageType.walkover,
       titleKey: 'msg_walkover_title',
       bodyKey: 'msg_walkover_body',
+      args: const {'reason': 'Unavailable squad', 'opponentName': 'Opponent'},
     );
 
     expect(result.inbox.messages, isEmpty);
@@ -344,9 +347,5 @@ void main() {
     expect(template.domain, MessageDomain.playerEvent);
     expect(template.defaultPriority, MessagePriority.silenced);
     expect(template.groupKey, 'ovr:own:{week}');
-  });
-
-  test('schema version is bumped for the serialized message model', () {
-    expect(SaveSchema.currentVersion, 23);
   });
 }

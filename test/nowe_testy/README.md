@@ -1,3 +1,5 @@
+> Refaktor testów, etap 5 (29 października 2026): `contract_messages`, `staff_season_messages` i `message_locale_switch` przeniesiono do `test/messages/`. Konsolidacja Inbox, lokalizacje i ustawienia są zakończone do review. Bieżące wyniki i zakres: [test/README.md](../README.md). Historyczne ścieżki poniżej nie opisują aktualnego wyboru testów.
+
 > Refaktor testów, etap 4 (28 października 2026): `calendar_pacing_phases` przeniesiono do `test/calendar/`, a `calendar_screen` rozdzielono na `calendar_dates` i `calendar_date_selection`. Bieżący wynik: [test/README.md](../README.md). Dodatkowe uruchamianie runtime’u w UTC pominięto decyzją użytkownika; historyczne opisy poniżej mogą zawierać dawne ścieżki.
 
 > Refaktor testów, etap 3 (28 października 2026): `game_controller_mutations`, `persistence` i `lifecycle` są w `test/app/providers/`. `save_management_boundary` scalono z odpowiednikami usługi, adaptera i integracji. Bieżące wyniki i mapa zmian: [test/README.md](../README.md). Dawne ścieżki poniżej stanowią zapis historyczny.

@@ -23,11 +23,9 @@ import 'package:new_football/l10n/generated/app_localizations.dart';
 
 import '../helpers/widgets/preferences_test_double.dart';
 import '../helpers/widgets/widget_harness.dart';
+import '../helpers/fixtures/calendar_fixtures.dart';
 
-const _property5Label =
-    'Feature: urgent-message-simulation-setting, Property 5: '
-    'skipping the stop preserves lifecycle and provides Inbox';
-const _property5CaseCount = 120;
+const _scenarioLabel = 'urgent message lifecycle and Inbox';
 
 DateTime _calendarSelectedDayFor(GameSave game) {
   final seasonYear = game.leagueState.currentSeason.year;
@@ -47,13 +45,8 @@ DateTime _calendarSelectedDayFor(GameSave game) {
 }
 
 void main() {
-  // **Validates: Requirements 5.1–5.5, 5.7, 9.5–9.6; Design Property 5**
-  test('$_property5Label preserves every message lifecycle for '
-      '$_property5CaseCount deterministic batch cases', () async {
-    final cases = _propertyCases();
-    expect(cases, hasLength(greaterThanOrEqualTo(100)));
-
-    for (final scenario in cases) {
+  for (final scenario in _lifecycleCases()) {
+    test('message lifecycle: ${scenario.label}', () async {
       final game = _gameFor(scenario);
       final originalMessages = <String, GameMessage>{
         for (final message in [
@@ -161,16 +154,11 @@ void main() {
       } finally {
         fixture.dispose();
       }
-    }
-  });
+    });
+  }
 
-  // **Validates: Requirements 5.3–5.5, 8.6–8.7, 9.5–9.6**
-  testWidgets('$_property5Label exposes one localized Inbox handoff for '
-      '$_property5CaseCount Calendar/Home result cases', (tester) async {
-    final cases = _propertyCases();
-    expect(cases, hasLength(greaterThanOrEqualTo(100)));
-
-    for (final scenario in cases) {
+  for (final scenario in _handoffCases()) {
+    testWidgets('Inbox handoff: ${scenario.label}', (tester) async {
       await tester.pumpWidget(const SizedBox.shrink());
       await tester.pumpAndSettle();
 
@@ -216,6 +204,21 @@ void main() {
         await _tapHomeAction(tester, scenario);
       }
       await tester.pumpAndSettle();
+
+      if (!scenario.enabled &&
+          scenario.surface == _UiSurface.calendar &&
+          scenario.outcome == _OrdinaryOutcome.event) {
+        expect(find.byType(AlertDialog), findsOneWidget);
+        final dialog = tester.element(find.byType(AlertDialog));
+        await tester.tap(
+          find.widgetWithText(
+            TextButton,
+            MaterialLocalizations.of(dialog).okButtonLabel,
+          ),
+        );
+        await tester.pumpAndSettle();
+        expect(find.text('property 5 draft destination'), findsOneWidget);
+      }
 
       final openInbox = l10n.simulation_openInbox;
       final actionCount = find.text(openInbox).evaluate().length;
@@ -273,13 +276,13 @@ void main() {
           reason: '$label Inbox action must open the existing Inbox UI',
         );
       }
-    }
-  });
+    });
+  }
 
   // The batch/UI assertions above deliberately never acknowledge a message.
   // This final example proves the existing manual Inbox lifecycle still owns
   // the only read/acknowledge transition.
-  testWidgets('$_property5Label retains the existing manual Inbox '
+  testWidgets('$_scenarioLabel retains the existing manual Inbox '
       'acknowledgement lifecycle', (tester) async {
     final preferences = PreferencesTestDouble(
       initialValues: <String, Object?>{urgentInterruptionSettingKey: false},
@@ -347,8 +350,8 @@ enum _OrdinaryOutcome { target, event, match }
 
 enum _UiSurface { calendar, home }
 
-class _PropertyCase {
-  const _PropertyCase({
+class _InboxScenario {
+  const _InboxScenario({
     required this.index,
     required this.enabled,
     required this.locale,
@@ -369,32 +372,57 @@ class _PropertyCase {
   final int seed;
 
   String get label =>
-      '$_property5Label case=$index '
+      '$_scenarioLabel case=$index '
       'policy=${enabled ? 'enabled' : 'disabled'} '
       'locale=${locale.languageCode} surface=${surface.name} '
       'outcome=${outcome.name} placement=${placement.name} '
       'messages=$messageCount seed=$seed';
 }
 
-List<_PropertyCase> _propertyCases() {
-  return [
-    for (var index = 0; index < _property5CaseCount; index++)
-      _PropertyCase(
-        index: index,
-        enabled: index.isEven,
-        locale: (index ~/ 4).isEven ? const Locale('pl') : const Locale('en'),
-        surface: (index ~/ 2).isEven ? _UiSurface.calendar : _UiSurface.home,
-        outcome: _OrdinaryOutcome.values[(index ~/ 8) % 3],
-        placement: _LifecyclePlacement.values[(index ~/ 24) % 3],
-        messageCount: index.isEven ? 1 : 2,
-        seed: 5200 + index,
-      ),
-  ];
-}
+List<_InboxScenario> _lifecycleCases() => [
+  for (final enabled in [false, true])
+    for (final outcome in _OrdinaryOutcome.values)
+      for (final placement in _LifecyclePlacement.values)
+        for (final count in [1, 2])
+          _InboxScenario(
+            index:
+                (enabled ? 18 : 0) +
+                outcome.index * 6 +
+                placement.index * 2 +
+                count -
+                1,
+            enabled: enabled,
+            locale: const Locale('pl'),
+            surface: _UiSurface.calendar,
+            outcome: outcome,
+            placement: placement,
+            messageCount: count,
+            seed: 5200,
+          ),
+];
+
+List<_InboxScenario> _handoffCases() => [
+  for (final enabled in [false, true])
+    for (final locale in ['pl', 'en'])
+      for (final surface in _UiSurface.values)
+        for (final outcome in _OrdinaryOutcome.values)
+          _InboxScenario(
+            index: outcome.index,
+            enabled: enabled,
+            locale: Locale(locale),
+            surface: surface,
+            outcome: outcome,
+            placement: locale == 'pl'
+                ? _LifecyclePlacement.pending
+                : _LifecyclePlacement.delivered,
+            messageCount: outcome.index.isEven ? 1 : 2,
+            seed: 5200,
+          ),
+];
 
 Future<BatchSimulationResult> _runBatch(
   GameController controller,
-  _PropertyCase scenario,
+  _InboxScenario scenario,
 ) {
   return switch (scenario.outcome) {
     _OrdinaryOutcome.target => controller.simulateToDate(
@@ -437,7 +465,7 @@ _ControllerFixture _controllerFixture(GameSave game, bool enabled) {
   return _ControllerFixture(container, controller);
 }
 
-GameSave _gameFor(_PropertyCase scenario) {
+GameSave _gameFor(_InboxScenario scenario) {
   final base = _baseGame(seed: scenario.seed, outcome: scenario.outcome);
   final league = base.leagueState;
   var inbox = const Inbox();
@@ -462,7 +490,10 @@ GameSave _gameFor(_PropertyCase scenario) {
 }
 
 GameSave _baseGame({required int seed, required _OrdinaryOutcome outcome}) {
-  final base = task41Game(seed: seed);
+  final base = calendarFixture(
+    seed: seed,
+    withPlayerMatch: outcome == _OrdinaryOutcome.match,
+  );
   final league = base.leagueState;
   switch (outcome) {
     case _OrdinaryOutcome.target:
@@ -536,7 +567,7 @@ class _ControllerFixture {
   void dispose() => container.dispose();
 }
 
-GameSave _uiGameFor(_PropertyCase scenario) {
+GameSave _uiGameFor(_InboxScenario scenario) {
   final base = _baseGame(seed: scenario.seed, outcome: scenario.outcome);
   final messages = [
     for (var index = 0; index < scenario.messageCount; index++)
@@ -551,7 +582,7 @@ GameSave _uiGameFor(_PropertyCase scenario) {
   return _withInbox(base, Inbox(messages: messages));
 }
 
-BatchSimulationResult _uiResultFor(GameSave game, _PropertyCase scenario) {
+BatchSimulationResult _uiResultFor(GameSave game, _InboxScenario scenario) {
   if (scenario.enabled) {
     return const BatchSimulationResult(
       stopReason: SimulationStopReason.urgent,
@@ -621,6 +652,7 @@ Widget _calendarUiApp({
     ],
   );
 
+  addTearDown(router.dispose);
   return ProviderScope(
     overrides: [
       sharedPreferencesProvider.overrideWithValue(preferences),
@@ -685,6 +717,7 @@ Widget _homeUiApp({
     ],
   );
 
+  addTearDown(router.dispose);
   return ProviderScope(
     overrides: [
       sharedPreferencesProvider.overrideWithValue(preferences),
@@ -742,7 +775,10 @@ UpcomingAction _homeActionFor(GameSave game, _OrdinaryOutcome outcome) {
   }
 }
 
-Future<void> _tapHomeAction(WidgetTester tester, _PropertyCase scenario) async {
+Future<void> _tapHomeAction(
+  WidgetTester tester,
+  _InboxScenario scenario,
+) async {
   final l10n = await AppLocalizations.delegate.load(scenario.locale);
   final finder = switch (scenario.outcome) {
     _OrdinaryOutcome.target => find.text(

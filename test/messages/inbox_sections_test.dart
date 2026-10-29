@@ -2,18 +2,15 @@
 library;
 
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/app/screens/inbox_screen.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/message.dart';
 import 'package:new_football/core/services/game_factory.dart';
-import 'package:new_football/core/services/message_service.dart';
-import 'package:new_football/l10n/generated/app_localizations.dart';
+import '../helpers/fixtures/game_fixtures.dart';
+import '../helpers/widgets/widget_harness.dart';
 
 void main() {
   GameMessage message({
@@ -92,132 +89,10 @@ void main() {
     );
   }
 
-  Widget app(LeagueStateFixture fixture) {
-    return ProviderScope(
-      overrides: [activeLeagueProvider.overrideWithValue(fixture.league)],
-      child: const MaterialApp(
-        locale: Locale('pl'),
-        localizationsDelegates: [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        supportedLocales: AppLocalizations.supportedLocales,
-        home: Scaffold(body: InboxScreen()),
-      ),
-    );
-  }
-
-  test('sortInboxMessages pins urgent and keeps unread before read', () {
-    final messages = [
-      message(
-        id: 'read',
-        title: 'Read',
-        domain: MessageDomain.system,
-        read: true,
-      ),
-      message(id: 'unread', title: 'Unread', domain: MessageDomain.system),
-      message(
-        id: 'urgent',
-        title: 'Urgent',
-        domain: MessageDomain.system,
-        priority: MessagePriority.urgent,
-      ),
-    ];
-
-    expect(sortInboxMessages(messages).map((item) => item.id), [
-      'urgent',
-      'unread',
-      'read',
-    ]);
-  });
-
-  test(
-    'decision choice dispatches an effect and acknowledges urgent message',
-    () {
-      final base = GameFactory()
-          .create(
-            const NewGameRequest(
-              saveName: 'Task 9 decision',
-              playerTeamId: 'team_europe_0',
-              seed: 10,
-            ),
-          )
-          .leagueState;
-      final decision = const DecisionSpec(
-        options: [
-          MessageAction(id: 'accept', labelKey: 'accept'),
-          MessageAction(id: 'decline', labelKey: 'decline'),
-        ],
-        defaultOnExpiry: 'decline',
-      );
-      final league = base.copyWith(
-        inbox: const Inbox().addMessage(
-          GameMessage(
-            id: 'decision',
-            type: MessageType.playerEvent,
-            domain: MessageDomain.playerEvent,
-            priority: MessagePriority.urgent,
-            seasonYear: 2026,
-            week: 1,
-            titleKey: 'msg_playerEvent_title',
-            bodyKey: 'msg_playerEvent_body',
-            decision: decision,
-          ),
-        ),
-      );
-      var effectApplied = false;
-      var dispatchCount = 0;
-      bool? acknowledgedDuringEffect;
-
-      final resolved = MessageService().resolveDecision(
-        league,
-        'decision',
-        'accept',
-        onDecision: (state, _, optionId) {
-          dispatchCount++;
-          effectApplied = optionId == 'accept';
-          acknowledgedDuringEffect = state.inbox.messages.single.acknowledged;
-          return state.copyWith(currentDay: 2);
-        },
-      );
-
-      expect(effectApplied, isTrue);
-      expect(dispatchCount, 1);
-      expect(acknowledgedDuringEffect, isFalse);
-      expect(resolved.currentDay, 2);
-      expect(resolved.inbox.pendingUrgent, isEmpty);
-    },
+  Widget app(LeagueStateFixture fixture) => task41App(
+    const Scaffold(body: InboxScreen()),
+    saveForLeague(fixture.league),
   );
-
-  test('muted non-decision type is routed to archive, not active inbox', () {
-    final league = GameFactory()
-        .create(
-          const NewGameRequest(
-            saveName: 'Task 9 muted',
-            playerTeamId: 'team_europe_0',
-            seed: 11,
-          ),
-        )
-        .leagueState
-        .copyWith(
-          messageSettings: const MessageSettings().withTypeLevel(
-            MessageType.walkover,
-            NotificationLevel.muted,
-          ),
-        );
-
-    final result = MessageService().send(
-      league,
-      type: MessageType.walkover,
-      titleKey: 'msg_walkover_title',
-      bodyKey: 'msg_walkover_body',
-    );
-
-    expect(result.inbox.messages, isEmpty);
-    expect(result.inbox.archive, hasLength(1));
-  });
 
   testWidgets(
     'inbox renders pinned urgent, unread/read sections and domain filter',

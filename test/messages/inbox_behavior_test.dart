@@ -1,8 +1,6 @@
 @Tags(['ui'])
 library;
 
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -16,15 +14,14 @@ import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/message.dart';
-import 'package:new_football/core/services/message_service.dart';
-import 'package:new_football/data/save_repository.dart';
+import '../helpers/persistence/no_disk_save_repository.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
 import '../helpers/widgets/widget_harness.dart';
 
 void main() {
   testWidgets(
-    'baseline: ordinary messages are read without acknowledgement and close normally',
+    'ordinary messages are read without acknowledgement and close normally',
     (tester) async {
       late GameController controller;
       final repository = _RecordingSaveRepository();
@@ -67,151 +64,66 @@ void main() {
     },
   );
 
-  testWidgets(
-    'baseline: already-read and already-acknowledged messages stay unchanged',
-    (tester) async {
-      late GameController controller;
-      final repository = _RecordingSaveRepository();
-      final readMessage = _message(
-        id: 'already-read-baseline',
-        title: 'Już przeczytana',
-        domain: MessageDomain.system,
-        read: true,
-      );
-      final acknowledgedUrgent = _message(
-        id: 'already-acknowledged-baseline',
-        title: 'Już potwierdzona pilna',
-        domain: MessageDomain.playerEvent,
-        priority: MessagePriority.urgent,
-        read: true,
-        acknowledged: true,
-      );
-      final game = _withInbox(
-        task41Game(seed: 4104),
-        Inbox(messages: [readMessage, acknowledgedUrgent]),
-      );
+  testWidgets('already-read and already-acknowledged messages stay unchanged', (
+    tester,
+  ) async {
+    late GameController controller;
+    final repository = _RecordingSaveRepository();
+    final readMessage = _message(
+      id: 'already-read-baseline',
+      title: 'Już przeczytana',
+      domain: MessageDomain.system,
+      read: true,
+    );
+    final acknowledgedUrgent = _message(
+      id: 'already-acknowledged-baseline',
+      title: 'Już potwierdzona pilna',
+      domain: MessageDomain.playerEvent,
+      priority: MessagePriority.urgent,
+      read: true,
+      acknowledged: true,
+    );
+    final game = _withInbox(
+      task41Game(seed: 4104),
+      Inbox(messages: [readMessage, acknowledgedUrgent]),
+    );
 
-      await tester.pumpWidget(
-        task41App(
-          const Scaffold(body: InboxScreen()),
-          game,
-          onController: (value) => controller = value,
-          saveRepository: repository,
-        ),
-      );
-      await tester.pumpAndSettle();
+    await tester.pumpWidget(
+      task41App(
+        const Scaffold(body: InboxScreen()),
+        game,
+        onController: (value) => controller = value,
+        saveRepository: repository,
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Już przeczytana'));
-      await tester.pumpAndSettle();
-      expect(find.text('Zamknij'), findsOneWidget);
-      await tester.tap(find.text('Zamknij'));
-      await tester.pumpAndSettle();
+    await tester.tap(find.text('Już przeczytana'));
+    await tester.pumpAndSettle();
+    expect(find.text('Zamknij'), findsOneWidget);
+    await tester.tap(find.text('Zamknij'));
+    await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Już potwierdzona pilna'));
-      await tester.pumpAndSettle();
-      expect(find.text('Potwierdź'), findsOneWidget);
-      Navigator.of(tester.element(find.byType(InboxScreen))).pop();
-      await tester.pumpAndSettle();
+    await tester.tap(find.text('Już potwierdzona pilna'));
+    await tester.pumpAndSettle();
+    expect(find.text('Potwierdź'), findsOneWidget);
+    Navigator.of(tester.element(find.byType(InboxScreen))).pop();
+    await tester.pumpAndSettle();
 
-      final messages = controller.save!.leagueState.inbox.messages;
-      expect(
-        messages.firstWhere((message) => message.id == readMessage.id),
-        readMessage,
-      );
-      expect(
-        messages.firstWhere((message) => message.id == acknowledgedUrgent.id),
-        acknowledgedUrgent,
-      );
-      expect(controller.save!.leagueState.inbox.pendingUrgent, isEmpty);
-      expect(repository.saveCount, 0);
-    },
-  );
+    final messages = controller.save!.leagueState.inbox.messages;
+    expect(
+      messages.firstWhere((message) => message.id == readMessage.id),
+      readMessage,
+    );
+    expect(
+      messages.firstWhere((message) => message.id == acknowledgedUrgent.id),
+      acknowledgedUrgent,
+    );
+    expect(controller.save!.leagueState.inbox.pendingUrgent, isEmpty);
+    expect(repository.saveCount, 0);
+  });
 
-  test(
-    'baseline: every existing decision option preserves effect ordering and meaning',
-    () {
-      final base = task41Game(seed: 4105).leagueState;
-      final options = <String, int>{'accept': 2, 'decline': 3};
-
-      for (final entry in options.entries) {
-        final message = _decisionMessage(
-          id: 'decision-${entry.key}',
-          title: 'Decyzja ${entry.key}',
-        );
-        final league = base.copyWith(inbox: Inbox(messages: [message]));
-        final effectTrace = <String>[];
-
-        final resolved = MessageService().resolveDecision(
-          league,
-          message.id,
-          entry.key,
-          onDecision: (state, selected, optionId) {
-            effectTrace.add(
-              '${state.inbox.messages.single.acknowledged}:$optionId:${selected.id}',
-            );
-            return state.copyWith(currentDay: entry.value);
-          },
-        );
-
-        expect(effectTrace, ['false:${entry.key}:${message.id}']);
-        expect(resolved.currentDay, entry.value);
-        expect(resolved.inbox.messages.single.read, isTrue);
-        expect(resolved.inbox.messages.single.acknowledged, isTrue);
-        expect(resolved.inbox.pendingUrgent, isEmpty);
-      }
-    },
-  );
-
-  test(
-    'baseline: seeded inbox ordering keeps urgent first and unread before read',
-    () {
-      for (final seed in [4103, 4104, 4105]) {
-        final random = Random(seed);
-        final messages = <GameMessage>[
-          _message(
-            id: 'seed-$seed-urgent',
-            title: 'Seed urgent $seed',
-            domain: MessageDomain.playerEvent,
-            priority: MessagePriority.urgent,
-            read: random.nextBool(),
-          ),
-          for (var index = 0; index < 6; index++)
-            _message(
-              id: 'seed-$seed-$index',
-              title: 'Seed $seed $index',
-              domain: MessageDomain.values[index % MessageDomain.values.length],
-              read: index.isEven ? false : random.nextBool(),
-            ),
-        ];
-
-        final sorted = sortInboxMessages(messages);
-        final firstNormal = sorted.indexWhere(
-          (message) => message.priority != MessagePriority.urgent,
-        );
-        expect(firstNormal, greaterThanOrEqualTo(1));
-        expect(
-          sorted
-              .take(firstNormal)
-              .every((message) => message.priority == MessagePriority.urgent),
-          isTrue,
-        );
-        final normalMessages = sorted.skip(firstNormal).toList();
-        final firstReadNormal = normalMessages.indexWhere(
-          (message) => message.read,
-        );
-        if (firstReadNormal >= 0) {
-          expect(
-            normalMessages
-                .skip(firstReadNormal)
-                .every((message) => message.read),
-            isTrue,
-          );
-        }
-      }
-    },
-  );
-
-  testWidgets('baseline: empty inbox and archive retain their empty states', (
+  testWidgets('empty inbox and archive retain their empty states', (
     tester,
   ) async {
     await tester.pumpWidget(
@@ -229,73 +141,8 @@ void main() {
     expect(find.text('Archiwum jest puste'), findsOneWidget);
   });
 
-  test(
-    'baseline: pending urgent blocks day advancement until its acknowledgement is persisted',
-    () async {
-      final repository = _RecordingSaveRepository();
-      final message = _message(
-        id: 'pending-baseline',
-        title: 'Pilna blokada',
-        domain: MessageDomain.playerEvent,
-        priority: MessagePriority.urgent,
-      );
-      final game = _withInbox(
-        task41Game(seed: 4103),
-        Inbox(messages: [message]),
-      );
-      final container = ProviderContainer(
-        overrides: [
-          saveRepositoryProvider.overrideWithValue(repository),
-          gameControllerProvider.overrideWith((ref) {
-            final controller = GameController(ref);
-            controller.state = AsyncValue.data(game);
-            return controller;
-          }),
-        ],
-      );
-      addTearDown(container.dispose);
-      final controller = container.read(gameControllerProvider.notifier);
-      final before = controller.save!.leagueState;
-
-      final blockedResult = await controller.advanceOneDay();
-      expect(blockedResult, isNull);
-      expect(controller.save!.leagueState.currentWeek, before.currentWeek);
-      expect(controller.save!.leagueState.currentDay, before.currentDay);
-      expect(controller.save!.leagueState.inbox.pendingUrgent, hasLength(1));
-      expect(
-        repository.lastPersisted?.leagueState.inbox.pendingUrgent,
-        hasLength(1),
-      );
-
-      await controller.acknowledgeMessage(message.id);
-      expect(repository.lastPersisted, isNotNull);
-      expect(
-        repository.lastPersisted!.leagueState.inbox.pendingUrgent,
-        isEmpty,
-      );
-      expect(
-        repository
-            .lastPersisted!
-            .leagueState
-            .inbox
-            .messages
-            .single
-            .acknowledged,
-        isTrue,
-      );
-
-      await controller.advanceOneDay();
-      final after = controller.save!.leagueState;
-      expect(
-        after.currentWeek != before.currentWeek ||
-            after.currentDay != before.currentDay,
-        isTrue,
-      );
-    },
-  );
-
   testWidgets(
-    'baseline: all shell tabs and local inbox controls remain available with pending urgent',
+    'all shell tabs and local inbox controls remain available with pending urgent',
     (tester) async {
       final urgent = _message(
         id: 'shell-pending-baseline',
@@ -350,7 +197,7 @@ void main() {
   );
 
   testWidgets(
-    'baseline: message actions preserve player, transfer, contract, staff, finance, and prospect routes',
+    'message actions preserve player, transfer, contract, staff, finance, and prospect routes',
     (tester) async {
       final game = task41Game(seed: 4108);
       final playerId = game.leagueState.playerTeam!.roster.first.id;
@@ -469,23 +316,6 @@ GameMessage _message({
   acknowledged: acknowledged,
 );
 
-GameMessage _decisionMessage({required String id, required String title}) =>
-    _message(
-      id: id,
-      title: title,
-      type: MessageType.playerEvent,
-      domain: MessageDomain.playerEvent,
-      priority: MessagePriority.urgent,
-    ).copyWith(
-      decision: const DecisionSpec(
-        options: [
-          MessageAction(id: 'accept', labelKey: 'accept'),
-          MessageAction(id: 'decline', labelKey: 'decline'),
-        ],
-        defaultOnExpiry: 'decline',
-      ),
-    );
-
 MessageDomain _domainFor(MessageType type) => switch (type) {
   MessageType.tradeOffer => MessageDomain.trades,
   MessageType.contractOffer => MessageDomain.contracts,
@@ -495,10 +325,9 @@ MessageDomain _domainFor(MessageType type) => switch (type) {
   _ => MessageDomain.system,
 };
 
-class _RecordingSaveRepository extends SaveRepository {
+class _RecordingSaveRepository extends NoDiskSaveRepository {
   int saveCount = 0;
   GameSave? lastPersisted;
-
   @override
   Future<void> save(GameSave gameSave) async {
     saveCount++;

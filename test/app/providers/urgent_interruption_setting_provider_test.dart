@@ -1,7 +1,5 @@
-@Tags(['property'])
+@Tags(['unit'])
 library;
-
-import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -9,79 +7,68 @@ import 'package:new_football/app/providers/settings_provider.dart';
 
 import '../../helpers/widgets/preferences_test_double.dart';
 
-const _property1Label =
-    'Feature: urgent-message-simulation-setting, Property 1: '
-    'global preference resolution and persistence';
-const _property1CaseCount = 120;
-
 void main() {
-  // **Validates: Requirements 2.1, 2.2, 2.3, 2.4, 2.5, 9.1, 9.2; Design Property 1**
-  test(
-    '$_property1Label holds for $_property1CaseCount deterministic generated '
-    'storage states',
-    () async {
-      final random = Random(20260308);
-
-      for (var caseIndex = 0; caseIndex < _property1CaseCount; caseIndex++) {
-        final generated = _generateStorageCase(caseIndex, random);
-        final caseLabel =
-            '$_property1Label case=$caseIndex '
-            'scenario=${generated.scenario}';
-        final preferences = PreferencesTestDouble(
-          initialValues: generated.initialValues,
-          readException: generated.readException,
-        );
-        final container = _containerFor(preferences);
-
-        try {
-          final controller = container.read(
-            urgentInterruptionSettingProvider.notifier,
+  for (final generated in _storageCases()) {
+    for (final persistedValue in [false, true]) {
+      test(
+        'preference ${generated.scenario}: persist and restore $persistedValue',
+        () async {
+          final caseLabel = '${generated.scenario}, persisted=$persistedValue';
+          final preferences = PreferencesTestDouble(
+            initialValues: generated.initialValues,
+            readException: generated.readException,
           );
+          final container = _containerFor(preferences);
 
-          expect(
-            container.read(urgentInterruptionSettingProvider),
-            generated.expectedInitialValue,
-            reason: caseLabel,
-          );
-          expect(
-            preferences.setBoolCallCount,
-            0,
-            reason: '$caseLabel must not repair the stored value on read',
-          );
-
-          final persistedValue = random.nextBool();
-          await controller.setUrgentInterruption(persistedValue);
-
-          expect(
-            container.read(urgentInterruptionSettingProvider),
-            persistedValue,
-            reason: '$caseLabel did not publish the successful write',
-          );
-          expect(
-            preferences.valueFor(urgentInterruptionSettingKey),
-            persistedValue,
-            reason: '$caseLabel did not persist the exact bool value',
-          );
-
-          // A read failure is transient in this fixture. Clearing it models a
-          // fresh controller after the successful write has completed.
-          preferences.readException = null;
-          final restoredContainer = _containerFor(preferences);
           try {
-            expect(
-              restoredContainer.read(urgentInterruptionSettingProvider),
-              persistedValue,
-              reason: '$caseLabel did not restore the last successful value',
+            final controller = container.read(
+              urgentInterruptionSettingProvider.notifier,
             );
+
+            expect(
+              container.read(urgentInterruptionSettingProvider),
+              generated.expectedInitialValue,
+              reason: caseLabel,
+            );
+            expect(
+              preferences.setBoolCallCount,
+              0,
+              reason: '$caseLabel must not repair the stored value on read',
+            );
+
+            await controller.setUrgentInterruption(persistedValue);
+
+            expect(
+              container.read(urgentInterruptionSettingProvider),
+              persistedValue,
+              reason: '$caseLabel did not publish the successful write',
+            );
+            expect(
+              preferences.valueFor(urgentInterruptionSettingKey),
+              persistedValue,
+              reason: '$caseLabel did not persist the exact bool value',
+            );
+
+            // A read failure is transient in this fixture. Clearing it models a
+            // fresh controller after the successful write has completed.
+            preferences.readException = null;
+            final restoredContainer = _containerFor(preferences);
+            try {
+              expect(
+                restoredContainer.read(urgentInterruptionSettingProvider),
+                persistedValue,
+                reason: '$caseLabel did not restore the last successful value',
+              );
+            } finally {
+              restoredContainer.dispose();
+            }
           } finally {
-            restoredContainer.dispose();
+            container.dispose();
           }
-        } finally {
-          container.dispose();
-        }
-      }
-    },
-  );
+        },
+      );
+    }
+  }
 
   test(
     'a false setBool result is a typed failure and preserves the previous state',
@@ -185,6 +172,7 @@ void main() {
       );
       addTearDown(subscription.close);
 
+      addTearDown(preferences.releaseSetBool);
       final write = controller.setUrgentInterruption(true);
       await preferences.firstSetBoolStarted;
 
@@ -221,6 +209,7 @@ void main() {
       );
       addTearDown(subscription.close);
 
+      addTearDown(preferences.releaseSetBool);
       final firstWrite = controller.setUrgentInterruption(false);
       await preferences.firstSetBoolStarted;
       final secondWrite = controller.setUrgentInterruption(true);
@@ -253,58 +242,39 @@ ProviderContainer _containerFor(PreferencesTestDouble preferences) {
   );
 }
 
-_GeneratedStorageCase _generateStorageCase(int caseIndex, Random random) {
-  switch (caseIndex % 5) {
-    case 0:
-      return const _GeneratedStorageCase(
-        scenario: 'missing key',
-        initialValues: <String, Object?>{},
-        expectedInitialValue: defaultUrgentInterruptionSetting,
-      );
-    case 1:
-      final value = caseIndex.isEven;
-      return _GeneratedStorageCase(
-        scenario: 'stored true/false bool',
-        initialValues: <String, Object?>{urgentInterruptionSettingKey: value},
-        expectedInitialValue: value,
-      );
-    case 2:
-      final value = !caseIndex.isEven;
-      return _GeneratedStorageCase(
-        scenario: 'stored false/true bool',
-        initialValues: <String, Object?>{urgentInterruptionSettingKey: value},
-        expectedInitialValue: value,
-      );
-    case 3:
-      final invalidValues = <Object?>[
-        'true',
-        1,
-        0.0,
-        <Object?>[true],
-        <String, Object?>{'value': false},
-        null,
-      ];
-      final invalidIndex = (caseIndex ~/ 5) % invalidValues.length;
-      return _GeneratedStorageCase(
-        scenario: 'invalid stored type $invalidIndex',
-        initialValues: <String, Object?>{
-          urgentInterruptionSettingKey: invalidValues[invalidIndex],
-        },
-        expectedInitialValue: defaultUrgentInterruptionSetting,
-      );
-    case 4:
-      return _GeneratedStorageCase(
-        scenario: 'read exception',
-        initialValues: <String, Object?>{
-          urgentInterruptionSettingKey: random.nextBool(),
-        },
-        readException: StateError('read failure case $caseIndex'),
-        expectedInitialValue: defaultUrgentInterruptionSetting,
-      );
-  }
-
-  throw StateError('unsupported generated scenario');
-}
+List<_GeneratedStorageCase> _storageCases() => [
+  const _GeneratedStorageCase(
+    scenario: 'missing key',
+    initialValues: {},
+    expectedInitialValue: true,
+  ),
+  for (final value in [false, true])
+    _GeneratedStorageCase(
+      scenario: 'stored $value',
+      initialValues: {urgentInterruptionSettingKey: value},
+      expectedInitialValue: value,
+    ),
+  for (final value in <Object?>[
+    'true',
+    1,
+    0.0,
+    <Object?>[true],
+    <String, Object?>{'value': false},
+    null,
+  ])
+    _GeneratedStorageCase(
+      scenario: 'invalid ${value.runtimeType}',
+      initialValues: {urgentInterruptionSettingKey: value},
+      expectedInitialValue: true,
+    ),
+  for (final value in [false, true])
+    _GeneratedStorageCase(
+      scenario: 'read exception with stored $value',
+      initialValues: {urgentInterruptionSettingKey: value},
+      expectedInitialValue: true,
+      readException: StateError('controlled read failure'),
+    ),
+];
 
 class _GeneratedStorageCase {
   const _GeneratedStorageCase({

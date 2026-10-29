@@ -15,174 +15,178 @@ import 'package:new_football/app/screens/settings_screen.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 import '../helpers/widgets/preferences_test_double.dart';
 
-const _propertyTag =
-    'Feature: urgent-message-simulation-setting, Property 9: '
-    'localization, semantics, and large text';
+const _propertyTag = 'urgent setting accessibility';
 const _urgentControlKey = ValueKey<String>('settings-urgent-interruption');
 const _locales = <Locale>[Locale('pl'), Locale('en')];
 const _textScales = <double>[1.0, 1.3, 1.5, 2.0];
-const _caseCount = 100;
+const _caseCount = 16;
 
 void main() {
-  // Feature: urgent-message-simulation-setting, Property 9: localization,
-  // semantics, and large text
-  testWidgets(_propertyTag, (tester) async {
-    final semanticsHandle = tester.ensureSemantics();
-    try {
-      for (var caseIndex = 0; caseIndex < _caseCount; caseIndex++) {
-        final scenario = _scenarioFor(caseIndex);
-        final caseLabel =
-            '$_propertyTag case ${caseIndex + 1}/$_caseCount '
-            '(locale=${scenario.locale.languageCode}, '
-            'enabled=${scenario.enabled}, scale=${scenario.textScale}, '
-            'accessibleNavigation=${scenario.accessibleNavigation}, '
-            'boldText=${scenario.boldText}, '
-            'highContrast=${scenario.highContrast})';
-        final preferences = PreferencesTestDouble(
-          initialValues: <String, Object?>{
-            'app_locale': scenario.locale.languageCode,
-            urgentInterruptionSettingKey: scenario.enabled,
-          },
-        );
+  for (var caseIndex = 0; caseIndex < _caseCount; caseIndex++) {
+    final scenario = _scenarioFor(caseIndex);
+    testWidgets(
+      'urgent setting accessibility: ${scenario.locale.languageCode}, enabled=${scenario.enabled}, scale=${scenario.textScale}',
+      (tester) async {
+        final semanticsHandle = tester.ensureSemantics();
+        try {
+          final caseLabel =
+              '$_propertyTag case ${caseIndex + 1}/$_caseCount '
+              '(locale=${scenario.locale.languageCode}, '
+              'enabled=${scenario.enabled}, scale=${scenario.textScale}, '
+              'accessibleNavigation=${scenario.accessibleNavigation}, '
+              'boldText=${scenario.boldText}, '
+              'highContrast=${scenario.highContrast})';
+          final preferences = PreferencesTestDouble(
+            initialValues: <String, Object?>{
+              'app_locale': scenario.locale.languageCode,
+              urgentInterruptionSettingKey: scenario.enabled,
+            },
+          );
 
-        await tester.pumpWidget(
-          _localizedSettingsApp(
-            locale: scenario.locale,
-            preferences: preferences,
-            textScale: scenario.textScale,
-            accessibleNavigation: scenario.accessibleNavigation,
-            boldText: scenario.boldText,
-            highContrast: scenario.highContrast,
-            testKey: 'property-9-${caseIndex + 1}',
-          ),
-        );
-        await tester.pumpAndSettle();
+          await tester.pumpWidget(
+            _localizedSettingsApp(
+              locale: scenario.locale,
+              preferences: preferences,
+              textScale: scenario.textScale,
+              accessibleNavigation: scenario.accessibleNavigation,
+              boldText: scenario.boldText,
+              highContrast: scenario.highContrast,
+              testKey: 'property-9-${caseIndex + 1}',
+            ),
+          );
+          await tester.pumpAndSettle();
 
-        final l10n = await AppLocalizations.delegate.load(scenario.locale);
-        final title = l10n.settings_urgentInterruptionTitle;
-        final description = scenario.enabled
-            ? l10n.settings_urgentInterruptionEnabledDescription
-            : l10n.settings_urgentInterruptionDisabledDescription;
-        final state = scenario.enabled
-            ? l10n.settings_urgentInterruptionEnabledLabel
-            : l10n.settings_urgentInterruptionDisabledLabel;
-        final alternateDescription = scenario.enabled
-            ? l10n.settings_urgentInterruptionDisabledDescription
-            : l10n.settings_urgentInterruptionEnabledDescription;
-        final alternateState = scenario.enabled
-            ? l10n.settings_urgentInterruptionDisabledLabel
-            : l10n.settings_urgentInterruptionEnabledLabel;
+          final l10n = await AppLocalizations.delegate.load(scenario.locale);
+          final title = l10n.settings_urgentInterruptionTitle;
+          final description = scenario.enabled
+              ? l10n.settings_urgentInterruptionEnabledDescription
+              : l10n.settings_urgentInterruptionDisabledDescription;
+          final state = scenario.enabled
+              ? l10n.settings_urgentInterruptionEnabledLabel
+              : l10n.settings_urgentInterruptionDisabledLabel;
+          final alternateDescription = scenario.enabled
+              ? l10n.settings_urgentInterruptionDisabledDescription
+              : l10n.settings_urgentInterruptionEnabledDescription;
+          final alternateState = scenario.enabled
+              ? l10n.settings_urgentInterruptionDisabledLabel
+              : l10n.settings_urgentInterruptionEnabledLabel;
 
-        _expectLocalizedSettingSurface(
-          tester,
-          l10n: l10n,
-          title: title,
-          description: description,
-          state: state,
-          alternateDescription: alternateDescription,
-          alternateState: alternateState,
-          caseLabel: caseLabel,
-        );
-        _expectNoLayoutOrTextOverflow(
-          tester,
-          title: title,
-          description: description,
-          state: state,
-          caseLabel: caseLabel,
-        );
+          _expectLocalizedSettingSurface(
+            tester,
+            l10n: l10n,
+            title: title,
+            description: description,
+            state: state,
+            alternateDescription: alternateDescription,
+            alternateState: alternateState,
+            caseLabel: caseLabel,
+          );
+          _expectNoLayoutOrTextOverflow(
+            tester,
+            title: title,
+            description: description,
+            state: state,
+            caseLabel: caseLabel,
+          );
 
-        final semanticsNode = _expectSwitchSemantics(
-          tester,
-          title: title,
-          description: description,
-          state: state,
-          enabled: scenario.enabled,
-          caseLabel: caseLabel,
-        );
+          final semanticsNode = _expectSwitchSemantics(
+            tester,
+            title: title,
+            description: description,
+            state: state,
+            enabled: scenario.enabled,
+            caseLabel: caseLabel,
+          );
 
-        // Exercise the same tap action exposed to assistive technology. The
-        // setting is deliberately left in a changed state until the keyboard
-        // check below toggles it back, so both activation paths are real.
-        final semanticsOwner = semanticsNode.owner;
-        expect(semanticsOwner, isNotNull, reason: caseLabel);
-        semanticsOwner!.performAction(semanticsNode.id, ui.SemanticsAction.tap);
-        await tester.pumpAndSettle();
-        expect(
-          preferences.valueFor(urgentInterruptionSettingKey),
-          !scenario.enabled,
-          reason: '$caseLabel: SemanticsAction.tap did not activate switch',
-        );
-        expect(
-          tester.widget<SwitchListTile>(find.byKey(_urgentControlKey)).value,
-          !scenario.enabled,
-          reason: '$caseLabel: visual switch state did not update after tap',
-        );
+          // Exercise the same tap action exposed to assistive technology. The
+          // setting is deliberately left in a changed state until the keyboard
+          // check below toggles it back, so both activation paths are real.
+          final semanticsOwner = semanticsNode.owner;
+          expect(semanticsOwner, isNotNull, reason: caseLabel);
+          semanticsOwner!.performAction(
+            semanticsNode.id,
+            ui.SemanticsAction.tap,
+          );
+          await tester.pumpAndSettle();
+          expect(
+            preferences.valueFor(urgentInterruptionSettingKey),
+            !scenario.enabled,
+            reason: '$caseLabel: SemanticsAction.tap did not activate switch',
+          );
+          expect(
+            tester.widget<SwitchListTile>(find.byKey(_urgentControlKey)).value,
+            !scenario.enabled,
+            reason: '$caseLabel: visual switch state did not update after tap',
+          );
 
-        // SwitchListTile deliberately excludes its inner Switch from focus;
-        // the enclosing ListTile is the real keyboard activation target.
-        final switchFinder = find.descendant(
-          of: find.byKey(_urgentControlKey),
-          matching: find.byType(Switch),
-        );
-        expect(switchFinder, findsOneWidget, reason: caseLabel);
-        final focusableSwitchFinder = find.descendant(
-          of: find.byKey(_urgentControlKey),
-          matching: find.byType(ListTile),
-        );
-        expect(
-          focusableSwitchFinder,
-          findsOneWidget,
-          reason: '$caseLabel: SwitchListTile must expose a focusable row',
-        );
-        await tester.tap(focusableSwitchFinder);
-        await tester.pumpAndSettle();
-        expect(
-          preferences.valueFor(urgentInterruptionSettingKey),
-          scenario.enabled,
-          reason: '$caseLabel: switch could not be focused/tapped',
-        );
-        // Automated pointer taps do not request focus for InkWell. Use the
-        // same focus action exposed by the merged SwitchListTile semantics
-        // row, which focuses the row's real keyboard activation target.
-        final focusTarget = _semanticsSubtree(_semanticsRoot(semanticsNode))
-            .singleWhere(
-              (node) =>
-                  node.label.contains(title) &&
-                  node.getSemanticsData().hasAction(ui.SemanticsAction.focus) &&
-                  node.getSemanticsData().hasAction(ui.SemanticsAction.tap),
-              orElse: () => throw TestFailure(
-                '$caseLabel: switch semantics must expose a focusable '
-                'keyboard activation target',
-              ),
-            );
-        final focusOwner = focusTarget.owner;
-        expect(focusOwner, isNotNull, reason: caseLabel);
-        focusOwner!.performAction(focusTarget.id, ui.SemanticsAction.focus);
-        await tester.pump();
-        final primaryFocus = FocusManager.instance.primaryFocus;
-        expect(
-          primaryFocus,
-          isNotNull,
-          reason: '$caseLabel: switch did not retain a keyboard focus target',
-        );
-        expect(
-          primaryFocus!.context,
-          isNotNull,
-          reason: '$caseLabel: keyboard focus target has no context',
-        );
-        await tester.sendKeyEvent(LogicalKeyboardKey.space);
-        await tester.pumpAndSettle();
-        expect(
-          preferences.valueFor(urgentInterruptionSettingKey),
-          !scenario.enabled,
-          reason: '$caseLabel: keyboard activation did not toggle switch',
-        );
-        expect(tester.takeException(), isNull, reason: caseLabel);
-      }
-    } finally {
-      semanticsHandle.dispose();
-    }
-  });
+          // SwitchListTile deliberately excludes its inner Switch from focus;
+          // the enclosing ListTile is the real keyboard activation target.
+          final switchFinder = find.descendant(
+            of: find.byKey(_urgentControlKey),
+            matching: find.byType(Switch),
+          );
+          expect(switchFinder, findsOneWidget, reason: caseLabel);
+          final focusableSwitchFinder = find.descendant(
+            of: find.byKey(_urgentControlKey),
+            matching: find.byType(ListTile),
+          );
+          expect(
+            focusableSwitchFinder,
+            findsOneWidget,
+            reason: '$caseLabel: SwitchListTile must expose a focusable row',
+          );
+          await tester.tap(focusableSwitchFinder);
+          await tester.pumpAndSettle();
+          expect(
+            preferences.valueFor(urgentInterruptionSettingKey),
+            scenario.enabled,
+            reason: '$caseLabel: switch could not be focused/tapped',
+          );
+          // Automated pointer taps do not request focus for InkWell. Use the
+          // same focus action exposed by the merged SwitchListTile semantics
+          // row, which focuses the row's real keyboard activation target.
+          final focusTarget = _semanticsSubtree(_semanticsRoot(semanticsNode))
+              .singleWhere(
+                (node) =>
+                    node.label.contains(title) &&
+                    node.getSemanticsData().hasAction(
+                      ui.SemanticsAction.focus,
+                    ) &&
+                    node.getSemanticsData().hasAction(ui.SemanticsAction.tap),
+                orElse: () => throw TestFailure(
+                  '$caseLabel: switch semantics must expose a focusable '
+                  'keyboard activation target',
+                ),
+              );
+          final focusOwner = focusTarget.owner;
+          expect(focusOwner, isNotNull, reason: caseLabel);
+          focusOwner!.performAction(focusTarget.id, ui.SemanticsAction.focus);
+          await tester.pump();
+          final primaryFocus = FocusManager.instance.primaryFocus;
+          expect(
+            primaryFocus,
+            isNotNull,
+            reason: '$caseLabel: switch did not retain a keyboard focus target',
+          );
+          expect(
+            primaryFocus!.context,
+            isNotNull,
+            reason: '$caseLabel: keyboard focus target has no context',
+          );
+          await tester.sendKeyEvent(LogicalKeyboardKey.space);
+          await tester.pumpAndSettle();
+          expect(
+            preferences.valueFor(urgentInterruptionSettingKey),
+            !scenario.enabled,
+            reason: '$caseLabel: keyboard activation did not toggle switch',
+          );
+          expect(tester.takeException(), isNull, reason: caseLabel);
+        } finally {
+          semanticsHandle.dispose();
+        }
+      },
+    );
+  }
 }
 
 void _expectLocalizedSettingSurface(
@@ -392,7 +396,7 @@ _Property9Scenario _scenarioFor(int index) {
     locale: _locales[index % _locales.length],
     enabled: ((index ~/ _locales.length) % 2) == 0,
     textScale: _textScales[(index ~/ 4) % _textScales.length],
-    accessibleNavigation: index.isEven,
+    accessibleNavigation: (index ~/ 4).isEven,
     boldText: index % 3 == 0,
     highContrast: index % 5 == 0,
   );

@@ -158,8 +158,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(controller.simulateToEventCalls, 1);
-      expect(controller.runEventCalls, 1);
-      expect(controller.advanceOneDayCalls, 1);
+      expect(controller.completedEvents, [CalendarEventId.combine]);
       expect(
         find.text('An urgent message is waiting in your inbox.'),
         findsOneWidget,
@@ -293,8 +292,8 @@ GameMessage _urgentMessage({required bool decision}) => GameMessage(
   seasonYear: 2026,
   week: 1,
   day: 1,
-  titleKey: 'msg_playerEvent_title',
-  bodyKey: 'msg_playerEvent_body',
+  titleKey: 'home_fixture_title',
+  bodyKey: 'home_fixture_body',
   args: const {
     '_legacyTitle': 'Pilna decyzja',
     '_legacyBody': 'Wybierz jedną z opcji.',
@@ -412,8 +411,7 @@ final class _FakeHomeController extends GameController {
   final BatchSimulationResult result;
   final DaySimulationResult? advanceResult;
   var simulateToEventCalls = 0;
-  var runEventCalls = 0;
-  var advanceOneDayCalls = 0;
+  final completedEvents = <CalendarEventId>[];
 
   @override
   Future<BatchSimulationResult> simulateToEvent() async {
@@ -423,15 +421,10 @@ final class _FakeHomeController extends GameController {
   }
 
   @override
-  Future<void> runEventAtCurrentDay(CalendarEventId eventId) async {
-    runEventCalls++;
-  }
-
-  @override
-  Future<DaySimulationResult?> advanceOneDay({
-    bool resolveContractMarket = true,
-  }) async {
-    advanceOneDayCalls++;
+  Future<DaySimulationResult?> completeEventAtCurrentDay(
+    CalendarEventId eventId,
+  ) async {
+    completedEvents.add(eventId);
     return advanceResult;
   }
 }

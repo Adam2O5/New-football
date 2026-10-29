@@ -14,13 +14,12 @@ import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
 import '../helpers/widgets/preferences_test_double.dart';
+import '../helpers/fixtures/game_fixtures.dart';
 import '../helpers/widgets/widget_harness.dart';
 
 const _urgentControlKey = ValueKey<String>('settings-urgent-interruption');
-const _property8Label =
-    'Feature: urgent-message-simulation-setting, Property 8: '
-    'Settings UI reflects provider without save dependency';
-const _property8CaseCount = 120;
+const _property8Label = 'urgent setting state';
+final _settingsGame = controllerSave();
 
 enum _PreferenceStorage {
   missing,
@@ -99,14 +98,8 @@ class _PropertyCase {
 }
 
 void main() {
-  // **Validates: Requirements 1.1, 1.2, 1.3, 1.4, 1.6, 2.8; Design Property 8**
-  testWidgets('$_property8Label holds across the generated settings matrix', (
-    tester,
-  ) async {
-    final scenarios = _propertyCases();
-    expect(scenarios, hasLength(greaterThanOrEqualTo(100)));
-
-    for (final scenario in scenarios) {
+  for (final scenario in _propertyCases()) {
+    testWidgets(scenario.label, (tester) async {
       final preferences = PreferencesTestDouble(
         initialValues: scenario.initialValues,
         readException: scenario.readException,
@@ -220,34 +213,41 @@ void main() {
         expectedGame: remountedGame,
         reason: '${scenario.label}: remount changed setting through save',
       );
-    }
-  });
+    });
+  }
 }
 
 List<_PropertyCase> _propertyCases() {
-  return [
-    for (var index = 0; index < _property8CaseCount; index++)
-      _PropertyCase(
-        index: index,
-        storage:
-            _PreferenceStorage.values[index % _PreferenceStorage.values.length],
-        locale: index.isEven ? const Locale('pl') : const Locale('en'),
-        remountLocale: index % 3 == 0
-            ? (index.isEven ? const Locale('en') : const Locale('pl'))
-            : (index.isEven ? const Locale('pl') : const Locale('en')),
-        gameSaveState:
-            _GameSaveState.values[index % _GameSaveState.values.length],
-        remountGameSaveState:
-            _GameSaveState.values[(index + 1) % _GameSaveState.values.length],
-        writeOutcome:
-            _WriteOutcome.values[(index ~/ _PreferenceStorage.values.length) %
-                _WriteOutcome.values.length],
-      ),
-  ];
+  final cases = <_PropertyCase>[];
+  for (final storage in _PreferenceStorage.values) {
+    for (final outcome in _WriteOutcome.values) {
+      for (final language in ['pl', 'en']) {
+        final index = cases.length;
+        final state =
+            (storage.index + outcome.index + (language == 'pl' ? 0 : 1)) % 3;
+        cases.add(
+          _PropertyCase(
+            index: index,
+            storage: storage,
+            writeOutcome: outcome,
+            locale: Locale(language),
+            remountLocale: Locale(language == 'pl' ? 'en' : 'pl'),
+            gameSaveState: _GameSaveState.values[state],
+            remountGameSaveState: _GameSaveState.values[(state + 1) % 3],
+          ),
+        );
+      }
+    }
+  }
+  return cases;
 }
 
 GameSave? _gameFor(_GameSaveState state, {required int seed}) {
-  return state == _GameSaveState.changed ? task41Game(seed: seed) : null;
+  return state == _GameSaveState.changed
+      ? _settingsGame.copyWith(
+          meta: _settingsGame.meta.copyWith(id: 'settings-$seed'),
+        )
+      : null;
 }
 
 Future<void> _pumpSettingsScreen(

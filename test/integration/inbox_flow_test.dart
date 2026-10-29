@@ -29,6 +29,7 @@ import 'package:new_football/l10n/generated/app_localizations.dart';
 
 import '../helpers/persistence/controlled_save_repository.dart';
 import '../helpers/widgets/widget_harness.dart';
+import '../helpers/fixtures/calendar_fixtures.dart';
 
 /// The project does not depend on Flutter's `integration_test` package and has
 /// no integration_test directory. These cases therefore use the equivalent
@@ -39,7 +40,7 @@ void main() {
     'production /game flow persists urgent acknowledgement and decision, '
     'reloads the save, and resumes simulation',
     (tester) async {
-      final base = task41Game(seed: 4103);
+      final base = calendarFixture(seed: 4103);
       final team = base.leagueState.playerTeam!;
       final urgent = _urgentMessage(
         id: 'flow-urgent-ack',
@@ -64,7 +65,8 @@ void main() {
       );
 
       final blockedBefore = fixture.controller.save!.leagueState;
-      final blocked = await tester.runAsync(
+      final blocked = await _awaitOperation(
+        tester,
         () => fixture.controller.advanceOneDay(),
       );
       expect(blocked, isNull);
@@ -94,7 +96,8 @@ void main() {
         tester,
         () =>
             _messageById(fixture.controller.save, urgent.id)?.acknowledged ==
-            true,
+                true &&
+            find.byType(CircularProgressIndicator).evaluate().isEmpty,
         reason: 'the urgent acknowledgement did not commit through /game',
       );
       await tester.pumpAndSettle();
@@ -118,10 +121,11 @@ void main() {
         tester,
         () =>
             _messageById(
-              fixture.controller.save,
-              teamDecision.id,
-            )?.acknowledged ==
-            true,
+                  fixture.controller.save,
+                  teamDecision.id,
+                )?.acknowledged ==
+                true &&
+            find.byType(CircularProgressIndicator).evaluate().isEmpty,
         reason:
             'the team decision did not commit through the production router',
       );
@@ -161,7 +165,8 @@ void main() {
       expect(_selectedTab(tester), 1);
 
       final beforeSimulation = fixture.controller.save!.leagueState;
-      final simulation = await tester.runAsync(
+      final simulation = await _awaitOperation(
+        tester,
         () => fixture.controller.advanceOneDay(resolveContractMarket: false),
       );
       expect(simulation, isNotNull);
@@ -170,6 +175,7 @@ void main() {
         afterSimulation.currentWeek,
         afterSimulation.currentDay,
       ), isNot((beforeSimulation.currentWeek, beforeSimulation.currentDay)));
+      await _awaitOperation(tester, fixture.controller.flushPendingSave);
       final reloadedAfterSimulation = await _reload(tester, fixture);
       expect(reloadedAfterSimulation.leagueState, afterSimulation);
       expect(fixture.router.state.uri.path, '/game');
@@ -178,8 +184,7 @@ void main() {
   );
 
   testWidgets(
-    'production save failure keeps active game, urgent badge/pause, route, '
-    'and retry available until the next commit',
+    'save failure keeps the applied state and route while disk retains the previous inbox',
     (tester) async {
       final directory = (await tester.runAsync(
         () => Directory.systemTemp.createTemp('nf_flow_failure_'),
@@ -190,7 +195,7 @@ void main() {
         failure: ControlledSaveFailure.beforeWrite,
       );
       final game = _withInbox(
-        task41Game(seed: 4103),
+        calendarFixture(seed: 4103),
         Inbox(
           messages: [
             _urgentMessage(
@@ -222,7 +227,7 @@ void main() {
       repository.release();
       await _waitFor(
         tester,
-        () => find.text('Spróbuj ponownie').evaluate().isNotEmpty,
+        () => find.text('Ponów zapis').evaluate().isNotEmpty,
         reason: 'the save error did not remain local to the sheet',
       );
       await tester.pump();
@@ -231,18 +236,20 @@ void main() {
       expect(find.byType(ShellScreen), findsOneWidget);
       expect(_selectedTab(tester), 5);
       expect(fixture.container.read(gameControllerProvider).value, isNotNull);
-      expect(fixture.controller.save, same(before));
+      expect(fixture.controller.save, isNot(same(before)));
+      expect(fixture.controller.save!.leagueState.inbox.pendingUrgent, isEmpty);
       expect(
-        fixture.controller.save!.leagueState.inbox.pendingUrgent,
-        hasLength(1),
-      );
-      expect(find.byType(Badge), findsWidgets);
-      expect(
-        tester
-            .widgetList<Badge>(find.byType(Badge))
-            .any((badge) => badge.backgroundColor != null),
+        _messageById(
+          fixture.controller.save,
+          'flow-save-failure',
+        )!.acknowledged,
         isTrue,
-        reason: 'the urgent pause badge disappeared while retry was available',
+      );
+      expect(
+        find.text(
+          'Zmiana została zastosowana, ale nie udało się jej zapisać. Ponów zapis.',
+        ),
+        findsOneWidget,
       );
       expect(repository.completedSaves, isEmpty);
       final diskAfterFailure = await _reload(tester, fixture);
@@ -250,7 +257,7 @@ void main() {
       expect(find.byType(BottomSheet), findsOneWidget);
 
       repository.failure = ControlledSaveFailure.none;
-      await _tapSheetButton(tester, 'Spróbuj ponownie');
+      await _tapSheetButton(tester, 'Ponów zapis');
       await tester.pump();
       await _waitFor(
         tester,
@@ -261,10 +268,11 @@ void main() {
         tester,
         () =>
             _messageById(
-              fixture.controller.save,
-              'flow-save-failure',
-            )?.acknowledged ==
-            true,
+                  fixture.controller.save,
+                  'flow-save-failure',
+                )?.acknowledged ==
+                true &&
+            find.byType(CircularProgressIndicator).evaluate().isEmpty,
         reason: 'successful retry did not publish the acknowledged save',
       );
       await tester.pumpAndSettle();
@@ -293,7 +301,7 @@ void main() {
         waitForRelease: true,
       );
       final game = _withInbox(
-        task41Game(seed: 4103),
+        calendarFixture(seed: 4103),
         Inbox(
           messages: [
             _urgentMessage(
@@ -332,12 +340,18 @@ void main() {
       repository.release();
       await _waitFor(
         tester,
+        () => repository.completedSaves.length == 1,
+        reason: 'the released save did not finish',
+      );
+      await _waitFor(
+        tester,
         () =>
             _messageById(
-              fixture.controller.save,
-              'flow-lifecycle',
-            )?.acknowledged ==
-            true,
+                  fixture.controller.save,
+                  'flow-lifecycle',
+                )?.acknowledged ==
+                true &&
+            find.byType(CircularProgressIndicator).evaluate().isEmpty,
         reason: 'the data operation did not finish after the route changed',
       );
       await tester.pumpAndSettle();
@@ -359,7 +373,7 @@ void main() {
   testWidgets(
     'production router preserves team and player effects after reload',
     (tester) async {
-      final base = task41Game(seed: 4103);
+      final base = calendarFixture(seed: 4103);
       final team = base.leagueState.playerTeam!;
       final teamDecision = _teamDecisionMessage(
         id: 'flow-team-effect',
@@ -387,10 +401,11 @@ void main() {
         tester,
         () =>
             _messageById(
-              fixture.controller.save,
-              teamDecision.id,
-            )?.acknowledged ==
-            true,
+                  fixture.controller.save,
+                  teamDecision.id,
+                )?.acknowledged ==
+                true &&
+            find.byType(CircularProgressIndicator).evaluate().isEmpty,
         reason: 'the team decision did not complete',
       );
       await tester.pumpAndSettle();
@@ -412,10 +427,11 @@ void main() {
         tester,
         () =>
             _messageById(
-              fixture.controller.save,
-              playerDecision.id,
-            )?.acknowledged ==
-            true,
+                  fixture.controller.save,
+                  playerDecision.id,
+                )?.acknowledged ==
+                true &&
+            find.byType(CircularProgressIndicator).evaluate().isEmpty,
         reason: 'the player decision did not complete',
       );
       await tester.pumpAndSettle();
@@ -466,10 +482,11 @@ void main() {
         tester,
         () =>
             _messageById(
-              acceptFixture.controller.save,
-              tradeScenario.messageId,
-            )?.acknowledged ==
-            true,
+                  acceptFixture.controller.save,
+                  tradeScenario.messageId,
+                )?.acknowledged ==
+                true &&
+            find.byType(CircularProgressIndicator).evaluate().isEmpty,
         reason: 'the trade accept decision did not complete',
       );
       await tester.pumpAndSettle();
@@ -651,12 +668,40 @@ Future<void> _waitFor(
 }) async {
   for (var attempt = 0; attempt < 120; attempt++) {
     if (condition()) return;
-    await tester.pump(const Duration(milliseconds: 1));
+    await tester.pump(const Duration(milliseconds: 20));
     await tester.runAsync(
       () => Future<void>.delayed(const Duration(milliseconds: 5)),
     );
   }
   expect(condition(), isTrue, reason: reason);
+}
+
+Future<T> _awaitOperation<T>(
+  WidgetTester tester,
+  Future<T> Function() start,
+) async {
+  var completed = false;
+  late T result;
+  Object? failure;
+  StackTrace? failureStack;
+  start().then<void>(
+    (value) {
+      result = value;
+      completed = true;
+    },
+    onError: (Object error, StackTrace stack) {
+      failure = error;
+      failureStack = stack;
+      completed = true;
+    },
+  );
+  await _waitFor(
+    tester,
+    () => completed,
+    reason: 'the queued operation did not finish',
+  );
+  if (failure != null) Error.throwWithStackTrace(failure!, failureStack!);
+  return result;
 }
 
 Future<GameSave> _reload(
@@ -684,8 +729,8 @@ GameMessage _urgentMessage({
   seasonYear: 2026,
   week: 1,
   day: 1,
-  titleKey: 'msg_playerEvent_title',
-  bodyKey: 'msg_playerEvent_body',
+  titleKey: 'flow_custom_title',
+  bodyKey: 'flow_custom_body',
   args: {'_legacyTitle': title, '_legacyBody': 'Treść $title'},
   read: read,
 );
@@ -736,8 +781,8 @@ GameMessage _playerDecisionMessage({
   seasonYear: 2026,
   week: 1,
   day: 1,
-  titleKey: 'msg_playerEvent_title',
-  bodyKey: 'msg_playerEvent_body',
+  titleKey: 'flow_custom_title',
+  bodyKey: 'flow_custom_body',
   args: {'_legacyTitle': title, '_legacyBody': 'Wybierz decyzję zawodnika.'},
   payload: {
     'teamId': teamId,
@@ -837,6 +882,14 @@ class _ProductionFixture {
   Future<void> dispose(WidgetTester tester) async {
     if (_disposed) return;
     _disposed = true;
+    final currentRepository = repository;
+    if (currentRepository is ControlledSaveRepository) {
+      currentRepository.release();
+    }
+    await _awaitOperation(
+      tester,
+      () => controller.enqueueSaveManagement(() async {}),
+    );
     await tester.pumpWidget(const SizedBox.shrink());
     await tester.pumpAndSettle();
     router.dispose();
