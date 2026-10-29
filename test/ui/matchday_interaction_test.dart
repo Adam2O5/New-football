@@ -68,6 +68,30 @@ void main() {
     return AppLocalizations.of(tester.element(find.byType(MatchdayScreen)))!;
   }
 
+  testWidgets(
+    'paused clock, pause button and speed controls remain interactive',
+    (tester) async {
+      final l10n = await showMatch(tester, 'en');
+      final clock = find.byKey(const ValueKey('matchday-clock'));
+      for (final speed in [1, 2, 4]) {
+        final choice = find.widgetWithText(ChoiceChip, '×$speed');
+        await tester.tap(choice);
+        await tester.pump();
+        expect(tester.widget<ChoiceChip>(choice).selected, isTrue);
+        expect(tester.widget<Text>(clock).data, "0'");
+      }
+      await tester.tap(find.text(l10n.matchday_resume));
+      await tester.pump();
+      expect(find.text(l10n.matchday_pause), findsOneWidget);
+      await tester.tap(find.text(l10n.matchday_pause));
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.text(l10n.matchday_resume), findsOneWidget);
+      expect(tester.widget<Text>(clock).data, "0'");
+      expect(tester.takeException(), isNull);
+      await tester.pumpWidget(const SizedBox.shrink());
+    },
+  );
+
   for (final language in ['pl', 'en']) {
     testWidgets(
       'auto-pause settings retain state while match stays paused ($language)',

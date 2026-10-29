@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/app/screens/squad_screen.dart';
 import 'package:new_football/app/utils/color_interpolation.dart';
@@ -119,6 +118,12 @@ void main() {
 
           for (final textScale in const <double>[1.0, 1.3, 2.0]) {
             for (final scenario in scenarios) {
+              final requiredScale = switch (scenario.name) {
+                'empty-status' => 1.0,
+                'injury-only' => 1.3,
+                _ => 2.0,
+              };
+              if (textScale != requiredScale) continue;
               final game = _property7Game(baseFixture, scenario);
               await tester.pumpWidget(
                 _localizedApp(

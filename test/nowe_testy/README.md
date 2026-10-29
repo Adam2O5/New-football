@@ -947,3 +947,7 @@ Pełny wynik uruchomienia zapisano w [etap-0-test-results.txt](C:/Users/dadam/Ne
 ## Migracja w etapie 7 refaktoru testów
 
 `game_fixtures` oraz domenowa generacja są teraz w `test/data/`; kontrole fabryki i terminarza scalono z `game_factory_test` i `schedule_generator_test`. `search_filters_interaction` przeniesiono do `test/search/`, a przypadki `search_filter_boundaries` scalono z testami graczy/prospektów/picków i providerów. Nie ma aktywnych kopii w obu folderach. Szczegóły oraz wyniki odbioru etapu są w `test/README.md`. Dalsze migracje UI/performance pozostają w etapach 8–9.
+
+## Migracja w etapie 8 refaktoru testów
+
+Do `test/ui/` przeniesiono career_navigation, matchday_interaction, squad_slot_interaction oraz career_screen_rebuilds. Save recovery scalono z testami listy zapisów. State-screen interactions mają właścicieli free_agency_form_state, contract_form_state, staff_form_state i prospects_selection_persistence, ze wspólnym harness. Pozostały tutaj tylko event_services, postseason_finalization i season_randomness; ich końcowe rozliczenie należy do etapu 9. Stan kontroli i ograniczenie końcowej analizy opisuje `test/README.md`.

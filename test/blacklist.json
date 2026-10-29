@@ -264,8 +264,15 @@
       "reason": "Deferred AI or match-engine requirements.",
       "reactivateWhen": "Implement and review the mechanic; restore only deferred cases, then run with an external time limit.",
       "long": false,
-      "recoverInStage": 8,
-      "recoverScenarios": "Restore independent domain, presentation, market or UI scenarios before final acceptance."
+      "activeOwners": [
+        "test/ui/matchday_interaction_test.dart",
+        "test/ui/career_navigation_test.dart"
+      ],
+      "deferredCases": [
+        "observation and simulate-to-end produce the same engine result",
+        "substitution and halftime formation changes affect the live engine runtime",
+        "resuming advances the match engine clock"
+      ]
     },
     {
       "path": "test/match/disabled/task41_matchday_squad_ui_test_deferred.dart.disabled",

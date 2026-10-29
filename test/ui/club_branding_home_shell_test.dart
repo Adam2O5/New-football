@@ -6,7 +6,6 @@ import 'package:flutter/semantics.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:new_football/app/branding/club_asset_registry.dart';
 import 'package:new_football/app/branding/club_branding_registry.dart';
 import 'package:new_football/app/branding/club_color_tokens.dart';
@@ -20,6 +19,7 @@ import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
+import '../helpers/fixtures/branding_fixtures.dart';
 import '../helpers/widgets/widget_harness.dart';
 
 const _portrait = Size(390, 844);
@@ -43,7 +43,7 @@ void main() {
       ];
 
       for (final testCase in cases) {
-        final sourceGame = task41Game(seed: 5600 + cases.indexOf(testCase));
+        final sourceGame = brandingFixture();
         final game = _withActiveTeam(sourceGame, testCase.teamId);
         await _pumpScreen(
           tester,
@@ -115,7 +115,7 @@ void main() {
   ) async {
     addTearDown(() => _resetTest(tester));
 
-    final game = _withUnknownActiveTeam(task41Game(seed: 5604), _unknownTeamId);
+    final game = _withUnknownActiveTeam(brandingFixture(), _unknownTeamId);
     final fallbackRegistry = ClubBrandingRegistry(
       records: const [],
       assets: ClubAssetRegistry.production,
@@ -163,7 +163,7 @@ void main() {
       final semanticsHandle = tester.ensureSemantics();
       addTearDown(() => _resetTest(tester));
 
-      final sourceGame = _seasonFixture(task41Game(seed: 5605));
+      final sourceGame = _seasonFixture(brandingFixture());
       final activeTeam = sourceGame.leagueState.teamById('team_europe_0')!;
       String? previousSeasonLine;
 
@@ -306,7 +306,7 @@ void main() {
       );
 
       for (final testCase in cases) {
-        final sourceGame = task41Game(seed: 5606 + cases.indexOf(testCase));
+        final sourceGame = brandingFixture();
         final game = testCase.fallback
             ? _withUnknownActiveTeam(sourceGame, testCase.teamId)
             : _withActiveTeam(sourceGame, testCase.teamId);
@@ -358,7 +358,7 @@ void main() {
       const longTeamName =
           'Marseille International Athletic Association Football Club';
       final game = _withActiveTeam(
-        task41Game(seed: 5610),
+        brandingFixture(),
         'team_europe_2',
         name: longTeamName,
       );

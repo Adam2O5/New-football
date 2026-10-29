@@ -75,41 +75,40 @@ class SubstituteSheet extends StatelessWidget {
       constraints: BoxConstraints(maxHeight: maxHeight),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _SubstituteSheetHeader(
-              l10n: l10n,
-              outPlayer: outPlayer,
-              visibleCandidateCount: candidates.length,
-              totalCandidateCount: totalCandidateCount,
+        child: CustomScrollView(
+          shrinkWrap: true,
+          slivers: [
+            SliverToBoxAdapter(
+              child: _SubstituteSheetHeader(
+                l10n: l10n,
+                outPlayer: outPlayer,
+                visibleCandidateCount: candidates.length,
+                totalCandidateCount: totalCandidateCount,
+              ),
             ),
-            const SizedBox(height: 8),
-            Flexible(
-              child: hasCandidates
-                  ? ListView.separated(
-                      shrinkWrap: true,
-                      itemCount: candidates.length,
-                      separatorBuilder: (_, _) => const SizedBox(height: 2),
-                      itemBuilder: (context, index) {
-                        final candidate = candidates[index];
-                        return PlayerListTile(
-                          l10n: l10n,
-                          player: candidate,
-                          zone: _rosterZoneOf(team, candidate.id),
-                          selected: false,
-                          metricMode: metricMode,
-                          onInfo: () =>
-                              context.push('/game/player/${candidate.id}'),
-                          onTap: () {
-                            Navigator.of(context).pop();
-                            onSelected(candidate);
-                          },
-                        );
-                      },
-                    )
-                  : _EmptyCandidatesState(l10n: l10n),
-            ),
+            const SliverToBoxAdapter(child: SizedBox(height: 8)),
+            if (hasCandidates)
+              SliverList.separated(
+                itemCount: candidates.length,
+                separatorBuilder: (_, _) => const SizedBox(height: 2),
+                itemBuilder: (context, index) {
+                  final candidate = candidates[index];
+                  return PlayerListTile(
+                    l10n: l10n,
+                    player: candidate,
+                    zone: _rosterZoneOf(team, candidate.id),
+                    selected: false,
+                    metricMode: metricMode,
+                    onInfo: () => context.push('/game/player/${candidate.id}'),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      onSelected(candidate);
+                    },
+                  );
+                },
+              )
+            else
+              SliverToBoxAdapter(child: _EmptyCandidatesState(l10n: l10n)),
           ],
         ),
       ),

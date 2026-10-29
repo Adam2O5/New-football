@@ -6,7 +6,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/app/screens/player_detail_screen.dart';
 import 'package:new_football/app/screens/squad_screen.dart';
@@ -20,16 +19,9 @@ import 'package:new_football/core/models/injury.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
+import '../helpers/widgets/layout_scenarios.dart';
 import '../helpers/widgets/widget_harness.dart';
 
-const _responsiveViewports = <Size>[
-  Size(320, 568),
-  Size(360, 800),
-  Size(390, 844),
-  Size(844, 390),
-];
-
-const _responsiveTextScales = <double>[1.0, 1.3, 2.0];
 const _geometryTolerance = 1.0;
 const _responsiveLongName =
     'Responsive Player With An Exceptionally Long Name For Layout';
@@ -46,21 +38,16 @@ void main() {
       final previousErrorHandler = FlutterError.onError;
       FlutterError.onError = (details) => frameworkErrors.add(details);
       var completedScenarios = 0;
-      expect(
-        _responsiveViewports.length * _responsiveTextScales.length,
-        12,
-        reason:
-            'Property 6 must cover all 4×3 viewport/text-scale combinations',
-      );
-
       try {
-        for (final viewport in _responsiveViewports) {
-          for (final textScale in _responsiveTextScales) {
+        for (final layout in layoutScenarios) {
+          final viewport = layout.viewport;
+          for (final textScale in [layout.textScale]) {
             final scenario = _scenarioName(viewport, textScale);
             final harness = _ResponsiveSquadHarness(
               game: _responsiveFixtureGame(),
               viewport: viewport,
               textScale: textScale,
+              locale: layout.locale,
             );
 
             try {
@@ -184,7 +171,7 @@ void main() {
         }
         expect(
           completedScenarios,
-          12,
+          layoutScenarios.length,
           reason: 'Property 6 did not execute the complete responsive matrix',
         );
       } finally {
@@ -844,11 +831,13 @@ class _ResponsiveSquadHarness {
     required this.game,
     required this.viewport,
     required this.textScale,
+    required this.locale,
   });
 
   final GameSave game;
   final Size viewport;
   final double textScale;
+  final Locale locale;
   late GameController controller;
 
   late final GoRouter router = GoRouter(
@@ -888,7 +877,7 @@ class _ResponsiveSquadHarness {
         }),
       ],
       child: MaterialApp.router(
-        locale: const Locale('pl'),
+        locale: locale,
         localizationsDelegates: const [
           AppLocalizations.delegate,
           GlobalMaterialLocalizations.delegate,

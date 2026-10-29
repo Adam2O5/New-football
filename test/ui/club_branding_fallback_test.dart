@@ -9,7 +9,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:new_football/app/branding/club_asset_registry.dart';
 import 'package:new_football/app/branding/club_branding_data.dart';
 import 'package:new_football/app/branding/club_branding_record.dart';
@@ -26,6 +25,7 @@ import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/services/game_factory.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
+import '../helpers/fixtures/branding_fixtures.dart';
 import '../helpers/widgets/widget_harness.dart';
 
 const _fallbackTeamId = 'team_europe_0';
@@ -369,7 +369,7 @@ void main() {
     (tester) async {
       final semanticsHandle = tester.ensureSemantics();
       try {
-        final game = task41Game(seed: 5630);
+        final game = brandingFixture();
         final mappedMissingRegistry = _registryFor(
           logoAsset: _missingMappedLogo,
           assets: ClubAssetRegistry.production,

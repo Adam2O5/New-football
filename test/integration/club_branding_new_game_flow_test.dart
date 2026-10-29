@@ -4,16 +4,15 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:new_football/core/models/game_save.dart';
-import 'package:new_football/core/services/game_factory.dart';
-import 'package:new_football/data/save_repository.dart';
 import 'package:new_football/app/screens/new_game_screen.dart';
 import 'package:new_football/app/widgets/team_selection/team_row.dart';
 import 'package:new_football/core/models/enums.dart';
+import 'package:new_football/core/models/game_save.dart';
+import 'package:new_football/core/services/game_factory.dart';
+import 'package:new_football/data/save_repository.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
-import '../ui/team_selection_menu_test.dart' as selection_test;
+import '../helpers/widgets/team_selection_harness.dart' as selection_test;
 
 /// Captures the existing request contract while delegating creation to the
 /// production factory. [previewTeams] therefore remains the real 30-team

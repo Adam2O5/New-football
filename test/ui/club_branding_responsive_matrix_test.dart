@@ -5,11 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-
 import 'package:new_football/app/branding/club_asset_registry.dart';
 import 'package:new_football/app/branding/club_branding_data.dart';
-import 'package:new_football/app/branding/club_branding_registry.dart';
 import 'package:new_football/app/branding/club_branding_record.dart';
+import 'package:new_football/app/branding/club_branding_registry.dart';
 import 'package:new_football/app/branding/club_branding_types.dart';
 import 'package:new_football/app/branding/club_color_tokens.dart';
 import 'package:new_football/app/providers/club_branding_provider.dart';
@@ -24,18 +23,11 @@ import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/services/game_factory.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
 
+import '../helpers/fixtures/branding_fixtures.dart';
+import '../helpers/widgets/layout_scenarios.dart';
+import '../helpers/widgets/team_selection_harness.dart' as selection_test;
 import '../helpers/widgets/widget_harness.dart';
-import 'team_selection_menu_test.dart' as selection_test;
 
-const _matrixViewports = <Size>[
-  Size(320, 568),
-  Size(360, 800),
-  Size(390, 844),
-  Size(844, 390),
-];
-
-const _matrixTextScales = <double>[1.0, 1.3, 2.0];
-const _portraitSmall = Size(320, 568);
 const _landscapeSmall = Size(844, 390);
 const _geometryTolerance = 1.0;
 const _seasonYear = 2042;
@@ -135,9 +127,10 @@ void main() {
     (tester) async {
       final previewTeams = GameFactory().previewTeams();
 
-      for (final viewport in _matrixViewports) {
-        for (final textScale in _matrixTextScales) {
-          for (final locale in _localesFor(viewport)) {
+      for (final layout in layoutScenarios) {
+        final viewport = layout.viewport;
+        for (final textScale in [layout.textScale]) {
+          for (final locale in [layout.locale]) {
             final harness = selection_test.TeamSelectionHarness(
               locale: locale,
               viewport: viewport,
@@ -331,7 +324,7 @@ void main() {
     'keeps the Shell title in its title area and clear of action controls',
     (tester) async {
       final game = _withActiveTeam(
-        task41Game(seed: 7230),
+        brandingFixture(),
         'team_europe_2',
         name: 'Marseille International Athletic Association Football Club',
       );
@@ -341,9 +334,10 @@ void main() {
         tester.view.reset();
       });
 
-      for (final viewport in _matrixViewports) {
-        for (final textScale in _matrixTextScales) {
-          for (final locale in _localesFor(viewport)) {
+      for (final layout in layoutScenarios) {
+        final viewport = layout.viewport;
+        for (final textScale in [layout.textScale]) {
+          for (final locale in [layout.locale]) {
             final scenario = _scenario(viewport, textScale, locale);
             await _pumpCareerScreen(
               tester,
@@ -432,7 +426,7 @@ void main() {
     'keeps Home logo, name, and exactly three season lines visible at scale 2',
     (tester) async {
       final game = _seasonFixture(
-        _withActiveTeam(task41Game(seed: 7231), 'team_europe_0'),
+        _withActiveTeam(brandingFixture(), 'team_europe_0'),
       );
       final semanticsHandle = tester.ensureSemantics();
       addTearDown(() async {
@@ -442,8 +436,11 @@ void main() {
       });
 
       try {
-        for (final viewport in _matrixViewports) {
-          for (final locale in _localesFor(viewport)) {
+        for (final layout in layoutScenarios.where(
+          (layout) => layout.textScale == 2,
+        )) {
+          final viewport = layout.viewport;
+          for (final locale in [layout.locale]) {
             final scenario = _scenario(viewport, 2.0, locale);
             await _pumpCareerScreen(
               tester,
@@ -612,11 +609,6 @@ void main() {
     },
     timeout: const Timeout(Duration(minutes: 3)),
   );
-}
-
-List<Locale> _localesFor(Size viewport) {
-  final isExtreme = viewport == _portraitSmall || viewport == _landscapeSmall;
-  return isExtreme ? const [Locale('pl'), Locale('en')] : const [Locale('pl')];
 }
 
 String _scenario(Size viewport, double textScale, Locale locale) =>
