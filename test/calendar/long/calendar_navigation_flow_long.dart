@@ -11,6 +11,13 @@ import 'package:new_football/core/services/schedule_generator.dart';
 import '../../helpers/calendar/real_calendar_harness.dart';
 
 void main() {
+  setUp(() {
+    // ignore: avoid_print
+    print(
+      'manual long: calendar_navigation_flow_long.dart seed=7 (individual batch parameters below) starting; external budget and logs supplied by scripts/test.ps1',
+    );
+  });
+
   testWidgets(
     'real draft and scout stops navigate after the calendar host is cleaned up',
     (tester) async {

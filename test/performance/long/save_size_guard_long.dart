@@ -81,6 +81,10 @@ void main() {
     millisByDayKind = <String, int>{};
 
     for (var i = 0; i < simulatedDays; i++) {
+      // ignore: avoid_print
+      print(
+        'size guard: seed=$seed step=${i + 1}/$simulatedDays week=${league.currentWeek} day=${league.currentDay}',
+      );
       final week = league.currentWeek;
       final day = league.currentDay;
       final kind = day == 7

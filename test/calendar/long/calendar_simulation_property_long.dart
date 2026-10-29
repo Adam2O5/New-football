@@ -20,11 +20,20 @@ import 'package:new_football/core/models/seed_data_generator.dart';
 import 'package:new_football/data/save_repository.dart';
 
 void main() {
+  setUp(() {
+    // ignore: avoid_print
+    print(
+      'manual long: calendar_simulation_property_long.dart seed=per-case (batch parameters below) starting; external budget and logs supplied by scripts/test.ps1',
+    );
+  });
+
   // **Validates: Requirements 2.1, 2.2, 2.3, 2.5**
   test(
     'seeded calendar batches preserve ordered, complete day feedback',
     () async {
       for (final batchCase in _generatedBatchCases()) {
+        // ignore: avoid_print
+        print('calendar batch: ${batchCase.description}');
         final container = _newContainer(_gameFor(batchCase));
         final controller = container.read(gameControllerProvider.notifier);
         final beforeResultIds = _resultIds(controller.save!);
@@ -780,6 +789,8 @@ ProviderContainer _newContainer(GameSave game) {
 }
 
 GameSave _gameFor(_BatchCase batchCase) {
+  // ignore: avoid_print
+  print('calendar case: seed=${batchCase.seed} ${batchCase.description}');
   final game =
       GameFactory(
         seedGenerator: SeedDataGenerator(random: Random(batchCase.seed)),

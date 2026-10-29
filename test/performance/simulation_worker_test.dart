@@ -1,9 +1,13 @@
-@Tags(['slow'])
+@Tags(['integration'])
 library;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:new_football/core/models/game_save.dart';
-import 'package:new_football/core/services/game_factory.dart';
+import 'package:new_football/core/models/draft_models.dart';
+import 'package:new_football/core/models/league_state.dart';
+import 'package:new_football/core/models/enums.dart';
+import '../helpers/fixtures/game_fixtures.dart';
+import '../helpers/fixtures/presentation_fixtures.dart';
 import 'package:new_football/core/services/simulation_worker.dart';
 
 /// Covers the isolate boundary itself: the app runs day advancement through
@@ -11,18 +15,17 @@ import 'package:new_football/core/services/simulation_worker.dart';
 /// What can only break here is the transport — an unsendable payload, a lost
 /// reply, or a worker that answers from the wrong cached state.
 void main() {
-  // Day simulation in an unoptimized test VM costs seconds per day, and these
-  // tests deliberately run the real pipeline on both sides of the port.
-  const generous = Timeout(Duration(minutes: 5));
-
+  const generous = Timeout(Duration(seconds: 15));
   late GameSave game;
-
   setUp(() {
-    game = GameFactory().create(
-      const NewGameRequest(
-        saveName: 'WorkerTransport',
-        playerTeamId: 'team_europe_0',
-        seed: 77,
+    final team = presentationTeam();
+    game = saveForLeague(
+      LeagueState(
+        teams: [team],
+        playerTeamId: team.id,
+        currentWeek: 50,
+        currentDay: 2,
+        currentSeason: const Season(year: 2026, phase: SeasonPhase.offseason),
       ),
     );
   });
@@ -77,9 +80,31 @@ void main() {
       blockOnPendingUrgent: false,
     );
 
+    expect(resent.league, cached.league);
     expect(resent.league.currentWeek, cached.league.currentWeek);
     expect(resent.league.currentDay, cached.league.currentDay);
     expect(resent.result?.stopReason, cached.result?.stopReason);
+  }, timeout: generous);
+
+  test('a changed full payload replaces the cached league', () async {
+    final runner = IsolateSimulationRunner();
+    addTearDown(runner.dispose);
+    final first = await runner.advanceDay(
+      game.leagueState,
+      saveSeed: game.saveSeed,
+      blockOnPendingUrgent: false,
+    );
+    final team = first.league.teams.single;
+    final changed = first.league.updateTeam(
+      team.copyWith(name: 'Replacement payload'),
+    );
+    final next = await runner.advanceDay(
+      changed,
+      saveSeed: game.saveSeed,
+      blockOnPendingUrgent: false,
+    );
+    expect(next.league.teams.single.name, 'Replacement payload');
+    expect(next.league.currentDay, first.league.currentDay + 1);
   }, timeout: generous);
 
   test('reaches the same date as the inline runner', () async {

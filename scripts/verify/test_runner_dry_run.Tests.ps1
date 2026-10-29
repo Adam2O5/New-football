@@ -57,7 +57,7 @@ try {
     $real = Get-TestSelection -Root $repoRoot
     $discovery = @(Get-ChildItem -LiteralPath (Join-Path $repoRoot 'test') -Filter '*_test.dart' -File -Recurse)
     Assert ($real.Files.Count -eq $discovery.Count) 'Wrapper and default filename discovery must agree.'
-    foreach ($area in @('ai', 'app', 'balance', 'branding', 'calendar', 'core', 'data', 'integration', 'l10n', 'market', 'match', 'messages', 'nowe_testy', 'performance', 'search', 'staff', 'ui')) {
+    foreach ($area in @('ai', 'app', 'balance', 'branding', 'calendar', 'core', 'data', 'integration', 'l10n', 'market', 'match', 'messages', 'performance', 'search', 'staff', 'ui')) {
         $selection = Get-TestSelection -Root $repoRoot -Area $area
         Assert (@($selection.Files | Where-Object { !$_.StartsWith("test/$area/") }).Count -eq 0) "Area leaked other files: $area"
     }

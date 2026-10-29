@@ -18,6 +18,7 @@ void main() {
       final game = largerSave();
       final samples = <Map<String, Object>>[];
       for (var run = 0; run < 3; run++) {
+        debugPrint('baseline: seed=$fixtureSeed sample=${run + 1}/3 starting');
         final directory = await Directory.systemTemp.createTemp(
           'football-baseline-',
         );
@@ -25,6 +26,9 @@ void main() {
           final repository = SaveRepository(overrideDirectory: directory);
           final beforeSave = DateTime.now();
           final stopwatch = Stopwatch()..start();
+          debugPrint(
+            'baseline: seed=$fixtureSeed sample=${run + 1}/3 operation=save',
+          );
           await repository.save(game);
           final saveMicros = stopwatch.elapsedMicroseconds;
           final afterSave = DateTime.now();
@@ -32,6 +36,9 @@ void main() {
           final compactBytes = await file.length();
 
           stopwatch.reset();
+          debugPrint(
+            'baseline: seed=$fixtureSeed sample=${run + 1}/3 operation=load',
+          );
           final loaded = await repository.load(game.meta.id);
           final loadMicros = stopwatch.elapsedMicroseconds;
           expect(loaded.meta.updatedAt.isBefore(beforeSave), isFalse);
@@ -46,6 +53,9 @@ void main() {
           );
 
           stopwatch.reset();
+          debugPrint(
+            'baseline: seed=$fixtureSeed sample=${run + 1}/3 operation=rename',
+          );
           final renamed = await repository.renameRaw(
             id: game.meta.id,
             newName: 'renamed-fixture',
@@ -59,6 +69,9 @@ void main() {
             name: 'duplicate-fixture',
           );
           stopwatch.reset();
+          debugPrint(
+            'baseline: seed=$fixtureSeed sample=${run + 1}/3 operation=duplicate',
+          );
           await repository.duplicateRaw(
             sourceId: game.meta.id,
             duplicateMeta: duplicateMeta,

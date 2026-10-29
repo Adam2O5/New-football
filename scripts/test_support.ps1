@@ -11,7 +11,7 @@ function Get-TestSelection {
     $testRoot = Join-Path $Root 'test'
     $manifest = Get-Content -LiteralPath (Join-Path $testRoot 'blacklist.json') -Raw | ConvertFrom-Json
     if ($manifest.version -ne 1) { throw 'Unsupported test blacklist version.' }
-    $areas = @('ai', 'app', 'balance', 'branding', 'calendar', 'core', 'data', 'integration', 'l10n', 'market', 'match', 'messages', 'nowe_testy', 'performance', 'search', 'staff', 'ui')
+    $areas = @('ai', 'app', 'balance', 'branding', 'calendar', 'core', 'data', 'integration', 'l10n', 'market', 'match', 'messages', 'performance', 'search', 'staff', 'ui')
     if ($Area -and $Area -cnotin $areas) { throw "Invalid -Area '$Area'. Allowed: $($areas -join ', ')." }
     $files = @(Get-ChildItem -LiteralPath $testRoot -File -Recurse | ForEach-Object {
         [IO.Path]::GetRelativePath($Root, $_.FullName).Replace('\', '/')

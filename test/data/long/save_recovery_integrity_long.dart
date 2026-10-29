@@ -16,6 +16,13 @@ Future<Map<String, List<int>>> _snapshot(Directory directory) async => {
 };
 
 void main() {
+  setUp(() {
+    // ignore: avoid_print
+    print(
+      'manual long: save_recovery_integrity_long.dart seed=123 starting; external budget and logs supplied by scripts/test.ps1',
+    );
+  });
+
   test(
     'missing verified index original preserves every recovery artifact',
     () async {

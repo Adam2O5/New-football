@@ -10,6 +10,13 @@ import 'package:flutter_test/flutter_test.dart';
 import '../../helpers/processes/test_process.dart';
 
 void main() {
+  setUp(() {
+    // ignore: avoid_print
+    print(
+      'manual long: process_cleanup_long.dart seed=n/a; process lifecycle only starting; external budget and logs supplied by scripts/test.ps1',
+    );
+  });
+
   final root = Platform.environment['FLUTTER_ROOT'];
   final cache = root == null
       ? File(Platform.resolvedExecutable).parent.parent.parent.parent.path

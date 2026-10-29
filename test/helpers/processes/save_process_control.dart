@@ -58,12 +58,16 @@ Future<void> killInterruptedWriter(
     final marker =
         jsonDecode(await ready.readAsString()) as Map<String, dynamic>;
     workerPid = marker['pid'] as int;
+    stdout.writeln(
+      'recovery worker: publication barrier reached, pid=$workerPid',
+    );
     if (whileBlocked != null) {
       await whileBlocked().timeout(const Duration(seconds: 30));
     }
     expect(Process.killPid(workerPid, ProcessSignal.sigkill), isTrue);
     await exit.timeout(const Duration(seconds: 30));
     workerPid = null;
+    stdout.writeln('recovery worker: killed writer and observed process exit');
     await Future.wait([
       stdoutDone,
       stderrDone,

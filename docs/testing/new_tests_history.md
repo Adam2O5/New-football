@@ -1,12 +1,16 @@
-> Refaktor testów, etap 6 (29 października 2026): okresy/rynek/retencja/wycena/scouting są w test/market; lifecycle ludzi, sloty i replay dat w test/match; reguły balansu w test/balance. Declaration_split zastąpiły bieżące kontrakty modeli w test/core/models. Wyniki: [test/README.md](../README.md). Poniższe ścieżki opisują historię.
+# Historyczne nowe testy
 
-> Refaktor testów, etap 5 (29 października 2026): `contract_messages`, `staff_season_messages` i `message_locale_switch` przeniesiono do `test/messages/`. Konsolidacja Inbox, lokalizacje i ustawienia są zakończone do review. Bieżące wyniki i zakres: [test/README.md](../README.md). Historyczne ścieżki poniżej nie opisują aktualnego wyboru testów.
+Bieżące komendy i zasady: [test/README.md](../../test/README.md). Poniższe polecenia i ścieżki są historyczne.
 
-> Refaktor testów, etap 4 (28 października 2026): `calendar_pacing_phases` przeniesiono do `test/calendar/`, a `calendar_screen` rozdzielono na `calendar_dates` i `calendar_date_selection`. Bieżący wynik: [test/README.md](../README.md). Dodatkowe uruchamianie runtime’u w UTC pominięto decyzją użytkownika; historyczne opisy poniżej mogą zawierać dawne ścieżki.
+> Refaktor testów, etap 6 (29 października 2026): okresy/rynek/retencja/wycena/scouting są w test/market; lifecycle ludzi, sloty i replay dat w test/match; reguły balansu w test/balance. Declaration_split zastąpiły bieżące kontrakty modeli w test/core/models. Wyniki: [test/README.md](../../test/README.md). Poniższe ścieżki opisują historię.
 
-> Refaktor testów, etap 3 (28 października 2026): `game_controller_mutations`, `persistence` i `lifecycle` są w `test/app/providers/`. `save_management_boundary` scalono z odpowiednikami usługi, adaptera i integracji. Bieżące wyniki i mapa zmian: [test/README.md](../README.md). Dawne ścieżki poniżej stanowią zapis historyczny.
+> Refaktor testów, etap 5 (29 października 2026): `contract_messages`, `staff_season_messages` i `message_locale_switch` przeniesiono do `test/messages/`. Konsolidacja Inbox, lokalizacje i ustawienia są zakończone do review. Bieżące wyniki i zakres: [test/README.md](../../test/README.md). Historyczne ścieżki poniżej nie opisują aktualnego wyboru testów.
 
-> Refaktor testów, etap 2 (28 października 2026): krótkie testy startup/lock/recovery/transakcji przeniesiono do `test/data/`. Mieszany `stage_six_persistence_test` zastąpiono `test/data/save_repository_workers_test.dart` oraz `test/core/services/game_factory_preview_test.dart`. Funkcjonalna kontrola większego payloadu jest w `test/data/save_repository_payload_test.dart`; pomiary i procesowe crash/recovery nadal wymagają profilu long. Bieżący wykaz i wyniki: [test/README.md](../README.md). Poniższe opisy wcześniejszych etapów są historyczne i mogą zawierać dawne ścieżki.
+> Refaktor testów, etap 4 (28 października 2026): `calendar_pacing_phases` przeniesiono do `test/calendar/`, a `calendar_screen` rozdzielono na `calendar_dates` i `calendar_date_selection`. Bieżący wynik: [test/README.md](../../test/README.md). Dodatkowe uruchamianie runtime’u w UTC pominięto decyzją użytkownika; historyczne opisy poniżej mogą zawierać dawne ścieżki.
+
+> Refaktor testów, etap 3 (28 października 2026): `game_controller_mutations`, `persistence` i `lifecycle` są w `test/app/providers/`. `save_management_boundary` scalono z odpowiednikami usługi, adaptera i integracji. Bieżące wyniki i mapa zmian: [test/README.md](../../test/README.md). Dawne ścieżki poniżej stanowią zapis historyczny.
+
+> Refaktor testów, etap 2 (28 października 2026): krótkie testy startup/lock/recovery/transakcji przeniesiono do `test/data/`. Mieszany `stage_six_persistence_test` zastąpiono `test/data/save_repository_workers_test.dart` oraz `test/core/services/game_factory_preview_test.dart`. Funkcjonalna kontrola większego payloadu jest w `test/data/save_repository_payload_test.dart`; pomiary i procesowe crash/recovery nadal wymagają profilu long. Bieżący wykaz i wyniki: [test/README.md](../../test/README.md). Poniższe opisy wcześniejszych etapów są historyczne i mogą zawierać dawne ścieżki.
 
 # Nowe testy — etapy 0–9
 

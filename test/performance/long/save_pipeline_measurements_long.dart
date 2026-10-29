@@ -33,6 +33,7 @@ void _sampleMemory(SendPort parent) {
 }
 
 Future<T> _measure<T>(String name, FutureOr<T> Function() operation) async {
+  debugPrint('measurement start: seed=$fixtureSeed operation=$name');
   final samples = ReceivePort();
   final messages = StreamIterator<dynamic>(samples);
   await Isolate.spawn(_sampleMemory, samples.sendPort);
@@ -74,10 +75,10 @@ Future<T> _measure<T>(String name, FutureOr<T> Function() operation) async {
 
 void main() {
   test(
-    'stage 6 local comparative measurements (not device profile)',
+    'local save pipeline measurements (not device profile)',
     () async {
       final game = largerSave();
-      final directory = await Directory.systemTemp.createTemp('stage-six-');
+      final directory = await Directory.systemTemp.createTemp('save-pipeline-');
       try {
         debugPrint(
           jsonEncode({

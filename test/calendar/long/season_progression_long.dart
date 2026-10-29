@@ -12,6 +12,13 @@ import 'package:new_football/core/services/game_factory.dart';
 import 'package:new_football/data/save_repository.dart';
 
 void main() {
+  setUp(() {
+    // ignore: avoid_print
+    print(
+      'manual long: season_progression_long.dart seed=7 (individual batch parameters below) starting; external budget and logs supplied by scripts/test.ps1',
+    );
+  });
+
   late Directory tempDir;
   late ProviderContainer container;
   late GameController controller;

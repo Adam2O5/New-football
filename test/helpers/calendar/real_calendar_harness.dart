@@ -283,6 +283,7 @@ final class IntegrationGameController extends GameController {
     final wrappedObserver = observer == null
         ? null
         : (CalendarDaySimulationFeedback feedback) async {
+            debugPrint('calendar day published: ${feedback.identityKey}');
             publishedFeedback.add(feedback);
             await observer(feedback);
           };
@@ -320,6 +321,9 @@ Future<RealFixture> newFixture(
   final directory = await Directory.systemTemp.createTemp('nf_it_');
   final repository = SaveRepository(overrideDirectory: directory);
   await repository.save(game);
+  debugPrint(
+    'calendar fixture ready: seed=${game.saveSeed} W${game.leagueState.currentWeek}D${game.leagueState.currentDay}',
+  );
   final overrides = [
     saveRepositoryProvider.overrideWithValue(repository),
     gameControllerProvider.overrideWith(

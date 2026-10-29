@@ -36,6 +36,7 @@ class ControlledSaveRepository extends SaveRepository {
     Duration? managementDelay,
     bool? waitForManagementRelease,
     ControlledManagementFailure? managementFailure,
+    SaveRepositoryCheckpointHook? onCheckpoint,
   }) {
     final control = _ControlledSaveControl(
       delay: delay,
@@ -50,12 +51,14 @@ class ControlledSaveRepository extends SaveRepository {
     return ControlledSaveRepository._(
       control,
       overrideDirectory: overrideDirectory,
+      onCheckpoint: onCheckpoint,
     );
   }
 
   ControlledSaveRepository._(
     _ControlledSaveControl control, {
     super.overrideDirectory,
+    super.onCheckpoint,
   }) : _control = control,
        super(beforePublish: control.beforePublish);
 

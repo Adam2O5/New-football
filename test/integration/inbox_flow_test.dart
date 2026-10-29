@@ -1,4 +1,5 @@
 @Tags(['ui', 'integration'])
+@Timeout(Duration(minutes: 2))
 library;
 
 import 'dart:io';
@@ -189,10 +190,14 @@ void main() {
       final directory = (await tester.runAsync(
         () => Directory.systemTemp.createTemp('nf_flow_failure_'),
       ))!;
+      SaveRepositoryCheckpoint? lastCheckpoint;
       final repository = ControlledSaveRepository(
         overrideDirectory: directory,
         waitForRelease: true,
         failure: ControlledSaveFailure.beforeWrite,
+        onCheckpoint: (checkpoint) async {
+          lastCheckpoint = checkpoint;
+        },
       );
       final game = _withInbox(
         calendarFixture(seed: 4103),
@@ -274,6 +279,15 @@ void main() {
                 true &&
             find.byType(CircularProgressIndicator).evaluate().isEmpty,
         reason: 'successful retry did not publish the acknowledged save',
+        diagnostics: () =>
+            'attempts=${repository.saveCount}, '
+            'completed=${repository.completedSaves.length}, '
+            'active=${repository.activeSaveCount}, '
+            'checkpoint=$lastCheckpoint, '
+            'ack=${_messageById(fixture.controller.save, 'flow-save-failure')?.acknowledged}, '
+            'sheets=${find.byType(BottomSheet).evaluate().length}, '
+            'spinners=${find.byType(CircularProgressIndicator).evaluate().length}, '
+            'retry=${find.text('Ponów zapis').evaluate().length}',
       );
       await tester.pumpAndSettle();
 
@@ -625,16 +639,18 @@ Future<void> _mountGame(
 
 Future<void> _tapSheetButton(WidgetTester tester, String label) async {
   final filled = find.widgetWithText(FilledButton, label);
-  if (filled.evaluate().isNotEmpty) {
-    final callback = tester.widget<FilledButton>(filled).onPressed;
-    expect(callback, isNotNull, reason: 'sheet button $label is disabled');
+  final callback = filled.evaluate().isNotEmpty
+      ? tester.widget<FilledButton>(filled).onPressed
+      : tester
+            .widget<TextButton>(find.widgetWithText(TextButton, label))
+            .onPressed;
+  expect(callback, isNotNull, reason: 'sheet button $label is disabled');
+  // Confirmation spawns native repository I/O and isolates. Start that work
+  // in the real async zone; keep rendering and animations under tester.pump.
+  await tester.runAsync(() async {
     callback!();
-  } else {
-    final textButton = find.widgetWithText(TextButton, label);
-    final callback = tester.widget<TextButton>(textButton).onPressed;
-    expect(callback, isNotNull, reason: 'sheet button $label is disabled');
-    callback!();
-  }
+    await Future<void>.delayed(Duration.zero);
+  });
   await tester.pump();
 }
 
@@ -665,15 +681,23 @@ Future<void> _waitFor(
   WidgetTester tester,
   bool Function() condition, {
   required String reason,
+  String Function()? diagnostics,
 }) async {
-  for (var attempt = 0; attempt < 120; attempt++) {
+  // Frames advance fake animation time; real repository I/O needs its own
+  // wall-clock budget, especially when the full suite runs in parallel.
+  final clock = Stopwatch()..start();
+  while (clock.elapsed < const Duration(seconds: 30)) {
     if (condition()) return;
     await tester.pump(const Duration(milliseconds: 20));
     await tester.runAsync(
       () => Future<void>.delayed(const Duration(milliseconds: 5)),
     );
   }
-  expect(condition(), isTrue, reason: reason);
+  expect(
+    condition(),
+    isTrue,
+    reason: diagnostics == null ? reason : '$reason: ${diagnostics()}',
+  );
 }
 
 Future<T> _awaitOperation<T>(
