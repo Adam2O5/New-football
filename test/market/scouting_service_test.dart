@@ -42,7 +42,7 @@ void main() {
   test('runCombine upgrades only assigned prospects', () {
     final draftClass = SeedDataGenerator().generateDraftClass(
       year: 2030,
-      prospectCount: 2,
+      seed: 2030,
     );
     final first = draftClass.prospects[0];
     final second = draftClass.prospects[1];
@@ -72,21 +72,37 @@ void main() {
     expect(updated.forProspect(second.id)!.tier, ScoutingTier.tier1);
   });
 
-  test('tickKnowledge eventually advances tiers with high evaluation', () {
-    var scouting = const TeamScouting(
-      watchlistProspectIds: ['p1'],
-      knowledge: [ScoutingKnowledge(prospectId: 'p1')],
-    );
-    final svc = ScoutingService(random: Random(1));
-    for (
-      var i = 0;
-      i < 30 && scouting.forProspect('p1')!.tier != ScoutingTier.tier5;
-      i++
-    ) {
-      scouting = svc.tickKnowledge(scouting, 5.0);
-    }
-    expect(scouting.forProspect('p1')!.tier, ScoutingTier.tier5);
-  });
+  test(
+    'Evaluation 5 advances on the documented 20/30/40/50-week boundaries',
+    () {
+      var scouting = const TeamScouting(
+        watchlistProspectIds: ['p1'],
+        knowledge: [ScoutingKnowledge(prospectId: 'p1')],
+      );
+      final service = ScoutingService();
+      const boundaries = {
+        19: ScoutingTier.tier1,
+        20: ScoutingTier.tier2,
+        29: ScoutingTier.tier2,
+        30: ScoutingTier.tier3,
+        39: ScoutingTier.tier3,
+        40: ScoutingTier.tier4,
+        49: ScoutingTier.tier4,
+        50: ScoutingTier.tier5,
+      };
+      for (var week = 1; week <= 50; week++) {
+        scouting = service.tickKnowledge(scouting, 5.0);
+        if (boundaries.containsKey(week)) {
+          expect(
+            scouting.forProspect('p1')!.tier,
+            boundaries[week],
+            reason: 'week $week',
+          );
+        }
+      }
+      expect(service.tickKnowledge(scouting, 5.0), scouting);
+    },
+  );
 
   test(
     'runScoutReport assigns at most combineAssignLimit(coverage) targets',

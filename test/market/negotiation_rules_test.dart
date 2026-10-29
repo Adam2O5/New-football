@@ -367,12 +367,23 @@ void main() {
       week: 45,
       day: 6,
     );
-    final result = service.expireAt(
-      league: league.copyWith(negotiations: [negotiation]),
+    final input = league.copyWith(negotiations: [negotiation]);
+    final lastSlot = service.expireAt(
+      league: input,
       seasonYear: 2026,
-      week: balance.calendar.freeAgencyPhaseIIEndWeek,
+      week: 45,
       day: 7,
       hour: balance.contracts.hoursPerDay,
+    );
+    expect(
+      lastSlot.negotiationById('task28-phase2')!.status,
+      NegotiationStatus.active,
+    );
+    final result = service.expireAt(
+      league: lastSlot,
+      seasonYear: 2026,
+      week: 46,
+      day: 1,
     );
     expect(
       result.negotiationById('task28-phase2')!.status,

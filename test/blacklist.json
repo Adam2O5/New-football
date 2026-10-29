@@ -2,6 +2,17 @@
   "version": 1,
   "entries": [
     {
+      "path": "test/market/disabled/free_agency_ai_acquisition_test.dart.disabled",
+      "originalPath": "test/market/free_agency_test.dart",
+      "area": "market",
+      "reason": "Acquisition of a free agent by autonomous AI requires the deferred AI market implementation; draft finalization and expiry stay active.",
+      "reactivateWhen": "Extract only the listed deferred case after implementing and reviewing autonomous AI free-agent offers.",
+      "long": false,
+      "deferredCases": [
+        "DaySimulator resolves free agency offers during week 47"
+      ]
+    },
+    {
       "path": "test/ai/disabled/staff_ai_contract_market_integration_test.dart.disabled",
       "originalPath": "test/ai/staff_ai_contract_market_integration_test.dart",
       "area": "ai",
@@ -110,18 +121,25 @@
       "originalPath": "test/balance/task24_calibration_test.dart",
       "area": "balance",
       "reason": "Deferred AI or match-engine requirements.",
-      "reactivateWhen": "Implement and review the mechanic; restore only deferred cases, then run with an external time limit.",
+      "reactivateWhen": "Implement and review the match engine, then restore an executable calibration body; the historical empty main is not a test.",
       "long": true
     },
     {
       "path": "test/market/disabled/staff_negotiation_property_test.dart.disabled",
       "originalPath": "test/market/staff_negotiation_property_test.dart",
       "area": "market",
-      "reason": "Deferred AI or match-engine requirements.",
-      "reactivateWhen": "Implement and review the mechanic; restore only deferred cases, then run with an external time limit.",
+      "reason": "Mixed archive: independent scenarios are active in the listed owners; only listed AI cases remain deferred.",
+      "reactivateWhen": "Extract only deferredCases after implementing and reviewing AI; do not restore the archived mixed matrix wholesale.",
       "long": false,
-      "recoverInStage": 6,
-      "recoverScenarios": "Restore independent domain, presentation, market or UI scenarios before final acceptance."
+      "deferredCases": [
+        "_assertAi / _observeAi: AI renewal/free-agent plan, selection, persisted score and replay"
+      ],
+      "recoveredInStage": 6,
+      "activeOwners": [
+        "test/market/staff_negotiation_service_test.dart",
+        "test/market/staff_offer_boundaries_test.dart",
+        "test/market/staff_negotiation_market_test.dart"
+      ]
     },
     {
       "path": "test/match/disabled/match_engine_test.dart.disabled",
@@ -265,21 +283,40 @@
       "path": "test/staff/disabled/staff_empty_slot_property_test.dart.disabled",
       "originalPath": "test/staff/staff_empty_slot_property_test.dart",
       "area": "staff",
-      "reason": "Deferred AI or match-engine requirements.",
-      "reactivateWhen": "Implement and review the mechanic; restore only deferred cases, then run with an external time limit.",
+      "reason": "Mixed archive: independent scenarios are active in the listed owners; only listed AI cases remain deferred.",
+      "reactivateWhen": "Extract only deferredCases after implementing and reviewing AI; do not restore the archived mixed matrix wholesale.",
       "long": false,
-      "recoverInStage": 6,
-      "recoverScenarios": "Restore independent domain, presentation, market or UI scenarios before final acceptance."
+      "deferredCases": [
+        "_expectMarketAndAiBoundaries: AI free-agent and extension plans for empty, missing and unknown members"
+      ],
+      "recoveredInStage": 6,
+      "activeOwners": [
+        "test/data/staff_data_compatibility_property_test.dart",
+        "test/data/staff_data_compatibility_integration_test.dart",
+        "test/staff/staff_presentation_slot_property_test.dart",
+        "test/staff/team_staff_payroll_property_test.dart",
+        "test/market/staff_empty_slot_guards_test.dart"
+      ]
     },
     {
       "path": "test/staff/disabled/staff_raw_display_separation_property_test.dart.disabled",
       "originalPath": "test/staff/staff_raw_display_separation_property_test.dart",
       "area": "staff",
-      "reason": "Deferred AI or match-engine requirements.",
-      "reactivateWhen": "Implement and review the mechanic; restore only deferred cases, then run with an external time limit.",
+      "reason": "Mixed archive: independent scenarios are active in the listed owners; only listed AI cases remain deferred.",
+      "reactivateWhen": "Extract only deferredCases after implementing and reviewing AI; do not restore the archived mixed matrix wholesale.",
       "long": false,
-      "recoverInStage": 6,
-      "recoverScenarios": "Restore independent domain, presentation, market or UI scenarios before final acceptance."
+      "deferredCases": [
+        "_expectAiRawRanking: AI candidate selection by raw precision, stable-ID tie, offers and irrelevant-attribute invariance"
+      ],
+      "recoveredInStage": 6,
+      "activeOwners": [
+        "test/staff/staff_role_ratings_raw_property_test.dart",
+        "test/staff/staff_rating_presentation_property_test.dart",
+        "test/market/staff_negotiation_service_test.dart",
+        "test/market/staff_offer_boundaries_test.dart",
+        "test/market/staff_negotiation_market_test.dart",
+        "test/staff/team_staff_payroll_property_test.dart"
+      ]
     },
     {
       "path": "test/staff/disabled/staff_attribute_effect_preservation_test_deferred.dart.disabled",

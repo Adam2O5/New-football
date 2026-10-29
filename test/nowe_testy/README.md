@@ -1,3 +1,5 @@
+> Refaktor testów, etap 6 (29 października 2026): okresy/rynek/retencja/wycena/scouting są w test/market; lifecycle ludzi, sloty i replay dat w test/match; reguły balansu w test/balance. Declaration_split zastąpiły bieżące kontrakty modeli w test/core/models. Wyniki: [test/README.md](../README.md). Poniższe ścieżki opisują historię.
+
 > Refaktor testów, etap 5 (29 października 2026): `contract_messages`, `staff_season_messages` i `message_locale_switch` przeniesiono do `test/messages/`. Konsolidacja Inbox, lokalizacje i ustawienia są zakończone do review. Bieżące wyniki i zakres: [test/README.md](../README.md). Historyczne ścieżki poniżej nie opisują aktualnego wyboru testów.
 
 > Refaktor testów, etap 4 (28 października 2026): `calendar_pacing_phases` przeniesiono do `test/calendar/`, a `calendar_screen` rozdzielono na `calendar_dates` i `calendar_date_selection`. Bieżący wynik: [test/README.md](../README.md). Dodatkowe uruchamianie runtime’u w UTC pominięto decyzją użytkownika; historyczne opisy poniżej mogą zawierać dawne ścieżki.

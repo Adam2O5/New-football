@@ -4,7 +4,6 @@ import 'dart:math';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:new_football/core/balance/injury_catalog.dart';
 import 'package:new_football/core/models/enums.dart';
-import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/core/models/injury.dart';
 import 'package:new_football/core/models/match_models.dart';
 import 'package:new_football/core/models/player.dart';
@@ -180,10 +179,9 @@ void main() {
       state: player.state.copyWith(injury: injury),
     );
     final negativeResult = development.developPlayer(negative);
-    expect(
-      negativeResult.hidden.overallProgress,
-      lessThan(negative.hidden.overallProgress),
-    );
+    expect(negativeResult.overall(), lessThan(negative.overall()));
+    expect(negativeResult.hidden.overallProgress, 99.0);
+    expect(negativeResult.state.lastDevelopmentOvrDelta, -1);
   });
 
   test('structural match injury and Injury serialization round-trip', () {
@@ -221,30 +219,6 @@ void main() {
         jsonDecode(jsonEncode(injury.toJson())) as Map<String, dynamic>,
       ),
       injury,
-    );
-  });
-
-  test('save schema rejects versions other than current version', () {
-    expect(SaveSchema.currentVersion, 23);
-    final meta = GameSaveMeta(
-      id: 'save',
-      name: 'Save',
-      createdAt: DateTime(2026),
-      updatedAt: DateTime(2026),
-      seasonYear: 2026,
-      phase: SeasonPhase.regular,
-      schemaVersion: SaveSchema.currentVersion,
-    );
-    expect(
-      meta.compatibilityWith(SaveSchema.currentVersion),
-      SaveCompatibility.compatible,
-    );
-    expect(meta.compatibilityWith(7), SaveCompatibility.newer);
-    expect(
-      meta
-          .copyWith(schemaVersion: 7)
-          .compatibilityWith(SaveSchema.currentVersion),
-      SaveCompatibility.older,
     );
   });
 }

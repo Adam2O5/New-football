@@ -73,7 +73,28 @@ void main() {
         .generateLeague(seed: 3610)
         .copyWith(playerTeamId: null);
     league = season.runLottery(league);
-    final finalized = season.advanceDraft(league, saveSeed: 3610);
+    final draft = league.currentSeason.draftState!;
+    final completed = [
+      for (var index = 0; index < draft.order.length - 1; index++)
+        draft.order[index].copyWith(
+          prospectId: draft.draftClass.prospects[index].id,
+        ),
+    ];
+    league = league.copyWith(
+      playerTeamId: draft.order.last.teamId,
+      currentSeason: league.currentSeason.copyWith(
+        draftState: draft.copyWith(
+          currentPickIndex: draft.order.length - 1,
+          completedPicks: completed,
+        ),
+      ),
+    );
+    final finalized = season.advanceDraft(
+      league,
+      saveSeed: 3610,
+      playerPickProspectId:
+          draft.draftClass.prospects[draft.order.length - 1].id,
+    );
 
     expect(finalized.freeAgents, hasLength(30));
     expect(finalized.freshUndraftedPlayers, hasLength(30));
@@ -117,7 +138,6 @@ void main() {
       jsonDecode(jsonEncode(save.toJson())) as Map<String, dynamic>,
     );
     expect(restoredSave.leagueState.freshUndraftedPlayers, hasLength(30));
-    expect(SaveSchema.currentVersion, 23);
   });
 
   test(

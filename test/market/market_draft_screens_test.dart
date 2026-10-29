@@ -251,11 +251,15 @@ void main() {
       late GameController controller;
       final base = task41Game(seed: 4112);
       final league = base.leagueState;
-      final draftClass = SeedDataGenerator().generateDraftClass(
+      final generated = SeedDataGenerator().generateDraftClass(
         year: league.currentSeason.year + 1,
-        prospectCount: 3,
+        seed: 4112,
+      );
+      final draftClass = generated.copyWith(
+        prospects: generated.prospects.take(3).toList(),
       );
       final prospectIds = draftClass.prospects
+          .take(3)
           .map((prospect) => prospect.id)
           .toList();
       const scout = StaffMember(
@@ -292,9 +296,16 @@ void main() {
         ),
       );
 
+      final visible = ValueNotifier(true);
+      addTearDown(visible.dispose);
       await tester.pumpWidget(
         task41App(
-          const ProspectsScreen(initialCombine: true),
+          ValueListenableBuilder<bool>(
+            valueListenable: visible,
+            builder: (_, show, _) => show
+                ? const ProspectsScreen(initialCombine: true)
+                : const SizedBox.shrink(),
+          ),
           game,
           onController: (value) => controller = value,
         ),
@@ -308,7 +319,17 @@ void main() {
       await tester.pump();
       expect(find.text('Przydzielono na Combine: 1 / 2'), findsOneWidget);
 
-      await tester.tap(find.byTooltip('Zapisz przydziały Combine'));
+      final secondCheckbox = find.byType(Checkbox).at(1);
+      await tester.tap(secondCheckbox);
+      await tester.pump();
+      expect(find.text('Przydzielono na Combine: 2 / 2'), findsOneWidget);
+      expect(
+        tester.widget<Checkbox>(find.byType(Checkbox).at(2)).onChanged,
+        isNull,
+      );
+      await tester.tap(secondCheckbox);
+      await tester.pump();
+      visible.value = false;
       await tester.pumpAndSettle();
 
       expect(
@@ -320,16 +341,17 @@ void main() {
             .combineAssignedProspectIds,
         hasLength(1),
       );
-      expect(find.text('Przydziały Combine zapisane.'), findsOneWidget);
+      expect(find.byType(ProspectsScreen), findsNothing);
+      expect(controller.save, isNotNull);
     },
   );
 }
 
 class GameFactoryDraftFixture {
   static Prospect prospect() => SeedDataGenerator()
-      .generateDraftClass(year: 2027, prospectCount: 1)
+      .generateDraftClass(year: 2027, seed: 4111)
       .prospects
-      .single;
+      .first;
 }
 
 Finder _verticalScrollable() => find.byWidgetPredicate(

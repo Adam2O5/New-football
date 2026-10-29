@@ -13,6 +13,7 @@ import 'package:new_football/core/services/contract_service.dart';
 import 'package:new_football/core/services/negotiation_rules.dart';
 import 'package:new_football/core/services/negotiation_service.dart';
 import 'package:new_football/core/services/trade_service.dart';
+import 'package:new_football/core/services/season_service.dart';
 
 void main() {
   const balance = BalanceConfig.defaults;
@@ -42,14 +43,16 @@ void main() {
     );
   }
 
-  Player rookieFreeAgent(LeagueState league, String id) {
+  Player expiringRookie(LeagueState league, String id) {
     final source = league.teams.first.roster.first;
     return source.copyWith(
       id: id,
       name: 'Task 29 Rookie $id',
       contract: source.contract.copyWith(
         salary: 8000000,
-        yearsRemaining: 0,
+        yearsRemaining: 1,
+        firstSeason: league.currentSeason.year - 3,
+        lastSeason: league.currentSeason.year,
         hasBirdRights: false,
         isRookieScale: true,
         rookiePickSlot: 1,
@@ -84,10 +87,10 @@ void main() {
   });
 
   test('QO uses the 1.25x rookie salary floor and supports RFA match', () {
-    final base = leagueAt(week: 47, day: 1, hour: 1);
+    final base = leagueAt(week: 46, day: 7, hour: 10);
     final owner = base.playerTeam!;
-    final player = rookieFreeAgent(base, 'task29-rfa');
-    final state = base.copyWith(freeAgents: [player]);
+    final player = expiringRookie(base, 'task29-rfa');
+    final state = base.updateTeam(owner.copyWith(roster: [player]));
     final floor = market.qualifyingOfferMinimum(player);
 
     expect(floor, 10000000);
@@ -111,9 +114,16 @@ void main() {
     expect(qualified, isNotNull);
     expect(qualified!.rfaQualifyingOffers.single.salary, floor);
 
-    final rival = qualified.teams.firstWhere((team) => team.id != owner.id);
+    final phaseI = SeasonService().expireContracts(
+      qualified.copyWith(currentWeek: 47, currentDay: 1, currentHour: 1),
+    );
+    expect(
+      phaseI.freeAgents.any((candidate) => candidate.id == player.id),
+      isTrue,
+    );
+    final rival = phaseI.teams.firstWhere((team) => team.id != owner.id);
     final sheetState = market.submitOfferSheet(
-      league: qualified,
+      league: phaseI,
       offeringTeamId: rival.id,
       playerId: player.id,
       offer: ContractOffer(salary: floor + 1000000, years: 2),

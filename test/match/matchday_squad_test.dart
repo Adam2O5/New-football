@@ -10,6 +10,7 @@ import 'package:new_football/app/widgets/tactics/player_list_tile.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/injury.dart';
 import 'package:new_football/core/models/league_state.dart';
+import 'package:new_football/core/tactics/lineup_slots.dart';
 
 import '../helpers/widgets/widget_harness.dart';
 
@@ -59,7 +60,9 @@ void main() {
       ],
     );
     final game = base.copyWith(
-      leagueState: base.leagueState.updateTeam(updatedTeam),
+      leagueState: base.leagueState.updateTeam(
+        reconcileLineupSlots(updatedTeam),
+      ),
     );
 
     await tester.pumpWidget(
@@ -81,34 +84,41 @@ void main() {
       (widget) => widget is PlayerListTile && widget.player.id == id,
     );
 
-    final starterTile = tester.widget<PlayerListTile>(tile(starterId));
-    starterTile.onTap();
+    await tester.ensureVisible(tile(starterId));
+    await tester.tap(tile(starterId));
     await tester.pump();
-    final injuredTile = tester.widget<PlayerListTile>(tile(injuredId));
-    injuredTile.onTap();
+    await tester.ensureVisible(tile(injuredId));
+    await tester.tap(tile(injuredId));
     await tester.pump();
     expect(
       controller.save!.leagueState.playerTeam!.lineupPlayerIds,
       contains(starterId),
     );
     expect(
-      controller.save!.leagueState.playerTeam!.benchPlayerIds,
-      contains(injuredId),
+      controller.save!.leagueState.playerTeam!.lineupPlayerIds,
+      isNot(contains(injuredId)),
     );
 
-    final starterForSuspension = tester.widget<PlayerListTile>(tile(starterId));
-    starterForSuspension.onTap();
+    await tester.ensureVisible(tile(starterId));
+    await tester.tap(tile(starterId));
     await tester.pump();
-    final suspendedTile = tester.widget<PlayerListTile>(tile(suspendedId));
-    suspendedTile.onTap();
+    await tester.ensureVisible(tile(suspendedId));
+    await tester.tap(tile(suspendedId));
     await tester.pump();
     expect(
       controller.save!.leagueState.playerTeam!.lineupPlayerIds,
       contains(starterId),
     );
     expect(
-      controller.save!.leagueState.playerTeam!.benchPlayerIds,
-      contains(suspendedId),
+      controller.save!.leagueState.playerTeam!.lineupPlayerIds,
+      isNot(contains(suspendedId)),
     );
+    final after = controller.save!.leagueState.playerTeam!;
+    expect(
+      after.roster.map((player) => player.id),
+      containsAll([injuredId, suspendedId]),
+    );
+    expect(after.benchPlayerIds, isNot(contains(injuredId)));
+    expect(after.benchPlayerIds, isNot(contains(suspendedId)));
   });
 }

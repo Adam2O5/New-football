@@ -3,7 +3,6 @@ import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:new_football/core/models/enums.dart';
-import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/match_models.dart';
 import 'package:new_football/core/models/player.dart';
@@ -268,14 +267,13 @@ void main() {
       ],
     );
     final rolled = SeasonService().rolloverSeason(changed);
-    final after = rolled.teamById(team.id)!.roster.first;
+    final after = [
+      ...rolled.teams.expand((team) => team.roster),
+      ...rolled.freeAgents,
+    ].singleWhere((candidate) => candidate.id == player.id);
 
     expect(after.state.regularSeasonYellowCards, 0);
     expect(after.state.playoffYellowCards, 0);
     expect(after.state.suspensionGamesRemaining, 2);
-  });
-
-  test('save schema is current version', () {
-    expect(SaveSchema.currentVersion, 23);
   });
 }

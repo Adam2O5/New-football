@@ -311,20 +311,27 @@ void main() {
 
         final base = const TeamScouting(
           watchlistProspectIds: ['p1'],
-          knowledge: [ScoutingKnowledge(prospectId: 'p1')],
+          knowledge: [
+            ScoutingKnowledge(prospectId: 'p1', weeksAtCurrentTier: 19),
+          ],
         );
-        final seed = _seedBetweenScoutingChances();
-        final lowEvaluation = ScoutingService(
-          random: Random(seed),
-        ).tickKnowledge(base, 0.0);
-        final highEvaluation = ScoutingService(
-          random: Random(seed),
-        ).tickKnowledge(base, 5.0);
+        final lowEvaluation = service.tickKnowledge(base, 1.0);
+        final highEvaluation = service.tickKnowledge(base, 5.0);
+        final beforeBoundary = base.copyWith(
+          knowledge: [
+            const ScoutingKnowledge(prospectId: 'p1', weeksAtCurrentTier: 18),
+          ],
+        );
+        expect(
+          service.tickKnowledge(beforeBoundary, 5.0).forProspect('p1')!.tier,
+          ScoutingTier.tier1,
+        );
 
         expect(
           lowEvaluation.forProspect('p1')!.tier,
           ScoutingTier.tier1,
-          reason: 'low Evaluation should not use the high-Evaluation chance',
+          reason:
+              'Evaluation 1 needs 28 weeks, rather than the 20-week threshold of Evaluation 5',
         );
         expect(
           highEvaluation.forProspect('p1')!.tier,
@@ -475,12 +482,4 @@ void main() {
       },
     );
   });
-}
-
-int _seedBetweenScoutingChances() {
-  for (var seed = 0; seed < 10000; seed++) {
-    final roll = Random(seed).nextDouble();
-    if (roll >= 0.15 && roll < 0.60) return seed;
-  }
-  throw StateError('Could not find deterministic scouting threshold seed');
 }

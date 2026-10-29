@@ -190,7 +190,9 @@ void main() {
         awayTeamId: away.id,
         round: 1,
       );
-      final selected = home.roster.first;
+      final selected = home.roster.firstWhere(
+        (player) => player.position != Position.gk,
+      );
       final changedSelected = selected.copyWith(
         position: Position.st,
         state: selected.state.copyWith(stamina: 100),

@@ -310,7 +310,11 @@ void main() {
       (player) => player.contract.yearsRemaining >= 2,
     );
     final trackedBefore = tracked.copyWith(
-      contract: tracked.contract.copyWith(yearsRemaining: 2),
+      contract: tracked.contract.copyWith(
+        yearsRemaining: 2,
+        firstSeason: base.currentSeason.year,
+        lastSeason: base.currentSeason.year + 1,
+      ),
       state: tracked.state.copyWith(seasonsWithTeam: 4),
     );
     final updatedPlayerTeam = playerTeam.copyWith(

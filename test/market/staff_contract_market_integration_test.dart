@@ -13,7 +13,7 @@ import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/staff.dart';
 import 'package:new_football/core/services/contract_market_service.dart';
 import 'package:new_football/core/services/staff_service.dart';
-import 'package:new_football/data/save_repository.dart';
+import '../helpers/persistence/no_disk_save_repository.dart';
 
 import '../helpers/staff_role_ratings_test_helpers.dart';
 
@@ -25,7 +25,7 @@ import '../helpers/staff_role_ratings_test_helpers.dart';
 /// appear correct.
 void main() {
   test(
-    'free-agent user flow persists raw score, honors CFO, and signs the member',
+    'free-agent user flow stores raw score in current state, honors CFO, and signs the member',
     () async {
       final role = StaffRole.headCoach;
       final assistingCfo = staffCfoMember(
@@ -710,13 +710,14 @@ Future<({StaffReaction reaction, GameSave save})> _submitThroughController(
   try {
     final controller = container.read(gameControllerProvider.notifier);
     final reaction = await controller.offerStaff(candidate, offer);
+    await controller.flushPendingSave();
     return (reaction: reaction, save: controller.save!);
   } finally {
     container.dispose();
   }
 }
 
-class _NoopSaveRepository extends SaveRepository {
+class _NoopSaveRepository extends NoDiskSaveRepository {
   @override
   Future<void> save(GameSave gameSave) async {}
 }
