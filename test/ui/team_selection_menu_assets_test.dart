@@ -76,22 +76,27 @@ void main() {
     tester,
   ) async {
     var activations = 0;
+    const missingAsset = 'assets/images/not-available.png';
+    final bundle = _UnavailableLogoBundle(missingAsset);
     const label = 'Fallback FC, Test City, Test Conference, Not selected';
     final semanticsHandle = ensureSemantics(tester);
     try {
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: TeamRow(
-              key: const ValueKey<String>('fallback-team-row'),
-              teamId: 'fallback-team',
-              name: 'Fallback FC',
-              city: 'Test City',
-              conferenceLabel: 'Test Conference',
-              selected: false,
-              placeholderAsset: 'assets/images/not-available.png',
-              localizedSemanticsLabel: label,
-              onActivate: () => activations++,
+        DefaultAssetBundle(
+          bundle: bundle,
+          child: MaterialApp(
+            home: Scaffold(
+              body: TeamRow(
+                key: const ValueKey<String>('fallback-team-row'),
+                teamId: 'fallback-team',
+                name: 'Fallback FC',
+                city: 'Test City',
+                conferenceLabel: 'Test Conference',
+                selected: false,
+                placeholderAsset: missingAsset,
+                localizedSemanticsLabel: label,
+                onActivate: () => activations++,
+              ),
             ),
           ),
         ),
@@ -109,7 +114,12 @@ void main() {
       expect(semanticsSubtree(rowNode), hasLength(1));
       expect(find.text('Fallback FC'), findsOneWidget);
       expect(find.text('Test City · Test Conference'), findsOneWidget);
-      expect(find.byType(Image), findsOneWidget);
+      expect(bundle.failedLoads, [
+        missingAsset,
+        TeamSelectionAssets.placeholderAsset,
+      ]);
+      expect(find.byIcon(Icons.shield_outlined), findsOneWidget);
+      expect(find.byType(Image), findsNothing);
       expect(takeException(tester), isNull);
 
       await tester.tap(find.byKey(const ValueKey<String>('fallback-team-row')));
@@ -123,4 +133,20 @@ void main() {
       semanticsHandle.dispose();
     }
   });
+}
+
+class _UnavailableLogoBundle extends CachingAssetBundle {
+  _UnavailableLogoBundle(this.missingAsset);
+
+  final String missingAsset;
+  final failedLoads = <String>[];
+
+  @override
+  Future<ByteData> load(String key) {
+    if (key == missingAsset || key == TeamSelectionAssets.placeholderAsset) {
+      failedLoads.add(key);
+      throw FlutterError('Controlled unavailable logo: $key');
+    }
+    return rootBundle.load(key);
+  }
 }
