@@ -1,0 +1,1600 @@
+{
+  "base_commit": "02891a28a6b99ad9924ca6e58d7d1c59e51f6659",
+  "scope": "Desktop/JIT, modified long measurement test; no device profiling or production changes",
+  "execution": {
+    "Status": "PASS",
+    "ExitCode": 0,
+    "Seconds": 6.15,
+    "ProcessId": 28376
+  },
+  "records": [
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "players": 26,
+      "seed": 123,
+      "iterations": 100,
+      "runtime": "Flutter test / desktop / JIT",
+      "platform": "windows",
+      "dart_version": "3.11.1 (stable) (Tue Feb 24 00:03:07 2026 -0800) on \"windows_x64\"",
+      "repository": "memory; no disk or UI listeners",
+      "first_run": 0,
+      "warm_samples": 5
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 0,
+      "stage": "transform-only",
+      "iterations": 100,
+      "batch_us": 1539
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 0,
+      "stage": "contract-normalization-only",
+      "iterations": 100,
+      "batch_us": 1293
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 0,
+      "stage": "lineup-reconciliation-only",
+      "iterations": 100,
+      "batch_us": 10045
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 0,
+      "stage": "transform-and-normalization",
+      "iterations": 100,
+      "batch_us": 7066
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 0,
+      "stage": "controller-publication",
+      "iterations": 100,
+      "batch_us": 46594
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 0,
+      "stage": "memory-save-barrier",
+      "iterations": 1,
+      "batch_us": 305
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 0,
+      "memory_writes": 100
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 1,
+      "stage": "transform-only",
+      "iterations": 100,
+      "batch_us": 341
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 1,
+      "stage": "contract-normalization-only",
+      "iterations": 100,
+      "batch_us": 455
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 1,
+      "stage": "lineup-reconciliation-only",
+      "iterations": 100,
+      "batch_us": 2310
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 1,
+      "stage": "transform-and-normalization",
+      "iterations": 100,
+      "batch_us": 3996
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 1,
+      "stage": "controller-publication",
+      "iterations": 100,
+      "batch_us": 33982
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 1,
+      "stage": "memory-save-barrier",
+      "iterations": 1,
+      "batch_us": 64
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 1,
+      "memory_writes": 100
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 2,
+      "stage": "transform-only",
+      "iterations": 100,
+      "batch_us": 333
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 2,
+      "stage": "contract-normalization-only",
+      "iterations": 100,
+      "batch_us": 266
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 2,
+      "stage": "lineup-reconciliation-only",
+      "iterations": 100,
+      "batch_us": 1321
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 2,
+      "stage": "transform-and-normalization",
+      "iterations": 100,
+      "batch_us": 2135
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 2,
+      "stage": "controller-publication",
+      "iterations": 100,
+      "batch_us": 30112
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 2,
+      "stage": "memory-save-barrier",
+      "iterations": 1,
+      "batch_us": 57
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 2,
+      "memory_writes": 100
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 3,
+      "stage": "transform-only",
+      "iterations": 100,
+      "batch_us": 417
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 3,
+      "stage": "contract-normalization-only",
+      "iterations": 100,
+      "batch_us": 251
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 3,
+      "stage": "lineup-reconciliation-only",
+      "iterations": 100,
+      "batch_us": 1428
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 3,
+      "stage": "transform-and-normalization",
+      "iterations": 100,
+      "batch_us": 2065
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 3,
+      "stage": "controller-publication",
+      "iterations": 100,
+      "batch_us": 29535
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 3,
+      "stage": "memory-save-barrier",
+      "iterations": 1,
+      "batch_us": 67
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 3,
+      "memory_writes": 100
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 4,
+      "stage": "transform-only",
+      "iterations": 100,
+      "batch_us": 314
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 4,
+      "stage": "contract-normalization-only",
+      "iterations": 100,
+      "batch_us": 221
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 4,
+      "stage": "lineup-reconciliation-only",
+      "iterations": 100,
+      "batch_us": 1086
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 4,
+      "stage": "transform-and-normalization",
+      "iterations": 100,
+      "batch_us": 1704
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 4,
+      "stage": "controller-publication",
+      "iterations": 100,
+      "batch_us": 25335
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 4,
+      "stage": "memory-save-barrier",
+      "iterations": 1,
+      "batch_us": 53
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 4,
+      "memory_writes": 100
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 5,
+      "stage": "transform-only",
+      "iterations": 100,
+      "batch_us": 321
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 5,
+      "stage": "contract-normalization-only",
+      "iterations": 100,
+      "batch_us": 147
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 5,
+      "stage": "lineup-reconciliation-only",
+      "iterations": 100,
+      "batch_us": 760
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 5,
+      "stage": "transform-and-normalization",
+      "iterations": 100,
+      "batch_us": 1567
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 5,
+      "stage": "controller-publication",
+      "iterations": 100,
+      "batch_us": 22844
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 5,
+      "stage": "memory-save-barrier",
+      "iterations": 1,
+      "batch_us": 71
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "run": 5,
+      "memory_writes": 100
+    },
+    {
+      "warm_summary": "transform-only",
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "samples": 5,
+      "iterations": 100,
+      "median_batch_us": 333,
+      "min_batch_us": 314,
+      "max_batch_us": 417
+    },
+    {
+      "warm_summary": "contract-normalization-only",
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "samples": 5,
+      "iterations": 100,
+      "median_batch_us": 251,
+      "min_batch_us": 147,
+      "max_batch_us": 455
+    },
+    {
+      "warm_summary": "lineup-reconciliation-only",
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "samples": 5,
+      "iterations": 100,
+      "median_batch_us": 1321,
+      "min_batch_us": 760,
+      "max_batch_us": 2310
+    },
+    {
+      "warm_summary": "transform-and-normalization",
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "samples": 5,
+      "iterations": 100,
+      "median_batch_us": 2065,
+      "min_batch_us": 1567,
+      "max_batch_us": 3996
+    },
+    {
+      "warm_summary": "controller-publication",
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "samples": 5,
+      "iterations": 100,
+      "median_batch_us": 29535,
+      "min_batch_us": 22844,
+      "max_batch_us": 33982
+    },
+    {
+      "warm_summary": "memory-save-barrier",
+      "scenario": "inbox-mark-read",
+      "teams": 1,
+      "samples": 5,
+      "iterations": 1,
+      "median_batch_us": 64,
+      "min_batch_us": 53,
+      "max_batch_us": 71
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "players": 26,
+      "seed": 123,
+      "iterations": 100,
+      "runtime": "Flutter test / desktop / JIT",
+      "platform": "windows",
+      "dart_version": "3.11.1 (stable) (Tue Feb 24 00:03:07 2026 -0800) on \"windows_x64\"",
+      "repository": "memory; no disk or UI listeners",
+      "first_run": 0,
+      "warm_samples": 5
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 0,
+      "stage": "transform-only",
+      "iterations": 100,
+      "batch_us": 63
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 0,
+      "stage": "contract-normalization-only",
+      "iterations": 100,
+      "batch_us": 127
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 0,
+      "stage": "lineup-reconciliation-only",
+      "iterations": 100,
+      "batch_us": 1020
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 0,
+      "stage": "transform-and-normalization",
+      "iterations": 100,
+      "batch_us": 1198
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 0,
+      "stage": "controller-publication",
+      "iterations": 100,
+      "batch_us": 23031
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 0,
+      "stage": "memory-save-barrier",
+      "iterations": 1,
+      "batch_us": 49
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 0,
+      "memory_writes": 100
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 1,
+      "stage": "transform-only",
+      "iterations": 100,
+      "batch_us": 80
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 1,
+      "stage": "contract-normalization-only",
+      "iterations": 100,
+      "batch_us": 200
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 1,
+      "stage": "lineup-reconciliation-only",
+      "iterations": 100,
+      "batch_us": 1181
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 1,
+      "stage": "transform-and-normalization",
+      "iterations": 100,
+      "batch_us": 1176
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 1,
+      "stage": "controller-publication",
+      "iterations": 100,
+      "batch_us": 21184
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 1,
+      "stage": "memory-save-barrier",
+      "iterations": 1,
+      "batch_us": 58
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 1,
+      "memory_writes": 100
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 2,
+      "stage": "transform-only",
+      "iterations": 100,
+      "batch_us": 71
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 2,
+      "stage": "contract-normalization-only",
+      "iterations": 100,
+      "batch_us": 140
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 2,
+      "stage": "lineup-reconciliation-only",
+      "iterations": 100,
+      "batch_us": 766
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 2,
+      "stage": "transform-and-normalization",
+      "iterations": 100,
+      "batch_us": 1114
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 2,
+      "stage": "controller-publication",
+      "iterations": 100,
+      "batch_us": 18958
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 2,
+      "stage": "memory-save-barrier",
+      "iterations": 1,
+      "batch_us": 46
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 2,
+      "memory_writes": 100
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 3,
+      "stage": "transform-only",
+      "iterations": 100,
+      "batch_us": 69
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 3,
+      "stage": "contract-normalization-only",
+      "iterations": 100,
+      "batch_us": 133
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 3,
+      "stage": "lineup-reconciliation-only",
+      "iterations": 100,
+      "batch_us": 1338
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 3,
+      "stage": "transform-and-normalization",
+      "iterations": 100,
+      "batch_us": 1025
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 3,
+      "stage": "controller-publication",
+      "iterations": 100,
+      "batch_us": 20201
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 3,
+      "stage": "memory-save-barrier",
+      "iterations": 1,
+      "batch_us": 44
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 3,
+      "memory_writes": 100
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 4,
+      "stage": "transform-only",
+      "iterations": 100,
+      "batch_us": 87
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 4,
+      "stage": "contract-normalization-only",
+      "iterations": 100,
+      "batch_us": 142
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 4,
+      "stage": "lineup-reconciliation-only",
+      "iterations": 100,
+      "batch_us": 826
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 4,
+      "stage": "transform-and-normalization",
+      "iterations": 100,
+      "batch_us": 1135
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 4,
+      "stage": "controller-publication",
+      "iterations": 100,
+      "batch_us": 20176
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 4,
+      "stage": "memory-save-barrier",
+      "iterations": 1,
+      "batch_us": 88
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 4,
+      "memory_writes": 100
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 5,
+      "stage": "transform-only",
+      "iterations": 100,
+      "batch_us": 9
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 5,
+      "stage": "contract-normalization-only",
+      "iterations": 100,
+      "batch_us": 129
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 5,
+      "stage": "lineup-reconciliation-only",
+      "iterations": 100,
+      "batch_us": 843
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 5,
+      "stage": "transform-and-normalization",
+      "iterations": 100,
+      "batch_us": 821
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 5,
+      "stage": "controller-publication",
+      "iterations": 100,
+      "batch_us": 17821
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 5,
+      "stage": "memory-save-barrier",
+      "iterations": 1,
+      "batch_us": 46
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 1,
+      "run": 5,
+      "memory_writes": 100
+    },
+    {
+      "warm_summary": "transform-only",
+      "scenario": "date-mutation",
+      "teams": 1,
+      "samples": 5,
+      "iterations": 100,
+      "median_batch_us": 71,
+      "min_batch_us": 9,
+      "max_batch_us": 87
+    },
+    {
+      "warm_summary": "contract-normalization-only",
+      "scenario": "date-mutation",
+      "teams": 1,
+      "samples": 5,
+      "iterations": 100,
+      "median_batch_us": 140,
+      "min_batch_us": 129,
+      "max_batch_us": 200
+    },
+    {
+      "warm_summary": "lineup-reconciliation-only",
+      "scenario": "date-mutation",
+      "teams": 1,
+      "samples": 5,
+      "iterations": 100,
+      "median_batch_us": 843,
+      "min_batch_us": 766,
+      "max_batch_us": 1338
+    },
+    {
+      "warm_summary": "transform-and-normalization",
+      "scenario": "date-mutation",
+      "teams": 1,
+      "samples": 5,
+      "iterations": 100,
+      "median_batch_us": 1114,
+      "min_batch_us": 821,
+      "max_batch_us": 1176
+    },
+    {
+      "warm_summary": "controller-publication",
+      "scenario": "date-mutation",
+      "teams": 1,
+      "samples": 5,
+      "iterations": 100,
+      "median_batch_us": 20176,
+      "min_batch_us": 17821,
+      "max_batch_us": 21184
+    },
+    {
+      "warm_summary": "memory-save-barrier",
+      "scenario": "date-mutation",
+      "teams": 1,
+      "samples": 5,
+      "iterations": 1,
+      "median_batch_us": 46,
+      "min_batch_us": 44,
+      "max_batch_us": 88
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "players": 780,
+      "seed": 123,
+      "iterations": 100,
+      "runtime": "Flutter test / desktop / JIT",
+      "platform": "windows",
+      "dart_version": "3.11.1 (stable) (Tue Feb 24 00:03:07 2026 -0800) on \"windows_x64\"",
+      "repository": "memory; no disk or UI listeners",
+      "first_run": 0,
+      "warm_samples": 5
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 0,
+      "stage": "transform-only",
+      "iterations": 100,
+      "batch_us": 258
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 0,
+      "stage": "contract-normalization-only",
+      "iterations": 100,
+      "batch_us": 3125
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 0,
+      "stage": "lineup-reconciliation-only",
+      "iterations": 100,
+      "batch_us": 29284
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 0,
+      "stage": "transform-and-normalization",
+      "iterations": 100,
+      "batch_us": 30040
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 0,
+      "stage": "controller-publication",
+      "iterations": 100,
+      "batch_us": 48126
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 0,
+      "stage": "memory-save-barrier",
+      "iterations": 1,
+      "batch_us": 47
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 0,
+      "memory_writes": 100
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 1,
+      "stage": "transform-only",
+      "iterations": 100,
+      "batch_us": 226
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 1,
+      "stage": "contract-normalization-only",
+      "iterations": 100,
+      "batch_us": 2408
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 1,
+      "stage": "lineup-reconciliation-only",
+      "iterations": 100,
+      "batch_us": 28046
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 1,
+      "stage": "transform-and-normalization",
+      "iterations": 100,
+      "batch_us": 34830
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 1,
+      "stage": "controller-publication",
+      "iterations": 100,
+      "batch_us": 51434
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 1,
+      "stage": "memory-save-barrier",
+      "iterations": 1,
+      "batch_us": 48
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 1,
+      "memory_writes": 100
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 2,
+      "stage": "transform-only",
+      "iterations": 100,
+      "batch_us": 278
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 2,
+      "stage": "contract-normalization-only",
+      "iterations": 100,
+      "batch_us": 2618
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 2,
+      "stage": "lineup-reconciliation-only",
+      "iterations": 100,
+      "batch_us": 26718
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 2,
+      "stage": "transform-and-normalization",
+      "iterations": 100,
+      "batch_us": 29967
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 2,
+      "stage": "controller-publication",
+      "iterations": 100,
+      "batch_us": 51859
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 2,
+      "stage": "memory-save-barrier",
+      "iterations": 1,
+      "batch_us": 52
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 2,
+      "memory_writes": 100
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 3,
+      "stage": "transform-only",
+      "iterations": 100,
+      "batch_us": 183
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 3,
+      "stage": "contract-normalization-only",
+      "iterations": 100,
+      "batch_us": 2977
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 3,
+      "stage": "lineup-reconciliation-only",
+      "iterations": 100,
+      "batch_us": 26573
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 3,
+      "stage": "transform-and-normalization",
+      "iterations": 100,
+      "batch_us": 32622
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 3,
+      "stage": "controller-publication",
+      "iterations": 100,
+      "batch_us": 51070
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 3,
+      "stage": "memory-save-barrier",
+      "iterations": 1,
+      "batch_us": 40
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 3,
+      "memory_writes": 100
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 4,
+      "stage": "transform-only",
+      "iterations": 100,
+      "batch_us": 185
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 4,
+      "stage": "contract-normalization-only",
+      "iterations": 100,
+      "batch_us": 2863
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 4,
+      "stage": "lineup-reconciliation-only",
+      "iterations": 100,
+      "batch_us": 27046
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 4,
+      "stage": "transform-and-normalization",
+      "iterations": 100,
+      "batch_us": 30128
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 4,
+      "stage": "controller-publication",
+      "iterations": 100,
+      "batch_us": 49292
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 4,
+      "stage": "memory-save-barrier",
+      "iterations": 1,
+      "batch_us": 40
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 4,
+      "memory_writes": 100
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 5,
+      "stage": "transform-only",
+      "iterations": 100,
+      "batch_us": 193
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 5,
+      "stage": "contract-normalization-only",
+      "iterations": 100,
+      "batch_us": 2515
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 5,
+      "stage": "lineup-reconciliation-only",
+      "iterations": 100,
+      "batch_us": 26017
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 5,
+      "stage": "transform-and-normalization",
+      "iterations": 100,
+      "batch_us": 32108
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 5,
+      "stage": "controller-publication",
+      "iterations": 100,
+      "batch_us": 51612
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 5,
+      "stage": "memory-save-barrier",
+      "iterations": 1,
+      "batch_us": 117
+    },
+    {
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "run": 5,
+      "memory_writes": 100
+    },
+    {
+      "warm_summary": "transform-only",
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "samples": 5,
+      "iterations": 100,
+      "median_batch_us": 193,
+      "min_batch_us": 183,
+      "max_batch_us": 278
+    },
+    {
+      "warm_summary": "contract-normalization-only",
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "samples": 5,
+      "iterations": 100,
+      "median_batch_us": 2618,
+      "min_batch_us": 2408,
+      "max_batch_us": 2977
+    },
+    {
+      "warm_summary": "lineup-reconciliation-only",
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "samples": 5,
+      "iterations": 100,
+      "median_batch_us": 26718,
+      "min_batch_us": 26017,
+      "max_batch_us": 28046
+    },
+    {
+      "warm_summary": "transform-and-normalization",
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "samples": 5,
+      "iterations": 100,
+      "median_batch_us": 32108,
+      "min_batch_us": 29967,
+      "max_batch_us": 34830
+    },
+    {
+      "warm_summary": "controller-publication",
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "samples": 5,
+      "iterations": 100,
+      "median_batch_us": 51434,
+      "min_batch_us": 49292,
+      "max_batch_us": 51859
+    },
+    {
+      "warm_summary": "memory-save-barrier",
+      "scenario": "inbox-mark-read",
+      "teams": 30,
+      "samples": 5,
+      "iterations": 1,
+      "median_batch_us": 48,
+      "min_batch_us": 40,
+      "max_batch_us": 117
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "players": 780,
+      "seed": 123,
+      "iterations": 100,
+      "runtime": "Flutter test / desktop / JIT",
+      "platform": "windows",
+      "dart_version": "3.11.1 (stable) (Tue Feb 24 00:03:07 2026 -0800) on \"windows_x64\"",
+      "repository": "memory; no disk or UI listeners",
+      "first_run": 0,
+      "warm_samples": 5
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 0,
+      "stage": "transform-only",
+      "iterations": 100,
+      "batch_us": 6
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 0,
+      "stage": "contract-normalization-only",
+      "iterations": 100,
+      "batch_us": 2759
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 0,
+      "stage": "lineup-reconciliation-only",
+      "iterations": 100,
+      "batch_us": 26262
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 0,
+      "stage": "transform-and-normalization",
+      "iterations": 100,
+      "batch_us": 29157
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 0,
+      "stage": "controller-publication",
+      "iterations": 100,
+      "batch_us": 46424
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 0,
+      "stage": "memory-save-barrier",
+      "iterations": 1,
+      "batch_us": 63
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 0,
+      "memory_writes": 100
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 1,
+      "stage": "transform-only",
+      "iterations": 100,
+      "batch_us": 7
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 1,
+      "stage": "contract-normalization-only",
+      "iterations": 100,
+      "batch_us": 2414
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 1,
+      "stage": "lineup-reconciliation-only",
+      "iterations": 100,
+      "batch_us": 26591
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 1,
+      "stage": "transform-and-normalization",
+      "iterations": 100,
+      "batch_us": 31380
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 1,
+      "stage": "controller-publication",
+      "iterations": 100,
+      "batch_us": 46008
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 1,
+      "stage": "memory-save-barrier",
+      "iterations": 1,
+      "batch_us": 38
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 1,
+      "memory_writes": 100
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 2,
+      "stage": "transform-only",
+      "iterations": 100,
+      "batch_us": 6
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 2,
+      "stage": "contract-normalization-only",
+      "iterations": 100,
+      "batch_us": 2565
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 2,
+      "stage": "lineup-reconciliation-only",
+      "iterations": 100,
+      "batch_us": 27901
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 2,
+      "stage": "transform-and-normalization",
+      "iterations": 100,
+      "batch_us": 28667
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 2,
+      "stage": "controller-publication",
+      "iterations": 100,
+      "batch_us": 47916
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 2,
+      "stage": "memory-save-barrier",
+      "iterations": 1,
+      "batch_us": 47
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 2,
+      "memory_writes": 100
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 3,
+      "stage": "transform-only",
+      "iterations": 100,
+      "batch_us": 7
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 3,
+      "stage": "contract-normalization-only",
+      "iterations": 100,
+      "batch_us": 2382
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 3,
+      "stage": "lineup-reconciliation-only",
+      "iterations": 100,
+      "batch_us": 25578
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 3,
+      "stage": "transform-and-normalization",
+      "iterations": 100,
+      "batch_us": 29658
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 3,
+      "stage": "controller-publication",
+      "iterations": 100,
+      "batch_us": 44410
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 3,
+      "stage": "memory-save-barrier",
+      "iterations": 1,
+      "batch_us": 47
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 3,
+      "memory_writes": 100
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 4,
+      "stage": "transform-only",
+      "iterations": 100,
+      "batch_us": 9
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 4,
+      "stage": "contract-normalization-only",
+      "iterations": 100,
+      "batch_us": 2914
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 4,
+      "stage": "lineup-reconciliation-only",
+      "iterations": 100,
+      "batch_us": 26686
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 4,
+      "stage": "transform-and-normalization",
+      "iterations": 100,
+      "batch_us": 30100
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 4,
+      "stage": "controller-publication",
+      "iterations": 100,
+      "batch_us": 47230
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 4,
+      "stage": "memory-save-barrier",
+      "iterations": 1,
+      "batch_us": 58
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 4,
+      "memory_writes": 100
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 5,
+      "stage": "transform-only",
+      "iterations": 100,
+      "batch_us": 9
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 5,
+      "stage": "contract-normalization-only",
+      "iterations": 100,
+      "batch_us": 2635
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 5,
+      "stage": "lineup-reconciliation-only",
+      "iterations": 100,
+      "batch_us": 27047
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 5,
+      "stage": "transform-and-normalization",
+      "iterations": 100,
+      "batch_us": 31132
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 5,
+      "stage": "controller-publication",
+      "iterations": 100,
+      "batch_us": 45723
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 5,
+      "stage": "memory-save-barrier",
+      "iterations": 1,
+      "batch_us": 42
+    },
+    {
+      "scenario": "date-mutation",
+      "teams": 30,
+      "run": 5,
+      "memory_writes": 100
+    },
+    {
+      "warm_summary": "transform-only",
+      "scenario": "date-mutation",
+      "teams": 30,
+      "samples": 5,
+      "iterations": 100,
+      "median_batch_us": 7,
+      "min_batch_us": 6,
+      "max_batch_us": 9
+    },
+    {
+      "warm_summary": "contract-normalization-only",
+      "scenario": "date-mutation",
+      "teams": 30,
+      "samples": 5,
+      "iterations": 100,
+      "median_batch_us": 2565,
+      "min_batch_us": 2382,
+      "max_batch_us": 2914
+    },
+    {
+      "warm_summary": "lineup-reconciliation-only",
+      "scenario": "date-mutation",
+      "teams": 30,
+      "samples": 5,
+      "iterations": 100,
+      "median_batch_us": 26686,
+      "min_batch_us": 25578,
+      "max_batch_us": 27901
+    },
+    {
+      "warm_summary": "transform-and-normalization",
+      "scenario": "date-mutation",
+      "teams": 30,
+      "samples": 5,
+      "iterations": 100,
+      "median_batch_us": 30100,
+      "min_batch_us": 28667,
+      "max_batch_us": 31380
+    },
+    {
+      "warm_summary": "controller-publication",
+      "scenario": "date-mutation",
+      "teams": 30,
+      "samples": 5,
+      "iterations": 100,
+      "median_batch_us": 46008,
+      "min_batch_us": 44410,
+      "max_batch_us": 47916
+    },
+    {
+      "warm_summary": "memory-save-barrier",
+      "scenario": "date-mutation",
+      "teams": 30,
+      "samples": 5,
+      "iterations": 1,
+      "median_batch_us": 47,
+      "min_batch_us": 38,
+      "max_batch_us": 58
+    }
+  ]
+}

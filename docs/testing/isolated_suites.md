@@ -1,6 +1,6 @@
 # Zestawy izolowane od standard i CI
 
-14 aktywnych plików long jest dostępnych wyłącznie przez jawny profil long. 42 pliki wyłączone są rejestrowane osobno w [blacklist.json](../../test/blacklist.json). Task 38 nie jest aktywnym long i nie był uruchamiany w refaktorze.
+15 aktywnych plików long jest dostępnych wyłącznie przez jawny profil long. 42 pliki wyłączone są rejestrowane osobno w [blacklist.json](../../test/blacklist.json). Task 38 nie jest aktywnym long i nie był uruchamiany w refaktorze.
 
 ## Aktywne long
 
@@ -14,6 +14,7 @@
 - [test/data/long/save_recovery_integrity_long.dart](../../test/data/long/save_recovery_integrity_long.dart)
 - [test/data/long/save_transaction_recovery_long.dart](../../test/data/long/save_transaction_recovery_long.dart)
 - [test/data/long/seeded_generation_long.dart](../../test/data/long/seeded_generation_long.dart)
+- [test/performance/long/controller_normalization_measurements_long.dart](../../test/performance/long/controller_normalization_measurements_long.dart) — komendy Inbox i daty, normalizacja, publikacja kontrolera; [metoda i wyniki](controller-normalization-baseline-2026-10-30.md).
 - [test/performance/long/save_pipeline_measurements_long.dart](../../test/performance/long/save_pipeline_measurements_long.dart)
 - [test/performance/long/save_repository_baseline_long.dart](../../test/performance/long/save_repository_baseline_long.dart)
 - [test/performance/long/save_size_guard_long.dart](../../test/performance/long/save_size_guard_long.dart)

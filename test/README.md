@@ -26,6 +26,7 @@ Bieżący wykaz: [isolated_suites.md](../docs/testing/isolated_suites.md). Dług
 
 - `performance/long`: duże save/load/rename/duplicate, próbki JIT/RSS i luk event loop, projekcja wielkości sezonu oraz pełna integracja workera. Metryki JIT/debug nie są profilem urządzenia. Wielosezonowe historie w fixture’ach są syntetyczne, nie symulowane.
 - `save_pipeline_measurements_long.dart`: dwa fixture’y (początkowy i z syntetyczną historią), osobny przebieg 0 i pięć kolejnych próbek z medianą/min/max. Metoda, wyniki i uruchomienie wybranego pliku z twardym limitem: [baseline zapisu](../docs/testing/save-pipeline-baseline-2026-10-30.md).
+- `controller_normalization_measurements_long.dart`: serie po 100 komend Inbox/daty dla 1 i 30 drużyn, osobne pomiary transformacji, normalizacji i publikacji; [metoda i wyniki](../docs/testing/controller-normalization-baseline-2026-10-30.md). Zapis wyłącznie w pamięci, bez pomiaru UI i dysku.
 - `data/long`: replay w osobnych VM, crash/recovery i blokady między procesami, sprzątanie procesów oraz ograniczony rozkład formacji.
 - `calendar/long`: rzeczywiste przebiegi kalendarza i kosztowne interakcje/pacing. Mają parametry, postęp i zewnętrzny limit; nie są codziennym smoke.
 
