@@ -32,7 +32,11 @@ void _sampleMemory(SendPort parent) {
   });
 }
 
-Future<T> _measure<T>(String name, FutureOr<T> Function() operation) async {
+Future<T> _measure<T>(
+  String name,
+  FutureOr<T> Function() operation, {
+  void Function(int elapsedMicroseconds)? onElapsed,
+}) async {
   debugPrint('measurement start: seed=$fixtureSeed operation=$name');
   final samples = ReceivePort();
   final messages = StreamIterator<dynamic>(samples);
@@ -61,6 +65,7 @@ Future<T> _measure<T>(String name, FutureOr<T> Function() operation) async {
     final peak = messages.current as int;
     await messages.cancel();
     samples.close();
+    onElapsed?.call(clock.elapsedMicroseconds);
     debugPrint(
       jsonEncode({
         'operation': name,
@@ -74,15 +79,32 @@ Future<T> _measure<T>(String name, FutureOr<T> Function() operation) async {
 }
 
 void main() {
+  _registerMeasurements('initial');
+  _registerMeasurements('synthetic-history');
+}
+
+void _registerMeasurements(String fixture) {
   test(
-    'local save pipeline measurements (not device profile)',
+    '$fixture save pipeline measurements (not device profile)',
     () async {
-      final game = largerSave();
+      final game = fixture == 'initial'
+          ? saveForLeague(seededLeague())
+          : largerSave();
       final directory = await Directory.systemTemp.createTemp('save-pipeline-');
       try {
         debugPrint(
           jsonEncode({
-            'runtime': 'Flutter test / Windows / JIT',
+            'runtime': 'Flutter test / desktop / JIT',
+            'platform': Platform.operatingSystem,
+            'dart_version': Platform.version,
+            'fixture': fixture,
+            'first_run': 0,
+            'warm_samples': 5,
+            'teams': game.leagueState.teams.length,
+            'players': game.leagueState.teams.fold<int>(
+              0,
+              (sum, team) => sum + team.roster.length,
+            ),
             'seed': fixtureSeed,
             'schema': SaveSchema.currentVersion,
             'synthetic_history_seasons': game.leagueState.history.length,
@@ -91,18 +113,46 @@ void main() {
           }),
         );
         final repository = SaveRepository(overrideDirectory: directory);
-        for (var run = 1; run <= 3; run++) {
-          await _measure('preview-10/$run', () {
+        final elapsedSamples = <String, List<int>>{};
+        for (var run = 0; run <= 5; run++) {
+          // Run zero is reported separately, not included in warm summaries.
+          Future<T> measure<T>(
+            String operation,
+            FutureOr<T> Function() action,
+          ) => _measure(
+            '$fixture/$operation/$run',
+            action,
+            onElapsed: run == 0
+                ? null
+                : (elapsed) => elapsedSamples
+                      .putIfAbsent(operation, () => [])
+                      .add(elapsed),
+          );
+          await measure('preview-10', () {
             final factory = GameFactory();
             for (var i = 0; i < 10; i++) {
               expect(factory.previewTeams(), hasLength(30));
             }
           });
-          await _measure('save/$run', () => repository.save(game));
+          await measure('save', () => repository.save(game));
           final file = File('${directory.path}/${game.meta.id}.json');
           final compactBytes = await file.length();
-          await _measure('load/$run', () => repository.load(game.meta.id));
-          final phases = await _measure('isolated-load-phases/$run', () async {
+          final loaded = await measure(
+            'load',
+            () => repository.load(game.meta.id),
+          );
+          expect(
+            loaded.leagueState == game.leagueState,
+            isTrue,
+            reason:
+                'The complete league payload must survive each measured load.',
+          );
+          expect(loaded.saveSeed, game.saveSeed);
+          expect(
+            loaded.meta,
+            game.meta.copyWith(updatedAt: loaded.meta.updatedAt),
+          );
+          final phases = await measure('isolated-load-phases', () async {
             final path = file.path;
             final result = await Isolate.run(() async {
               final clock = Stopwatch()..start();
@@ -140,18 +190,21 @@ void main() {
               'return_and_scheduling_us': transfer,
             };
           });
-          debugPrint(jsonEncode({'load_phases': phases}));
-          final renamed = await _measure(
-            'rename/$run',
+          debugPrint(
+            jsonEncode({'fixture': fixture, 'run': run, 'load_phases': phases}),
+          );
+          final renamed = await measure(
+            'rename',
             () => repository.renameRaw(
               id: game.meta.id,
-              newName: 'renamed-fixture',
+              newName: 'renamed-fixture-$run',
             ),
           );
+          expect(renamed.name, 'renamed-fixture-$run');
           final renamedBytes = await file.length();
           final duplicate = renamed.copyWith(id: 'duplicate-$run');
-          await _measure(
-            'duplicate/$run',
+          await measure(
+            'duplicate',
             () => repository.duplicateRaw(
               sourceId: game.meta.id,
               duplicateMeta: duplicate,
@@ -159,6 +212,7 @@ void main() {
           );
           debugPrint(
             jsonEncode({
+              'fixture': fixture,
               'run': run,
               'compact_bytes': compactBytes,
               'renamed_bytes': renamedBytes,
@@ -167,8 +221,24 @@ void main() {
               ).length(),
             }),
           );
+          // Keep index cardinality fixed across samples; cleanup is not timed.
+          await repository.delete(duplicate.id);
         }
-        await _measure('save-snapshot-graph-sink-phases', () async {
+        for (final entry in elapsedSamples.entries) {
+          final sorted = entry.value.toList()..sort();
+          expect(sorted, hasLength(5));
+          debugPrint(
+            jsonEncode({
+              'warm_summary': entry.key,
+              'fixture': fixture,
+              'samples': sorted.length,
+              'median_us': sorted[sorted.length ~/ 2],
+              'min_us': sorted.first,
+              'max_us': sorted.last,
+            }),
+          );
+        }
+        await _measure('$fixture/save-snapshot-graph-sink-phases', () async {
           final path = '${directory.path}/stream-measurement.json';
           final report = await Isolate.run(() async {
             final rssBeforeGraph = ProcessInfo.currentRss;
@@ -208,7 +278,7 @@ void main() {
             }
           });
           expect(await File(path).length(), report['encoded_bytes']);
-          debugPrint(jsonEncode({'save_phases': report}));
+          debugPrint(jsonEncode({'fixture': fixture, 'save_phases': report}));
         });
       } finally {
         await directory.delete(recursive: true);
