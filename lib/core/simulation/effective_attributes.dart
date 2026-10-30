@@ -1,5 +1,5 @@
+import 'package:new_football/core/tactics/position_role_fit.dart';
 import 'package:new_football/core/balance/balance_config.dart';
-import 'package:new_football/core/models/assigned_role.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/goalkeeper_attributes.dart';
 import 'package:new_football/core/models/player_attributes.dart';
@@ -313,7 +313,7 @@ class EffectiveAttributeCalculator {
     if (assignedPosition != null) {
       return player.position == assignedPosition ? 1.0 : 0.90;
     }
-    return _positionFitsRole(player.position, player.state.role) ? 1.0 : 0.90;
+    return positionFitsRole(player.position, player.state.role) ? 1.0 : 0.90;
   }
 
   /// Role fit is independent from natural-position fit and chemistry cohesion.
@@ -398,17 +398,4 @@ class EffectiveAttributeCalculator {
     baseAttributeCache?._put(player, attributes);
     return attributes;
   }
-
-  static bool _positionFitsRole(Position position, AssignedRole role) =>
-      role.map(
-        gk: (_) => position == Position.gk,
-        cb: (_) => position == Position.cb,
-        fullBack: (_) => position == Position.lb || position == Position.rb,
-        wingBack: (_) => position == Position.lwb || position == Position.rwb,
-        cdm: (_) => position == Position.cdm,
-        cm: (_) => position == Position.cm,
-        cam: (_) => position == Position.cam,
-        winger: (_) => position == Position.lw || position == Position.rw,
-        striker: (_) => position == Position.st,
-      );
 }

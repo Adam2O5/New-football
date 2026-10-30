@@ -1,5 +1,5 @@
+import 'package:new_football/core/tactics/position_role_fit.dart';
 import 'package:new_football/core/models/assigned_role.dart';
-import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/staff.dart';
 
@@ -31,7 +31,7 @@ class CohesionService {
     var bonus = 0;
     for (final p in lineup) {
       // Position check: assigned role type maps to position(s).
-      final positionFits = _positionFitsRole(p.position, p.state.role);
+      final positionFits = positionFitsRole(p.position, p.state.role);
       bonus += positionFits ? _positionCorrect : _positionForeign;
 
       // Optimal role check.
@@ -87,21 +87,6 @@ class CohesionService {
     if (motivation < 3.0) return 1.00;
     if (motivation < 4.0) return 1.01;
     return 1.03;
-  }
-
-  /// Whether the player's natural position matches the assigned role type.
-  static bool _positionFitsRole(Position position, AssignedRole role) {
-    return role.map(
-      gk: (_) => position == Position.gk,
-      cb: (_) => position == Position.cb,
-      fullBack: (_) => position == Position.lb || position == Position.rb,
-      wingBack: (_) => position == Position.lwb || position == Position.rwb,
-      cdm: (_) => position == Position.cdm,
-      cm: (_) => position == Position.cm,
-      cam: (_) => position == Position.cam,
-      winger: (_) => position == Position.lw || position == Position.rw,
-      striker: (_) => position == Position.st,
-    );
   }
 
   /// Two AssignedRole instances match if they have the same discriminator type

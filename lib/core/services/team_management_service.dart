@@ -1,5 +1,5 @@
+import 'package:new_football/core/tactics/position_role_fit.dart';
 import 'package:new_football/core/balance/balance_config.dart';
-import 'package:new_football/core/models/assigned_role.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/match_models.dart';
@@ -232,7 +232,7 @@ class TeamManagementService {
     for (var i = 0; i < lineup.length; i++) {
       final player = lineup[i];
       final optimal = positions == null
-          ? _positionFitsRole(player.position, player.state.role)
+          ? positionFitsRole(player.position, player.state.role)
           : player.position == positions[i];
       if (optimal) {
         optimalPlayers++;
@@ -414,19 +414,5 @@ class TeamManagementService {
       count++;
     }
     return last * count;
-  }
-
-  static bool _positionFitsRole(Position position, AssignedRole role) {
-    return role.map(
-      gk: (_) => position == Position.gk,
-      cb: (_) => position == Position.cb,
-      fullBack: (_) => position == Position.lb || position == Position.rb,
-      wingBack: (_) => position == Position.lwb || position == Position.rwb,
-      cdm: (_) => position == Position.cdm,
-      cm: (_) => position == Position.cm,
-      cam: (_) => position == Position.cam,
-      winger: (_) => position == Position.lw || position == Position.rw,
-      striker: (_) => position == Position.st,
-    );
   }
 }
