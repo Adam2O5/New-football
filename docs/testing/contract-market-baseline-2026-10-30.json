@@ -1,0 +1,778 @@
+{
+  "base_commit": "5b296a9a88198be502fce658e3789b857d1ce2f4",
+  "scope": "Desktop/JIT; synthetic manual FA-I/waiting fixtures and separate lookup probe; AI disabled; combined execution includes simulation measurement tests",
+  "execution": {
+    "Status": "PASS",
+    "ExitCode": 0,
+    "Seconds": 5.73,
+    "ProcessId": 1848
+  },
+  "records": [
+    {
+      "scenario": "manual-hourly",
+      "teams": 1,
+      "players": 12,
+      "free_agents": 200,
+      "iterations": 20,
+      "seed": 123,
+      "week": 47,
+      "day": 2,
+      "first_run": 0,
+      "warm_samples": 5,
+      "runtime": "Flutter test / desktop / JIT",
+      "platform": "windows",
+      "dart_version": "3.11.1 (stable) (Tue Feb 24 00:03:07 2026 -0800) on \"windows_x64\"",
+      "ai_enabled": false
+    },
+    {
+      "teams": 1,
+      "stage": "submit-offer",
+      "run": 0,
+      "iterations": 20,
+      "batch_us": 39476
+    },
+    {
+      "teams": 1,
+      "stage": "resolve-waiting-hour",
+      "run": 0,
+      "iterations": 20,
+      "batch_us": 15480
+    },
+    {
+      "teams": 1,
+      "stage": "finalize-offer",
+      "run": 0,
+      "iterations": 20,
+      "batch_us": 11499
+    },
+    {
+      "teams": 1,
+      "stage": "submit-offer",
+      "run": 1,
+      "iterations": 20,
+      "batch_us": 3284
+    },
+    {
+      "teams": 1,
+      "stage": "resolve-waiting-hour",
+      "run": 1,
+      "iterations": 20,
+      "batch_us": 4052
+    },
+    {
+      "teams": 1,
+      "stage": "finalize-offer",
+      "run": 1,
+      "iterations": 20,
+      "batch_us": 4928
+    },
+    {
+      "teams": 1,
+      "stage": "submit-offer",
+      "run": 2,
+      "iterations": 20,
+      "batch_us": 3124
+    },
+    {
+      "teams": 1,
+      "stage": "resolve-waiting-hour",
+      "run": 2,
+      "iterations": 20,
+      "batch_us": 3468
+    },
+    {
+      "teams": 1,
+      "stage": "finalize-offer",
+      "run": 2,
+      "iterations": 20,
+      "batch_us": 5118
+    },
+    {
+      "teams": 1,
+      "stage": "submit-offer",
+      "run": 3,
+      "iterations": 20,
+      "batch_us": 2581
+    },
+    {
+      "teams": 1,
+      "stage": "resolve-waiting-hour",
+      "run": 3,
+      "iterations": 20,
+      "batch_us": 2746
+    },
+    {
+      "teams": 1,
+      "stage": "finalize-offer",
+      "run": 3,
+      "iterations": 20,
+      "batch_us": 3436
+    },
+    {
+      "teams": 1,
+      "stage": "submit-offer",
+      "run": 4,
+      "iterations": 20,
+      "batch_us": 2406
+    },
+    {
+      "teams": 1,
+      "stage": "resolve-waiting-hour",
+      "run": 4,
+      "iterations": 20,
+      "batch_us": 2574
+    },
+    {
+      "teams": 1,
+      "stage": "finalize-offer",
+      "run": 4,
+      "iterations": 20,
+      "batch_us": 3350
+    },
+    {
+      "teams": 1,
+      "stage": "submit-offer",
+      "run": 5,
+      "iterations": 20,
+      "batch_us": 2199
+    },
+    {
+      "teams": 1,
+      "stage": "resolve-waiting-hour",
+      "run": 5,
+      "iterations": 20,
+      "batch_us": 2763
+    },
+    {
+      "teams": 1,
+      "stage": "finalize-offer",
+      "run": 5,
+      "iterations": 20,
+      "batch_us": 3587
+    },
+    {
+      "warm_summary": "submit-offer",
+      "teams": 1,
+      "samples": 5,
+      "iterations": 20,
+      "median_batch_us": 2581,
+      "min_batch_us": 2199,
+      "max_batch_us": 3284
+    },
+    {
+      "warm_summary": "resolve-waiting-hour",
+      "teams": 1,
+      "samples": 5,
+      "iterations": 20,
+      "median_batch_us": 2763,
+      "min_batch_us": 2574,
+      "max_batch_us": 4052
+    },
+    {
+      "warm_summary": "finalize-offer",
+      "teams": 1,
+      "samples": 5,
+      "iterations": 20,
+      "median_batch_us": 3587,
+      "min_batch_us": 3350,
+      "max_batch_us": 5118
+    },
+    {
+      "scenario": "lookup-probe",
+      "teams": 1,
+      "players": 12,
+      "free_agents": 200,
+      "iterations": 100,
+      "seed": 123,
+      "week": 47,
+      "day": 2,
+      "first_run": 0,
+      "warm_samples": 5,
+      "runtime": "Flutter test / desktop / JIT",
+      "platform": "windows",
+      "dart_version": "3.11.1 (stable) (Tue Feb 24 00:03:07 2026 -0800) on \"windows_x64\"",
+      "ai_enabled": false
+    },
+    {
+      "teams": 1,
+      "mode": "same-snapshot",
+      "run": 0,
+      "population": 212,
+      "source_reads": 212,
+      "index_builds": 1
+    },
+    {
+      "teams": 1,
+      "stage": "lookup-same-snapshot",
+      "run": 0,
+      "iterations": 100,
+      "batch_us": 1488
+    },
+    {
+      "teams": 1,
+      "mode": "same-snapshot",
+      "run": 1,
+      "population": 212,
+      "source_reads": 212,
+      "index_builds": 1
+    },
+    {
+      "teams": 1,
+      "stage": "lookup-same-snapshot",
+      "run": 1,
+      "iterations": 100,
+      "batch_us": 384
+    },
+    {
+      "teams": 1,
+      "mode": "same-snapshot",
+      "run": 2,
+      "population": 212,
+      "source_reads": 212,
+      "index_builds": 1
+    },
+    {
+      "teams": 1,
+      "stage": "lookup-same-snapshot",
+      "run": 2,
+      "iterations": 100,
+      "batch_us": 375
+    },
+    {
+      "teams": 1,
+      "mode": "same-snapshot",
+      "run": 3,
+      "population": 212,
+      "source_reads": 212,
+      "index_builds": 1
+    },
+    {
+      "teams": 1,
+      "stage": "lookup-same-snapshot",
+      "run": 3,
+      "iterations": 100,
+      "batch_us": 366
+    },
+    {
+      "teams": 1,
+      "mode": "same-snapshot",
+      "run": 4,
+      "population": 212,
+      "source_reads": 212,
+      "index_builds": 1
+    },
+    {
+      "teams": 1,
+      "stage": "lookup-same-snapshot",
+      "run": 4,
+      "iterations": 100,
+      "batch_us": 543
+    },
+    {
+      "teams": 1,
+      "mode": "same-snapshot",
+      "run": 5,
+      "population": 212,
+      "source_reads": 212,
+      "index_builds": 1
+    },
+    {
+      "teams": 1,
+      "stage": "lookup-same-snapshot",
+      "run": 5,
+      "iterations": 100,
+      "batch_us": 519
+    },
+    {
+      "teams": 1,
+      "mode": "new-snapshot",
+      "run": 0,
+      "population": 212,
+      "source_reads": 21200,
+      "index_builds": 100
+    },
+    {
+      "teams": 1,
+      "stage": "lookup-new-snapshot",
+      "run": 0,
+      "iterations": 100,
+      "batch_us": 4423
+    },
+    {
+      "teams": 1,
+      "mode": "new-snapshot",
+      "run": 1,
+      "population": 212,
+      "source_reads": 21200,
+      "index_builds": 100
+    },
+    {
+      "teams": 1,
+      "stage": "lookup-new-snapshot",
+      "run": 1,
+      "iterations": 100,
+      "batch_us": 3536
+    },
+    {
+      "teams": 1,
+      "mode": "new-snapshot",
+      "run": 2,
+      "population": 212,
+      "source_reads": 21200,
+      "index_builds": 100
+    },
+    {
+      "teams": 1,
+      "stage": "lookup-new-snapshot",
+      "run": 2,
+      "iterations": 100,
+      "batch_us": 3250
+    },
+    {
+      "teams": 1,
+      "mode": "new-snapshot",
+      "run": 3,
+      "population": 212,
+      "source_reads": 21200,
+      "index_builds": 100
+    },
+    {
+      "teams": 1,
+      "stage": "lookup-new-snapshot",
+      "run": 3,
+      "iterations": 100,
+      "batch_us": 2306
+    },
+    {
+      "teams": 1,
+      "mode": "new-snapshot",
+      "run": 4,
+      "population": 212,
+      "source_reads": 21200,
+      "index_builds": 100
+    },
+    {
+      "teams": 1,
+      "stage": "lookup-new-snapshot",
+      "run": 4,
+      "iterations": 100,
+      "batch_us": 2159
+    },
+    {
+      "teams": 1,
+      "mode": "new-snapshot",
+      "run": 5,
+      "population": 212,
+      "source_reads": 21200,
+      "index_builds": 100
+    },
+    {
+      "teams": 1,
+      "stage": "lookup-new-snapshot",
+      "run": 5,
+      "iterations": 100,
+      "batch_us": 1972
+    },
+    {
+      "warm_summary": "lookup-same-snapshot",
+      "teams": 1,
+      "samples": 5,
+      "iterations": 100,
+      "median_batch_us": 384,
+      "min_batch_us": 366,
+      "max_batch_us": 543
+    },
+    {
+      "warm_summary": "lookup-new-snapshot",
+      "teams": 1,
+      "samples": 5,
+      "iterations": 100,
+      "median_batch_us": 2306,
+      "min_batch_us": 1972,
+      "max_batch_us": 3536
+    },
+    {
+      "scenario": "manual-hourly",
+      "teams": 30,
+      "players": 766,
+      "free_agents": 200,
+      "iterations": 20,
+      "seed": 123,
+      "week": 47,
+      "day": 2,
+      "first_run": 0,
+      "warm_samples": 5,
+      "runtime": "Flutter test / desktop / JIT",
+      "platform": "windows",
+      "dart_version": "3.11.1 (stable) (Tue Feb 24 00:03:07 2026 -0800) on \"windows_x64\"",
+      "ai_enabled": false
+    },
+    {
+      "teams": 30,
+      "stage": "submit-offer",
+      "run": 0,
+      "iterations": 20,
+      "batch_us": 4343
+    },
+    {
+      "teams": 30,
+      "stage": "resolve-waiting-hour",
+      "run": 0,
+      "iterations": 20,
+      "batch_us": 6094
+    },
+    {
+      "teams": 30,
+      "stage": "finalize-offer",
+      "run": 0,
+      "iterations": 20,
+      "batch_us": 6986
+    },
+    {
+      "teams": 30,
+      "stage": "submit-offer",
+      "run": 1,
+      "iterations": 20,
+      "batch_us": 2872
+    },
+    {
+      "teams": 30,
+      "stage": "resolve-waiting-hour",
+      "run": 1,
+      "iterations": 20,
+      "batch_us": 4446
+    },
+    {
+      "teams": 30,
+      "stage": "finalize-offer",
+      "run": 1,
+      "iterations": 20,
+      "batch_us": 5830
+    },
+    {
+      "teams": 30,
+      "stage": "submit-offer",
+      "run": 2,
+      "iterations": 20,
+      "batch_us": 2326
+    },
+    {
+      "teams": 30,
+      "stage": "resolve-waiting-hour",
+      "run": 2,
+      "iterations": 20,
+      "batch_us": 5154
+    },
+    {
+      "teams": 30,
+      "stage": "finalize-offer",
+      "run": 2,
+      "iterations": 20,
+      "batch_us": 4574
+    },
+    {
+      "teams": 30,
+      "stage": "submit-offer",
+      "run": 3,
+      "iterations": 20,
+      "batch_us": 2611
+    },
+    {
+      "teams": 30,
+      "stage": "resolve-waiting-hour",
+      "run": 3,
+      "iterations": 20,
+      "batch_us": 4609
+    },
+    {
+      "teams": 30,
+      "stage": "finalize-offer",
+      "run": 3,
+      "iterations": 20,
+      "batch_us": 4800
+    },
+    {
+      "teams": 30,
+      "stage": "submit-offer",
+      "run": 4,
+      "iterations": 20,
+      "batch_us": 2461
+    },
+    {
+      "teams": 30,
+      "stage": "resolve-waiting-hour",
+      "run": 4,
+      "iterations": 20,
+      "batch_us": 4125
+    },
+    {
+      "teams": 30,
+      "stage": "finalize-offer",
+      "run": 4,
+      "iterations": 20,
+      "batch_us": 4477
+    },
+    {
+      "teams": 30,
+      "stage": "submit-offer",
+      "run": 5,
+      "iterations": 20,
+      "batch_us": 2207
+    },
+    {
+      "teams": 30,
+      "stage": "resolve-waiting-hour",
+      "run": 5,
+      "iterations": 20,
+      "batch_us": 3859
+    },
+    {
+      "teams": 30,
+      "stage": "finalize-offer",
+      "run": 5,
+      "iterations": 20,
+      "batch_us": 4917
+    },
+    {
+      "warm_summary": "submit-offer",
+      "teams": 30,
+      "samples": 5,
+      "iterations": 20,
+      "median_batch_us": 2461,
+      "min_batch_us": 2207,
+      "max_batch_us": 2872
+    },
+    {
+      "warm_summary": "resolve-waiting-hour",
+      "teams": 30,
+      "samples": 5,
+      "iterations": 20,
+      "median_batch_us": 4446,
+      "min_batch_us": 3859,
+      "max_batch_us": 5154
+    },
+    {
+      "warm_summary": "finalize-offer",
+      "teams": 30,
+      "samples": 5,
+      "iterations": 20,
+      "median_batch_us": 4800,
+      "min_batch_us": 4477,
+      "max_batch_us": 5830
+    },
+    {
+      "scenario": "lookup-probe",
+      "teams": 30,
+      "players": 766,
+      "free_agents": 200,
+      "iterations": 100,
+      "seed": 123,
+      "week": 47,
+      "day": 2,
+      "first_run": 0,
+      "warm_samples": 5,
+      "runtime": "Flutter test / desktop / JIT",
+      "platform": "windows",
+      "dart_version": "3.11.1 (stable) (Tue Feb 24 00:03:07 2026 -0800) on \"windows_x64\"",
+      "ai_enabled": false
+    },
+    {
+      "teams": 30,
+      "mode": "same-snapshot",
+      "run": 0,
+      "population": 966,
+      "source_reads": 966,
+      "index_builds": 1
+    },
+    {
+      "teams": 30,
+      "stage": "lookup-same-snapshot",
+      "run": 0,
+      "iterations": 100,
+      "batch_us": 951
+    },
+    {
+      "teams": 30,
+      "mode": "same-snapshot",
+      "run": 1,
+      "population": 966,
+      "source_reads": 966,
+      "index_builds": 1
+    },
+    {
+      "teams": 30,
+      "stage": "lookup-same-snapshot",
+      "run": 1,
+      "iterations": 100,
+      "batch_us": 919
+    },
+    {
+      "teams": 30,
+      "mode": "same-snapshot",
+      "run": 2,
+      "population": 966,
+      "source_reads": 966,
+      "index_builds": 1
+    },
+    {
+      "teams": 30,
+      "stage": "lookup-same-snapshot",
+      "run": 2,
+      "iterations": 100,
+      "batch_us": 651
+    },
+    {
+      "teams": 30,
+      "mode": "same-snapshot",
+      "run": 3,
+      "population": 966,
+      "source_reads": 966,
+      "index_builds": 1
+    },
+    {
+      "teams": 30,
+      "stage": "lookup-same-snapshot",
+      "run": 3,
+      "iterations": 100,
+      "batch_us": 666
+    },
+    {
+      "teams": 30,
+      "mode": "same-snapshot",
+      "run": 4,
+      "population": 966,
+      "source_reads": 966,
+      "index_builds": 1
+    },
+    {
+      "teams": 30,
+      "stage": "lookup-same-snapshot",
+      "run": 4,
+      "iterations": 100,
+      "batch_us": 388
+    },
+    {
+      "teams": 30,
+      "mode": "same-snapshot",
+      "run": 5,
+      "population": 966,
+      "source_reads": 966,
+      "index_builds": 1
+    },
+    {
+      "teams": 30,
+      "stage": "lookup-same-snapshot",
+      "run": 5,
+      "iterations": 100,
+      "batch_us": 448
+    },
+    {
+      "teams": 30,
+      "mode": "new-snapshot",
+      "run": 0,
+      "population": 966,
+      "source_reads": 96600,
+      "index_builds": 100
+    },
+    {
+      "teams": 30,
+      "stage": "lookup-new-snapshot",
+      "run": 0,
+      "iterations": 100,
+      "batch_us": 12116
+    },
+    {
+      "teams": 30,
+      "mode": "new-snapshot",
+      "run": 1,
+      "population": 966,
+      "source_reads": 96600,
+      "index_builds": 100
+    },
+    {
+      "teams": 30,
+      "stage": "lookup-new-snapshot",
+      "run": 1,
+      "iterations": 100,
+      "batch_us": 13315
+    },
+    {
+      "teams": 30,
+      "mode": "new-snapshot",
+      "run": 2,
+      "population": 966,
+      "source_reads": 96600,
+      "index_builds": 100
+    },
+    {
+      "teams": 30,
+      "stage": "lookup-new-snapshot",
+      "run": 2,
+      "iterations": 100,
+      "batch_us": 12577
+    },
+    {
+      "teams": 30,
+      "mode": "new-snapshot",
+      "run": 3,
+      "population": 966,
+      "source_reads": 96600,
+      "index_builds": 100
+    },
+    {
+      "teams": 30,
+      "stage": "lookup-new-snapshot",
+      "run": 3,
+      "iterations": 100,
+      "batch_us": 12680
+    },
+    {
+      "teams": 30,
+      "mode": "new-snapshot",
+      "run": 4,
+      "population": 966,
+      "source_reads": 96600,
+      "index_builds": 100
+    },
+    {
+      "teams": 30,
+      "stage": "lookup-new-snapshot",
+      "run": 4,
+      "iterations": 100,
+      "batch_us": 13705
+    },
+    {
+      "teams": 30,
+      "mode": "new-snapshot",
+      "run": 5,
+      "population": 966,
+      "source_reads": 96600,
+      "index_builds": 100
+    },
+    {
+      "teams": 30,
+      "stage": "lookup-new-snapshot",
+      "run": 5,
+      "iterations": 100,
+      "batch_us": 13746
+    },
+    {
+      "warm_summary": "lookup-same-snapshot",
+      "teams": 30,
+      "samples": 5,
+      "iterations": 100,
+      "median_batch_us": 651,
+      "min_batch_us": 388,
+      "max_batch_us": 919
+    },
+    {
+      "warm_summary": "lookup-new-snapshot",
+      "teams": 30,
+      "samples": 5,
+      "iterations": 100,
+      "median_batch_us": 13315,
+      "min_batch_us": 12577,
+      "max_batch_us": 13746
+    }
+  ]
+}

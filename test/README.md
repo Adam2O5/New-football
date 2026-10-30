@@ -27,12 +27,16 @@ Bieżący wykaz: [isolated_suites.md](../docs/testing/isolated_suites.md). Dług
 - `performance/long`: duże save/load/rename/duplicate, próbki JIT/RSS i luk event loop, projekcja wielkości sezonu oraz pełna integracja workera. Metryki JIT/debug nie są profilem urządzenia. Wielosezonowe historie w fixture’ach są syntetyczne, nie symulowane.
 - `save_pipeline_measurements_long.dart`: dwa fixture’y (początkowy i z syntetyczną historią), osobny przebieg 0 i pięć kolejnych próbek z medianą/min/max. Metoda, wyniki i uruchomienie wybranego pliku z twardym limitem: [baseline zapisu](../docs/testing/save-pipeline-baseline-2026-10-30.md).
 - `controller_normalization_measurements_long.dart`: serie po 100 komend Inbox/daty dla 1 i 30 drużyn, osobne pomiary transformacji, normalizacji i publikacji; [metoda i wyniki](../docs/testing/controller-normalization-baseline-2026-10-30.md). Zapis wyłącznie w pamięci, bez pomiaru UI i dysku.
+- `simulation_pipeline_measurements_long.dart`: 1 i 5 dni bez meczów/AI dla 1 i 30 drużyn, inline oraz worker z cache i pełnym payloadem; [metoda i wyniki](../docs/testing/simulation-pipeline-baseline-2026-10-30.md).
+- `contract_market_measurements_long.dart`: ręczne oferty, rozstrzygnięcia waiting i podpisy w FA-I oraz osobna próba cache; [metoda i wyniki](../docs/testing/contract-market-baseline-2026-10-30.md). Bez autonomicznych ofert AI.
 - `data/long`: replay w osobnych VM, crash/recovery i blokady między procesami, sprzątanie procesów oraz ograniczony rozkład formacji.
 - `calendar/long`: rzeczywiste przebiegi kalendarza i kosztowne interakcje/pacing. Mają parametry, postęp i zewnętrzny limit; nie są codziennym smoke.
 
 Jedyny rejestr wyłączeń AI/silnika to [blacklist.json](blacklist.json): pliki `*.dart.disabled`, powód i warunki reaktywacji. Archiwa mieszane wskazują aktywnych właścicieli odzyskanych przypadków; przy przyszłej reaktywacji należy odzyskać wyłącznie odroczone scenariusze. Task 38 pozostaje wyłączony, bez zmian jego logiki. Reaktywacja wymaga implementacji mechaniki, kontroli źródła i ograniczonego uruchomienia, a następnie usunięcia wpisu manifestu.
 
 Osobno pozostaje **jeden jawny SKIP wyliczania liderów nagród** w `calendar/task39_season_service_test.dart`: system nagród jest do przebudowy po redukcji danych meczowych. Użytkownik zatwierdził pozostawienie tego SKIP 29 października 2026. Nie dopisano go do blacklisty AI. Aktywne kontrole Coach of the Year, progów i rollover pozostają wykonywane.
+
+Przygotowanie odbioru mobilnego i granice porównań z JIT: [profil Android](../docs/testing/android-profile-checklist.md). Profil telefonu pozostaje odłożony; lokalny build APK profile przeszedł.
 
 ## Logi i weryfikacja runnera
 

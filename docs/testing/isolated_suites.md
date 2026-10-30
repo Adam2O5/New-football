@@ -1,6 +1,6 @@
 # Zestawy izolowane od standard i CI
 
-15 aktywnych plików long jest dostępnych wyłącznie przez jawny profil long. 42 pliki wyłączone są rejestrowane osobno w [blacklist.json](../../test/blacklist.json). Task 38 nie jest aktywnym long i nie był uruchamiany w refaktorze.
+17 aktywnych plików long jest dostępnych wyłącznie przez jawny profil long. 42 pliki wyłączone są rejestrowane osobno w [blacklist.json](../../test/blacklist.json). Task 38 nie jest aktywnym long i nie był uruchamiany w refaktorze.
 
 ## Aktywne long
 
@@ -14,10 +14,12 @@
 - [test/data/long/save_recovery_integrity_long.dart](../../test/data/long/save_recovery_integrity_long.dart)
 - [test/data/long/save_transaction_recovery_long.dart](../../test/data/long/save_transaction_recovery_long.dart)
 - [test/data/long/seeded_generation_long.dart](../../test/data/long/seeded_generation_long.dart)
+- [test/performance/long/contract_market_measurements_long.dart](../../test/performance/long/contract_market_measurements_long.dart) — ręczne operacje FA-I i osobna diagnostyka cache; [metoda i wyniki](contract-market-baseline-2026-10-30.md).
 - [test/performance/long/controller_normalization_measurements_long.dart](../../test/performance/long/controller_normalization_measurements_long.dart) — komendy Inbox i daty, normalizacja, publikacja kontrolera; [metoda i wyniki](controller-normalization-baseline-2026-10-30.md).
 - [test/performance/long/save_pipeline_measurements_long.dart](../../test/performance/long/save_pipeline_measurements_long.dart)
 - [test/performance/long/save_repository_baseline_long.dart](../../test/performance/long/save_repository_baseline_long.dart)
 - [test/performance/long/save_size_guard_long.dart](../../test/performance/long/save_size_guard_long.dart)
+- [test/performance/long/simulation_pipeline_measurements_long.dart](../../test/performance/long/simulation_pipeline_measurements_long.dart) — pojedynczy dzień i seria bez meczów/AI, inline i transport workera; [metoda i wyniki](simulation-pipeline-baseline-2026-10-30.md).
 - [test/performance/long/simulation_worker_long.dart](../../test/performance/long/simulation_worker_long.dart)
 
 Wyniki ręcznych, wybranych przebiegów znajdują się w raporcie etapu 9. Brak wykonania pozostałych plików oznacza LONG_NOT_RUN, nie PASS. Limity są zabezpieczeniem przed zawieszeniem, nie progami wydajności sprzętu.
