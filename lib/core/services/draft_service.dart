@@ -6,8 +6,8 @@ import 'package:new_football/core/models/seed_data_generator.dart';
 import 'dart:math';
 
 /// Service odpowiedzialny za budowanie kolejności draftu na podstawie
-/// wyników loterii. Wywoływany po zakończeniu interaktywnej loterii
-/// na `LotteryScreen`.
+/// wyników loterii. Wspólny dla interaktywnej loterii na `LotteryScreen`
+/// i automatycznej loterii w `SeasonService`.
 class DraftService {
   DraftService({Random? random}) : _random = random ?? Random();
 
