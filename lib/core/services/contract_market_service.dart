@@ -124,11 +124,7 @@ class ContractMarketService
   }
 
   @override
-  Object? _indexedTeams;
-  @override
-  Object? _indexedFreeAgents;
-  @override
-  Object? _indexedDraftedRights;
+  LeagueState? _indexedLeague;
   @override
   Map<String, Player> _playerIndex = const {};
 }
@@ -212,14 +208,8 @@ mixin _ContractMarketShared {
 
   LeagueState _removeFreshUndrafted(LeagueState league, String playerId);
 
-  Object? get _indexedTeams;
-  set _indexedTeams(Object? value);
-
-  Object? get _indexedFreeAgents;
-  set _indexedFreeAgents(Object? value);
-
-  Object? get _indexedDraftedRights;
-  set _indexedDraftedRights(Object? value);
+  LeagueState? get _indexedLeague;
+  set _indexedLeague(LeagueState? value);
 
   Map<String, Player> get _playerIndex;
   set _playerIndex(Map<String, Player> value);

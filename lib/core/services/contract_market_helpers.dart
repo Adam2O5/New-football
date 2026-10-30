@@ -128,14 +128,13 @@ mixin _ContractMarketHelpers on _ContractMarketShared {
   /// An hourly free-agency day looks players up dozens of times per team, and
   /// a linear lookup walks every roster before reaching the free agents.
   ///
-  /// The index is a function of exactly three immutable lists, so it stays
-  /// valid while all three keep their identity — which is the case across the
-  /// many states an hour produces by touching only negotiations and the inbox.
+  /// Cache only the current immutable snapshot. Freezed list getters may
+  /// create a new unmodifiable view on every read, so their identity cannot
+  /// determine whether the index is still valid. A new league snapshot
+  /// deliberately rebuilds the index, even for an inbox-only change.
   @override
   Player? _findPlayer(LeagueState league, String playerId) {
-    if (!identical(_indexedTeams, league.teams) ||
-        !identical(_indexedFreeAgents, league.freeAgents) ||
-        !identical(_indexedDraftedRights, league.draftedRights)) {
+    if (!identical(_indexedLeague, league)) {
       // putIfAbsent, not assignment: the first roster to hold an id wins, as
       // it did when this walked the rosters in order.
       final index = <String, Player>{};
@@ -151,9 +150,7 @@ mixin _ContractMarketHelpers on _ContractMarketShared {
         index.putIfAbsent(right.player.id, () => right.player);
       }
       _playerIndex = index;
-      _indexedTeams = league.teams;
-      _indexedFreeAgents = league.freeAgents;
-      _indexedDraftedRights = league.draftedRights;
+      _indexedLeague = league;
     }
     return _playerIndex[playerId];
   }
