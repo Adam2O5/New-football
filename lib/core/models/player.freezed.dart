@@ -232,7 +232,7 @@ return $default(_that.year,_that.minutes,_that.goals,_that.assists,_that.appeara
 @JsonSerializable()
 
 class _PlayerSeasonStats implements PlayerSeasonStats {
-  const _PlayerSeasonStats({required this.year, this.minutes = 0, this.goals = 0, this.assists = 0, this.appearances = 0, this.yellowCards = 0, this.redCards = 0, this.shots = 0, this.shotsOnTarget = 0, this.xg = 0.0, this.passes = 0, this.passAccuracy = 0.0, this.duelsWon = 0, this.offsides = 0, this.corners = 0, this.tackles = 0, this.interceptions = 0, this.cleanSheets = 0, this.saves = 0, this.shotsFaced = 0, this.ratingAvg = 6.0, this.motmCount = 0});
+  const _PlayerSeasonStats({required this.year, this.minutes = 0, this.goals = 0, this.assists = 0, this.appearances = 0, this.yellowCards = 0, this.redCards = 0, this.shots = 0, this.shotsOnTarget = 0, this.xg = 0.0, this.passes = 0, this.passAccuracy = 0.0, this.duelsWon = 0, this.offsides = 0, this.corners = 0, this.tackles = 0, this.interceptions = 0, this.cleanSheets = 0, this.saves = 0, this.shotsFaced = 0, this.ratingAvg = MatchdayBalance.defaultUnratedPlayerRating, this.motmCount = 0});
   factory _PlayerSeasonStats.fromJson(Map<String, dynamic> json) => _$PlayerSeasonStatsFromJson(json);
 
 @override final  int year;
@@ -1631,7 +1631,7 @@ return $default(_that.playerId,_that.minutes,_that.goals,_that.assists,_that.sho
 @JsonSerializable()
 
 class _PlayerMatchStats implements PlayerMatchStats {
-  const _PlayerMatchStats({required this.playerId, this.minutes = 0, this.goals = 0, this.assists = 0, this.shots = 0, this.shotsOnTarget = 0, this.xg = 0.0, this.passes = 0, this.passAccuracy = 0.0, this.duelsWon = 0, this.offsides = 0, this.corners = 0, this.yellowCards = 0, this.redCards = 0, this.tackles = 0, this.interceptions = 0, this.saves = 0, this.shotsFaced = 0, this.ownGoals = 0, this.cleanSheet = false, this.staminaAfterMatch = -1, this.rating = 6.0});
+  const _PlayerMatchStats({required this.playerId, this.minutes = 0, this.goals = 0, this.assists = 0, this.shots = 0, this.shotsOnTarget = 0, this.xg = 0.0, this.passes = 0, this.passAccuracy = 0.0, this.duelsWon = 0, this.offsides = 0, this.corners = 0, this.yellowCards = 0, this.redCards = 0, this.tackles = 0, this.interceptions = 0, this.saves = 0, this.shotsFaced = 0, this.ownGoals = 0, this.cleanSheet = false, this.staminaAfterMatch = -1, this.rating = MatchdayBalance.defaultUnratedPlayerRating});
   factory _PlayerMatchStats.fromJson(Map<String, dynamic> json) => _$PlayerMatchStatsFromJson(json);
 
 @override final  String playerId;

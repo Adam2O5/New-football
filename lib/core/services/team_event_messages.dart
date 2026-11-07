@@ -27,7 +27,12 @@ mixin _TeamEventMessages on _TeamEventShared {
     if (kind == 'transferRequestII' && _isFutureUfa(player)) {
       return _emitDeclineToExtend(state, teamId, player);
     }
-    var next = _setPointValueMultiplier(state, teamId, playerId, 0.9);
+    var next = _setPointValueMultiplier(
+      state,
+      teamId,
+      playerId,
+      balance.events.transferPointValueMultiplier,
+    );
     return _queueDecision(
       next,
       teamId: teamId,
@@ -184,7 +189,7 @@ mixin _TeamEventMessages on _TeamEventShared {
         return byOverall != 0 ? byOverall : a.id.compareTo(b.id);
       });
     final rank = ranked.indexWhere((player) => player.id == playerId);
-    return rank >= 0 && rank < 14;
+    return rank >= 0 && rank < balance.events.aiMoreMinutesPriorityPlayers;
   }
 
   LeagueState _emitDecisionMessage(

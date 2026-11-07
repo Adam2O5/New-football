@@ -23,6 +23,9 @@ class CalendarBalance {
   static const winPoints = 3;
   static const drawPoints = 1;
   const CalendarBalance({
+    this.scoutingMonthlyFirstWeek = 5,
+    this.scoutingMonthlyIntervalWeeks = 4,
+    this.scoutingMonthlyDay = 1,
     this.strengthRefreshFirstWeek = 5,
     this.strengthRefreshIntervalWeeks = 4,
     this.strengthRefreshDay = 1,
@@ -56,6 +59,9 @@ class CalendarBalance {
   });
 
   final int regularSeasonWeeks;
+  final int scoutingMonthlyFirstWeek;
+  final int scoutingMonthlyIntervalWeeks;
+  final int scoutingMonthlyDay;
   final int strengthRefreshFirstWeek;
   final int strengthRefreshIntervalWeeks;
   final int strengthRefreshDay;

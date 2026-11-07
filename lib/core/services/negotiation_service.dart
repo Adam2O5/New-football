@@ -111,7 +111,9 @@ class NegotiationService {
             week: week,
             day: day,
             hour: hour,
-            hours: 2,
+            hours: negotiation.subjectKind == NegotiationSubjectKind.player
+                ? balance.contracts.playerWaitingHours
+                : balance.contracts.staffWaitingHours,
           )
         : null;
     return negotiation.copyWith(
@@ -246,6 +248,8 @@ class NegotiationService {
       }
       final rivalSelection =
           negotiation.selectedByRival && !negotiation.rivalFinalized;
+      // Start-of-slot expiry runs before the market resolver. The due slot
+      // must survive so the response can resolve even when both timers meet.
       final waitingTimerActive =
           negotiation.status == NegotiationStatus.waiting &&
           negotiation.waitingUntilSeasonYear != null &&
@@ -258,7 +262,7 @@ class NegotiationService {
                 negotiation.waitingUntilWeek!,
                 negotiation.waitingUntilDay!,
                 negotiation.waitingUntilHour ?? 0,
-              ) <
+              ) <=
               0;
       final cancelled = phaseIIWindowEnded || rivalSelection;
       final expired =

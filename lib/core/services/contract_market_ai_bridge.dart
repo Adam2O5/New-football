@@ -354,7 +354,9 @@ mixin _ContractMarketAiBridge on _ContractMarketShared {
       final original = ContractOffer(
         salary: max(
           balance.salaryCap.minSalary,
-          (playerCounter.salary * 0.90).round(),
+          (playerCounter.salary *
+                  balance.contracts.aiCounterOriginalSalaryFactor)
+              .round(),
         ),
         years: playerCounter.years,
         exception: playerCounter.exception,

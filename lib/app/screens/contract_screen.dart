@@ -40,9 +40,10 @@ class _ContractScreenState extends ConsumerState<ContractScreen>
   @override
   final _yearsCtrl = TextEditingController(text: '3');
   @override
-  final _contractService = ContractService();
+  ContractService get _contractService => ref.read(contractServiceProvider);
   @override
-  final _marketService = ContractMarketService();
+  ContractMarketService get _marketService =>
+      ref.read(contractMarketServiceProvider);
   String? _selectedId;
   @override
   _Target _target = _Target.none;
@@ -252,7 +253,9 @@ class _ContractScreenState extends ConsumerState<ContractScreen>
     }
     final salary = int.tryParse(_salaryCtrl.text.trim());
     final years = int.tryParse(_yearsCtrl.text.trim());
-    if (salary == null || years == null || years < 1) {
+    if (salary == null ||
+        years == null ||
+        years < ref.read(balanceProvider).contracts.playerMinYears) {
       setState(() => _status = l10n.contract_invalidOffer);
       return;
     }

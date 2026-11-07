@@ -80,8 +80,13 @@ class ScoutingService {
   ) {
     if (currentTier == ScoutingTier.tier5) return null;
     if (evaluationStars <= 0) return null;
-    final base = currentTier == ScoutingTier.tier1 ? 30.0 : 20.0;
-    return (base - 2 * evaluationStars).round().clamp(1, 999);
+    final base = currentTier == ScoutingTier.tier1
+        ? balance.scouting.firstTierWeeks
+        : balance.scouting.laterTierWeeks;
+    return (base -
+            balance.scouting.weeksReductionPerEvaluationStar * evaluationStars)
+        .round()
+        .clamp(1, 999);
   }
 
   /// Cotygodniowy progres tieru dla obserwowanych prospectów, deterministyczny
@@ -150,7 +155,7 @@ class ScoutingService {
     final byId = {for (final p in prospects) p.id: p};
     final topTargetCount = min(
       scouting.watchlistProspectIds.length,
-      max(limit, limit * 2),
+      max(limit, limit * balance.scouting.reportCandidateMultiplier),
     );
     final topTargets =
         scouting.watchlistProspectIds.where(byId.containsKey).toList()..sort(
@@ -181,18 +186,26 @@ class ScoutingService {
     List<Prospect> prospects = const [],
     int? seed,
     int seasonYear = 0,
-    int week = 45,
+    int? week,
     String teamId = '',
   }) {
+    final resolvedWeek =
+        week ?? balance.calendar.draftWeek - balance.calendar.scoutWeekOffset;
     final byId = {for (final p in prospects) p.id: p};
-    final bonusChance = (0.5 + evaluationStars * 0.1).clamp(0.5, 1.0);
+    final bonusChance =
+        (balance.scouting.combineChanceBase +
+                evaluationStars * balance.scouting.combineChancePerStar)
+            .clamp(
+              balance.scouting.combineChanceMin,
+              balance.scouting.combineChanceMax,
+            );
     final assigned = scouting.combineAssignedProspectIds.toSet();
     final updated = scouting.knowledge.map((knowledge) {
       if (!assigned.contains(knowledge.prospectId)) return knowledge;
       final random = _scopedRandom(
         seed: seed,
         seasonYear: seasonYear,
-        week: week,
+        week: resolvedWeek,
         teamId: teamId,
         kind: 'scout-combine',
         prospectId: knowledge.prospectId,
@@ -233,7 +246,7 @@ class ScoutingService {
     int seasonYear = 0,
     int week = 1,
     String teamId = '',
-    double replacementProbability = 0.40,
+    double? replacementProbability,
   }) {
     if (scouting.watchlistProspectIds.isEmpty || rankedProspects.isEmpty) {
       return scouting;
@@ -252,7 +265,8 @@ class ScoutingService {
             .where(
               (entry) =>
                   !watched.contains(entry.key) &&
-                  (previousRanks[entry.key] ?? entry.value) - entry.value > 20,
+                  (previousRanks[entry.key] ?? entry.value) - entry.value >
+                      balance.scouting.monthlyRankRiseMinExclusive,
             )
             .toList()
           ..sort((a, b) => a.value.compareTo(b.value));
@@ -267,7 +281,8 @@ class ScoutingService {
       kind: 'scout-watchlist-replacement',
       prospectId: rising.first.key,
     ).nextDouble();
-    if (roll >= replacementProbability) {
+    if (roll >=
+        (replacementProbability ?? balance.scouting.monthlyReplacementChance)) {
       return scouting.copyWith(mockRanks: currentRanks);
     }
 
@@ -296,11 +311,16 @@ class ScoutingService {
     double evaluationStars, {
     int? seed,
     int seasonYear = 0,
-    int week = 45,
+    int? week,
     String teamId = '',
   }) {
-    final stars = evaluationStars.clamp(0.0, 5.0);
-    final t = 1 - (stars / 5.0);
+    final resolvedWeek =
+        week ?? balance.calendar.draftWeek - balance.calendar.scoutWeekOffset;
+    final stars = evaluationStars.clamp(
+      balance.staff.starMin,
+      balance.staff.starMax,
+    );
+    final t = 1 - (stars / balance.staff.starMax);
     final noiseRange =
         (balance.scouting.earlyMockNoiseMin +
                 (balance.scouting.earlyMockNoiseMax -
@@ -314,7 +334,7 @@ class ScoutingService {
       ScoutingTier.tier2,
       seed: seed,
       seasonYear: seasonYear,
-      week: week,
+      week: resolvedWeek,
       teamId: teamId,
     );
   }
@@ -327,9 +347,11 @@ class ScoutingService {
     double evaluationStars, {
     int? seed,
     int seasonYear = 0,
-    int week = 45,
+    int? week,
     String teamId = '',
   }) {
+    final resolvedWeek =
+        week ?? balance.calendar.draftWeek - balance.calendar.scoutWeekOffset;
     final noiseRange =
         (balance.scouting.finalMockNoiseBase -
                 evaluationStars * balance.scouting.finalMockNoisePerStar)
@@ -345,7 +367,7 @@ class ScoutingService {
       ScoutingTier.tier3,
       seed: seed,
       seasonYear: seasonYear,
-      week: week,
+      week: resolvedWeek,
       teamId: teamId,
     );
   }
@@ -411,11 +433,7 @@ class ScoutingService {
   ) {
     if (prospect == null) return knowledge;
     final overall = prospect.projectedOverall(balance).round();
-    final span = tier.index >= ScoutingTier.tier5.index
-        ? 1
-        : tier.index >= ScoutingTier.tier3.index
-        ? 3
-        : 5;
+    final span = balance.scouting.ovrSpans[tier]!;
     final evidence = knowledge.copyWith(
       estimatedOvrMin: tier.index >= ScoutingTier.tier2.index
           ? max(
@@ -431,14 +449,20 @@ class ScoutingService {
           : null,
       estimatedPotentialMin: tier.index >= ScoutingTier.tier4.index
           ? max(
-              knowledge.estimatedPotentialMin ?? 0.5,
-              max(0.5, prospect.potentialStars - 1.0),
+              knowledge.estimatedPotentialMin ?? balance.player.potentialMin,
+              max(
+                balance.player.potentialMin,
+                prospect.potentialStars - balance.scouting.potentialSpan,
+              ),
             )
           : null,
       estimatedPotentialMax: tier.index >= ScoutingTier.tier4.index
           ? min(
-              knowledge.estimatedPotentialMax ?? 5.0,
-              min(5.0, prospect.potentialStars + 1.0),
+              knowledge.estimatedPotentialMax ?? balance.player.potentialMax,
+              min(
+                balance.player.potentialMax,
+                prospect.potentialStars + balance.scouting.potentialSpan,
+              ),
             )
           : null,
     );
@@ -460,44 +484,60 @@ class ScoutingService {
     if (prospect == null) return knowledge;
     return knowledge.copyWith(
       injuryProneMin: injuryKnown
-          ? max(knowledge.injuryProneMin ?? 1, max(1, prospect.injuryProne - 2))
+          ? max(
+              knowledge.injuryProneMin ?? balance.player.traitMin,
+              max(
+                balance.player.traitMin,
+                prospect.injuryProne - balance.scouting.traitSpan,
+              ),
+            )
           : knowledge.injuryProneMin,
       injuryProneMax: injuryKnown
           ? min(
-              knowledge.injuryProneMax ?? 10,
-              min(10, prospect.injuryProne + 2),
+              knowledge.injuryProneMax ?? balance.player.traitMax,
+              min(
+                balance.player.traitMax,
+                prospect.injuryProne + balance.scouting.traitSpan,
+              ),
             )
           : knowledge.injuryProneMax,
       determinationMin: determinationKnown
           ? max(
-              knowledge.determinationMin ?? 1,
-              max(1, prospect.determination - 2),
+              knowledge.determinationMin ?? balance.player.traitMin,
+              max(
+                balance.player.traitMin,
+                prospect.determination - balance.scouting.traitSpan,
+              ),
             )
           : knowledge.determinationMin,
       determinationMax: determinationKnown
           ? min(
-              knowledge.determinationMax ?? 10,
-              min(10, prospect.determination + 2),
+              knowledge.determinationMax ?? balance.player.traitMax,
+              min(
+                balance.player.traitMax,
+                prospect.determination + balance.scouting.traitSpan,
+              ),
             )
           : knowledge.determinationMax,
     );
   }
 
   int _uncertainty(ScoutingKnowledge? knowledge) {
-    if (knowledge == null) return 1000;
+    if (knowledge == null) return balance.scouting.unknownProspectUncertainty;
     final ovrRange =
         knowledge.estimatedOvrMin == null || knowledge.estimatedOvrMax == null
-        ? 100
+        ? balance.scouting.unknownOvrUncertainty
         : knowledge.estimatedOvrMax! - knowledge.estimatedOvrMin!;
     final potentialRange =
         knowledge.estimatedPotentialMin == null ||
             knowledge.estimatedPotentialMax == null
-        ? 20
+        ? balance.scouting.unknownPotentialUncertainty
         : ((knowledge.estimatedPotentialMax! -
                       knowledge.estimatedPotentialMin!) *
-                  10)
+                  balance.scouting.potentialUncertaintyWeight)
               .round();
-    return (ScoutingTier.values.length - knowledge.tier.index) * 100 +
+    return (ScoutingTier.values.length - knowledge.tier.index) *
+            balance.scouting.tierUncertaintyWeight +
         ovrRange +
         potentialRange;
   }
@@ -524,13 +564,9 @@ class ScoutingService {
   }
 
   EstimatedDraftSlot _slotForRank(int rank) {
-    if (rank == 0) return EstimatedDraftSlot.top1;
-    if (rank < 3) return EstimatedDraftSlot.top3;
-    if (rank < 5) return EstimatedDraftSlot.top5;
-    if (rank < 10) return EstimatedDraftSlot.top10;
-    if (rank < 30) return EstimatedDraftSlot.r1;
-    if (rank < 60) return EstimatedDraftSlot.r2;
-    if (rank < 90) return EstimatedDraftSlot.r3;
+    for (final (rankExclusive, slot) in balance.scouting.slotBands) {
+      if (rank < rankExclusive) return slot;
+    }
     return EstimatedDraftSlot.x;
   }
 }

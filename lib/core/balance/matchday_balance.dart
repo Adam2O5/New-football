@@ -7,6 +7,7 @@ import 'package:new_football/core/tactics/tactics_setup.dart';
 /// the remaining fields are the documented model constants that later
 /// simulation tasks will consume.
 class MatchdayBalance {
+  static const defaultUnratedPlayerRating = 6.0;
   const MatchdayBalance({
     this.oneOnOneRedMultiplier = 2.0,
     this.duelInjuryMultiplier = 2.5,

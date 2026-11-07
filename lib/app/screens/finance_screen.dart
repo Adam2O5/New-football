@@ -117,7 +117,7 @@ class FinanceScreen extends ConsumerWidget {
       );
     }
 
-    const capService = SalaryCapService();
+    final capService = SalaryCapService(balance: ref.watch(balanceProvider));
     final snapshot = capService.snapshot(team);
 
     return _themed(

@@ -181,12 +181,8 @@ class TeamEventService
       final entry = table.entryFor(team.id);
       if (entry == null) continue;
       final achievedRound = _playoffRoundReached(league, team.id);
-      final threshold = switch (entry.teamStatus) {
-        TeamStatus.elite => 3,
-        TeamStatus.contender => 2,
-        TeamStatus.pretender => 1,
-        _ => 0,
-      };
+      final threshold =
+          balance.events.postPlayoffExpectedRounds[entry.teamStatus] ?? 0;
       if (threshold == 0 || achievedRound >= threshold) {
         state = _setTeamEventState(
           state,
@@ -201,7 +197,9 @@ class TeamEventService
           final byOverall = _eventOverall(b).compareTo(_eventOverall(a));
           return byOverall != 0 ? byOverall : a.id.compareTo(b.id);
         });
-      final topEleven = candidates.take(11).toList();
+      final topEleven = candidates
+          .take(balance.events.postPlayoffCandidates)
+          .toList();
       final eligible = topEleven
           .where((player) => player.personality != PlayerPersonality.loyal)
           .toList();

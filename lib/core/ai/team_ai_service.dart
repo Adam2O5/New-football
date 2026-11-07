@@ -95,7 +95,10 @@ class TeamAiService {
         balance.salaryCap.minSalary,
         balance.salaryCap.maxSalary,
       ),
-      years: (expectedLength + random.nextInt(2) - 1).clamp(1, 5),
+      years: (expectedLength + random.nextInt(2) - 1).clamp(
+        balance.contracts.playerMinYears,
+        balance.contracts.playerMaxYears,
+      ),
     );
   }
 

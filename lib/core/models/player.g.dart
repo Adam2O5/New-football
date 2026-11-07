@@ -28,7 +28,9 @@ _PlayerSeasonStats _$PlayerSeasonStatsFromJson(Map<String, dynamic> json) =>
       cleanSheets: (json['cleanSheets'] as num?)?.toInt() ?? 0,
       saves: (json['saves'] as num?)?.toInt() ?? 0,
       shotsFaced: (json['shotsFaced'] as num?)?.toInt() ?? 0,
-      ratingAvg: (json['ratingAvg'] as num?)?.toDouble() ?? 6.0,
+      ratingAvg:
+          (json['ratingAvg'] as num?)?.toDouble() ??
+          MatchdayBalance.defaultUnratedPlayerRating,
       motmCount: (json['motmCount'] as num?)?.toInt() ?? 0,
     );
 
@@ -256,7 +258,9 @@ _PlayerMatchStats _$PlayerMatchStatsFromJson(Map<String, dynamic> json) =>
       ownGoals: (json['ownGoals'] as num?)?.toInt() ?? 0,
       cleanSheet: json['cleanSheet'] as bool? ?? false,
       staminaAfterMatch: (json['staminaAfterMatch'] as num?)?.toInt() ?? -1,
-      rating: (json['rating'] as num?)?.toDouble() ?? 6.0,
+      rating:
+          (json['rating'] as num?)?.toDouble() ??
+          MatchdayBalance.defaultUnratedPlayerRating,
     );
 
 Map<String, dynamic> _$PlayerMatchStatsToJson(_PlayerMatchStats instance) =>

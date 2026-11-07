@@ -12,34 +12,25 @@ import 'package:new_football/core/models/enums.dart';
 class NegotiationRules {
   const NegotiationRules._();
 
-  static const List<double> _cfoMultipliers = [
-    0.95,
-    1.00,
-    1.01,
-    1.02,
-    1.04,
-    1.05,
-    1.07,
-    1.08,
-    1.10,
-    1.11,
-    1.13,
-  ];
-
-  static int teamStatusBonus(TeamStatus status) => switch (status) {
-    TeamStatus.rebuild => -5,
-    TeamStatus.retool => -3,
-    TeamStatus.pretender => 0,
-    TeamStatus.contender => 5,
-    TeamStatus.elite => 7,
-  };
+  static int teamStatusBonus(
+    TeamStatus status, [
+    ContractNegBalance balance = const ContractNegBalance(),
+  ]) => balance.teamStatusBonuses[status] ?? 0;
 
   /// Returns the documented CFO multiplier. Missing/zero negotiation gives
   /// the no-CFO value of ×0.95; half-star values map to the nearest table row.
-  static double cfoDiscount(double? negotiation) {
-    if (negotiation == null || negotiation <= 0) return _cfoMultipliers.first;
-    final index = (negotiation * 2).round().clamp(1, 10);
-    return _cfoMultipliers[index];
+  static double cfoDiscount(
+    double? negotiation, [
+    ContractNegBalance balance = const ContractNegBalance(),
+  ]) {
+    if (negotiation == null || negotiation <= 0) {
+      return balance.cfoMultipliers.first;
+    }
+    final index = (negotiation * balance.cfoStepsPerStar).round().clamp(
+      1,
+      balance.cfoMultipliers.length - 1,
+    );
+    return balance.cfoMultipliers[index];
   }
 
   static double salaryFit({
@@ -83,12 +74,15 @@ class NegotiationRules {
       expectedLength: expectedLength,
       balance: balance,
     );
-    final teamComponent = teamStatusBonus(offeringTeamStatus).toDouble();
-    final discount = cfoDiscount(cfoNegotiation);
-    final total = ((salaryComponent + lengthComponent + teamComponent) *
-            discount)
-        .clamp(0.0, 100.0)
-        .toDouble();
+    final teamComponent = teamStatusBonus(
+      offeringTeamStatus,
+      balance,
+    ).toDouble();
+    final discount = cfoDiscount(cfoNegotiation, balance);
+    final total =
+        ((salaryComponent + lengthComponent + teamComponent) * discount)
+            .clamp(balance.offerScoreMin, balance.offerScoreMax)
+            .toDouble();
     return OfferScoreBreakdown(
       salaryFit: salaryComponent,
       lengthFit: lengthComponent,
@@ -106,8 +100,7 @@ class NegotiationRules {
     ContractNegBalance balance = const ContractNegBalance(),
   }) {
     return (balance.mixedAcceptProbabilityAtMidpoint +
-            (score - balance.mixedScoreMidpoint) *
-                balance.mixedAcceptSlope)
+            (score - balance.mixedScoreMidpoint) * balance.mixedAcceptSlope)
         .clamp(0.0, 1.0)
         .toDouble();
   }
@@ -127,11 +120,13 @@ class NegotiationRules {
     if (score <= balance.rejectScoreMax) return NegotiationDecision.reject;
     if (score <= balance.counterScoreMax) return NegotiationDecision.counter;
 
-    final phaseOneWaiting = phase == NegotiationPhase.freeAgencyPhaseI &&
+    final phaseOneWaiting =
+        phase == NegotiationPhase.freeAgencyPhaseI &&
         (competingOffers || belowExpectation || forceWaiting);
     if (score <= balance.mixedScoreMax) {
       if (phaseOneWaiting) return NegotiationDecision.waiting;
-      return random.nextDouble() < mixedAcceptProbability(score, balance: balance)
+      return random.nextDouble() <
+              mixedAcceptProbability(score, balance: balance)
           ? NegotiationDecision.accept
           : NegotiationDecision.counter;
     }

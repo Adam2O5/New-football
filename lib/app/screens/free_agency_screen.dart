@@ -48,11 +48,12 @@ class _FreeAgencyScreenState extends ConsumerState<FreeAgencyScreen>
   @override
   final _yearsController = TextEditingController(text: '3');
   @override
-  final _contractService = ContractService();
+  ContractService get _contractService => ref.read(contractServiceProvider);
   @override
-  final _marketService = ContractMarketService();
+  ContractMarketService get _marketService =>
+      ref.read(contractMarketServiceProvider);
   @override
-  final _staffService = StaffService();
+  StaffService get _staffService => ref.read(staffServiceProvider);
   @override
   String? _selectedId;
   @override
@@ -90,7 +91,9 @@ class _FreeAgencyScreenState extends ConsumerState<FreeAgencyScreen>
 
     final freeAgents = _filteredFreeAgents(league.freeAgents);
     final selected = _playerByIdFromList(league.freeAgents, _selectedId);
-    final capSnapshot = const SalaryCapService().snapshot(team);
+    final capSnapshot = SalaryCapService(
+      balance: ref.watch(balanceProvider),
+    ).snapshot(team);
 
     return Scaffold(
       appBar: _appBar(context, l10n),
@@ -265,7 +268,10 @@ class _FreeAgencyScreenState extends ConsumerState<FreeAgencyScreen>
     final id = _selectedId;
     final salary = int.tryParse(_salaryController.text.trim());
     final years = int.tryParse(_yearsController.text.trim());
-    if (id == null || salary == null || years == null || years < 1) {
+    if (id == null ||
+        salary == null ||
+        years == null ||
+        years < ref.read(balanceProvider).contracts.playerMinYears) {
       setState(() => _status = l10n.freeAgency_invalidOffer);
       return;
     }
@@ -298,8 +304,8 @@ class _FreeAgencyScreenState extends ConsumerState<FreeAgencyScreen>
     if (salary == null ||
         salary <= 0 ||
         years == null ||
-        years < 1 ||
-        years > 5) {
+        years < ref.read(balanceProvider).contracts.playerMinYears ||
+        years > ref.read(balanceProvider).contracts.playerMaxYears) {
       setState(() => _status = l10n.freeAgency_invalidOffer);
       return;
     }

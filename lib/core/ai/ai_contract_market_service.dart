@@ -158,7 +158,10 @@ class AiContractMarketService {
                         player,
                         currentTeamStatus: context.teamStatus,
                       )
-                      .clamp(1, 5))
+                      .clamp(
+                        balance.contracts.playerMinYears,
+                        balance.contracts.playerMaxYears,
+                      ))
             .toInt();
     final offer = _buildPlayerOffer(
       team: team,
@@ -246,7 +249,10 @@ class AiContractMarketService {
     final context = _context(league, team, saveSeed: saveSeed);
     final years =
         (player.age >= 33 ? 1 : min(original.years, playerCounter.years))
-            .clamp(1, 5)
+            .clamp(
+              balance.contracts.playerMinYears,
+              balance.contracts.playerMaxYears,
+            )
             .toInt();
     final salary = max(
       original.salary,
@@ -820,7 +826,12 @@ class AiContractMarketService {
     );
     final years = member.age >= balance.ai.staffAge60MaxAge
         ? balance.ai.staffAge60MaxYears
-        : expectedLength.clamp(1, 4).toInt();
+        : expectedLength
+              .clamp(
+                balance.staff.minContractYears,
+                balance.staff.maxContractYears,
+              )
+              .toInt();
     _ScoredStaffOffer? best;
     for (var index = 0; index <= 60; index++) {
       final salary = lower + (((upper - lower) * index) / 60.0).round();
@@ -862,13 +873,24 @@ class AiContractMarketService {
   }
 
   int _faYears(Player player, {required bool phaseOne}) {
-    final expected = contracts.expectedLength(player).clamp(1, 5).toInt();
+    final expected = contracts
+        .expectedLength(player)
+        .clamp(
+          balance.contracts.playerMinYears,
+          balance.contracts.playerMaxYears,
+        )
+        .toInt();
     final maxYears = player.age >= 33
         ? balance.ai.faAge33MaxYears
         : phaseOne
         ? expected + 1
         : expected + 1;
-    return min(expected + 1, maxYears).clamp(1, 5).toInt();
+    return min(expected + 1, maxYears)
+        .clamp(
+          balance.contracts.playerMinYears,
+          balance.contracts.playerMaxYears,
+        )
+        .toInt();
   }
 
   bool _hasPlayerCompetition(LeagueState league, String playerId) =>

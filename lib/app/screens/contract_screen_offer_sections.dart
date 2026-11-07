@@ -92,7 +92,10 @@ mixin _ContractScreenOfferSections
     );
     final salary = int.tryParse(_salaryCtrl.text.trim());
     final years = int.tryParse(_yearsCtrl.text.trim());
-    final score = salary == null || years == null || years < 1
+    final score =
+        salary == null ||
+            years == null ||
+            years < ref.read(balanceProvider).contracts.playerMinYears
         ? null
         : _contractService.playerOfferScore(
             player,

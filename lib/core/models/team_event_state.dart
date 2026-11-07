@@ -37,7 +37,7 @@ abstract class MinutesHistoryEntry with _$MinutesHistoryEntry {
     required int seasonYear,
     required int week,
     @Default(0) int minutes,
-    @Default(90) int possibleMinutes,
+    @Default(PlayerBalance.defaultMinutesPerMatch) int possibleMinutes,
   }) = _MinutesHistoryEntry;
 
   factory MinutesHistoryEntry.fromJson(Map<String, dynamic> json) =>
@@ -72,8 +72,9 @@ abstract class TeamPromise with _$TeamPromise {
     required int createdSeasonYear,
     required int createdWeek,
     @Default(0) int weeksElapsed,
-    @Default(4) int durationWeeks,
-    @Default(0.4) double requiredMinutesShare,
+    @Default(EventsBalance.defaultPromiseWeeks) int durationWeeks,
+    @Default(EventsBalance.defaultPromiseMinutesShare)
+    double requiredMinutesShare,
   }) = _TeamPromise;
 
   factory TeamPromise.fromJson(Map<String, dynamic> json) =>
@@ -90,7 +91,7 @@ abstract class TeamTransferSituation with _$TeamTransferSituation {
     required String kind,
     required int createdSeasonYear,
     required int createdWeek,
-    @Default(4) int weeksRemaining,
+    @Default(EventsBalance.defaultTransferSituationWeeks) int weeksRemaining,
   }) = _TeamTransferSituation;
 
   factory TeamTransferSituation.fromJson(Map<String, dynamic> json) =>
@@ -125,8 +126,14 @@ extension TeamEventStateX on TeamEventState {
       .where((modifier) => modifier.type == type && modifier.isActive)
       .fold(0.0, (sum, modifier) => sum + modifier.value);
 
-  double get negativeEventMultiplier =>
-      (1.0 + modifierValue('negativeEventMultiplier')).clamp(0.5, 2.0);
+  double get negativeEventMultiplier => negativeEventMultiplierFor();
+
+  double negativeEventMultiplierFor([
+    BalanceConfig balance = BalanceConfig.defaults,
+  ]) => (1.0 + modifierValue('negativeEventMultiplier')).clamp(
+    balance.events.negativeEventMultiplierMin,
+    balance.events.negativeEventMultiplierMax,
+  );
 
   bool hasModifier(String type) =>
       modifiers.any((modifier) => modifier.type == type && modifier.isActive);
@@ -206,12 +213,21 @@ extension TeamEventStateX on TeamEventState {
   double pointValueMultiplierFor(String playerId) =>
       pointValueMultipliers[playerId] ?? 1.0;
 
-  TeamEventState withPointValueMultiplier(String playerId, double multiplier) {
+  TeamEventState withPointValueMultiplier(
+    String playerId,
+    double multiplier, [
+    BalanceConfig balance = BalanceConfig.defaults,
+  ]) {
     final next = {...pointValueMultipliers};
     if (multiplier == 1.0) {
       next.remove(playerId);
     } else {
-      next[playerId] = multiplier.clamp(0.5, 1.0).toDouble();
+      next[playerId] = multiplier
+          .clamp(
+            balance.events.pointValueMultiplierMin,
+            balance.events.pointValueMultiplierMax,
+          )
+          .toDouble();
     }
     return copyWith(pointValueMultipliers: next);
   }
@@ -252,7 +268,8 @@ extension TeamEventStateX on TeamEventState {
     final currentKey = calendar.weekIndex(currentSeasonYear, currentWeek);
     final retained = all.where((entry) {
       final key = calendar.weekIndex(entry.seasonYear, entry.week);
-      return key <= currentKey && key >= currentKey - 5;
+      return key <= currentKey &&
+          key >= currentKey - (balance.events.minutesHistoryWeeks - 1);
     }).toList();
 
     // Keep the event history rolling, but aggregate the same match entries

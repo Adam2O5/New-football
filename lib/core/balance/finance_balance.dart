@@ -1,10 +1,27 @@
 class SalaryCapBalance {
+  static const defaultSalaryCap = 350000000;
+  static const defaultFirstApron = 396700000;
+  static const defaultSecondApron = 431700000;
+  static const defaultMidLevelException = 20400000;
+  static const defaultMinSalary = 1000000;
   const SalaryCapBalance({
-    this.salaryCap = 350000000,
-    this.firstApron = 396700000,
-    this.secondApron = 431700000,
-    this.midLevelException = 20400000,
-    this.minSalary = 1000000,
+    this.earlyBirdSeasons = 2,
+    this.earlyBirdSalaryMultiplier = 1.75,
+    this.earlyBirdMaxSalaryShare = 0.60,
+    this.earlyBirdMaxYears = 4,
+    this.nonBirdSalaryMultiplier = 1.20,
+    this.nonBirdMaxYears = 4,
+    this.veteranExtensionMultiplier = 1.08,
+    this.midLevelMaxYears = 4,
+    this.tvResetYearsMin = 5,
+    this.tvResetYearsMax = 7,
+    this.tvIncreasePctMin = 4,
+    this.tvIncreasePctMax = 12,
+    this.salaryCap = defaultSalaryCap,
+    this.firstApron = defaultFirstApron,
+    this.secondApron = defaultSecondApron,
+    this.midLevelException = defaultMidLevelException,
+    this.minSalary = defaultMinSalary,
     this.maxSalary = 60000000,
     this.rookieBaseScale = 8000000,
     this.rookieMinSalary = 1000000,
@@ -22,6 +39,18 @@ class SalaryCapBalance {
   });
 
   final int salaryCap;
+  final int earlyBirdSeasons;
+  final double earlyBirdSalaryMultiplier;
+  final double earlyBirdMaxSalaryShare;
+  final int earlyBirdMaxYears;
+  final double nonBirdSalaryMultiplier;
+  final int nonBirdMaxYears;
+  final double veteranExtensionMultiplier;
+  final int midLevelMaxYears;
+  final int tvResetYearsMin;
+  final int tvResetYearsMax;
+  final int tvIncreasePctMin;
+  final int tvIncreasePctMax;
   final int firstApron;
   final int secondApron;
   final int midLevelException;
@@ -57,8 +86,9 @@ class SalaryCapBalance {
 }
 
 class ClubCashBalance {
+  static const defaultStartingCash = 75000000;
   const ClubCashBalance({
-    this.startingCash = 75000000,
+    this.startingCash = defaultStartingCash,
     this.startingCashVariance = 15000000,
     this.tvBase = 90000000,
     this.tvBonusMax = 45000000,

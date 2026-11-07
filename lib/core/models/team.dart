@@ -144,7 +144,11 @@ extension TeamX on Team {
   List<Player> get availablePlayers =>
       roster.where((p) => p.isAvailable).toList();
 
-  List<Player> get startingEleven {
+  List<Player> get startingEleven => startingElevenFor();
+
+  List<Player> startingElevenFor([
+    BalanceConfig balance = BalanceConfig.defaults,
+  ]) {
     final candidates = availablePlayers
         .where((player) => player.isEligibleForStartingEleven)
         .toList();
@@ -155,7 +159,7 @@ extension TeamX on Team {
       final player = byId[id];
       if (player == null) continue;
       selected.add(player);
-      if (selected.length >= 11) break;
+      if (selected.length >= balance.roster.startingXi) break;
     }
 
     // A motivational event can require a player in the next XI even when the
@@ -169,7 +173,7 @@ extension TeamX on Team {
         .toList();
     for (final player in required) {
       if (selected.any((item) => item.id == player.id)) continue;
-      if (selected.length < 11) {
+      if (selected.length < balance.roster.startingXi) {
         selected.add(player);
         continue;
       }
@@ -180,7 +184,7 @@ extension TeamX on Team {
     }
 
     for (final player in candidates) {
-      if (selected.length >= 11) break;
+      if (selected.length >= balance.roster.startingXi) break;
       if (!selected.any((item) => item.id == player.id)) selected.add(player);
     }
     return selected;

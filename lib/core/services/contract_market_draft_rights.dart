@@ -140,8 +140,8 @@ mixin _ContractMarketDraftRights on _ContractMarketShared {
         if (!decision.offer) continue;
 
         final offer = ContractOffer(
-          salary: balance.salaryCap.minSalary,
-          years: 2,
+          salary: decision.salary,
+          years: decision.years,
         );
         final legal = contracts.validateOffer(
           team: currentTeam,

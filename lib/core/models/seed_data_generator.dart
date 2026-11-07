@@ -122,7 +122,11 @@ class SeedDataGenerator
         seasonYear: year,
       ),
     );
-    final tvSchedule = tvCapScheduleFor(currentYear: year, saveSeed: seed ?? 0);
+    final tvSchedule = tvCapScheduleFor(
+      currentYear: year,
+      saveSeed: seed ?? 0,
+      balance: balance,
+    );
 
     return ContractPeriodService(balance: balance).normalizeLeague(
       LeagueState(

@@ -208,13 +208,13 @@ void main() {
       final initial = controller.save!.leagueState;
       final negotiation = initial.negotiations.single;
       expect(negotiation.status, NegotiationStatus.waiting);
-      expect(negotiation.waitingUntilHour, 3);
+      expect(negotiation.waitingUntilHour, 4);
       expect(negotiation.offerScore, closeTo(expectedScore, 1e-9));
 
       // advanceOneHour resolves the same hourly market used by the UI. The
-      // first two calls reach the persisted two-hour waiting deadline; the
-      // third call evaluates the waiting record.
-      for (var i = 0; i < 3; i++) {
+      // first three calls reach the persisted three-hour waiting deadline; the
+      // fourth call evaluates the waiting record.
+      for (var i = 0; i < 4; i++) {
         await controller.advanceOneHour();
       }
       final resolved = controller.save!.leagueState.negotiationById(

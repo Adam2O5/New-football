@@ -289,8 +289,8 @@ mixin _ContractMarketFinalization on _ContractMarketShared {
               replacingSalary: replacingSalary,
             ) !=
             null ||
-        offer.years < 1 ||
-        offer.years > 4) {
+        offer.years < balance.staff.minContractYears ||
+        offer.years > balance.staff.maxContractYears) {
       return null;
     }
     final reaction = staff.evaluateCounterResponse(

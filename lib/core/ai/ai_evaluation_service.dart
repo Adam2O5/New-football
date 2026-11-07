@@ -133,7 +133,10 @@ class AiEvaluationService {
       apply('ntc', balance.ai.ntcMult);
     }
 
-    final estimatedSalary = estimatedSalaryForOverall(player.overall(balance));
+    final estimatedSalary = estimatedSalaryForOverall(
+      player.overall(balance),
+      balance,
+    );
     if (player.contract.salary > estimatedSalary * 1.5 &&
         player.contract.yearsRemaining >= 3) {
       apply('overpaidContract', balance.ai.overpaidContractMult);
@@ -363,7 +366,10 @@ class AiEvaluationService {
 
   /// Public helper used by tests, tuning screens and future trade policy.
   double contractDrag(Player player) {
-    final estimated = estimatedSalaryForOverall(player.overall(balance));
+    final estimated = estimatedSalaryForOverall(
+      player.overall(balance),
+      balance,
+    );
     return (player.contract.salary - estimated) /
         1000000.0 *
         player.contract.yearsRemaining;

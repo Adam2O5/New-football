@@ -14,6 +14,7 @@ mixin _TeamEventDecisions on _TeamEventShared {
     final team = state.teamById(teamId);
     if (team == null) return state;
     final player = playerId == null ? null : _findPlayer(team, playerId);
+    final events = balance.events;
 
     switch (kind) {
       case 'moreMinutesRequest':
@@ -39,7 +40,7 @@ mixin _TeamEventDecisions on _TeamEventShared {
                 promise,
               ],
             ),
-            atmosphere: -3,
+            atmosphere: events.moreMinutesAcceptAtmosphere,
             reason: 'moreMinutesAccept',
             payload: {'playerId': player.id, 'promiseId': promise.id},
           );
@@ -78,12 +79,12 @@ mixin _TeamEventDecisions on _TeamEventShared {
           final extra =
               player.personality == PlayerPersonality.temperamental ||
                   player.personality == PlayerPersonality.ambitious
-              ? 3
+              ? events.moreMinutesPersonalityPenalty
               : 0;
           return _applyTeamDeltas(
             state,
             teamId,
-            atmosphere: -7 - extra,
+            atmosphere: events.moreMinutesDeclineAtmosphere - extra,
             reason: 'moreMinutesDecline',
             payload: {'playerId': player.id},
           );
@@ -113,11 +114,16 @@ mixin _TeamEventDecisions on _TeamEventShared {
                 situation,
               ],
             ),
-            atmosphere: 3,
+            atmosphere: events.transferAcceptAtmosphere,
             reason: '${kind}Accept',
             payload: {'playerId': player.id, 'situationId': situation.id},
           );
-          next = _setPointValueMultiplier(next, teamId, player.id, 0.9);
+          next = _setPointValueMultiplier(
+            next,
+            teamId,
+            player.id,
+            events.transferPointValueMultiplier,
+          );
           final updated = next.teamById(teamId);
           if (updated == null) return next;
           return _setTeamEventState(
@@ -140,8 +146,8 @@ mixin _TeamEventDecisions on _TeamEventShared {
           var next = _applyTeamDeltas(
             state,
             teamId,
-            atmosphere: -6,
-            chemistry: -2,
+            atmosphere: events.transferDeclineEffect.$1,
+            chemistry: events.transferDeclineEffect.$2,
             reason: '${kind}Decline',
             payload: {'playerId': player.id},
           );
@@ -156,7 +162,12 @@ mixin _TeamEventDecisions on _TeamEventShared {
                 ?.whereType<String>()
                 .toList() ??
             const <String>[];
-        var next = _setTeamCooldown(state, teamId, 'dressingRoomConflict', 1);
+        var next = _setTeamCooldown(
+          state,
+          teamId,
+          'dressingRoomConflict',
+          events.dressingRoomConflictCooldownWeeks,
+        );
         if (optionId == 'intervene') {
           final positive =
               _random(
@@ -166,12 +177,15 @@ mixin _TeamEventDecisions on _TeamEventShared {
                 'dressingRoomConflictOutcome',
                 saveSeed,
               ).nextDouble() <
-              0.5;
+              events.conflictInterveneSuccessChance;
+          final effect = positive
+              ? events.conflictSuccessEffect
+              : events.conflictFailureEffect;
           next = _applyTeamDeltas(
             next,
             teamId,
-            atmosphere: positive ? 2 : -3,
-            chemistry: -2,
+            atmosphere: effect.$1,
+            chemistry: effect.$2,
             reason: 'dressingRoomConflictIntervene',
           );
           if (!positive) {
@@ -179,7 +193,7 @@ mixin _TeamEventDecisions on _TeamEventShared {
               next,
               teamId,
               type: 'negativeEventMultiplier',
-              value: 0.2,
+              value: events.conflictNegativeEventBonus,
               weeks: balance.events.dressingRoomConflictPenaltyWeeks,
             );
           }
@@ -199,15 +213,15 @@ mixin _TeamEventDecisions on _TeamEventShared {
           next = _applyTeamDeltas(
             next,
             teamId,
-            atmosphere: -3,
-            chemistry: -2,
+            atmosphere: events.conflictIgnoreEffect.$1,
+            chemistry: events.conflictIgnoreEffect.$2,
             reason: 'dressingRoomConflictIgnore',
           );
           return _addTeamModifier(
             next,
             teamId,
             type: 'negativeEventMultiplier',
-            value: 0.2,
+            value: events.conflictNegativeEventBonus,
             weeks: balance.events.dressingRoomConflictPenaltyWeeks,
           );
         }
@@ -223,9 +237,9 @@ mixin _TeamEventDecisions on _TeamEventShared {
         };
         if (nextMultiplier == null) return state;
         final (atmosphere, chemistry) = switch (optionId) {
-          'punish' => (-2, -2.0),
-          'response' => (-1, -1.0),
-          _ => (-1, -1.0),
+          'punish' => events.criticismPunishEffect,
+          'response' => events.criticismResponseEffect,
+          _ => events.criticismIgnoreEffect,
         };
         final current = team.eventState.copyWith(
           publicCriticismRollMultiplier: nextMultiplier,

@@ -80,16 +80,20 @@ class StaffService {
     TeamStatus currentTeamStatus = TeamStatus.pretender,
   }) {
     final raw =
-        _rawOverall(member) * 20 +
-        NegotiationRules.teamStatusBonus(currentTeamStatus);
-    return raw.clamp(0.0, 100.0).toDouble();
+        _rawOverall(member) * balance.staff.wantPerStar +
+        NegotiationRules.teamStatusBonus(currentTeamStatus, balance.contracts);
+    return raw
+        .clamp(balance.contracts.wantMin, balance.contracts.wantMax)
+        .toDouble();
   }
 
   int expectedSalary(
     StaffMember member, {
     TeamStatus currentTeamStatus = TeamStatus.pretender,
   }) {
-    final want = staffWant(member, currentTeamStatus: currentTeamStatus) / 100;
+    final want =
+        staffWant(member, currentTeamStatus: currentTeamStatus) /
+        balance.contracts.wantNormalization;
     final salary =
         balance.staff.minSalary +
         (balance.staff.maxSalary - balance.staff.minSalary) * want * want;
@@ -104,19 +108,16 @@ class StaffService {
     TeamStatus currentTeamStatus = TeamStatus.pretender,
   }) {
     final want = staffWant(member, currentTeamStatus: currentTeamStatus);
-    final band = want <= 39
-        ? 0
-        : want <= 69
-        ? 1
-        : 2;
-    if (member.age <= 54) return const [2, 3, 4][band];
-    if (member.age <= 59) return const [1, 2, 2][band];
-    return 1;
+    return balance.staff.desiredLengthFor(
+      member.age,
+      balance.contracts.lengthWantBand(want),
+    );
   }
 
   double cfoDiscount({StaffMember? cfo, double? negotiation}) =>
       NegotiationRules.cfoDiscount(
         _cfoNegotiationValue(cfo: cfo, negotiation: negotiation),
+        balance.contracts,
       );
 
   OfferScoreBreakdown staffOfferBreakdown(
@@ -232,7 +233,7 @@ class StaffService {
     final years = expectedLength(
       member,
       currentTeamStatus: currentTeamStatus,
-    ).clamp(1, 4);
+    ).clamp(balance.staff.minContractYears, balance.staff.maxContractYears);
     final expected = expectedSalary(
       member,
       currentTeamStatus: currentTeamStatus,
@@ -249,7 +250,10 @@ class StaffService {
     final desiredSalaryFit =
         target / discount -
         length -
-        NegotiationRules.teamStatusBonus(offeringTeamStatus) -
+        NegotiationRules.teamStatusBonus(
+          offeringTeamStatus,
+          balance.contracts,
+        ) -
         balance.contracts.salaryFitBase;
     final percentage = desiredSalaryFit >= 0
         ? desiredSalaryFit / balance.contracts.salaryAboveBonusPerPct
@@ -323,6 +327,10 @@ class StaffService {
     int? seasonYear,
     int week = 1,
   }) {
+    if (offer.years < balance.staff.minContractYears ||
+        offer.years > balance.staff.maxContractYears) {
+      return null;
+    }
     final existing = team.staff.canonicalMember(member.role);
     if (existing != null && existing.id != member.id) return null;
     final replacingSalary = existing?.contract?.salary ?? 0;

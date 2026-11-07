@@ -34,7 +34,7 @@ abstract class PlayerSeasonStats with _$PlayerSeasonStats {
     @Default(0) int cleanSheets,
     @Default(0) int saves,
     @Default(0) int shotsFaced,
-    @Default(6.0) double ratingAvg,
+    @Default(MatchdayBalance.defaultUnratedPlayerRating) double ratingAvg,
 
     /// Accumulated here rather than derived from stored fixtures: a persisted
     /// `MatchResult` no longer keeps per-match player rows.
@@ -235,7 +235,7 @@ extension PlayerX on Player {
     final stars = hidden.developmentCeilingStars > 0
         ? hidden.developmentCeilingStars
         : potentialStars;
-    return _ceilingOvrForStars(stars);
+    return balance.tradeValue.ceilingOvrForStars(stars);
   }
 
   /// Available for selection unless injured or suspended. Low stamina still
@@ -303,58 +303,60 @@ extension PlayerX on Player {
   ///   ageComponent + contractComponent), -1000, 1000)`
   int computePointValue([BalanceConfig balance = BalanceConfig.defaults]) {
     final ovr = overall(balance);
+    final b = balance.tradeValue;
 
     // 1. Komponent overall: (overall - 70) * 30  →  -600 … +870
-    final ovrComponent = (ovr - 70) * 30;
+    final ovrComponent = (ovr - b.pointOvrBase) * b.pointOvrWeight;
 
     // 2. Komponent potencjału: potentialGap * (4.5*youngFactor + olderFactor)
-    final ceilingOvr = _ceilingOvrForStars(potentialStars);
-    final potentialGap = (ceilingOvr - ovr).clamp(0.0, 50.0);
-    final youngFactor = age <= 26
-        ? (4.5 - 0.5 * (age - 18)).clamp(0.0, 4.5)
+    final ceilingOvr = b.ceilingOvrForStars(potentialStars);
+    final potentialGap = (ceilingOvr - ovr).clamp(0.0, b.pointPotentialGapMax);
+    final youngFactor = age <= b.pointYoungAgeMax
+        ? (b.pointYoungFactorBase -
+                  b.pointYoungFactorDecay * (age - b.pointYoungAgeStart))
+              .clamp(0.0, b.pointYoungFactorBase)
         : 0.0;
-    final olderFactor = age >= 27
-        ? (0.8 - 0.08 * (age - 27)).clamp(0.15, 0.8)
+    final olderFactor = age >= b.pointOlderAgeMin
+        ? (b.pointOlderFactorBase -
+                  b.pointOlderFactorDecay * (age - b.pointOlderAgeMin))
+              .clamp(b.pointOlderFactorMin, b.pointOlderFactorBase)
         : 0.0;
-    final potentialComponent = potentialGap * (4.5 * youngFactor + olderFactor);
+    final potentialComponent =
+        potentialGap *
+        (b.pointYoungPotentialWeight * youngFactor + olderFactor);
 
     // 3. Komponent wieku: ageScore * 150  →  -150 … +150
     final double ageScore;
-    if (age <= 24) {
+    if (age <= b.pointAgePeakMax) {
       ageScore = 1.0;
-    } else if (age >= 34) {
+    } else if (age >= b.pointAgeDeclineMin) {
       ageScore = -1.0;
     } else {
-      ageScore = 1.0 - 2.0 * (age - 24) / 10.0;
+      ageScore =
+          1.0 -
+          2.0 *
+              (age - b.pointAgePeakMax) /
+              (b.pointAgeDeclineMin - b.pointAgePeakMax);
     }
-    final ageComponent = ageScore * 150;
+    final ageComponent = ageScore * b.pointAgeWeight;
 
     // 4. Komponent kontraktowy: salaryScore * 260 * (0.5 + 0.5*lengthFactor)
-    final estimatedSalary = estimatedSalaryForOverall(ovr);
+    final estimatedSalary = estimatedSalaryForOverall(ovr, balance);
     final salaryScore = estimatedSalary > 0
         ? (1.0 - contract.salary / estimatedSalary).clamp(-1.0, 1.0)
         : 0.0;
-    final lengthFactor = (contract.yearsRemaining / 5.0).clamp(0.0, 1.0);
-    final contractComponent = salaryScore * 260 * (0.5 + 0.5 * lengthFactor);
+    final lengthFactor = (contract.yearsRemaining / b.contractLengthCap).clamp(
+      0.0,
+      1.0,
+    );
+    final contractComponent =
+        salaryScore *
+        b.pointContractWeight *
+        (b.pointContractBase + b.pointContractLengthWeight * lengthFactor);
 
     final raw =
         ovrComponent + potentialComponent + ageComponent + contractComponent;
-    return raw.round().clamp(-1000, 1000);
-  }
-
-  /// Midpoint ceiling OVR for a given potential stars rating
-  /// (`player_management.md` — tabela gwiazdek).
-  static double _ceilingOvrForStars(double stars) {
-    if (stars <= 0.5) return 52.5;
-    if (stars <= 1.0) return 58.0;
-    if (stars <= 1.5) return 63.0;
-    if (stars <= 2.0) return 68.0;
-    if (stars <= 2.5) return 73.0;
-    if (stars <= 3.0) return 78.0;
-    if (stars <= 3.5) return 82.5;
-    if (stars <= 4.0) return 86.5;
-    if (stars <= 4.5) return 90.5;
-    return 96.0; // 5.0★
+    return raw.round().clamp(b.pointMin, b.pointMax);
   }
 
   /// Przelicza i zapisuje [Player.pointValue] — wołać po każdej zmianie
@@ -420,7 +422,7 @@ abstract class PlayerMatchStats with _$PlayerMatchStats {
     @Default(0) int ownGoals,
     @Default(false) bool cleanSheet,
     @Default(-1) int staminaAfterMatch,
-    @Default(6.0) double rating,
+    @Default(MatchdayBalance.defaultUnratedPlayerRating) double rating,
   }) = _PlayerMatchStats;
 
   factory PlayerMatchStats.fromJson(Map<String, dynamic> json) =>

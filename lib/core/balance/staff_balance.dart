@@ -4,6 +4,14 @@ class StaffBalance {
   static const defaultRatingMin = 0.0;
   static const defaultRatingMax = 5.0;
   const StaffBalance({
+    this.minContractYears = 1,
+    this.maxContractYears = 4,
+    this.wantPerStar = 20.0,
+    this.desiredLengthTable = const [
+      (54, [2, 3, 4]),
+      (59, [1, 2, 2]),
+      (null, [1, 1, 1]),
+    ],
     this.salaryCap = 15000000,
     this.minSalary = 500000,
     this.maxSalary = 5000000,
@@ -41,6 +49,19 @@ class StaffBalance {
   });
 
   final int salaryCap;
+  final int minContractYears;
+  final int maxContractYears;
+  final double wantPerStar;
+  final List<(int? ageMax, List<int> years)> desiredLengthTable;
+
+  int desiredLengthFor(int age, int wantBand) {
+    final row = desiredLengthTable.firstWhere(
+      (row) => row.$1 == null || age <= row.$1!,
+      orElse: () => desiredLengthTable.last,
+    );
+    return row.$2[wantBand];
+  }
+
   final int minSalary;
   final int maxSalary;
   final int roleSlots;

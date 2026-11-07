@@ -1,5 +1,7 @@
 class DraftBalance {
+  static const defaultUndraftedContractYears = 2;
   const DraftBalance({
+    this.undraftedContractYears = defaultUndraftedContractYears,
     this.classSize = 120,
     this.rounds = 3,
     this.teams = 30,
@@ -21,6 +23,7 @@ class DraftBalance {
   });
 
   final int classSize;
+  final int undraftedContractYears;
   final int rounds;
   final int teams;
   final int lotteryTeams;

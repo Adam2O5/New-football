@@ -300,7 +300,7 @@ void main() {
     },
   );
 
-  test('waiting lasts two hours and collapses to hour 10 from hour 9', () {
+  test('waiting lasts three hours and collapses to hour 10 from hour 9', () {
     final base = leagueAt(week: 47, day: 1, hour: 9);
     final team = base.playerTeam!;
     final candidate = freeAgent(base, 'task29-waiting');

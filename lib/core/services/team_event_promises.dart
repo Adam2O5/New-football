@@ -50,7 +50,7 @@ mixin _TeamEventPromises on _TeamEventShared {
         nextState = _applyTeamDeltas(
           nextState,
           team.id,
-          atmosphere: 5,
+          atmosphere: balance.events.promiseFulfilledAtmosphere,
           reason: 'promiseFulfilled',
           payload: {'playerId': promise.playerId, 'promiseId': promise.id},
         );
@@ -59,12 +59,12 @@ mixin _TeamEventPromises on _TeamEventShared {
             ? 0
             : (player.personality == PlayerPersonality.temperamental ||
                       player.personality == PlayerPersonality.ambitious
-                  ? 3
+                  ? balance.events.promiseBrokenPersonalityPenalty
                   : 0);
         nextState = _applyTeamDeltas(
           nextState,
           team.id,
-          atmosphere: -12 - extraPenalty,
+          atmosphere: balance.events.promiseBrokenAtmosphere - extraPenalty,
           reason: 'promiseBroken',
           payload: {
             'playerId': promise.playerId,
@@ -144,8 +144,8 @@ mixin _TeamEventPromises on _TeamEventShared {
       nextState = _applyTeamDeltas(
         nextState,
         team.id,
-        atmosphere: -15,
-        chemistry: -4,
+        atmosphere: balance.events.transferExpiredEffect.$1,
+        chemistry: balance.events.transferExpiredEffect.$2,
         reason: 'transferRequestExpired',
         payload: {
           'playerId': situation.playerId,

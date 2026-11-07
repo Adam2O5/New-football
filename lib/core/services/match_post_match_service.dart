@@ -51,7 +51,7 @@ Player applyMatchPlayerEffects({
 
   next = next.withMatchForm(
     minutesPlayed: minutes,
-    rating: stats?.rating ?? 6.0,
+    rating: stats?.rating ?? MatchdayBalance.defaultUnratedPlayerRating,
     lost: lost,
     balance: balance,
   );

@@ -69,9 +69,14 @@ Map<String, dynamic> _$CapExceptionToJson(_CapException instance) =>
     };
 
 _TeamFinance _$TeamFinanceFromJson(Map<String, dynamic> json) => _TeamFinance(
-  salaryCap: (json['salaryCap'] as num?)?.toInt() ?? 350000000,
-  firstApron: (json['firstApron'] as num?)?.toInt() ?? 396700000,
-  secondApron: (json['secondApron'] as num?)?.toInt() ?? 431700000,
+  salaryCap:
+      (json['salaryCap'] as num?)?.toInt() ?? SalaryCapBalance.defaultSalaryCap,
+  firstApron:
+      (json['firstApron'] as num?)?.toInt() ??
+      SalaryCapBalance.defaultFirstApron,
+  secondApron:
+      (json['secondApron'] as num?)?.toInt() ??
+      SalaryCapBalance.defaultSecondApron,
   totalPayroll: (json['totalPayroll'] as num?)?.toInt() ?? 0,
   activeExceptions:
       (json['activeExceptions'] as List<dynamic>?)
@@ -79,10 +84,13 @@ _TeamFinance _$TeamFinanceFromJson(Map<String, dynamic> json) => _TeamFinance(
           .toList() ??
       const [],
   midLevelExceptionAmount:
-      (json['midLevelExceptionAmount'] as num?)?.toInt() ?? 20400000,
+      (json['midLevelExceptionAmount'] as num?)?.toInt() ??
+      SalaryCapBalance.defaultMidLevelException,
   midLevelExceptionAvailable:
       json['midLevelExceptionAvailable'] as bool? ?? true,
-  cashBalance: (json['cashBalance'] as num?)?.toInt() ?? 75000000,
+  cashBalance:
+      (json['cashBalance'] as num?)?.toInt() ??
+      ClubCashBalance.defaultStartingCash,
 );
 
 Map<String, dynamic> _$TeamFinanceToJson(_TeamFinance instance) =>

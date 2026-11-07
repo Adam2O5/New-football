@@ -67,10 +67,12 @@ mixin _DayWorldUpdates {
   }
 
   bool _isMonthlyScoutingReport(int week, int day) {
-    return day == 1 &&
-        week >= 5 &&
+    return day == balance.calendar.scoutingMonthlyDay &&
+        week >= balance.calendar.scoutingMonthlyFirstWeek &&
         week < balance.calendar.tradeDeadlineWeek &&
-        (week - 1) % 4 == 0;
+        (week - balance.calendar.scoutingMonthlyFirstWeek) %
+                balance.calendar.scoutingMonthlyIntervalWeeks ==
+            0;
   }
 
   LeagueState _runMonthlyScoutingReport(

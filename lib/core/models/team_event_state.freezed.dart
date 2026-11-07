@@ -482,7 +482,7 @@ return $default(_that.playerId,_that.seasonYear,_that.week,_that.minutes,_that.p
 @JsonSerializable()
 
 class _MinutesHistoryEntry implements MinutesHistoryEntry {
-  const _MinutesHistoryEntry({required this.playerId, required this.seasonYear, required this.week, this.minutes = 0, this.possibleMinutes = 90});
+  const _MinutesHistoryEntry({required this.playerId, required this.seasonYear, required this.week, this.minutes = 0, this.possibleMinutes = PlayerBalance.defaultMinutesPerMatch});
   factory _MinutesHistoryEntry.fromJson(Map<String, dynamic> json) => _$MinutesHistoryEntryFromJson(json);
 
 @override final  String playerId;
@@ -1032,7 +1032,7 @@ return $default(_that.id,_that.playerId,_that.kind,_that.createdSeasonYear,_that
 @JsonSerializable()
 
 class _TeamPromise implements TeamPromise {
-  const _TeamPromise({required this.id, required this.playerId, required this.kind, required this.createdSeasonYear, required this.createdWeek, this.weeksElapsed = 0, this.durationWeeks = 4, this.requiredMinutesShare = 0.4});
+  const _TeamPromise({required this.id, required this.playerId, required this.kind, required this.createdSeasonYear, required this.createdWeek, this.weeksElapsed = 0, this.durationWeeks = EventsBalance.defaultPromiseWeeks, this.requiredMinutesShare = EventsBalance.defaultPromiseMinutesShare});
   factory _TeamPromise.fromJson(Map<String, dynamic> json) => _$TeamPromiseFromJson(json);
 
 @override final  String id;
@@ -1314,7 +1314,7 @@ return $default(_that.id,_that.playerId,_that.kind,_that.createdSeasonYear,_that
 @JsonSerializable()
 
 class _TeamTransferSituation implements TeamTransferSituation {
-  const _TeamTransferSituation({required this.id, required this.playerId, required this.kind, required this.createdSeasonYear, required this.createdWeek, this.weeksRemaining = 4});
+  const _TeamTransferSituation({required this.id, required this.playerId, required this.kind, required this.createdSeasonYear, required this.createdWeek, this.weeksRemaining = EventsBalance.defaultTransferSituationWeeks});
   factory _TeamTransferSituation.fromJson(Map<String, dynamic> json) => _$TeamTransferSituationFromJson(json);
 
 @override final  String id;

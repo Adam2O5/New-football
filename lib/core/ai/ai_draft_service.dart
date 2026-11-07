@@ -406,6 +406,8 @@ class AiDraftService {
         ? balance.ai.draftUndraftedBelowTargetProbability
         : balance.ai.draftUndraftedDefaultProbability;
     return AiUndraftedSigningDecision(
+      salary: balance.salaryCap.minSalary,
+      years: balance.draft.undraftedContractYears,
       offer: _roll(
         saveSeed: saveSeed,
         seasonYear: seasonYear,

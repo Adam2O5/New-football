@@ -154,21 +154,35 @@ mixin _ContractMarketResolution on _ContractMarketShared {
           'waiting:${negotiation.round}',
         ),
       );
+      final deadline = negotiations.deadlineFor(
+        phase: negotiation.phase,
+        seasonYear: state.currentSeason.year,
+        week: state.currentWeek,
+        day: state.currentDay,
+        hour: hour,
+      );
       ContractNegotiation next;
-      if (score >= 70 ||
-          (score >= 55 &&
+      if (score >= balance.contracts.acceptScoreMin ||
+          (score >= balance.contracts.counterScoreMax + 1 &&
               random.nextDouble() <
-                  (0.50 + (score - 62) * 0.03).clamp(0.0, 1.0))) {
+                  NegotiationRules.mixedAcceptProbability(
+                    score,
+                    balance: balance.contracts,
+                  ))) {
         next = negotiation.copyWith(
           status: NegotiationStatus.pendingFinalization,
           requiresFinalization: true,
           offerScore: score,
+          expirySeasonYear: deadline.seasonYear,
+          expiryWeek: deadline.week,
+          expiryDay: deadline.day,
+          expiryHour: deadline.hour,
           waitingUntilSeasonYear: null,
           waitingUntilWeek: null,
           waitingUntilDay: null,
           waitingUntilHour: null,
         );
-      } else if (score >= 40) {
+      } else if (score >= balance.contracts.rejectScoreMax + 1) {
         final counter = _counterFor(state, negotiation);
         next = negotiation.copyWith(
           status: counter == null
@@ -179,6 +193,10 @@ mixin _ContractMarketResolution on _ContractMarketShared {
           round: negotiation.round + 1,
           offerScore: score,
           requiresFinalization: false,
+          expirySeasonYear: deadline.seasonYear,
+          expiryWeek: deadline.week,
+          expiryDay: deadline.day,
+          expiryHour: deadline.hour,
           waitingUntilSeasonYear: null,
           waitingUntilWeek: null,
           waitingUntilDay: null,
@@ -186,7 +204,7 @@ mixin _ContractMarketResolution on _ContractMarketShared {
         );
       } else {
         next = negotiation.copyWith(
-          status: score <= 24
+          status: score <= balance.contracts.hardRejectScoreMax
               ? NegotiationStatus.hardRejected
               : NegotiationStatus.rejected,
           offerScore: score,

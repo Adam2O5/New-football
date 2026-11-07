@@ -15,7 +15,7 @@ class PlayerBalance {
     this.traitMax = 10,
     this.staminaMin = 0,
     this.staminaMax = 100,
-    this.minutesPerMatch = 90,
+    this.minutesPerMatch = defaultMinutesPerMatch,
     // Kept for compatibility with older callers; Task 12 uses positional
     // consumption through [staminaLossForMinutes].
     this.fatiguePerFullMatch = 15,
@@ -60,6 +60,7 @@ class PlayerBalance {
   });
 
   static const defaultAttributeMin = 50;
+  static const defaultMinutesPerMatch = 90;
   static const defaultAttributeMax = 99;
   static const defaultInitialStamina = 100;
   static const defaultInitialForm = 5.0;

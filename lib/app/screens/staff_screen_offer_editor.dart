@@ -20,7 +20,10 @@ mixin _StaffScreenOfferEditor
     );
     final salary = int.tryParse(_salaryController.text.trim());
     final years = int.tryParse(_yearsController.text.trim());
-    final score = salary == null || years == null || years < 1
+    final score =
+        salary == null ||
+            years == null ||
+            years < ref.read(balanceProvider).staff.minContractYears
         ? null
         : _staffService.staffOfferScore(
             member,
@@ -161,17 +164,18 @@ mixin _StaffScreenOfferEditor
   }
 }
 
-class _StaffCounterDialog extends StatefulWidget {
+class _StaffCounterDialog extends ConsumerStatefulWidget {
   const _StaffCounterDialog({required this.l10n, required this.current});
 
   final AppLocalizations l10n;
   final NegotiationOffer current;
 
   @override
-  State<_StaffCounterDialog> createState() => _StaffCounterDialogState();
+  ConsumerState<_StaffCounterDialog> createState() =>
+      _StaffCounterDialogState();
 }
 
-class _StaffCounterDialogState extends State<_StaffCounterDialog> {
+class _StaffCounterDialogState extends ConsumerState<_StaffCounterDialog> {
   late final TextEditingController salaryController;
   late final TextEditingController yearsController;
   String? error;
@@ -232,7 +236,10 @@ class _StaffCounterDialogState extends State<_StaffCounterDialog> {
           onPressed: () {
             final salary = int.tryParse(salaryController.text.trim());
             final years = int.tryParse(yearsController.text.trim());
-            if (salary == null || years == null || years < 1 || years > 4) {
+            if (salary == null ||
+                years == null ||
+                years < ref.read(balanceProvider).staff.minContractYears ||
+                years > ref.read(balanceProvider).staff.maxContractYears) {
               setState(() => error = l10n.contract_invalidOffer);
               return;
             }

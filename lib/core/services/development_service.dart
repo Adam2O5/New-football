@@ -73,7 +73,10 @@ class DevelopmentService {
 
   /// Compatibility entry point retained for tests and older call sites.
   Player developPlayer(Player player, {double staffMultiplier = 1.0}) {
-    final result = developPlayerWithContext(player, atmosphere: 50);
+    final result = developPlayerWithContext(
+      player,
+      atmosphere: balance.development.atmosphereNeutral.round(),
+    );
     if (staffMultiplier == 1.0) return result.player;
     final rate = (result.player.hidden.growthRate * staffMultiplier).clamp(
       balance.development.growthRateMin,

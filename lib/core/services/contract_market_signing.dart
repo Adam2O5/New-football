@@ -36,7 +36,10 @@ mixin _ContractMarketSigning on _ContractMarketShared {
     if (candidates.isEmpty) return null;
 
     final contractYears = (years ?? balance.ai.rosterEmergencyOfferYears)
-        .clamp(1, 5)
+        .clamp(
+          balance.contracts.playerMinYears,
+          balance.contracts.playerMaxYears,
+        )
         .toInt();
     final offers = <ContractOffer>[
       ContractOffer(salary: balance.salaryCap.minSalary, years: contractYears),

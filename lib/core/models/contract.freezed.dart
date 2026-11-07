@@ -788,7 +788,7 @@ return $default(_that.salaryCap,_that.firstApron,_that.secondApron,_that.totalPa
 @JsonSerializable()
 
 class _TeamFinance implements TeamFinance {
-  const _TeamFinance({this.salaryCap = 350000000, this.firstApron = 396700000, this.secondApron = 431700000, this.totalPayroll = 0, final  List<CapException> activeExceptions = const [], this.midLevelExceptionAmount = 20400000, this.midLevelExceptionAvailable = true, this.cashBalance = 75000000}): _activeExceptions = activeExceptions;
+  const _TeamFinance({this.salaryCap = SalaryCapBalance.defaultSalaryCap, this.firstApron = SalaryCapBalance.defaultFirstApron, this.secondApron = SalaryCapBalance.defaultSecondApron, this.totalPayroll = 0, final  List<CapException> activeExceptions = const [], this.midLevelExceptionAmount = SalaryCapBalance.defaultMidLevelException, this.midLevelExceptionAvailable = true, this.cashBalance = ClubCashBalance.defaultStartingCash}): _activeExceptions = activeExceptions;
   factory _TeamFinance.fromJson(Map<String, dynamic> json) => _$TeamFinanceFromJson(json);
 
 @override@JsonKey() final  int salaryCap;

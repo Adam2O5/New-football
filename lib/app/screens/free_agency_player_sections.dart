@@ -167,7 +167,10 @@ mixin _FreeAgencyPlayerSections
   ) {
     final salary = int.tryParse(_salaryController.text.trim());
     final years = int.tryParse(_yearsController.text.trim());
-    final score = salary == null || years == null || years < 1
+    final score =
+        salary == null ||
+            years == null ||
+            years < ref.read(balanceProvider).contracts.playerMinYears
         ? null
         : _contractService.playerOfferScore(
             player,

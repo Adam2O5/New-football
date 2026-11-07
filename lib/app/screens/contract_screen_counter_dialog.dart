@@ -14,17 +14,19 @@ mixin _ContractScreenCounterDialog
   }
 }
 
-class _ContractCounterDialog extends StatefulWidget {
+class _ContractCounterDialog extends ConsumerStatefulWidget {
   const _ContractCounterDialog({required this.l10n, required this.current});
 
   final AppLocalizations l10n;
   final NegotiationOffer current;
 
   @override
-  State<_ContractCounterDialog> createState() => _ContractCounterDialogState();
+  ConsumerState<_ContractCounterDialog> createState() =>
+      _ContractCounterDialogState();
 }
 
-class _ContractCounterDialogState extends State<_ContractCounterDialog> {
+class _ContractCounterDialogState
+    extends ConsumerState<_ContractCounterDialog> {
   late final TextEditingController salaryController;
   late final TextEditingController yearsController;
   String? error;
@@ -86,7 +88,10 @@ class _ContractCounterDialogState extends State<_ContractCounterDialog> {
           onPressed: () {
             final salary = int.tryParse(salaryController.text.trim());
             final years = int.tryParse(yearsController.text.trim());
-            if (salary == null || years == null || years < 1) {
+            if (salary == null ||
+                years == null ||
+                years < ref.read(balanceProvider).contracts.playerMinYears ||
+                years > ref.read(balanceProvider).contracts.playerMaxYears) {
               setState(() => error = l10n.contract_invalidOffer);
               return;
             }

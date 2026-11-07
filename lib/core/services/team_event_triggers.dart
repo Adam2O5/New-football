@@ -7,7 +7,7 @@ mixin _TeamEventTriggers on _TeamEventShared {
       return state;
     }
     final events = balance.events;
-    final xi = team.startingEleven;
+    final xi = team.startingElevenFor(balance);
     final averageOvr = xi.isEmpty
         ? 0.0
         : xi.map((player) => _eventOverall(player)).reduce((a, b) => a + b) /
@@ -40,7 +40,7 @@ mixin _TeamEventTriggers on _TeamEventShared {
           final betterThanXi =
               xi.isNotEmpty && _eventOverall(player) >= averageOvr;
           final youngWithPotential =
-              player.age <= 26 &&
+              player.age <= events.moreMinutesYoungAgeMax &&
               player.potentialStars > rosterAveragePotential;
           return betterThanXi || youngWithPotential;
         }).toList()..sort((a, b) {
@@ -59,8 +59,13 @@ mixin _TeamEventTriggers on _TeamEventShared {
           team.atmosphere,
           balance,
         ) *
-        team.eventState.negativeEventMultiplier;
-    final rollState = _setTeamCooldown(state, team.id, 'moreMinutesRequest', 1);
+        team.eventState.negativeEventMultiplierFor(balance);
+    final rollState = _setTeamCooldown(
+      state,
+      team.id,
+      'moreMinutesRequest',
+      events.moreMinutesCooldownWeeks,
+    );
     if (!_roll(
       rollState,
       team.id,
@@ -139,8 +144,13 @@ mixin _TeamEventTriggers on _TeamEventShared {
           team.atmosphere,
           balance,
         ) *
-        team.eventState.negativeEventMultiplier;
-    final rollState = _setTeamCooldown(state, team.id, 'transferRequestI', 1);
+        team.eventState.negativeEventMultiplierFor(balance);
+    final rollState = _setTeamCooldown(
+      state,
+      team.id,
+      'transferRequestI',
+      events.transferRequestCooldownWeeks,
+    );
     if (!_roll(
       rollState,
       team.id,
@@ -169,7 +179,8 @@ mixin _TeamEventTriggers on _TeamEventShared {
     final team = state.teamById(teamId);
     if (team == null) return state;
     final events = balance.events;
-    final temperamental = team.startingEleven
+    final temperamental = team
+        .startingElevenFor(balance)
         .where(
           (player) => player.personality == PlayerPersonality.temperamental,
         )
@@ -191,7 +202,7 @@ mixin _TeamEventTriggers on _TeamEventShared {
           team.atmosphere,
           balance,
         ) *
-        team.eventState.negativeEventMultiplier;
+        team.eventState.negativeEventMultiplierFor(balance);
     if (!_roll(
       state,
       team.id,
@@ -229,9 +240,9 @@ mixin _TeamEventTriggers on _TeamEventShared {
         team.eventState.isOnCooldown('leaderSupport') ||
         _winStreak(team.recentMatchResults) <
             balance.events.leaderSupportWinStreak ||
-        !team.startingEleven.any(
-          (player) => player.personality == PlayerPersonality.leader,
-        )) {
+        !team
+            .startingElevenFor(balance)
+            .any((player) => player.personality == PlayerPersonality.leader)) {
       return state;
     }
     final chance =
@@ -251,13 +262,13 @@ mixin _TeamEventTriggers on _TeamEventShared {
     next = _applyTeamDeltas(
       next,
       team.id,
-      atmosphere: 4,
-      chemistry: 1,
+      atmosphere: balance.events.leaderSupportEffect.$1,
+      chemistry: balance.events.leaderSupportEffect.$2,
       reason: 'leaderSupport',
     );
-    final leader = team.startingEleven.firstWhere(
-      (player) => player.personality == PlayerPersonality.leader,
-    );
+    final leader = team
+        .startingElevenFor(balance)
+        .firstWhere((player) => player.personality == PlayerPersonality.leader);
     return _emitAutomatic(
       next,
       teamId: team.id,
@@ -288,8 +299,11 @@ mixin _TeamEventTriggers on _TeamEventShared {
         return byOverall != 0 ? byOverall : a.id.compareTo(b.id);
       });
     final player = candidate
-        .take(15)
-        .where((candidate) => candidate.age > 25)
+        .take(balance.events.publicCriticismCandidates)
+        .where(
+          (candidate) =>
+              candidate.age > balance.events.publicCriticismAgeMinExclusive,
+        )
         .firstOrNull;
     if (player == null) return state;
     final rollMultiplier = team.eventState.publicCriticismRollMultiplier;
@@ -299,7 +313,7 @@ mixin _TeamEventTriggers on _TeamEventShared {
           team.atmosphere,
           balance,
         ) *
-        team.eventState.negativeEventMultiplier *
+        team.eventState.negativeEventMultiplierFor(balance) *
         rollMultiplier;
     final resetMultiplier = _setTeamEventState(
       state,

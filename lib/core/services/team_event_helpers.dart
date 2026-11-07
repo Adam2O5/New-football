@@ -151,7 +151,11 @@ mixin _TeamEventHelpers on _TeamEventShared {
         : _setTeamEventState(
             state,
             teamId,
-            team.eventState.withPointValueMultiplier(playerId, multiplier),
+            team.eventState.withPointValueMultiplier(
+              playerId,
+              multiplier,
+              balance,
+            ),
           );
   }
 
@@ -209,7 +213,10 @@ mixin _TeamEventHelpers on _TeamEventShared {
     if (values.isEmpty) {
       _valueThresholdCache = null;
     } else {
-      final count = max(1, (values.length * 0.20).ceil());
+      final count = max(
+        1,
+        (values.length * balance.events.transferValueTopShare).ceil(),
+      );
       _valueThresholdCache = values[min(count - 1, values.length - 1)];
     }
     _valueThresholdReady = true;
@@ -322,7 +329,7 @@ mixin _TeamEventHelpers on _TeamEventShared {
     // the only restricted path represented by the current model, so avoid
     // emitting a UFA declaration for them; veteran contracts are treated as
     // UFA candidates when their remaining term reaches one year.
-    return player.contract.yearsRemaining <= 1 &&
+    return player.contract.yearsRemaining <= balance.events.futureUfaYearsMax &&
         !player.contract.isRookieScale;
   }
 

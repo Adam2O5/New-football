@@ -1,3 +1,4 @@
+import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/draft_models.dart';
 import 'package:new_football/core/models/enums.dart';
 
@@ -72,12 +73,14 @@ class AiUndraftedSigningDecision {
     required this.offer,
     required this.probability,
     required this.reason,
+    this.salary = SalaryCapBalance.defaultMinSalary,
+    this.years = DraftBalance.defaultUndraftedContractYears,
   });
 
   final bool offer;
   final double probability;
   final String reason;
 
-  int get salary => 1000000;
-  int get years => 2;
+  final int salary;
+  final int years;
 }

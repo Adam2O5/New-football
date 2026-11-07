@@ -26,7 +26,9 @@ _MinutesHistoryEntry _$MinutesHistoryEntryFromJson(Map<String, dynamic> json) =>
       seasonYear: (json['seasonYear'] as num).toInt(),
       week: (json['week'] as num).toInt(),
       minutes: (json['minutes'] as num?)?.toInt() ?? 0,
-      possibleMinutes: (json['possibleMinutes'] as num?)?.toInt() ?? 90,
+      possibleMinutes:
+          (json['possibleMinutes'] as num?)?.toInt() ??
+          PlayerBalance.defaultMinutesPerMatch,
     );
 
 Map<String, dynamic> _$MinutesHistoryEntryToJson(
@@ -64,9 +66,12 @@ _TeamPromise _$TeamPromiseFromJson(Map<String, dynamic> json) => _TeamPromise(
   createdSeasonYear: (json['createdSeasonYear'] as num).toInt(),
   createdWeek: (json['createdWeek'] as num).toInt(),
   weeksElapsed: (json['weeksElapsed'] as num?)?.toInt() ?? 0,
-  durationWeeks: (json['durationWeeks'] as num?)?.toInt() ?? 4,
+  durationWeeks:
+      (json['durationWeeks'] as num?)?.toInt() ??
+      EventsBalance.defaultPromiseWeeks,
   requiredMinutesShare:
-      (json['requiredMinutesShare'] as num?)?.toDouble() ?? 0.4,
+      (json['requiredMinutesShare'] as num?)?.toDouble() ??
+      EventsBalance.defaultPromiseMinutesShare,
 );
 
 Map<String, dynamic> _$TeamPromiseToJson(_TeamPromise instance) =>
@@ -89,7 +94,9 @@ _TeamTransferSituation _$TeamTransferSituationFromJson(
   kind: json['kind'] as String,
   createdSeasonYear: (json['createdSeasonYear'] as num).toInt(),
   createdWeek: (json['createdWeek'] as num).toInt(),
-  weeksRemaining: (json['weeksRemaining'] as num?)?.toInt() ?? 4,
+  weeksRemaining:
+      (json['weeksRemaining'] as num?)?.toInt() ??
+      EventsBalance.defaultTransferSituationWeeks,
 );
 
 Map<String, dynamic> _$TeamTransferSituationToJson(

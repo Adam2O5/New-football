@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:new_football/core/balance/finance_balance.dart';
 import 'package:new_football/core/models/enums.dart';
 
 part 'contract.freezed.dart';
@@ -42,14 +43,15 @@ abstract class CapException with _$CapException {
 @freezed
 abstract class TeamFinance with _$TeamFinance {
   const factory TeamFinance({
-    @Default(350000000) int salaryCap,
-    @Default(396700000) int firstApron,
-    @Default(431700000) int secondApron,
+    @Default(SalaryCapBalance.defaultSalaryCap) int salaryCap,
+    @Default(SalaryCapBalance.defaultFirstApron) int firstApron,
+    @Default(SalaryCapBalance.defaultSecondApron) int secondApron,
     @Default(0) int totalPayroll,
     @Default([]) List<CapException> activeExceptions,
-    @Default(20400000) int midLevelExceptionAmount,
+    @Default(SalaryCapBalance.defaultMidLevelException)
+    int midLevelExceptionAmount,
     @Default(true) bool midLevelExceptionAvailable,
-    @Default(75000000) int cashBalance,
+    @Default(ClubCashBalance.defaultStartingCash) int cashBalance,
   }) = _TeamFinance;
 
   factory TeamFinance.fromJson(Map<String, dynamic> json) =>

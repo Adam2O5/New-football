@@ -169,7 +169,9 @@ class TradeService {
       if (player == null) return 0;
       var baseValue = player.computePointValue(balance);
       // AI should discount an incoming player whose consent is still needed.
-      if (player.contract.noTradeClause) baseValue = (baseValue * 0.75).round();
+      if (player.contract.noTradeClause) {
+        baseValue = (baseValue * balance.tradeValue.ntcAssetMultiplier).round();
+      }
       return (baseValue * team.eventState.pointValueMultiplierFor(player.id))
           .round();
     }
@@ -956,6 +958,7 @@ class TradeService {
     required Team destination,
     required Player player,
   }) {
+    final b = balance.contracts;
     final table = league.strengthTable;
     final sourceStatus = table?.statusOf(source.id) ?? TeamStatus.pretender;
     final destinationStatus =
@@ -963,26 +966,30 @@ class TradeService {
     final statusDelta =
         TeamStatus.values.indexOf(destinationStatus) -
         TeamStatus.values.indexOf(sourceStatus);
-    var probability = 0.55;
+    var probability = b.ntcConsentBase;
     if (statusDelta > 0) {
-      probability += 0.20;
+      probability += b.ntcHigherStatusBonus;
     } else if (statusDelta < 0) {
-      probability -= 0.15;
+      probability -= b.ntcLowerStatusPenalty;
     }
 
     if (source.eventState.transferSituationFor(player.id) != null) {
-      probability += 0.30;
+      probability += b.ntcTransferRequestBonus;
     }
     if (player.personality == PlayerPersonality.loyal) {
-      probability -= 0.15;
+      probability -= b.ntcLoyalPenalty;
     }
     if (player.personality == PlayerPersonality.ambitious &&
-        (table?.rankOf(destination.id) ?? 15) <
-            (table?.rankOf(source.id) ?? 15)) {
-      probability += 0.10;
+        (table?.rankOf(destination.id, balance) ??
+                balance.ai.expectedRankFallback) <
+            (table?.rankOf(source.id, balance) ??
+                balance.ai.expectedRankFallback)) {
+      probability += b.ntcAmbitiousBetterRankBonus;
     }
-    if (source.atmosphere < 40) probability += 0.10;
-    return probability.clamp(0.10, 0.95).toDouble();
+    if (source.atmosphere < b.ntcLowAtmosphereThreshold) {
+      probability += b.ntcLowAtmosphereBonus;
+    }
+    return probability.clamp(b.ntcConsentMin, b.ntcConsentMax).toDouble();
   }
 
   TradeValidation _validateLeagueAssets(

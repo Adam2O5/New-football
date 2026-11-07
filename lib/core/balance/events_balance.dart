@@ -1,10 +1,54 @@
+import 'package:new_football/core/models/enums.dart';
+
 /// Activation thresholds and roll probabilities from the team/player event
 /// sections of `docs/team_management.md` and `docs/player_management.md`.
 ///
-/// This is a declaration-only balance surface for now. Event services will
-/// consume these fields in the later event implementation tasks.
+/// Consumed by the player/team event services and their persisted state.
 class EventsBalance {
+  static const defaultPromiseWeeks = 4;
+  static const defaultPromiseMinutesShare = 0.40;
+  static const defaultTransferSituationWeeks = 4;
+
   const EventsBalance({
+    this.moreMinutesYoungAgeMax = 26,
+    this.moreMinutesCooldownWeeks = 1,
+    this.transferRequestCooldownWeeks = 1,
+    this.dressingRoomConflictCooldownWeeks = 1,
+    this.publicCriticismCandidates = 15,
+    this.publicCriticismAgeMinExclusive = 25,
+    this.aiMoreMinutesPriorityPlayers = 14,
+    this.transferValueTopShare = 0.20,
+    this.postPlayoffCandidates = 11,
+    this.postPlayoffExpectedRounds = const {
+      TeamStatus.elite: 3,
+      TeamStatus.contender: 2,
+      TeamStatus.pretender: 1,
+    },
+    this.futureUfaYearsMax = 1,
+    this.minutesHistoryWeeks = 6,
+    this.moreMinutesAcceptAtmosphere = -3,
+    this.moreMinutesDeclineAtmosphere = -7,
+    this.moreMinutesPersonalityPenalty = 3,
+    this.transferAcceptAtmosphere = 3,
+    this.transferPointValueMultiplier = 0.9,
+    this.transferDeclineEffect = (-6, -2.0),
+    this.transferExpiredEffect = (-15, -4.0),
+    this.conflictInterveneSuccessChance = 0.5,
+    this.conflictSuccessEffect = (2, -2.0),
+    this.conflictFailureEffect = (-3, -2.0),
+    this.conflictIgnoreEffect = (-3, -2.0),
+    this.conflictNegativeEventBonus = 0.2,
+    this.leaderSupportEffect = (4, 1.0),
+    this.criticismPunishEffect = (-2, -2.0),
+    this.criticismResponseEffect = (-1, -1.0),
+    this.criticismIgnoreEffect = (-1, -1.0),
+    this.promiseFulfilledAtmosphere = 5,
+    this.promiseBrokenAtmosphere = -12,
+    this.promiseBrokenPersonalityPenalty = 3,
+    this.negativeEventMultiplierMin = 0.5,
+    this.negativeEventMultiplierMax = 2.0,
+    this.pointValueMultiplierMin = 0.5,
+    this.pointValueMultiplierMax = 1.0,
     this.veteranMotivationAgeMin = 32,
     this.veteranMotivationSeasonsMin = 4,
     this.veteranMentorTargetAgeMax = 23,
@@ -42,10 +86,10 @@ class EventsBalance {
     this.publicCriticismAtmosphereThreshold = 30,
     this.publicCriticismChance = 0.08,
     this.moreMinutesLowShareThreshold = 0.25,
-    this.moreMinutesPromiseShare = 0.40,
-    this.moreMinutesPromiseWeeks = 4,
+    this.moreMinutesPromiseShare = defaultPromiseMinutesShare,
+    this.moreMinutesPromiseWeeks = defaultPromiseWeeks,
     this.moreMinutesPromiseMatchScoreBonus = 0.08,
-    this.transferSituationWeeks = 4,
+    this.transferSituationWeeks = defaultTransferSituationWeeks,
     this.transferTradeAppetiteMultiplier = 3.0,
     this.transferTradeSurplusShift = -8.0,
     this.aiMoreMinutesTopFourteenAcceptChance = 0.75,
@@ -132,6 +176,41 @@ class EventsBalance {
   });
 
   final double minutesRequestChance;
+  final int moreMinutesYoungAgeMax;
+  final int moreMinutesCooldownWeeks;
+  final int transferRequestCooldownWeeks;
+  final int dressingRoomConflictCooldownWeeks;
+  final int publicCriticismCandidates;
+  final int publicCriticismAgeMinExclusive;
+  final int aiMoreMinutesPriorityPlayers;
+  final double transferValueTopShare;
+  final int postPlayoffCandidates;
+  final Map<TeamStatus, int> postPlayoffExpectedRounds;
+  final int futureUfaYearsMax;
+  final int minutesHistoryWeeks;
+  final int moreMinutesAcceptAtmosphere;
+  final int moreMinutesDeclineAtmosphere;
+  final int moreMinutesPersonalityPenalty;
+  final int transferAcceptAtmosphere;
+  final double transferPointValueMultiplier;
+  final (int atmosphere, double chemistry) transferDeclineEffect;
+  final (int atmosphere, double chemistry) transferExpiredEffect;
+  final double conflictInterveneSuccessChance;
+  final (int atmosphere, double chemistry) conflictSuccessEffect;
+  final (int atmosphere, double chemistry) conflictFailureEffect;
+  final (int atmosphere, double chemistry) conflictIgnoreEffect;
+  final double conflictNegativeEventBonus;
+  final (int atmosphere, double chemistry) leaderSupportEffect;
+  final (int atmosphere, double chemistry) criticismPunishEffect;
+  final (int atmosphere, double chemistry) criticismResponseEffect;
+  final (int atmosphere, double chemistry) criticismIgnoreEffect;
+  final int promiseFulfilledAtmosphere;
+  final int promiseBrokenAtmosphere;
+  final int promiseBrokenPersonalityPenalty;
+  final double negativeEventMultiplierMin;
+  final double negativeEventMultiplierMax;
+  final double pointValueMultiplierMin;
+  final double pointValueMultiplierMax;
   final int veteranMotivationAgeMin;
   final int veteranMotivationSeasonsMin;
   final int veteranMentorTargetAgeMax;

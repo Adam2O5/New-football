@@ -37,9 +37,10 @@ class _StaffScreenState extends ConsumerState<StaffScreen>
         _StaffScreenOfferEditor,
         _StaffScreenNegotiations {
   @override
-  final _staffService = StaffService();
+  StaffService get _staffService => ref.read(staffServiceProvider);
   @override
-  final _marketService = ContractMarketService();
+  ContractMarketService get _marketService =>
+      ref.read(contractMarketServiceProvider);
   @override
   final _salaryController = TextEditingController();
   @override

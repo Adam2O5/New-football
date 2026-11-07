@@ -188,19 +188,13 @@ class ContractService {
     Player player, {
     TeamStatus currentTeamStatus = TeamStatus.pretender,
   }) {
-    final personalityFactor = switch (player.personality) {
-      PlayerPersonality.ambitious => 5,
-      PlayerPersonality.temperamental => 4,
-      PlayerPersonality.leader => 1,
-      PlayerPersonality.balanced => 0,
-      PlayerPersonality.professional => -2,
-      PlayerPersonality.loyal => -4,
-    };
+    final b = balance.contracts;
+    final personalityFactor = b.playerPersonalityWant[player.personality] ?? 0;
     final raw =
-        (player.pointValue + 1000) / 20 +
+        (player.pointValue + b.playerWantOffset) / b.playerWantDivisor +
         personalityFactor +
-        NegotiationRules.teamStatusBonus(currentTeamStatus);
-    return raw.clamp(0, 100).round();
+        NegotiationRules.teamStatusBonus(currentTeamStatus, balance.contracts);
+    return raw.clamp(b.wantMin, b.wantMax).round();
   }
 
   /// Expected annual salary derived from [playerWant], not the score itself.
@@ -208,11 +202,13 @@ class ContractService {
     Player player, {
     TeamStatus currentTeamStatus = TeamStatus.pretender,
   }) {
-    final want = playerWant(player, currentTeamStatus: currentTeamStatus) / 100;
+    final want =
+        playerWant(player, currentTeamStatus: currentTeamStatus) /
+        balance.contracts.wantNormalization;
     final salary =
         balance.salaryCap.minSalary +
         (balance.salaryCap.maxSalary - balance.salaryCap.minSalary) *
-            pow(want, 3);
+            pow(want, balance.contracts.playerSalaryExponent);
     return salary.round().clamp(
       balance.salaryCap.minSalary,
       balance.salaryCap.maxSalary,
@@ -224,19 +220,14 @@ class ContractService {
     TeamStatus currentTeamStatus = TeamStatus.pretender,
   }) {
     final want = playerWant(player, currentTeamStatus: currentTeamStatus);
-    final band = want <= 39
-        ? 0
-        : want <= 69
-        ? 1
-        : 2;
-    if (player.age <= 23) return const [2, 3, 4][band];
-    if (player.age <= 29) return const [2, 3, 5][band];
-    if (player.age <= 32) return const [1, 2, 3][band];
-    return const [1, 1, 2][band];
+    return balance.contracts.playerLengthFor(player.age, want.toDouble());
   }
 
   double cfoDiscount({StaffMember? cfo, double? negotiation}) =>
-      NegotiationRules.cfoDiscount(negotiation ?? cfo?.attributes.negotiation);
+      NegotiationRules.cfoDiscount(
+        negotiation ?? cfo?.attributes.negotiation,
+        balance.contracts,
+      );
 
   OfferScoreBreakdown playerOfferBreakdown(
     Player player,
@@ -351,7 +342,7 @@ class ContractService {
     final years = expectedLength(
       player,
       currentTeamStatus: currentTeamStatus,
-    ).clamp(1, 5);
+    ).clamp(balance.contracts.playerMinYears, balance.contracts.playerMaxYears);
     final expected = expectedSalary(
       player,
       currentTeamStatus: currentTeamStatus,
@@ -368,7 +359,10 @@ class ContractService {
     final desiredSalaryFit =
         target / discount -
         length -
-        NegotiationRules.teamStatusBonus(offeringTeamStatus) -
+        NegotiationRules.teamStatusBonus(
+          offeringTeamStatus,
+          balance.contracts,
+        ) -
         balance.contracts.salaryFitBase;
     final percentage = desiredSalaryFit >= 0
         ? desiredSalaryFit / balance.contracts.salaryAboveBonusPerPct
@@ -431,9 +425,15 @@ class ContractService {
     final isExtension = existingIndex >= 0;
     final replacingSalary = isExtension ? player.contract.salary : 0;
 
-    if (offer.years < 1) {
+    if (offer.years < balance.contracts.playerMinYears) {
       return const ContractOfferValidation.invalid(
         'Kontrakt musi trwać co najmniej rok',
+      );
+    }
+
+    if (offer.years > balance.contracts.playerMaxYears) {
+      return ContractOfferValidation.invalid(
+        'Maksymalna długość kontraktu to ${balance.contracts.playerMaxYears} lat',
       );
     }
 
@@ -502,10 +502,10 @@ class ContractService {
   /// Eligibility is deliberately pure so UI previews and deterministic AI
   /// signing can use the same threshold before the random roll.
   bool isNtcEligible(Player player, ContractOffer offer) =>
-      player.age >= 30 &&
-      player.state.seasonsWithTeam >= 4 &&
-      player.pointValue >= 200 &&
-      offer.years >= 2;
+      player.age >= balance.contracts.ntcAgeMin &&
+      player.state.seasonsWithTeam >= balance.contracts.ntcSeasonsMin &&
+      player.pointValue >= balance.contracts.ntcPointValueMin &&
+      offer.years >= balance.contracts.ntcYearsMin;
 
   Team? signPlayer({
     required Team team,
@@ -534,7 +534,8 @@ class ContractService {
     final isExtension = existingIndex >= 0;
     final receivesNtc =
         isNtcEligible(player, offer) &&
-        (ntcRandom ?? _random).nextDouble() < 0.20;
+        (ntcRandom ?? _random).nextDouble() <
+            balance.contracts.ntcSigningChance;
     var signed = player.copyWith(
       contract: Contract(
         salary: offer.salary,

@@ -104,12 +104,26 @@ class TvCapSchedule {
 TvCapSchedule tvCapScheduleFor({
   required int currentYear,
   required int saveSeed,
+  BalanceConfig balance = BalanceConfig.defaults,
 }) {
   final seed = (saveSeed ^ (currentYear * 1000003) ^ 0x5f3759df) & 0x7fffffff;
   final random = Random(seed);
   return TvCapSchedule(
-    nextTvCapResetSeason: currentYear + 5 + random.nextInt(3),
-    nextTvCapIncreasePct: 4 + random.nextInt(9),
+    nextTvCapResetSeason:
+        currentYear +
+        balance.salaryCap.tvResetYearsMin +
+        random.nextInt(
+          balance.salaryCap.tvResetYearsMax -
+              balance.salaryCap.tvResetYearsMin +
+              1,
+        ),
+    nextTvCapIncreasePct:
+        balance.salaryCap.tvIncreasePctMin +
+        random.nextInt(
+          balance.salaryCap.tvIncreasePctMax -
+              balance.salaryCap.tvIncreasePctMin +
+              1,
+        ),
   );
 }
 
@@ -248,7 +262,7 @@ class SalaryCapService {
           type: exception,
           minSalary: b.minSalary,
           maxSalary: b.maxSalary,
-          maxYears: 5,
+          maxYears: balance.contracts.playerMaxYears,
           exclusive: true,
         );
       case CapExceptionType.qualifyingOffer:
@@ -266,7 +280,7 @@ class SalaryCapService {
           type: exception,
           minSalary: qualifyingOffer,
           maxSalary: b.maxSalary,
-          maxYears: 5,
+          maxYears: balance.contracts.playerMaxYears,
         );
       case CapExceptionType.fullBirdRights:
       case CapExceptionType.birdRights:
@@ -280,10 +294,10 @@ class SalaryCapService {
           type: exception,
           minSalary: b.minSalary,
           maxSalary: b.maxSalary,
-          maxYears: 5,
+          maxYears: balance.contracts.playerMaxYears,
         );
       case CapExceptionType.earlyBirdRights:
-        if (player.state.seasonsWithTeam != 2) {
+        if (player.state.seasonsWithTeam != b.earlyBirdSeasons) {
           return const CapExceptionValidation.invalid(
             'Early Bird Rights wymagają dokładnie 2 sezonów w klubie',
           );
@@ -292,13 +306,13 @@ class SalaryCapService {
           type: exception,
           minSalary: b.minSalary,
           maxSalary: min(
-            (previousSalary * 1.75).round(),
-            (b.maxSalary * 0.60).round(),
+            (previousSalary * b.earlyBirdSalaryMultiplier).round(),
+            (b.maxSalary * b.earlyBirdMaxSalaryShare).round(),
           ),
-          maxYears: 4,
+          maxYears: b.earlyBirdMaxYears,
         );
       case CapExceptionType.nonBirdRights:
-        if (player.state.seasonsWithTeam >= 2) {
+        if (player.state.seasonsWithTeam >= b.earlyBirdSeasons) {
           return const CapExceptionValidation.invalid(
             'Non-Bird Rights dotyczą stażu krótszego niż 2 sezony',
           );
@@ -306,8 +320,8 @@ class SalaryCapService {
         terms = CapExceptionTerms(
           type: exception,
           minSalary: b.minSalary,
-          maxSalary: (previousSalary * 1.20).round(),
-          maxYears: 4,
+          maxSalary: (previousSalary * b.nonBirdSalaryMultiplier).round(),
+          maxYears: b.nonBirdMaxYears,
         );
       case CapExceptionType.veteranExtensionRaiseCap:
         if (player.contract.isRookieScale) {
@@ -318,26 +332,29 @@ class SalaryCapService {
         terms = CapExceptionTerms(
           type: exception,
           minSalary: b.minSalary,
-          maxSalary: min(b.maxSalary, (previousSalary * 1.08).round()),
-          maxYears: 5,
+          maxSalary: min(
+            b.maxSalary,
+            (previousSalary * b.veteranExtensionMultiplier).round(),
+          ),
+          maxYears: balance.contracts.playerMaxYears,
         );
       case CapExceptionType.midLevelException:
         terms = CapExceptionTerms(
           type: exception,
           minSalary: b.minSalary,
           maxSalary: b.midLevelException,
-          maxYears: 4,
+          maxYears: b.midLevelMaxYears,
         );
       case CapExceptionType.tradedPlayerException:
         terms = CapExceptionTerms(
           type: exception,
           minSalary: b.minSalary,
           maxSalary: b.maxSalary,
-          maxYears: 5,
+          maxYears: balance.contracts.playerMaxYears,
         );
     }
 
-    if (years < 1 || years > terms.maxYears) {
+    if (years < balance.contracts.playerMinYears || years > terms.maxYears) {
       return CapExceptionValidation.invalid(
         'Maksymalna długość tego wyjątku to ${terms.maxYears} lat',
       );
@@ -374,7 +391,7 @@ class SalaryCapService {
       player: player,
       exception: exception,
       salary: probeSalary,
-      years: 1,
+      years: balance.contracts.playerMinYears,
       rookiePickSlot: rookiePickSlot,
     );
     if (!result.ok || result.terms == null) {
@@ -387,12 +404,21 @@ class SalaryCapService {
   TvCapSchedule tvScheduleFor({
     required int currentYear,
     required int saveSeed,
-  }) => tvCapScheduleFor(currentYear: currentYear, saveSeed: saveSeed);
+  }) => tvCapScheduleFor(
+    currentYear: currentYear,
+    saveSeed: saveSeed,
+    balance: balance,
+  );
 
   /// Scales both aprons by the same ratios as the current cap. Existing
   /// player contracts are never touched; only TeamFinance thresholds change.
   List<Team> applyTvUpdate(List<Team> teams, {required int increasePct}) {
-    final pct = increasePct.clamp(4, 12).toInt();
+    final pct = increasePct
+        .clamp(
+          balance.salaryCap.tvIncreasePctMin,
+          balance.salaryCap.tvIncreasePctMax,
+        )
+        .toInt();
     return teams.map((team) {
       final current = snapshot(team);
       final newCap = (current.cap * (100 + pct) / 100).round();

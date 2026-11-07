@@ -35,7 +35,10 @@ mixin _ContractMarketStaffOffers on _ContractMarketShared {
         league.hourlyStaffOfferUsed) {
       return null;
     }
-    if (offer.years < 1 || offer.years > 4) return null;
+    if (offer.years < balance.staff.minContractYears ||
+        offer.years > balance.staff.maxContractYears) {
+      return null;
+    }
     final replacingSalary = isExtension
         ? actualCandidate.contract?.salary ?? 0
         : 0;
