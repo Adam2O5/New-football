@@ -230,14 +230,9 @@ mixin _ContractMarketHelpers on _ContractMarketShared {
     int dayB,
     int hourB,
   ) {
-    final a =
-        (((seasonA * balance.calendar.seasonCycleWeeks + weekA) * 7 + dayA) *
-            (balance.contracts.hoursPerDay + 1)) +
-        hourA;
-    final b =
-        (((seasonB * balance.calendar.seasonCycleWeeks + weekB) * 7 + dayB) *
-            (balance.contracts.hoursPerDay + 1)) +
-        hourB;
-    return a.compareTo(b);
+    final clock = CalendarService(balance: balance);
+    return clock
+        .momentIndex(seasonA, weekA, dayA, hourA)
+        .compareTo(clock.momentIndex(seasonB, weekB, dayB, hourB));
   }
 }

@@ -633,7 +633,7 @@ class DraftTradeService {
     int? hour,
     bool emitMessages = true,
   }) {
-    final now = _momentFor(
+    final now = calendar.momentIndex(
       seasonYear ?? league.currentSeason.year,
       week ?? league.currentWeek,
       day ?? league.currentDay,
@@ -642,13 +642,13 @@ class DraftTradeService {
     var next = league;
     for (final offer in league.tradeOffers) {
       if (!offer.isPending || !_isDraftOfferRecord(next, offer)) continue;
-      final expiry = _momentFor(
+      final expiry = calendar.momentIndex(
         offer.expirySeasonYear,
         offer.expiryWeek,
         offer.expiryDay,
         offer.expiryHour,
       );
-      if (now.isBefore(expiry)) continue;
+      if (now < expiry) continue;
       next = _closeOffer(
         next,
         offer,
@@ -776,8 +776,7 @@ class DraftTradeService {
     final stable = _stableHash(key);
     final resolvedThread =
         threadId ?? 'draftTradeThread:$year:$week:$day:$sequence:$stable';
-    final expiry = _offerExpiryMoment(year, week, day, hour);
-    final coordinates = _coordinatesForMoment(expiry);
+    final coordinates = calendar.tradeOfferDeadline(year, week, day, hour);
     return TradeOffer(
       id: 'draftTradeOffer:$year:$week:$day:$hour:$sequence:$stable',
       threadId: resolvedThread,
@@ -816,19 +815,19 @@ class DraftTradeService {
         reason: 'Oferta wymiany jest już zamknięta',
       );
     }
-    final now = _momentFor(
+    final now = calendar.momentIndex(
       league.currentSeason.year,
       league.currentWeek,
       league.currentDay,
       league.currentHour ?? 0,
     );
-    final expiry = _momentFor(
+    final expiry = calendar.momentIndex(
       offer.expirySeasonYear,
       offer.expiryWeek,
       offer.expiryDay,
       offer.expiryHour,
     );
-    if (!now.isBefore(expiry)) {
+    if (now >= expiry) {
       return const TradeValidation(
         ok: false,
         code: 'offerExpired',
@@ -1132,25 +1131,8 @@ ${first.id}|${second.id}|${first.teamId}|${second.teamId}
     return league.copyWith(inbox: inbox);
   }
 
-  DateTime _offerExpiryMoment(int year, int week, int day, int hour) {
-    final now = _momentFor(year, week, day, hour);
-    final deadlineYear = week >= 23 ? year + 1 : year;
-    final deadline = _momentFor(deadlineYear, 23, 1, 0);
-    final sevenDays = now.add(const Duration(days: 7));
-    return sevenDays.isBefore(deadline) ? sevenDays : deadline;
-  }
-
-  DateTime _momentFor(int year, int week, int day, int hour) => DateTime.utc(
-    year,
-    1,
-    1,
-  ).add(Duration(days: (week - 1) * 7 + (day - 1), hours: hour));
-
-  (int, int, int, int) _coordinatesForMoment(DateTime moment) {
-    final yearStart = DateTime.utc(moment.year, 1, 1);
-    final dayOfYear = moment.difference(yearStart).inDays;
-    return (moment.year, dayOfYear ~/ 7 + 1, dayOfYear % 7 + 1, moment.hour);
-  }
+  DateTime _momentFor(int year, int week, int day, int hour) =>
+      calendar.dateTimeForMoment(year, week, day, hour);
 
   int _stableHash(String value) {
     var hash = 2166136261;

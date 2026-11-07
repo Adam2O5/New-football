@@ -1,13 +1,7 @@
 part of 'home_screen.dart';
 
-DateTime _dateForInGameWeekDay(int seasonYear, int week, int day) =>
-    const CalendarService().dateForWeekDay(seasonYear, week, day);
-
-({int week, int day})? _inGameWeekDayForDate(DateTime date, int seasonYear) =>
-    const CalendarService().weekDayForDate(date, seasonYear);
-
-DateTime _monthForInGame(LeagueState league) {
-  final d = _dateForInGameWeekDay(
+DateTime _monthForInGame(LeagueState league, CalendarService calendar) {
+  final d = calendar.dateForWeekDay(
     league.currentSeason.year,
     league.currentWeek,
     league.currentDay,
@@ -20,6 +14,7 @@ void _refreshCalendarCursor(WidgetRef ref) {
   if (league == null) return;
   ref.read(calendarCursorMonthProvider.notifier).state = _monthForInGame(
     league,
+    ref.read(calendarServiceProvider),
   );
 }
 

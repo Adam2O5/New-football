@@ -1,16 +1,7 @@
 part of 'calendar_screen.dart';
 
-DateTime _week1StartForSeason(int seasonYear) =>
-    const CalendarService().week1StartForSeason(seasonYear);
-
-DateTime _dateForInGameWeekDay(int seasonYear, int week, int day) =>
-    const CalendarService().dateForWeekDay(seasonYear, week, day);
-
-({int week, int day})? _inGameWeekDayForDate(DateTime date, int seasonYear) =>
-    const CalendarService().weekDayForDate(date, seasonYear);
-
-DateTime _monthForInGame(LeagueState league) {
-  final d = _dateForInGameWeekDay(
+DateTime _monthForInGame(LeagueState league, CalendarService calendar) {
+  final d = calendar.dateForWeekDay(
     league.currentSeason.year,
     league.currentWeek,
     league.currentDay,

@@ -4,6 +4,7 @@ mixin _SeasonLottery on _SeasonServiceShared {
   LeagueState runLottery(LeagueState league, {int saveSeed = 0}) {
     final lottery = _computeLotteryResults(league, saveSeed: saveSeed);
     final drafted = DraftService(
+      balance: balance,
       random: _random,
     ).buildDraftOrder(league, lottery, saveSeed: saveSeed);
     final state = drafted.copyWith(

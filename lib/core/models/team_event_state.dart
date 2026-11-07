@@ -1,4 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:new_football/core/balance/balance_config.dart';
+import 'package:new_football/core/services/calendar_service.dart';
 
 part 'team_event_state.freezed.dart';
 part 'team_event_state.g.dart';
@@ -242,12 +244,14 @@ extension TeamEventStateX on TeamEventState {
     Iterable<MinutesHistoryEntry> entries, {
     required int currentSeasonYear,
     required int currentWeek,
+    BalanceConfig balance = BalanceConfig.defaults,
   }) {
     final entryList = entries.toList();
     final all = [...minutesHistory, ...entryList];
-    final currentKey = currentSeasonYear * 52 + currentWeek;
+    final calendar = CalendarService(balance: balance);
+    final currentKey = calendar.weekIndex(currentSeasonYear, currentWeek);
     final retained = all.where((entry) {
-      final key = entry.seasonYear * 52 + entry.week;
+      final key = calendar.weekIndex(entry.seasonYear, entry.week);
       return key <= currentKey && key >= currentKey - 5;
     }).toList();
 

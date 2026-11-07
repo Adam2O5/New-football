@@ -327,5 +327,6 @@ mixin _TeamEventHelpers on _TeamEventShared {
   }
 
   @override
-  int _calendarWeekKey(int seasonYear, int week) => seasonYear * 52 + week;
+  int _calendarWeekKey(int seasonYear, int week) =>
+      calendar.weekIndex(seasonYear, week);
 }

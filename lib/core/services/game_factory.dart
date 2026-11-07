@@ -68,7 +68,11 @@ class GameFactory {
     );
     teams = teams.map((t) => _seedInitialStaff(t, staffRng)).toList();
     final staffPool = _seedGenerator
-        .generateStaffPool(balance.seed.staffPoolSize, random: staffRng)
+        .generateStaffPool(
+          balance.seed.staffPoolSize,
+          random: staffRng,
+          balance: balance,
+        )
         .map(
           (m) => m.copyWith(
             contract: null, // free agents: no contract until hired

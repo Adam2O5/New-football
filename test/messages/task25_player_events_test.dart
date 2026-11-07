@@ -118,6 +118,40 @@ void main() {
   GameMessage messageOf(LeagueState league, String kind) =>
       league.inbox.messages.lastWhere((message) => message.kind == kind);
 
+  test('a one-day player decision expires at the next logical season day', () {
+    final source = leagueFor(fixture(determination: 8, form: 7));
+    final league = source.copyWith(
+      currentWeek: 52,
+      currentDay: 7,
+      currentSeason: source.currentSeason.copyWith(year: 2027),
+    );
+    final service = PlayerEventService(
+      balance: BalanceConfig(events: eventBalance(extraTrainingChance: 1)),
+    );
+    final pending = service.weeklyTick(league, saveSeed: 25);
+    final message = messageOf(pending, 'extraTraining');
+    expect(DateTime.parse(message.expiresAt!), DateTime.utc(2028, 8, 7));
+    expect(
+      messageOf(
+        service.resolveExpiredDecisions(pending),
+        'extraTraining',
+      ).acknowledged,
+      isFalse,
+    );
+    final nextSeason = pending.copyWith(
+      currentWeek: 1,
+      currentDay: 1,
+      currentSeason: pending.currentSeason.copyWith(year: 2028),
+    );
+    expect(
+      messageOf(
+        service.resolveExpiredDecisions(nextSeason),
+        'extraTraining',
+      ).acknowledged,
+      isTrue,
+    );
+  });
+
   test('TimedModifier round-trips and expires after exactly its duration', () {
     const initial = PlayerEventState(
       modifiers: [

@@ -170,7 +170,9 @@ class HomeScreen extends ConsumerWidget {
       List<String> eventLabels,
     })?
     dayInfo(DateTime date) {
-      final mapped = _inGameWeekDayForDate(date, seasonYear);
+      final mapped = ref
+          .read(calendarServiceProvider)
+          .weekDayForDate(date, seasonYear);
       if (mapped == null) return null;
       final w = mapped.week;
       final d = mapped.day;
@@ -213,10 +215,11 @@ class HomeScreen extends ConsumerWidget {
       );
     }
 
-    final today = _dateForInGameWeekDay(seasonYear, currentWeek, currentDay);
     final next7 = List<DateTime>.generate(
       7,
-      (i) => today.add(Duration(days: i)),
+      (i) => ref
+          .read(calendarServiceProvider)
+          .dateAfterDays(seasonYear, currentWeek, currentDay, i),
     );
     final seasonContextLines = SeasonContextLines.fromLeague(context, league);
 

@@ -218,18 +218,19 @@ class TradeService {
   /// The block is reconstructed from persisted history, so no save-schema
   /// field or migration is required.
   bool isPairTradeBlocked(LeagueState league, String teamAId, String teamBId) {
-    final now = _logicalDate(league);
     for (final entry in league.tradeHistory.reversed) {
       if (entry.outcome != 'hardRejected' ||
           !_samePair(entry.teamAId, entry.teamBId, teamAId, teamBId)) {
         continue;
       }
-      final created = DateTime.utc(
-        entry.seasonYear,
-        1,
-        1,
-      ).add(Duration(days: (entry.week - 1) * 7 + (entry.day - 1)));
-      if (now.isBefore(created.add(const Duration(days: 30)))) return true;
+      final age =
+          calendarService.dayIndex(
+            league.currentSeason.year,
+            league.currentWeek,
+            league.currentDay,
+          ) -
+          calendarService.dayIndex(entry.seasonYear, entry.week, entry.day);
+      if (age < balance.contracts.tradePairBlockDays) return true;
     }
     return false;
   }
@@ -618,7 +619,7 @@ class TradeService {
     int? hour,
     bool emitMessages = true,
   }) {
-    final now = _momentFor(
+    final now = calendarService.momentIndex(
       seasonYear ?? league.currentSeason.year,
       week ?? league.currentWeek,
       day ?? league.currentDay,
@@ -627,13 +628,13 @@ class TradeService {
     var next = league;
     for (final offer in league.tradeOffers) {
       if (!offer.isPending) continue;
-      final expiry = _momentFor(
+      final expiry = calendarService.momentIndex(
         offer.expirySeasonYear,
         offer.expiryWeek,
         offer.expiryDay,
         offer.expiryHour,
       );
-      if (now.isBefore(expiry)) continue;
+      if (now < expiry) continue;
       final proposal = _proposalFromOffer(offer);
       next = _closeTradeOffer(
         next,
@@ -733,7 +734,12 @@ class TradeService {
         playerId: entry.id,
         destinationTeamId: b.id,
         createdAt: now,
-        expiresAt: now.add(const Duration(days: 30)),
+        expiresAt: calendarService.dateAfterDays(
+          offeredLeague.currentSeason.year,
+          offeredLeague.currentWeek,
+          offeredLeague.currentDay,
+          balance.contracts.ntcTradeBlockDays,
+        ),
       );
       var next = offeredLeague.copyWith(
         ntcTradeBlocks: [
@@ -793,7 +799,12 @@ class TradeService {
         playerId: entry.id,
         destinationTeamId: a.id,
         createdAt: now,
-        expiresAt: now.add(const Duration(days: 30)),
+        expiresAt: calendarService.dateAfterDays(
+          offeredLeague.currentSeason.year,
+          offeredLeague.currentWeek,
+          offeredLeague.currentDay,
+          balance.contracts.ntcTradeBlockDays,
+        ),
       );
       var next = offeredLeague.copyWith(
         ntcTradeBlocks: [
@@ -1766,7 +1777,12 @@ class TradeService {
       playerId: player.id,
       destinationTeamId: destination.id,
       createdAt: now,
-      expiresAt: now.add(const Duration(days: 30)),
+      expiresAt: calendarService.dateAfterDays(
+        league.currentSeason.year,
+        league.currentWeek,
+        league.currentDay,
+        balance.contracts.ntcTradeBlockDays,
+      ),
     );
     var next = league.copyWith(
       ntcTradeBlocks: [
@@ -1844,20 +1860,19 @@ class TradeService {
         reason: 'Oferta wymiany jest już zamknięta',
       );
     }
-    final now = _momentFor(
+    final now = calendarService.momentIndex(
       league.currentSeason.year,
       league.currentWeek,
       league.currentDay,
       league.currentHour ?? 0,
     );
-    if (!now.isBefore(
-      _momentFor(
-        offer.expirySeasonYear,
-        offer.expiryWeek,
-        offer.expiryDay,
-        offer.expiryHour,
-      ),
-    )) {
+    if (now >=
+        calendarService.momentIndex(
+          offer.expirySeasonYear,
+          offer.expiryWeek,
+          offer.expiryDay,
+          offer.expiryHour,
+        )) {
       return const TradeValidation(
         ok: false,
         code: 'offerExpired',
@@ -1907,8 +1922,12 @@ class TradeService {
     final resolvedThread =
         threadId ?? 'tradeThread:$year:$week:$day:$sequence:$stable';
     final id = 'tradeOffer:$year:$week:$day:$hour:$sequence:$stable';
-    final expiry = _offerExpiryMoment(year, week, day, hour);
-    final expiryCoordinates = _coordinatesForMoment(expiry);
+    final expiryCoordinates = calendarService.tradeOfferDeadline(
+      year,
+      week,
+      day,
+      hour,
+    );
     return TradeOffer(
       id: id,
       threadId: resolvedThread,
@@ -2129,25 +2148,8 @@ class TradeService {
     );
   }
 
-  DateTime _offerExpiryMoment(int year, int week, int day, int hour) {
-    final now = _momentFor(year, week, day, hour);
-    final deadlineYear = week >= 23 ? year + 1 : year;
-    final deadline = _momentFor(deadlineYear, 23, 1, 0);
-    final sevenDays = now.add(const Duration(days: 7));
-    return sevenDays.isBefore(deadline) ? sevenDays : deadline;
-  }
-
-  DateTime _momentFor(int year, int week, int day, int hour) => DateTime.utc(
-    year,
-    1,
-    1,
-  ).add(Duration(days: (week - 1) * 7 + (day - 1), hours: hour));
-
-  (int, int, int, int) _coordinatesForMoment(DateTime moment) {
-    final yearStart = DateTime.utc(moment.year, 1, 1);
-    final dayOfYear = moment.difference(yearStart).inDays;
-    return (moment.year, dayOfYear ~/ 7 + 1, dayOfYear % 7 + 1, moment.hour);
-  }
+  DateTime _momentFor(int year, int week, int day, int hour) =>
+      calendarService.dateTimeForMoment(year, week, day, hour);
 
   LeagueState _addHistory(
     LeagueState league,
@@ -2211,9 +2213,14 @@ class TradeService {
           for (final asset in proposal.assetsFromB) asset.toSnapshot().toJson(),
         ],
       },
-      expiresAt: _logicalDate(
-        league,
-      ).add(const Duration(days: 1)).toIso8601String(),
+      expiresAt: calendarService
+          .dateAfterDays(
+            league.currentSeason.year,
+            league.currentWeek,
+            league.currentDay,
+            balance.messages.tradeDecisionExpiryDays,
+          )
+          .toIso8601String(),
     );
     String? offerMessageId;
     for (final message in next.inbox.messages.reversed) {
@@ -2276,11 +2283,12 @@ class TradeService {
   String _proposalKey(TradeProposal proposal) =>
       '${proposal.teamAId}|${proposal.teamBId}|${proposal.assetsFromA.map((a) => a.identity).join(',')}|${proposal.assetsFromB.map((a) => a.identity).join(',')}';
 
-  DateTime _logicalDate(LeagueState league) => DateTime.utc(
-    league.currentSeason.year,
-    1,
-    1,
-  ).add(Duration(days: (league.currentWeek - 1) * 7 + (league.currentDay - 1)));
+  DateTime _logicalDate(LeagueState league) =>
+      calendarService.dateTimeForMoment(
+        league.currentSeason.year,
+        league.currentWeek,
+        league.currentDay,
+      );
 
   int _stableHash(String value) {
     var hash = 2166136261;

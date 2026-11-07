@@ -62,12 +62,11 @@ mixin _SeedPlayerGeneration on _SeedGenerationShared {
         ),
       );
     }
-    final weights =
-        BalanceConfig.defaults.player.outfieldOverallWeights[position];
+    final weights = balance.player.outfieldOverallWeights[position];
     if (weights == null) {
       throw StateError(
         'Brak wag atrybutów dla pozycji $position w '
-        'BalanceConfig.defaults.player.outfieldOverallWeights.',
+        'balance.player.outfieldOverallWeights.',
       );
     }
     return PlayerAttributes.outfield(
@@ -150,7 +149,7 @@ mixin _SeedPlayerGeneration on _SeedGenerationShared {
   /// Pensja wg wzoru z `salary_cap.md`/`data_generation.md`:
   /// `minSalary + (maxSalary - minSalary) * (((OVR-50)*2)/100)^3`.
   int _rollSalary(int ovr) {
-    final cap = BalanceConfig.defaults.salaryCap;
+    final cap = balance.salaryCap;
     final t = (((ovr - 50) * 2) / 100).clamp(0.0, 1.0);
     final salary = cap.minSalary + (cap.maxSalary - cap.minSalary) * pow(t, 3);
     return salary.round();
@@ -209,9 +208,7 @@ mixin _SeedPlayerGeneration on _SeedGenerationShared {
         overallProgress: (age <= 26 ? 40 + rng.nextInt(50) : rng.nextInt(30))
             .clamp(0.0, 99.0)
             .toDouble(),
-        growthRate: BalanceConfig.defaults.development.baseGrowthRateFor(
-          determination,
-        ),
+        growthRate: balance.development.baseGrowthRateFor(determination),
         developmentOutcome: outcome,
         developmentCeilingStars: rollDevelopmentCeilingStars(
           roundedStars,
@@ -303,9 +300,7 @@ mixin _SeedPlayerGeneration on _SeedGenerationShared {
         overallProgress: (age <= 26 ? 40 + rng.nextInt(50) : rng.nextInt(30))
             .clamp(0.0, 99.0)
             .toDouble(),
-        growthRate: BalanceConfig.defaults.development.baseGrowthRateFor(
-          determination,
-        ),
+        growthRate: balance.development.baseGrowthRateFor(determination),
         developmentOutcome: outcome,
         developmentCeilingStars: rollDevelopmentCeilingStars(
           potentialStars,

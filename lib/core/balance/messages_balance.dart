@@ -6,8 +6,8 @@ class MessagesBalance {
     this.inboxRetentionSeasons = 2,
     this.digestMinItems = 3,
     this.maxUnreadInbox = 50,
-    this.scoutReportDay = 1,
     this.tradeOfferExpiryDays = 7,
+    this.tradeDecisionExpiryDays = 1,
     this.teamEventExpiry = TeamEventExpiryMode.endOfDay,
     this.playerEventExpiryDaysMin = 1,
     this.playerEventExpiryDaysMax = 3,
@@ -20,8 +20,8 @@ class MessagesBalance {
   final int inboxRetentionSeasons;
   final int digestMinItems;
   final int maxUnreadInbox;
-  final int scoutReportDay;
   final int tradeOfferExpiryDays;
+  final int tradeDecisionExpiryDays;
   final TeamEventExpiryMode teamEventExpiry;
   final int playerEventExpiryDaysMin;
   final int playerEventExpiryDaysMax;

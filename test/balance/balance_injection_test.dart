@@ -17,6 +17,22 @@ import 'package:new_football/core/services/simulation_worker.dart';
 import '../helpers/fixtures/presentation_fixtures.dart';
 
 void main() {
+  test('initial salaries and cached growth rates use the supplied balance', () {
+    final balance = BalanceConfig(
+      salaryCap: const SalaryCapBalance(minSalary: 1230000, maxSalary: 1230000),
+      development: DevelopmentBalance(
+        determinationGrowthRates: List.filled(10, 0.125),
+      ),
+    );
+    final league = SeedDataGenerator(balance: balance).generateLeague(seed: 19);
+    for (final team in league.teams) {
+      for (final player in team.roster) {
+        expect(player.contract.salary, 1230000);
+        expect(player.hidden.growthRate, 0.125);
+      }
+    }
+  });
+
   test(
     'club mock noise can change independently of the public draft board',
     () {

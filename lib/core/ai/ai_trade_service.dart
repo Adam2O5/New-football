@@ -1494,7 +1494,7 @@ class AiTradeService {
   bool _samePair(String a, String b, String c, String d) =>
       (a == c && b == d) || (a == d && b == c);
 
-  int _weekIndex(int year, int week) => year * 52 + week;
+  int _weekIndex(int year, int week) => calendar.weekIndex(year, week);
 
   String _proposalKey(TradeProposal proposal) =>
       '${proposal.teamAId}|${proposal.teamBId}|${proposal.assetsFromA.map((a) => a.identity).join(',')}|${proposal.assetsFromB.map((a) => a.identity).join(',')}';

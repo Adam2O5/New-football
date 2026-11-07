@@ -2,11 +2,14 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/draft_pick.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/seed_data_generator.dart';
 import 'package:new_football/core/models/trade_models.dart';
 import 'package:new_football/core/services/trade_service.dart';
+import 'package:new_football/core/services/calendar_service.dart';
+import 'package:new_football/core/services/draft_trade_service.dart';
 
 class _AlwaysAcceptRandom implements Random {
   const _AlwaysAcceptRandom();
@@ -35,9 +38,14 @@ class _AlwaysRejectRandom implements Random {
 }
 
 void main() {
-  LeagueState leagueAt({int week = 1, int day = 1, int hour = 0}) {
+  LeagueState leagueAt({
+    int year = 2026,
+    int week = 1,
+    int day = 1,
+    int hour = 0,
+  }) {
     return SeedDataGenerator()
-        .generateLeague(seed: 30)
+        .generateLeague(seed: 30, year: year)
         .copyWith(currentWeek: week, currentDay: day, currentHour: hour);
   }
 
@@ -51,6 +59,182 @@ void main() {
       assetsFromB: [TradeAsset.player(b.roster.first.id)],
     );
   }
+
+  test('pending offer survives rollover until its seventh logical day', () {
+    final league = leagueAt(year: 2027, week: 52, day: 7, hour: 2);
+    final service = TradeService();
+    final created = service.createOffer(
+      league,
+      oneForOne(league),
+      emitMessages: false,
+    );
+    final offer = created.league.tradeOfferById(created.offerId!)!;
+    expect(
+      (
+        offer.expirySeasonYear,
+        offer.expiryWeek,
+        offer.expiryDay,
+        offer.expiryHour,
+      ),
+      (2028, 1, 7, 2),
+    );
+    final before = service.expireOffers(
+      created.league,
+      seasonYear: 2028,
+      week: 1,
+      day: 7,
+      hour: 1,
+      emitMessages: false,
+    );
+    expect(before.tradeOfferById(offer.id)!.isPending, isTrue);
+    final expired = service.expireOffers(
+      before,
+      seasonYear: 2028,
+      week: 1,
+      day: 7,
+      hour: 2,
+      emitMessages: false,
+    );
+    expect(expired.tradeOfferById(offer.id)!.status, TradeOfferStatus.expired);
+  });
+
+  test('draft-slot offers use the same logical expiry across rollover', () {
+    final base = leagueAt(year: 2027, week: 52, day: 7, hour: 2);
+    final a = base.teams[0].id, b = base.teams[1].id;
+    final league = base.copyWith(
+      currentSeason: base.currentSeason.copyWith(
+        draftState: base.currentSeason.draftState!.copyWith(
+          order: [
+            DraftPick(
+              id: 'clock-a',
+              year: 2027,
+              round: 1,
+              pickNumber: 1,
+              teamId: a,
+              originalTeamId: a,
+            ),
+            DraftPick(
+              id: 'clock-b',
+              year: 2027,
+              round: 1,
+              pickNumber: 2,
+              teamId: b,
+              originalTeamId: b,
+            ),
+          ],
+        ),
+      ),
+    );
+    final service = DraftTradeService();
+    final created = service.createOfferForSlots(
+      league,
+      offeredPickId: 'clock-a',
+      targetPickId: 'clock-b',
+      offeringTeamId: a,
+      emitMessages: false,
+    );
+    expect(created.outcome, 'pending');
+    final offer = created.league.tradeOfferById(created.offerId!)!;
+    expect(
+      (
+        offer.expirySeasonYear,
+        offer.expiryWeek,
+        offer.expiryDay,
+        offer.expiryHour,
+      ),
+      (2028, 1, 7, 2),
+    );
+    final before = service.expireOffers(
+      created.league,
+      seasonYear: 2028,
+      week: 1,
+      day: 7,
+      hour: 1,
+      emitMessages: false,
+    );
+    expect(before.tradeOfferById(offer.id)!.isPending, isTrue);
+    final expired = service.expireOffers(
+      before,
+      seasonYear: 2028,
+      week: 1,
+      day: 7,
+      hour: 2,
+      emitMessages: false,
+    );
+    expect(expired.tradeOfferById(offer.id)!.status, TradeOfferStatus.expired);
+  });
+
+  test(
+    'pair rejection block counts logical days, including the August gap',
+    () {
+      final league = leagueAt(year: 2028, week: 1, day: 1);
+      final a = league.teams[0].id, b = league.teams[1].id;
+      final withHistory = league.copyWith(
+        tradeHistory: [
+          TradeHistoryEntry(
+            id: 'blocked',
+            teamAId: a,
+            teamBId: b,
+            seasonYear: 2027,
+            week: 52,
+            day: 7,
+            outcome: 'hardRejected',
+          ),
+        ],
+      );
+      final service = TradeService(
+        balance: const BalanceConfig(
+          contracts: ContractNegBalance(tradePairBlockDays: 2),
+        ),
+      );
+      expect(service.isPairTradeBlocked(withHistory, a, b), isTrue);
+      expect(
+        service.isPairTradeBlocked(withHistory.copyWith(currentDay: 2), a, b),
+        isFalse,
+      );
+    },
+  );
+
+  test(
+    'NTC block expires after logical days rather than during the civil gap',
+    () {
+      final base = leagueAt(year: 2027, week: 52, day: 7);
+      final a = base.teams[0], b = base.teams[1];
+      final player = a.roster.first.copyWith(
+        contract: a.roster.first.contract.copyWith(
+          noTradeClause: true,
+          blockedTeamIds: [],
+        ),
+      );
+      final league = base.updateTeam(
+        a.copyWith(roster: [player, ...a.roster.skip(1)]),
+      );
+      final service = TradeService(
+        random: const _AlwaysRejectRandom(),
+        balance: const BalanceConfig(
+          contracts: ContractNegBalance(ntcTradeBlockDays: 2),
+        ),
+      );
+      final created = service.createOffer(
+        league,
+        oneForOne(league),
+        emitMessages: false,
+      );
+      final refused = service.acceptOffer(
+        created.league,
+        created.offerId!,
+        actingTeamId: b.id,
+        emitMessages: false,
+      );
+      expect(refused.outcome, 'ntcRefused');
+      final block = refused.league.ntcTradeBlocks.single;
+      const clock = CalendarService();
+      expect(block.createdAt, DateTime.utc(2028, 7, 30));
+      expect(block.expiresAt, DateTime.utc(2028, 8, 8));
+      expect(block.isActiveAt(clock.dateTimeForMoment(2028, 1, 1)), isTrue);
+      expect(block.isActiveAt(clock.dateTimeForMoment(2028, 1, 2)), isFalse);
+    },
+  );
 
   test('TradeOffer and LeagueState serialize pending lifecycle state', () {
     final league = leagueAt();

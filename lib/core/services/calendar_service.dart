@@ -12,9 +12,84 @@ class CalendarService {
   CalendarBalance get _c => balance.calendar;
 
   DateTime week1StartForSeason(int seasonYear) {
-    final augustStart = DateTime(seasonYear, 8, 1);
-    final daysUntilMonday = (DateTime.monday - augustStart.weekday + 7) % 7;
-    return DateTime(seasonYear, 8, 1 + daysUntilMonday);
+    final monthStart = DateTime(seasonYear, _c.seasonStartMonth, 1);
+    final daysUntilMonday = (DateTime.monday - monthStart.weekday + 7) % 7;
+    return DateTime(seasonYear, _c.seasonStartMonth, 1 + daysUntilMonday);
+  }
+
+  int weekIndex(int seasonYear, int week) =>
+      seasonYear * _c.seasonCycleWeeks + week - 1;
+
+  int dayIndex(int seasonYear, int week, int day) =>
+      weekIndex(seasonYear, week) * 7 + day - 1;
+
+  /// Hour zero and the final market slot are distinct from the following day.
+  int momentIndex(int seasonYear, int week, int day, [int hour = 0]) =>
+      dayIndex(seasonYear, week, day) * (balance.contracts.hoursPerDay + 1) +
+      hour;
+
+  /// Logical days skip any civil gap between consecutive season anchors.
+  (int seasonYear, int week, int day, int hour) addDays(
+    int seasonYear,
+    int week,
+    int day,
+    int hour,
+    int days,
+  ) {
+    final index = dayIndex(seasonYear, week, day) + days;
+    final daysPerSeason = _c.seasonCycleWeeks * 7;
+    final offset = index % daysPerSeason;
+    return (index ~/ daysPerSeason, offset ~/ 7 + 1, offset % 7 + 1, hour);
+  }
+
+  /// UTC projection for persisted dates; elapsed gameplay uses the indices above.
+  DateTime dateTimeForMoment(
+    int seasonYear,
+    int week,
+    int day, [
+    int hour = 0,
+  ]) {
+    final date = dateForWeekDay(seasonYear, week, day);
+    return DateTime.utc(date.year, date.month, date.day, hour);
+  }
+
+  DateTime dateAfterDays(
+    int seasonYear,
+    int week,
+    int day,
+    int days, [
+    int hour = 0,
+  ]) {
+    final next = addDays(seasonYear, week, day, hour, days);
+    return dateTimeForMoment(next.$1, next.$2, next.$3, next.$4);
+  }
+
+  (int seasonYear, int week, int day, int hour) tradeOfferDeadline(
+    int seasonYear,
+    int week,
+    int day,
+    int hour,
+  ) {
+    final expiry = addDays(
+      seasonYear,
+      week,
+      day,
+      hour,
+      balance.messages.tradeOfferExpiryDays,
+    );
+    final deadline = (
+      seasonYear +
+          (isAtOrAfter(week, day, _c.tradeDeadlineWeek, _c.tradeDeadlineDay)
+              ? 1
+              : 0),
+      _c.tradeDeadlineWeek,
+      _c.tradeDeadlineDay,
+      0,
+    );
+    return momentIndex(expiry.$1, expiry.$2, expiry.$3, expiry.$4) <
+            momentIndex(deadline.$1, deadline.$2, deadline.$3, deadline.$4)
+        ? expiry
+        : deadline;
   }
 
   DateTime dateForWeekDay(int seasonYear, int week, int day) {
@@ -64,11 +139,11 @@ class CalendarService {
 
   /// Contract extensions run Tuesday–Sunday of draft week.
   bool isContractExtensionWindow(int week, int day) =>
-      week == _c.draftWeek && day >= 2 && day <= 7;
+      week == _c.draftWeek && day >= _c.contractExtensionStartDay && day <= 7;
 
   /// Free agency phase I is the ten-slot hourly window in week 47.
   bool isFreeAgencyPhaseI(int week, [int day = 1]) =>
-      week == _c.freeAgencyWeek && day >= 1 && day <= 7;
+      week == _c.freeAgencyWeek && day >= _c.freeAgencyOpenDay && day <= 7;
 
   /// Free agency phase II wraps around the season boundary: it starts on
   /// Monday of week 48 and ends on Sunday of week 45. Week 46 Monday is the
@@ -116,14 +191,15 @@ class CalendarService {
       isHourlyContractMode(week, day) && hour >= hoursForDate(week, day);
 
   bool isTradeDeadline(int week, int day) =>
-      week == _c.tradeDeadlineWeek && day == 1;
+      week == _c.tradeDeadlineWeek && day == _c.tradeDeadlineDay;
 
   bool isTradeWindowOpen(int week, {int day = 1}) {
     // Open from week 44 until the week 23 deadline, which closes the window
     // at the start of deadline day. The optional day keeps old callers valid.
-    if (week >= _c.tradeWindowOpenWeek) return true;
+    if (week > _c.tradeWindowOpenWeek) return true;
+    if (week == _c.tradeWindowOpenWeek) return day >= _c.tradeWindowOpenDay;
     if (week < _c.tradeDeadlineWeek) return true;
-    if (week == _c.tradeDeadlineWeek) return false;
+    if (week == _c.tradeDeadlineWeek) return day < _c.tradeDeadlineDay;
     return false;
   }
 

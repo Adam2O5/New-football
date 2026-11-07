@@ -189,6 +189,7 @@ class _CalendarScreenState extends ConsumerState<CalendarScreen>
     if (nextLeague == null) return;
     ref.read(calendarCursorMonthProvider.notifier).state = _monthForInGame(
       nextLeague,
+      ref.read(calendarServiceProvider),
     );
   }
 

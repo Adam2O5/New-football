@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:new_football/app/providers/game_provider.dart';
+import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/game_save.dart';
 import 'package:new_football/core/services/game_factory.dart';
 import 'package:new_football/l10n/generated/app_localizations.dart';
@@ -56,17 +57,23 @@ Widget dashboardRouterApp(GoRouter router, GameSave game) {
   );
 }
 
-Widget dashboardApp(Widget screen, GameSave game) {
-  return dashboardAppWithOverrides(screen, game);
+Widget dashboardApp(
+  Widget screen,
+  GameSave game, {
+  BalanceConfig balance = BalanceConfig.defaults,
+}) {
+  return dashboardAppWithOverrides(screen, game, balance: balance);
 }
 
 Widget dashboardAppWithOverrides(
   Widget screen,
   GameSave game, {
   void Function(GameController controller)? onController,
+  BalanceConfig balance = BalanceConfig.defaults,
 }) {
   return ProviderScope(
     overrides: [
+      balanceProvider.overrideWithValue(balance),
       saveRepositoryProvider.overrideWithValue(DashboardNoopSaveRepository()),
       gameControllerProvider.overrideWith((ref) {
         final controller = GameController(ref);

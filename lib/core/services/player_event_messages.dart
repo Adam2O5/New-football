@@ -122,7 +122,14 @@ mixin _PlayerEventMessages on _PlayerEventShared {
     state = _publishTickTeams(state);
     final expiresAt = expiryDays == null
         ? null
-        : logicalDate(state).add(Duration(days: expiryDays)).toIso8601String();
+        : calendar
+              .dateAfterDays(
+                state.currentSeason.year,
+                state.currentWeek,
+                state.currentDay,
+                expiryDays,
+              )
+              .toIso8601String();
     return messages.send(
       state,
       type: type,

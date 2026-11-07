@@ -34,6 +34,8 @@ class ContractNegBalance {
     this.phaseIFinalizationHours = 3,
     this.phaseIIFinalizationDays = 3,
     this.extensionFinalizationDays = 1,
+    this.tradePairBlockDays = 30,
+    this.ntcTradeBlockDays = 30,
 
     // Whole-season extension minutes rule.
     this.extensionMinutesMinimumPossibleMinutes = 1000,
@@ -59,6 +61,8 @@ class ContractNegBalance {
   });
 
   final int hoursPerDay;
+  final int tradePairBlockDays;
+  final int ntcTradeBlockDays;
   final int offersPerHour;
 
   final int hardRejectScoreMax;

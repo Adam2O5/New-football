@@ -102,12 +102,12 @@ class CalendarEventRegistry {
 
   static List<CalendarEventSlot> _buildSlots(CalendarBalance calendar) {
     final awardsWeek = calendar.awardsWeek;
-    final scoutWeek = awardsWeek + 1;
+    final scoutWeek = awardsWeek + calendar.scoutWeekOffset;
     return [
       CalendarEventSlot(
         id: CalendarEventId.capUpdateTv,
         week: awardsWeek,
-        day: 1,
+        day: calendar.awardsDay,
         order: -2,
         kind: CalendarEventKind.automatic,
         execution: CalendarEventExecution.automatic,
@@ -115,7 +115,7 @@ class CalendarEventRegistry {
       CalendarEventSlot(
         id: CalendarEventId.awards,
         week: awardsWeek,
-        day: 1,
+        day: calendar.awardsDay,
         order: 0,
         kind: CalendarEventKind.informational,
         execution: CalendarEventExecution.automatic,
@@ -123,7 +123,7 @@ class CalendarEventRegistry {
       CalendarEventSlot(
         id: CalendarEventId.staffGrowth,
         week: awardsWeek,
-        day: 2,
+        day: calendar.staffGrowthDay,
         order: 0,
         kind: CalendarEventKind.automatic,
         execution: CalendarEventExecution.automatic,
@@ -131,7 +131,7 @@ class CalendarEventRegistry {
       CalendarEventSlot(
         id: CalendarEventId.retirements,
         week: awardsWeek,
-        day: 3,
+        day: calendar.retirementsDay,
         order: 0,
         kind: CalendarEventKind.informational,
         execution: CalendarEventExecution.automatic,
@@ -139,7 +139,7 @@ class CalendarEventRegistry {
       CalendarEventSlot(
         id: CalendarEventId.lottery,
         week: awardsWeek,
-        day: 5,
+        day: calendar.lotteryDay,
         order: 0,
         kind: CalendarEventKind.playerAction,
         execution: CalendarEventExecution.playerAction,
@@ -147,7 +147,7 @@ class CalendarEventRegistry {
       CalendarEventSlot(
         id: CalendarEventId.tradeWindowOpen,
         week: calendar.tradeWindowOpenWeek,
-        day: 1,
+        day: calendar.tradeWindowOpenDay,
         order: -1,
         kind: CalendarEventKind.automatic,
         execution: CalendarEventExecution.automatic,
@@ -155,7 +155,7 @@ class CalendarEventRegistry {
       CalendarEventSlot(
         id: CalendarEventId.scoutReport,
         week: scoutWeek,
-        day: 1,
+        day: calendar.scoutReportDay,
         order: 0,
         kind: CalendarEventKind.playerAction,
         execution: CalendarEventExecution.playerAction,
@@ -163,7 +163,7 @@ class CalendarEventRegistry {
       CalendarEventSlot(
         id: CalendarEventId.combine,
         week: scoutWeek,
-        day: 3,
+        day: calendar.combineDay,
         order: 0,
         kind: CalendarEventKind.automatic,
         execution: CalendarEventExecution.automatic,
@@ -171,7 +171,7 @@ class CalendarEventRegistry {
       CalendarEventSlot(
         id: CalendarEventId.finalMock,
         week: scoutWeek,
-        day: 5,
+        day: calendar.finalMockDay,
         order: 0,
         kind: CalendarEventKind.automatic,
         execution: CalendarEventExecution.automatic,
@@ -179,7 +179,7 @@ class CalendarEventRegistry {
       CalendarEventSlot(
         id: CalendarEventId.draft,
         week: calendar.draftWeek,
-        day: 1,
+        day: calendar.draftDay,
         order: 0,
         kind: CalendarEventKind.playerAction,
         execution: CalendarEventExecution.playerAction,
@@ -187,7 +187,7 @@ class CalendarEventRegistry {
       CalendarEventSlot(
         id: CalendarEventId.nextClassGeneration,
         week: calendar.draftWeek,
-        day: 1,
+        day: calendar.draftDay,
         order: 1,
         kind: CalendarEventKind.playerAction,
         execution: CalendarEventExecution.automatic,
@@ -195,7 +195,7 @@ class CalendarEventRegistry {
       CalendarEventSlot(
         id: CalendarEventId.tradeDeadline,
         week: calendar.tradeDeadlineWeek,
-        day: 1,
+        day: calendar.tradeDeadlineDay,
         order: 0,
         kind: CalendarEventKind.informational,
         execution: CalendarEventExecution.automatic,
@@ -203,7 +203,7 @@ class CalendarEventRegistry {
       CalendarEventSlot(
         id: CalendarEventId.freeAgencyOpen,
         week: calendar.freeAgencyWeek,
-        day: 1,
+        day: calendar.freeAgencyOpenDay,
         order: 0,
         kind: CalendarEventKind.playerAction,
         execution: CalendarEventExecution.playerAction,
@@ -229,16 +229,16 @@ class CalendarEventRegistry {
       CalendarEventWindow(
         id: CalendarEventId.tradeWindowOpen,
         startWeek: calendar.tradeWindowOpenWeek,
-        startDay: 1,
+        startDay: calendar.tradeWindowOpenDay,
         endWeek: calendar.tradeDeadlineWeek,
-        endDay: 1,
+        endDay: calendar.tradeDeadlineDay,
         kind: CalendarEventKind.automatic,
         wrapsYear: true,
       ),
       CalendarEventWindow(
         id: CalendarEventId.contractExtensions,
         startWeek: calendar.draftWeek,
-        startDay: 2,
+        startDay: calendar.contractExtensionStartDay,
         endWeek: calendar.draftWeek,
         endDay: 7,
         kind: CalendarEventKind.playerAction,
@@ -246,7 +246,7 @@ class CalendarEventRegistry {
       CalendarEventWindow(
         id: CalendarEventId.freeAgencyOpen,
         startWeek: calendar.freeAgencyWeek,
-        startDay: 1,
+        startDay: calendar.freeAgencyOpenDay,
         endWeek: calendar.seasonCycleWeeks,
         endDay: 7,
         kind: CalendarEventKind.playerAction,

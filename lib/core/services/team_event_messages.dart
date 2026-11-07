@@ -197,8 +197,13 @@ mixin _TeamEventMessages on _TeamEventShared {
     // Team events are generated at the end of a simulated day and become
     // actionable at the next day's start. Keep the configured one actionable
     // day after that delivery boundary instead of expiring at that boundary.
-    final expiry = logicalDate(state)
-        .add(Duration(days: balance.events.teamEventDecisionExpiryDays + 1))
+    final expiry = calendar
+        .dateAfterDays(
+          state.currentSeason.year,
+          state.currentWeek,
+          state.currentDay,
+          balance.events.teamEventDecisionExpiryDays + 1,
+        )
         .toIso8601String();
     return messages.send(
       state,

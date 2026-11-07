@@ -453,22 +453,27 @@ class _FreeAgencyScreenState extends ConsumerState<FreeAgencyScreen>
       TeamStatus.pretender;
 
   @override
-  int _sheetClock(RfaOfferSheet sheet) =>
-      (((sheet.seasonYear * 60 + sheet.week) * 7 + sheet.day) *
-          BalanceConfig.defaults.contracts.hoursPerDay) +
-      sheet.hour;
+  int _sheetClock(RfaOfferSheet sheet) => ref
+      .read(calendarServiceProvider)
+      .momentIndex(sheet.seasonYear, sheet.week, sheet.day, sheet.hour);
 
   bool _deadlinePassed(LeagueState league, RfaOfferSheet sheet) {
-    final current =
-        (((league.currentSeason.year * 60 + league.currentWeek) * 7 +
-                league.currentDay) *
-            BalanceConfig.defaults.contracts.hoursPerDay) +
-        (league.currentHour ?? 0);
-    final deadline =
-        (((sheet.expirySeasonYear * 60 + sheet.expiryWeek) * 7 +
-                sheet.expiryDay) *
-            BalanceConfig.defaults.contracts.hoursPerDay) +
-        sheet.expiryHour;
+    final current = ref
+        .read(calendarServiceProvider)
+        .momentIndex(
+          league.currentSeason.year,
+          league.currentWeek,
+          league.currentDay,
+          league.currentHour ?? 0,
+        );
+    final deadline = ref
+        .read(calendarServiceProvider)
+        .momentIndex(
+          sheet.expirySeasonYear,
+          sheet.expiryWeek,
+          sheet.expiryDay,
+          sheet.expiryHour,
+        );
     return current > deadline;
   }
 
@@ -477,16 +482,22 @@ class _FreeAgencyScreenState extends ConsumerState<FreeAgencyScreen>
     LeagueState league,
     ContractNegotiation negotiation,
   ) {
-    final current =
-        (((league.currentSeason.year * 60 + league.currentWeek) * 7 +
-                league.currentDay) *
-            BalanceConfig.defaults.contracts.hoursPerDay) +
-        (league.currentHour ?? 0);
-    final deadline =
-        (((negotiation.expirySeasonYear * 60 + negotiation.expiryWeek) * 7 +
-                negotiation.expiryDay) *
-            BalanceConfig.defaults.contracts.hoursPerDay) +
-        negotiation.expiryHour;
+    final current = ref
+        .read(calendarServiceProvider)
+        .momentIndex(
+          league.currentSeason.year,
+          league.currentWeek,
+          league.currentDay,
+          league.currentHour ?? 0,
+        );
+    final deadline = ref
+        .read(calendarServiceProvider)
+        .momentIndex(
+          negotiation.expirySeasonYear,
+          negotiation.expiryWeek,
+          negotiation.expiryDay,
+          negotiation.expiryHour,
+        );
     return current > deadline;
   }
 }

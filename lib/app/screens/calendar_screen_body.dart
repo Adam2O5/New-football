@@ -23,7 +23,7 @@ mixin _CalendarScreenBody
     final day = league.currentDay;
     final seasonYear = league.currentSeason.year;
 
-    final currentMonth = _monthForInGame(league);
+    final currentMonth = _monthForInGame(league, calendar);
     final cursorMonthValue = ref.watch(calendarCursorMonthProvider);
     if (cursorMonthValue == null) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -35,7 +35,7 @@ mixin _CalendarScreenBody
     final firstSeasonYear = league.history.isNotEmpty
         ? league.history.map((h) => h.year).reduce((a, b) => a < b ? a : b)
         : seasonYear;
-    final minMonthDate = _week1StartForSeason(firstSeasonYear);
+    final minMonthDate = calendar.week1StartForSeason(firstSeasonYear);
     final minMonth = DateTime(minMonthDate.year, minMonthDate.month);
     final maxMonth = DateTime(currentMonth.year, currentMonth.month + 12);
 
@@ -66,7 +66,7 @@ mixin _CalendarScreenBody
       List<String> eventLabels,
     })?
     dayInfo(DateTime date) {
-      final mapped = _inGameWeekDayForDate(date, seasonYear);
+      final mapped = calendar.weekDayForDate(date, seasonYear);
       if (mapped == null) return null;
       final w = mapped.week;
       final d = mapped.day;
@@ -181,7 +181,7 @@ mixin _CalendarScreenBody
 
     final selectedDay =
         ref.watch(calendarSelectedDayProvider) ??
-        _dateForInGameWeekDay(seasonYear, currentWeek, currentDay);
+        calendar.dateForWeekDay(seasonYear, currentWeek, currentDay);
     final selectedInfo = dayInfo(selectedDay);
 
     String selectedDayBody;

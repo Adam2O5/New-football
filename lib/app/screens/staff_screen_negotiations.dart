@@ -195,23 +195,32 @@ mixin _StaffScreenNegotiations
   String _subjectName(LeagueState league, String id) =>
       _staffById(league, id)?.name ?? id;
 
-  int _negotiationClock(ContractNegotiation negotiation) =>
-      (((negotiation.seasonYear * 60 + negotiation.week) * 7 +
-              negotiation.day) *
-          BalanceConfig.defaults.contracts.hoursPerDay) +
-      negotiation.hour;
+  int _negotiationClock(ContractNegotiation negotiation) => ref
+      .read(calendarServiceProvider)
+      .momentIndex(
+        negotiation.seasonYear,
+        negotiation.week,
+        negotiation.day,
+        negotiation.hour,
+      );
 
   bool _deadlinePassed(LeagueState league, ContractNegotiation negotiation) {
-    final current =
-        (((league.currentSeason.year * 60 + league.currentWeek) * 7 +
-                league.currentDay) *
-            BalanceConfig.defaults.contracts.hoursPerDay) +
-        (league.currentHour ?? 0);
-    final deadline =
-        (((negotiation.expirySeasonYear * 60 + negotiation.expiryWeek) * 7 +
-                negotiation.expiryDay) *
-            BalanceConfig.defaults.contracts.hoursPerDay) +
-        negotiation.expiryHour;
+    final current = ref
+        .read(calendarServiceProvider)
+        .momentIndex(
+          league.currentSeason.year,
+          league.currentWeek,
+          league.currentDay,
+          league.currentHour ?? 0,
+        );
+    final deadline = ref
+        .read(calendarServiceProvider)
+        .momentIndex(
+          negotiation.expirySeasonYear,
+          negotiation.expiryWeek,
+          negotiation.expiryDay,
+          negotiation.expiryHour,
+        );
     return current > deadline;
   }
 }

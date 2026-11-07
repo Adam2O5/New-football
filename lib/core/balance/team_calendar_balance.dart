@@ -30,6 +30,20 @@ class CalendarBalance {
     this.tradeWindowOpenWeek = 44,
     this.breakWeek = 30,
     this.seasonCycleWeeks = 52,
+    this.seasonStartMonth = 8,
+    this.awardsDay = 1,
+    this.staffGrowthDay = 2,
+    this.retirementsDay = 3,
+    this.lotteryDay = 5,
+    this.scoutWeekOffset = 1,
+    this.scoutReportDay = 1,
+    this.combineDay = 3,
+    this.finalMockDay = 5,
+    this.draftDay = 1,
+    this.tradeWindowOpenDay = 1,
+    this.tradeDeadlineDay = 1,
+    this.freeAgencyOpenDay = 1,
+    this.contractExtensionStartDay = 2,
   });
 
   final int regularSeasonWeeks;
@@ -50,6 +64,20 @@ class CalendarBalance {
 
   /// Number of seven-day weeks in one calendar cycle.
   final int seasonCycleWeeks;
+  final int seasonStartMonth;
+  final int awardsDay;
+  final int staffGrowthDay;
+  final int retirementsDay;
+  final int lotteryDay;
+  final int scoutWeekOffset;
+  final int scoutReportDay;
+  final int combineDay;
+  final int finalMockDay;
+  final int draftDay;
+  final int tradeWindowOpenDay;
+  final int tradeDeadlineDay;
+  final int freeAgencyOpenDay;
+  final int contractExtensionStartDay;
 }
 
 class ChemistryBalance {

@@ -111,6 +111,7 @@ class TeamEventService
         team.copyWith(
           eventState: team.eventState.recordMinutes(
             entries,
+            balance: balance,
             currentSeasonYear: state.currentSeason.year,
             currentWeek: state.currentWeek,
           ),
@@ -285,11 +286,11 @@ class TeamEventService
       );
 
   @override
-  DateTime logicalDate(LeagueState league) => DateTime.utc(
+  DateTime logicalDate(LeagueState league) => calendar.dateTimeForMoment(
     league.currentSeason.year,
-    1,
-    1,
-  ).add(Duration(days: (league.currentWeek - 1) * 7 + (league.currentDay - 1)));
+    league.currentWeek,
+    league.currentDay,
+  );
 }
 
 mixin _TeamEventShared {

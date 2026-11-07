@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:new_football/core/services/calendar_service.dart';
 
 import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/balance/injury_catalog.dart';
@@ -34,12 +35,16 @@ class PlayerEventService
   PlayerEventService({
     this.balance = BalanceConfig.defaults,
     MessageService? messages,
-  }) : messages = messages ?? MessageService();
+    CalendarService? calendar,
+  }) : calendar = calendar ?? CalendarService(balance: balance),
+       messages = messages ?? MessageService();
 
   @override
   final BalanceConfig balance;
   @override
   final MessageService messages;
+  @override
+  final CalendarService calendar;
 
   /// Working roster map for the current [weeklyTick]. Mutations stay here
   /// until a message or the end of the tick publishes them, so a Sunday
@@ -225,11 +230,11 @@ class PlayerEventService
 
   /// Date representation used in `GameMessage.expiresAt` for this save.
   @override
-  DateTime logicalDate(LeagueState league) => DateTime.utc(
+  DateTime logicalDate(LeagueState league) => calendar.dateTimeForMoment(
     league.currentSeason.year,
-    1,
-    1,
-  ).add(Duration(days: (league.currentWeek - 1) * 7 + (league.currentDay - 1)));
+    league.currentWeek,
+    league.currentDay,
+  );
 
   LeagueState _tickPlayer(
     LeagueState state,
@@ -362,6 +367,7 @@ class PlayerEventService
 }
 
 mixin _PlayerEventShared {
+  CalendarService get calendar;
   BalanceConfig get balance;
 
   MessageService get messages;

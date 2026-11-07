@@ -375,31 +375,15 @@ class NegotiationService {
     required int hour,
     required int hours,
   }) {
-    var nextSeason = seasonYear;
-    var nextWeek = week;
-    var nextDay = day;
-    var nextHour = hour + hours;
-
-    // Waiting is resolved inside the current FA-I day. A normal slot gets
-    // the full two-hour timer, while the final two slots collapse to the last
-    // available slot instead of leaking into the next calendar day.
-    if (nextHour > balance.contracts.hoursPerDay) {
-      nextHour = balance.contracts.hoursPerDay;
-    }
-
-    while (nextDay > 7) {
-      nextDay -= 7;
-      nextWeek++;
-    }
-    while (nextWeek > balance.calendar.seasonCycleWeeks) {
-      nextWeek -= balance.calendar.seasonCycleWeeks;
-      nextSeason++;
-    }
+    // Waiting stays within the current market day; its final slot is inclusive.
+    final until = hour + hours;
     return NegotiationDeadline(
-      seasonYear: nextSeason,
-      week: nextWeek,
-      day: nextDay,
-      hour: nextHour,
+      seasonYear: seasonYear,
+      week: week,
+      day: day,
+      hour: until > balance.contracts.hoursPerDay
+          ? balance.contracts.hoursPerDay
+          : until,
     );
   }
 
@@ -410,22 +394,14 @@ class NegotiationService {
     required int hour,
     required int days,
   }) {
-    var nextWeek = week;
-    var nextDay = day + days;
-    while (nextDay > 7) {
-      nextDay -= 7;
-      nextWeek++;
-    }
-    var nextSeason = seasonYear;
-    while (nextWeek > balance.calendar.seasonCycleWeeks) {
-      nextWeek -= balance.calendar.seasonCycleWeeks;
-      nextSeason++;
-    }
+    final next = CalendarService(
+      balance: balance,
+    ).addDays(seasonYear, week, day, hour, days);
     return NegotiationDeadline(
-      seasonYear: nextSeason,
-      week: nextWeek,
-      day: nextDay,
-      hour: hour,
+      seasonYear: next.$1,
+      week: next.$2,
+      day: next.$3,
+      hour: next.$4,
     );
   }
 
@@ -481,15 +457,10 @@ class NegotiationService {
     int dayB,
     int hourB,
   ) {
-    final a =
-        (((seasonA * balance.calendar.seasonCycleWeeks + weekA) * 7 + dayA) *
-            (balance.contracts.hoursPerDay + 1)) +
-        hourA;
-    final b =
-        (((seasonB * balance.calendar.seasonCycleWeeks + weekB) * 7 + dayB) *
-            (balance.contracts.hoursPerDay + 1)) +
-        hourB;
-    return a.compareTo(b);
+    final clock = CalendarService(balance: balance);
+    return clock
+        .momentIndex(seasonA, weekA, dayA, hourA)
+        .compareTo(clock.momentIndex(seasonB, weekB, dayB, hourB));
   }
 }
 
