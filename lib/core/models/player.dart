@@ -153,8 +153,8 @@ abstract class PlayerHidden with _$PlayerHidden {
 @freezed
 abstract class PlayerState with _$PlayerState {
   const factory PlayerState({
-    @Default(100) int stamina,
-    @Default(5.0) double form,
+    @Default(PlayerBalance.defaultInitialStamina) int stamina,
+    @Default(PlayerBalance.defaultInitialForm) double form,
     Injury? injury,
     @Default(0) int regularSeasonYellowCards,
     @Default(0) int playoffYellowCards,

@@ -22,7 +22,14 @@ mixin _SeedTeamGeneration on _SeedGenerationShared {
       city: city,
       conference: conference,
       roster: roster,
-      finance: TeamFinance(totalPayroll: payroll),
+      finance: TeamFinance(
+        totalPayroll: payroll,
+        salaryCap: balance.salaryCap.salaryCap,
+        firstApron: balance.salaryCap.firstApron,
+        secondApron: balance.salaryCap.secondApron,
+        midLevelExceptionAmount: balance.salaryCap.midLevelException,
+        cashBalance: balance.cash.startingCash,
+      ),
       tactics: TacticsSetup(formation: formation),
       lineupPlayerIds: roster
           .take(balance.roster.startingXi)
@@ -77,11 +84,12 @@ mixin _SeedTeamGeneration on _SeedGenerationShared {
   }) {
     final positions = _buildRosterPositions(formation);
 
-    if (positions.length != balance.seed.rosterProfiles.length) {
+    if (positions.length != balance.seed.rosterProfiles.length ||
+        positions.length != balance.roster.seedSize) {
       throw StateError(
-        'Liczba slotów rosteru (${positions.length}) dla formacji $formation '
-        'nie zgadza się z tabelą OVR/wiek '
-        '(${balance.seed.rosterProfiles.length}) z data_generation.md.',
+        'Liczba slotów rosteru (${positions.length}) dla formacji $formation, '
+        'profili OVR/wiek (${balance.seed.rosterProfiles.length}) i '
+        'roster.seedSize (${balance.roster.seedSize}) musi być zgodna.',
       );
     }
 
@@ -104,12 +112,9 @@ mixin _SeedTeamGeneration on _SeedGenerationShared {
     final formationPositions = _positionsForFormation(formation);
 
     return [
-      ...formationPositions,
-      ...formationPositions,
-      Position.gk,
-      Position.cb,
-      Position.cm,
-      Position.st,
+      for (var i = 0; i < balance.seed.rosterFormationCopies; i++)
+        ...formationPositions,
+      ...balance.seed.rosterExtraPositions,
     ];
   }
 

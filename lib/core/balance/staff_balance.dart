@@ -1,13 +1,15 @@
 import 'package:new_football/core/models/enums.dart';
 
 class StaffBalance {
+  static const defaultRatingMin = 0.0;
+  static const defaultRatingMax = 5.0;
   const StaffBalance({
     this.salaryCap = 15000000,
     this.minSalary = 500000,
     this.maxSalary = 5000000,
     this.roleSlots = 6,
-    this.starMin = 0.0,
-    this.starMax = 5.0,
+    this.starMin = defaultRatingMin,
+    this.starMax = defaultRatingMax,
     this.starStep = 0.5,
     this.maxWatchedBase = 4,
     this.maxWatchedPerCoverageStar = 6,

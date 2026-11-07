@@ -324,13 +324,16 @@ mixin _PlayerEventTriggers on _PlayerEventShared {
         stats: outfield.stats.copyWith(
           physicality:
               (outfield.stats.physicality + events.lateBloomerAttributeBonus)
-                  .clamp(50, 99),
+                  .clamp(
+                    balance.player.attributeMin,
+                    balance.player.attributeMax,
+                  ),
         ),
       ),
       goalkeeper: (goalkeeper) => PlayerAttributes.goalkeeper(
         stats: goalkeeper.stats.copyWith(
           speed: (goalkeeper.stats.speed + events.lateBloomerAttributeBonus)
-              .clamp(50, 99),
+              .clamp(balance.player.attributeMin, balance.player.attributeMax),
         ),
       ),
     );

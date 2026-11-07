@@ -65,21 +65,36 @@ extension ProspectX on Prospect {
       heightCm: heightCm,
       optimalRole: optimalRole,
       state: PlayerState(
-        stamina: 100,
-        form: (1 + rng.nextInt(10)).toDouble(),
+        stamina: balance.player.initialStamina,
+        form:
+            (balance.seed.prospectFormMin +
+                    rng.nextInt(
+                      balance.seed.prospectFormMax -
+                          balance.seed.prospectFormMin +
+                          1,
+                    ))
+                .toDouble(),
         role: position.defaultAssignedRole,
         seasonsWithTeam: 0,
       ),
       hidden: PlayerHidden(
         injuryProne: injuryProne,
         determination: determination,
-        overallProgress: (40 + rng.nextInt(50)).toDouble(),
+        overallProgress:
+            (balance.seed.prospectProgressMin +
+                    rng.nextInt(
+                      balance.seed.prospectProgressMax -
+                          balance.seed.prospectProgressMin +
+                          1,
+                    ))
+                .toDouble(),
         growthRate: balance.development.baseGrowthRateFor(determination),
         developmentOutcome: outcome,
         developmentCeilingStars: rollDevelopmentCeilingStars(
           potentialStars,
           outcome,
           rng,
+          balance,
         ),
       ),
     );

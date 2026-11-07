@@ -858,7 +858,7 @@ return $default(_that.stamina,_that.form,_that.injury,_that.regularSeasonYellowC
 @JsonSerializable()
 
 class _PlayerState implements PlayerState {
-  const _PlayerState({this.stamina = 100, this.form = 5.0, this.injury, this.regularSeasonYellowCards = 0, this.playoffYellowCards = 0, this.suspensionGamesRemaining = 0, this.role = const AssignedRole.cm(), this.seasonsWithTeam = 0, this.minutesThisWeek = 0, this.lastDevelopmentOvrDelta = 0, this.lastDevelopmentProgressDelta = 0.0, this.eventState = const PlayerEventState()});
+  const _PlayerState({this.stamina = PlayerBalance.defaultInitialStamina, this.form = PlayerBalance.defaultInitialForm, this.injury, this.regularSeasonYellowCards = 0, this.playoffYellowCards = 0, this.suspensionGamesRemaining = 0, this.role = const AssignedRole.cm(), this.seasonsWithTeam = 0, this.minutesThisWeek = 0, this.lastDevelopmentOvrDelta = 0, this.lastDevelopmentProgressDelta = 0.0, this.eventState = const PlayerEventState()});
   factory _PlayerState.fromJson(Map<String, dynamic> json) => _$PlayerStateFromJson(json);
 
 @override@JsonKey() final  int stamina;

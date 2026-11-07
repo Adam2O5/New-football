@@ -183,7 +183,7 @@ class DevelopmentService {
     PlayerAttributes attributes,
     int delta,
   ) {
-    int clamp(int value) => (value + delta).clamp(50, 99);
+    int clamp(int value) => balance.player.clampAttribute(value + delta);
     return attributes.map(
       outfield: (outfield) => PlayerAttributes.outfield(
         stats: outfield.stats.copyWith(

@@ -6,7 +6,7 @@ String _formatMoney(double value) {
   return value.round().toString();
 }
 
-class _PlayersFilterTab extends StatelessWidget {
+class _PlayersFilterTab extends ConsumerWidget {
   const _PlayersFilterTab({
     required this.l10n,
     required this.league,
@@ -20,7 +20,8 @@ class _PlayersFilterTab extends StatelessWidget {
   final ValueChanged<PlayersFilterState> onChanged;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final attributes = ref.watch(balanceProvider).player;
     final teamOptions = <(String, String)>[
       (PlayersFilterState.noClubSentinel, l10n.searchFilters_noClub),
       for (final team in league?.teams ?? const []) (team.id, team.name),
@@ -77,9 +78,11 @@ class _PlayersFilterTab extends StatelessWidget {
         _RangeFilterTile(
           label: l10n.stat_ovr,
           filter: filters.ovr,
-          min: 30,
-          max: 99,
-          divisions: 69,
+          min: attributes.attributeMin.toDouble(),
+          max: attributes.attributeMax.toDouble(),
+          divisions: attributes.attributeMax > attributes.attributeMin
+              ? attributes.attributeMax - attributes.attributeMin
+              : 1,
           onChanged: (v) => onChanged(filters.copyWith(ovr: v)),
         ),
         _RangeFilterTile(
@@ -104,7 +107,7 @@ class _PlayersFilterTab extends StatelessWidget {
   }
 }
 
-class _ProspectsFilterTab extends StatelessWidget {
+class _ProspectsFilterTab extends ConsumerWidget {
   const _ProspectsFilterTab({
     required this.l10n,
     required this.filters,
@@ -116,7 +119,8 @@ class _ProspectsFilterTab extends StatelessWidget {
   final ValueChanged<ProspectsFilterState> onChanged;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final attributes = ref.watch(balanceProvider).player;
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -161,9 +165,11 @@ class _ProspectsFilterTab extends StatelessWidget {
         _RangeFilterTile(
           label: l10n.stat_ovr,
           filter: filters.ovr,
-          min: 30,
-          max: 99,
-          divisions: 69,
+          min: attributes.attributeMin.toDouble(),
+          max: attributes.attributeMax.toDouble(),
+          divisions: attributes.attributeMax > attributes.attributeMin
+              ? attributes.attributeMax - attributes.attributeMin
+              : 1,
           onChanged: (v) => onChanged(filters.copyWith(ovr: v)),
         ),
         const SizedBox(height: 4),

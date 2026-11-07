@@ -27,6 +27,12 @@ class RetirementBalance {
 
 class DevelopmentBalance {
   const DevelopmentBalance({
+    this.exceedSmallOffsetChance = 0.8,
+    this.exceedSmallOffset = 0.5,
+    this.exceedLargeOffset = 1.0,
+    this.underSmallOffsetChance = 0.6,
+    this.underSmallOffset = -0.5,
+    this.underLargeOffset = -1.0,
     this.growthRateBase = 1.0,
     this.growthRateMin = -3.0,
     this.growthRateMax = 3.0,
@@ -61,6 +67,12 @@ class DevelopmentBalance {
     ],
   });
 
+  final double exceedSmallOffsetChance;
+  final double exceedSmallOffset;
+  final double exceedLargeOffset;
+  final double underSmallOffsetChance;
+  final double underSmallOffset;
+  final double underLargeOffset;
   final double growthRateBase;
   final double growthRateMin;
   final double growthRateMax;

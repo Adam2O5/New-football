@@ -90,8 +90,9 @@ const _$DevelopmentOutcomeEnumMap = {
 };
 
 _PlayerState _$PlayerStateFromJson(Map<String, dynamic> json) => _PlayerState(
-  stamina: (json['stamina'] as num?)?.toInt() ?? 100,
-  form: (json['form'] as num?)?.toDouble() ?? 5.0,
+  stamina:
+      (json['stamina'] as num?)?.toInt() ?? PlayerBalance.defaultInitialStamina,
+  form: (json['form'] as num?)?.toDouble() ?? PlayerBalance.defaultInitialForm,
   injury: json['injury'] == null
       ? null
       : Injury.fromJson(json['injury'] as Map<String, dynamic>),

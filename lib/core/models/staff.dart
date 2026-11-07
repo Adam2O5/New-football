@@ -40,10 +40,10 @@ enum StaffAttributeKey {
 /// Flutter.
 abstract final class StaffRatingSystem {
   /// Lower bound of the star scale.
-  static const double minRating = 0.0;
+  static const double minRating = StaffBalance.defaultRatingMin;
 
   /// Upper bound of the star scale.
-  static const double maxRating = 5.0;
+  static const double maxRating = StaffBalance.defaultRatingMax;
 
   /// Canonical role → relevant attributes, in stable presentation order.
   ///

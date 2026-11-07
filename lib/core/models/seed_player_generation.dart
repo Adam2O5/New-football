@@ -4,41 +4,35 @@ mixin _SeedPlayerGeneration on _SeedGenerationShared {
   /// Offset (`lo`, `hi`) względem docelowego OVR `X` per waga atrybutu
   /// pozycji (`data_generation.md` §„Wagi atrybutów pozycji"). Klucz to
   /// waga × 100, żeby uniknąć porównań liczb zmiennoprzecinkowych.
-  static const Map<int, (int lo, int hi)> _attrOffsetRangeForWeight = {
-    5: (-18, -13),
-    8: (-8, -5),
-    10: (-6, -3),
-    12: (-4, -2),
-    14: (-3, 0),
-    15: (-2, 0),
-    18: (0, 1),
-    20: (-1, 1),
-    25: (2, 3),
-    28: (3, 4),
-    30: (3, 4),
-    35: (4, 6),
-    40: (3, 5),
-  };
 
   /// Losuje wartość atrybutu wg wagi pozycji, względem docelowego OVR `X`
   /// (`data_generation.md` §„Generowanie OVR").
   int _attrForWeight(int targetOvr, double weight, Random rng) {
     final key = (weight * 100).round();
-    final range = _attrOffsetRangeForWeight[key];
+    final range = balance.seed.attributeOffsets[key];
     if (range == null) {
       throw StateError(
         'Brak zdefiniowanego zakresu offsetu dla wagi $weight — '
-        'zaktualizuj _attrOffsetRangeForWeight zgodnie z data_generation.md.',
+        'zaktualizuj balance.seed.attributeOffsets zgodnie z data_generation.md.',
       );
     }
     final (lo, hi) = range;
-    return (targetOvr + lo + rng.nextInt(hi - lo + 1)).clamp(1, 99);
+    return balance.player.clampAttribute(
+      targetOvr + lo + rng.nextInt(hi - lo + 1),
+    );
   }
 
   /// Atrybut bramkarza: waga 1/6 każdego atrybutu → zakres X-2…X+2
   /// (`data_generation.md` §„Bramkarze").
-  int _gkAttrForOvr(int targetOvr, Random rng) =>
-      (targetOvr - 2 + rng.nextInt(5)).clamp(1, 99);
+  int _gkAttrForOvr(int targetOvr, Random rng) => balance.player.clampAttribute(
+    targetOvr +
+        balance.seed.gkAttributeOffsetMin +
+        rng.nextInt(
+          balance.seed.gkAttributeOffsetMax -
+              balance.seed.gkAttributeOffsetMin +
+              1,
+        ),
+  );
 
   /// Atrybuty gracza wg wag pozycji i docelowego OVR — wspólna formuła dla
   /// startowego rosteru (`_generatePlayer`) i prospektów draftowych
@@ -84,74 +78,34 @@ mixin _SeedPlayerGeneration on _SeedGenerationShared {
   /// Potencjał (★) wg wieku i OVR (`data_generation.md` §„Potencjał").
   /// Wiersze/kolumny poza tabelą (np. wiek <18 albo OVR <50) są przycinane
   /// do najbliższego zdefiniowanego przedziału.
-  static const List<
-    (int ageMax, List<(int ovrMax, double starMin, double starMax)>)
-  >
-  _potentialTable = [
-    (
-      22,
-      [
-        (59, 2.0, 3.0),
-        (69, 3.5, 4.5),
-        (77, 3.0, 4.0),
-        (83, 3.5, 4.5),
-        (89, 4.5, 5.0),
-        (95, 5.0, 5.0),
-      ],
-    ),
-    (
-      26,
-      [
-        (59, 2.0, 2.5),
-        (69, 3.0, 4.0),
-        (77, 3.0, 3.5),
-        (83, 3.5, 4.0),
-        (89, 4.5, 5.0),
-        (95, 5.0, 5.0),
-      ],
-    ),
-    (
-      32,
-      [
-        (59, 1.0, 2.0),
-        (69, 2.0, 3.5),
-        (77, 2.5, 3.0),
-        (83, 3.0, 4.0),
-        (89, 4.5, 4.5),
-        (95, 5.0, 5.0),
-      ],
-    ),
-    (
-      40,
-      [
-        (59, 0.5, 1.5),
-        (69, 1.5, 2.5),
-        (77, 2.5, 3.0),
-        (83, 3.0, 3.5),
-        (89, 4.5, 4.5),
-        (95, 5.0, 5.0),
-      ],
-    ),
-  ];
 
   double _rollPotentialStars(int age, int ovr, Random rng) {
-    final ageRow = _potentialTable
-        .firstWhere((row) => age <= row.$1, orElse: () => _potentialTable.last)
+    final ageRow = balance.seed.potentialProfiles
+        .firstWhere(
+          (row) => age <= row.$1,
+          orElse: () => balance.seed.potentialProfiles.last,
+        )
         .$2;
     final (_, starMin, starMax) = ageRow.firstWhere(
       (cell) => ovr <= cell.$1,
       orElse: () => ageRow.last,
     );
     final stars = starMin + rng.nextDouble() * (starMax - starMin);
-    return (stars * 2).round() / 2.0;
+    return (stars * balance.seed.potentialRoundingSteps).round() /
+        balance.seed.potentialRoundingSteps;
   }
 
   /// Pensja wg wzoru z `salary_cap.md`/`data_generation.md`:
   /// `minSalary + (maxSalary - minSalary) * (((OVR-50)*2)/100)^3`.
   int _rollSalary(int ovr) {
     final cap = balance.salaryCap;
-    final t = (((ovr - 50) * 2) / 100).clamp(0.0, 1.0);
-    final salary = cap.minSalary + (cap.maxSalary - cap.minSalary) * pow(t, 3);
+    final t =
+        (((ovr - balance.seed.salaryOvrBase) * balance.seed.salaryOvrScale) /
+                balance.seed.salaryOvrDivisor)
+            .clamp(0.0, 1.0);
+    final salary =
+        cap.minSalary +
+        (cap.maxSalary - cap.minSalary) * pow(t, balance.seed.salaryExponent);
     return salary.round();
   }
 
@@ -174,10 +128,14 @@ mixin _SeedPlayerGeneration on _SeedGenerationShared {
     final salary = _rollSalary(targetOvr);
     final roundedStars = _rollPotentialStars(age, targetOvr, rng);
 
-    final injuryProne = 1 + rng.nextInt(10);
-    final determination = 1 + rng.nextInt(10);
+    final injuryProne =
+        balance.player.traitMin +
+        rng.nextInt(balance.player.traitMax - balance.player.traitMin + 1);
+    final determination =
+        balance.player.traitMin +
+        rng.nextInt(balance.player.traitMax - balance.player.traitMin + 1);
     final heightCm = _heightCmFor(position, rng);
-    final outcome = rollDevelopmentOutcome(determination, rng);
+    final outcome = rollDevelopmentOutcome(determination, rng, balance);
 
     final player = Player(
       id: id,
@@ -193,33 +151,63 @@ mixin _SeedPlayerGeneration on _SeedGenerationShared {
       optimalRole: _randomRoleFor(position, rng),
       contract: Contract(
         salary: salary,
-        yearsRemaining: 1 + rng.nextInt(4),
+        yearsRemaining:
+            balance.seed.initialContractYearsMin +
+            rng.nextInt(
+              balance.seed.initialContractYearsMax -
+                  balance.seed.initialContractYearsMin +
+                  1,
+            ),
         hasBirdRights: false,
       ),
       state: PlayerState(
-        stamina: 100,
-        form: (3 + rng.nextInt(6)).toDouble(),
+        stamina: balance.player.initialStamina,
+        form:
+            (balance.seed.playerFormMin +
+                    rng.nextInt(
+                      balance.seed.playerFormMax -
+                          balance.seed.playerFormMin +
+                          1,
+                    ))
+                .toDouble(),
         role: position.defaultAssignedRole,
         seasonsWithTeam: 0,
       ),
       hidden: PlayerHidden(
         injuryProne: injuryProne,
         determination: determination,
-        overallProgress: (age <= 26 ? 40 + rng.nextInt(50) : rng.nextInt(30))
-            .clamp(0.0, 99.0)
-            .toDouble(),
+        overallProgress:
+            (age <= balance.seed.youngProgressMaxAge
+                    ? balance.seed.youngProgressMin +
+                          rng.nextInt(
+                            balance.seed.youngProgressMax -
+                                balance.seed.youngProgressMin +
+                                1,
+                          )
+                    : balance.seed.matureProgressMin +
+                          rng.nextInt(
+                            balance.seed.matureProgressMax -
+                                balance.seed.matureProgressMin +
+                                1,
+                          ))
+                .clamp(
+                  balance.seed.initialProgressMin,
+                  balance.seed.initialProgressMax,
+                )
+                .toDouble(),
         growthRate: balance.development.baseGrowthRateFor(determination),
         developmentOutcome: outcome,
         developmentCeilingStars: rollDevelopmentCeilingStars(
           roundedStars,
           outcome,
           rng,
+          balance,
         ),
       ),
     );
     return player
-        .copyWith(seasonStartOvr: player.overall())
-        .recalculatePointValue();
+        .copyWith(seasonStartOvr: player.overall(balance))
+        .recalculatePointValue(balance);
   }
 
   /// Startowa pula wolnych agentów dostępnych od pierwszego dnia save'a
@@ -227,11 +215,23 @@ mixin _SeedPlayerGeneration on _SeedGenerationShared {
   /// OVR 73–78, wiek 22–32, potencjał 2,5–4,0★. Pozycja, narodowość, rola,
   /// temperament itd. są w pełni losowe (możliwe 0 bramkarzy w puli).
   List<Player> generateFreeAgentPlayers({required Random rng}) {
-    final count = 25 + rng.nextInt(11); // 25..35
+    final count =
+        balance.seed.freeAgentCountMin +
+        rng.nextInt(
+          balance.seed.freeAgentCountMax - balance.seed.freeAgentCountMin + 1,
+        ); // 25..35
     return List.generate(count, (i) {
       final position = Position.values[rng.nextInt(Position.values.length)];
-      final targetOvr = 73 + rng.nextInt(6); // 73..78
-      final age = 22 + rng.nextInt(11); // 22..32
+      final targetOvr =
+          balance.seed.freeAgentOvrMin +
+          rng.nextInt(
+            balance.seed.freeAgentOvrMax - balance.seed.freeAgentOvrMin + 1,
+          ); // 73..78
+      final age =
+          balance.seed.freeAgentAgeMin +
+          rng.nextInt(
+            balance.seed.freeAgentAgeMax - balance.seed.freeAgentAgeMin + 1,
+          ); // 22..32
       return _generateFreeAgentPlayer(
         index: i,
         position: position,
@@ -243,13 +243,14 @@ mixin _SeedPlayerGeneration on _SeedGenerationShared {
   }
 
   /// Potencjał (★) wolnych agentów: 2,5–4,0★, zadany wprost i niezależny od
-  /// `_potentialTable` (wiek/OVR) używanej dla rosterów startowych i draftu
+  /// `balance.seed.potentialProfiles` (wiek/OVR) używanej dla rosterów startowych i draftu
   /// (`data_generation.md` §„Wolni agenci na starcie save'a").
   double _rollFreeAgentPotentialStars(Random rng) {
-    const starMin = 2.5;
-    const starMax = 4.0;
+    final starMin = balance.seed.freeAgentPotentialMin;
+    final starMax = balance.seed.freeAgentPotentialMax;
     final stars = starMin + rng.nextDouble() * (starMax - starMin);
-    return (stars * 2).round() / 2.0;
+    return (stars * balance.seed.potentialRoundingSteps).round() /
+        balance.seed.potentialRoundingSteps;
   }
 
   Player _generateFreeAgentPlayer({
@@ -268,10 +269,14 @@ mixin _SeedPlayerGeneration on _SeedGenerationShared {
     final salary = _rollSalary(targetOvr);
     final potentialStars = _rollFreeAgentPotentialStars(rng);
 
-    final injuryProne = 1 + rng.nextInt(10);
-    final determination = 1 + rng.nextInt(10);
+    final injuryProne =
+        balance.player.traitMin +
+        rng.nextInt(balance.player.traitMax - balance.player.traitMin + 1);
+    final determination =
+        balance.player.traitMin +
+        rng.nextInt(balance.player.traitMax - balance.player.traitMin + 1);
     final heightCm = _heightCmFor(position, rng);
-    final outcome = rollDevelopmentOutcome(determination, rng);
+    final outcome = rollDevelopmentOutcome(determination, rng, balance);
 
     final player = Player(
       id: id,
@@ -289,40 +294,59 @@ mixin _SeedPlayerGeneration on _SeedGenerationShared {
       // co dla graczy z wygasłym kontraktem (`contract_market_models.dart`).
       contract: Contract(salary: salary, yearsRemaining: 0),
       state: PlayerState(
-        stamina: 100,
-        form: (3 + rng.nextInt(6)).toDouble(),
+        stamina: balance.player.initialStamina,
+        form:
+            (balance.seed.playerFormMin +
+                    rng.nextInt(
+                      balance.seed.playerFormMax -
+                          balance.seed.playerFormMin +
+                          1,
+                    ))
+                .toDouble(),
         role: position.defaultAssignedRole,
         seasonsWithTeam: 0,
       ),
       hidden: PlayerHidden(
         injuryProne: injuryProne,
         determination: determination,
-        overallProgress: (age <= 26 ? 40 + rng.nextInt(50) : rng.nextInt(30))
-            .clamp(0.0, 99.0)
-            .toDouble(),
+        overallProgress:
+            (age <= balance.seed.youngProgressMaxAge
+                    ? balance.seed.youngProgressMin +
+                          rng.nextInt(
+                            balance.seed.youngProgressMax -
+                                balance.seed.youngProgressMin +
+                                1,
+                          )
+                    : balance.seed.matureProgressMin +
+                          rng.nextInt(
+                            balance.seed.matureProgressMax -
+                                balance.seed.matureProgressMin +
+                                1,
+                          ))
+                .clamp(
+                  balance.seed.initialProgressMin,
+                  balance.seed.initialProgressMax,
+                )
+                .toDouble(),
         growthRate: balance.development.baseGrowthRateFor(determination),
         developmentOutcome: outcome,
         developmentCeilingStars: rollDevelopmentCeilingStars(
           potentialStars,
           outcome,
           rng,
+          balance,
         ),
       ),
     );
     return player
-        .copyWith(seasonStartOvr: player.overall())
-        .recalculatePointValue();
+        .copyWith(seasonStartOvr: player.overall(balance))
+        .recalculatePointValue(balance);
   }
 
   @override
   int _heightCmFor(Position position, Random rng) {
-    final (minH, maxH) = switch (position) {
-      Position.gk => (175, 200),
-      Position.cb => (175, 200),
-      Position.st => (170, 195),
-      Position.cdm => (170, 195),
-      _ => (160, 190),
-    };
+    final (minH, maxH) =
+        balance.seed.heightRanges[position] ?? balance.seed.defaultHeightRange;
     return minH + rng.nextInt(maxH - minH + 1);
   }
 

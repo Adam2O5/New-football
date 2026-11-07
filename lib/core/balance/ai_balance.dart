@@ -1,5 +1,6 @@
 import 'package:new_football/core/ai/ai_evaluation_models.dart';
 import 'package:new_football/core/models/enums.dart';
+import 'package:new_football/core/balance/team_calendar_balance.dart';
 
 const _defaultAiRosterGroups = <AiRosterGroupDefinition>[
   AiRosterGroupDefinition(
@@ -147,7 +148,7 @@ class AiBalance {
   const AiBalance({
     this.teamPowerSquadSize = 15,
     this.statusMaxTierChange = 1,
-    this.rosterTargetTotal = 25,
+    this.rosterTargetTotal = RosterBalance.defaultSeedSize,
     this.minGapThreshold = 40,
     this.evaluationNoiseSd = 4.0,
     this.pickFutureDiscount = 0.90,

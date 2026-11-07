@@ -1,3 +1,5 @@
+import 'package:new_football/core/balance/player_balance.dart';
+
 /// Zakres wartości handlowej dla przedziału OVR (`player_management.md` §3).
 class OvrTradeValueBand {
   const OvrTradeValueBand({
@@ -86,7 +88,10 @@ class TradeValueBalance {
   /// nie produkuje wartości poza tym zakresem) — brak ekstrapolacji poza
   /// tabelę, wejście jest jednak clampowane na wszelki wypadek.
   OvrTradeValueBand bandForOvr(int ovr) {
-    final clamped = ovr.clamp(50, 99);
+    final clamped = ovr.clamp(
+      PlayerBalance.defaultAttributeMin,
+      PlayerBalance.defaultAttributeMax,
+    );
     return ovrBands.firstWhere(
       (b) => clamped >= b.ovrMin && clamped <= b.ovrMax,
       orElse: () =>

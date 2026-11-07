@@ -4,37 +4,25 @@ mixin _SeedDraftGeneration on _SeedGenerationShared {
   /// Liczba prospektów, przedział OVR i przedział potencjału per kubełek
   /// (`data_generation.md` §„Potencjał i OVR”). Suma liczebności musi
   /// odpowiadać `prospectCount` (domyślnie 120).
-  static const List<
-    (int count, int ovrMin, int ovrMax, double starMin, double starMax)
-  >
-  _draftClassOvrTable = [
-    (3, 77, 79, 4.0, 5.0),
-    (8, 74, 76, 3.5, 4.5),
-    (12, 70, 73, 3.5, 4.0),
-    (10, 65, 75, 3.0, 4.5),
-    (20, 66, 69, 3.0, 3.5),
-    (20, 62, 65, 2.5, 3.0),
-    (20, 58, 61, 2.0, 2.5),
-    (27, 58, 79, 2.0, 5.0),
-  ];
 
   DraftClass generateDraftClass({
     required int year,
-    int prospectCount = 120,
+    int? prospectCount,
     int? seed,
   }) {
+    prospectCount ??= balance.draft.classSize;
     final rng = seed == null
         ? _random
         : Random(seasonEventSeed(seed, year, 'draft-class'));
     final ovrTargets =
         <(int ovrMin, int ovrMax, double starMin, double starMax)>[];
     for (final (count, ovrMin, ovrMax, starMin, starMax)
-        in _draftClassOvrTable) {
+        in balance.seed.draftProfiles) {
       ovrTargets.addAll(List.filled(count, (ovrMin, ovrMax, starMin, starMax)));
     }
     if (ovrTargets.length != prospectCount) {
       throw StateError(
-        'Suma liczebności w _draftClassOvrTable (${ovrTargets.length}) nie '
+        'Suma liczebności w balance.seed.draftProfiles (${ovrTargets.length}) nie '
         'zgadza się z prospectCount ($prospectCount) — zaktualizuj tabelę '
         'zgodnie z data_generation.md.',
       );
@@ -44,7 +32,7 @@ mixin _SeedDraftGeneration on _SeedGenerationShared {
     final prospects = <Prospect>[];
     for (var i = 0; i < prospectCount; i++) {
       final positions = Position.values.where((p) => p != Position.gk).toList();
-      if (i < 3) {
+      if (i < balance.seed.draftGkEligibleSlots) {
         positions.insert(0, Position.gk);
       }
       final pos = positions[rng.nextInt(positions.length)];
@@ -52,7 +40,9 @@ mixin _SeedDraftGeneration on _SeedGenerationShared {
       final (ovrMin, ovrMax, starMin, starMax) = ovrTargets[i];
       final ovr = ovrMin + rng.nextInt(ovrMax - ovrMin + 1);
       final stars = starMin + rng.nextDouble() * (starMax - starMin);
-      final roundedStars = (stars * 2).round() / 2.0;
+      final roundedStars =
+          (stars * balance.seed.potentialRoundingSteps).round() /
+          balance.seed.potentialRoundingSteps;
 
       final nationality =
           Nationality.values[rng.nextInt(Nationality.values.length)];
@@ -65,15 +55,43 @@ mixin _SeedDraftGeneration on _SeedGenerationShared {
           name: _generateName(rng, nationality),
           nationality: nationality,
           position: pos,
-          age: 18 + rng.nextInt(3),
+          age:
+              balance.draft.prospectAgeMin +
+              rng.nextInt(
+                balance.draft.prospectAgeMax - balance.draft.prospectAgeMin + 1,
+              ),
           optimalRole: _randomRoleFor(pos, rng),
           attributes: _attributesForOvr(pos, ovr, rng),
-          scoutGrade: (ovr + rng.nextInt(8) - 4).clamp(30, 99),
-          combineScore: (ovr + rng.nextInt(12) - 6).clamp(30, 99),
+          scoutGrade: balance.player.clampAttribute(
+            ovr +
+                rng.nextInt(
+                  balance.seed.scoutGradeOffsetMax -
+                      balance.seed.scoutGradeOffsetMin +
+                      1,
+                ) +
+                balance.seed.scoutGradeOffsetMin,
+          ),
+          combineScore: balance.player.clampAttribute(
+            ovr +
+                rng.nextInt(
+                  balance.seed.combineOffsetMax -
+                      balance.seed.combineOffsetMin +
+                      1,
+                ) +
+                balance.seed.combineOffsetMin,
+          ),
           potentialStars: roundedStars,
           heightCm: _heightCmFor(pos, rng),
-          injuryProne: 1 + rng.nextInt(10),
-          determination: 1 + rng.nextInt(10),
+          injuryProne:
+              balance.player.traitMin +
+              rng.nextInt(
+                balance.player.traitMax - balance.player.traitMin + 1,
+              ),
+          determination:
+              balance.player.traitMin +
+              rng.nextInt(
+                balance.player.traitMax - balance.player.traitMin + 1,
+              ),
         ),
       );
     }

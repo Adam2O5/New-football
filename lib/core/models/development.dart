@@ -25,12 +25,22 @@ DevelopmentOutcome rollDevelopmentOutcome(
 double rollDevelopmentCeilingStars(
   double potentialStars,
   DevelopmentOutcome outcome,
-  Random rng,
-) {
+  Random rng, [
+  BalanceConfig balance = BalanceConfig.defaults,
+]) {
+  final b = balance.development;
   final offset = switch (outcome) {
-    DevelopmentOutcome.exceed => rng.nextDouble() < 0.8 ? 0.5 : 1.0,
+    DevelopmentOutcome.exceed =>
+      rng.nextDouble() < b.exceedSmallOffsetChance
+          ? b.exceedSmallOffset
+          : b.exceedLargeOffset,
     DevelopmentOutcome.hit => 0.0,
-    DevelopmentOutcome.under => rng.nextDouble() < 0.6 ? -0.5 : -1.0,
+    DevelopmentOutcome.under =>
+      rng.nextDouble() < b.underSmallOffsetChance
+          ? b.underSmallOffset
+          : b.underLargeOffset,
   };
-  return (potentialStars + offset).clamp(0.5, 5.0).toDouble();
+  return (potentialStars + offset)
+      .clamp(balance.player.potentialMin, balance.player.potentialMax)
+      .toDouble();
 }

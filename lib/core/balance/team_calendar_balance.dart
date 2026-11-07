@@ -1,8 +1,9 @@
 class RosterBalance {
+  static const defaultSeedSize = 26;
   const RosterBalance({
     this.minSize = 20,
     this.maxSize = 30,
-    this.seedSize = 25,
+    this.seedSize = defaultSeedSize,
     this.startingXi = 11,
     this.benchSize = 7,
   });

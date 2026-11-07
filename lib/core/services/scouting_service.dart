@@ -418,10 +418,16 @@ class ScoutingService {
         : 5;
     final evidence = knowledge.copyWith(
       estimatedOvrMin: tier.index >= ScoutingTier.tier2.index
-          ? max(knowledge.estimatedOvrMin ?? 0, (overall - span).clamp(0, 99))
+          ? max(
+              knowledge.estimatedOvrMin ?? balance.player.attributeMin,
+              balance.player.clampAttribute(overall - span),
+            )
           : null,
       estimatedOvrMax: tier.index >= ScoutingTier.tier2.index
-          ? min(knowledge.estimatedOvrMax ?? 99, (overall + span).clamp(0, 99))
+          ? min(
+              knowledge.estimatedOvrMax ?? balance.player.attributeMax,
+              balance.player.clampAttribute(overall + span),
+            )
           : null,
       estimatedPotentialMin: tier.index >= ScoutingTier.tier4.index
           ? max(

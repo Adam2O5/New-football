@@ -3,37 +3,30 @@ part of 'seed_data_generator.dart';
 mixin _SeedStaffGeneration on _SeedGenerationShared {
   /// Rozkład gwiazdek generowanego sztabu (`data_generation.md`
   /// §„Generowanie po staffGrowth"). Wagi sumują się do 1.0.
-  static const List<(double stars, double probability)> _staffStarWeights = [
-    (0.5, 0.10),
-    (1.0, 0.10),
-    (1.5, 0.10),
-    (2.0, 0.15),
-    (2.5, 0.20),
-    (3.0, 0.15),
-    (3.5, 0.10),
-    (4.0, 0.06),
-    (4.5, 0.03),
-    (5.0, 0.01),
-  ];
 
   StaffMember generateStaffMember(
     Random rng,
     StaffRole role, {
-    BalanceConfig balance = BalanceConfig.defaults,
+    BalanceConfig? balance,
   }) {
+    final config = balance ?? this.balance;
     final nationality =
         Nationality.values[rng.nextInt(Nationality.values.length)];
     final name = _generateName(rng, nationality);
-    final age = 35 + rng.nextInt(16); // 35–50
+    final age =
+        config.seed.staffAgeMin +
+        rng.nextInt(
+          config.seed.staffAgeMax - config.seed.staffAgeMin + 1,
+        ); // 35–50
 
     double star() {
       final roll = rng.nextDouble();
       var cumulative = 0.0;
-      for (final (stars, probability) in _staffStarWeights) {
+      for (final (stars, probability) in config.seed.staffStarWeights) {
         cumulative += probability;
         if (roll < cumulative) return stars;
       }
-      return _staffStarWeights.last.$1;
+      return config.seed.staffStarWeights.last.$1;
     }
 
     final attrs = switch (role) {
@@ -77,10 +70,15 @@ mixin _SeedStaffGeneration on _SeedGenerationShared {
     StaffRole role,
     double stars,
   ) {
+    final config = balance;
     final nationality =
         Nationality.values[rng.nextInt(Nationality.values.length)];
     final name = _generateName(rng, nationality);
-    final age = 35 + rng.nextInt(16); // 35–50
+    final age =
+        config.seed.staffAgeMin +
+        rng.nextInt(
+          config.seed.staffAgeMax - config.seed.staffAgeMin + 1,
+        ); // 35–50
     final clamped = StaffRatingSystem.clampToScale(stars);
 
     final attrs = switch (role) {
@@ -119,14 +117,17 @@ mixin _SeedStaffGeneration on _SeedGenerationShared {
   List<StaffMember> generateStaffPool(
     int count, {
     Random? random,
-    BalanceConfig balance = BalanceConfig.defaults,
+    BalanceConfig? balance,
   }) {
     final rng = random ?? _random;
     final roles = StaffRole.values;
     return List.generate(
       count,
-      (i) =>
-          generateStaffMember(rng, roles[i % roles.length], balance: balance),
+      (i) => generateStaffMember(
+        rng,
+        roles[i % roles.length],
+        balance: balance ?? this.balance,
+      ),
     );
   }
 }

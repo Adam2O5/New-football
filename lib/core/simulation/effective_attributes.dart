@@ -172,7 +172,12 @@ class EffectiveAttributeCalculator {
           staminaMult *
           contextMult[attribute]! *
           leaderMult;
-      values[attribute] = effective.clamp(1.0, 120.0).toDouble();
+      values[attribute] = effective
+          .clamp(
+            balance.matchday.effectiveAttributeMin,
+            balance.matchday.effectiveAttributeMax,
+          )
+          .toDouble();
     }
 
     return EffectivePlayerAttributes(
@@ -273,7 +278,12 @@ class EffectiveAttributeCalculator {
           staminaMult *
           contextMult[attribute]! *
           leaderMult;
-      values[attribute] = effective.clamp(1.0, 120.0).toDouble();
+      values[attribute] = effective
+          .clamp(
+            balance.matchday.effectiveAttributeMin,
+            balance.matchday.effectiveAttributeMax,
+          )
+          .toDouble();
     }
 
     return EffectivePlayerAttributes(

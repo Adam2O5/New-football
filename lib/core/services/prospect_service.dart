@@ -11,12 +11,13 @@ import 'package:new_football/core/services/mock_draft_service.dart';
 class ProspectService {
   ProspectService({
     Random? random,
-    BalanceConfig balance = BalanceConfig.defaults,
+    this.balance = BalanceConfig.defaults,
     MockDraftService? mockDraftService,
   }) : _random = random ?? Random(),
        _mockDraftService =
            mockDraftService ?? MockDraftService(balance: balance);
 
+  final BalanceConfig balance;
   final Random _random;
   final MockDraftService _mockDraftService;
 
@@ -28,6 +29,7 @@ class ProspectService {
   /// Used both at league creation (seed) and during mid-season calendar event.
   DraftState generateNextDraftClass({required int currentYear, int? seed}) {
     final draftClass = SeedDataGenerator(
+      balance: balance,
       random: _random,
     ).generateDraftClass(year: currentYear + 1, seed: seed);
     final trueBoard = _mockDraftService.trueBoard(draftClass.prospects);
