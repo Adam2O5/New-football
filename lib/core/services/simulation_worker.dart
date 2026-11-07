@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:isolate';
+import 'package:new_football/core/balance/balance_config.dart';
 
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/match_models.dart';
@@ -135,7 +136,9 @@ class SimulationWorkerException implements Exception {
 /// its parameters — the league then crosses the port once per day (the reply
 /// the UI has to publish) instead of twice.
 class IsolateSimulationRunner implements SimulationRunner {
-  IsolateSimulationRunner();
+  IsolateSimulationRunner({this.balance = BalanceConfig.defaults});
+
+  final BalanceConfig balance;
 
   final Map<int, Completer<_StepResponse>> _pending = {};
 
@@ -320,7 +323,7 @@ class IsolateSimulationRunner implements SimulationRunner {
     try {
       _isolate = await Isolate.spawn(
         _workerMain,
-        responses.sendPort,
+        (responses: responses.sendPort, balance: balance),
         onError: responses.sendPort,
         onExit: responses.sendPort,
         errorsAreFatal: false,
@@ -413,11 +416,12 @@ class _StepError {
   final String stackTrace;
 }
 
-void _workerMain(SendPort responses) {
+void _workerMain(({SendPort responses, BalanceConfig balance}) initialization) {
+  final responses = initialization.responses;
   final commands = ReceivePort();
   responses.send(commands.sendPort);
 
-  final pipeline = DayPipeline();
+  final pipeline = DayPipeline(balance: initialization.balance);
   LeagueState? cached;
 
   commands.listen((Object? message) {

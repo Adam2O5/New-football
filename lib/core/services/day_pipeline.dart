@@ -79,10 +79,11 @@ class DayPipeline {
     TeamEventService? teamEvents,
     ContractMarketService? contractMarket,
   }) : calendar = calendar ?? CalendarService(balance: balance),
-       negotiations = negotiations ?? const NegotiationService(),
+       negotiations = negotiations ?? NegotiationService(balance: balance),
        draftTrades =
            draftTrades ??
            DraftTradeService(
+             balance: balance,
              calendar: calendar ?? CalendarService(balance: balance),
            ),
        trades = trades ?? TradeService(balance: balance),

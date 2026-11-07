@@ -1,41 +1,63 @@
 part of 'game_provider.dart';
 
+final balanceProvider = Provider<BalanceConfig>(
+  (ref) => BalanceConfig.defaults,
+);
+
 final saveRepositoryProvider = Provider((ref) {
   return SaveRepository();
 });
 
-final gameFactoryProvider = Provider((ref) => GameFactory());
+final gameFactoryProvider = Provider(
+  (ref) => GameFactory(balance: ref.watch(balanceProvider)),
+);
 
-final calendarServiceProvider = Provider((ref) => const CalendarService());
+final calendarServiceProvider = Provider(
+  (ref) => CalendarService(balance: ref.watch(balanceProvider)),
+);
 
 final matchContextFactoryProvider = Provider(
   (ref) => MatchContextFactory(calendar: ref.watch(calendarServiceProvider)),
 );
 
-final matchEngineProvider = Provider((ref) => SimulationMatchEngine());
+final matchEngineProvider = Provider(
+  (ref) => SimulationMatchEngine(balance: ref.watch(balanceProvider)),
+);
 
 final aiMatchdayServiceProvider = Provider(
-  (ref) => AiMatchdayService(matchEngine: ref.watch(matchEngineProvider)),
+  (ref) => AiMatchdayService(
+    balance: ref.watch(balanceProvider),
+    matchEngine: ref.watch(matchEngineProvider),
+  ),
 );
 
 final aiTradeServiceProvider = Provider(
-  (ref) => AiTradeService(tradeService: ref.watch(tradeServiceProvider)),
+  (ref) => AiTradeService(
+    balance: ref.watch(balanceProvider),
+    tradeService: ref.watch(tradeServiceProvider),
+  ),
 );
 
 final aiRosterManagementServiceProvider = Provider(
   (ref) => AiRosterManagementService(
+    balance: ref.watch(balanceProvider),
     contractMarket: ref.watch(contractMarketServiceProvider),
     tradeService: ref.watch(tradeServiceProvider),
     aiTradeService: ref.watch(aiTradeServiceProvider),
   ),
 );
 
-final playerEventServiceProvider = Provider((ref) => PlayerEventService());
+final playerEventServiceProvider = Provider(
+  (ref) => PlayerEventService(balance: ref.watch(balanceProvider)),
+);
 
-final teamEventServiceProvider = Provider((ref) => TeamEventService());
+final teamEventServiceProvider = Provider(
+  (ref) => TeamEventService(balance: ref.watch(balanceProvider)),
+);
 
 final daySimulatorProvider = Provider((ref) {
   return DaySimulator(
+    balance: ref.watch(balanceProvider),
     matchEngine: ref.watch(matchEngineProvider),
     aiMatchdayService: ref.watch(aiMatchdayServiceProvider),
     aiTradeService: ref.watch(aiTradeServiceProvider),
@@ -49,6 +71,7 @@ final daySimulatorProvider = Provider((ref) {
 
 final dayPipelineProvider = Provider(
   (ref) => DayPipeline(
+    balance: ref.watch(balanceProvider),
     calendar: ref.watch(calendarServiceProvider),
     days: ref.watch(daySimulatorProvider),
     negotiations: ref.watch(negotiationServiceProvider),
@@ -71,6 +94,7 @@ final simulationRunnerProvider = Provider<SimulationRunner>((ref) {
 
 final seasonServiceProvider = Provider(
   (ref) => SeasonService(
+    balance: ref.watch(balanceProvider),
     matchEngine: ref.watch(matchEngineProvider),
     aiMatchdayService: ref.watch(aiMatchdayServiceProvider),
     teamEvents: ref.watch(teamEventServiceProvider),
@@ -79,26 +103,40 @@ final seasonServiceProvider = Provider(
   ),
 );
 
-final draftServiceProvider = Provider((ref) => DraftService());
+final draftServiceProvider = Provider(
+  (ref) => DraftService(balance: ref.watch(balanceProvider)),
+);
 
 final draftTradeServiceProvider = Provider(
-  (ref) => DraftTradeService(calendar: ref.watch(calendarServiceProvider)),
+  (ref) => DraftTradeService(
+    balance: ref.watch(balanceProvider),
+    calendar: ref.watch(calendarServiceProvider),
+  ),
 );
 
-final staffServiceProvider = Provider((ref) => StaffService());
+final staffServiceProvider = Provider(
+  (ref) => StaffService(balance: ref.watch(balanceProvider)),
+);
 
-final scoutingServiceProvider = Provider((ref) => ScoutingService());
+final scoutingServiceProvider = Provider(
+  (ref) => ScoutingService(balance: ref.watch(balanceProvider)),
+);
 
-final contractServiceProvider = Provider((ref) => ContractService());
+final contractServiceProvider = Provider(
+  (ref) => ContractService(balance: ref.watch(balanceProvider)),
+);
 
 final negotiationServiceProvider = Provider(
-  (ref) => const NegotiationService(),
+  (ref) => NegotiationService(balance: ref.watch(balanceProvider)),
 );
 
-final tradeServiceProvider = Provider((ref) => TradeService());
+final tradeServiceProvider = Provider(
+  (ref) => TradeService(balance: ref.watch(balanceProvider)),
+);
 
 final contractMarketServiceProvider = Provider(
   (ref) => ContractMarketService(
+    balance: ref.watch(balanceProvider),
     calendar: ref.watch(calendarServiceProvider),
     contracts: ref.watch(contractServiceProvider),
     staff: ref.watch(staffServiceProvider),

@@ -4,12 +4,16 @@ import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/standing.dart';
 import 'package:new_football/core/models/seed_data_generator.dart';
 import 'dart:math';
+import 'package:new_football/core/balance/balance_config.dart';
 
 /// Service odpowiedzialny za budowanie kolejności draftu na podstawie
 /// wyników loterii. Wspólny dla interaktywnej loterii na `LotteryScreen`
 /// i automatycznej loterii w `SeasonService`.
 class DraftService {
-  DraftService({Random? random}) : _random = random ?? Random();
+  DraftService({this.balance = BalanceConfig.defaults, Random? random})
+    : _random = random ?? Random();
+
+  final BalanceConfig balance;
 
   final Random _random;
 
@@ -48,6 +52,7 @@ class DraftService {
     final draftClass =
         existingClass ??
         SeedDataGenerator(
+          balance: balance,
           random: _random,
         ).generateDraftClass(year: currentYear, seed: saveSeed);
 

@@ -1,3 +1,6 @@
+import 'package:new_football/core/balance/seed_balance.dart';
+import 'package:new_football/core/balance/scouting_balance.dart';
+import 'package:new_football/core/balance/ui_balance.dart';
 import 'package:new_football/core/balance/ai_balance.dart';
 import 'package:new_football/core/balance/events_balance.dart';
 import 'package:new_football/core/balance/matchday_balance.dart';
@@ -12,6 +15,9 @@ import 'package:new_football/core/balance/development_balance.dart';
 import 'package:new_football/core/balance/contract_neg_balance.dart';
 import 'package:new_football/core/balance/team_calendar_balance.dart';
 
+export 'package:new_football/core/balance/seed_balance.dart';
+export 'package:new_football/core/balance/scouting_balance.dart';
+export 'package:new_football/core/balance/ui_balance.dart';
 export 'package:new_football/core/balance/ai_balance.dart';
 export 'package:new_football/core/balance/events_balance.dart';
 export 'package:new_football/core/balance/matchday_balance.dart';
@@ -34,6 +40,9 @@ export 'package:new_football/core/balance/team_calendar_balance.dart';
 /// runtime values (payroll, cash), not this config.
 class BalanceConfig {
   const BalanceConfig({
+    this.ui = const UiBalance(),
+    this.scouting = const ScoutingBalance(),
+    this.seed = const SeedBalance(),
     this.roster = const RosterBalance(),
     this.matchday = const MatchdayBalance(),
     this.player = const PlayerBalance(),
@@ -54,6 +63,9 @@ class BalanceConfig {
     this.events = const EventsBalance(),
   });
 
+  final SeedBalance seed;
+  final ScoutingBalance scouting;
+  final UiBalance ui;
   final RosterBalance roster;
   final MatchdayBalance matchday;
   final PlayerBalance player;

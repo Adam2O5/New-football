@@ -24,8 +24,15 @@ mixin _SeedTeamGeneration on _SeedGenerationShared {
       roster: roster,
       finance: TeamFinance(totalPayroll: payroll),
       tactics: TacticsSetup(formation: formation),
-      lineupPlayerIds: roster.take(11).map((p) => p.id).toList(),
-      benchPlayerIds: roster.skip(11).take(7).map((p) => p.id).toList(),
+      lineupPlayerIds: roster
+          .take(balance.roster.startingXi)
+          .map((p) => p.id)
+          .toList(),
+      benchPlayerIds: roster
+          .skip(balance.roster.startingXi)
+          .take(balance.roster.benchSize)
+          .map((p) => p.id)
+          .toList(),
       ownedPicks: _generateOwnedPicks(teamId, seasonYear),
       ai: isPlayer ? null : const TeamAiConfig(),
     );
@@ -37,8 +44,12 @@ mixin _SeedTeamGeneration on _SeedGenerationShared {
   /// dla danego roku (`SeasonService.runLottery`).
   List<DraftPick> _generateOwnedPicks(String teamId, int seasonYear) {
     final picks = <DraftPick>[];
-    for (var y = seasonYear + 1; y <= seasonYear + 7; y++) {
-      for (var round = 1; round <= 3; round++) {
+    for (
+      var y = seasonYear + 1;
+      y <= seasonYear + balance.salaryCap.maxPickYearsAhead;
+      y++
+    ) {
+      for (var round = 1; round <= balance.draft.rounds; round++) {
         final pick = DraftPick(
           id: 'pick_${teamId}_${y}_r$round',
           year: y,
@@ -46,7 +57,9 @@ mixin _SeedTeamGeneration on _SeedGenerationShared {
           teamId: teamId,
           originalTeamId: teamId,
         );
-        picks.add(pick.recalculateTradeValue(currentYear: seasonYear));
+        picks.add(
+          pick.recalculateTradeValue(currentYear: seasonYear, balance: balance),
+        );
       }
     }
     return picks;
@@ -56,37 +69,7 @@ mixin _SeedTeamGeneration on _SeedGenerationShared {
   /// wg OVR (`data_generation.md` §„Generowanie zawodników na początku save'a").
   /// Slot `i` tej tabeli odpowiada slotowi `i` z `_buildRosterPositions`,
   /// więc najsilniejsi gracze trafiają na początek listy i stają się
-  /// startowym lineupem (`roster.take(11)`).
-  static const List<(int ovr, int ageMin, int ageMax)> _seedRosterOvrAgeTable =
-      [
-        (85, 27, 30),
-        (85, 27, 30),
-        (84, 32, 35),
-        (82, 23, 26),
-        (82, 23, 26),
-        (81, 23, 24),
-        (80, 27, 32),
-        (80, 27, 32),
-        (79, 27, 32),
-        (79, 27, 32),
-        (79, 23, 26),
-        (79, 33, 40),
-        (77, 27, 32),
-        (77, 27, 32),
-        (77, 27, 32),
-        (77, 23, 26),
-        (77, 23, 26),
-        (77, 33, 40),
-        (75, 18, 22),
-        (75, 18, 22),
-        (73, 27, 32),
-        (72, 33, 40),
-        (70, 38, 40),
-        (68, 18, 22),
-        (66, 18, 22),
-        (63, 18, 22),
-      ];
-
+  /// startowym lineupem (`roster.take(balance.roster.startingXi)`).
   List<Player> _generateRoster(
     String teamId,
     Random rng, {
@@ -94,17 +77,17 @@ mixin _SeedTeamGeneration on _SeedGenerationShared {
   }) {
     final positions = _buildRosterPositions(formation);
 
-    if (positions.length != _seedRosterOvrAgeTable.length) {
+    if (positions.length != balance.seed.rosterProfiles.length) {
       throw StateError(
         'Liczba slotów rosteru (${positions.length}) dla formacji $formation '
         'nie zgadza się z tabelą OVR/wiek '
-        '(${_seedRosterOvrAgeTable.length}) z data_generation.md.',
+        '(${balance.seed.rosterProfiles.length}) z data_generation.md.',
       );
     }
 
     return List.generate(positions.length, (i) {
       final pos = positions[i];
-      final (ovr, ageMin, ageMax) = _seedRosterOvrAgeTable[i];
+      final (ovr, ageMin, ageMax) = balance.seed.rosterProfiles[i];
       final age = ageMin + rng.nextInt(ageMax - ageMin + 1);
       return _generatePlayer(
         teamId: teamId,

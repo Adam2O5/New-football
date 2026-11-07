@@ -45,14 +45,12 @@ class SeedDataGenerator
 
   @override
   final Random _random;
+  @override
   final BalanceConfig balance;
   final MockDraftService _mockDraftService;
 
-  LeagueState generateLeague({
-    int year = 2026,
-    String? playerTeamId,
-    int? seed,
-  }) {
+  LeagueState generateLeague({int? year, String? playerTeamId, int? seed}) {
+    year ??= balance.seed.startYear;
     final rng = seed != null
         ? Random(seasonEventSeed(seed, year, 'rosters'))
         : _random;
@@ -156,6 +154,7 @@ class SeedDataGenerator
 
 mixin _SeedGenerationShared {
   Random get _random;
+  BalanceConfig get balance;
 
   PlayerAttributes _attributesForOvr(
     Position position,

@@ -110,7 +110,11 @@ class _LivePlayerTile extends StatelessWidget {
         discipline.any((item) => item.redCardKind != RedCardKind.none);
     final injured = player.state.injured;
     final suspended = player.state.suspensionGamesRemaining > 0;
-    final attention = condition <= 35 || yellow || sentOff || injured;
+    final attention =
+        condition <= live.legacyMatch.balance.ui.lowStaminaWarning ||
+        yellow ||
+        sentOff ||
+        injured;
     final status = sentOff
         ? l10n.matchday_sentOff
         : injured

@@ -302,9 +302,9 @@ class ScoutingService {
     final stars = evaluationStars.clamp(0.0, 5.0);
     final t = 1 - (stars / 5.0);
     final noiseRange =
-        (balance.draft.mockEarlyNoiseMin +
-                (balance.draft.mockEarlyNoiseMax -
-                        balance.draft.mockEarlyNoiseMin) *
+        (balance.scouting.earlyMockNoiseMin +
+                (balance.scouting.earlyMockNoiseMax -
+                        balance.scouting.earlyMockNoiseMin) *
                     t)
             .round();
     return _runMock(
@@ -330,7 +330,14 @@ class ScoutingService {
     int week = 45,
     String teamId = '',
   }) {
-    final noiseRange = (25 - evaluationStars * 4).clamp(5, 25).round();
+    final noiseRange =
+        (balance.scouting.finalMockNoiseBase -
+                evaluationStars * balance.scouting.finalMockNoisePerStar)
+            .clamp(
+              balance.scouting.finalMockNoiseMin,
+              balance.scouting.finalMockNoiseMax,
+            )
+            .round();
     return _runMock(
       scouting,
       rankedProspects,

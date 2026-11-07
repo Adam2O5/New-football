@@ -22,7 +22,9 @@ void main() async {
         // Day simulation is the app's only long CPU burst. Off the UI isolate
         // it cannot trigger "application not responding".
         simulationRunnerProvider.overrideWith((ref) {
-          final runner = IsolateSimulationRunner();
+          final runner = IsolateSimulationRunner(
+            balance: ref.watch(balanceProvider),
+          );
           ref.onDispose(runner.dispose);
           return runner;
         }),

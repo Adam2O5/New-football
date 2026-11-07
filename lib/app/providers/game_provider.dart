@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/tactics/lineup_slots.dart';
 import 'package:new_football/core/services/contract_period_service.dart';
 

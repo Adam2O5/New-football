@@ -7,7 +7,7 @@ import '../../helpers/fixtures/game_fixtures.dart';
 class _NoGeneration extends SeedDataGenerator {
   @override
   LeagueState generateLeague({
-    int year = 2026,
+    int? year,
     String? playerTeamId,
     int? seed,
   }) {

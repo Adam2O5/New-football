@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/tactics/lineup_slots.dart';
 import 'package:new_football/core/random/seeds.dart';
 
@@ -20,19 +21,23 @@ class NewGameRequest {
   const NewGameRequest({
     required this.saveName,
     required this.playerTeamId,
-    this.seasonYear = 2026,
+    this.seasonYear,
     this.seed,
   });
 
   final String saveName;
   final String playerTeamId;
-  final int seasonYear;
+  final int? seasonYear;
   final int? seed;
 }
 
 class GameFactory {
-  GameFactory({SeedDataGenerator? seedGenerator})
-    : _seedGenerator = seedGenerator ?? SeedDataGenerator();
+  GameFactory({
+    this.balance = BalanceConfig.defaults,
+    SeedDataGenerator? seedGenerator,
+  }) : _seedGenerator = seedGenerator ?? SeedDataGenerator(balance: balance);
+
+  final BalanceConfig balance;
 
   final SeedDataGenerator _seedGenerator;
   final _uuid = const Uuid();
@@ -41,11 +46,12 @@ class GameFactory {
   previewTeams() => seedTeamCatalog;
 
   GameSave create(NewGameRequest request) {
+    final seasonYear = request.seasonYear ?? balance.seed.startYear;
     // Generate the seed once so the initial world and every later match share
     // the same persisted deterministic root, even when the request omitted it.
     final saveSeed = request.seed ?? Random().nextInt(1 << 32);
     var league = _seedGenerator.generateLeague(
-      year: request.seasonYear,
+      year: seasonYear,
       playerTeamId: request.playerTeamId,
       seed: saveSeed,
     );
@@ -54,15 +60,15 @@ class GameFactory {
       league.teams.map((t) => t.id).toList(),
     );
 
-    final ai = TeamAiService();
+    final ai = TeamAiService(balance: balance);
     var teams = league.teams.map(ai.autoSelectLineup).toList();
 
     final staffRng = Random(
-      seasonEventSeed(saveSeed, request.seasonYear, 'initial-staff'),
+      seasonEventSeed(saveSeed, seasonYear, 'initial-staff'),
     );
     teams = teams.map((t) => _seedInitialStaff(t, staffRng)).toList();
     final staffPool = _seedGenerator
-        .generateStaffPool(90, random: staffRng)
+        .generateStaffPool(balance.seed.staffPoolSize, random: staffRng)
         .map(
           (m) => m.copyWith(
             contract: null, // free agents: no contract until hired
@@ -71,7 +77,7 @@ class GameFactory {
         .toList();
 
     final freeAgentRng = Random(
-      seasonEventSeed(saveSeed, request.seasonYear, 'free-agents'),
+      seasonEventSeed(saveSeed, seasonYear, 'free-agents'),
     );
     final freeAgentPlayers = _seedGenerator.generateFreeAgentPlayers(
       rng: freeAgentRng,
@@ -91,13 +97,12 @@ class GameFactory {
     );
 
     // Initial strength table — no hysteresis on first calculation.
-    final strengthService = const LeagueStrengthService();
+    final strengthService = LeagueStrengthService(balance: balance);
     final strengthTable = strengthService.calculate(league, week: 1, day: 1);
     league = league.copyWith(strengthTable: strengthTable);
-    league = const ContractPeriodService().normalizeLeague(
-      league,
-      initial: true,
-    );
+    league = ContractPeriodService(
+      balance: balance,
+    ).normalizeLeague(league, initial: true);
     league = reconcileLeagueLineups(league);
 
     final playerTeam = league.playerTeam;
@@ -108,7 +113,7 @@ class GameFactory {
         name: request.saveName,
         createdAt: now,
         updatedAt: now,
-        seasonYear: request.seasonYear,
+        seasonYear: seasonYear,
         phase: SeasonPhase.regular,
         playerTeamName: playerTeam?.name,
         schemaVersion: SaveSchema.currentVersion,
@@ -124,21 +129,11 @@ class GameFactory {
   /// Startowy sztab drużyny (`data_generation.md` §„Generowanie na początku
   /// save'a"): wszystkie 6 ról obsadzone, ustalony rozkład gwiazdek/pensji/
   /// długości kontraktu przydzielony do losowo przetasowanych ról.
-  static const List<(double stars, int years, int salary)>
-  _initialStaffDistribution = [
-    (2.0, 1, 750000),
-    (2.0, 1, 750000),
-    (2.0, 1, 750000),
-    (2.5, 1, 1000000),
-    (3.0, 2, 1500000),
-    (3.5, 2, 2000000),
-  ];
-
   Team _seedInitialStaff(Team team, Random rng) {
     var staff = team.staff;
     final roles = StaffRole.values.toList()..shuffle(rng);
     for (var i = 0; i < roles.length; i++) {
-      final (stars, years, salary) = _initialStaffDistribution[i];
+      final (stars, years, salary) = balance.seed.initialStaff[i];
       final member = _seedGenerator.generateStaffMemberAtStars(
         rng,
         roles[i],
