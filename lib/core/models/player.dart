@@ -277,28 +277,22 @@ extension PlayerX on Player {
     final b = balance.player;
     var nextForm = state.form;
     if (minutesPlayed <= 0) {
-      if (nextForm < 6) {
+      if (nextForm < b.noAppearanceNeutralForm) {
         nextForm += b.noAppearanceFormDrift;
-      } else if (nextForm > 6) {
+      } else if (nextForm > b.noAppearanceNeutralForm) {
         nextForm -= b.noAppearanceFormDrift;
       }
     } else {
-      var delta = switch (rating) {
-        >= 8.5 => 2.0,
-        >= 7.5 => 1.0,
-        >= 6.0 => 0.0,
-        >= 4.5 => -1.0,
-        _ => -2.0,
-      };
+      var delta = b.matchFormDelta(rating);
       if (lost && delta < 0 && personality == PlayerPersonality.temperamental) {
-        delta *= 1.5;
+        delta *= b.temperamentalFormLossMultiplier;
       }
       nextForm += delta;
     }
     final formFloor = state.eventState.modifierValue('formFloor');
     final clampedForm = b.clampForm(nextForm);
     final finalForm = formFloor > 0
-        ? clampedForm.clamp(formFloor, 10.0).toDouble()
+        ? clampedForm.clamp(formFloor, b.formMax).toDouble()
         : clampedForm;
     return copyWith(state: state.copyWith(form: finalForm));
   }

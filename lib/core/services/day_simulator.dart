@@ -90,7 +90,8 @@ class DaySimulator
        contractMarket =
            contractMarket ?? ContractMarketService(balance: balance),
        messages = messages ?? MessageService(),
-       teamManagement = teamManagement ?? const TeamManagementService(),
+       teamManagement =
+           teamManagement ?? TeamManagementService(balance: balance),
        playerEvents =
            playerEvents ??
            PlayerEventService(balance: balance, messages: messages),

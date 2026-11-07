@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'package:new_football/core/balance/balance_config.dart';
 
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/match_models.dart';
@@ -35,10 +36,9 @@ class DisciplineApplication {
 
 /// Applies persistent disciplinary state after a completed match.
 class DisciplineService {
-  const DisciplineService();
+  const DisciplineService({this.balance = BalanceConfig.defaults});
 
-  static const regularYellowThreshold = 5;
-  static const playoffYellowThreshold = 3;
+  final BalanceConfig balance;
 
   DisciplineApplication applyToTeam({
     required Team team,
@@ -86,25 +86,31 @@ class DisciplineService {
         playerInStartingXi = discipline.playerInStartingXi;
         if (phase == SeasonPhase.regular) {
           regularYellowCards += discipline.yellowCardsInMatch;
-          if (regularYellowCards >= regularYellowThreshold) {
+          if (regularYellowCards >= balance.player.regularYellowThreshold) {
             regularYellowCards = 0;
-            addedGames = 1;
+            addedGames = balance.player.yellowSuspensionGames;
             reason = 'yellowThreshold';
           }
         } else {
           playoffYellowCards += discipline.yellowCardsInMatch;
-          if (playoffYellowCards >= playoffYellowThreshold) {
+          if (playoffYellowCards >= balance.player.playoffYellowThreshold) {
             playoffYellowCards = 0;
-            addedGames = 1;
+            addedGames = balance.player.yellowSuspensionGames;
             reason = 'playoffYellowThreshold';
           }
         }
 
         final redGames = switch (discipline.redCardKind) {
           RedCardKind.none => 0,
-          RedCardKind.secondYellow => 1,
+          RedCardKind.secondYellow =>
+            balance.player.secondYellowSuspensionGames,
           RedCardKind.direct =>
-            discipline.directRedSeverity.clamp(1, 3).toInt(),
+            discipline.directRedSeverity
+                .clamp(
+                  balance.player.directRedSeverityThresholds.first.$2,
+                  balance.player.directRedSeverityThresholds.last.$2,
+                )
+                .toInt(),
         };
         if (redGames > addedGames) {
           addedGames = redGames;
@@ -147,11 +153,11 @@ class DisciplineService {
     );
   }
 
-  static int rollDirectRedSeverity(Random random) {
-    final roll = random.nextDouble();
-    if (roll < 0.60) return 1;
-    if (roll < 0.90) return 2;
-    return 3;
+  static int rollDirectRedSeverity(
+    Random random, [
+    BalanceConfig balance = BalanceConfig.defaults,
+  ]) {
+    return balance.player.directRedSeverity(random.nextDouble());
   }
 
   RedCardKind _moreSevereRed(RedCardKind left, RedCardKind right) {

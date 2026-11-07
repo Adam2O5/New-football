@@ -102,22 +102,24 @@ class DevelopmentService {
     var attributes = player.attributes;
     var appliedOvrDelta = 0;
 
-    if (progress >= 100.0) {
+    if (progress >= balance.development.progressThreshold) {
       if (oldOverall < player.developmentCeilingOvr(balance)) {
         attributes = _changeAllAttributes(attributes, 1);
         appliedOvrDelta = 1;
-        progress = 0.0;
+        progress = balance.development.progressResetAfterGrowth;
       } else {
         // The career outcome is a real ceiling: progress cannot create an
         // attribute increase after the player reaches it.
-        progress = 99.0;
+        progress = balance.development.progressAtCeiling;
       }
     } else if (progress < 0.0) {
       attributes = _changeAllAttributes(attributes, -1);
       appliedOvrDelta = -1;
-      progress = 99.0;
+      progress = balance.development.progressResetAfterDecline;
     } else {
-      progress = progress.clamp(0.0, 99.999999).toDouble();
+      progress = progress
+          .clamp(0.0, balance.development.progressThreshold - 0.000001)
+          .toDouble();
     }
 
     final next = player
@@ -159,7 +161,7 @@ class DevelopmentService {
     var rate = b.baseGrowthRateFor(player.hidden.determination);
     rate += b.formBonusFor(player.state.form);
     rate += b.ageBonusFor(player.age);
-    rate += player.state.minutesThisWeek * 0.01;
+    rate += player.state.minutesThisWeek * b.minutesGrowthRate;
 
     // `docs/staff.md` §6: Development is the development coach's growth-rate
     // bonus for every player; there is no head-coach fallback.
@@ -169,7 +171,9 @@ class DevelopmentService {
     if (player.age <= b.developmentAgeMax && youthMentoring != null) {
       rate *= 1.0 + b.staffDevelopmentBonusFor(youthMentoring);
     }
-    if (player.personality == PlayerPersonality.ambitious) rate *= 1.10;
+    if (player.personality == PlayerPersonality.ambitious) {
+      rate *= b.ambitiousGrowthMultiplier;
+    }
     // Individual event modifiers are additive and must be applied before the
     // documented growth-rate clamp.
     rate += player.state.eventState.modifierValue('growthRate');

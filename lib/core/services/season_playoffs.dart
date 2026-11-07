@@ -327,10 +327,9 @@ mixin _SeasonPlayoffs on _SeasonServiceShared {
       final championTeam = state.teamById(champion);
       if (championTeam != null) {
         final before = championTeam.atmosphere;
-        final updated = const TeamManagementService().applyAtmosphereDelta(
-          championTeam,
-          30,
-        );
+        final updated = TeamManagementService(
+          balance: balance,
+        ).applyAtmosphereDelta(championTeam, 30);
         state = state
             .updateTeam(updated)
             .copyWith(

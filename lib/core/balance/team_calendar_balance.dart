@@ -86,6 +86,49 @@ class ChemistryBalance {
   static const recentResultsWindow = 8;
 
   const ChemistryBalance({
+    this.chemistryBands = const [
+      (30.0, 0.95),
+      (50.0, 0.98),
+      (70.0, 1.0),
+      (85.0, 1.02),
+      (100.0, 1.05),
+    ],
+    this.atmosphereBands = const [
+      (30, 0.95),
+      (45, 0.97),
+      (70, 1.0),
+      (85, 1.02),
+      (100, 1.04),
+    ],
+    this.negativeEventBands = const [(30, 1.25), (45, 1.10), (100, 1.0)],
+    this.positiveEventBands = const [(70, 1.0), (85, 1.10), (100, 1.20)],
+    this.atmosphereChemistryDrift = const [
+      (30, -2.0),
+      (45, -1.0),
+      (70, 0.0),
+      (85, 1.0),
+      (100, 2.0),
+    ],
+    this.scoreMin = 0,
+    this.scoreMax = 100,
+    this.cohesionBase = 50,
+    this.cohesionCorrectPosition = 2,
+    this.cohesionForeignPosition = -5,
+    this.cohesionOptimalRole = 2,
+    this.cohesionMultipliers = const [
+      (20.0, 1.01),
+      (40.0, 1.02),
+      (60.0, 1.03),
+      (80.0, 1.04),
+      (100.0, 1.05),
+    ],
+    this.headCoachMotivationMultipliers = const [
+      (1.0, 0.97),
+      (2.0, 0.99),
+      (3.0, 1.00),
+      (4.0, 1.01),
+      (5.0, 1.03),
+    ],
     this.multMin = 0.92,
     this.multMax = 1.08,
     this.roleMultOkMin = 1.05,
@@ -96,6 +139,20 @@ class ChemistryBalance {
   });
 
   final double multMin;
+  final List<(double upperBound, double multiplier)> chemistryBands;
+  final List<(int upperBound, double multiplier)> atmosphereBands;
+  final List<(int upperBound, double multiplier)> negativeEventBands;
+  final List<(int upperBound, double multiplier)> positiveEventBands;
+  final List<(int upperBound, double delta)> atmosphereChemistryDrift;
+  final int scoreMin;
+  final int scoreMax;
+  final int cohesionBase;
+  final int cohesionCorrectPosition;
+  final int cohesionForeignPosition;
+  final int cohesionOptimalRole;
+  final List<(double upperBound, double multiplier)> cohesionMultipliers;
+  final List<(double upperBound, double multiplier)>
+  headCoachMotivationMultipliers;
   final double multMax;
   final double roleMultOkMin;
   final double roleMultOkMax;

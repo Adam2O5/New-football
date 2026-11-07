@@ -189,9 +189,9 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
         .map((id) => playersById[id])
         .whereType<Player>()
         .toList();
-    final lineupCohesion = const CohesionService().computeCohesion(
-      lineupPlayers,
-    );
+    final lineupCohesion = CohesionService(
+      balance: ref.watch(balanceProvider),
+    ).computeCohesion(lineupPlayers);
     final formationLayout = FormationLayout.of(formation!);
     final placements = placePlayersOnSlots(
       slots: formationLayout.slots,

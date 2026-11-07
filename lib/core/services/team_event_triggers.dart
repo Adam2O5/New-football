@@ -55,7 +55,10 @@ mixin _TeamEventTriggers on _TeamEventShared {
         : events.minutesRequestChance;
     final effectiveChance =
         chance *
-        TeamManagementService.negativeEventMultiplier(team.atmosphere) *
+        TeamManagementService.negativeEventMultiplier(
+          team.atmosphere,
+          balance,
+        ) *
         team.eventState.negativeEventMultiplier;
     final rollState = _setTeamCooldown(state, team.id, 'moreMinutesRequest', 1);
     if (!_roll(
@@ -132,7 +135,10 @@ mixin _TeamEventTriggers on _TeamEventShared {
         (player.personality == PlayerPersonality.ambitious
             ? events.transferRequestAmbitiousMultiplier
             : 1.0) *
-        TeamManagementService.negativeEventMultiplier(team.atmosphere) *
+        TeamManagementService.negativeEventMultiplier(
+          team.atmosphere,
+          balance,
+        ) *
         team.eventState.negativeEventMultiplier;
     final rollState = _setTeamCooldown(state, team.id, 'transferRequestI', 1);
     if (!_roll(
@@ -181,7 +187,10 @@ mixin _TeamEventTriggers on _TeamEventShared {
     }
     final chance =
         events.lockerRoomConflictChance *
-        TeamManagementService.negativeEventMultiplier(team.atmosphere) *
+        TeamManagementService.negativeEventMultiplier(
+          team.atmosphere,
+          balance,
+        ) *
         team.eventState.negativeEventMultiplier;
     if (!_roll(
       state,
@@ -227,7 +236,7 @@ mixin _TeamEventTriggers on _TeamEventShared {
     }
     final chance =
         balance.events.leaderSupportChance *
-        TeamManagementService.positiveEventMultiplier(team.atmosphere);
+        TeamManagementService.positiveEventMultiplier(team.atmosphere, balance);
     if (!_roll(state, team.id, null, 'leaderSupport', chance, saveSeed)) {
       return state;
     }
@@ -286,7 +295,10 @@ mixin _TeamEventTriggers on _TeamEventShared {
     final rollMultiplier = team.eventState.publicCriticismRollMultiplier;
     final chance =
         balance.events.publicCriticismChance *
-        TeamManagementService.negativeEventMultiplier(team.atmosphere) *
+        TeamManagementService.negativeEventMultiplier(
+          team.atmosphere,
+          balance,
+        ) *
         team.eventState.negativeEventMultiplier *
         rollMultiplier;
     final resetMultiplier = _setTeamEventState(

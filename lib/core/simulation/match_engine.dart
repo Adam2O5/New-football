@@ -510,7 +510,7 @@ class SimulationLiveMatch {
 
   double _runtimeCohesionBaseMultiplier(bool homeSide) {
     final score = _runtimeCohesionScore(homeSide);
-    return const CohesionService()
+    return CohesionService(balance: balance)
         .cohesionMult(
           score.clamp(0.0, 100.0),
           headCoach: homeSide
@@ -531,14 +531,19 @@ class SimulationLiveMatch {
     final assignments = homeSide
         ? _homeAssignedPositions
         : _awayAssignedPositions;
-    var score = 50.0;
+    final b = balance.chemistry;
+    var score = b.cohesionBase.toDouble();
     for (final player in lineup) {
       final assigned = assignments[player.id] ?? player.position;
-      score += player.position == assigned ? 2.0 : -5.0;
-      if (player.state.role == player.optimalRole) score += 2.0;
+      score += player.position == assigned
+          ? b.cohesionCorrectPosition
+          : b.cohesionForeignPosition;
+      if (player.state.role == player.optimalRole) {
+        score += b.cohesionOptimalRole;
+      }
     }
     score -= _adaptationPenalty(homeSide);
-    return score.clamp(0.0, 100.0).toDouble();
+    return score.clamp(b.scoreMin, b.scoreMax).toDouble();
   }
 
   double _adaptationPenalty(bool homeSide) {

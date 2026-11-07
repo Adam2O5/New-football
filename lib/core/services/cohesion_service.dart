@@ -2,6 +2,7 @@ import 'package:new_football/core/tactics/position_role_fit.dart';
 import 'package:new_football/core/models/assigned_role.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/staff.dart';
+import 'package:new_football/core/balance/balance_config.dart';
 
 /// Lineup cohesion calculation (`squad_management.md`).
 ///
@@ -9,14 +10,9 @@ import 'package:new_football/core/models/staff.dart';
 /// fit their assigned positions and roles. It modifies effective attributes
 /// via `cohesionMult` in the match engine (`matchday_model.md` §4).
 class CohesionService {
-  const CohesionService();
+  const CohesionService({this.balance = BalanceConfig.defaults});
 
-  /// Per-player position bonus.
-  static const int _positionCorrect = 2;
-  static const int _positionForeign = -5;
-
-  /// Per-player optimal role bonus.
-  static const int _optimalRoleBonus = 2;
+  final BalanceConfig balance;
 
   /// Compute raw cohesion score for a lineup (0–100, clamped).
   ///
@@ -26,21 +22,24 @@ class CohesionService {
   ///
   /// Base score = 50 + sum of bonuses, clamped to [0, 100].
   int computeCohesion(List<Player> lineup) {
-    if (lineup.isEmpty) return 50;
+    final b = balance.chemistry;
+    if (lineup.isEmpty) return b.cohesionBase;
 
     var bonus = 0;
     for (final p in lineup) {
       // Position check: assigned role type maps to position(s).
       final positionFits = positionFitsRole(p.position, p.state.role);
-      bonus += positionFits ? _positionCorrect : _positionForeign;
+      bonus += positionFits
+          ? b.cohesionCorrectPosition
+          : b.cohesionForeignPosition;
 
       // Optimal role check.
       if (_rolesMatch(p.state.role, p.optimalRole)) {
-        bonus += _optimalRoleBonus;
+        bonus += b.cohesionOptimalRole;
       }
     }
 
-    return (50 + bonus).clamp(0, 100);
+    return (b.cohesionBase + bonus).clamp(b.scoreMin, b.scoreMax);
   }
 
   /// Cohesion multiplier for the match engine.
@@ -59,12 +58,12 @@ class CohesionService {
     return baseMult * motivationFactor;
   }
 
-  static double _baseCohesionMult(double cohesion) {
-    if (cohesion <= 20) return 1.01;
-    if (cohesion <= 40) return 1.02;
-    if (cohesion <= 60) return 1.03;
-    if (cohesion <= 80) return 1.04;
-    return 1.05;
+  double _baseCohesionMult(double cohesion) {
+    for (final (upperBound, multiplier)
+        in balance.chemistry.cohesionMultipliers) {
+      if (cohesion <= upperBound) return multiplier;
+    }
+    return balance.chemistry.cohesionMultipliers.last.$2;
   }
 
   /// HC Motivation multiplier (`staff.md`).
@@ -79,14 +78,14 @@ class CohesionService {
   /// | 4–5          | 1.03       |
   ///
   /// No HC = 1.00 (no bonus, no penalty beyond empty slot effects elsewhere).
-  static double _hcMotivationFactor(StaffMember? hc) {
+  double _hcMotivationFactor(StaffMember? hc) {
     if (hc == null) return 1.0;
     final motivation = hc.attributes.motivation;
-    if (motivation < 1.0) return 0.97;
-    if (motivation < 2.0) return 0.99;
-    if (motivation < 3.0) return 1.00;
-    if (motivation < 4.0) return 1.01;
-    return 1.03;
+    for (final (upperBound, multiplier)
+        in balance.chemistry.headCoachMotivationMultipliers) {
+      if (motivation < upperBound) return multiplier;
+    }
+    return balance.chemistry.headCoachMotivationMultipliers.last.$2;
   }
 
   /// Two AssignedRole instances match if they have the same discriminator type

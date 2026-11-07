@@ -411,7 +411,7 @@ class MatchEngine {
       seed: context.seed == 0 ? rngSeed : context.seed,
     );
 
-    final cohesionService = const CohesionService();
+    final cohesionService = CohesionService(balance: balance);
     final homeCohesionMult = cohesionService.cohesionMult(
       cohesionService.computeCohesion(report.home.startingXi),
       headCoach: home.staff.headCoach,
@@ -523,18 +523,18 @@ class MatchEngine {
       awayChemistry: away.chemistry,
       homeAtmosphere: home.atmosphere,
       awayAtmosphere: away.atmosphere,
-      homeDoctorCareMult: const InjuryService().doctorCareMult(
-        home.staff.doctor,
-      ),
-      awayDoctorCareMult: const InjuryService().doctorCareMult(
-        away.staff.doctor,
-      ),
-      homeDoctorPreventionMult: const InjuryService().doctorPreventionMult(
-        home.staff.doctor,
-      ),
-      awayDoctorPreventionMult: const InjuryService().doctorPreventionMult(
-        away.staff.doctor,
-      ),
+      homeDoctorCareMult: InjuryService(
+        balance: balance,
+      ).doctorCareMult(home.staff.doctor),
+      awayDoctorCareMult: InjuryService(
+        balance: balance,
+      ).doctorCareMult(away.staff.doctor),
+      homeDoctorPreventionMult: InjuryService(
+        balance: balance,
+      ).doctorPreventionMult(home.staff.doctor),
+      awayDoctorPreventionMult: InjuryService(
+        balance: balance,
+      ).doctorPreventionMult(away.staff.doctor),
     );
     if (refreshDerivedRatings) {
       _refreshRuntimeRatings(live);
@@ -769,7 +769,10 @@ class MatchEngine {
               (candidate) => candidate.id == player.id,
             );
         if (rng.nextDouble() < balance.matchday.redDirect) {
-          final severity = DisciplineService.rollDirectRedSeverity(rng);
+          final severity = DisciplineService.rollDirectRedSeverity(
+            rng,
+            balance,
+          );
           newEvents.add(
             MatchEvent(
               type: MatchEventType.redCard,
@@ -848,7 +851,7 @@ class MatchEngine {
               balance: balance,
             ).injuryMultiplier(player);
         if (rng.nextDouble() < injuryChance) {
-          final diagnosis = const InjuryService().diagnose(
+          final diagnosis = InjuryService(balance: balance).diagnose(
             random: rng,
             doctorCareMultiplier: homeSide
                 ? live.homeDoctorCareMult
@@ -1036,9 +1039,13 @@ class MatchEngine {
     // Compatibility fallback for manually assembled LiveMatch instances that
     // predate the runtime diagnostics. Normal MatchEngine.start always takes
     // the UnitRatings branch above.
-    final chemMult = TeamManagementService.chemistryMultiplier(chemistry);
+    final chemMult = TeamManagementService.chemistryMultiplier(
+      chemistry,
+      balance,
+    );
     final atmosphereMult = TeamManagementService.atmosphereMultiplier(
       atmosphere,
+      balance,
     );
     var sum = 0.0;
     for (final p in lineup) {

@@ -5,6 +5,8 @@
 /// consume these fields in the later event implementation tasks.
 class EventsBalance {
   const EventsBalance({
+    this.inspiringPerformanceFormBonus = 1.0,
+    this.inspiringPerformanceProgressBonus = 5.0,
     this.minutesRequestChance = 0.03,
     this.minutesRequestAmbitiousChance = 0.05,
     this.transferRequestChance = 0.01,
@@ -109,6 +111,8 @@ class EventsBalance {
   });
 
   final double minutesRequestChance;
+  final double inspiringPerformanceFormBonus;
+  final double inspiringPerformanceProgressBonus;
   final double minutesRequestAmbitiousChance;
   final double transferRequestChance;
   final double transferRequestAmbitiousMultiplier;

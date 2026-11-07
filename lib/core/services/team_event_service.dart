@@ -45,7 +45,8 @@ class TeamEventService
     TeamManagementService? teamManagement,
   }) : messages = messages ?? MessageService(),
        calendar = calendar ?? CalendarService(balance: balance),
-       teamManagement = teamManagement ?? const TeamManagementService();
+       teamManagement =
+           teamManagement ?? TeamManagementService(balance: balance);
 
   @override
   final BalanceConfig balance;

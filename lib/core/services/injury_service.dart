@@ -1,6 +1,7 @@
 import 'dart:math';
 
 import 'package:new_football/core/balance/injury_catalog.dart';
+import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/injury.dart';
 import 'package:new_football/core/models/player.dart';
@@ -20,9 +21,9 @@ class InjuryDiagnosis {
 
 /// Deterministic injury rules shared by match simulation and tests.
 class InjuryService {
-  const InjuryService();
+  const InjuryService({this.balance = BalanceConfig.defaults});
 
-  static const majorPotentialLossChance = 0.10;
+  final BalanceConfig balance;
 
   InjuryDefinition pickDefinition(Random random) {
     final target = random.nextDouble() * InjuryCatalog.totalWeight;
@@ -47,7 +48,7 @@ class InjuryService {
               random.nextInt(definition.maxDays - definition.minDays + 1);
     final days = (rawDays * (doctorCareMultiplier ?? doctorCareMult(doctor)))
         .round()
-        .clamp(0, 365)
+        .clamp(0, balance.player.injuryDaysClampMax)
         .toInt();
     final injury = Injury(
       id: definition.id,
@@ -59,7 +60,7 @@ class InjuryService {
     final potentialLoss =
         definition.type == InjuryType.major &&
         potentialLossRoll &&
-        random.nextDouble() < majorPotentialLossChance;
+        random.nextDouble() < balance.events.majorInjuryPotentialLossChance;
     return InjuryDiagnosis(
       definition: definition,
       injury: injury,
@@ -83,7 +84,7 @@ class InjuryService {
               nextInt(definition.maxDays - definition.minDays + 1);
     final days = (rawDays * (doctorCareMultiplier ?? doctorCareMult(doctor)))
         .round()
-        .clamp(0, 365)
+        .clamp(0, balance.player.injuryDaysClampMax)
         .toInt();
     final injury = Injury(
       id: definition.id,
@@ -95,7 +96,7 @@ class InjuryService {
     final potentialLoss =
         definition.type == InjuryType.major &&
         potentialLossRoll &&
-        nextDouble() < majorPotentialLossChance;
+        nextDouble() < balance.events.majorInjuryPotentialLossChance;
     return InjuryDiagnosis(
       definition: definition,
       injury: injury,
@@ -129,19 +130,27 @@ class InjuryService {
     if (!diagnosis.potentialLoss) return player;
     return player
         .copyWith(
-          potentialStars: (player.potentialStars - 0.5)
-              .clamp(0.5, 5.0)
-              .toDouble(),
+          potentialStars:
+              (player.potentialStars - balance.player.injuryPotentialLoss)
+                  .clamp(
+                    balance.player.potentialMin,
+                    balance.player.potentialMax,
+                  )
+                  .toDouble(),
         )
-        .recalculatePointValue();
+        .recalculatePointValue(balance);
   }
 
   double _staffMultiplier(
     StaffMember? member,
     double Function(StaffAttributes) value,
   ) {
-    if (member == null) return 1.05;
-    final stars = value(member.attributes).clamp(0.0, 5.0).toDouble();
-    return 1.05 - stars * 0.036;
+    final b = balance.player;
+    if (member == null) return b.medicalStaffMultiplierBase;
+    final stars = value(
+      member.attributes,
+    ).clamp(balance.staff.starMin, balance.staff.starMax).toDouble();
+    return b.medicalStaffMultiplierBase -
+        stars * b.medicalStaffMultiplierPerStar;
   }
 }

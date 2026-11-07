@@ -293,7 +293,7 @@ mixin _SeasonPostMatch on _SeasonServiceShared {
     SeasonPhase phase, {
     String? matchId,
   }) {
-    final disciplineService = const DisciplineService();
+    final disciplineService = DisciplineService(balance: balance);
     final administrativeTeamIds = TeamManagementService.walkoverTeamIds(result);
     final isAdministrative = TeamManagementService.isWalkoverResult(result);
     final statsByPlayer = {
@@ -353,7 +353,7 @@ mixin _SeasonPostMatch on _SeasonServiceShared {
       final assignedPositions = team.id == result.homeTeamId
           ? result.homeLineupPositions
           : result.awayLineupPositions;
-      next = const TeamManagementService()
+      next = TeamManagementService(balance: balance)
           .applyMatchResult(
             team: next,
             result: result,
@@ -365,7 +365,9 @@ mixin _SeasonPostMatch on _SeasonServiceShared {
           )
           .team;
       if (isAdministrative && administrativeTeamIds.contains(team.id)) {
-        next = const TeamManagementService().applyAtmosphereDelta(next, -15);
+        next = TeamManagementService(
+          balance: balance,
+        ).applyAtmosphereDelta(next, -15);
       }
       return next;
     }).toList();

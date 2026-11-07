@@ -18,7 +18,15 @@ class PlayerBalance {
     // consumption through [staminaLossForMinutes].
     this.fatiguePerFullMatch = 15,
     this.recoveryBetweenMatches = 20,
-    this.injuryDaysClampMax = 999,
+    this.injuryDaysClampMax = 365,
+    this.injuryPotentialLoss = 0.5,
+    this.medicalStaffMultiplierBase = 1.05,
+    this.medicalStaffMultiplierPerStar = 0.036,
+    this.regularYellowThreshold = 5,
+    this.playoffYellowThreshold = 3,
+    this.yellowSuspensionGames = 1,
+    this.secondYellowSuspensionGames = 1,
+    this.directRedSeverityThresholds = const [(0.60, 1), (0.90, 2), (1.0, 3)],
     this.staminaOkThreshold = 80,
     this.staminaSoftThreshold = 60,
     this.staminaMidThreshold = 40,
@@ -36,6 +44,15 @@ class PlayerBalance {
     this.formMin = 1.0,
     this.formMax = 10.0,
     this.noAppearanceFormDrift = 0.2,
+    this.noAppearanceNeutralForm = 6.0,
+    this.temperamentalFormLossMultiplier = 1.5,
+    this.matchFormChanges = const [
+      (8.5, 2.0),
+      (7.5, 1.0),
+      (6.0, 0.0),
+      (4.5, -1.0),
+    ],
+    this.matchFormBelowThresholdDelta = -2.0,
     this.outfieldOverallWeights = _defaultOutfieldOverallWeights,
     this.tallestOutfieldSampleSize = 5,
   });
@@ -60,6 +77,21 @@ class PlayerBalance {
   final int fatiguePerFullMatch;
   final int recoveryBetweenMatches;
   final int injuryDaysClampMax;
+  final double injuryPotentialLoss;
+  final double medicalStaffMultiplierBase;
+  final double medicalStaffMultiplierPerStar;
+  final int regularYellowThreshold;
+  final int playoffYellowThreshold;
+  final int yellowSuspensionGames;
+  final int secondYellowSuspensionGames;
+  final List<(double threshold, int severity)> directRedSeverityThresholds;
+
+  int directRedSeverity(double roll) {
+    for (final (threshold, severity) in directRedSeverityThresholds) {
+      if (roll < threshold) return severity;
+    }
+    return directRedSeverityThresholds.last.$2;
+  }
 
   /// Stamina thresholds from `player_management.md`.
   final int staminaOkThreshold;
@@ -84,6 +116,17 @@ class PlayerBalance {
   final double formMin;
   final double formMax;
   final double noAppearanceFormDrift;
+  final double noAppearanceNeutralForm;
+  final double temperamentalFormLossMultiplier;
+  final List<(double ratingMin, double delta)> matchFormChanges;
+  final double matchFormBelowThresholdDelta;
+
+  double matchFormDelta(double rating) {
+    for (final (ratingMin, delta) in matchFormChanges) {
+      if (rating >= ratingMin) return delta;
+    }
+    return matchFormBelowThresholdDelta;
+  }
 
   /// Weighted OVR face-stats per outfield position (weights need not sum to 1).
   final Map<Position, OutfieldAttrWeights> outfieldOverallWeights;

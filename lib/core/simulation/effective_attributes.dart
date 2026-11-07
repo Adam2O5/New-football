@@ -124,9 +124,13 @@ class EffectiveAttributeCalculator {
       assignedPosition: assignedPosition,
     );
     final roleFitMult = roleFitMultiplier(player);
-    final chemistryMult = TeamManagementService.chemistryMultiplier(chemistry);
+    final chemistryMult = TeamManagementService.chemistryMultiplier(
+      chemistry,
+      balance,
+    );
     final atmosphereMult = TeamManagementService.atmosphereMultiplier(
       atmosphere,
+      balance,
     );
     final formMult = balance.player.formMult(player.state.form);
     final staminaMult = balance.player.performanceMult(
@@ -199,9 +203,13 @@ class EffectiveAttributeCalculator {
     Map<String, Position> assignedPositions = const {},
   }) {
     final lineupList = lineup.toList(growable: false);
-    final chemistryMult = TeamManagementService.chemistryMultiplier(chemistry);
+    final chemistryMult = TeamManagementService.chemistryMultiplier(
+      chemistry,
+      balance,
+    );
     final atmosphereMult = TeamManagementService.atmosphereMultiplier(
       atmosphere,
+      balance,
     );
     final Map<EffectiveAttribute, double> contextMult = Map.unmodifiable({
       for (final attribute in EffectiveAttribute.values)

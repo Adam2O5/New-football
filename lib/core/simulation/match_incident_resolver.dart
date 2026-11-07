@@ -59,11 +59,13 @@ class InjuryDecision {
 class MatchIncidentResolver {
   const MatchIncidentResolver({
     this.balance = BalanceConfig.defaults,
-    this.injuryService = const InjuryService(),
-  });
+    InjuryService? injuryService,
+  }) : _injuryService = injuryService;
 
   final BalanceConfig balance;
-  final InjuryService injuryService;
+  final InjuryService? _injuryService;
+  InjuryService get injuryService =>
+      _injuryService ?? InjuryService(balance: balance);
 
   double foulProbability({
     required double attackerPace,
@@ -156,7 +158,9 @@ class MatchIncidentResolver {
 
     final directP = directRedProbability(oneOnOne: oneOnOne);
     final directRed = nextDouble() < directP;
-    final severity = directRed ? directRedSeverityFromRoll(nextDouble()) : 0;
+    final severity = directRed
+        ? directRedSeverityFromRoll(nextDouble(), balance)
+        : 0;
     return CardDecision(
       yellowProbability: yellowP,
       directRedProbability: directP,
@@ -167,11 +171,12 @@ class MatchIncidentResolver {
     );
   }
 
-  static int directRedSeverityFromRoll(double roll) {
+  static int directRedSeverityFromRoll(
+    double roll, [
+    BalanceConfig balance = BalanceConfig.defaults,
+  ]) {
     final bounded = roll.clamp(0.0, 0.999999999).toDouble();
-    if (bounded < 0.60) return 1;
-    if (bounded < 0.90) return 2;
-    return 3;
+    return balance.player.directRedSeverity(bounded);
   }
 
   double injuryProbability({

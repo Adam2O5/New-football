@@ -81,7 +81,7 @@ mixin _DayMatchResultApplication {
     }).toList();
 
     if (!isAdministrativeResult) {
-      final disciplineService = const DisciplineService();
+      final disciplineService = DisciplineService(balance: balance);
       teams = teams.map((team) {
         if (team.id != result.homeTeamId && team.id != result.awayTeamId) {
           return team;

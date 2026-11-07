@@ -39,49 +39,62 @@ class TeamWeeklyUpdate {
 /// Match cohesion remains in [CohesionService]. This service owns the slower,
 /// saved team-level chemistry and the weekly atmosphere lifecycle.
 class TeamManagementService {
-  const TeamManagementService();
+  const TeamManagementService({this.balance = BalanceConfig.defaults});
+
+  final BalanceConfig balance;
 
   /// Discrete chemistry multiplier used by the match engine.
-  static double chemistryMultiplier(num chemistry) {
-    final value = chemistry.toDouble().clamp(0.0, 100.0);
-    if (value < 30) return 0.95;
-    if (value < 50) return 0.98;
-    if (value < 70) return 1.00;
-    if (value < 85) return 1.02;
-    return 1.05;
+  static double chemistryMultiplier(
+    num chemistry, [
+    BalanceConfig balance = BalanceConfig.defaults,
+  ]) {
+    final b = balance.chemistry;
+    final value = chemistry.toDouble().clamp(b.scoreMin, b.scoreMax);
+    for (final (upperBound, multiplier) in b.chemistryBands) {
+      if (value < upperBound) return multiplier;
+    }
+    return b.chemistryBands.last.$2;
   }
 
   /// Discrete atmosphere multiplier used by the match engine.
-  static double atmosphereMultiplier(int atmosphere) {
-    final value = atmosphere.clamp(0, 100);
-    if (value < 30) return 0.95;
-    if (value < 45) return 0.97;
-    if (value < 70) return 1.00;
-    if (value < 85) return 1.02;
-    return 1.04;
+  static double atmosphereMultiplier(
+    int atmosphere, [
+    BalanceConfig balance = BalanceConfig.defaults,
+  ]) {
+    final b = balance.chemistry;
+    final value = atmosphere.clamp(b.scoreMin, b.scoreMax);
+    for (final (upperBound, multiplier) in b.atmosphereBands) {
+      if (value < upperBound) return multiplier;
+    }
+    return b.atmosphereBands.last.$2;
   }
 
   /// Event chance multiplier for the two atmosphere-driven event families.
   static double eventProbabilityMultiplier(
     int atmosphere, {
     required bool positive,
+    BalanceConfig balance = BalanceConfig.defaults,
   }) {
-    final value = atmosphere.clamp(0, 100);
-    if (positive) {
-      if (value >= 85) return 1.20;
-      if (value >= 70) return 1.10;
-      return 1.00;
+    final b = balance.chemistry;
+    final value = atmosphere.clamp(b.scoreMin, b.scoreMax);
+    final bands = positive ? b.positiveEventBands : b.negativeEventBands;
+    for (final (upperBound, multiplier) in bands) {
+      if (value < upperBound) return multiplier;
     }
-    if (value < 30) return 1.25;
-    if (value < 45) return 1.10;
-    return 1.00;
+    return bands.last.$2;
   }
 
-  static double negativeEventMultiplier(int atmosphere) =>
-      eventProbabilityMultiplier(atmosphere, positive: false);
+  static double negativeEventMultiplier(
+    int atmosphere, [
+    BalanceConfig balance = BalanceConfig.defaults,
+  ]) =>
+      eventProbabilityMultiplier(atmosphere, positive: false, balance: balance);
 
-  static double positiveEventMultiplier(int atmosphere) =>
-      eventProbabilityMultiplier(atmosphere, positive: true);
+  static double positiveEventMultiplier(
+    int atmosphere, [
+    BalanceConfig balance = BalanceConfig.defaults,
+  ]) =>
+      eventProbabilityMultiplier(atmosphere, positive: true, balance: balance);
 
   /// Expected wins for a team-power rank in the 58-game regular season.
   static int expectedWins(int expectedRank) {
@@ -327,7 +340,10 @@ class TeamManagementService {
     if (rankDifference <= -2 && rankDifference >= -5) atmosphereDelta -= 1;
 
     final nextAtmosphere = (team.atmosphere + atmosphereDelta).clamp(0, 100);
-    final chemistryDelta = chemistryDriftForAtmosphere(team.atmosphere);
+    final chemistryDelta = chemistryDriftForAtmosphere(
+      team.atmosphere,
+      balance,
+    );
     final nextChemistry = (team.chemistry + chemistryDelta)
         .clamp(0.0, 100.0)
         .toDouble();
@@ -349,12 +365,9 @@ class TeamManagementService {
         losses: losses,
       ),
     ];
-    final retainedHistory =
-        history.length <= BalanceConfig.defaults.calendar.seasonCycleWeeks
+    final retainedHistory = history.length <= balance.calendar.seasonCycleWeeks
         ? history
-        : history.sublist(
-            history.length - BalanceConfig.defaults.calendar.seasonCycleWeeks,
-          );
+        : history.sublist(history.length - balance.calendar.seasonCycleWeeks);
 
     return TeamWeeklyUpdate(
       team: team.copyWith(
@@ -396,12 +409,15 @@ class TeamManagementService {
   }
 
   /// Weekly chemistry drift induced by the current atmosphere.
-  static double chemistryDriftForAtmosphere(int atmosphere) {
-    if (atmosphere < 30) return -2.0;
-    if (atmosphere < 45) return -1.0;
-    if (atmosphere < 70) return 0.0;
-    if (atmosphere < 85) return 1.0;
-    return 2.0;
+  static double chemistryDriftForAtmosphere(
+    int atmosphere, [
+    BalanceConfig balance = BalanceConfig.defaults,
+  ]) {
+    for (final (upperBound, delta)
+        in balance.chemistry.atmosphereChemistryDrift) {
+      if (atmosphere < upperBound) return delta;
+    }
+    return balance.chemistry.atmosphereChemistryDrift.last.$2;
   }
 
   static int _streak(List<int> results) {

@@ -69,12 +69,16 @@ Player applyMatchPlayerEffects({
   if (result.inspiredPerformancePlayerId == player.id) {
     next = next.copyWith(
       state: next.state.copyWith(
-        form: balance.player.clampForm(next.state.form + 1.0),
+        form: balance.player.clampForm(
+          next.state.form + balance.events.inspiringPerformanceFormBonus,
+        ),
       ),
       hidden: next.hidden.copyWith(
-        overallProgress: (next.hidden.overallProgress + 5.0)
-            .clamp(0.0, 100.0)
-            .toDouble(),
+        overallProgress:
+            (next.hidden.overallProgress +
+                    balance.events.inspiringPerformanceProgressBonus)
+                .clamp(0.0, balance.development.progressThreshold)
+                .toDouble(),
       ),
     );
   }
@@ -96,13 +100,21 @@ Player applyMatchPlayerEffects({
     if (matchInjury.potentialLoss) {
       next = next
           .copyWith(
-            potentialStars: (next.potentialStars - 0.5)
-                .clamp(0.5, 5.0)
-                .toDouble(),
+            potentialStars:
+                (next.potentialStars - balance.player.injuryPotentialLoss)
+                    .clamp(
+                      balance.player.potentialMin,
+                      balance.player.potentialMax,
+                    )
+                    .toDouble(),
             hidden: next.hidden.copyWith(
               developmentCeilingStars:
-                  (next.hidden.developmentCeilingStars - 0.5)
-                      .clamp(0.5, 5.0)
+                  (next.hidden.developmentCeilingStars -
+                          balance.player.injuryPotentialLoss)
+                      .clamp(
+                        balance.player.potentialMin,
+                        balance.player.potentialMax,
+                      )
                       .toDouble(),
             ),
           )
@@ -208,12 +220,14 @@ Player _recordSeasonStats(
     seasons[index] = next;
   }
 
-  final growthRate = (player.hidden.growthRate + stats.minutes * 0.01)
-      .clamp(
-        balance.development.growthRateMin,
-        balance.development.growthRateMax,
-      )
-      .toDouble();
+  final growthRate =
+      (player.hidden.growthRate +
+              stats.minutes * balance.development.minutesGrowthRate)
+          .clamp(
+            balance.development.growthRateMin,
+            balance.development.growthRateMax,
+          )
+          .toDouble();
   return player.copyWith(
     seasonStats: seasons,
     hidden: player.hidden.copyWith(growthRate: growthRate),

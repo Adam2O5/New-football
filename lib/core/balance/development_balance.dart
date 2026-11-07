@@ -27,6 +27,22 @@ class RetirementBalance {
 
 class DevelopmentBalance {
   const DevelopmentBalance({
+    this.minutesGrowthRate = 0.01,
+    this.ambitiousGrowthMultiplier = 1.10,
+    this.progressThreshold = 100.0,
+    this.progressResetAfterGrowth = 0.0,
+    this.progressResetAfterDecline = 99.0,
+    this.progressAtCeiling = 99.0,
+    this.ageBonusStartAge = 18,
+    this.ageBonuses = defaultAgeBonuses,
+    this.staffDevelopmentBonuses = defaultStaffDevelopmentBonuses,
+    this.formLowThreshold = 3.0,
+    this.formHighThreshold = 8.0,
+    this.formLowBase = -0.20,
+    this.formHighBase = 0.05,
+    this.formBonusSlope = 0.05,
+    this.atmosphereNeutral = 50.0,
+    this.atmosphereBonusDivisor = 500.0,
     this.exceedSmallOffsetChance = 0.8,
     this.exceedSmallOffset = 0.5,
     this.exceedLargeOffset = 1.0,
@@ -67,6 +83,22 @@ class DevelopmentBalance {
     ],
   });
 
+  final double minutesGrowthRate;
+  final double ambitiousGrowthMultiplier;
+  final double progressThreshold;
+  final double progressResetAfterGrowth;
+  final double progressResetAfterDecline;
+  final double progressAtCeiling;
+  final int ageBonusStartAge;
+  final List<double> ageBonuses;
+  final List<(double, double)> staffDevelopmentBonuses;
+  final double formLowThreshold;
+  final double formHighThreshold;
+  final double formLowBase;
+  final double formHighBase;
+  final double formBonusSlope;
+  final double atmosphereNeutral;
+  final double atmosphereBonusDivisor;
   final double exceedSmallOffsetChance;
   final double exceedSmallOffset;
   final double exceedLargeOffset;
@@ -87,7 +119,7 @@ class DevelopmentBalance {
   /// Each entry: `(exceed%, hit%)`; under% = `100 − exceed − hit`.
   final List<(int exceed, int hit)> determinationOutcomeTable;
 
-  static const _ageBonuses = <double>[
+  static const defaultAgeBonuses = <double>[
     0.40,
     0.34,
     0.29,
@@ -113,7 +145,7 @@ class DevelopmentBalance {
     -3.00,
   ];
 
-  static const _staffDevelopmentBonuses = <(double, double)>[
+  static const defaultStaffDevelopmentBonuses = <(double, double)>[
     (0.0, -0.10),
     (0.5, 0.01),
     (1.0, 0.02),
@@ -134,34 +166,34 @@ class DevelopmentBalance {
   }
 
   double ageBonusFor(int age) {
-    if (age <= 18) return _ageBonuses.first;
-    if (age >= 40) return _ageBonuses.last;
-    return _ageBonuses[age - 18];
+    return ageBonuses[(age - ageBonusStartAge).clamp(0, ageBonuses.length - 1)];
   }
 
   double formBonusFor(double form) {
     final f = form.clamp(1.0, 10.0).toDouble();
-    if (f <= 3.0) return -0.20 + f * 0.05;
-    if (f >= 8.0) return 0.05 + (f - 8.0) * 0.05;
+    if (f <= formLowThreshold) return formLowBase + f * formBonusSlope;
+    if (f >= formHighThreshold) {
+      return formHighBase + (f - formHighThreshold) * formBonusSlope;
+    }
     return 0.0;
   }
 
   double staffDevelopmentBonusFor(double stars) {
     final value = stars.clamp(0.0, 5.0).toDouble();
-    for (var i = 1; i < _staffDevelopmentBonuses.length; i++) {
-      final (previousStars, previousBonus) = _staffDevelopmentBonuses[i - 1];
-      final (nextStars, nextBonus) = _staffDevelopmentBonuses[i];
+    for (var i = 1; i < staffDevelopmentBonuses.length; i++) {
+      final (previousStars, previousBonus) = staffDevelopmentBonuses[i - 1];
+      final (nextStars, nextBonus) = staffDevelopmentBonuses[i];
       if (value <= nextStars) {
         final fraction = (value - previousStars) / (nextStars - previousStars);
         return previousBonus + (nextBonus - previousBonus) * fraction;
       }
     }
-    return _staffDevelopmentBonuses.last.$2;
+    return staffDevelopmentBonuses.last.$2;
   }
 
   double atmosphereBonusFor(int atmosphere) {
     final value = atmosphere.clamp(0, 100).toDouble();
-    return (value - 50.0) / 500.0;
+    return (value - atmosphereNeutral) / atmosphereBonusDivisor;
   }
 
   double progressFor(double growthRate) => growthRate * constDev;

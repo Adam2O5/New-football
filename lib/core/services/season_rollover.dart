@@ -175,10 +175,9 @@ mixin _SeasonRollover on _SeasonServiceShared {
             ? -8
             : 0;
         if (delta == 0 || qualified.contains(team.id)) return team;
-        final updated = const TeamManagementService().applyAtmosphereDelta(
-          team,
-          delta,
-        );
+        final updated = TeamManagementService(
+          balance: balance,
+        ).applyAtmosphereDelta(team, delta);
         atmosphereDeltas[team.id] = updated.atmosphere - team.atmosphere;
         return updated;
       }).toList();
