@@ -218,7 +218,7 @@ mixin _TeamEventHelpers on _TeamEventShared {
 
   @override
   bool _isBottomHalf(LeagueState state, String teamId) {
-    final rank = TeamManagementService.actualRankOf(state, teamId);
+    final rank = TeamManagementService.actualRankOf(state, teamId, balance);
     return rank > state.teams.length / 2;
   }
 

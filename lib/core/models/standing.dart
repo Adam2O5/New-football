@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:new_football/core/models/enums.dart';
+import 'package:new_football/core/balance/team_calendar_balance.dart';
 
 part 'standing.freezed.dart';
 part 'standing.g.dart';
@@ -21,7 +22,8 @@ abstract class Standing with _$Standing {
 }
 
 extension StandingX on Standing {
-  int get points => wins * 3 + draws;
+  int get points =>
+      wins * CalendarBalance.winPoints + draws * CalendarBalance.drawPoints;
   int get goalDifference => goalsFor - goalsAgainst;
   int get gamesPlayed => wins + losses + draws;
 

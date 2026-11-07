@@ -40,7 +40,8 @@ mixin _PlayerEventTriggers on _PlayerEventShared {
             )
             .withCooldown(
               'breakthrough',
-              52 * events.breakthroughCooldownSeasons,
+              balance.calendar.seasonCycleWeeks *
+                  events.breakthroughCooldownSeasons,
             )
             .withCounter('breakthroughYear', state.currentSeason.year),
       ),
@@ -93,7 +94,7 @@ mixin _PlayerEventTriggers on _PlayerEventShared {
       teamId: team.id,
       player: player,
       kind: 'coldStreak',
-      expiryDays: 1,
+      expiryDays: events.coldStreakDecisionDays,
       saveSeed: saveSeed,
       payload: {
         'form': player.state.form,
@@ -139,7 +140,7 @@ mixin _PlayerEventTriggers on _PlayerEventShared {
       teamId: team.id,
       player: player,
       kind: 'injuryComplication',
-      expiryDays: 1,
+      expiryDays: events.injuryComplicationDecisionDays,
       saveSeed: saveSeed,
       args: {'extraDays': events.injuryComplicationCautiousExtraDaysMin},
       payload: {
@@ -162,8 +163,8 @@ mixin _PlayerEventTriggers on _PlayerEventShared {
         : _currentPlayer(state, teamId, playerId);
     if (team == null || player == null) return state;
     final events = balance.events;
-    if (player.age < 32 ||
-        player.state.seasonsWithTeam < 4 ||
+    if (player.age < events.veteranMotivationAgeMin ||
+        player.state.seasonsWithTeam < events.veteranMotivationSeasonsMin ||
         player.personality == PlayerPersonality.professional ||
         player.personality == PlayerPersonality.leader ||
         !_isBottomHalf(state, team.id) ||
@@ -183,7 +184,7 @@ mixin _PlayerEventTriggers on _PlayerEventShared {
       teamId: team.id,
       player: player,
       kind: 'veteranMotivation',
-      expiryDays: 2,
+      expiryDays: events.veteranMotivationDecisionDays,
       saveSeed: saveSeed,
       payload: {
         'determination': player.hidden.determination,
@@ -205,8 +206,8 @@ mixin _PlayerEventTriggers on _PlayerEventShared {
     if (team == null || player == null) return state;
     final events = balance.events;
     final eventState = player.state.eventState;
-    if (player.hidden.determination < 7 ||
-        player.state.form < 6 ||
+    if (player.hidden.determination < events.extraTrainingDeterminationMin ||
+        player.state.form < events.extraTrainingFormMin ||
         player.state.injured ||
         eventState.isOnCooldown('extraTraining') ||
         _hasPendingDecision(state, player.id, 'extraTraining') ||
@@ -224,7 +225,7 @@ mixin _PlayerEventTriggers on _PlayerEventShared {
       teamId: team.id,
       player: player,
       kind: 'extraTraining',
-      expiryDays: 1,
+      expiryDays: events.extraTrainingDecisionDays,
       saveSeed: saveSeed,
       payload: {
         'determination': player.hidden.determination,
@@ -380,8 +381,9 @@ mixin _PlayerEventTriggers on _PlayerEventShared {
     final oldMajor = eventState.lastMajorInjury;
     if (oldMajor == null ||
         oldMajor.type != InjuryType.major ||
-        eventState.weeksSinceMajorInjury > 52 ||
-        player.hidden.injuryProne < 7 ||
+        eventState.weeksSinceMajorInjury >
+            events.recurringInjuryLookbackWeeks ||
+        player.hidden.injuryProne < events.recurringInjuryProneMin ||
         player.state.injured ||
         eventState.isOnCooldown('recurringInjury') ||
         !_rollFor(
@@ -417,7 +419,9 @@ mixin _PlayerEventTriggers on _PlayerEventShared {
         injury: recurrence,
         eventState: eventState.withCooldown(
           'recurringInjury',
-          52 * events.recurringInjuryCooldownMonths ~/ 12,
+          balance.calendar.seasonCycleWeeks *
+              events.recurringInjuryCooldownMonths ~/
+              12,
         ),
       ),
     );
@@ -467,7 +471,7 @@ mixin _PlayerEventTriggers on _PlayerEventShared {
       teamId: team.id,
       player: player,
       kind: 'plateau',
-      expiryDays: 2,
+      expiryDays: events.plateauDecisionDays,
       saveSeed: saveSeed,
       payload: {'plateauWeeks': eventState.counterValue('plateauWeeks')},
     );

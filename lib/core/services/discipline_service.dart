@@ -72,7 +72,7 @@ class DisciplineService {
     final notifications = <DisciplineNotification>[];
     final roster = team.roster.map((player) {
       final oldRemaining = player.state.suspensionGamesRemaining
-          .clamp(0, 100)
+          .clamp(0, balance.player.suspensionGamesClampMax)
           .toInt();
       final remainingAfterMatch = oldRemaining > 0 ? oldRemaining - 1 : 0;
       final discipline = entries[player.id];

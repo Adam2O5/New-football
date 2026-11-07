@@ -97,31 +97,40 @@ class TeamManagementService {
       eventProbabilityMultiplier(atmosphere, positive: true, balance: balance);
 
   /// Expected wins for a team-power rank in the 58-game regular season.
-  static int expectedWins(int expectedRank) {
+  static int expectedWins(
+    int expectedRank, [
+    BalanceConfig balance = BalanceConfig.defaults,
+  ]) {
     final rank = expectedRank.clamp(1, 30);
-    return (58 * (1 - (rank - 1) / 29 * 0.45) * 0.5).round();
+    return (58 *
+            (1 - (rank - 1) / 29 * balance.chemistry.expectedWinsRankPenalty) *
+            balance.chemistry.expectedWinsBaseShare)
+        .round();
   }
 
   /// Form of the last eight results as a points ratio in [0, 1].
-  static double teamForm(Iterable<int> results) {
+  static double teamForm(
+    Iterable<int> results, [
+    BalanceConfig balance = BalanceConfig.defaults,
+  ]) {
     final allValues = results.toList();
     final values = allValues.length <= ChemistryBalance.recentResultsWindow
         ? allValues
         : allValues.sublist(
             allValues.length - ChemistryBalance.recentResultsWindow,
           );
-    if (values.isEmpty) return 0.5;
+    if (values.isEmpty) return balance.chemistry.emptyTeamForm;
     final points = values.fold<int>(
       0,
       (sum, result) =>
           sum +
           (result > 0
-              ? 3
+              ? CalendarBalance.winPoints
               : result == 0
-              ? 1
+              ? CalendarBalance.drawPoints
               : 0),
     );
-    return points / (values.length * 3);
+    return points / (values.length * CalendarBalance.winPoints);
   }
 
   /// Returns true for structural administrative results. The description
@@ -235,7 +244,8 @@ class TeamManagementService {
       );
     }
 
-    final lineup = startingEleven.take(11).toList();
+    final b = balance.chemistry;
+    final lineup = startingEleven.take(balance.roster.startingXi).toList();
     final positions =
         assignedPositions != null && assignedPositions.length >= lineup.length
         ? assignedPositions
@@ -255,15 +265,20 @@ class TeamManagementService {
     }
 
     var delta = 0.0;
-    if (lineup.length == 11 && optimalPlayers == 11) {
-      delta += 0.3;
+    if (lineup.length == balance.roster.startingXi &&
+        optimalPlayers == balance.roster.startingXi) {
+      delta += b.fullLineupChemistryBonus;
     }
-    delta -= outOfPosition * 0.4;
+    delta -= outOfPosition * b.foreignPositionChemistryPenalty;
 
     final experienced = team.roster
-        .where((player) => player.state.seasonsWithTeam >= 3)
+        .where(
+          (player) => player.state.seasonsWithTeam >= b.experiencedSeasonsMin,
+        )
         .length;
-    if (experienced >= 10) delta += 0.3;
+    if (experienced >= b.experiencedPlayersMin) {
+      delta += b.experiencedChemistryBonus;
+    }
 
     final nationalityCounts = <Nationality, int>{};
     for (final player in lineup) {
@@ -272,24 +287,31 @@ class TeamManagementService {
     }
     final clusters = nationalityCounts.values.fold<int>(
       0,
-      (sum, count) => sum + count ~/ 4,
+      (sum, count) => sum + count ~/ b.nationalityClusterSize,
     );
-    delta += (clusters * 0.2).clamp(0.0, 1.0);
+    delta += (clusters * b.nationalityClusterBonus).clamp(
+      0.0,
+      b.nationalityBonusMax,
+    );
 
     final appearances = Map<String, int>.from(team.chemistryAppearances);
     for (final player in lineup) {
       final previousAppearances = appearances[player.id] ?? 0;
-      if (previousAppearances < 5) {
+      if (previousAppearances < balance.matchday.adaptationAppearances) {
         // -1.0, -0.8, -0.6, -0.4, -0.2 before appearances 1–5;
         // the penalty is zero from the sixth appearance onward.
-        delta -= (5 - previousAppearances) / 5;
+        delta -= balance.matchday.adaptationPenaltyForAppearances(
+          previousAppearances,
+        );
       }
       appearances[player.id] = previousAppearances + 1;
     }
 
     final rosterIds = team.roster.map((player) => player.id).toSet();
     appearances.removeWhere((id, _) => !rosterIds.contains(id));
-    final nextChemistry = (team.chemistry + delta).clamp(0.0, 100.0).toDouble();
+    final nextChemistry = (team.chemistry + delta)
+        .clamp(balance.chemistry.scoreMin, balance.chemistry.scoreMax)
+        .toDouble();
     return TeamMatchUpdate(
       team: withStats.copyWith(
         chemistry: nextChemistry,
@@ -330,22 +352,32 @@ class TeamManagementService {
   }) {
     var atmosphereDelta = 0;
     final streak = _streak(team.recentMatchResults);
-    if (streak >= 3) atmosphereDelta += 3;
-    if (streak <= -3) atmosphereDelta -= 3;
+    final b = balance.chemistry;
+    if (streak >= b.atmosphereStreakLength) {
+      atmosphereDelta += b.atmosphereStreakDelta;
+    }
+    if (streak <= -b.atmosphereStreakLength) {
+      atmosphereDelta -= b.atmosphereStreakDelta;
+    }
 
     final rankDifference = expectedRank - currentRank;
-    if (rankDifference >= 6) atmosphereDelta += 2;
-    if (rankDifference >= 2 && rankDifference <= 5) atmosphereDelta += 1;
-    if (rankDifference <= -6) atmosphereDelta -= 2;
-    if (rankDifference <= -2 && rankDifference >= -5) atmosphereDelta -= 1;
+    for (final (minDifference, delta) in b.rankAtmosphereBands) {
+      if (rankDifference.abs() >= minDifference) {
+        atmosphereDelta += rankDifference.sign * delta;
+        break;
+      }
+    }
 
-    final nextAtmosphere = (team.atmosphere + atmosphereDelta).clamp(0, 100);
+    final nextAtmosphere = (team.atmosphere + atmosphereDelta).clamp(
+      balance.chemistry.scoreMin,
+      balance.chemistry.scoreMax,
+    );
     final chemistryDelta = chemistryDriftForAtmosphere(
       team.atmosphere,
       balance,
     );
     final nextChemistry = (team.chemistry + chemistryDelta)
-        .clamp(0.0, 100.0)
+        .clamp(balance.chemistry.scoreMin, balance.chemistry.scoreMax)
         .toDouble();
 
     final wins = team.recentMatchResults.where((result) => result > 0).length;
@@ -382,17 +414,26 @@ class TeamManagementService {
 
   /// Applies an immediate event/season atmosphere delta.
   Team applyAtmosphereDelta(Team team, num delta) => team.copyWith(
-    atmosphere: (team.atmosphere + delta).round().clamp(0, 100),
+    atmosphere: (team.atmosphere + delta).round().clamp(
+      balance.chemistry.scoreMin,
+      balance.chemistry.scoreMax,
+    ),
   );
 
   /// Applies an immediate chemistry delta while preserving fractional points.
   Team applyChemistryDelta(Team team, num delta) => team.copyWith(
-    chemistry: (team.chemistry + delta).clamp(0.0, 100.0).toDouble(),
+    chemistry: (team.chemistry + delta)
+        .clamp(balance.chemistry.scoreMin, balance.chemistry.scoreMax)
+        .toDouble(),
   );
 
   /// Overall regular-season rank (1-based), using points then point
   /// differential, matching the UI's existing rank calculation.
-  static int actualRankOf(LeagueState league, String teamId) {
+  static int actualRankOf(
+    LeagueState league,
+    String teamId, [
+    BalanceConfig balance = BalanceConfig.defaults,
+  ]) {
     final standings =
         [
           for (final conference in league.currentSeason.standings)
@@ -405,7 +446,7 @@ class TeamManagementService {
           return a.teamId.compareTo(b.teamId);
         });
     final index = standings.indexWhere((standing) => standing.teamId == teamId);
-    return index < 0 ? 15 : index + 1;
+    return index < 0 ? balance.ai.expectedRankFallback : index + 1;
   }
 
   /// Weekly chemistry drift induced by the current atmosphere.

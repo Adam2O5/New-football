@@ -60,8 +60,14 @@ mixin _DayWeeklyBoundary {
         team: team,
         seasonYear: state.currentSeason.year,
         week: week,
-        expectedRank: strengthTable?.rankOf(team.id) ?? 15,
-        currentRank: TeamManagementService.actualRankOf(state, team.id),
+        expectedRank:
+            strengthTable?.rankOf(team.id, balance) ??
+            balance.ai.expectedRankFallback,
+        currentRank: TeamManagementService.actualRankOf(
+          state,
+          team.id,
+          balance,
+        ),
       );
       weeklyUpdates[team.id] = update;
       return update.team;

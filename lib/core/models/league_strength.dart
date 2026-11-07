@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:new_football/core/models/enums.dart';
+import 'package:new_football/core/balance/balance_config.dart';
 
 part 'league_strength.freezed.dart';
 part 'league_strength.g.dart';
@@ -61,5 +62,6 @@ extension LeagueStrengthTableX on LeagueStrengthTable {
       entryFor(teamId)?.teamStatus ?? TeamStatus.pretender;
 
   /// ExpectedRank (1–30) for a given team. Falls back to 15 if not found.
-  int rankOf(String teamId) => entryFor(teamId)?.expectedRank ?? 15;
+  int rankOf(String teamId, [BalanceConfig balance = BalanceConfig.defaults]) =>
+      entryFor(teamId)?.expectedRank ?? balance.ai.expectedRankFallback;
 }

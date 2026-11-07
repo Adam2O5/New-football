@@ -318,7 +318,7 @@ class PlayerEventService
         teamId: team.id,
         player: nextPlayer,
         kind: 'personalSupport',
-        expiryDays: 3,
+        expiryDays: events.personalSupportDecisionDays,
         saveSeed: saveSeed,
         payload: {'followUp': true},
       );

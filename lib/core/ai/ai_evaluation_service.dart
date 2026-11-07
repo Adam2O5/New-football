@@ -166,7 +166,7 @@ class AiEvaluationService {
   }) {
     final year = currentYear ?? recipient.seasonYear;
     final ownerRank = recipient
-        .expectedRankFor(pick.originalTeamId)
+        .expectedRankFor(pick.originalTeamId, balance)
         .clamp(1, 30);
     final materialized = pick.pickNumber != null;
     final projectedSlot = materialized

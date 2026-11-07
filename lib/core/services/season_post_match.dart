@@ -365,9 +365,10 @@ mixin _SeasonPostMatch on _SeasonServiceShared {
           )
           .team;
       if (isAdministrative && administrativeTeamIds.contains(team.id)) {
-        next = TeamManagementService(
-          balance: balance,
-        ).applyAtmosphereDelta(next, -15);
+        next = TeamManagementService(balance: balance).applyAtmosphereDelta(
+          next,
+          balance.chemistry.walkoverAtmospherePenalty,
+        );
       }
       return next;
     }).toList();

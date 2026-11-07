@@ -123,8 +123,12 @@ mixin _DayMatchResultApplication {
       );
       var next = update.team;
       if (administrativeTeamIds.contains(team.id)) {
-        next = teamManagement.applyAtmosphereDelta(next, -15);
-        immediateAtmosphereDeltas[team.id] = -15;
+        next = teamManagement.applyAtmosphereDelta(
+          next,
+          balance.chemistry.walkoverAtmospherePenalty,
+        );
+        immediateAtmosphereDeltas[team.id] =
+            balance.chemistry.walkoverAtmospherePenalty;
       }
       return next;
     }).toList();

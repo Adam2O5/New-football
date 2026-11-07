@@ -1,4 +1,5 @@
 import 'package:new_football/core/models/enums.dart';
+import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/league_strength.dart';
 import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/random/seeds.dart';
@@ -33,11 +34,14 @@ class AiEvaluationContext {
   final int week;
   final DecisionType decisionType;
 
-  int expectedRankFor(String teamId) {
+  int expectedRankFor(
+    String teamId, [
+    BalanceConfig balance = BalanceConfig.defaults,
+  ]) {
     final fromTable = strengthTable?.entryFor(teamId)?.expectedRank;
     if (fromTable != null) return fromTable;
     if (teamId == team.id) return expectedRank;
-    return 15;
+    return balance.ai.expectedRankFallback;
   }
 
   AiEvaluationContext withDecision({

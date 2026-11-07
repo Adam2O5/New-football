@@ -8,6 +8,8 @@ import 'package:new_football/core/tactics/tactics_setup.dart';
 /// simulation tasks will consume.
 class MatchdayBalance {
   const MatchdayBalance({
+    this.oneOnOneRedMultiplier = 2.0,
+    this.duelInjuryMultiplier = 2.5,
     this.effectiveAttributeMin = 30.0,
     this.effectiveAttributeMax = 120.0,
     this.walkoverGoalsFor = 0,
@@ -275,6 +277,8 @@ class MatchdayBalance {
 
   /// Illegal roster → walkover score for the offending side.
   final double effectiveAttributeMin;
+  final double oneOnOneRedMultiplier;
+  final double duelInjuryMultiplier;
   final double effectiveAttributeMax;
   final int walkoverGoalsFor;
   final int walkoverGoalsAgainst;

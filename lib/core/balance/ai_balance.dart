@@ -145,7 +145,11 @@ const _defaultAiPayrollBands = <AiPayrollBand>[
 /// Task 32 adds the canonical valuation tables here so the evaluator and
 /// future AI decision systems share one balance source.
 class AiBalance {
+  static const defaultExpectedRank = 15;
   const AiBalance({
+    this.missingTeamPowerOvr = 50.0,
+    this.statusDistribution = const [5, 7, 9, 6, 3],
+    this.expectedRankFallback = defaultExpectedRank,
     this.teamPowerSquadSize = 15,
     this.statusMaxTierChange = 1,
     this.rosterTargetTotal = RosterBalance.defaultSeedSize,
@@ -349,6 +353,9 @@ class AiBalance {
 
   final int teamPowerSquadSize;
   final int statusMaxTierChange;
+  final double missingTeamPowerOvr;
+  final List<int> statusDistribution;
+  final int expectedRankFallback;
   final int rosterTargetTotal;
   final int minGapThreshold;
   final double evaluationNoiseSd;

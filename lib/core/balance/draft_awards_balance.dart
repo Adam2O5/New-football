@@ -60,6 +60,25 @@ class DraftBalance {
 
 class AwardsBalance {
   const AwardsBalance({
+    this.mvpRatingWeight = 0.25,
+    this.mvpProductionWeight = 0.20,
+    this.mvpOverallWeight = 0.10,
+    this.dpoyRatingWeight = 0.40,
+    this.dpoyCleanSheetsWeight = 0.25,
+    this.dpoyActionsWeight = 0.20,
+    this.gkSaveWeight = 0.45,
+    this.gkCleanSheetsWeight = 0.25,
+    this.gkGoalsPreventedWeight = 0.20,
+    this.gkRatingWeight = 0.10,
+    this.totsRatingWeight = 0.60,
+    this.totsProductionWeight = 0.25,
+    this.totsDefensiveWeight = 0.15,
+    this.productionNormalizer = 4.0,
+    this.overallBase = 50.0,
+    this.overallNormalizer = 49.0,
+    this.ratingNormalizer = 10.0,
+    this.defensiveNormalizer = 40.0,
+    this.finalRankFallback = 30,
     this.regularSeasonGames = 58,
     this.minutesPerGame = 90,
     this.mvpMinutesPct = 0.40,
@@ -72,6 +91,25 @@ class AwardsBalance {
   });
 
   final int regularSeasonGames;
+  final double mvpRatingWeight;
+  final double mvpProductionWeight;
+  final double mvpOverallWeight;
+  final double dpoyRatingWeight;
+  final double dpoyCleanSheetsWeight;
+  final double dpoyActionsWeight;
+  final double gkSaveWeight;
+  final double gkCleanSheetsWeight;
+  final double gkGoalsPreventedWeight;
+  final double gkRatingWeight;
+  final double totsRatingWeight;
+  final double totsProductionWeight;
+  final double totsDefensiveWeight;
+  final double productionNormalizer;
+  final double overallBase;
+  final double overallNormalizer;
+  final double ratingNormalizer;
+  final double defensiveNormalizer;
+  final int finalRankFallback;
   final int minutesPerGame;
   final double mvpMinutesPct;
   final double dpoyMinutesPct;

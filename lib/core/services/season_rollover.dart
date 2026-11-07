@@ -167,13 +167,7 @@ mixin _SeasonRollover on _SeasonServiceShared {
       final atmosphereDeltas = <String, int>{};
       final teams = league.teams.map((team) {
         final status = table?.statusOf(team.id);
-        final delta = status == TeamStatus.elite
-            ? -15
-            : status == TeamStatus.contender
-            ? -12
-            : status == TeamStatus.pretender
-            ? -8
-            : 0;
+        final delta = balance.chemistry.playoffMissAtmosphere[status] ?? 0;
         if (delta == 0 || qualified.contains(team.id)) return team;
         final updated = TeamManagementService(
           balance: balance,
@@ -240,7 +234,7 @@ mixin _SeasonRollover on _SeasonServiceShared {
               age: playerAge(p),
               state: p.state.copyWith(
                 seasonsWithTeam: p.state.seasonsWithTeam + 1,
-                stamina: 90,
+                stamina: balance.player.rolloverStamina,
                 regularSeasonYellowCards: 0,
                 playoffYellowCards: 0,
               ),

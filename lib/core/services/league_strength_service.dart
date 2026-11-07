@@ -20,10 +20,6 @@ class LeagueStrengthService {
 
   final BalanceConfig balance;
 
-  static const _topN = 15;
-  static const _missingOvr = 50.0;
-  static const _tierCounts = <int>[5, 7, 9, 6, 3];
-
   /// Computes teamPower rounded to the two decimal places shown in the UI.
   double computeTeamPower(Team team) => _round(computeTeamPowerPrecise(team));
 
@@ -34,30 +30,41 @@ class LeagueStrengthService {
           ..sort((a, b) => b.compareTo(a));
 
     var sum = 0.0;
-    for (var i = 0; i < _topN; i++) {
-      sum += i < overalls.length ? overalls[i] : _missingOvr;
+    for (var i = 0; i < balance.ai.teamPowerSquadSize; i++) {
+      sum += i < overalls.length ? overalls[i] : balance.ai.missingTeamPowerOvr;
     }
-    return sum / _topN;
+    return sum / balance.ai.teamPowerSquadSize;
   }
 
   /// Tier for a given rank position (1-indexed).
   /// Distribution: 1–3=elite, 4–9=contender, 10–18=pretender,
   /// 19–25=retool, 26–30=rebuild.
-  static TeamStatus tierForRank(int rank) {
-    if (rank <= 3) return TeamStatus.elite;
-    if (rank <= 9) return TeamStatus.contender;
-    if (rank <= 18) return TeamStatus.pretender;
-    if (rank <= 25) return TeamStatus.retool;
+  static TeamStatus tierForRank(
+    int rank, [
+    BalanceConfig balance = BalanceConfig.defaults,
+  ]) {
+    var upperRank = 0;
+    for (var i = TeamStatus.values.length - 1; i >= 0; i--) {
+      upperRank += balance.ai.statusDistribution[i];
+      if (rank <= upperRank) return TeamStatus.values[i];
+    }
     return TeamStatus.rebuild;
   }
 
   /// Applies hysteresis: clamps tier change to ±1 from previous.
-  static TeamStatus applyHysteresis(TeamStatus target, TeamStatus? previous) {
+  static TeamStatus applyHysteresis(
+    TeamStatus target,
+    TeamStatus? previous, [
+    BalanceConfig balance = BalanceConfig.defaults,
+  ]) {
     if (previous == null) return target;
     final tiers = TeamStatus.values;
     final targetIdx = tiers.indexOf(target);
     final prevIdx = tiers.indexOf(previous);
-    final clamped = targetIdx.clamp(prevIdx - 1, prevIdx + 1);
+    final clamped = targetIdx.clamp(
+      prevIdx - balance.ai.statusMaxTierChange,
+      prevIdx + balance.ai.statusMaxTierChange,
+    );
     return tiers[clamped];
   }
 
@@ -147,11 +154,21 @@ class LeagueStrengthService {
       return true;
     }
 
-    if (week == balance.calendar.tradeDeadlineWeek && day == 1) return true;
-    if (day == 1 && week >= 5 && week < balance.calendar.tradeDeadlineWeek) {
-      if ((week - 1) % 4 == 0) return true;
+    if (week == balance.calendar.tradeDeadlineWeek &&
+        day == balance.calendar.tradeDeadlineDay) {
+      return true;
     }
-    return week == balance.calendar.awardsWeek && day == 2;
+    if (day == balance.calendar.strengthRefreshDay &&
+        week >= balance.calendar.strengthRefreshFirstWeek &&
+        week < balance.calendar.tradeDeadlineWeek) {
+      if ((week - balance.calendar.strengthRefreshFirstWeek) %
+              balance.calendar.strengthRefreshIntervalWeeks ==
+          0) {
+        return true;
+      }
+    }
+    return week == balance.calendar.awardsWeek &&
+        day == balance.calendar.strengthAwardsRefreshDay;
   }
 
   static bool _isSigned(Player player) =>
@@ -179,8 +196,9 @@ class LeagueStrengthService {
       return [
         for (var i = 0; i < sorted.length; i++)
           applyHysteresis(
-            tierForRank(i + 1),
+            tierForRank(i + 1, balance),
             previousTable?.entryFor(sorted[i].id)?.teamStatus,
+            balance,
           ),
       ];
     }
@@ -193,7 +211,9 @@ class LeagueStrengthService {
       for (final team in sorted) previousTable?.entryFor(team.id)?.teamStatus,
     ];
     if (previousTable == null) {
-      return [for (var rank = 1; rank <= 30; rank++) tierForRank(rank)];
+      return [
+        for (var rank = 1; rank <= 30; rank++) tierForRank(rank, balance),
+      ];
     }
 
     final memo = <String, List<int>?>{};
@@ -205,7 +225,7 @@ class LeagueStrengthService {
         return memo[key] = complete ? <int>[] : null;
       }
 
-      final target = TeamStatus.values.indexOf(tierForRank(index + 1));
+      final target = TeamStatus.values.indexOf(tierForRank(index + 1, balance));
       final previousStatus = previous[index];
       final previousIndex = previousStatus == null
           ? null
@@ -218,7 +238,9 @@ class LeagueStrengthService {
         candidate++
       ) {
         if (remaining[candidate] == 0) continue;
-        if (previousIndex != null && (candidate - previousIndex).abs() > 1) {
+        if (previousIndex != null &&
+            (candidate - previousIndex).abs() >
+                balance.ai.statusMaxTierChange) {
           continue;
         }
         final nextRemaining = [...remaining];
@@ -234,13 +256,14 @@ class LeagueStrengthService {
       return memo[key] = best;
     }
 
-    final indexes = solve(0, [..._tierCounts]);
+    final indexes = solve(0, [...balance.ai.statusDistribution]);
     if (indexes == null) {
       return [
         for (var i = 0; i < sorted.length; i++)
           applyHysteresis(
-            tierForRank(i + 1),
+            tierForRank(i + 1, balance),
             previousTable.entryFor(sorted[i].id)?.teamStatus,
+            balance,
           ),
       ];
     }

@@ -30,7 +30,10 @@ mixin _PlayerEventDecisions on _PlayerEventShared {
     required int saveSeed,
     required GameMessage message,
   }) {
-    var eventState = player.state.eventState.withCooldown('coldStreak', 1);
+    var eventState = player.state.eventState.withCooldown(
+      'coldStreak',
+      balance.events.coldStreakCooldownWeeks,
+    );
     var nextForm = player.state.form;
     if (optionId == 'accept') {
       final success = _roll(
@@ -96,7 +99,7 @@ mixin _PlayerEventDecisions on _PlayerEventShared {
     if (original == null) return state;
     var eventState = player.state.eventState.withCooldown(
       'injuryComplication',
-      52,
+      balance.events.injuryComplicationCooldownWeeks,
     );
     Injury? nextInjury;
     final random = _randomFor(
@@ -117,7 +120,10 @@ mixin _PlayerEventDecisions on _PlayerEventShared {
         daysTotal: original.daysTotal + extra,
         daysRemaining: extra,
       );
-      eventState = eventState.withCooldown('recurringInjury', 52);
+      eventState = eventState.withCooldown(
+        'recurringInjury',
+        balance.events.cautiousRecurrenceCooldownWeeks,
+      );
     } else if (optionId == 'full') {
       if (random.nextDouble() <
           balance.events.injuryComplicationFullRecurrenceChance) {
@@ -126,7 +132,10 @@ mixin _PlayerEventDecisions on _PlayerEventShared {
             random.nextDouble() *
                 (balance.events.injuryComplicationFullRecurrenceFractionMax -
                     balance.events.injuryComplicationFullRecurrenceFractionMin);
-        final days = max(1, (original.daysTotal * fraction).round());
+        final days = max(
+          balance.events.recurrenceDaysMin,
+          (original.daysTotal * fraction).round(),
+        );
         nextInjury = original.copyWith(
           id: '${original.id}_recurrence',
           daysTotal: days,
@@ -159,7 +168,7 @@ mixin _PlayerEventDecisions on _PlayerEventShared {
     var stateAfter = state;
     var eventState = player.state.eventState.withCooldown(
       'veteranMotivation',
-      4,
+      balance.events.veteranMotivationCooldownWeeks,
     );
     final mentor = optionId == 'mentor' || optionId == 'accept';
     final ignore = optionId == 'ignore' || optionId == 'decline';
@@ -168,7 +177,9 @@ mixin _PlayerEventDecisions on _PlayerEventShared {
             balance.events.veteranMentorDeterminationMin) {
       final young = team.roster
           .where(
-            (candidate) => candidate.id != player.id && candidate.age <= 23,
+            (candidate) =>
+                candidate.id != player.id &&
+                candidate.age <= balance.events.veteranMentorTargetAgeMax,
           )
           .toList();
       if (young.isNotEmpty) {
@@ -207,7 +218,10 @@ mixin _PlayerEventDecisions on _PlayerEventShared {
         team.id,
         current.copyWith(
           state: current.state.copyWith(
-            form: balance.player.clampForm(current.state.form - 1),
+            form: balance.player.clampForm(
+              current.state.form -
+                  balance.events.veteranMotivationIgnoreFormPenalty,
+            ),
           ),
         ),
       );
@@ -230,7 +244,8 @@ mixin _PlayerEventDecisions on _PlayerEventShared {
   ) {
     var eventState = player.state.eventState.withCooldown(
       'extraTraining',
-      4 * balance.events.extraTrainingCooldownMonths,
+      balance.events.extraTrainingWeeksPerMonth *
+          balance.events.extraTrainingCooldownMonths,
     );
     var form = player.state.form;
     if (optionId == 'accept') {
@@ -252,7 +267,9 @@ mixin _PlayerEventDecisions on _PlayerEventShared {
           );
     } else if (optionId == 'decline') {
       if (player.personality == PlayerPersonality.ambitious) {
-        form = balance.player.clampForm(form - 1);
+        form = balance.player.clampForm(
+          form - balance.events.extraTrainingDeclineFormPenalty,
+        );
       }
     } else {
       return state;

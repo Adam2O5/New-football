@@ -5,6 +5,27 @@
 /// consume these fields in the later event implementation tasks.
 class EventsBalance {
   const EventsBalance({
+    this.veteranMotivationAgeMin = 32,
+    this.veteranMotivationSeasonsMin = 4,
+    this.veteranMentorTargetAgeMax = 23,
+    this.veteranMotivationCooldownWeeks = 4,
+    this.veteranMotivationIgnoreFormPenalty = 1.0,
+    this.extraTrainingDeterminationMin = 7,
+    this.extraTrainingFormMin = 6.0,
+    this.extraTrainingDeclineFormPenalty = 1.0,
+    this.extraTrainingWeeksPerMonth = 4,
+    this.coldStreakCooldownWeeks = 1,
+    this.injuryComplicationCooldownWeeks = 52,
+    this.cautiousRecurrenceCooldownWeeks = 52,
+    this.recurrenceDaysMin = 1,
+    this.recurringInjuryLookbackWeeks = 52,
+    this.recurringInjuryProneMin = 7,
+    this.coldStreakDecisionDays = 1,
+    this.injuryComplicationDecisionDays = 1,
+    this.veteranMotivationDecisionDays = 2,
+    this.extraTrainingDecisionDays = 1,
+    this.plateauDecisionDays = 2,
+    this.personalSupportDecisionDays = 3,
     this.inspiringPerformanceFormBonus = 1.0,
     this.inspiringPerformanceProgressBonus = 5.0,
     this.minutesRequestChance = 0.03,
@@ -111,6 +132,27 @@ class EventsBalance {
   });
 
   final double minutesRequestChance;
+  final int veteranMotivationAgeMin;
+  final int veteranMotivationSeasonsMin;
+  final int veteranMentorTargetAgeMax;
+  final int veteranMotivationCooldownWeeks;
+  final double veteranMotivationIgnoreFormPenalty;
+  final int extraTrainingDeterminationMin;
+  final double extraTrainingFormMin;
+  final double extraTrainingDeclineFormPenalty;
+  final int extraTrainingWeeksPerMonth;
+  final int coldStreakCooldownWeeks;
+  final int injuryComplicationCooldownWeeks;
+  final int cautiousRecurrenceCooldownWeeks;
+  final int recurrenceDaysMin;
+  final int recurringInjuryLookbackWeeks;
+  final int recurringInjuryProneMin;
+  final int coldStreakDecisionDays;
+  final int injuryComplicationDecisionDays;
+  final int veteranMotivationDecisionDays;
+  final int extraTrainingDecisionDays;
+  final int plateauDecisionDays;
+  final int personalSupportDecisionDays;
   final double inspiringPerformanceFormBonus;
   final double inspiringPerformanceProgressBonus;
   final double minutesRequestAmbitiousChance;

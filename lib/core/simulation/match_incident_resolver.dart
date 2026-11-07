@@ -132,7 +132,8 @@ class MatchIncidentResolver {
           .toDouble();
 
   double directRedProbability({required bool oneOnOne}) =>
-      (balance.matchday.redDirect * (oneOnOne ? 2.0 : 1.0))
+      (balance.matchday.redDirect *
+              (oneOnOne ? balance.matchday.oneOnOneRedMultiplier : 1.0))
           .clamp(0.0, 1.0)
           .toDouble();
 
@@ -202,7 +203,7 @@ class MatchIncidentResolver {
           pressing: tactics.pressing,
         ) *
         balance.matchday.weatherInjuryMultiplier(context.weather) *
-        (duelInvolved ? 2.5 : 1.0);
+        (duelInvolved ? balance.matchday.duelInjuryMultiplier : 1.0);
     return probability.clamp(0.0, 1.0).toDouble();
   }
 

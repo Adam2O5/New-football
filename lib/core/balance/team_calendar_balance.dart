@@ -1,3 +1,5 @@
+import 'package:new_football/core/models/enums.dart';
+
 class RosterBalance {
   static const defaultSeedSize = 26;
   const RosterBalance({
@@ -18,7 +20,13 @@ class RosterBalance {
 }
 
 class CalendarBalance {
+  static const winPoints = 3;
+  static const drawPoints = 1;
   const CalendarBalance({
+    this.strengthRefreshFirstWeek = 5,
+    this.strengthRefreshIntervalWeeks = 4,
+    this.strengthRefreshDay = 1,
+    this.strengthAwardsRefreshDay = 2,
     this.regularSeasonWeeks = 29,
     this.tradeDeadlineWeek = 23,
     this.playInWeek = 31,
@@ -48,6 +56,10 @@ class CalendarBalance {
   });
 
   final int regularSeasonWeeks;
+  final int strengthRefreshFirstWeek;
+  final int strengthRefreshIntervalWeeks;
+  final int strengthRefreshDay;
+  final int strengthAwardsRefreshDay;
   final int tradeDeadlineWeek;
   final int playInWeek;
   final int playoffStartWeek;
@@ -86,6 +98,27 @@ class ChemistryBalance {
   static const recentResultsWindow = 8;
 
   const ChemistryBalance({
+    this.fullLineupChemistryBonus = 0.3,
+    this.foreignPositionChemistryPenalty = 0.4,
+    this.experiencedSeasonsMin = 3,
+    this.experiencedPlayersMin = 10,
+    this.experiencedChemistryBonus = 0.3,
+    this.nationalityClusterSize = 4,
+    this.nationalityClusterBonus = 0.2,
+    this.nationalityBonusMax = 1.0,
+    this.atmosphereStreakLength = 3,
+    this.atmosphereStreakDelta = 3,
+    this.rankAtmosphereBands = const [(6, 2), (2, 1)],
+    this.expectedWinsRankPenalty = 0.45,
+    this.expectedWinsBaseShare = 0.5,
+    this.emptyTeamForm = 0.5,
+    this.walkoverAtmospherePenalty = -15,
+    this.championshipAtmosphereBonus = 30,
+    this.playoffMissAtmosphere = const {
+      TeamStatus.elite: -15,
+      TeamStatus.contender: -12,
+      TeamStatus.pretender: -8,
+    },
     this.chemistryBands = const [
       (30.0, 0.95),
       (50.0, 0.98),
@@ -139,6 +172,23 @@ class ChemistryBalance {
   });
 
   final double multMin;
+  final double fullLineupChemistryBonus;
+  final double foreignPositionChemistryPenalty;
+  final int experiencedSeasonsMin;
+  final int experiencedPlayersMin;
+  final double experiencedChemistryBonus;
+  final int nationalityClusterSize;
+  final double nationalityClusterBonus;
+  final double nationalityBonusMax;
+  final int atmosphereStreakLength;
+  final int atmosphereStreakDelta;
+  final List<(int minDifference, int delta)> rankAtmosphereBands;
+  final double expectedWinsRankPenalty;
+  final double expectedWinsBaseShare;
+  final double emptyTeamForm;
+  final int walkoverAtmospherePenalty;
+  final int championshipAtmosphereBonus;
+  final Map<TeamStatus, int> playoffMissAtmosphere;
   final List<(double upperBound, double multiplier)> chemistryBands;
   final List<(int upperBound, double multiplier)> atmosphereBands;
   final List<(int upperBound, double multiplier)> negativeEventBands;

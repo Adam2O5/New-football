@@ -275,15 +275,23 @@ mixin _SeasonAwards on _SeasonServiceShared {
     final stats = candidate.stats;
     final production = stats.minutes == 0
         ? 0.0
-        : ((stats.goals + stats.assists) * 90 / stats.minutes / 4)
+        : ((stats.goals + stats.assists) *
+                  balance.awards.minutesPerGame /
+                  stats.minutes /
+                  balance.awards.productionNormalizer)
               .clamp(0.0, 1.0)
               .toDouble();
-    final overallNorm = ((candidate.player.overall(balance) - 50) / 49)
-        .clamp(0.0, 1.0)
-        .toDouble();
-    return 0.25 * (stats.ratingAvg / 10).clamp(0.0, 1.0).toDouble() +
-        0.20 * production +
-        0.10 * overallNorm;
+    final overallNorm =
+        ((candidate.player.overall(balance) - balance.awards.overallBase) /
+                balance.awards.overallNormalizer)
+            .clamp(0.0, 1.0)
+            .toDouble();
+    return balance.awards.mvpRatingWeight *
+            (stats.ratingAvg / balance.awards.ratingNormalizer)
+                .clamp(0.0, 1.0)
+                .toDouble() +
+        balance.awards.mvpProductionWeight * production +
+        balance.awards.mvpOverallWeight * overallNorm;
   }
 
   _AwardCandidate? _bestDefender(Iterable<_AwardCandidate> pool) {
@@ -306,9 +314,12 @@ mixin _SeasonAwards on _SeasonServiceShared {
       final actions = maxDefensiveActions == 0
           ? 0.0
           : (stats.tackles + stats.interceptions) / maxDefensiveActions;
-      return 0.40 * (stats.ratingAvg / 10).clamp(0.0, 1.0).toDouble() +
-          0.25 * cleanShare +
-          0.20 * actions;
+      return balance.awards.dpoyRatingWeight *
+              (stats.ratingAvg / balance.awards.ratingNormalizer)
+                  .clamp(0.0, 1.0)
+                  .toDouble() +
+          balance.awards.dpoyCleanSheetsWeight * cleanShare +
+          balance.awards.dpoyActionsWeight * actions;
     });
   }
 
@@ -360,10 +371,13 @@ mixin _SeasonAwards on _SeasonServiceShared {
       final goalsPrevented = maxGoalsPrevented == 0
           ? 0.0
           : stats.goalsPrevented / maxGoalsPrevented;
-      return 0.45 * savePct +
-          0.25 * cleanSheets +
-          0.20 * goalsPrevented +
-          0.10 * (stats.ratingAvg / 10).clamp(0.0, 1.0).toDouble();
+      return balance.awards.gkSaveWeight * savePct +
+          balance.awards.gkCleanSheetsWeight * cleanSheets +
+          balance.awards.gkGoalsPreventedWeight * goalsPrevented +
+          balance.awards.gkRatingWeight *
+              (stats.ratingAvg / balance.awards.ratingNormalizer)
+                  .clamp(0.0, 1.0)
+                  .toDouble();
     });
   }
 
@@ -431,15 +445,23 @@ mixin _SeasonAwards on _SeasonServiceShared {
     final stats = candidate.stats;
     final production = minutes == 0
         ? 0.0
-        : ((stats.goals + stats.assists) * 90 / minutes / 4)
+        : ((stats.goals + stats.assists) *
+                  balance.awards.minutesPerGame /
+                  minutes /
+                  balance.awards.productionNormalizer)
               .clamp(0.0, 1.0)
               .toDouble();
-    final defensive = ((stats.tackles + stats.interceptions) / 40)
-        .clamp(0.0, 1.0)
-        .toDouble();
-    return 0.60 * (stats.ratingAvg / 10).clamp(0.0, 1.0).toDouble() +
-        0.25 * production +
-        0.15 * defensive;
+    final defensive =
+        ((stats.tackles + stats.interceptions) /
+                balance.awards.defensiveNormalizer)
+            .clamp(0.0, 1.0)
+            .toDouble();
+    return balance.awards.totsRatingWeight *
+            (stats.ratingAvg / balance.awards.ratingNormalizer)
+                .clamp(0.0, 1.0)
+                .toDouble() +
+        balance.awards.totsProductionWeight * production +
+        balance.awards.totsDefensiveWeight * defensive;
   }
 
   String? _coachOfYearTeamId(LeagueState league) {
@@ -471,11 +493,14 @@ mixin _SeasonAwards on _SeasonServiceShared {
         orElse: () => Standing(teamId: team.id),
       );
       final entry = league.strengthTable?.entryFor(team.id);
-      final expectedRank = entry?.expectedRank ?? 15;
-      final finalPosition = finalPositions[team.id] ?? 30;
+      final expectedRank =
+          entry?.expectedRank ?? balance.ai.expectedRankFallback;
+      final finalPosition =
+          finalPositions[team.id] ?? balance.awards.finalRankFallback;
       final placeVsSeed = expectedRank - finalPosition;
       final winsVsProjected =
-          standing.wins - TeamManagementService.expectedWins(expectedRank);
+          standing.wins -
+          TeamManagementService.expectedWins(expectedRank, balance);
       final score = winsVsProjected + placeVsSeed;
       if (score > bestScore ||
           (score == bestScore && placeVsSeed > bestPlace) ||
