@@ -1,3 +1,4 @@
+import 'package:new_football/core/balance/balance_config.dart';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -32,6 +33,7 @@ class PlayerListTile extends StatelessWidget {
     this.enableDragDrop = false,
     this.onAcceptDrop,
     this.metricMode = SquadTileMetricMode.staminaForm,
+    this.balance = BalanceConfig.defaults,
   });
 
   final AppLocalizations l10n;
@@ -57,6 +59,7 @@ class PlayerListTile extends StatelessWidget {
   final bool enableDragDrop;
   final void Function(String draggedPlayerId)? onAcceptDrop;
   final SquadTileMetricMode metricMode;
+  final BalanceConfig balance;
 
   AssignedSlot? get _resolvedAssignment => positionAssignment ?? assignment;
 
@@ -76,6 +79,7 @@ class PlayerListTile extends StatelessWidget {
       roundedOvr,
       _formatForm(form),
       _zoneLabel(l10n, zone),
+      _formatForm(balance.ui.formDisplayMax),
     );
     final statuses = <String>[
       if (status.hasActiveInjury) l10n.squad_statusInjury,
@@ -112,6 +116,7 @@ class PlayerListTile extends StatelessWidget {
               label: l10n.squad_formLabel,
               width: badgeSize,
               bar: FormIndicator(
+                balance: balance,
                 form: clampedForm,
                 l10n: l10n,
                 width: badgeSize,
@@ -122,8 +127,8 @@ class PlayerListTile extends StatelessWidget {
       case SquadTileMetricMode.potential:
         return PotentialStars(
           playerId: player.id,
-          stars: displayedPotentialStars(player.potentialStars),
-          color: potentialStarColor(player.age),
+          stars: displayedPotentialStars(player.potentialStars, balance),
+          color: potentialStarColor(player.age, balance),
           l10n: l10n,
           iconSize: compact ? 11 : 13,
         );
@@ -140,7 +145,7 @@ class PlayerListTile extends StatelessWidget {
   Widget _buildPresentationTile(BuildContext context) {
     final status = statusFor(player, _resolvedAssignment);
     final roundedOvr = roundedOvrForDisplay(player.overall());
-    final clampedForm = clampedFormValue(player.state.form);
+    final clampedForm = clampedFormValue(player.state.form, balance);
     final clampedStamina = clampedStaminaValue(player.state.stamina.toDouble());
     final nameParts = splitPlayerName(player.name);
     final rowSemantics = _rowSemantics(status, roundedOvr, clampedForm);

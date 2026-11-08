@@ -150,8 +150,14 @@ class PlayerDetailScreen extends ConsumerWidget {
                       l10n.stat_pot,
                       PotentialStars(
                         playerId: p.id,
-                        stars: displayedPotentialStars(p.potentialStars),
-                        color: potentialStarColor(p.age),
+                        stars: displayedPotentialStars(
+                          p.potentialStars,
+                          ref.watch(balanceProvider),
+                        ),
+                        color: potentialStarColor(
+                          p.age,
+                          ref.watch(balanceProvider),
+                        ),
                         l10n: l10n,
                       ),
                     ),
@@ -232,7 +238,7 @@ class PlayerDetailScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             _sectionTitle(context, l10n.playerDetail_attributes),
-            ..._attributeRows(p),
+            ..._attributeRows(p, ref),
             const SizedBox(height: 16),
             _sectionTitle(context, l10n.playerDetail_contract),
             Card(
@@ -408,28 +414,29 @@ class PlayerDetailScreen extends ConsumerWidget {
     );
   }
 
-  List<Widget> _attributeRows(Player p) {
+  List<Widget> _attributeRows(Player p, WidgetRef ref) {
+    final maximum = ref.watch(balanceProvider).player.attributeMax;
     return p.attributes.map(
       outfield: (a) => [
-        _bar('Pace', a.stats.pace),
-        _bar('Shooting', a.stats.shooting),
-        _bar('Passing', a.stats.passing),
-        _bar('Dribbling', a.stats.dribbling),
-        _bar('Defending', a.stats.defending),
-        _bar('Physical', a.stats.physicality),
+        _bar('Pace', a.stats.pace, maximum),
+        _bar('Shooting', a.stats.shooting, maximum),
+        _bar('Passing', a.stats.passing, maximum),
+        _bar('Dribbling', a.stats.dribbling, maximum),
+        _bar('Defending', a.stats.defending, maximum),
+        _bar('Physical', a.stats.physicality, maximum),
       ],
       goalkeeper: (a) => [
-        _bar('Diving', a.stats.diving),
-        _bar('Handling', a.stats.handling),
-        _bar('Kicking', a.stats.kicking),
-        _bar('Reflexes', a.stats.reflexes),
-        _bar('Speed', a.stats.speed),
-        _bar('Positioning', a.stats.positioning),
+        _bar('Diving', a.stats.diving, maximum),
+        _bar('Handling', a.stats.handling, maximum),
+        _bar('Kicking', a.stats.kicking, maximum),
+        _bar('Reflexes', a.stats.reflexes, maximum),
+        _bar('Speed', a.stats.speed, maximum),
+        _bar('Positioning', a.stats.positioning, maximum),
       ],
     );
   }
 
-  Widget _bar(String label, int value) {
+  Widget _bar(String label, int value, int maximum) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -437,7 +444,7 @@ class PlayerDetailScreen extends ConsumerWidget {
           SizedBox(width: 100, child: Text(label)),
           Expanded(
             child: LinearProgressIndicator(
-              value: (value / 99).clamp(0.0, 1.0),
+              value: (value / maximum).clamp(0.0, 1.0),
               minHeight: 8,
             ),
           ),

@@ -71,8 +71,8 @@ class RankingsScreen extends ConsumerWidget {
               children: [
                 _teamRankingTab(context, l10n, league),
                 _tradePowerRankingTab(context, l10n, league),
-                _youngPlayersRankingTab(context, l10n, league),
-                _playersRankingTab(context, l10n, league),
+                _youngPlayersRankingTab(context, l10n, league, ref),
+                _playersRankingTab(context, l10n, league, ref),
               ],
             ),
           ),
@@ -229,11 +229,15 @@ class RankingsScreen extends ConsumerWidget {
     BuildContext context,
     AppLocalizations l10n,
     LeagueState league,
+    WidgetRef ref,
   ) {
     final candidates = <_PlayerRankingRow>[];
     for (final team in league.teams) {
       for (final player in team.roster) {
-        if (player.age < 18 || player.age > 21) continue;
+        if (player.age < ref.read(balanceProvider).ui.youngRankingAgeMin ||
+            player.age > ref.read(balanceProvider).ui.youngRankingAgeMax) {
+          continue;
+        }
         candidates.add(
           _PlayerRankingRow(
             team: team,
@@ -244,7 +248,9 @@ class RankingsScreen extends ConsumerWidget {
       }
     }
     candidates.sort((a, b) => b.sortValue.compareTo(a.sortValue));
-    final top = candidates.take(30).toList();
+    final top = candidates
+        .take(ref.read(balanceProvider).ui.rankingPlayerLimit)
+        .toList();
 
     if (top.isEmpty) return Center(child: Text(l10n.rankings_noData));
     return _playerTable(l10n, top);
@@ -258,6 +264,7 @@ class RankingsScreen extends ConsumerWidget {
     BuildContext context,
     AppLocalizations l10n,
     LeagueState league,
+    WidgetRef ref,
   ) {
     final all = <_PlayerRankingRow>[];
     for (final team in league.teams) {
@@ -278,7 +285,9 @@ class RankingsScreen extends ConsumerWidget {
         a.player.computePointValue(),
       );
     });
-    final top = all.take(30).toList();
+    final top = all
+        .take(ref.read(balanceProvider).ui.rankingPlayerLimit)
+        .toList();
 
     if (top.isEmpty) return Center(child: Text(l10n.rankings_noData));
     return _playerTable(l10n, top);

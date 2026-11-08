@@ -284,8 +284,14 @@ class _DevelopmentScreenState extends ConsumerState<DevelopmentScreen>
                 width: _colPotentialWidth,
                 child: PotentialStars(
                   playerId: player.id,
-                  stars: displayedPotentialStars(player.potentialStars),
-                  color: potentialStarColor(player.age),
+                  stars: displayedPotentialStars(
+                    player.potentialStars,
+                    ref.watch(balanceProvider),
+                  ),
+                  color: potentialStarColor(
+                    player.age,
+                    ref.watch(balanceProvider),
+                  ),
                   l10n: l10n,
                 ),
               ),

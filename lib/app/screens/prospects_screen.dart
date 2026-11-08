@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:new_football/core/balance/balance_config.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -50,6 +51,7 @@ Widget _buildPotentialEstimate(
   AppLocalizations l10n,
   Prospect prospect,
   ScoutingKnowledge? knowledge,
+  BalanceConfig balance,
 ) {
   final min = knowledge?.estimatedPotentialMin;
   final max = knowledge?.estimatedPotentialMax;
@@ -59,8 +61,8 @@ Widget _buildPotentialEstimate(
   final midpoint = (min + max) / 2;
   return PotentialStars(
     playerId: prospect.id,
-    stars: displayedPotentialStars(midpoint),
-    color: potentialStarColor(prospect.age),
+    stars: displayedPotentialStars(midpoint, balance),
+    color: potentialStarColor(prospect.age, balance),
     l10n: l10n,
   );
 }

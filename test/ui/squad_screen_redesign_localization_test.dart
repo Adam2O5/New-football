@@ -214,7 +214,7 @@ void _expectProperty7LocalizationValues(AppLocalizations l10n) {
     l10n.squad_statusSlotEmpty,
     l10n.squad_playerSelected,
     l10n.squad_playerNotSelected,
-    l10n.squad_formIndicatorSemantics('10'),
+    l10n.squad_formIndicatorSemantics('10', '10'),
     l10n.squad_zoneFrameSemantics(l10n.squad_zoneXi),
     l10n.squad_profileAction('Property Seven Player'),
   ];
@@ -257,7 +257,10 @@ void _expectProperty7Surface(
 
   final formValue = clampedFormValue(player.state.form);
   expect(formValue, inInclusiveRange(0.0, 10.0));
-  final formLabel = l10n.squad_formIndicatorSemantics(_formatForm(formValue));
+  final formLabel = l10n.squad_formIndicatorSemantics(
+    _formatForm(formValue),
+    '10',
+  );
   expect(
     find.descendant(of: rowFinder, matching: find.bySemanticsLabel(formLabel)),
     findsOneWidget,
@@ -555,6 +558,7 @@ String _property7RowSemanticsLabel(
     roundedOvrForDisplay(player.overall()),
     _formatForm(form),
     _localizedZoneLabel(l10n, zone),
+    '10',
   );
   final statuses = <String>[
     if (status.hasActiveInjury) l10n.squad_statusInjury,
@@ -618,7 +622,7 @@ void _expectLocalizedSquadSurface(
   ];
   final markerStatus = statusLabels.join(', ');
   final rowLabel =
-      '${l10n.squad_playerRowSemantics(fixture.player.name, fixture.player.position.code, roundedOvr, formText, zoneLabel)}. '
+      '${l10n.squad_playerRowSemantics(fixture.player.name, fixture.player.position.code, roundedOvr, formText, zoneLabel, '10')}. '
       '${statusLabels.join('. ')}.';
   final markerLabel = l10n.squad_playerMarkerSemantics(
     fixture.player.name,
@@ -642,7 +646,7 @@ void _expectLocalizedSquadSurface(
     l10n.squad_zoneFrameSemantics(zoneLabel),
     l10n.squad_positionBadgeSemantics(fixture.player.position.code),
     l10n.squad_ovrBadgeSemantics(roundedOvr),
-    l10n.squad_formIndicatorSemantics(formText),
+    l10n.squad_formIndicatorSemantics(formText, '10'),
     l10n.squad_profileAction(fixture.player.name),
     l10n.squad_rosterTitle,
     l10n.squad_metricStaminaForm,
@@ -736,7 +740,7 @@ void _expectLocalizedSquadSurface(
     find.descendant(
       of: rowKeyFinder,
       matching: find.bySemanticsLabel(
-        l10n.squad_formIndicatorSemantics(formText),
+        l10n.squad_formIndicatorSemantics(formText, '10'),
       ),
     ),
     findsOneWidget,

@@ -21,7 +21,7 @@ class _PlayersFilterTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final attributes = ref.watch(balanceProvider).player;
+    final ui = ref.watch(balanceProvider).ui;
     final teamOptions = <(String, String)>[
       (PlayersFilterState.noClubSentinel, l10n.searchFilters_noClub),
       for (final team in league?.teams ?? const []) (team.id, team.name),
@@ -61,45 +61,50 @@ class _PlayersFilterTab extends ConsumerWidget {
         _RangeFilterTile(
           label: l10n.prospects_potential,
           filter: filters.potential,
-          min: 0,
-          max: 5,
-          divisions: 10,
+          min: ui.filterPotentialMin,
+          max: ui.filterPotentialMax,
+          divisions:
+              ((ui.filterPotentialMax - ui.filterPotentialMin) /
+                      ui.filterPotentialStep)
+                  .round(),
           formatValue: (v) => v.toStringAsFixed(1),
           onChanged: (v) => onChanged(filters.copyWith(potential: v)),
         ),
         _RangeFilterTile(
           label: l10n.prospects_age,
           filter: filters.age,
-          min: 15,
-          max: 45,
-          divisions: 30,
+          min: ui.playerFilterAgeMin.toDouble(),
+          max: ui.playerFilterAgeMax.toDouble(),
+          divisions: ui.playerFilterAgeMax - ui.playerFilterAgeMin,
           onChanged: (v) => onChanged(filters.copyWith(age: v)),
         ),
         _RangeFilterTile(
           label: l10n.stat_ovr,
           filter: filters.ovr,
-          min: attributes.attributeMin.toDouble(),
-          max: attributes.attributeMax.toDouble(),
-          divisions: attributes.attributeMax > attributes.attributeMin
-              ? attributes.attributeMax - attributes.attributeMin
+          min: ui.filterOvrMin.toDouble(),
+          max: ui.filterOvrMax.toDouble(),
+          divisions: ui.filterOvrMax > ui.filterOvrMin
+              ? ui.filterOvrMax - ui.filterOvrMin
               : 1,
           onChanged: (v) => onChanged(filters.copyWith(ovr: v)),
         ),
         _RangeFilterTile(
           label: l10n.searchFilters_salary,
           filter: filters.salary,
-          min: 0,
-          max: 60000000,
-          divisions: 60,
+          min: ui.filterSalaryMin,
+          max: ui.filterSalaryMax,
+          divisions:
+              ((ui.filterSalaryMax - ui.filterSalaryMin) / ui.filterSalaryStep)
+                  .round(),
           formatValue: _formatMoney,
           onChanged: (v) => onChanged(filters.copyWith(salary: v)),
         ),
         _RangeFilterTile(
           label: l10n.searchFilters_contractLength,
           filter: filters.contractLength,
-          min: 0,
-          max: 6,
-          divisions: 6,
+          min: ui.filterContractYearsMin.toDouble(),
+          max: ui.filterContractYearsMax.toDouble(),
+          divisions: ui.filterContractYearsMax - ui.filterContractYearsMin,
           onChanged: (v) => onChanged(filters.copyWith(contractLength: v)),
         ),
       ],
@@ -120,7 +125,7 @@ class _ProspectsFilterTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final attributes = ref.watch(balanceProvider).player;
+    final ui = ref.watch(balanceProvider).ui;
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -148,27 +153,30 @@ class _ProspectsFilterTab extends ConsumerWidget {
         _RangeFilterTile(
           label: l10n.prospects_potential,
           filter: filters.potential,
-          min: 0,
-          max: 5,
-          divisions: 10,
+          min: ui.filterPotentialMin,
+          max: ui.filterPotentialMax,
+          divisions:
+              ((ui.filterPotentialMax - ui.filterPotentialMin) /
+                      ui.filterPotentialStep)
+                  .round(),
           formatValue: (v) => v.toStringAsFixed(1),
           onChanged: (v) => onChanged(filters.copyWith(potential: v)),
         ),
         _RangeFilterTile(
           label: l10n.prospects_age,
           filter: filters.age,
-          min: 16,
-          max: 25,
-          divisions: 9,
+          min: ui.prospectFilterAgeMin.toDouble(),
+          max: ui.prospectFilterAgeMax.toDouble(),
+          divisions: ui.prospectFilterAgeMax - ui.prospectFilterAgeMin,
           onChanged: (v) => onChanged(filters.copyWith(age: v)),
         ),
         _RangeFilterTile(
           label: l10n.stat_ovr,
           filter: filters.ovr,
-          min: attributes.attributeMin.toDouble(),
-          max: attributes.attributeMax.toDouble(),
-          divisions: attributes.attributeMax > attributes.attributeMin
-              ? attributes.attributeMax - attributes.attributeMin
+          min: ui.filterOvrMin.toDouble(),
+          max: ui.filterOvrMax.toDouble(),
+          divisions: ui.filterOvrMax > ui.filterOvrMin
+              ? ui.filterOvrMax - ui.filterOvrMin
               : 1,
           onChanged: (v) => onChanged(filters.copyWith(ovr: v)),
         ),
@@ -202,7 +210,7 @@ class _ProspectsFilterTab extends ConsumerWidget {
   }
 }
 
-class _PicksFilterTab extends StatelessWidget {
+class _PicksFilterTab extends ConsumerWidget {
   const _PicksFilterTab({
     required this.l10n,
     required this.league,
@@ -216,7 +224,7 @@ class _PicksFilterTab extends StatelessWidget {
   final ValueChanged<PicksFilterState> onChanged;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final teamOptions = <(String, String)>[
       for (final team in league?.teams ?? const []) (team.id, team.name),
     ];
@@ -227,6 +235,7 @@ class _PicksFilterTab extends StatelessWidget {
     final currentYear = league?.currentSeason.year ?? DateTime.now().year;
     final yearBounds = yearSliderBounds(
       years.cast<int>(),
+      balance: ref.watch(balanceProvider),
       fallbackYear: currentYear,
     );
 

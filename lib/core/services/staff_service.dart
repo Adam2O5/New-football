@@ -28,7 +28,7 @@ class StaffService {
     Random? random,
     MessageService? messages,
   }) : _random = random ?? Random(),
-       _messages = messages ?? MessageService();
+       _messages = messages ?? MessageService(balance: balance);
 
   final BalanceConfig balance;
   final Random _random;

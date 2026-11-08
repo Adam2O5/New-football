@@ -85,12 +85,14 @@ class DaySimulator
            ),
        matchMessageEmitter =
            matchMessageEmitter ??
-           MatchMessageEmitter(messages: messages ?? MessageService()),
+           MatchMessageEmitter(
+             messages: messages ?? MessageService(balance: balance),
+           ),
        development = development ?? DevelopmentService(balance: balance),
        scouting = scouting ?? ScoutingService(balance: balance),
        contractMarket =
            contractMarket ?? ContractMarketService(balance: balance),
-       messages = messages ?? MessageService(),
+       messages = messages ?? MessageService(balance: balance),
        teamManagement =
            teamManagement ?? TeamManagementService(balance: balance),
        playerEvents =

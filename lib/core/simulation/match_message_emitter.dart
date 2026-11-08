@@ -1,3 +1,4 @@
+import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/match_state.dart';
@@ -8,8 +9,10 @@ import 'package:new_football/core/simulation/pre_match_validator.dart';
 /// the minute-by-minute engine. Messages are limited to fixtures involving
 /// the player's team; AI-only matches stay silent.
 class MatchMessageEmitter {
-  MatchMessageEmitter({MessageService? messages})
-    : _messages = messages ?? MessageService();
+  MatchMessageEmitter({
+    BalanceConfig balance = BalanceConfig.defaults,
+    MessageService? messages,
+  }) : _messages = messages ?? MessageService(balance: balance);
 
   final MessageService _messages;
 

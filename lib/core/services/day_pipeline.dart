@@ -131,6 +131,7 @@ class DayPipeline {
         league.currentWeek,
         league.currentDay,
         hour: hour,
+        balance: balance.messages,
       ),
     );
     if (!resolveExpired) return state;
@@ -210,10 +211,7 @@ class DayPipeline {
       delivered.currentWeek,
       delivered.currentDay,
     )) {
-      return HourStepOutput(
-        outcome: HourStepOutcome.notHourly,
-        league: league,
-      );
+      return HourStepOutput(outcome: HourStepOutcome.notHourly, league: league);
     }
     if (blockOnPendingUrgent && hasPendingUrgent(delivered)) {
       return HourStepOutput(

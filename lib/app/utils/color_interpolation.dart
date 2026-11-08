@@ -1,3 +1,4 @@
+import 'package:new_football/core/balance/balance_config.dart';
 import 'dart:math' show pow;
 import 'dart:ui' show Color;
 
@@ -24,10 +25,6 @@ class ColorStop {
 /// The lower and upper OVR values represented by [ovrGradientStops].
 const int minOvrGradientValue = 50;
 const int maxOvrGradientValue = 99;
-
-/// The lower and upper form values represented by [formGradientStops].
-const double minFormGradientValue = 0;
-const double maxFormGradientValue = 10;
 
 /// The lower and upper values represented by [percentGradientStops].
 const double minPercentGradientValue = 0;
@@ -165,15 +162,26 @@ Color ovrColorForRoundedValue(int roundedOvr) =>
 /// Form values at or below 1 use the red endpoint; values at or above 10 use
 /// the blue endpoint. `NaN` is treated as the safe lower endpoint and
 /// infinities are clamped to the corresponding finite endpoint.
-Color formColorForClampedValue(double form) =>
-    interpolateStops(_clampForm(form), formGradientStops);
+Color formColorForClampedValue(
+  double form, [
+  BalanceConfig balance = BalanceConfig.defaults,
+]) => interpolateStops(_clampForm(form, balance), formGradientStops);
 
 /// Clamps a raw form value to the inclusive 0–10 presentation scale.
-double clampedFormValue(double form) => _clampForm(form);
+double clampedFormValue(
+  double form, [
+  BalanceConfig balance = BalanceConfig.defaults,
+]) => _clampForm(form, balance);
 
 /// Returns the filled fraction for a raw form value on a 0–10 track.
-double formFillForValue(double form) =>
-    (_clampForm(form) / maxFormGradientValue).clamp(0.0, 1.0).toDouble();
+double formFillForValue(
+  double form, [
+  BalanceConfig balance = BalanceConfig.defaults,
+]) =>
+    ((_clampForm(form, balance) - balance.ui.formDisplayMin) /
+            (balance.ui.formDisplayMax - balance.ui.formDisplayMin))
+        .clamp(0.0, 1.0)
+        .toDouble();
 
 /// Returns the background colour for a 0–100 metric value after clamping.
 ///
@@ -323,12 +331,17 @@ int _lerpChannel(int lower, int upper, double fraction) {
   return value.round().clamp(0, 255).toInt();
 }
 
-double _clampForm(double value) {
+double _clampForm(
+  double value, [
+  BalanceConfig balance = BalanceConfig.defaults,
+]) {
   if (value.isNaN || value == double.negativeInfinity) {
-    return minFormGradientValue;
+    return balance.ui.formDisplayMin;
   }
-  if (value == double.infinity) return maxFormGradientValue;
-  return value.clamp(minFormGradientValue, maxFormGradientValue).toDouble();
+  if (value == double.infinity) return balance.ui.formDisplayMax;
+  return value
+      .clamp(balance.ui.formDisplayMin, balance.ui.formDisplayMax)
+      .toDouble();
 }
 
 double _clampPercent(double value) {

@@ -37,7 +37,7 @@ class PlayerEventService
     MessageService? messages,
     CalendarService? calendar,
   }) : calendar = calendar ?? CalendarService(balance: balance),
-       messages = messages ?? MessageService();
+       messages = messages ?? MessageService(balance: balance);
 
   @override
   final BalanceConfig balance;

@@ -19,9 +19,9 @@ void main() {
             overrides: [
               balanceProvider.overrideWithValue(
                 BalanceConfig(
-                  player: PlayerBalance(
-                    attributeMin: bounds.$1,
-                    attributeMax: bounds.$2,
+                  ui: UiBalance(
+                    filterOvrMin: bounds.$1,
+                    filterOvrMax: bounds.$2,
                   ),
                 ),
               ),

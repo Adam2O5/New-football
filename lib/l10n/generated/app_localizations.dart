@@ -1654,8 +1654,8 @@ abstract class AppLocalizations {
   /// No description provided for @home_simulateHour.
   ///
   /// In pl, this message translates to:
-  /// **'Symuluj godzinę · {hour}/10'**
-  String home_simulateHour(int hour);
+  /// **'Symuluj godzinę · {hour}/{hours}'**
+  String home_simulateHour(int hour, int hours);
 
   /// No description provided for @home_simulateToNextMatch.
   ///
@@ -1827,13 +1827,14 @@ abstract class AppLocalizations {
   /// Pełna etykieta dostępności wiersza zawodnika; aktywne statusy są dołączane osobno.
   ///
   /// In pl, this message translates to:
-  /// **'{name}, pozycja {position}, OVR {ovr}, forma {form} na 10, strefa {zone}'**
+  /// **'{name}, pozycja {position}, OVR {ovr}, forma {form} na {maximum}, strefa {zone}'**
   String squad_playerRowSemantics(
     String name,
     String position,
     int ovr,
     String form,
     String zone,
+    String maximum,
   );
 
   /// Etykieta dostępności znacznika zawodnika na boisku; status zawiera aktywne kontuzje, zawieszenia i niedopasowanie pozycji.
@@ -1867,8 +1868,8 @@ abstract class AppLocalizations {
   /// Etykieta dostępności clamped wartości formy na poziomej skali 0–10.
   ///
   /// In pl, this message translates to:
-  /// **'Forma: {form} na 10'**
-  String squad_formIndicatorSemantics(String form);
+  /// **'Forma: {form} na {maximum}'**
+  String squad_formIndicatorSemantics(String form, String maximum);
 
   /// Niezależna etykieta akcji otwierającej profil reprezentowanego zawodnika.
   ///
@@ -2431,8 +2432,8 @@ abstract class AppLocalizations {
   /// No description provided for @freeAgency_rosterUsage.
   ///
   /// In pl, this message translates to:
-  /// **'Skład: {count}/30'**
-  String freeAgency_rosterUsage(Object count);
+  /// **'Skład: {count}/{maximum}'**
+  String freeAgency_rosterUsage(int count, int maximum);
 
   /// No description provided for @freeAgency_empty.
   ///
@@ -2485,8 +2486,8 @@ abstract class AppLocalizations {
   /// No description provided for @freeAgency_invalidOffer.
   ///
   /// In pl, this message translates to:
-  /// **'Podaj prawidłową pensję i 1–5 lat kontraktu'**
-  String get freeAgency_invalidOffer;
+  /// **'Podaj prawidłową pensję i {minYears}–{maxYears} lat kontraktu'**
+  String freeAgency_invalidOffer(int minYears, int maxYears);
 
   /// No description provided for @freeAgency_accepted.
   ///
@@ -3796,8 +3797,8 @@ abstract class AppLocalizations {
   /// No description provided for @staff_yearsRange.
   ///
   /// In pl, this message translates to:
-  /// **'Długość kontraktu musi wynosić od 1 do 4 lat'**
-  String get staff_yearsRange;
+  /// **'Długość kontraktu musi wynosić od {minYears} do {maxYears} lat'**
+  String staff_yearsRange(int minYears, int maxYears);
 
   /// No description provided for @staff_capExceeded.
   ///
@@ -5416,8 +5417,8 @@ abstract class AppLocalizations {
   /// No description provided for @squad_belowXi.
   ///
   /// In pl, this message translates to:
-  /// **'Dostępnych jest mniej niż 11 zdrowych zawodników'**
-  String get squad_belowXi;
+  /// **'Dostępnych jest mniej niż {minimum} zdrowych zawodników'**
+  String squad_belowXi(int minimum);
 
   /// No description provided for @squad_xiCount.
   ///
@@ -6698,8 +6699,12 @@ abstract class AppLocalizations {
   /// No description provided for @msg_draftedRightsReminder_body.
   ///
   /// In pl, this message translates to:
-  /// **'Masz prawa do {playerName}; roster: {rosterCount}/30.'**
-  String msg_draftedRightsReminder_body(Object playerName, Object rosterCount);
+  /// **'Masz prawa do {playerName}; roster: {rosterCount}/{maximum}.'**
+  String msg_draftedRightsReminder_body(
+    String playerName,
+    int rosterCount,
+    int maximum,
+  );
 
   /// No description provided for @msg_apronWarning_title.
   ///
@@ -7528,8 +7533,8 @@ abstract class AppLocalizations {
   /// No description provided for @msg_trade_hardRejected_body.
   ///
   /// In pl, this message translates to:
-  /// **'Negocjacje są zablokowane przez 30 dni.'**
-  String get msg_trade_hardRejected_body;
+  /// **'Negocjacje są zablokowane przez {days} dni.'**
+  String msg_trade_hardRejected_body(int days);
 
   /// No description provided for @msg_trade_ntcRefusal_title.
   ///

@@ -19,7 +19,7 @@ mixin _ContractScreenOfferSections
         window == ContractMarketWindow.freeAgencyPhaseI;
     final hour = (league.currentHour ?? 1).clamp(
       1,
-      BalanceConfig.defaults.contracts.hoursPerDay,
+      ref.read(balanceProvider).contracts.hoursPerDay,
     );
     return Card(
       child: Padding(
@@ -43,7 +43,7 @@ mixin _ContractScreenOfferSections
             const SizedBox(height: 6),
             Text(
               '${l10n.market_date(league.currentDay, league.currentWeek)}'
-              '${hourly ? '\n${l10n.market_hour(hour, BalanceConfig.defaults.contracts.hoursPerDay)}' : ''}',
+              '${hourly ? '\n${l10n.market_hour(hour, ref.read(balanceProvider).contracts.hoursPerDay)}' : ''}',
             ),
             if (hourly) ...[
               const SizedBox(height: 10),

@@ -193,7 +193,7 @@ class _LotteryScreenState extends ConsumerState<LotteryScreen> {
             padding: const EdgeInsets.all(12),
             child: LotteryResultsTable(
               results: _results,
-              revealedCount: 10,
+              revealedCount: _results.length,
               teams: teamNames,
             ),
           ),
@@ -211,7 +211,8 @@ class _LotteryScreenState extends ConsumerState<LotteryScreen> {
   }
 
   Widget _buildAnimationOverlay() {
-    final currentPick = 10 - _revealedCount; // pick being revealed NOW
+    final currentPick =
+        _results.length - _revealedCount; // pick being revealed NOW
     final result = _results.firstWhere((r) => r.assignedPick == currentPick);
     final league = ref.read(activeLeagueProvider)!;
     final teamName = league.teamById(result.teamId)?.name ?? result.teamId;
@@ -238,7 +239,7 @@ class _LotteryScreenState extends ConsumerState<LotteryScreen> {
       if (pts != 0) return pts;
       return a.goalDifference.compareTo(b.goalDifference);
     });
-    return all.take(10).toList();
+    return all.take(ref.read(balanceProvider).draft.lotteryTeams).toList();
   }
 
   Map<String, String> _buildTeamNamesMap(LeagueState league) {
@@ -270,7 +271,7 @@ class _LotteryScreenState extends ConsumerState<LotteryScreen> {
     setState(() {
       _revealedCount++;
       _animating = false;
-      if (_revealedCount >= 10) {
+      if (_revealedCount >= _results.length) {
         _phase = LotteryPhase.completed;
         _persistResults();
       } else {
@@ -282,7 +283,7 @@ class _LotteryScreenState extends ConsumerState<LotteryScreen> {
   void _skipToResults() {
     // Show animation only for pick #1
     setState(() {
-      _revealedCount = 9; // After this animation, it will become 10
+      _revealedCount = _results.length - 1; // Reveal only the final pick.
       _phase = LotteryPhase.revealing;
       _animating = true;
     });

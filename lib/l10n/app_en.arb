@@ -378,9 +378,16 @@
   "home_nextActionTitle": "Next action",
   "home_nextEvent": "event",
   "home_readUrgent": "Read urgent message",
-  "home_simulateHour": "Simulate hour · {hour}/10",
+  "home_simulateHour": "Simulate hour · {hour}/{hours}",
   "@home_simulateHour": {
-    "placeholders": {"hour": {"type": "int"}}
+    "placeholders": {
+      "hour": {
+        "type": "int"
+      },
+      "hours": {
+        "type": "int"
+      }
+    }
   },
   "home_simulateToNextMatch": "Simulate to next match",
   "home_simulateUntilEvent": "Simulate to event",
@@ -490,15 +497,28 @@
   "@squad_positionMismatch": {
     "description": "Accessibility description for a player assigned outside the exact position."
   },
-  "squad_playerRowSemantics": "{name}, position {position}, OVR {ovr}, form {form} out of 10, zone {zone}",
+  "squad_playerRowSemantics": "{name}, position {position}, OVR {ovr}, form {form} out of {maximum}, zone {zone}",
   "@squad_playerRowSemantics": {
     "description": "Full accessibility label for a player row; active statuses are appended separately.",
     "placeholders": {
-      "name": {"type": "String"},
-      "position": {"type": "String"},
-      "ovr": {"type": "int"},
-      "form": {"type": "String"},
-      "zone": {"type": "String"}
+      "name": {
+        "type": "String"
+      },
+      "position": {
+        "type": "String"
+      },
+      "ovr": {
+        "type": "int"
+      },
+      "form": {
+        "type": "String"
+      },
+      "zone": {
+        "type": "String"
+      },
+      "maximum": {
+        "type": "String"
+      }
     }
   },
   "squad_playerMarkerSemantics": "{name}, position {position}. {status}",
@@ -531,11 +551,16 @@
       "ovr": {"type": "int"}
     }
   },
-  "squad_formIndicatorSemantics": "Form: {form} out of 10",
+  "squad_formIndicatorSemantics": "Form: {form} out of {maximum}",
   "@squad_formIndicatorSemantics": {
     "description": "Accessibility label for the clamped form value on the horizontal 0–10 scale.",
     "placeholders": {
-      "form": {"type": "String"}
+      "form": {
+        "type": "String"
+      },
+      "maximum": {
+        "type": "String"
+      }
     }
   },
   "squad_profileAction": "Open player profile for {name}",
@@ -736,7 +761,17 @@
   "freeAgency_sortOvr": "Overall",
   "freeAgency_sortName": "Name",
   "freeAgency_poolCount": "Available free agents: {count}",
-  "freeAgency_rosterUsage": "Roster: {count}/30",
+  "freeAgency_rosterUsage": "Roster: {count}/{maximum}",
+  "@freeAgency_rosterUsage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "maximum": {
+        "type": "int"
+      }
+    }
+  },
   "freeAgency_empty": "No free agents match the filters",
   "freeAgency_playerSubtitle": "{position} · OVR {ovr} · Market salary: {salary}",
   "freeAgency_contractHeader": "Offer for {name}",
@@ -745,7 +780,17 @@
   "freeAgency_offerYears": "Contract years",
   "freeAgency_submitOffer": "Submit offer",
   "freeAgency_selectPlayer": "Select a free agent first",
-  "freeAgency_invalidOffer": "Enter a valid salary and 1–5 contract years",
+  "freeAgency_invalidOffer": "Enter a valid salary and {minYears}–{maxYears} contract years",
+  "@freeAgency_invalidOffer": {
+    "placeholders": {
+      "minYears": {
+        "type": "int"
+      },
+      "maxYears": {
+        "type": "int"
+      }
+    }
+  },
   "freeAgency_accepted": "Offer accepted — confirm finalization",
   "freeAgency_rejected": "Offer rejected",
   "freeAgency_waiting": "Player is considering the offer",
@@ -1019,7 +1064,17 @@
   },
   "staff_contractExpired": "Contract expired",
   "staff_salaryRange": "Salary must be between {min} and {max}",
-  "staff_yearsRange": "Contract length must be between 1 and 4 years",
+  "staff_yearsRange": "Contract length must be between {minYears} and {maxYears} years",
+  "@staff_yearsRange": {
+    "placeholders": {
+      "minYears": {
+        "type": "int"
+      },
+      "maxYears": {
+        "type": "int"
+      }
+    }
+  },
   "staff_capExceeded": "The offer exceeds the available staff cap",
   "staff_candidatesHeader": "Hiring candidates",
   "staff_noCandidates": "No free candidates for this role",
@@ -1318,7 +1373,14 @@
   "squad_noPlayers": "No players match the filters",
   "squad_matchday": "Matchday squad",
   "squad_healthy": "Healthy: {count}",
-  "squad_belowXi": "Fewer than 11 healthy players are available",
+  "squad_belowXi": "Fewer than {minimum} healthy players are available",
+  "@squad_belowXi": {
+    "placeholders": {
+      "minimum": {
+        "type": "int"
+      }
+    }
+  },
   "squad_xiCount": "XI: {count}",
   "squad_benchCount": "Bench: {count}",
   "squad_reserveCount": "Reserves: {count}",
@@ -1533,7 +1595,20 @@
   "msg_draftPickLeague_title": "Another team's pick",
   "msg_draftPickLeague_body": "Another team made a draft selection.",
   "msg_draftedRightsReminder_title": "Unsigned drafted player",
-  "msg_draftedRightsReminder_body": "You hold the rights to {playerName}; roster: {rosterCount}/30.",
+  "msg_draftedRightsReminder_body": "You hold the rights to {playerName}; roster: {rosterCount}/{maximum}.",
+  "@msg_draftedRightsReminder_body": {
+    "placeholders": {
+      "playerName": {
+        "type": "String"
+      },
+      "rosterCount": {
+        "type": "int"
+      },
+      "maximum": {
+        "type": "int"
+      }
+    }
+  },
   "msg_apronWarning_title": "Apron exceeded",
   "msg_apronWarning_body": "Payroll is above the allowed level.",
   "msg_capUpdateTv_title": "Salary cap update",
@@ -1685,7 +1760,14 @@
   "msg_trade_rejected_title": "Trade rejected",
   "msg_trade_rejected_body": "The partner rejected the trade proposal.",
   "msg_trade_hardRejected_title": "Trade blocked",
-  "msg_trade_hardRejected_body": "Negotiations are blocked for 30 days.",
+  "msg_trade_hardRejected_body": "Negotiations are blocked for {days} days.",
+  "@msg_trade_hardRejected_body": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "msg_trade_ntcRefusal_title": "NTC refusal",
   "msg_trade_ntcRefusal_body": "The player did not approve the transfer.",
   "msg_trade_leagueDigest_title": "League trades",

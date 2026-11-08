@@ -32,7 +32,12 @@ Widget _buildNextActionSection(
       child: FilledButton.icon(
         onPressed: () => _advanceOneHour(context, ref, l10n),
         icon: const Icon(Icons.schedule),
-        label: Text(l10n.home_simulateHour(hour)),
+        label: Text(
+          l10n.home_simulateHour(
+            hour,
+            ref.watch(balanceProvider).contracts.hoursPerDay,
+          ),
+        ),
       ),
     );
   }

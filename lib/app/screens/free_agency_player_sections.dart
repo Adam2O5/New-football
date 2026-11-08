@@ -49,7 +49,10 @@ mixin _FreeAgencyPlayerSections
                 ),
                 DropdownButton<int>(
                   value: _minimumOvr,
-                  items: [0, 60, 70, 80, 90]
+                  items: ref
+                      .watch(balanceProvider)
+                      .ui
+                      .freeAgencyOvrOptions
                       .map(
                         (value) => DropdownMenuItem(
                           value: value,

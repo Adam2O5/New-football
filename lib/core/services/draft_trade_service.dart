@@ -36,7 +36,7 @@ class DraftTradeService {
     CalendarService? calendar,
     MessageService? messageService,
   }) : calendar = calendar ?? CalendarService(balance: balance),
-       messages = messageService ?? MessageService();
+       messages = messageService ?? MessageService(balance: balance);
 
   final BalanceConfig balance;
   final CalendarService calendar;

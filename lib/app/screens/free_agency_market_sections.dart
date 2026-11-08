@@ -17,7 +17,7 @@ mixin _FreeAgencyMarketSections
     final hourly = window == ContractMarketWindow.freeAgencyPhaseI;
     final hour = (league.currentHour ?? 1).clamp(
       1,
-      BalanceConfig.defaults.contracts.hoursPerDay,
+      ref.read(balanceProvider).contracts.hoursPerDay,
     );
     return Card(
       child: Padding(
@@ -41,7 +41,7 @@ mixin _FreeAgencyMarketSections
             const SizedBox(height: 6),
             Text(
               '${l10n.market_date(league.currentDay, league.currentWeek)}'
-              '${hourly ? '\n${l10n.market_hour(hour, BalanceConfig.defaults.contracts.hoursPerDay)}' : ''}',
+              '${hourly ? '\n${l10n.market_hour(hour, ref.read(balanceProvider).contracts.hoursPerDay)}' : ''}',
             ),
             if (hourly) ...[
               const SizedBox(height: 10),
@@ -75,7 +75,7 @@ mixin _FreeAgencyMarketSections
     Team team,
     CapSnapshot snapshot,
   ) {
-    final full = team.roster.length >= BalanceConfig.defaults.roster.maxSize;
+    final full = team.roster.length >= ref.read(balanceProvider).roster.maxSize;
     return Card(
       color: full
           ? Theme.of(context).colorScheme.errorContainer
@@ -93,7 +93,12 @@ mixin _FreeAgencyMarketSections
             Text(
               l10n.freeAgency_capSpace(formatMoney(context, snapshot.capSpace)),
             ),
-            Text(l10n.freeAgency_rosterUsage(team.roster.length)),
+            Text(
+              l10n.freeAgency_rosterUsage(
+                team.roster.length,
+                ref.watch(balanceProvider).roster.maxSize,
+              ),
+            ),
             if (snapshot.capSpace < 0) ...[
               const SizedBox(height: 6),
               Row(
@@ -206,7 +211,7 @@ mixin _FreeAgencyMarketSections
         .where((right) => right.ownerTeamId == team.id)
         .toList();
     if (rights.isEmpty) return const SizedBox.shrink();
-    final full = team.roster.length >= BalanceConfig.defaults.roster.maxSize;
+    final full = team.roster.length >= ref.read(balanceProvider).roster.maxSize;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(12),

@@ -7,7 +7,6 @@ import 'package:new_football/app/utils/formatters.dart';
 import 'package:new_football/app/utils/staff_presentation.dart';
 import 'package:new_football/app/widgets/screen_background.dart';
 import 'package:new_football/app/widgets/staff_rating_stars.dart';
-import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/contract_market_models.dart';
 import 'package:new_football/core/models/contract_negotiation.dart';
 import 'package:new_football/core/models/enums.dart';
@@ -46,7 +45,7 @@ class _FreeAgencyScreenState extends ConsumerState<FreeAgencyScreen>
   @override
   final _salaryController = TextEditingController();
   @override
-  final _yearsController = TextEditingController(text: '3');
+  final _yearsController = TextEditingController();
   @override
   ContractService get _contractService => ref.read(contractServiceProvider);
   @override
@@ -59,13 +58,26 @@ class _FreeAgencyScreenState extends ConsumerState<FreeAgencyScreen>
   @override
   Position? _positionFilter;
   @override
-  int _minimumOvr = 0;
+  late int _minimumOvr;
   @override
   _FreeAgencySort _sort = _FreeAgencySort.overall;
   @override
   String? _status;
   @override
   bool _isAdvancingHour = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final balance = ref.read(balanceProvider);
+    _minimumOvr = balance.ui.freeAgencyOvrOptions.first;
+    _yearsController.text = balance.ui.defaultPlayerOfferYears
+        .clamp(
+          balance.contracts.playerMinYears,
+          balance.contracts.playerMaxYears,
+        )
+        .toString();
+  }
 
   @override
   void dispose() {
@@ -271,8 +283,14 @@ class _FreeAgencyScreenState extends ConsumerState<FreeAgencyScreen>
     if (id == null ||
         salary == null ||
         years == null ||
-        years < ref.read(balanceProvider).contracts.playerMinYears) {
-      setState(() => _status = l10n.freeAgency_invalidOffer);
+        years < ref.read(balanceProvider).contracts.playerMinYears ||
+        years > ref.read(balanceProvider).contracts.playerMaxYears) {
+      setState(
+        () => _status = l10n.freeAgency_invalidOffer(
+          ref.read(balanceProvider).contracts.playerMinYears,
+          ref.read(balanceProvider).contracts.playerMaxYears,
+        ),
+      );
       return;
     }
     if (!_canSubmitOfferSheet(league, team)) {
@@ -306,7 +324,12 @@ class _FreeAgencyScreenState extends ConsumerState<FreeAgencyScreen>
         years == null ||
         years < ref.read(balanceProvider).contracts.playerMinYears ||
         years > ref.read(balanceProvider).contracts.playerMaxYears) {
-      setState(() => _status = l10n.freeAgency_invalidOffer);
+      setState(
+        () => _status = l10n.freeAgency_invalidOffer(
+          ref.read(balanceProvider).contracts.playerMinYears,
+          ref.read(balanceProvider).contracts.playerMaxYears,
+        ),
+      );
       return;
     }
     if (!_canSubmitPlayerOffer(league, team)) {
@@ -388,7 +411,7 @@ class _FreeAgencyScreenState extends ConsumerState<FreeAgencyScreen>
         phase != NegotiationPhase.freeAgencyPhaseII) {
       return false;
     }
-    if (team.roster.length >= BalanceConfig.defaults.roster.maxSize) {
+    if (team.roster.length >= ref.read(balanceProvider).roster.maxSize) {
       return false;
     }
     return phase != NegotiationPhase.freeAgencyPhaseI ||
@@ -413,7 +436,7 @@ class _FreeAgencyScreenState extends ConsumerState<FreeAgencyScreen>
         phase != NegotiationPhase.freeAgencyPhaseII) {
       return false;
     }
-    if (team.roster.length >= BalanceConfig.defaults.roster.maxSize) {
+    if (team.roster.length >= ref.read(balanceProvider).roster.maxSize) {
       return false;
     }
     final qualifying = _activeQualifyingOffer(league, _selectedId ?? '');

@@ -179,7 +179,7 @@ class _LiveMetric extends StatelessWidget {
   }
 }
 
-class _EventFeed extends StatelessWidget {
+class _EventFeed extends ConsumerWidget {
   const _EventFeed({
     required this.events,
     required this.home,
@@ -191,9 +191,11 @@ class _EventFeed extends StatelessWidget {
   final Team away;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context)!;
-    final visible = events.reversed.take(35).toList();
+    final visible = events.reversed
+        .take(ref.watch(balanceProvider).ui.matchEventListLimit)
+        .toList();
     return Card(
       margin: const EdgeInsets.all(6),
       child: Column(

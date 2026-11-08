@@ -137,7 +137,6 @@ const _legacyUserFacingFiles = <String>{
 const _legacyNumericFiles = <String>{
   // Existing domain constants pending centralization in BalanceConfig.
   'lib/core/models/game_save.dart',
-  'lib/core/models/message.dart',
   'lib/core/models/player.dart',
   'lib/core/models/player_value.dart',
   'lib/core/models/seed_data_generator.dart',

@@ -114,14 +114,16 @@ class SeasonService
            ),
        matchMessageEmitter =
            matchMessageEmitter ??
-           MatchMessageEmitter(messages: messages ?? MessageService()),
+           MatchMessageEmitter(
+             messages: messages ?? MessageService(balance: balance),
+           ),
        development = development ?? DevelopmentService(balance: balance),
        capService = capService ?? SalaryCapService(balance: balance),
        staffService = staffService ?? StaffService(balance: balance),
        scoutingService = scoutingService ?? ScoutingService(balance: balance),
        mockDraftService =
            mockDraftService ?? MockDraftService(balance: balance),
-       _messages = messages ?? MessageService(),
+       _messages = messages ?? MessageService(balance: balance),
        teamEvents =
            teamEvents ?? TeamEventService(balance: balance, messages: messages),
        _random = random ?? Random();

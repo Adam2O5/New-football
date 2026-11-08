@@ -246,28 +246,36 @@ class _StatsScreenState extends ConsumerState<StatsScreen> {
                   context,
                   l10n,
                   l10n.stats_leagueGoals,
-                  goalsRows.take(15).toList(),
+                  goalsRows
+                      .take(ref.read(balanceProvider).ui.statsLeaderLimit)
+                      .toList(),
                   (row) => '${row.stats.goals}',
                 ),
                 _rankedTable(
                   context,
                   l10n,
                   l10n.stats_leagueAssists,
-                  assistsRows.take(15).toList(),
+                  assistsRows
+                      .take(ref.read(balanceProvider).ui.statsLeaderLimit)
+                      .toList(),
                   (row) => '${row.stats.assists}',
                 ),
                 _rankedTable(
                   context,
                   l10n,
                   l10n.stats_leagueCleanSheets,
-                  cleanSheetsRows.take(15).toList(),
+                  cleanSheetsRows
+                      .take(ref.read(balanceProvider).ui.statsLeaderLimit)
+                      .toList(),
                   (row) => '${row.stats.cleanSheets}',
                 ),
                 _rankedTable(
                   context,
                   l10n,
                   l10n.stats_leagueMvp,
-                  mvpRows.take(15).toList(),
+                  mvpRows
+                      .take(ref.read(balanceProvider).ui.statsLeaderLimit)
+                      .toList(),
                   (row) => '${row.stats.motmCount}',
                 ),
               ],

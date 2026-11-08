@@ -5,6 +5,7 @@ class ContractNegBalance {
     this.offerScoreMin = 0.0,
     this.offerScoreMax = 100.0,
     this.playerMinYears = 1,
+    this.qualifyingOfferYears = 1,
     this.playerMaxYears = 5,
     this.wantMin = 0.0,
     this.wantMax = 100.0,
@@ -129,6 +130,7 @@ class ContractNegBalance {
   final double offerScoreMin;
   final double offerScoreMax;
   final int playerMinYears;
+  final int qualifyingOfferYears;
   final int playerMaxYears;
   final double wantMin;
   final double wantMax;

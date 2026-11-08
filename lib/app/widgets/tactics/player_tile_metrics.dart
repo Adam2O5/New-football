@@ -7,24 +7,29 @@ class FormIndicator extends StatelessWidget {
     required this.form,
     required this.l10n,
     this.width = 34.0,
+    this.balance = BalanceConfig.defaults,
   });
 
   final double form;
+  final BalanceConfig balance;
   final AppLocalizations l10n;
   final double width;
 
   @override
   Widget build(BuildContext context) {
-    final clampedForm = clampedFormValue(form);
-    final fill = formFillForValue(clampedForm);
-    final fillColor = formColorForClampedValue(clampedForm);
+    final clampedForm = clampedFormValue(form, balance);
+    final fill = formFillForValue(clampedForm, balance);
+    final fillColor = formColorForClampedValue(clampedForm, balance);
     final colors = Theme.of(context).colorScheme;
     final trackColor = colors.surfaceContainerLow;
     final indicatorWidth = width.clamp(32.0, 36.0).toDouble();
 
     return Semantics(
       container: true,
-      label: l10n.squad_formIndicatorSemantics(_formatForm(clampedForm)),
+      label: l10n.squad_formIndicatorSemantics(
+        _formatForm(clampedForm),
+        _formatForm(balance.ui.formDisplayMax),
+      ),
       child: ExcludeSemantics(
         child: Container(
           key: const ValueKey('squad-form-indicator'),

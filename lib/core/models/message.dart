@@ -1,3 +1,4 @@
+import 'package:new_football/core/balance/messages_balance.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:new_football/core/models/enums.dart';
 
@@ -116,18 +117,6 @@ abstract class Inbox with _$Inbox {
 }
 
 extension InboxX on Inbox {
-  static const digestMinItems = 3;
-  static const maxUnreadInbox = 50;
-  static const retentionSeasons = 2;
-
-  /// Hard ceilings on the persisted inbox. Neither list had one, so a save
-  /// accumulated every message ever generated — one week boundary alone
-  /// produces a dozen or more. At ~1 KB per message these two caps keep the
-  /// inbox around 0.4 MB and bound the cost of [_containsDedup] and
-  /// [degradeMissingPayload], which walk all three lists on every send.
-  static const maxInboxMessages = 200;
-  static const maxArchiveMessages = 200;
-
   List<GameMessage> get unread => messages.where((m) => !m.read).toList();
 
   List<GameMessage> get pendingUrgent => messages
@@ -138,33 +127,59 @@ extension InboxX on Inbox {
   /// and the unread inbox cap.
   Inbox addMessage(
     GameMessage message, {
-    int digestMinItems = InboxX.digestMinItems,
-    int maxUnread = InboxX.maxUnreadInbox,
+    MessagesBalance balance = const MessagesBalance(),
+    int? digestMinItems,
+    int? maxUnread,
   }) {
     if (_containsDedup(message)) return this;
     if (message.priority == MessagePriority.silenced) {
-      return copyWith(archive: _capArchive([...archive, message]));
+      return copyWith(
+        archive: _capArchive([
+          ...archive,
+          message,
+        ], maximum: balance.maxArchiveMessages),
+      );
     }
 
     final active = [...messages, message];
-    final compacted = _compactDigest(active, archive, digestMinItems);
+    final compacted = _compactDigest(
+      active,
+      archive,
+      digestMinItems ?? balance.digestMinItems,
+    );
     return copyWith(
-      messages: _capMessages(_capUnread(compacted.$1, maxUnread)),
-      archive: _capArchive(compacted.$2),
+      messages: _capMessages(
+        _capUnread(compacted.$1, maxUnread ?? balance.maxUnreadInbox),
+        maximum: balance.maxInboxMessages,
+      ),
+      archive: _capArchive(compacted.$2, maximum: balance.maxArchiveMessages),
     );
   }
 
-  Inbox scheduleMessage(GameMessage message) {
+  Inbox scheduleMessage(
+    GameMessage message, {
+    MessagesBalance balance = const MessagesBalance(),
+  }) {
     if (_containsDedup(message)) return this;
     if (message.priority == MessagePriority.silenced) {
-      return copyWith(archive: _capArchive([...archive, message]));
+      return copyWith(
+        archive: _capArchive([
+          ...archive,
+          message,
+        ], maximum: balance.maxArchiveMessages),
+      );
     }
     return copyWith(scheduled: [...scheduled, message]);
   }
 
   /// Delivers the complete package due at the beginning of a calendar
   /// day/hour. Future messages remain hidden until their delivery slot.
-  Inbox deliverScheduled(int week, int day, {int? hour}) {
+  Inbox deliverScheduled(
+    int week,
+    int day, {
+    int? hour,
+    MessagesBalance balance = const MessagesBalance(),
+  }) {
     final due = <GameMessage>[];
     final waiting = <GameMessage>[];
     for (final message in scheduled) {
@@ -180,7 +195,7 @@ extension InboxX on Inbox {
 
     var result = copyWith(scheduled: waiting);
     for (final message in due) {
-      result = result.addMessage(message);
+      result = result.addMessage(message, balance: balance);
     }
     return result;
   }
@@ -209,12 +224,16 @@ extension InboxX on Inbox {
     );
   }
 
-  /// Moves messages older than the active plus previous season to archive.
+  /// Moves messages outside the configured retained seasons to archive.
   Inbox retainSeasons(
     int currentSeasonYear, {
-    int retentionSeasons = InboxX.retentionSeasons,
+    MessagesBalance balance = const MessagesBalance(),
+    int? retentionSeasons,
   }) {
-    final firstKeptSeason = currentSeasonYear - retentionSeasons + 1;
+    final firstKeptSeason =
+        currentSeasonYear -
+        (retentionSeasons ?? balance.inboxRetentionSeasons) +
+        1;
     final oldMessages = messages
         .where((m) => m.seasonYear < firstKeptSeason)
         .toList();
@@ -226,7 +245,11 @@ extension InboxX on Inbox {
       scheduled: scheduled
           .where((m) => m.seasonYear >= firstKeptSeason)
           .toList(),
-      archive: _capArchive([...archive, ...oldMessages, ...oldScheduled]),
+      archive: _capArchive([
+        ...archive,
+        ...oldMessages,
+        ...oldScheduled,
+      ], maximum: balance.maxArchiveMessages),
     );
   }
 
@@ -352,7 +375,7 @@ extension InboxX on Inbox {
     return (result, history);
   }
 
-  /// Drops the oldest evictable messages down to [maxInboxMessages].
+  /// Drops the oldest evictable messages down to [MessagesBalance.maxInboxMessages].
   ///
   /// The cap is a soft ceiling: game logic reads the inbox, so a message is
   /// only evictable once losing it cannot change behaviour. Protected are
@@ -362,7 +385,7 @@ extension InboxX on Inbox {
   /// default outcome). If nothing qualifies, the list is left over the limit.
   List<GameMessage> _capMessages(
     List<GameMessage> input, {
-    int maximum = InboxX.maxInboxMessages,
+    required int maximum,
   }) {
     if (input.length <= maximum) return input;
     var toDrop = input.length - maximum;
@@ -384,16 +407,14 @@ extension InboxX on Inbox {
     ];
   }
 
-  /// Keeps the newest [maxArchiveMessages] entries. Nothing in the game logic
+  /// Keeps the newest [MessagesBalance.maxArchiveMessages] entries. Nothing in the game logic
   /// reads the archive, so this needs no exemptions; the only consequence is
   /// that `dedupKey` matches older than the window stop suppressing repeats,
   /// and those keys are scoped to a single match or season anyway.
   List<GameMessage> _capArchive(
     List<GameMessage> input, {
-    int maximum = InboxX.maxArchiveMessages,
-  }) => input.length <= maximum
-      ? input
-      : input.sublist(input.length - maximum);
+    required int maximum,
+  }) => input.length <= maximum ? input : input.sublist(input.length - maximum);
 
   List<GameMessage> _capUnread(List<GameMessage> input, int maximum) {
     final result = [...input];

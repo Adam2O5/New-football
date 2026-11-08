@@ -1,3 +1,4 @@
+import 'package:new_football/core/balance/balance_config.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -11,6 +12,7 @@ import 'package:new_football/l10n/generated/app_localizations.dart';
 
 Future<void> showSubstituteSheet(
   BuildContext context, {
+  BalanceConfig balance = BalanceConfig.defaults,
   required AppLocalizations l10n,
   required Team team,
   required Player outPlayer,
@@ -25,6 +27,7 @@ Future<void> showSubstituteSheet(
     isScrollControlled: false,
     useSafeArea: true,
     builder: (context) => SubstituteSheet(
+      balance: balance,
       l10n: l10n,
       team: team,
       outPlayer: outPlayer,
@@ -49,6 +52,7 @@ RosterZone _rosterZoneOf(Team team, String playerId) {
 class SubstituteSheet extends StatelessWidget {
   const SubstituteSheet({
     super.key,
+    this.balance = BalanceConfig.defaults,
     required this.l10n,
     required this.team,
     required this.outPlayer,
@@ -59,6 +63,7 @@ class SubstituteSheet extends StatelessWidget {
   });
 
   final AppLocalizations l10n;
+  final BalanceConfig balance;
   final Team team;
   final Player outPlayer;
   final List<Player> candidates;
@@ -94,6 +99,7 @@ class SubstituteSheet extends StatelessWidget {
                 itemBuilder: (context, index) {
                   final candidate = candidates[index];
                   return PlayerListTile(
+                    balance: balance,
                     l10n: l10n,
                     player: candidate,
                     zone: _rosterZoneOf(team, candidate.id),

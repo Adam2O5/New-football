@@ -1,3 +1,4 @@
+import 'package:new_football/core/balance/balance_config.dart';
 import 'package:uuid/uuid.dart';
 
 import 'package:new_football/core/balance/message_catalog.dart';
@@ -16,8 +17,10 @@ typedef MessageDecisionHandler =
 
 /// Centralized message creation and lifecycle rules (`messages.md` §4–12).
 class MessageService {
-  MessageService({Uuid? uuid}) : _uuid = uuid ?? const Uuid();
+  MessageService({this.balance = BalanceConfig.defaults, Uuid? uuid})
+    : _uuid = uuid ?? const Uuid();
 
+  final BalanceConfig balance;
   final Uuid _uuid;
 
   /// Creates and delivers a message to the league inbox.
@@ -69,7 +72,14 @@ class MessageService {
     final targetWeek = deliveryWeek ?? league.currentWeek;
     final targetDay = deliveryDay ?? league.currentDay;
     final targetHour = deliveryHour ?? hour;
-    final expandedArgs = Map<String, dynamic>.from(args);
+    final expandedArgs = <String, dynamic>{
+      if (type == MessageType.draftedRightsReminder)
+        'maximum': balance.roster.maxSize,
+      if ((type == MessageType.trade || type == MessageType.tradeOffer) &&
+          kind == 'hardRejected')
+        'days': balance.contracts.tradePairBlockDays,
+      ...args,
+    };
     final expansionValues = <String, dynamic>{
       'week': targetWeek,
       'day': targetDay,
@@ -116,8 +126,8 @@ class MessageService {
             targetHour > league.currentHour!);
 
     var inbox = isFuture
-        ? league.inbox.scheduleMessage(msg)
-        : league.inbox.addMessage(msg);
+        ? league.inbox.scheduleMessage(msg, balance: balance.messages)
+        : league.inbox.addMessage(msg, balance: balance.messages);
     // Degradation can only ever strip a message that offers actions on a
     // player or a team, so the id sets — every roster in the league plus the
     // free agents — are worth building only when such a message is present.
@@ -131,7 +141,10 @@ class MessageService {
       );
     }
     return league.copyWith(
-      inbox: inbox.retainSeasons(league.currentSeason.year),
+      inbox: inbox.retainSeasons(
+        league.currentSeason.year,
+        balance: balance.messages,
+      ),
     );
   }
 

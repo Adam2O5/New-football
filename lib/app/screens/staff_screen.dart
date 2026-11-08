@@ -8,7 +8,6 @@ import 'package:new_football/app/utils/formatters.dart';
 import 'package:new_football/app/utils/staff_presentation.dart';
 import 'package:new_football/app/widgets/screen_background.dart';
 import 'package:new_football/app/widgets/staff_rating_stars.dart';
-import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/contract_negotiation.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
@@ -44,12 +43,21 @@ class _StaffScreenState extends ConsumerState<StaffScreen>
   @override
   final _salaryController = TextEditingController();
   @override
-  final _yearsController = TextEditingController(text: '3');
+  final _yearsController = TextEditingController();
   String? _selectedStaffId;
   @override
   bool _selectedExtension = false;
   String? _status;
   bool _isAdvancingHour = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final balance = ref.read(balanceProvider);
+    _yearsController.text = balance.ui.defaultStaffOfferYears
+        .clamp(balance.staff.minContractYears, balance.staff.maxContractYears)
+        .toString();
+  }
 
   @override
   void dispose() {
@@ -70,7 +78,7 @@ class _StaffScreenState extends ConsumerState<StaffScreen>
       );
     }
 
-    const balance = BalanceConfig.defaults;
+    final balance = ref.watch(balanceProvider);
     final cap = balance.staff.salaryCap;
     final used = team.staff.totalSalary;
     final selected = _selectedStaff(league, team);
@@ -147,7 +155,7 @@ class _StaffScreenState extends ConsumerState<StaffScreen>
         window == ContractMarketWindow.freeAgencyPhaseI;
     final hour = (league.currentHour ?? 1).clamp(
       1,
-      BalanceConfig.defaults.contracts.hoursPerDay,
+      ref.read(balanceProvider).contracts.hoursPerDay,
     );
     return Card(
       child: Padding(
@@ -171,7 +179,7 @@ class _StaffScreenState extends ConsumerState<StaffScreen>
             const SizedBox(height: 6),
             Text(
               '${l10n.market_date(league.currentDay, league.currentWeek)}'
-              '${hourly ? '\n${l10n.market_hour(hour, BalanceConfig.defaults.contracts.hoursPerDay)}' : ''}',
+              '${hourly ? '\n${l10n.market_hour(hour, ref.read(balanceProvider).contracts.hoursPerDay)}' : ''}',
             ),
             if (hourly) ...[
               const SizedBox(height: 10),
@@ -446,7 +454,13 @@ class _StaffScreenState extends ConsumerState<StaffScreen>
         formatMoney(context, _staffService.balance.staff.maxSalary),
       );
     }
-    if (parsedYears < 1 || parsedYears > 4) return l10n.staff_yearsRange;
+    if (parsedYears < _staffService.balance.staff.minContractYears ||
+        parsedYears > _staffService.balance.staff.maxContractYears) {
+      return l10n.staff_yearsRange(
+        _staffService.balance.staff.minContractYears,
+        _staffService.balance.staff.maxContractYears,
+      );
+    }
     final replacingSalary = isExtension
         ? team.staff.canonicalMember(member.role)?.contract?.salary ?? 0
         : 0;
@@ -471,7 +485,9 @@ class _StaffScreenState extends ConsumerState<StaffScreen>
     if (isExtension) {
       return phase == NegotiationPhase.contractExtension &&
           team.staff.canonicalMember(member.role)?.id == member.id &&
-          (member.contract?.yearsRemaining ?? 99) <= 1;
+          (member.contract != null &&
+              member.contract!.yearsRemaining <=
+                  ref.read(balanceProvider).ui.expiringContractMaxYears);
     }
     if (phase != NegotiationPhase.freeAgencyPhaseI &&
         phase != NegotiationPhase.freeAgencyPhaseII) {

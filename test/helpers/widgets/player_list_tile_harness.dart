@@ -189,6 +189,7 @@ String rowSemanticsLabel(
     roundedOvrForDisplay(player.overall()),
     formattedForm,
     zoneLabel(l10n, zone),
+    '10',
   );
   final statuses = <String>[
     if (status.hasActiveInjury) l10n.squad_statusInjury,

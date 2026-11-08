@@ -8,7 +8,6 @@ import 'package:go_router/go_router.dart';
 import 'package:new_football/app/widgets/screen_background.dart';
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/app/l10n/enum_labels.dart';
-import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/assigned_role.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/player.dart';
@@ -180,8 +179,8 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
     AppLocalizations l10n,
     Team team,
   ) {
-    final min = BalanceConfig.defaults.roster.minSize;
-    final max = BalanceConfig.defaults.roster.maxSize;
+    final min = ref.read(balanceProvider).roster.minSize;
+    final max = ref.read(balanceProvider).roster.maxSize;
     final playersById = <String, Player>{
       for (final player in team.roster) player.id: player,
     };
@@ -402,6 +401,7 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
                     children: [
                       for (final p in sortedRoster)
                         PlayerListTile(
+                          balance: ref.watch(balanceProvider),
                           l10n: l10n,
                           player: p,
                           zone: rosterZoneOf(team, p.id),
@@ -639,6 +639,7 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
 
     await showSubstituteSheet(
       context,
+      balance: ref.read(balanceProvider),
       l10n: l10n,
       team: team,
       outPlayer: outPlayer,

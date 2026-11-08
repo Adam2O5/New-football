@@ -43,7 +43,7 @@ class TeamEventService
     MessageService? messages,
     CalendarService? calendar,
     TeamManagementService? teamManagement,
-  }) : messages = messages ?? MessageService(),
+  }) : messages = messages ?? MessageService(balance: balance),
        calendar = calendar ?? CalendarService(balance: balance),
        teamManagement =
            teamManagement ?? TeamManagementService(balance: balance);

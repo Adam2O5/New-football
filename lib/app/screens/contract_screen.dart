@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'package:new_football/app/providers/game_provider.dart';
 import 'package:new_football/app/utils/formatters.dart';
 import 'package:new_football/app/widgets/screen_background.dart';
-import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/contract_negotiation.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/league_state.dart';
@@ -38,7 +37,7 @@ class _ContractScreenState extends ConsumerState<ContractScreen>
   @override
   final _salaryCtrl = TextEditingController();
   @override
-  final _yearsCtrl = TextEditingController(text: '3');
+  final _yearsCtrl = TextEditingController();
   @override
   ContractService get _contractService => ref.read(contractServiceProvider);
   @override
@@ -50,6 +49,18 @@ class _ContractScreenState extends ConsumerState<ContractScreen>
   String? _status;
   @override
   bool _isAdvancingHour = false;
+
+  @override
+  void initState() {
+    super.initState();
+    final balance = ref.read(balanceProvider);
+    _yearsCtrl.text = balance.ui.defaultPlayerOfferYears
+        .clamp(
+          balance.contracts.playerMinYears,
+          balance.contracts.playerMaxYears,
+        )
+        .toString();
+  }
 
   @override
   void dispose() {
@@ -73,10 +84,17 @@ class _ContractScreenState extends ConsumerState<ContractScreen>
     }
 
     final expiring =
-        team.roster.where((p) => p.contract.yearsRemaining <= 1).toList()..sort(
-          (a, b) =>
-              a.contract.yearsRemaining.compareTo(b.contract.yearsRemaining),
-        );
+        team.roster
+            .where(
+              (p) =>
+                  p.contract.yearsRemaining <=
+                  ref.read(balanceProvider).ui.expiringContractMaxYears,
+            )
+            .toList()
+          ..sort(
+            (a, b) =>
+                a.contract.yearsRemaining.compareTo(b.contract.yearsRemaining),
+          );
     final freeAgents = [...league.freeAgents]
       ..sort((a, b) => b.overall().compareTo(a.overall()));
     final selected = _selectedPlayer(league, team);
@@ -138,36 +156,43 @@ class _ContractScreenState extends ConsumerState<ContractScreen>
             if (freeAgents.isEmpty)
               Card(child: ListTile(title: Text(l10n.contract_freeAgentsEmpty)))
             else
-              ...freeAgents.take(30).map((player) {
-                final isSelected =
-                    _target == _Target.freeAgent && player.id == _selectedId;
-                return Card(
-                  color: isSelected
-                      ? Theme.of(context).colorScheme.primaryContainer
-                      : null,
-                  child: ListTile(
-                    title: Text(player.name),
-                    subtitle: Text(
-                      l10n.contract_playerSubtitle(
-                        player.position.code,
-                        player.overall().round(),
-                        player.contract.yearsRemaining,
-                        formatMoney(
-                          context,
-                          _expectedSalary(
-                            league,
-                            team,
-                            player,
-                            isExtension: false,
+              ...freeAgents
+                  .take(ref.watch(balanceProvider).ui.contractFreeAgentLimit)
+                  .map((player) {
+                    final isSelected =
+                        _target == _Target.freeAgent &&
+                        player.id == _selectedId;
+                    return Card(
+                      color: isSelected
+                          ? Theme.of(context).colorScheme.primaryContainer
+                          : null,
+                      child: ListTile(
+                        title: Text(player.name),
+                        subtitle: Text(
+                          l10n.contract_playerSubtitle(
+                            player.position.code,
+                            player.overall().round(),
+                            player.contract.yearsRemaining,
+                            formatMoney(
+                              context,
+                              _expectedSalary(
+                                league,
+                                team,
+                                player,
+                                isExtension: false,
+                              ),
+                            ),
                           ),
                         ),
+                        onTap: () => _selectPlayer(
+                          league,
+                          team,
+                          player,
+                          _Target.freeAgent,
+                        ),
                       ),
-                    ),
-                    onTap: () =>
-                        _selectPlayer(league, team, player, _Target.freeAgent),
-                  ),
-                );
-              }),
+                    );
+                  }),
             if (selected != null) ...[
               const SizedBox(height: 16),
               _offerPreviewCard(context, l10n, league, team, selected),
@@ -450,7 +475,7 @@ class _ContractScreenState extends ConsumerState<ContractScreen>
       return false;
     }
     if (_target == _Target.freeAgent &&
-        team.roster.length >= BalanceConfig.defaults.roster.maxSize) {
+        team.roster.length >= ref.read(balanceProvider).roster.maxSize) {
       return false;
     }
     if (phase == NegotiationPhase.freeAgencyPhaseI &&

@@ -1,3 +1,4 @@
+import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/search_filters.dart';
 import 'package:new_football/core/models/assigned_role.dart';
 import 'package:new_football/core/models/enums.dart';
@@ -110,9 +111,14 @@ double _roundToHalf(double value) => (value * 2).round() / 2;
 ({int min, int max, int divisions}) yearSliderBounds(
   Iterable<int> years, {
   required int fallbackYear,
+  BalanceConfig balance = BalanceConfig.defaults,
 }) {
   if (years.isEmpty) {
-    return (min: fallbackYear, max: fallbackYear + 3, divisions: 3);
+    return (
+      min: fallbackYear,
+      max: fallbackYear + balance.ui.pickFilterFallbackYears,
+      divisions: balance.ui.pickFilterFallbackYears,
+    );
   }
   final minYear = years.reduce((a, b) => a < b ? a : b);
   final rawMaxYear = years.reduce((a, b) => a > b ? a : b);

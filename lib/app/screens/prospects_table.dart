@@ -197,7 +197,12 @@ mixin _ProspectsTable
               cell(_colProjWidth, _slotLabel(l10n, knowledge?.estimatedSlot)),
               SizedBox(
                 width: _colPotentialWidth,
-                child: _buildPotentialEstimate(l10n, prospect, knowledge),
+                child: _buildPotentialEstimate(
+                  l10n,
+                  prospect,
+                  knowledge,
+                  ref.watch(balanceProvider),
+                ),
               ),
               cell(
                 _colInjWidth,

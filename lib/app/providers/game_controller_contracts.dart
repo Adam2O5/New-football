@@ -110,7 +110,7 @@ mixin _GameControllerContracts {
   Future<bool> submitQualifyingOffer(
     String playerId, {
     int? salary,
-    int years = 1,
+    int? years,
   }) {
     return _mutateSave<bool>(false, (current) async {
       final teamId = current.leagueState.playerTeamId;

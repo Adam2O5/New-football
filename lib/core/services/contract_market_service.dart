@@ -66,7 +66,7 @@ class ContractMarketService
        staff = staff ?? StaffService(balance: balance),
        capService = capService ?? SalaryCapService(balance: balance),
        negotiations = negotiations ?? NegotiationService(balance: balance),
-       messages = messages ?? MessageService(),
+       messages = messages ?? MessageService(balance: balance),
        aiPolicy =
            aiPolicy ??
            AiContractMarketService(
@@ -155,7 +155,7 @@ mixin _ContractMarketShared {
     required String ownerTeamId,
     required String playerId,
     int? salary,
-    int years = 1,
+    int? years,
   });
 
   LeagueState? matchOfferSheet(

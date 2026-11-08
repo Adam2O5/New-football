@@ -847,8 +847,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get home_readUrgent => 'Read urgent message';
 
   @override
-  String home_simulateHour(int hour) {
-    return 'Simulate hour · $hour/10';
+  String home_simulateHour(int hour, int hours) {
+    return 'Simulate hour · $hour/$hours';
   }
 
   @override
@@ -970,8 +970,9 @@ class AppLocalizationsEn extends AppLocalizations {
     int ovr,
     String form,
     String zone,
+    String maximum,
   ) {
-    return '$name, position $position, OVR $ovr, form $form out of 10, zone $zone';
+    return '$name, position $position, OVR $ovr, form $form out of $maximum, zone $zone';
   }
 
   @override
@@ -999,8 +1000,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String squad_formIndicatorSemantics(String form) {
-    return 'Form: $form out of 10';
+  String squad_formIndicatorSemantics(String form, String maximum) {
+    return 'Form: $form out of $maximum';
   }
 
   @override
@@ -1305,8 +1306,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String freeAgency_rosterUsage(Object count) {
-    return 'Roster: $count/30';
+  String freeAgency_rosterUsage(int count, int maximum) {
+    return 'Roster: $count/$maximum';
   }
 
   @override
@@ -1340,8 +1341,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get freeAgency_selectPlayer => 'Select a free agent first';
 
   @override
-  String get freeAgency_invalidOffer =>
-      'Enter a valid salary and 1–5 contract years';
+  String freeAgency_invalidOffer(int minYears, int maxYears) {
+    return 'Enter a valid salary and $minYears–$maxYears contract years';
+  }
 
   @override
   String get freeAgency_accepted => 'Offer accepted — confirm finalization';
@@ -2096,8 +2098,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get staff_yearsRange =>
-      'Contract length must be between 1 and 4 years';
+  String staff_yearsRange(int minYears, int maxYears) {
+    return 'Contract length must be between $minYears and $maxYears years';
+  }
 
   @override
   String get staff_capExceeded => 'The offer exceeds the available staff cap';
@@ -2989,7 +2992,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get squad_belowXi => 'Fewer than 11 healthy players are available';
+  String squad_belowXi(int minimum) {
+    return 'Fewer than $minimum healthy players are available';
+  }
 
   @override
   String squad_xiCount(Object count) {
@@ -3693,8 +3698,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get msg_draftedRightsReminder_title => 'Unsigned drafted player';
 
   @override
-  String msg_draftedRightsReminder_body(Object playerName, Object rosterCount) {
-    return 'You hold the rights to $playerName; roster: $rosterCount/30.';
+  String msg_draftedRightsReminder_body(
+    String playerName,
+    int rosterCount,
+    int maximum,
+  ) {
+    return 'You hold the rights to $playerName; roster: $rosterCount/$maximum.';
   }
 
   @override
@@ -4221,8 +4230,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get msg_trade_hardRejected_title => 'Trade blocked';
 
   @override
-  String get msg_trade_hardRejected_body =>
-      'Negotiations are blocked for 30 days.';
+  String msg_trade_hardRejected_body(int days) {
+    return 'Negotiations are blocked for $days days.';
+  }
 
   @override
   String get msg_trade_ntcRefusal_title => 'NTC refusal';

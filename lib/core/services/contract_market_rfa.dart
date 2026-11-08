@@ -15,7 +15,7 @@ mixin _ContractMarketRfa on _ContractMarketShared {
     required String ownerTeamId,
     required String playerId,
     int? salary,
-    int years = 1,
+    int? years,
   }) {
     final team = league.teamById(ownerTeamId);
     final player = _findPlayer(league, playerId);
@@ -30,11 +30,17 @@ mixin _ContractMarketRfa on _ContractMarketShared {
         player.contract.lastSeason != league.currentSeason.year) {
       return null;
     }
+    final preferredYears =
+        years ??
+        balance.contracts.qualifyingOfferYears.clamp(
+          balance.contracts.playerMinYears,
+          balance.contracts.playerMaxYears,
+        );
     final offerYears = team.ai == null
-        ? years
+        ? preferredYears
         : balance.ai.contractYearsFor(
             player.age,
-            years,
+            preferredYears,
             minYears: balance.contracts.playerMinYears,
             maxYears: balance.contracts.playerMaxYears,
           );

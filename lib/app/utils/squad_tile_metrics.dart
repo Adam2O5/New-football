@@ -1,3 +1,4 @@
+import 'package:new_football/core/balance/balance_config.dart';
 import 'package:flutter/material.dart';
 
 /// Which extra values a squad roster tile currently shows.
@@ -5,20 +6,30 @@ enum SquadTileMetricMode { staminaForm, potential, optimalRole }
 
 /// Players at this age or younger still use the developing (gold) potential
 /// colour. Older players use the faded gold-grey treatment.
-const int developingPotentialMaxAge = 26;
-
-bool isDevelopingPotentialAge(int age) => age <= developingPotentialMaxAge;
+bool isDevelopingPotentialAge(
+  int age, [
+  BalanceConfig balance = BalanceConfig.defaults,
+]) => age <= balance.ui.developingPotentialMaxAge;
 
 /// Gold for developing players, pale gold-grey after age 26.
-Color potentialStarColor(int age) {
-  return isDevelopingPotentialAge(age)
+Color potentialStarColor(
+  int age, [
+  BalanceConfig balance = BalanceConfig.defaults,
+]) {
+  return isDevelopingPotentialAge(age, balance)
       ? const Color(0xFFFFC107)
       : const Color(0xFFB8A98A);
 }
 
 /// Potential shown on tiles: 0.5–5.0 in half-star steps.
-double displayedPotentialStars(double raw) {
-  final bounded = raw.clamp(0.5, 5.0);
+double displayedPotentialStars(
+  double raw, [
+  BalanceConfig balance = BalanceConfig.defaults,
+]) {
+  final bounded = raw.clamp(
+    balance.player.potentialMin,
+    balance.player.potentialMax,
+  );
   return (bounded * 2).roundToDouble() / 2.0;
 }
 

@@ -848,8 +848,8 @@ class AppLocalizationsPl extends AppLocalizations {
   String get home_readUrgent => 'Odczytaj pilną wiadomość';
 
   @override
-  String home_simulateHour(int hour) {
-    return 'Symuluj godzinę · $hour/10';
+  String home_simulateHour(int hour, int hours) {
+    return 'Symuluj godzinę · $hour/$hours';
   }
 
   @override
@@ -971,8 +971,9 @@ class AppLocalizationsPl extends AppLocalizations {
     int ovr,
     String form,
     String zone,
+    String maximum,
   ) {
-    return '$name, pozycja $position, OVR $ovr, forma $form na 10, strefa $zone';
+    return '$name, pozycja $position, OVR $ovr, forma $form na $maximum, strefa $zone';
   }
 
   @override
@@ -1000,8 +1001,8 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
-  String squad_formIndicatorSemantics(String form) {
-    return 'Forma: $form na 10';
+  String squad_formIndicatorSemantics(String form, String maximum) {
+    return 'Forma: $form na $maximum';
   }
 
   @override
@@ -1308,8 +1309,8 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
-  String freeAgency_rosterUsage(Object count) {
-    return 'Skład: $count/30';
+  String freeAgency_rosterUsage(int count, int maximum) {
+    return 'Skład: $count/$maximum';
   }
 
   @override
@@ -1343,8 +1344,9 @@ class AppLocalizationsPl extends AppLocalizations {
   String get freeAgency_selectPlayer => 'Najpierw wybierz wolnego agenta';
 
   @override
-  String get freeAgency_invalidOffer =>
-      'Podaj prawidłową pensję i 1–5 lat kontraktu';
+  String freeAgency_invalidOffer(int minYears, int maxYears) {
+    return 'Podaj prawidłową pensję i $minYears–$maxYears lat kontraktu';
+  }
 
   @override
   String get freeAgency_accepted => 'Oferta przyjęta — potwierdź finalizację';
@@ -2102,7 +2104,9 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
-  String get staff_yearsRange => 'Długość kontraktu musi wynosić od 1 do 4 lat';
+  String staff_yearsRange(int minYears, int maxYears) {
+    return 'Długość kontraktu musi wynosić od $minYears do $maxYears lat';
+  }
 
   @override
   String get staff_capExceeded => 'Oferta przekracza dostępny staff cap';
@@ -2994,8 +2998,9 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
-  String get squad_belowXi =>
-      'Dostępnych jest mniej niż 11 zdrowych zawodników';
+  String squad_belowXi(int minimum) {
+    return 'Dostępnych jest mniej niż $minimum zdrowych zawodników';
+  }
 
   @override
   String squad_xiCount(Object count) {
@@ -3698,8 +3703,12 @@ class AppLocalizationsPl extends AppLocalizations {
   String get msg_draftedRightsReminder_title => 'Niepodpisany draftowany';
 
   @override
-  String msg_draftedRightsReminder_body(Object playerName, Object rosterCount) {
-    return 'Masz prawa do $playerName; roster: $rosterCount/30.';
+  String msg_draftedRightsReminder_body(
+    String playerName,
+    int rosterCount,
+    int maximum,
+  ) {
+    return 'Masz prawa do $playerName; roster: $rosterCount/$maximum.';
   }
 
   @override
@@ -4224,8 +4233,9 @@ class AppLocalizationsPl extends AppLocalizations {
   String get msg_trade_hardRejected_title => 'Blokada wymiany';
 
   @override
-  String get msg_trade_hardRejected_body =>
-      'Negocjacje są zablokowane przez 30 dni.';
+  String msg_trade_hardRejected_body(int days) {
+    return 'Negocjacje są zablokowane przez $days dni.';
+  }
 
   @override
   String get msg_trade_ntcRefusal_title => 'Odmowa NTC';

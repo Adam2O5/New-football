@@ -400,9 +400,16 @@
   "home_nextActionTitle": "Najbliższa akcja",
   "home_nextEvent": "wydarzenia",
   "home_readUrgent": "Odczytaj pilną wiadomość",
-  "home_simulateHour": "Symuluj godzinę · {hour}/10",
+  "home_simulateHour": "Symuluj godzinę · {hour}/{hours}",
   "@home_simulateHour": {
-    "placeholders": {"hour": {"type": "int"}}
+    "placeholders": {
+      "hour": {
+        "type": "int"
+      },
+      "hours": {
+        "type": "int"
+      }
+    }
   },
   "home_simulateToNextMatch": "Symuluj do następnego meczu",
   "home_simulateUntilEvent": "Symuluj do wydarzenia",
@@ -519,15 +526,28 @@
   "@squad_positionMismatch": {
     "description": "Dostępnościowy opis przypisania zawodnika poza jego dokładną pozycją."
   },
-  "squad_playerRowSemantics": "{name}, pozycja {position}, OVR {ovr}, forma {form} na 10, strefa {zone}",
+  "squad_playerRowSemantics": "{name}, pozycja {position}, OVR {ovr}, forma {form} na {maximum}, strefa {zone}",
   "@squad_playerRowSemantics": {
     "description": "Pełna etykieta dostępności wiersza zawodnika; aktywne statusy są dołączane osobno.",
     "placeholders": {
-      "name": {"type": "String"},
-      "position": {"type": "String"},
-      "ovr": {"type": "int"},
-      "form": {"type": "String"},
-      "zone": {"type": "String"}
+      "name": {
+        "type": "String"
+      },
+      "position": {
+        "type": "String"
+      },
+      "ovr": {
+        "type": "int"
+      },
+      "form": {
+        "type": "String"
+      },
+      "zone": {
+        "type": "String"
+      },
+      "maximum": {
+        "type": "String"
+      }
     }
   },
   "squad_playerMarkerSemantics": "{name}, pozycja {position}. {status}",
@@ -560,11 +580,16 @@
       "ovr": {"type": "int"}
     }
   },
-  "squad_formIndicatorSemantics": "Forma: {form} na 10",
+  "squad_formIndicatorSemantics": "Forma: {form} na {maximum}",
   "@squad_formIndicatorSemantics": {
     "description": "Etykieta dostępności clamped wartości formy na poziomej skali 0–10.",
     "placeholders": {
-      "form": {"type": "String"}
+      "form": {
+        "type": "String"
+      },
+      "maximum": {
+        "type": "String"
+      }
     }
   },
   "squad_profileAction": "Otwórz profil zawodnika {name}",
@@ -780,7 +805,17 @@
   "freeAgency_sortOvr": "Overall",
   "freeAgency_sortName": "Nazwa",
   "freeAgency_poolCount": "Dostępni wolni agenci: {count}",
-  "freeAgency_rosterUsage": "Skład: {count}/30",
+  "freeAgency_rosterUsage": "Skład: {count}/{maximum}",
+  "@freeAgency_rosterUsage": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "maximum": {
+        "type": "int"
+      }
+    }
+  },
   "freeAgency_empty": "Brak wolnych agentów pasujących do filtrów",
   "freeAgency_playerSubtitle": "{position} · OVR {ovr} · Szacowana pensja: {salary}",
   "freeAgency_contractHeader": "Oferta dla {name}",
@@ -789,7 +824,17 @@
   "freeAgency_offerYears": "Lata kontraktu",
   "freeAgency_submitOffer": "Złóż ofertę",
   "freeAgency_selectPlayer": "Najpierw wybierz wolnego agenta",
-  "freeAgency_invalidOffer": "Podaj prawidłową pensję i 1–5 lat kontraktu",
+  "freeAgency_invalidOffer": "Podaj prawidłową pensję i {minYears}–{maxYears} lat kontraktu",
+  "@freeAgency_invalidOffer": {
+    "placeholders": {
+      "minYears": {
+        "type": "int"
+      },
+      "maxYears": {
+        "type": "int"
+      }
+    }
+  },
   "freeAgency_accepted": "Oferta przyjęta — potwierdź finalizację",
   "freeAgency_rejected": "Oferta odrzucona",
   "freeAgency_waiting": "Zawodnik rozważa ofertę",
@@ -1170,7 +1215,17 @@
       "max": {"type": "String"}
     }
   },
-  "staff_yearsRange": "Długość kontraktu musi wynosić od 1 do 4 lat",
+  "staff_yearsRange": "Długość kontraktu musi wynosić od {minYears} do {maxYears} lat",
+  "@staff_yearsRange": {
+    "placeholders": {
+      "minYears": {
+        "type": "int"
+      },
+      "maxYears": {
+        "type": "int"
+      }
+    }
+  },
   "staff_capExceeded": "Oferta przekracza dostępny staff cap",
   "staff_candidatesHeader": "Kandydaci do zatrudnienia",
   "staff_noCandidates": "Brak wolnych kandydatów na tę rolę",
@@ -1571,7 +1626,14 @@
   "squad_noPlayers": "Brak zawodników pasujących do filtrów",
   "squad_matchday": "Skład meczowy",
   "squad_healthy": "Zdrowi: {count}",
-  "squad_belowXi": "Dostępnych jest mniej niż 11 zdrowych zawodników",
+  "squad_belowXi": "Dostępnych jest mniej niż {minimum} zdrowych zawodników",
+  "@squad_belowXi": {
+    "placeholders": {
+      "minimum": {
+        "type": "int"
+      }
+    }
+  },
   "squad_xiCount": "XI: {count}",
   "squad_benchCount": "Ławka: {count}",
   "squad_reserveCount": "Rezerwy: {count}",
@@ -1786,7 +1848,20 @@
   "msg_draftPickLeague_title": "Wybór innej drużyny",
   "msg_draftPickLeague_body": "Inna drużyna dokonała wyboru w drafcie.",
   "msg_draftedRightsReminder_title": "Niepodpisany draftowany",
-  "msg_draftedRightsReminder_body": "Masz prawa do {playerName}; roster: {rosterCount}/30.",
+  "msg_draftedRightsReminder_body": "Masz prawa do {playerName}; roster: {rosterCount}/{maximum}.",
+  "@msg_draftedRightsReminder_body": {
+    "placeholders": {
+      "playerName": {
+        "type": "String"
+      },
+      "rosterCount": {
+        "type": "int"
+      },
+      "maximum": {
+        "type": "int"
+      }
+    }
+  },
   "msg_apronWarning_title": "Przekroczenie apronu",
   "msg_apronWarning_body": "Payroll przekracza dozwolony poziom.",
   "msg_capUpdateTv_title": "Aktualizacja salary cap",
@@ -1938,7 +2013,14 @@
   "msg_trade_rejected_title": "Wymiana odrzucona",
   "msg_trade_rejected_body": "Partner odrzucił propozycję wymiany.",
   "msg_trade_hardRejected_title": "Blokada wymiany",
-  "msg_trade_hardRejected_body": "Negocjacje są zablokowane przez 30 dni.",
+  "msg_trade_hardRejected_body": "Negocjacje są zablokowane przez {days} dni.",
+  "@msg_trade_hardRejected_body": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
   "msg_trade_ntcRefusal_title": "Odmowa NTC",
   "msg_trade_ntcRefusal_body": "Zawodnik nie wyraził zgody na transfer.",
   "msg_trade_leagueDigest_title": "Wymiany w lidze",

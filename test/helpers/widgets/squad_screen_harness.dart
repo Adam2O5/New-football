@@ -130,6 +130,7 @@ String rosterRowSemanticsLabel(AppLocalizations l10n, PlayerListTile tile) {
     roundedOvrForDisplay(tile.player.overall()),
     formattedForm,
     localizedRosterZoneLabel(l10n, tile.zone),
+    '10',
   );
   final statuses = <String>[
     if (status.hasActiveInjury) l10n.squad_statusInjury,

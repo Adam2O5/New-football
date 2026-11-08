@@ -18,7 +18,9 @@ mixin _StaffScreenSlots on ConsumerState<StaffScreen>, _StaffScreenShared {
     final memberCanExtend =
         memberIsOccupied &&
         member != null &&
-        (member.contract?.yearsRemaining ?? 99) <= 1;
+        (member.contract != null &&
+            member.contract!.yearsRemaining <=
+                ref.read(balanceProvider).ui.expiringContractMaxYears);
     final memberCanFire =
         memberIsOccupied && member != null && _canFire(member);
 

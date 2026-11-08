@@ -137,7 +137,7 @@ class TradeService {
     Random? random,
   }) : capService = capService ?? SalaryCapService(balance: balance),
        calendarService = calendarService ?? CalendarService(balance: balance),
-       messages = messageService ?? MessageService(),
+       messages = messageService ?? MessageService(balance: balance),
        _random = random;
 
   final BalanceConfig balance;
