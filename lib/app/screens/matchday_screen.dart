@@ -132,7 +132,9 @@ class _MatchdayScreenState extends ConsumerState<MatchdayScreen> {
               phase: league.currentSeason.phase,
               opponentFormation: away.tactics.formation,
               opponentFormationHistory: homeHistory,
-              nextMatchWithinThreeDays: matchContext.homeMatchInWeek >= 2,
+              nextMatchWithinThreeDays:
+                  matchContext.homeMatchInWeek >=
+                  ref.read(balanceProvider).ai.matchdayShortRestMatchCount,
             ),
           );
     final plannedHome = homePlan?.applyTo(home) ?? home;
@@ -150,7 +152,9 @@ class _MatchdayScreenState extends ConsumerState<MatchdayScreen> {
               phase: league.currentSeason.phase,
               opponentFormation: homePlan?.formation ?? home.tactics.formation,
               opponentFormationHistory: awayHistory,
-              nextMatchWithinThreeDays: matchContext.awayMatchInWeek >= 2,
+              nextMatchWithinThreeDays:
+                  matchContext.awayMatchInWeek >=
+                  ref.read(balanceProvider).ai.matchdayShortRestMatchCount,
             ),
           );
     final plannedAway = awayPlan?.applyTo(away) ?? away;

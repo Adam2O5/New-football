@@ -28,9 +28,6 @@ class TeamAiService {
   final Random _random;
   final AiEvaluationService _evaluator;
 
-  /// Fixed value margin for trade acceptance (AI_behaviour.md §1: no difficulty).
-  static const double _valueMargin = 0.12;
-
   bool shouldAcceptTrade({
     required Team self,
     required Team other,
@@ -71,7 +68,10 @@ class TeamAiService {
 
     final ratio = ourValue / theirValue;
     // Legacy in-memory callers without a league snapshot retain the old API.
-    return ratio >= 1.0 - _valueMargin * 0.5;
+    return ratio >=
+        1.0 -
+            balance.ai.helperTradeValueMargin *
+                balance.ai.helperTradeMarginShare;
   }
 
   ContractOffer makeFaOffer(
@@ -89,15 +89,21 @@ class TeamAiService {
         : Random(
             aiSeed(saveSeed, seasonYear, week, teamId, DecisionType.faOffer),
           );
-    final mult = 0.95 + random.nextDouble() * 0.15;
+    final mult =
+        balance.ai.helperFaSalaryFactorMin +
+        random.nextDouble() * balance.ai.helperFaSalaryFactorSpan;
     return ContractOffer(
       salary: (expectedSalary * mult).round().clamp(
         balance.salaryCap.minSalary,
         balance.salaryCap.maxSalary,
       ),
-      years: (expectedLength + random.nextInt(2) - 1).clamp(
-        balance.contracts.playerMinYears,
-        balance.contracts.playerMaxYears,
+      years: balance.ai.contractYearsFor(
+        player.age,
+        expectedLength +
+            random.nextInt(balance.ai.helperFaYearJitterRange) -
+            balance.ai.helperFaYearJitterOffset,
+        minYears: balance.contracts.playerMinYears,
+        maxYears: balance.contracts.playerMaxYears,
       ),
     );
   }

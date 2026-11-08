@@ -120,7 +120,7 @@ class AiRosterManagementService {
     final team = next.teamById(teamId);
     if (team == null) return next;
     final available = _availableCount(team);
-    if (available > 13) return next;
+    if (available > balance.ai.rosterAvailabilityRepairMax) return next;
 
     // A roster with fewer than an XI gets an unconditional same-day attempt;
     // the documented 90% roll applies to the softer <=13-depth response.
@@ -205,7 +205,9 @@ class AiRosterManagementService {
                 !(candidate.state.injury?.isActive ?? false),
           )
           .length;
-      final goalkeeperResponse = isGoalkeeper && remainingGoalkeepers <= 1;
+      final goalkeeperResponse =
+          isGoalkeeper &&
+          remainingGoalkeepers <= balance.ai.rosterMajorGkRemainingMax;
       final lineupResponse =
           _wasLikelyStarter(team, currentPlayer.id) &&
           !_hasCloseSubstitute(team, currentPlayer);
@@ -297,7 +299,7 @@ class AiRosterManagementService {
     if (partners.isEmpty) return null;
 
     final outgoing = _tradeOutgoers(source);
-    if (outgoing.length < 2) return null;
+    if (outgoing.length < balance.ai.rosterSpaceTradeMinOutgoers) return null;
     for (final partner in partners) {
       final incoming = [...partner.roster]
         ..sort((a, b) {
@@ -361,7 +363,7 @@ class AiRosterManagementService {
           team.roster
                   .where((candidate) => candidate.position == Position.gk)
                   .length <=
-              2) {
+              balance.ai.rosterProtectedGoalkeepers) {
         return false;
       }
       return !_isCriticalNeed(team, player.position);
@@ -370,7 +372,9 @@ class AiRosterManagementService {
       final byValue = a.pointValue.compareTo(b.pointValue);
       return byValue != 0 ? byValue : a.id.compareTo(b.id);
     });
-    if (candidates.length >= 2) return candidates;
+    if (candidates.length >= balance.ai.rosterSpaceTradeMinOutgoers) {
+      return candidates;
+    }
 
     final fallback = [...team.roster]
       ..sort((a, b) {

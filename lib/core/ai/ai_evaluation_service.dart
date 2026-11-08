@@ -53,7 +53,7 @@ class AiEvaluationService {
     return AiEvaluationContext(
       team: team,
       teamStatus: entry?.teamStatus ?? TeamStatus.pretender,
-      expectedRank: entry?.expectedRank ?? 15,
+      expectedRank: entry?.expectedRank ?? balance.ai.expectedRankFallback,
       teamPower: entry?.teamPower ?? fallbackPower,
       leagueTeams: league?.teams ?? [team],
       strengthTable: table,
@@ -126,7 +126,9 @@ class AiEvaluationService {
         !player.contract.blockedTeamIds.contains(recipient.team.id)) {
       apply('expiringContract', balance.ai.expiringContractMult);
     }
-    if (player.contract.isRookieScale && player.contract.yearsRemaining >= 4) {
+    if (player.contract.isRookieScale &&
+        player.contract.yearsRemaining >=
+            balance.ai.rookieFirstYearMinRemaining) {
       apply('rookieScaleYearOne', balance.ai.rookieYearOneMult);
     }
     if (player.contract.noTradeClause) {
@@ -137,8 +139,9 @@ class AiEvaluationService {
       player.overall(balance),
       balance,
     );
-    if (player.contract.salary > estimatedSalary * 1.5 &&
-        player.contract.yearsRemaining >= 3) {
+    if (player.contract.salary >
+            estimatedSalary * balance.ai.overpaidSalaryRatio &&
+        player.contract.yearsRemaining >= balance.ai.overpaidMinYears) {
       apply('overpaidContract', balance.ai.overpaidContractMult);
     }
 
@@ -170,7 +173,7 @@ class AiEvaluationService {
     final year = currentYear ?? recipient.seasonYear;
     final ownerRank = recipient
         .expectedRankFor(pick.originalTeamId, balance)
-        .clamp(1, 30);
+        .clamp(1, balance.draft.teams);
     final materialized = pick.pickNumber != null;
     final projectedSlot = materialized
         ? pick.pickNumber!.toDouble()
@@ -184,11 +187,7 @@ class AiEvaluationService {
         ? 1.0
         : balance.ai.uncertaintyFor(yearsAhead);
     final statusPickMult = pick.round == 1
-        ? switch (recipient.teamStatus) {
-            TeamStatus.rebuild || TeamStatus.retool => 1.15,
-            TeamStatus.contender || TeamStatus.elite => 0.88,
-            TeamStatus.pretender => 1.00,
-          }
+        ? balance.ai.firstRoundStatusMultipliers[recipient.teamStatus]!
         : 1.0;
     return AiAssetValuation(
       kind: AiAssetKind.pick,
@@ -209,12 +208,13 @@ class AiEvaluationService {
     int? currentYear,
   }) {
     final pickNumber = rights.pickNumber;
-    if (pickNumber < 1 || pickNumber > 90) {
+    if (pickNumber < 1 ||
+        pickNumber > balance.draft.teams * balance.draft.rounds) {
       return _zeroValuation(AiAssetKind.rights, rights.id);
     }
-    final round = pickNumber <= 30
+    final round = pickNumber <= balance.draft.teams
         ? 1
-        : pickNumber <= 60
+        : pickNumber <= balance.draft.teams * 2
         ? 2
         : 3;
     final pick = DraftPick(
@@ -287,14 +287,15 @@ class AiEvaluationService {
         resultingStatus == CapStatus.secondApron &&
         currentStatus != CapStatus.secondApron;
     final secondApronRoll = entersSecondApron ? random.nextDouble() : null;
-    final titleChance = recipient.expectedRank <= 3;
+    final titleChance = recipient.expectedRank <= balance.ai.titleChanceRankMax;
     final secondApronBlocked =
         entersSecondApron &&
         !(recipient.teamStatus == TeamStatus.elite &&
             titleChance &&
             (secondApronRoll ?? 1.0) < balance.ai.pSecondApronEntry);
     final netValue = netBeforeApron - apronPenalty;
-    final rawSurplusPct = netValue / max(100.0, outValue) * 100.0;
+    final rawSurplusPct =
+        netValue / max(balance.ai.surplusValueFloor, outValue) * 100.0;
     return AiPackageEvaluation(
       incoming: incomingList,
       outgoing: outgoingList,
@@ -395,13 +396,15 @@ class AiEvaluationService {
     ]..sort();
     final leagueMedianOvr = _median(medianValues, fallback: bestOvr);
     final gapPenalty = count >= definition.max
-        ? -12.0
+        ? balance.ai.needSurplusPenalty
         : count < definition.min
-        ? 40.0 + (definition.min - count) * 15.0
+        ? balance.ai.needBelowMinBase +
+              (definition.min - count) * balance.ai.needBelowMinPerPlayer
         : count < definition.target
-        ? (definition.target - count) * 8.0
+        ? (definition.target - count) * balance.ai.needBelowTargetPerPlayer
         : 0.0;
-    final qualityGap = max(0.0, leagueMedianOvr - bestOvr) * 1.5;
+    final qualityGap =
+        max(0.0, leagueMedianOvr - bestOvr) * balance.ai.needQualityGapWeight;
     final needScore = gapPenalty + qualityGap;
     final band = needScore >= balance.ai.minGapThreshold
         ? AiNeedBand.critical
@@ -497,10 +500,14 @@ class AiEvaluationService {
   static bool _isSigned(Player player) =>
       player.contract.salary > 0 && player.contract.yearsRemaining > 0;
 
-  static AiContractDragClass _contractDragClass(double drag) {
-    if (drag >= 60) return AiContractDragClass.toxic;
-    if (drag >= 30) return AiContractDragClass.anchor;
-    if (drag >= 10) return AiContractDragClass.burden;
+  AiContractDragClass _contractDragClass(double drag) {
+    if (drag >= balance.ai.contractDragToxic) return AiContractDragClass.toxic;
+    if (drag >= balance.ai.contractDragAnchor) {
+      return AiContractDragClass.anchor;
+    }
+    if (drag >= balance.ai.contractDragBurden) {
+      return AiContractDragClass.burden;
+    }
     return AiContractDragClass.acceptable;
   }
 
@@ -515,10 +522,13 @@ class AiEvaluationService {
   }
 
   double _projectedSlot(int round, int ownerRank) {
-    if (round == 1 && ownerRank >= 21) {
-      return balance.ai.lotteryExpectedSlots[ownerRank] ?? 9.4;
+    if (round == 1 &&
+        ownerRank >= balance.draft.teams - balance.draft.lotteryTeams + 1) {
+      return balance.ai.lotteryExpectedSlots[ownerRank] ??
+          balance.ai.lotteryFallbackSlot;
     }
-    return (31 - ownerRank) + (round - 1) * 30.0;
+    return (balance.draft.teams + 1 - ownerRank) +
+        (round - 1) * balance.draft.teams.toDouble();
   }
 
   static CapStatus _capStatusForPayroll(int payroll, CapSnapshot thresholds) {

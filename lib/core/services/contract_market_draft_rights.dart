@@ -141,7 +141,12 @@ mixin _ContractMarketDraftRights on _ContractMarketShared {
 
         final offer = ContractOffer(
           salary: decision.salary,
-          years: decision.years,
+          years: balance.ai.contractYearsFor(
+            player.age,
+            decision.years,
+            minYears: balance.contracts.playerMinYears,
+            maxYears: balance.contracts.playerMaxYears,
+          ),
         );
         final legal = contracts.validateOffer(
           team: currentTeam,
@@ -257,7 +262,14 @@ mixin _ContractMarketDraftRights on _ContractMarketShared {
     }
     final offer = ContractOffer(
       salary: right.player.contract.salary,
-      years: right.player.contract.yearsRemaining,
+      years: team.ai == null
+          ? right.player.contract.yearsRemaining
+          : balance.ai.contractYearsFor(
+              right.player.age,
+              right.player.contract.yearsRemaining,
+              minYears: balance.contracts.playerMinYears,
+              maxYears: balance.contracts.playerMaxYears,
+            ),
       exception: CapExceptionType.rookieScale,
       rookiePickSlot: right.pickNumber,
     );

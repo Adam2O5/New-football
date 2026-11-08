@@ -33,8 +33,9 @@ class AiDraftService {
     LeagueState? league,
     int saveSeed = 0,
     int? seasonYear,
-    int week = 46,
+    int? week,
   }) {
+    final resolvedWeek = week ?? balance.calendar.draftWeek;
     final scout = team.staff.scout;
     if (scout == null) return const TeamScouting();
 
@@ -56,7 +57,7 @@ class AiDraftService {
       league: league,
       saveSeed: saveSeed,
       seasonYear: year,
-      week: week,
+      week: resolvedWeek,
       decisionType: DecisionType.scoutAssign,
     );
     final rankById = {
@@ -65,14 +66,14 @@ class AiDraftService {
     final tieSeed = aiSeed(
       saveSeed,
       year,
-      week,
+      resolvedWeek,
       team.id,
       DecisionType.scoutAssign,
     );
     int tieFor(String id) => teamEventSeed(
       tieSeed,
       year,
-      week,
+      resolvedWeek,
       team.id,
       'scout-assign-tie',
       playerId: id,
@@ -140,8 +141,9 @@ class AiDraftService {
     LeagueState? league,
     int saveSeed = 0,
     int? seasonYear,
-    int week = 46,
+    int? week,
   }) {
+    final resolvedWeek = week ?? balance.calendar.draftWeek;
     final ranked = mockRankedProspects == null
         ? ([...prospects]..sort((a, b) {
             final grade = b.scoutGrade.compareTo(a.scoutGrade);
@@ -157,7 +159,7 @@ class AiDraftService {
       league: league,
       saveSeed: saveSeed,
       seasonYear: year,
-      week: week,
+      week: resolvedWeek,
       decisionType: DecisionType.draftPick,
     );
     final entries = <AiProspectBoardEntry>[];
@@ -190,7 +192,7 @@ class AiDraftService {
                   : balance.ai.scoutNoScoutNoiseRank,
               saveSeed: saveSeed,
               seasonYear: year,
-              week: week,
+              week: resolvedWeek,
               teamId: team.id,
               prospectId: prospect.id,
             );
@@ -211,7 +213,7 @@ class AiDraftService {
               teamEventSeed(
                 saveSeed,
                 year,
-                week,
+                resolvedWeek,
                 team.id,
                 'draft-score-noise',
                 playerId: prospect.id,
@@ -221,8 +223,9 @@ class AiDraftService {
           ) *
           balance.ai.draftScoreNoiseSd;
       final score =
-          0.55 * estimatedOvr +
-          0.45 * (estimatedPotential * 12.0) +
+          balance.ai.draftOverallWeight * estimatedOvr +
+          balance.ai.draftPotentialWeight *
+              (estimatedPotential * balance.ai.draftPotentialScale) +
           needBonus +
           noise;
       entries.add(
@@ -262,9 +265,10 @@ class AiDraftService {
     LeagueState? league,
     int saveSeed = 0,
     int? seasonYear,
-    int week = 46,
+    int? week,
     double? slotThreshold,
   }) {
+    final resolvedWeek = week ?? balance.calendar.draftWeek;
     final board = buildBoard(
       team: team,
       prospects: prospects,
@@ -274,23 +278,27 @@ class AiDraftService {
       league: league,
       saveSeed: saveSeed,
       seasonYear: seasonYear,
-      week: week,
+      week: resolvedWeek,
     );
     final year = seasonYear ?? league?.currentSeason.year ?? 0;
     final upRoll = Random(
-      aiSeed(saveSeed, year, week, team.id, DecisionType.draftPick),
+      aiSeed(saveSeed, year, resolvedWeek, team.id, DecisionType.draftPick),
     ).nextDouble();
     final topTarget = board
-        .take(5)
+        .take(balance.ai.draftTradeUpCandidateLimit)
         .cast<AiProspectBoardEntry?>()
         .firstWhere(
-          (entry) => entry!.mockRank >= pickNumber + 4,
+          (entry) =>
+              entry!.mockRank >= pickNumber + balance.ai.draftTradeUpLookahead,
           orElse: () => null,
         );
     if (topTarget != null && upRoll < balance.ai.pDraftTradeUp) {
       final targetIndex = draftOrder.isEmpty
           ? null
-          : min(currentPickIndex + 4, draftOrder.length - 1);
+          : min(
+              currentPickIndex + balance.ai.draftTradeUpLookahead,
+              draftOrder.length - 1,
+            );
       return AiDraftDecision(
         action: AiDraftAction.tradeUp,
         board: board,
@@ -307,7 +315,7 @@ class AiDraftService {
       teamEventSeed(
         saveSeed,
         year,
-        week,
+        resolvedWeek,
         team.id,
         'draft-trade-down',
         salt: pickNumber,
@@ -335,12 +343,21 @@ class AiDraftService {
     double needScore = 0.0,
     int saveSeed = 0,
     int seasonYear = 0,
-    int week = 46,
+    int? week,
   }) {
+    final resolvedWeek = week ?? balance.calendar.draftWeek;
     final probability = switch (round) {
-      1 when team.roster.length < 30 => balance.ai.draftR1SigningProbability,
-      2 when team.roster.length < 29 => balance.ai.draftR2SigningProbability,
-      3 when team.roster.length < 28 && needScore > 0 =>
+      1 when team.roster.length < balance.roster.maxSize =>
+        balance.ai.draftR1SigningProbability,
+      2
+          when team.roster.length <
+              balance.roster.maxSize - balance.ai.draftRoundTwoReservedSlots =>
+        balance.ai.draftR2SigningProbability,
+      3
+          when team.roster.length <
+                  balance.roster.maxSize -
+                      balance.ai.draftRoundThreeReservedSlots &&
+              needScore > 0 =>
         balance.ai.draftR3SigningProbability,
       _ => 0.0,
     };
@@ -349,7 +366,7 @@ class AiDraftService {
         _roll(
           saveSeed: saveSeed,
           seasonYear: seasonYear,
-          week: week,
+          week: resolvedWeek,
           teamId: team.id,
           kind: 'draft-sign',
           subjectId: prospectId,
@@ -367,9 +384,10 @@ class AiDraftService {
     required String prospectId,
     int saveSeed = 0,
     int seasonYear = 0,
-    int week = 47,
+    int? week,
   }) {
-    final probability = team.roster.length < 30
+    final resolvedWeek = week ?? balance.calendar.freeAgencyWeek;
+    final probability = team.roster.length < balance.roster.maxSize
         ? balance.ai.draftDeferredSigningProbability
         : 0.0;
     final sign =
@@ -377,7 +395,7 @@ class AiDraftService {
         _roll(
           saveSeed: saveSeed,
           seasonYear: seasonYear,
-          week: week,
+          week: resolvedWeek,
           teamId: team.id,
           kind: 'draft-deferred-sign',
           subjectId: prospectId,
@@ -396,13 +414,16 @@ class AiDraftService {
     required AiNeedBand needBand,
     int saveSeed = 0,
     int seasonYear = 0,
-    int week = 47,
+    int? week,
   }) {
-    final probability = team.roster.length < 20
+    final resolvedWeek = week ?? balance.calendar.freeAgencyWeek;
+    final probability = team.roster.length < balance.roster.minSize
         ? balance.ai.draftUndraftedUnderRosterProbability
-        : needBand == AiNeedBand.critical && team.roster.length < 26
+        : needBand == AiNeedBand.critical &&
+              team.roster.length < balance.ai.rosterTargetTotal
         ? balance.ai.draftUndraftedCriticalProbability
-        : needBand == AiNeedBand.belowTarget && team.roster.length < 24
+        : needBand == AiNeedBand.belowTarget &&
+              team.roster.length < balance.ai.draftUndraftedBelowTargetSize
         ? balance.ai.draftUndraftedBelowTargetProbability
         : balance.ai.draftUndraftedDefaultProbability;
     return AiUndraftedSigningDecision(
@@ -411,14 +432,16 @@ class AiDraftService {
       offer: _roll(
         saveSeed: saveSeed,
         seasonYear: seasonYear,
-        week: week,
+        week: resolvedWeek,
         teamId: team.id,
         kind: 'undrafted-offer',
         subjectId: prospectId,
         probability: probability,
       ),
       probability: probability,
-      reason: team.roster.length < 20 ? 'roster-repair' : needBand.name,
+      reason: team.roster.length < balance.roster.minSize
+          ? 'roster-repair'
+          : needBand.name,
     );
   }
 
@@ -429,17 +452,12 @@ class AiDraftService {
     int pickNumber,
   ) {
     if (position == Position.gk &&
-        pickNumber > 45 &&
-        team.roster.where((p) => p.position == Position.gk).length < 2) {
-      return 20.0;
+        pickNumber > balance.ai.draftLateGoalkeeperAfterPick &&
+        team.roster.where((p) => p.position == Position.gk).length <
+            balance.ai.draftLateGoalkeeperMinCount) {
+      return balance.ai.draftLateGoalkeeperBonus;
     }
-    return switch (need?.band) {
-      AiNeedBand.critical => 8.0,
-      AiNeedBand.belowTarget => 4.0,
-      AiNeedBand.target => 0.0,
-      AiNeedBand.surplus => -6.0,
-      null => 0.0,
-    };
+    return balance.ai.draftNeedBonuses[need?.band] ?? 0.0;
   }
 
   int _noisyRank(
@@ -468,16 +486,31 @@ class AiDraftService {
 
   double _proxyOverall(int rank, int length) {
     final t = length <= 1 ? 0.0 : (rank - 1) / (length - 1);
-    return (95.0 - t * 45.0).clamp(50.0, 95.0);
+    return (balance.ai.draftProxyOverallMax -
+            t * balance.ai.draftProxyOverallSpread)
+        .clamp(
+          balance.ai.draftProxyOverallMin,
+          balance.ai.draftProxyOverallMax,
+        );
   }
 
   double _proxyPotential(int rank, int length) {
     final t = length <= 1 ? 0.0 : (rank - 1) / (length - 1);
-    return (5.0 - t * 4.5).clamp(0.5, 5.0);
+    return (balance.ai.draftProxyPotentialMax -
+            t * balance.ai.draftProxyPotentialSpread)
+        .clamp(
+          balance.ai.draftProxyPotentialMin,
+          balance.ai.draftProxyPotentialMax,
+        );
   }
 
   double _slotThreshold(int pickNumber) =>
-      (84.0 - max(0, pickNumber - 1) * 0.45).clamp(40.0, 84.0);
+      (balance.ai.draftSlotQualityBase -
+              max(0, pickNumber - 1) * balance.ai.draftSlotQualityDecay)
+          .clamp(
+            balance.ai.draftSlotQualityMin,
+            balance.ai.draftSlotQualityBase,
+          );
 
   bool _roll({
     required int saveSeed,

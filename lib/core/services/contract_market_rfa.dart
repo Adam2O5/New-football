@@ -30,6 +30,14 @@ mixin _ContractMarketRfa on _ContractMarketShared {
         player.contract.lastSeason != league.currentSeason.year) {
       return null;
     }
+    final offerYears = team.ai == null
+        ? years
+        : balance.ai.contractYearsFor(
+            player.age,
+            years,
+            minYears: balance.contracts.playerMinYears,
+            maxYears: balance.contracts.playerMaxYears,
+          );
     final amount = salary ?? qualifyingOfferMinimum(player);
     final validation = contracts.validateOffer(
       team: team,
@@ -39,7 +47,7 @@ mixin _ContractMarketRfa on _ContractMarketShared {
       ),
       offer: ContractOffer(
         salary: amount,
-        years: years,
+        years: offerYears,
         exception: CapExceptionType.qualifyingOffer,
       ),
     );
@@ -49,7 +57,7 @@ mixin _ContractMarketRfa on _ContractMarketShared {
       playerId: player.id,
       ownerTeamId: ownerTeamId,
       salary: amount,
-      years: years,
+      years: offerYears,
       seasonYear: league.currentSeason.year,
     );
     var state = league.copyWith(
@@ -69,13 +77,13 @@ mixin _ContractMarketRfa on _ContractMarketShared {
         'subjectName': player.name,
         'playerName': player.name,
         'salary': amount,
-        'years': years,
+        'years': offerYears,
       },
       payload: {
         'playerId': player.id,
         'teamId': ownerTeamId,
         'salary': amount,
-        'years': years,
+        'years': offerYears,
       },
     );
   }

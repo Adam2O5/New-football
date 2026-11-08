@@ -66,10 +66,14 @@ class AiMatchdayService {
     nextMatchWithinThreeDays:
         nextMatchWithinThreeDays ??
         (team.id == matchContext.homeTeamId
-            ? matchContext.homeMatchInWeek >= 2
-            : matchContext.awayMatchInWeek >= 2),
+            ? matchContext.homeMatchInWeek >=
+                  balance.ai.matchdayShortRestMatchCount
+            : matchContext.awayMatchInWeek >=
+                  balance.ai.matchdayShortRestMatchCount),
     mathematicallyMeaningless:
-        mathematicallyMeaningless ?? (week >= 27 && week <= 29),
+        mathematicallyMeaningless ??
+        (week >= balance.ai.meaninglessFirstWeek &&
+            week <= balance.ai.meaninglessLastWeek),
   );
 
   /// Selects one AI side's complete pre-match plan.
@@ -296,35 +300,35 @@ class AiMatchdayService {
       return;
     }
 
-    if (minute >= 60 &&
+    if (minute >= balance.ai.subCriticalMinute &&
         _applyStaminaTrigger(
           live: live,
           runtime: runtime,
           homeSide: homeSide,
-          threshold: 35,
+          threshold: balance.ai.subCriticalStamina,
           probability: balance.ai.pSubstitutionStaminaCritical,
           triggerKey: 'stamina-critical',
           allowAnyReplacement: true,
         )) {
       return;
     }
-    if (minute >= 45 &&
+    if (minute >= balance.ai.subLowMinute &&
         _applyStaminaTrigger(
           live: live,
           runtime: runtime,
           homeSide: homeSide,
-          threshold: 45,
+          threshold: balance.ai.subLowStamina,
           probability: balance.ai.pSubstitutionStaminaLow,
           triggerKey: 'stamina-low',
           allowAnyReplacement: false,
         )) {
       return;
     }
-    if (minute >= 60 &&
+    if (minute >= balance.ai.subRatingMinute &&
         _applyRatingTrigger(live: live, runtime: runtime, homeSide: homeSide)) {
       return;
     }
-    if (minute >= 70 &&
+    if (minute >= balance.ai.subYellowMinute &&
         _applyYellowCardTrigger(
           live: live,
           runtime: runtime,
@@ -336,50 +340,50 @@ class AiMatchdayService {
     final scoreDelta = homeSide
         ? live.state.homeGoals - live.state.awayGoals
         : live.state.awayGoals - live.state.homeGoals;
-    if (scoreDelta <= -2 && minute >= 60) {
+    if (scoreDelta <= -2 && minute >= balance.ai.subTrailingTwoMinute) {
       if (_applyScoreTrigger(
         live: live,
         runtime: runtime,
         homeSide: homeSide,
         triggerKey: 'trailing-two',
         probability: balance.ai.pSubstitutionTrailingTwo,
-        count: 2,
+        count: balance.ai.subTrailingTwoCount,
         offensive: true,
       )) {
         return;
       }
-    } else if (scoreDelta == -1 && minute >= 65) {
+    } else if (scoreDelta == -1 && minute >= balance.ai.subTrailingOneMinute) {
       if (_applyScoreTrigger(
         live: live,
         runtime: runtime,
         homeSide: homeSide,
         triggerKey: 'trailing-one',
         probability: balance.ai.pSubstitutionTrailingOne,
-        count: 1,
+        count: balance.ai.subScoreChangeCount,
         offensive: true,
       )) {
         return;
       }
-    } else if (scoreDelta >= 2 && minute >= 70) {
+    } else if (scoreDelta >= 2 && minute >= balance.ai.subLeadingTwoMinute) {
       if (_applyScoreTrigger(
         live: live,
         runtime: runtime,
         homeSide: homeSide,
         triggerKey: 'leading-two',
         probability: balance.ai.pSubstitutionLeadingTwo,
-        count: 1,
+        count: balance.ai.subScoreChangeCount,
         offensive: false,
       )) {
         return;
       }
-    } else if (scoreDelta == 1 && minute >= 78) {
+    } else if (scoreDelta == 1 && minute >= balance.ai.subLeadingOneMinute) {
       if (_applyScoreTrigger(
         live: live,
         runtime: runtime,
         homeSide: homeSide,
         triggerKey: 'leading-one',
         probability: balance.ai.pSubstitutionLeadingOne,
-        count: 1,
+        count: balance.ai.subScoreChangeCount,
         offensive: false,
       )) {
         return;
@@ -387,7 +391,7 @@ class AiMatchdayService {
     }
 
     if (scoreDelta <= -2 &&
-        minute > 70 &&
+        minute > balance.ai.subTacticalCorrectionAfterMinute &&
         !runtime.hasHandled('tactical-correction') &&
         runtime.random.nextDouble() < balance.ai.pTacticalLateCorrection) {
       final current = homeSide
@@ -458,9 +462,15 @@ class AiMatchdayService {
 
   /// The four documented readiness bands: 1.00 / 0.94 / 0.82 / 0.60.
   double staminaReadiness(int stamina) {
-    if (stamina >= 80) return balance.ai.staminaReadinessFull;
-    if (stamina >= 60) return balance.ai.staminaReadinessGood;
-    if (stamina >= 40) return balance.ai.staminaReadinessMid;
+    if (stamina >= balance.ai.staminaReadinessFullMin) {
+      return balance.ai.staminaReadinessFull;
+    }
+    if (stamina >= balance.ai.staminaReadinessGoodMin) {
+      return balance.ai.staminaReadinessGood;
+    }
+    if (stamina >= balance.ai.staminaReadinessMidMin) {
+      return balance.ai.staminaReadinessMid;
+    }
     return balance.ai.staminaReadinessLow;
   }
 
@@ -532,8 +542,9 @@ class AiMatchdayService {
   }
 
   bool _shouldRotate(Player player, AiMatchdayContext context, Random random) {
-    final lowStamina = player.state.stamina < 45;
-    if (context.isPlayoff && player.state.stamina >= 55) {
+    final lowStamina = player.state.stamina < balance.ai.rotationLowStamina;
+    if (context.isPlayoff &&
+        player.state.stamina >= balance.ai.rotationPlayoffMinStamina) {
       if (random.nextDouble() < balance.ai.pPlayoffBestXi) return false;
     }
     if (lowStamina &&
@@ -541,7 +552,7 @@ class AiMatchdayService {
       return true;
     }
     if (context.nextMatchWithinThreeDays &&
-        player.state.stamina < 65 &&
+        player.state.stamina < balance.ai.rotationShortRestStamina &&
         random.nextDouble() < balance.ai.pRotationShortRest) {
       return true;
     }
@@ -578,7 +589,9 @@ class AiMatchdayService {
                 ? byFit
                 : a.formation.index.compareTo(b.formation.index);
           });
-    final top = ranked.take(3).toList(growable: false);
+    final top = ranked
+        .take(balance.ai.formationCandidateLimit)
+        .toList(growable: false);
     if (top.isEmpty) return (formation: Formation.f433, counterApplied: false);
 
     final observed = _mostFrequent(history) ?? opponentFormation;
@@ -647,11 +660,14 @@ class AiMatchdayService {
     Formation? opponent,
   ) {
     final matchup = opponent == null
-        ? 50.0
-        : (50.0 +
+        ? balance.ai.formationMatchupNeutral
+        : (balance.ai.formationMatchupNeutral +
                   balance.tactics.formationMatchupBonus(formation, opponent) *
-                      1000.0)
-              .clamp(0.0, 100.0)
+                      balance.ai.formationMatchupScale)
+              .clamp(
+                balance.ai.formationMatchupMin,
+                balance.ai.formationMatchupMax,
+              )
               .toDouble();
     return fit * balance.ai.formationFitWeight +
         matchup * balance.ai.formationMatchupWeight;
@@ -795,10 +811,10 @@ class AiMatchdayService {
       }
     }
 
-    addGroup((p) => p.position == Position.gk, 1);
-    addGroup(_isDefender, 2);
-    addGroup(_isMidfielder, 2);
-    addGroup(_isAttacker, 2);
+    addGroup((p) => p.position == Position.gk, balance.ai.benchGoalkeepers);
+    addGroup(_isDefender, balance.ai.benchDefenders);
+    addGroup(_isMidfielder, balance.ai.benchMidfielders);
+    addGroup(_isAttacker, balance.ai.benchAttackers);
     for (final player in available) {
       if (bench.length >= balance.roster.benchSize) break;
       if (!bench.contains(player)) bench.add(player);
@@ -819,19 +835,19 @@ class AiMatchdayService {
     var width = AttackWidth.balanced;
     var line = DefensiveLine.normal;
     var pressing = PressingIntensity.medium;
-    if (difference >= 12) {
+    if (difference >= balance.ai.tacticalLargeStrengthGap) {
       width = AttackWidth.wide;
       line = DefensiveLine.high;
       pressing = PressingIntensity.high;
-    } else if (difference >= 5) {
+    } else if (difference >= balance.ai.tacticalStrengthGap) {
       width = AttackWidth.wide;
       pressing = PressingIntensity.high;
-    } else if (difference <= -12) {
+    } else if (difference <= -balance.ai.tacticalLargeStrengthGap) {
       tempo = Tempo.slow;
       width = AttackWidth.narrow;
       line = DefensiveLine.deep;
       pressing = PressingIntensity.low;
-    } else if (difference <= -5) {
+    } else if (difference <= -balance.ai.tacticalStrengthGap) {
       tempo = Tempo.fast;
       line = DefensiveLine.deep;
       pressing = PressingIntensity.low;
@@ -887,8 +903,8 @@ class AiMatchdayService {
     required Random random,
   }) {
     final result = <String, AssignedRole>{};
-    final offensive = strengthDifference >= 5;
-    final defensive = strengthDifference <= -5;
+    final offensive = strengthDifference >= balance.ai.tacticalStrengthGap;
+    final defensive = strengthDifference <= -balance.ai.tacticalStrengthGap;
     for (final player in lineup) {
       var role = player.optimalRole;
       if ((offensive || defensive) &&
@@ -1019,7 +1035,8 @@ class AiMatchdayService {
           final average =
               effective.values.values.fold<double>(0, (a, b) => a + b) /
               effective.values.length;
-          return average / 10.0 < 5.0;
+          return average / balance.ai.subLowRatingScale <
+              balance.ai.subLowRatingThreshold;
         })
         .firstOrNull;
     if (outgoing == null) return false;
@@ -1167,7 +1184,8 @@ class AiMatchdayService {
       return bScore.compareTo(aScore);
     });
     if (!allowAnyReplacement &&
-        candidates.first.overall(balance) < outgoing.overall(balance) - 4) {
+        candidates.first.overall(balance) <
+            outgoing.overall(balance) - balance.ai.subReplacementOvrGap) {
       return null;
     }
     return candidates.first;
@@ -1184,10 +1202,12 @@ class AiMatchdayService {
   }
 
   double _aerialRating(Player player) =>
-      player.heightCm * 0.20 +
+      player.heightCm * balance.ai.aerialHeightWeight +
       player.attributes.map(
-        outfield: (attributes) => attributes.stats.physicality * 0.60,
-        goalkeeper: (attributes) => attributes.stats.overall * 0.60,
+        outfield: (attributes) =>
+            attributes.stats.physicality * balance.ai.aerialPhysicalityWeight,
+        goalkeeper: (attributes) =>
+            attributes.stats.overall * balance.ai.aerialPhysicalityWeight,
       );
 
   double _shootingRating(Player player) => player.attributes.map(

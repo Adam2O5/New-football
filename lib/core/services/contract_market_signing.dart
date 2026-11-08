@@ -35,23 +35,33 @@ mixin _ContractMarketSigning on _ContractMarketShared {
       });
     if (candidates.isEmpty) return null;
 
-    final contractYears = (years ?? balance.ai.rosterEmergencyOfferYears)
+    final preferredYears = (years ?? balance.ai.rosterEmergencyOfferYears)
         .clamp(
           balance.contracts.playerMinYears,
           balance.contracts.playerMaxYears,
         )
         .toInt();
-    final offers = <ContractOffer>[
-      ContractOffer(salary: balance.salaryCap.minSalary, years: contractYears),
-      if (team.finance.midLevelExceptionAvailable)
+    for (final player in candidates) {
+      final contractYears = team.ai == null
+          ? preferredYears
+          : balance.ai.contractYearsFor(
+              player.age,
+              preferredYears,
+              minYears: balance.contracts.playerMinYears,
+              maxYears: balance.contracts.playerMaxYears,
+            );
+      final offers = <ContractOffer>[
         ContractOffer(
           salary: balance.salaryCap.minSalary,
           years: contractYears,
-          exception: CapExceptionType.midLevelException,
         ),
-    ];
-
-    for (final player in candidates) {
+        if (team.finance.midLevelExceptionAvailable)
+          ContractOffer(
+            salary: balance.salaryCap.minSalary,
+            years: contractYears,
+            exception: CapExceptionType.midLevelException,
+          ),
+      ];
       for (final offer in offers) {
         final validation = contracts.validateOffer(
           team: team,

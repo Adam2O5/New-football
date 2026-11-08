@@ -61,7 +61,7 @@ class AiTradeService {
       // A pending transfer request is a player-specific ×3 appetite signal.
       // Raising the club's maximum need keeps that signal in the same formula
       // while the target selector applies it to the requested player too.
-      maxNeed = max(maxNeed, 100.0);
+      maxNeed = max(maxNeed, balance.ai.tradeTransferRequestNeedFloor);
     }
     final surplusPressure = needs.isEmpty
         ? 0.0
@@ -79,15 +79,15 @@ class AiTradeService {
     final injuryPressure = _injuryPressure(team, needs);
     final deadlineProximity = _deadlineProximity(league.currentWeek);
     var value =
-        0.35 * (maxNeed / 100.0) +
-        0.25 * surplusPressure +
-        0.20 * deadlineProximity +
-        0.20 * injuryPressure;
+        balance.ai.tradeNeedAppetiteWeight * (maxNeed / 100.0) +
+        balance.ai.tradeSurplusAppetiteWeight * surplusPressure +
+        balance.ai.tradeDeadlineAppetiteWeight * deadlineProximity +
+        balance.ai.tradeInjuryAppetiteWeight * injuryPressure;
     if (deadlineProximity > 0) {
       value *= balance.ai.tradeDeadlineAppetiteMultiplier;
     }
     final superteam = _isSuperteam(league, team);
-    if (superteam) value *= 0.5;
+    if (superteam) value *= balance.ai.tradeSuperteamAppetiteMultiplier;
     return AiTradeAppetite(
       maxNeedScore: maxNeed.clamp(0.0, 100.0).toDouble(),
       surplusPositionPressure: surplusPressure,
@@ -263,7 +263,7 @@ class AiTradeService {
           ? AiTradeAction.counter
           : AiTradeAction.reject;
       counterTarget = _counterTargetForRound(round);
-    } else if (effective >= -15.0) {
+    } else if (effective >= balance.ai.tradeCounterNearFairFloor) {
       counterProbability = balance.ai.tradeCounterProbabilityLow;
       rejectProbability = balance.ai.tradeRejectProbabilityLow;
       action = roll < counterProbability
@@ -388,12 +388,12 @@ class AiTradeService {
         continue;
       }
       addVariant([...incoming, asset], List<TradeAsset>.from(outgoing));
-      if (variants.length >= 24) break;
+      if (variants.length >= balance.ai.tradeCounterIncomingVariantLimit) break;
     }
     for (final asset in _tradableAssets(self)) {
       if (existing.contains(asset.identity)) continue;
       addVariant(List<TradeAsset>.from(incoming), [...outgoing, asset]);
-      if (variants.length >= 36) break;
+      if (variants.length >= balance.ai.tradeCounterOutgoingVariantLimit) break;
     }
 
     TradeProposal? best;
@@ -550,7 +550,11 @@ class AiTradeService {
         team.id: appetiteForTeam(league: state, team: team),
     };
     final eligible = aiTeams
-        .where((team) => (appetites[team.id]?.value ?? 0) >= 0.30)
+        .where(
+          (team) =>
+              (appetites[team.id]?.value ?? 0) >=
+              balance.ai.tradeEligibleAppetiteMin,
+        )
         .toList();
     final pairScores = <String, double>{};
     for (var i = 0; i < eligible.length; i++) {
@@ -651,7 +655,7 @@ class AiTradeService {
     var rejected = 0;
     final order = [...aiTeams]..sort((a, b) => a.id.compareTo(b.id));
     for (final ai in order) {
-      if (createdOffers >= 3) break;
+      if (createdOffers >= balance.ai.tradeUserOffersPerTick) break;
       if (_hasOfferCooldown(state, ai.id, player.id)) continue;
       final roll = Random(
         negotiationSeed(
@@ -740,7 +744,9 @@ class AiTradeService {
       if (gap > 0) candidates.add((player: target, gap: gap));
     }
     candidates.sort((a, b) => b.gap.compareTo(a.gap));
-    for (final target in candidates.take(8)) {
+    for (final target in candidates.take(
+      balance.ai.tradeUserTargetCandidateLimit,
+    )) {
       final picks = [...ai.ownedPicks]
         ..sort(
           (a, b) => a
@@ -784,14 +790,18 @@ class AiTradeService {
           packageSalt: 5000 + target.player.id.length,
         );
         if (decision.surplusPct < balance.ai.tradeOfferMinimum ||
-            decision.surplusPct > balance.ai.tradeOfferTarget + 18.0) {
+            decision.surplusPct >
+                balance.ai.tradeOfferTarget +
+                    balance.ai.tradeUserTargetScoreHeadroom) {
           continue;
         }
         return proposal;
       }
       // A player-for-player offer is a fallback when the AI has no suitable
       // pick. It still passes through the same legal and valuation filters.
-      for (final offered in _tradablePlayers(ai).take(4)) {
+      for (final offered in _tradablePlayers(
+        ai,
+      ).take(balance.ai.tradeUserOutgoingPlayerLimit)) {
         final proposal = TradeProposal(
           teamAId: ai.id,
           teamBId: player.id,
@@ -827,8 +837,12 @@ class AiTradeService {
     required int saveSeed,
   }) {
     final proposals = <TradeProposal>[..._contractDumpProposals(league, a, b)];
-    final aPlayers = _tradablePlayers(a).take(3).toList();
-    final bPlayers = _tradablePlayers(b).take(3).toList();
+    final aPlayers = _tradablePlayers(
+      a,
+    ).take(balance.ai.tradePairPlayerCandidateLimit).toList();
+    final bPlayers = _tradablePlayers(
+      b,
+    ).take(balance.ai.tradePairPlayerCandidateLimit).toList();
     for (final pa in aPlayers) {
       for (final pb in bPlayers) {
         proposals.add(
@@ -841,10 +855,14 @@ class AiTradeService {
         );
       }
     }
-    final aPicks = _tradablePicks(a).take(3).toList();
-    final bPicks = _tradablePicks(b).take(3).toList();
-    for (final pa in aPlayers.take(2)) {
-      for (final pick in bPicks.take(2)) {
+    final aPicks = _tradablePicks(
+      a,
+    ).take(balance.ai.tradePairPickCandidateLimit).toList();
+    final bPicks = _tradablePicks(
+      b,
+    ).take(balance.ai.tradePairPickCandidateLimit).toList();
+    for (final pa in aPlayers.take(balance.ai.tradePairMixedPlayerLimit)) {
+      for (final pick in bPicks.take(balance.ai.tradePairMixedPickLimit)) {
         proposals.add(
           TradeProposal(
             teamAId: a.id,
@@ -855,8 +873,8 @@ class AiTradeService {
         );
       }
     }
-    for (final pb in bPlayers.take(2)) {
-      for (final pick in aPicks.take(2)) {
+    for (final pb in bPlayers.take(balance.ai.tradePairMixedPlayerLimit)) {
+      for (final pick in aPicks.take(balance.ai.tradePairMixedPickLimit)) {
         proposals.add(
           TradeProposal(
             teamAId: a.id,
@@ -930,6 +948,7 @@ class AiTradeService {
           validation: validation,
           contractDump: contractDump,
           buyerAcceptsContract: buyerAcceptsContract,
+          mutualMinSurplusPct: balance.ai.aiTradeMutualMin * 100.0,
         ),
       );
     }
@@ -951,10 +970,11 @@ class AiTradeService {
             week: league.currentWeek,
           )
           .teamStatus;
-      final dumpPlayers = _tradablePlayers(
-        dumper,
-      ).where((player) => evaluator.contractDrag(player) >= 10);
-      for (final player in dumpPlayers.take(2)) {
+      final dumpPlayers = _tradablePlayers(dumper).where(
+        (player) =>
+            evaluator.contractDrag(player) >= balance.ai.contractDragBurden,
+      );
+      for (final player in dumpPlayers.take(balance.ai.tradeDumpPlayerLimit)) {
         final drag = evaluator.contractDrag(player);
         final pick = _dumpSweetener(
           dumper,
@@ -997,15 +1017,18 @@ class AiTradeService {
     if (drag >= balance.ai.contractDragToxic &&
         (status == TeamStatus.elite || status == TeamStatus.contender)) {
       final protectedR1 = picks.where(
-        (pick) => pick.round == 1 && pick.year >= currentYear + 4,
+        (pick) =>
+            pick.round == 1 &&
+            pick.year >=
+                currentYear + balance.ai.tradeDumpProtectedFirstRoundYearsAhead,
       );
       if (protectedR1.isNotEmpty) return protectedR1.first;
     }
     final desiredRound = drag >= balance.ai.contractDragToxic
-        ? 2
+        ? balance.ai.tradeDumpToxicSweetenerRound
         : drag >= balance.ai.contractDragAnchor
-        ? 3
-        : 3;
+        ? balance.ai.tradeDumpAnchorSweetenerRound
+        : balance.ai.tradeDumpBurdenSweetenerRound;
     final matching = picks.where((pick) => pick.round == desiredRound).toList();
     if (matching.isNotEmpty) return matching.first;
     return picks
@@ -1023,7 +1046,8 @@ class AiTradeService {
           final player = source.roster
               .where((candidate) => candidate.id == asset.playerId)
               .firstOrNull;
-          return player != null && evaluator.contractDrag(player) >= 10;
+          return player != null &&
+              evaluator.contractDrag(player) >= balance.ai.contractDragBurden;
         });
 
     return hasDrag(a, proposal.assetsFromA) || hasDrag(b, proposal.assetsFromB);
@@ -1053,7 +1077,7 @@ class AiTradeService {
         .firstOrNull;
     if (incomingPlayer == null) return false;
     final drag = evaluator.contractDrag(incomingPlayer);
-    if (drag < 10) return false;
+    if (drag < balance.ai.contractDragBurden) return false;
     final capSpace = SalaryCapService(
       balance: balance,
     ).snapshot(buyer).capSpace;
@@ -1071,15 +1095,15 @@ class AiTradeService {
         .teamStatus;
     double probability;
     if (buyerStatus == TeamStatus.rebuild &&
-        capSpace > 60000000 &&
+        capSpace > balance.ai.tradeAbsorbR1CapSpaceMin &&
         sweetenerRound == 1) {
       probability = balance.ai.tradeRebuildR1ContractProbability;
     } else if (buyerStatus == TeamStatus.rebuild &&
-        capSpace > 40000000 &&
+        capSpace > balance.ai.tradeAbsorbR2CapSpaceMin &&
         sweetenerRound == 2) {
       probability = balance.ai.tradeRebuildR2ContractProbability;
     } else if (buyerStatus == TeamStatus.retool &&
-        capSpace > 40000000 &&
+        capSpace > balance.ai.tradeAbsorbR2CapSpaceMin &&
         sweetenerRound == 2) {
       probability = balance.ai.tradeRetoolR2ContractProbability;
     } else {
@@ -1241,7 +1265,7 @@ class AiTradeService {
       null,
       incomingSource,
       incoming,
-    ).any((player) => player.age >= 30);
+    ).any((player) => player.age >= balance.ai.tradeVeteranAgeMin);
     final givesR1 = outgoing.any(
       (asset) => asset.isPick && asset.pickRound == 1,
     );
@@ -1258,7 +1282,8 @@ class AiTradeService {
       final player = team.roster
           .where((p) => p.id == asset.playerId)
           .firstOrNull;
-      return player != null && evaluator.contractDrag(player) >= 10;
+      return player != null &&
+          evaluator.contractDrag(player) >= balance.ai.contractDragBurden;
     });
     if (!hasDrag) return false;
     final nearR1 = outgoing.where(
@@ -1278,7 +1303,9 @@ class AiTradeService {
     required List<TradeAsset> outgoing,
     required AiPackageEvaluation evaluation,
   }) {
-    return evaluation.outgoing.any((asset) => asset.contractDrag >= 10) &&
+    return evaluation.outgoing.any(
+          (asset) => asset.contractDrag >= balance.ai.contractDragBurden,
+        ) &&
         outgoing.any((asset) => asset.isPlayer);
   }
 
@@ -1289,8 +1316,12 @@ class AiTradeService {
     required Team source,
     required Team partner,
   }) =>
-      evaluation.incoming.any((asset) => asset.contractDrag >= 10) ||
-      evaluation.outgoing.any((asset) => asset.contractDrag >= 10);
+      evaluation.incoming.any(
+        (asset) => asset.contractDrag >= balance.ai.contractDragBurden,
+      ) ||
+      evaluation.outgoing.any(
+        (asset) => asset.contractDrag >= balance.ai.contractDragBurden,
+      );
 
   double _dumpFloor(AiPackageEvaluation evaluation) {
     final drag = evaluation.outgoing
@@ -1401,14 +1432,24 @@ class AiTradeService {
   }
 
   double _playerOfferProbability(int week) {
-    if (week >= 20 && week <= 23) return balance.ai.pOfferToUserDeadline;
-    if (week >= 44 && week <= 47) return balance.ai.pOfferToUserOffseason;
+    if (week >=
+            balance.calendar.tradeDeadlineWeek -
+                balance.ai.tradeDeadlineOfferLookbackWeeks &&
+        week <= balance.calendar.tradeDeadlineWeek) {
+      return balance.ai.pOfferToUserDeadline;
+    }
+    if (week >= balance.calendar.tradeWindowOpenWeek &&
+        week <= balance.calendar.freeAgencyWeek) {
+      return balance.ai.pOfferToUserOffseason;
+    }
     return balance.ai.pOfferToUserRegular;
   }
 
   double _deadlineProximity(int week) {
     final remaining = balance.calendar.tradeDeadlineWeek - week;
-    return remaining >= 0 && remaining <= 2 ? 1.0 : 0.0;
+    return remaining >= 0 && remaining <= balance.ai.tradeDeadlineUrgencyWeeks
+        ? 1.0
+        : 0.0;
   }
 
   double _injuryPressure(Team team, List<AiPositionNeed> needs) {

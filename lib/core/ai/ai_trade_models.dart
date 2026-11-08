@@ -1,3 +1,4 @@
+import 'package:new_football/core/balance/ai_balance.dart';
 import 'package:new_football/core/ai/ai_evaluation_models.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/services/trade_service.dart';
@@ -56,6 +57,7 @@ class AiTradePackage {
     this.validation,
     this.contractDump = false,
     this.buyerAcceptsContract = false,
+    this.mutualMinSurplusPct = AiBalance.defaultAiTradeMutualMin * 100.0,
   });
 
   final TradeProposal proposal;
@@ -65,10 +67,11 @@ class AiTradePackage {
   final TradeValidation? validation;
   final bool contractDump;
   final bool buyerAcceptsContract;
+  final double mutualMinSurplusPct;
 
   bool get isMutuallyBeneficial =>
-      (teamAEvaluation.surplusPct >= 2.0 &&
-          teamBEvaluation.surplusPct >= 2.0) ||
+      (teamAEvaluation.surplusPct >= mutualMinSurplusPct &&
+          teamBEvaluation.surplusPct >= mutualMinSurplusPct) ||
       (contractDump && buyerAcceptsContract);
 }
 

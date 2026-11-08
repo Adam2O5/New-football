@@ -145,8 +145,146 @@ const _defaultAiPayrollBands = <AiPayrollBand>[
 /// Task 32 adds the canonical valuation tables here so the evaluator and
 /// future AI decision systems share one balance source.
 class AiBalance {
+  static const defaultAiTradeMutualMin = 0.02;
   static const defaultExpectedRank = 15;
   const AiBalance({
+    this.tradeTransferRequestNeedFloor = 100.0,
+
+    this.tradeNeedAppetiteWeight = 0.35,
+    this.tradeSurplusAppetiteWeight = 0.25,
+    this.tradeDeadlineAppetiteWeight = 0.2,
+    this.tradeInjuryAppetiteWeight = 0.2,
+    this.tradeSuperteamAppetiteMultiplier = 0.5,
+    this.tradeEligibleAppetiteMin = 0.3,
+    this.tradeCounterNearFairFloor = -15.0,
+    this.tradeCounterIncomingVariantLimit = 24,
+    this.tradeCounterOutgoingVariantLimit = 36,
+    this.tradeUserOffersPerTick = 3,
+    this.tradeUserTargetCandidateLimit = 8,
+    this.tradeUserOutgoingPlayerLimit = 4,
+    this.tradePairPlayerCandidateLimit = 3,
+    this.tradePairPickCandidateLimit = 3,
+    this.tradePairMixedPlayerLimit = 2,
+    this.tradePairMixedPickLimit = 2,
+    this.tradeUserTargetScoreHeadroom = 18.0,
+    this.tradeDumpPlayerLimit = 2,
+    this.tradeDumpProtectedFirstRoundYearsAhead = 4,
+    this.tradeDumpToxicSweetenerRound = 2,
+    this.tradeDumpAnchorSweetenerRound = 3,
+    this.tradeDumpBurdenSweetenerRound = 3,
+    this.tradeAbsorbR1CapSpaceMin = 60000000,
+    this.tradeAbsorbR2CapSpaceMin = 40000000,
+    this.tradeVeteranAgeMin = 30,
+    this.tradeDeadlineOfferLookbackWeeks = 3,
+    this.tradeDeadlineUrgencyWeeks = 2,
+
+    this.seniorContractAge = 33,
+    this.extensionRookiePotentialMin = 3.5,
+    this.extensionEarlyBirdAssetMin = 150.0,
+    this.extensionVeteranAgeMax = 32,
+    this.extensionCounterHighAssetThreshold = 200.0,
+    this.staffRenewalNormalProbability = 0.5,
+    this.rfaQualifyingPointMin = 120,
+    this.rfaDepthRankMax = 18,
+    this.playerSalarySearchSteps = 80,
+    this.staffSalarySearchSteps = 60,
+    this.staffPriorityRoleLastIndex = 2,
+    this.faPreferredYearsBonus = 1,
+    this.helperTradeValueMargin = 0.12,
+    this.helperTradeMarginShare = 0.5,
+    this.helperFaSalaryFactorMin = 0.95,
+    this.helperFaSalaryFactorSpan = 0.15,
+    this.helperFaYearJitterRange = 2,
+    this.helperFaYearJitterOffset = 1,
+    this.rosterMajorGkRemainingMax = 1,
+
+    this.matchdayShortRestMatchCount = 2,
+    this.meaninglessFirstWeek = 27,
+    this.meaninglessLastWeek = 29,
+    this.subCriticalMinute = 60,
+    this.subCriticalStamina = 35,
+    this.subLowMinute = 45,
+    this.subLowStamina = 45,
+    this.subRatingMinute = 60,
+    this.subYellowMinute = 70,
+    this.subTrailingTwoMinute = 60,
+    this.subTrailingOneMinute = 65,
+    this.subLeadingTwoMinute = 70,
+    this.subLeadingOneMinute = 78,
+    this.subTacticalCorrectionAfterMinute = 70,
+    this.subTrailingTwoCount = 2,
+    this.subScoreChangeCount = 1,
+    this.staminaReadinessFullMin = 80,
+    this.staminaReadinessGoodMin = 60,
+    this.staminaReadinessMidMin = 40,
+    this.rotationLowStamina = 45,
+    this.rotationPlayoffMinStamina = 55,
+    this.rotationShortRestStamina = 65,
+    this.formationCandidateLimit = 3,
+    this.formationMatchupNeutral = 50.0,
+    this.formationMatchupScale = 1000.0,
+    this.formationMatchupMin = 0.0,
+    this.formationMatchupMax = 100.0,
+    this.benchGoalkeepers = 1,
+    this.benchDefenders = 2,
+    this.benchMidfielders = 2,
+    this.benchAttackers = 2,
+    this.tacticalLargeStrengthGap = 12.0,
+    this.tacticalStrengthGap = 5.0,
+    this.subLowRatingScale = 10.0,
+    this.subLowRatingThreshold = 5.0,
+    this.subReplacementOvrGap = 4.0,
+    this.aerialHeightWeight = 0.2,
+    this.aerialPhysicalityWeight = 0.6,
+    this.overpaidSalaryRatio = 1.5,
+    this.overpaidMinYears = 3,
+    this.rookieFirstYearMinRemaining = 4,
+    this.titleChanceRankMax = 3,
+    this.surplusValueFloor = 100.0,
+    this.needSurplusPenalty = -12.0,
+    this.needBelowMinBase = 40.0,
+    this.needBelowMinPerPlayer = 15.0,
+    this.needBelowTargetPerPlayer = 8.0,
+    this.needQualityGapWeight = 1.5,
+    this.contractDragBurden = 10.0,
+    this.lotteryFallbackSlot = 9.4,
+    this.rosterAvailabilityRepairMax = 13,
+    this.rosterSpaceTradeMinOutgoers = 2,
+    this.rosterProtectedGoalkeepers = 2,
+    this.draftOverallWeight = 0.55,
+    this.draftPotentialWeight = 0.45,
+    this.draftPotentialScale = 12.0,
+    this.draftTradeUpCandidateLimit = 5,
+    this.draftTradeUpLookahead = 4,
+    this.draftRoundTwoReservedSlots = 1,
+    this.draftRoundThreeReservedSlots = 2,
+    this.draftUndraftedBelowTargetSize = 24,
+    this.draftLateGoalkeeperAfterPick = 45,
+    this.draftLateGoalkeeperMinCount = 2,
+    this.draftLateGoalkeeperBonus = 20.0,
+    this.draftProxyOverallMax = 95.0,
+    this.draftProxyOverallSpread = 45.0,
+    this.draftProxyOverallMin = 50.0,
+    this.draftProxyPotentialMax = 5.0,
+    this.draftProxyPotentialSpread = 4.5,
+    this.draftProxyPotentialMin = 0.5,
+    this.draftSlotQualityBase = 84.0,
+    this.draftSlotQualityDecay = 0.45,
+    this.draftSlotQualityMin = 40.0,
+    this.firstRoundStatusMultipliers = const {
+      TeamStatus.rebuild: 1.15,
+      TeamStatus.retool: 1.15,
+      TeamStatus.pretender: 1.0,
+      TeamStatus.contender: 0.88,
+      TeamStatus.elite: 0.88,
+    },
+    this.draftNeedBonuses = const {
+      AiNeedBand.critical: 8.0,
+      AiNeedBand.belowTarget: 4.0,
+      AiNeedBand.target: 0.0,
+      AiNeedBand.surplus: -6.0,
+    },
+
     this.missingTeamPowerOvr = 50.0,
     this.statusDistribution = const [5, 7, 9, 6, 3],
     this.expectedRankFallback = defaultExpectedRank,
@@ -241,7 +379,7 @@ class AiBalance {
     this.pOfferToUserDeadline = 0.050,
     this.userOfferCooldownWeeks = 3,
     this.aiTradePairsPerWeek = 12,
-    this.aiTradeMutualMin = 0.02,
+    this.aiTradeMutualMin = defaultAiTradeMutualMin,
     this.aiTradeSeasonLimit = 6,
     this.draftScoreNoiseSd = 3.5,
     this.pDraftTradeUp = 0.08,
@@ -350,6 +488,132 @@ class AiBalance {
     this.overpaidContractMult = 0.85,
     this.rightsValueMult = 0.85,
   });
+
+  final double tradeTransferRequestNeedFloor;
+
+  final double tradeNeedAppetiteWeight;
+  final double tradeSurplusAppetiteWeight;
+  final double tradeDeadlineAppetiteWeight;
+  final double tradeInjuryAppetiteWeight;
+  final double tradeSuperteamAppetiteMultiplier;
+  final double tradeEligibleAppetiteMin;
+  final double tradeCounterNearFairFloor;
+  final int tradeCounterIncomingVariantLimit;
+  final int tradeCounterOutgoingVariantLimit;
+  final int tradeUserOffersPerTick;
+  final int tradeUserTargetCandidateLimit;
+  final int tradeUserOutgoingPlayerLimit;
+  final int tradePairPlayerCandidateLimit;
+  final int tradePairPickCandidateLimit;
+  final int tradePairMixedPlayerLimit;
+  final int tradePairMixedPickLimit;
+  final double tradeUserTargetScoreHeadroom;
+  final int tradeDumpPlayerLimit;
+  final int tradeDumpProtectedFirstRoundYearsAhead;
+  final int tradeDumpToxicSweetenerRound;
+  final int tradeDumpAnchorSweetenerRound;
+  final int tradeDumpBurdenSweetenerRound;
+  final int tradeAbsorbR1CapSpaceMin;
+  final int tradeAbsorbR2CapSpaceMin;
+  final int tradeVeteranAgeMin;
+  final int tradeDeadlineOfferLookbackWeeks;
+  final int tradeDeadlineUrgencyWeeks;
+
+  final int seniorContractAge;
+  final double extensionRookiePotentialMin;
+  final double extensionEarlyBirdAssetMin;
+  final int extensionVeteranAgeMax;
+  final double extensionCounterHighAssetThreshold;
+  final double staffRenewalNormalProbability;
+  final int rfaQualifyingPointMin;
+  final int rfaDepthRankMax;
+  final int playerSalarySearchSteps;
+  final int staffSalarySearchSteps;
+  final int staffPriorityRoleLastIndex;
+  final int faPreferredYearsBonus;
+  final double helperTradeValueMargin;
+  final double helperTradeMarginShare;
+  final double helperFaSalaryFactorMin;
+  final double helperFaSalaryFactorSpan;
+  final int helperFaYearJitterRange;
+  final int helperFaYearJitterOffset;
+  final int rosterMajorGkRemainingMax;
+
+  final int matchdayShortRestMatchCount;
+  final int meaninglessFirstWeek;
+  final int meaninglessLastWeek;
+  final int subCriticalMinute;
+  final int subCriticalStamina;
+  final int subLowMinute;
+  final int subLowStamina;
+  final int subRatingMinute;
+  final int subYellowMinute;
+  final int subTrailingTwoMinute;
+  final int subTrailingOneMinute;
+  final int subLeadingTwoMinute;
+  final int subLeadingOneMinute;
+  final int subTacticalCorrectionAfterMinute;
+  final int subTrailingTwoCount;
+  final int subScoreChangeCount;
+  final int staminaReadinessFullMin;
+  final int staminaReadinessGoodMin;
+  final int staminaReadinessMidMin;
+  final int rotationLowStamina;
+  final int rotationPlayoffMinStamina;
+  final int rotationShortRestStamina;
+  final int formationCandidateLimit;
+  final double formationMatchupNeutral;
+  final double formationMatchupScale;
+  final double formationMatchupMin;
+  final double formationMatchupMax;
+  final int benchGoalkeepers;
+  final int benchDefenders;
+  final int benchMidfielders;
+  final int benchAttackers;
+  final double tacticalLargeStrengthGap;
+  final double tacticalStrengthGap;
+  final double subLowRatingScale;
+  final double subLowRatingThreshold;
+  final double subReplacementOvrGap;
+  final double aerialHeightWeight;
+  final double aerialPhysicalityWeight;
+  final double overpaidSalaryRatio;
+  final int overpaidMinYears;
+  final int rookieFirstYearMinRemaining;
+  final int titleChanceRankMax;
+  final double surplusValueFloor;
+  final double needSurplusPenalty;
+  final double needBelowMinBase;
+  final double needBelowMinPerPlayer;
+  final double needBelowTargetPerPlayer;
+  final double needQualityGapWeight;
+  final double contractDragBurden;
+  final double lotteryFallbackSlot;
+  final int rosterAvailabilityRepairMax;
+  final int rosterSpaceTradeMinOutgoers;
+  final int rosterProtectedGoalkeepers;
+  final double draftOverallWeight;
+  final double draftPotentialWeight;
+  final double draftPotentialScale;
+  final int draftTradeUpCandidateLimit;
+  final int draftTradeUpLookahead;
+  final int draftRoundTwoReservedSlots;
+  final int draftRoundThreeReservedSlots;
+  final int draftUndraftedBelowTargetSize;
+  final int draftLateGoalkeeperAfterPick;
+  final int draftLateGoalkeeperMinCount;
+  final double draftLateGoalkeeperBonus;
+  final double draftProxyOverallMax;
+  final double draftProxyOverallSpread;
+  final double draftProxyOverallMin;
+  final double draftProxyPotentialMax;
+  final double draftProxyPotentialSpread;
+  final double draftProxyPotentialMin;
+  final double draftSlotQualityBase;
+  final double draftSlotQualityDecay;
+  final double draftSlotQualityMin;
+  final Map<TeamStatus, double> firstRoundStatusMultipliers;
+  final Map<AiNeedBand, double> draftNeedBonuses;
 
   final int teamPowerSquadSize;
   final int statusMaxTierChange;
@@ -493,6 +757,8 @@ class AiBalance {
   final int faPhaseTwoNeedRosterThreshold;
   final int faRosterRepairSize;
   final double faPositionMaxProbability;
+
+  /// Shared maximum for every AI offer/extension at seniorContractAge or above.
   final int faAge33MaxYears;
 
   /// Task 37 roster-safety and injury-response policy.
@@ -551,6 +817,20 @@ class AiBalance {
   final double ntcMult;
   final double overpaidContractMult;
   final double rightsValueMult;
+
+  /// Shared AI policy; a shorter preferred term remains shorter.
+  /// Trade receipts keep their existing contracts and do not call this rule.
+  int contractYearsFor(
+    int age,
+    int preferredYears, {
+    required int minYears,
+    required int maxYears,
+  }) {
+    final legalYears = preferredYears.clamp(minYears, maxYears);
+    return age >= seniorContractAge && legalYears > faAge33MaxYears
+        ? faAge33MaxYears
+        : legalYears;
+  }
 
   AiRosterGroupDefinition definitionFor(AiRosterGroup group) =>
       rosterGroups.firstWhere((definition) => definition.group == group);

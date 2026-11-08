@@ -150,19 +150,10 @@ class AiContractMarketService {
     );
     if (exception == null) return null;
 
-    final years =
-        (player.age >= 33
-                ? 1
-                : contracts
-                      .expectedLength(
-                        player,
-                        currentTeamStatus: context.teamStatus,
-                      )
-                      .clamp(
-                        balance.contracts.playerMinYears,
-                        balance.contracts.playerMaxYears,
-                      ))
-            .toInt();
+    final years = _playerYears(
+      player,
+      contracts.expectedLength(player, currentTeamStatus: context.teamStatus),
+    );
     final offer = _buildPlayerOffer(
       team: team,
       player: player,
@@ -191,19 +182,24 @@ class AiContractMarketService {
   }) {
     if (player.contract.isRookieScale &&
         player.contract.yearsRemaining <= 1 &&
-        player.potentialStars >= 3.5) {
+        player.potentialStars >= balance.ai.extensionRookiePotentialMin) {
       return CapExceptionType.rookieExtension;
     }
-    if (player.state.seasonsWithTeam >= 3 && top11) {
+    if (player.state.seasonsWithTeam >= balance.salaryCap.birdRightsSeasons &&
+        top11) {
       return CapExceptionType.fullBirdRights;
     }
-    if (player.state.seasonsWithTeam == 2 && assetValue > 150) {
+    if (player.state.seasonsWithTeam == balance.salaryCap.earlyBirdSeasons &&
+        assetValue > balance.ai.extensionEarlyBirdAssetMin) {
       return CapExceptionType.earlyBirdRights;
     }
-    if (!player.contract.isRookieScale && assetValue > 0 && player.age <= 32) {
+    if (!player.contract.isRookieScale &&
+        assetValue > 0 &&
+        player.age <= balance.ai.extensionVeteranAgeMax) {
       return CapExceptionType.veteranExtensionRaiseCap;
     }
-    if (criticalNeed && player.state.seasonsWithTeam < 2) {
+    if (criticalNeed &&
+        player.state.seasonsWithTeam < balance.salaryCap.earlyBirdSeasons) {
       return CapExceptionType.nonBirdRights;
     }
     return null;
@@ -219,7 +215,7 @@ class AiContractMarketService {
   }) {
     final value = playerAssetValue(league, team, player, saveSeed: saveSeed);
     if (value < 0) return false;
-    final probability = value > 200
+    final probability = value > balance.ai.extensionCounterHighAssetThreshold
         ? balance.ai.extensionCounterRaiseHighProbability
         : balance.ai.extensionCounterRaiseNormalProbability;
     final roll = Random(
@@ -247,13 +243,10 @@ class AiContractMarketService {
     required int saveSeed,
   }) {
     final context = _context(league, team, saveSeed: saveSeed);
-    final years =
-        (player.age >= 33 ? 1 : min(original.years, playerCounter.years))
-            .clamp(
-              balance.contracts.playerMinYears,
-              balance.contracts.playerMaxYears,
-            )
-            .toInt();
+    final years = _playerYears(
+      player,
+      min(original.years, playerCounter.years),
+    );
     final salary = max(
       original.salary,
       ((original.salary + playerCounter.salary) / 2).round(),
@@ -310,7 +303,7 @@ class AiContractMarketService {
       ),
     ).nextDouble();
     final rosterUnder20 = team.roster.length < balance.ai.faRosterRepairSize;
-    final effectiveProbability = hour >= 10
+    final effectiveProbability = hour >= balance.contracts.hoursPerDay
         ? (rosterUnder20
               ? balance.ai.faPhaseOneFinalHourUnderRosterProbability
               : balance.ai.faPhaseOneFinalHourProbability)
@@ -435,7 +428,7 @@ class AiContractMarketService {
     for (final player in candidates) {
       if (_hasActiveQualifyingOffer(league, player.id)) continue;
       final years = team.roster.length < balance.ai.faRosterRepairSize
-          ? 1
+          ? _playerYears(player, balance.ai.rosterEmergencyOfferYears)
           : _faYears(player, phaseOne: false);
       final target = balance.ai.faPhaseTwoTargetScore;
       final offer = team.roster.length < balance.ai.faRosterRepairSize
@@ -565,7 +558,7 @@ class AiContractMarketService {
           ? balance.ai.staffRenewalHighProbability
           : rawOverall < balance.ai.staffRenewalQualityLow
           ? balance.ai.staffRenewalLowProbability
-          : 0.50;
+          : balance.ai.staffRenewalNormalProbability;
       if (!_roll(
         saveSeed,
         league,
@@ -645,7 +638,8 @@ class AiContractMarketService {
     final context = _context(league, team, saveSeed: saveSeed);
     final need = evaluator.needForPosition(context, player.position);
     final minGap = need != null && need.count < need.definition.min;
-    final probability = player.pointValue >= 120 || minGap
+    final probability =
+        player.pointValue >= balance.ai.rfaQualifyingPointMin || minGap
         ? balance.ai.rfaQualifyingHighProbability
         : balance.ai.rfaQualifyingDefaultProbability;
     return _roll(
@@ -666,6 +660,7 @@ class AiContractMarketService {
     final team = league.teamById(sheet.originalTeamId);
     final player = _findPlayer(league, sheet.playerId);
     if (team == null || player == null || team.ai == null) return false;
+    if (_playerYears(player, sheet.years) != sheet.years) return false;
     final context = _context(
       league,
       team,
@@ -690,9 +685,9 @@ class AiContractMarketService {
     final rank = _rosterRank(team, player.id);
     final probability = surplus
         ? balance.ai.rfaMatchSurplusProbability
-        : rank <= 11
+        : rank <= balance.roster.startingXi
         ? balance.ai.pMatchOfferSheetTop11
-        : rank <= 18
+        : rank <= balance.ai.rfaDepthRankMax
         ? balance.ai.rfaMatchDepthProbability
         : balance.ai.rfaMatchSurplusProbability;
     return _roll(
@@ -722,11 +717,14 @@ class AiContractMarketService {
       balance.salaryCap.maxSalary,
     );
     _ScoredPlayerOffer? best;
-    for (var index = 0; index <= 80; index++) {
-      final salary = minimum + (((maximum - minimum) * index) / 80.0).round();
+    for (var index = 0; index <= balance.ai.playerSalarySearchSteps; index++) {
+      final salary =
+          minimum +
+          (((maximum - minimum) * index) / balance.ai.playerSalarySearchSteps)
+              .round();
       final offer = ContractOffer(
         salary: salary,
-        years: years,
+        years: _playerYears(player, years),
         exception: exception,
       );
       final legal = contracts.validateOffer(
@@ -808,12 +806,12 @@ class AiContractMarketService {
   }) {
     final lower = roleIndex == 0
         ? balance.staff.minSalary
-        : roleIndex <= 2
+        : roleIndex <= balance.ai.staffPriorityRoleLastIndex
         ? balance.ai.staffPriorityRoleMinSalary
         : balance.ai.staffOtherRoleMinSalary;
     final upper = roleIndex == 0
         ? min(balance.staff.maxSalary, balance.ai.staffHeadCoachMaxSalary)
-        : roleIndex <= 2
+        : roleIndex <= balance.ai.staffPriorityRoleLastIndex
         ? min(balance.staff.maxSalary, balance.ai.staffPriorityRoleMaxSalary)
         : min(balance.staff.maxSalary, balance.ai.staffOtherRoleMaxSalary);
     final expectedSalary = staff.expectedSalary(
@@ -833,8 +831,11 @@ class AiContractMarketService {
               )
               .toInt();
     _ScoredStaffOffer? best;
-    for (var index = 0; index <= 60; index++) {
-      final salary = lower + (((upper - lower) * index) / 60.0).round();
+    for (var index = 0; index <= balance.ai.staffSalarySearchSteps; index++) {
+      final salary =
+          lower +
+          (((upper - lower) * index) / balance.ai.staffSalarySearchSteps)
+              .round();
       if (staff.hireValidationReason(
             team,
             salary,
@@ -872,6 +873,14 @@ class AiContractMarketService {
     return best;
   }
 
+  int _playerYears(Player player, int preferredYears) =>
+      balance.ai.contractYearsFor(
+        player.age,
+        preferredYears,
+        minYears: balance.contracts.playerMinYears,
+        maxYears: balance.contracts.playerMaxYears,
+      );
+
   int _faYears(Player player, {required bool phaseOne}) {
     final expected = contracts
         .expectedLength(player)
@@ -880,17 +889,7 @@ class AiContractMarketService {
           balance.contracts.playerMaxYears,
         )
         .toInt();
-    final maxYears = player.age >= 33
-        ? balance.ai.faAge33MaxYears
-        : phaseOne
-        ? expected + 1
-        : expected + 1;
-    return min(expected + 1, maxYears)
-        .clamp(
-          balance.contracts.playerMinYears,
-          balance.contracts.playerMaxYears,
-        )
-        .toInt();
+    return _playerYears(player, expected + balance.ai.faPreferredYearsBonus);
   }
 
   bool _hasPlayerCompetition(LeagueState league, String playerId) =>
@@ -906,7 +905,8 @@ class AiContractMarketService {
       .rfaQualifyingOffers
       .any((offer) => offer.playerId == playerId && !offer.declined);
 
-  bool _top11(Team team, String playerId) => _rosterRank(team, playerId) <= 11;
+  bool _top11(Team team, String playerId) =>
+      _rosterRank(team, playerId) <= balance.roster.startingXi;
 
   int _rosterRank(Team team, String playerId) {
     final players = [...team.roster]
