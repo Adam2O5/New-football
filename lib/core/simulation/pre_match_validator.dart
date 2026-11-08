@@ -88,7 +88,7 @@ class PreMatchReport {
 
 /// Validates the matchday roster before the engine is allowed to simulate a
 /// minute. The validator is public so UI/orchestration can show warnings
-/// before calling [MatchEngine].
+/// before starting the simulation engine.
 class PreMatchValidator {
   const PreMatchValidator({this.balance = BalanceConfig.defaults});
 

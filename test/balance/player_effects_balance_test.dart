@@ -431,7 +431,7 @@ void main() {
     final live = SimulationMatchEngine(
       balance: balance,
     ).start(home: team, away: league.teams[1], rngSeed: 42);
-    expect(live.legacyMatch.homeCohesionMult, 1.2);
+    expect(live.runtime.homeSnapshot!.cohesionMultiplier, 1.2);
     final expected =
         40 +
         live.state.homeLineup.length +

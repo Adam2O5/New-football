@@ -3,6 +3,39 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  test('active simulation has no dependency on the retired minute engine', () {
+    final bootstrap = File(
+      'lib/core/simulation/match_bootstrap.dart',
+    ).readAsStringSync();
+    expect(bootstrap, contains('class MatchBootstrap'));
+    expect(
+      bootstrap,
+      isNot(matches(RegExp(r'\bclass\s+(?:MatchEngine|LiveMatch)\b'))),
+    );
+    expect(bootstrap, isNot(contains('simulateMinute(')));
+    expect(bootstrap, isNot(contains('simulateFull(')));
+    final state = File(
+      'lib/core/simulation/live_match_state.dart',
+    ).readAsStringSync();
+    expect(state, isNot(contains('toResult(')));
+    final obsoleteReferences = <String>[];
+    for (final root in ['lib', 'test']) {
+      for (final file in _dartFiles(Directory(root))) {
+        final path = _relativePath(file.path);
+        if (_isGenerated(path) ||
+            path == 'test/core/source_boundaries_test.dart') {
+          continue;
+        }
+        if (RegExp(
+          r'\blegacyMatch\b|\blegacy\.MatchEngine\b|\bclass\s+MatchEngine\b|\bLegacyMatchBalance\b',
+        ).hasMatch(file.readAsStringSync())) {
+          obsoleteReferences.add(path);
+        }
+      }
+    }
+    expect(obsoleteReferences, isEmpty);
+  });
+
   test('production user-facing literals have reviewed legacy exceptions', () {
     final violations = <String>[];
     for (final root in ['lib/app', 'lib/core']) {
@@ -98,7 +131,6 @@ const _legacyUserFacingFiles = <String>{
   'lib/core/services/season_service.dart',
   'lib/core/services/team_event_service.dart',
   'lib/core/services/trade_service.dart',
-  'lib/core/simulation/match_bootstrap.dart',
   'lib/core/simulation/match_engine.dart',
 };
 
@@ -124,7 +156,6 @@ const _legacyNumericFiles = <String>{
   'lib/core/services/team_management_service.dart',
   'lib/core/services/trade_service.dart',
   'lib/core/simulation/duel_resolver.dart',
-  'lib/core/simulation/match_bootstrap.dart',
   'lib/core/simulation/match_context_factory.dart',
   'lib/core/simulation/match_engine.dart',
   'lib/core/simulation/match_stats.dart',

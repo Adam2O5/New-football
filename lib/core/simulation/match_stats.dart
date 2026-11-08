@@ -27,18 +27,18 @@ class MatchResultAssembler {
     required SimulationLiveMatch live,
     required SimulationResult simulation,
   }) {
-    final administrative = live.legacyMatch.administrativeResult;
+    final administrative = live.runtime.administrativeResult;
     if (administrative != null) return administrative;
 
-    final players = live.legacyMatch.playersById;
-    final teamByPlayerId = live.legacyMatch.teamByPlayerId;
+    final players = live.runtime.playersById;
+    final teamByPlayerId = live.runtime.teamByPlayerId;
     final totals = <String, _PlayerTotals>{
       for (final player in players.values)
         player.id: _PlayerTotals(
           playerId: player.id,
           teamId: teamByPlayerId[player.id] ?? away.id,
-          minutes: live.legacyMatch.minutesPlayed[player.id] ?? 0,
-          staminaAfterMatch: live.legacyMatch.visibleStamina(player),
+          minutes: live.runtime.minutesPlayed[player.id] ?? 0,
+          staminaAfterMatch: live.runtime.visibleStamina(player),
         ),
     };
 
@@ -225,14 +225,14 @@ class MatchResultAssembler {
       context: simulation.context,
       homeTactics: live.state.homeTactics,
       awayTactics: live.state.awayTactics,
-      homeLineup: live.legacyMatch.homeStartingLineup,
-      awayLineup: live.legacyMatch.awayStartingLineup,
+      homeLineup: live.runtime.homeStartingLineup,
+      awayLineup: live.runtime.awayStartingLineup,
       homeLineupPositions:
-          live.legacyMatch.homeSnapshot?.assignedPositions ?? const [],
+          live.runtime.homeSnapshot?.assignedPositions ?? const [],
       awayLineupPositions:
-          live.legacyMatch.awaySnapshot?.assignedPositions ?? const [],
-      homeSnapshot: live.legacyMatch.homeSnapshot ?? const MatchTeamSnapshot(),
-      awaySnapshot: live.legacyMatch.awaySnapshot ?? const MatchTeamSnapshot(),
+          live.runtime.awaySnapshot?.assignedPositions ?? const [],
+      homeSnapshot: live.runtime.homeSnapshot ?? const MatchTeamSnapshot(),
+      awaySnapshot: live.runtime.awaySnapshot ?? const MatchTeamSnapshot(),
       noGkPenalty: simulation.homeNoGkPenalty || simulation.awayNoGkPenalty,
       noGkPenaltyTeamIds: [
         if (simulation.homeNoGkPenalty) home.id,

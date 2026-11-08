@@ -98,7 +98,7 @@ class _LivePlayerTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final condition = live.legacyMatch.visibleStamina(player);
+    final condition = live.runtime.visibleStamina(player);
     final discipline = live.disciplines.where(
       (item) => item.playerId == player.id,
     );
@@ -111,7 +111,7 @@ class _LivePlayerTile extends StatelessWidget {
     final injured = player.state.injured;
     final suspended = player.state.suspensionGamesRemaining > 0;
     final attention =
-        condition <= live.legacyMatch.balance.ui.lowStaminaWarning ||
+        condition <= live.runtime.balance.ui.lowStaminaWarning ||
         yellow ||
         sentOff ||
         injured;

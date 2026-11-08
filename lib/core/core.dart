@@ -13,6 +13,7 @@ export 'ai/team_ai_service.dart';
 export 'balance/balance_config.dart';
 export 'random/match_random.dart';
 export 'simulation/match_bootstrap.dart';
+export 'simulation/live_match_state.dart';
 export 'simulation/duel_resolver.dart';
 export 'simulation/effective_attributes.dart';
 export 'simulation/goalkeeper_resolver.dart';
