@@ -2374,13 +2374,13 @@ class AppLocalizationsPl extends AppLocalizations {
   }
 
   @override
-  String draft_injuryProneShort(int value) {
-    return 'Kontuzje $value/10';
+  String draft_injuryProneShort(int value, int maximum) {
+    return 'Kontuzje $value/$maximum';
   }
 
   @override
-  String draft_determinationShort(int value) {
-    return 'Determinacja $value/10';
+  String draft_determinationShort(int value, int maximum) {
+    return 'Determinacja $value/$maximum';
   }
 
   @override

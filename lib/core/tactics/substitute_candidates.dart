@@ -1,8 +1,7 @@
+import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/team.dart';
-
-const int kVisibleSubstituteCandidateLimit = 10;
 
 const Map<Position, List<Position>> _substituteOptionsByPosition = {
   Position.gk: [Position.gk],
@@ -37,6 +36,7 @@ List<Position> substituteOptionsFor(Position position) =>
 List<Player> allSubstituteCandidatesFor({
   required Team team,
   required Player outPlayer,
+  BalanceConfig balance = BalanceConfig.defaults,
 }) {
   final xiIds = team.lineupPlayerIds.toSet();
   final allowedPositions = substituteOptionsFor(outPlayer.position);
@@ -63,7 +63,7 @@ List<Player> allSubstituteCandidatesFor({
       return aPriority.compareTo(bPriority);
     }
 
-    return b.overall().compareTo(a.overall());
+    return b.overall(balance).compareTo(a.overall(balance));
   });
 
   return candidates;
@@ -72,16 +72,19 @@ List<Player> allSubstituteCandidatesFor({
 List<Player> substituteCandidatesFor({
   required Team team,
   required Player outPlayer,
-  int limit = kVisibleSubstituteCandidateLimit,
+  BalanceConfig balance = BalanceConfig.defaults,
+  int? limit,
 }) {
   final allCandidates = allSubstituteCandidatesFor(
     team: team,
     outPlayer: outPlayer,
+    balance: balance,
   );
 
-  if (allCandidates.length <= limit) {
+  final maximum = limit ?? balance.ui.visibleSubstituteCandidateLimit;
+  if (allCandidates.length <= maximum) {
     return allCandidates;
   }
 
-  return allCandidates.take(limit).toList();
+  return allCandidates.take(maximum).toList();
 }

@@ -1474,14 +1474,14 @@ class AiTradeService {
     final powers = <double>[
       for (final item in league.teams)
         (league.strengthTable?.entryFor(item.id)?.teamPower ??
-                item.teamStrength)
+                item.teamStrengthFor(balance))
             .toDouble(),
     ];
     if (powers.isEmpty) return false;
     final average = powers.reduce((a, b) => a + b) / powers.length;
     final own =
         (league.strengthTable?.entryFor(team.id)?.teamPower ??
-                team.teamStrength)
+                team.teamStrengthFor(balance))
             .toDouble();
     return own > average + balance.ai.superteamBrakeThreshold;
   }

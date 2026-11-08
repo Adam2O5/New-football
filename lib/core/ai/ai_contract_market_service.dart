@@ -130,7 +130,10 @@ class AiContractMarketService {
     required Player player,
     required int saveSeed,
   }) {
-    if (player.contract.yearsRemaining > 1) return null;
+    if (player.contract.yearsRemaining >
+        balance.ai.extensionMaxYearsRemaining) {
+      return null;
+    }
     final minutes = contracts.assessExtensionMinutes(
       team: team,
       player: player,
@@ -181,7 +184,8 @@ class AiContractMarketService {
     required bool criticalNeed,
   }) {
     if (player.contract.isRookieScale &&
-        player.contract.yearsRemaining <= 1 &&
+        player.contract.yearsRemaining <=
+            balance.salaryCap.rookieExtensionMaxYearsRemaining &&
         player.potentialStars >= balance.ai.extensionRookiePotentialMin) {
       return CapExceptionType.rookieExtension;
     }
@@ -548,7 +552,8 @@ class AiContractMarketService {
         continue;
       }
       final contract = member.contract;
-      if (contract == null || contract.yearsRemaining > 1) {
+      if (contract == null ||
+          contract.yearsRemaining > balance.staff.extensionMaxYearsRemaining) {
         continue;
       }
       final rawOverall = _staffRawOverall(member);

@@ -253,9 +253,10 @@ class SalaryCapService {
         );
       case CapExceptionType.rookieExtension:
         if (!player.contract.isRookieScale ||
-            player.contract.yearsRemaining > 1) {
+            player.contract.yearsRemaining >
+                b.rookieExtensionMaxYearsRemaining) {
           return const CapExceptionValidation.invalid(
-            'Rookie extension jest dostępne wyłącznie w ostatnim roku skali',
+            'Rookie extension jest niedostępne przy obecnej długości kontraktu',
           );
         }
         terms = CapExceptionTerms(
@@ -286,8 +287,8 @@ class SalaryCapService {
       case CapExceptionType.birdRights:
         if (player.state.seasonsWithTeam < b.birdRightsSeasons &&
             !player.contract.hasBirdRights) {
-          return const CapExceptionValidation.invalid(
-            'Full Bird Rights wymagają co najmniej 3 sezonów w klubie',
+          return CapExceptionValidation.invalid(
+            'Full Bird Rights wymagają co najmniej ${b.birdRightsSeasons} sezonów w klubie',
           );
         }
         terms = CapExceptionTerms(
@@ -298,8 +299,8 @@ class SalaryCapService {
         );
       case CapExceptionType.earlyBirdRights:
         if (player.state.seasonsWithTeam != b.earlyBirdSeasons) {
-          return const CapExceptionValidation.invalid(
-            'Early Bird Rights wymagają dokładnie 2 sezonów w klubie',
+          return CapExceptionValidation.invalid(
+            'Early Bird Rights wymagają dokładnie ${b.earlyBirdSeasons} sezonów w klubie',
           );
         }
         terms = CapExceptionTerms(
@@ -313,8 +314,8 @@ class SalaryCapService {
         );
       case CapExceptionType.nonBirdRights:
         if (player.state.seasonsWithTeam >= b.earlyBirdSeasons) {
-          return const CapExceptionValidation.invalid(
-            'Non-Bird Rights dotyczą stażu krótszego niż 2 sezony',
+          return CapExceptionValidation.invalid(
+            'Non-Bird Rights dotyczą stażu krótszego niż ${b.earlyBirdSeasons} sezony',
           );
         }
         terms = CapExceptionTerms(
@@ -501,7 +502,8 @@ class SalaryCapService {
     if (!allowed && reason == null) {
       reason = switch (mode) {
         TradeMatchingMode.capSpace => 'Przekroczony cap space',
-        TradeMatchingMode.salaryMatching => 'Przekroczony matching 125%',
+        TradeMatchingMode.salaryMatching =>
+          'Przekroczony matching ${(balance.salaryCap.salaryMatchPct * 100).toStringAsFixed(2)}%',
         TradeMatchingMode.noAggregation =>
           'Między apronami nie wolno agregować pensji',
         TradeMatchingMode.noNetPayrollIncrease =>

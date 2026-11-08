@@ -1,3 +1,4 @@
+import 'package:new_football/core/balance/balance_config.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:new_football/core/models/assigned_role.dart';
 import 'package:new_football/core/models/enums.dart';
@@ -86,8 +87,8 @@ abstract class MatchTeamSnapshot with _$MatchTeamSnapshot {
     @Default([]) List<Position> assignedPositions,
     @Default([]) List<AssignedRole> assignedRoles,
     @Default(TacticsSetup()) TacticsSetup tactics,
-    @Default(50.0) double chemistry,
-    @Default(50) int atmosphere,
+    @Default(ChemistryBalance.defaultInitialChemistry) double chemistry,
+    @Default(ChemistryBalance.defaultInitialAtmosphere) int atmosphere,
     @Default(1.0) double cohesionMultiplier,
     @Default(TeamStaff()) TeamStaff staff,
   }) = _MatchTeamSnapshot;

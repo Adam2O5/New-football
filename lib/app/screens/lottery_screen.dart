@@ -7,7 +7,6 @@ import 'package:new_football/app/widgets/envelope_animation.dart';
 import 'package:new_football/app/widgets/lottery_odds_table.dart';
 import 'package:new_football/app/widgets/lottery_results_table.dart';
 import 'package:new_football/app/widgets/screen_background.dart';
-import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/draft_models.dart';
 import 'package:new_football/core/models/league_state.dart';
 import 'package:new_football/core/models/lottery_models.dart';
@@ -102,7 +101,7 @@ class _LotteryScreenState extends ConsumerState<LotteryScreen> {
 
   Widget _buildProjectedPhase(LeagueState league) {
     final lotteryTeams = _getLotteryTeams(league);
-    final weights = DraftBalance.lotteryWeights;
+    final weights = ref.watch(balanceProvider).draft.lotteryWeightTable;
     final odds = LotteryService.computeOddsPercentages(weights);
 
     final teamOdds = lotteryTeams.asMap().entries.map((e) {
@@ -250,6 +249,7 @@ class _LotteryScreenState extends ConsumerState<LotteryScreen> {
     final lotteryTeams = _getLotteryTeams(league);
     final results = LotteryService.computeResults(
       lotteryTeams,
+      balance: ref.read(balanceProvider),
       saveSeed: ref.read(gameControllerProvider).value!.saveSeed,
       seasonYear: league.currentSeason.year,
     );

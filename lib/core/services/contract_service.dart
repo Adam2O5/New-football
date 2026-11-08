@@ -483,8 +483,8 @@ class ContractService {
 
     if (offer.salary < balance.salaryCap.minSalary ||
         offer.salary > balance.salaryCap.maxSalary) {
-      return const ContractOfferValidation.invalid(
-        'Pensja zawodnika jest poza zakresem 1–60M',
+      return ContractOfferValidation.invalid(
+        'Pensja zawodnika jest poza zakresem ${balance.salaryCap.minSalary}–${balance.salaryCap.maxSalary}',
       );
     }
     if (!capService.canSign(

@@ -1,3 +1,4 @@
+import 'package:new_football/core/balance/staff_balance.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/staff.dart';
 
@@ -103,7 +104,7 @@ class StaffAttributeView {
     rawOverall: value,
     displayedRating: displayedRating,
     stars: stars,
-    accessibilityLabel: 'Rating ${displayedRating.toStringAsFixed(1)} out of 5',
+    accessibilityLabel: staffRatingAccessibilityLabel(displayedRating),
   );
 }
 
@@ -283,7 +284,7 @@ abstract final class StaffPresentation {
       rawOverall: raw,
       displayedRating: displayed,
       stars: starsForRaw(raw),
-      accessibilityLabel: 'Rating ${displayed.toStringAsFixed(1)} out of 5',
+      accessibilityLabel: staffRatingAccessibilityLabel(displayed),
     );
   }
 
@@ -339,4 +340,12 @@ class _IndexedStaffCandidate {
 
   final StaffMember member;
   final int sourceIndex;
+}
+
+String staffRatingAccessibilityLabel(double displayedRating) {
+  final maximum = StaffBalance.defaultRatingMax.toString().replaceFirst(
+    RegExp(r'\.0$'),
+    '',
+  );
+  return 'Rating ${displayedRating.toStringAsFixed(1)} out of $maximum';
 }

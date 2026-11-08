@@ -31,7 +31,9 @@ mixin _ContractMarketPlayerOffers on _ContractMarketShared {
     }
     if (isExtension) {
       final isRookieExtensionCandidate =
-          player.contract.isRookieScale && player.contract.yearsRemaining <= 1;
+          player.contract.isRookieScale &&
+          player.contract.yearsRemaining <=
+              balance.salaryCap.rookieExtensionMaxYearsRemaining;
       if (isRookieExtensionCandidate &&
           offer.effectiveException != CapExceptionType.rookieExtension) {
         return null;

@@ -114,8 +114,12 @@ _Team _$TeamFromJson(Map<String, dynamic> json) => _Team(
           ?.map((e) => e as String)
           .toList() ??
       const [],
-  atmosphere: (json['atmosphere'] as num?)?.toInt() ?? 50,
-  chemistry: (json['chemistry'] as num?)?.toDouble() ?? 50.0,
+  atmosphere:
+      (json['atmosphere'] as num?)?.toInt() ??
+      ChemistryBalance.defaultInitialAtmosphere,
+  chemistry:
+      (json['chemistry'] as num?)?.toDouble() ??
+      ChemistryBalance.defaultInitialChemistry,
   weeklyHistory:
       (json['weeklyHistory'] as List<dynamic>?)
           ?.map((e) => TeamWeeklyHistory.fromJson(e as Map<String, dynamic>))

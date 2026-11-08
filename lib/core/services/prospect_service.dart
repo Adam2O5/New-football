@@ -57,17 +57,17 @@ class ProspectService {
     final oldDraftState = league.currentSeason.draftState;
 
     final currentYear = league.currentSeason.year;
-    final horizonYear = currentYear + 7;
+    final horizonYear = currentYear + balance.salaryCap.maxPickYearsAhead;
     final teams = league.teams.map((t) {
       final newPicks = [
-        for (var round = 1; round <= 3; round++)
+        for (var round = 1; round <= balance.draft.rounds; round++)
           DraftPick(
             id: 'pick_${t.id}_${horizonYear}_r$round',
             year: horizonYear,
             round: round,
             teamId: t.id,
             originalTeamId: t.id,
-          ).recalculateTradeValue(currentYear: currentYear),
+          ).recalculateTradeValue(currentYear: currentYear, balance: balance),
       ];
       return t.copyWith(ownedPicks: [...t.ownedPicks, ...newPicks]);
     }).toList();

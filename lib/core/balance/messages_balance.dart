@@ -1,6 +1,4 @@
 /// Tunable message and inbox constants from `docs/messages.md` §15.
-enum TeamEventExpiryMode { endOfDay }
-
 class MessagesBalance {
   const MessagesBalance({
     this.inboxRetentionSeasons = 2,
@@ -10,13 +8,6 @@ class MessagesBalance {
     this.maxArchiveMessages = 200,
     this.tradeOfferExpiryDays = 7,
     this.tradeDecisionExpiryDays = 1,
-    this.teamEventExpiry = TeamEventExpiryMode.endOfDay,
-    this.playerEventExpiryDaysMin = 1,
-    this.playerEventExpiryDaysMax = 3,
-    this.faAcceptFinalizeHours = 3,
-    this.faAcceptFinalizeDays = 3,
-    this.extAcceptFinalizeDays = 1,
-    this.hardRejectBlockDays = 30,
   });
 
   final int inboxRetentionSeasons;
@@ -26,11 +17,4 @@ class MessagesBalance {
   final int maxArchiveMessages;
   final int tradeOfferExpiryDays;
   final int tradeDecisionExpiryDays;
-  final TeamEventExpiryMode teamEventExpiry;
-  final int playerEventExpiryDaysMin;
-  final int playerEventExpiryDaysMax;
-  final int faAcceptFinalizeHours;
-  final int faAcceptFinalizeDays;
-  final int extAcceptFinalizeDays;
-  final int hardRejectBlockDays;
 }

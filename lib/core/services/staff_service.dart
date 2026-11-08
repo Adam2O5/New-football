@@ -306,7 +306,8 @@ class StaffService {
       return 'Pensja sztabu musi mieścić się w zakresie '
           '${balance.staff.minSalary}–${balance.staff.maxSalary}';
     }
-    final adjustedPayroll = team.staff.totalSalary - replacingSalary;
+    final adjustedPayroll =
+        team.staff.totalSalaryFor(balance) - replacingSalary;
     if (adjustedPayroll + salary > balance.staff.salaryCap) {
       return 'Przekroczony staff salary cap';
     }

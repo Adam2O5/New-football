@@ -1154,8 +1154,28 @@
   "scouting_slot_x": "Proj: X",
   "draft_scoutGradeShort": "Scout {grade}",
   "draft_potentialShort": "Pot. {stars}",
-  "draft_injuryProneShort": "Injury {value}/10",
-  "draft_determinationShort": "Determination {value}/10",
+  "draft_injuryProneShort": "Injury {value}/{maximum}",
+  "@draft_injuryProneShort": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      },
+      "maximum": {
+        "type": "int"
+      }
+    }
+  },
+  "draft_determinationShort": "Determination {value}/{maximum}",
+  "@draft_determinationShort": {
+    "placeholders": {
+      "value": {
+        "type": "int"
+      },
+      "maximum": {
+        "type": "int"
+      }
+    }
+  },
 
   "contract_faCounter": "FA counter offer — try again with a higher bid",
 

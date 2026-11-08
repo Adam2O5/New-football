@@ -43,18 +43,11 @@ void main() {
       ai.pDraftTradeUp,
       ai.scoutCoverageUsage,
       ai.pFaCompete,
-      ai.staffCapUsageTargetMin,
-      ai.staffCapUsageTargetMax,
       ai.pMatchOfferSheetTop11,
-      ai.pRebuildAbsorbsContract,
     ]) {
       _expectProbability(probability);
     }
 
-    expect(
-      ai.staffCapUsageTargetMin,
-      lessThanOrEqualTo(ai.staffCapUsageTargetMax),
-    );
     expect(ai.evaluationNoiseSd, greaterThan(0));
     expect(ai.pickFutureDiscount, greaterThan(0));
   });
@@ -63,18 +56,15 @@ void main() {
     final messages = config.messages;
     expect(messages.digestMinItems, greaterThanOrEqualTo(1));
     expect(messages.maxUnreadInbox, greaterThanOrEqualTo(1));
-    expect(messages.playerEventExpiryDaysMin, greaterThanOrEqualTo(1));
-    expect(
-      messages.playerEventExpiryDaysMin,
-      lessThanOrEqualTo(messages.playerEventExpiryDaysMax),
-    );
-    expect(messages.teamEventExpiry, TeamEventExpiryMode.endOfDay);
+    expect(messages.maxInboxMessages, greaterThanOrEqualTo(1));
+    expect(messages.maxArchiveMessages, greaterThanOrEqualTo(1));
+    expect(messages.inboxRetentionSeasons, greaterThanOrEqualTo(1));
 
     final events = config.events;
     for (final probability in <double>[
       events.minutesRequestChance,
       events.minutesRequestAmbitiousChance,
-      events.transferRequestChance,
+      events.transferRequestIChance,
       events.lockerRoomConflictChance,
       events.leaderSupportChance,
       events.publicCriticismChance,

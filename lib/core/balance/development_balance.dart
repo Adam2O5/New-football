@@ -49,13 +49,9 @@ class DevelopmentBalance {
     this.underSmallOffsetChance = 0.6,
     this.underSmallOffset = -0.5,
     this.underLargeOffset = -1.0,
-    this.growthRateBase = 1.0,
     this.growthRateMin = -3.0,
     this.growthRateMax = 3.0,
     this.constDev = 3.67,
-    this.plateauAgeMin = 27,
-    this.plateauAgeMax = 32,
-    this.declineAgeMin = 33,
     this.developmentAgeMax = 26,
     this.determinationGrowthRates = const [
       0.50,
@@ -105,13 +101,9 @@ class DevelopmentBalance {
   final double underSmallOffsetChance;
   final double underSmallOffset;
   final double underLargeOffset;
-  final double growthRateBase;
   final double growthRateMin;
   final double growthRateMax;
   final double constDev;
-  final int plateauAgeMin;
-  final int plateauAgeMax;
-  final int declineAgeMin;
   final int developmentAgeMax;
   final List<double> determinationGrowthRates;
 

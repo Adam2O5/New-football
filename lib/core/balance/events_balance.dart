@@ -74,7 +74,6 @@ class EventsBalance {
     this.inspiringPerformanceProgressBonus = 5.0,
     this.minutesRequestChance = 0.03,
     this.minutesRequestAmbitiousChance = 0.05,
-    this.transferRequestChance = 0.01,
     this.transferRequestAmbitiousMultiplier = 2.0,
     this.lowAtmosphereThreshold = 40,
     this.lowAtmosphereWeeks = 4,
@@ -82,7 +81,6 @@ class EventsBalance {
     this.lockerRoomConflictChance = 0.05,
     this.leaderSupportWinStreak = 3,
     this.leaderSupportChance = 0.15,
-    this.leaderSupportCooldownMonths = 1,
     this.publicCriticismAtmosphereThreshold = 30,
     this.publicCriticismChance = 0.08,
     this.moreMinutesLowShareThreshold = 0.25,
@@ -235,7 +233,6 @@ class EventsBalance {
   final double inspiringPerformanceFormBonus;
   final double inspiringPerformanceProgressBonus;
   final double minutesRequestAmbitiousChance;
-  final double transferRequestChance;
   final double transferRequestAmbitiousMultiplier;
   final int lowAtmosphereThreshold;
   final int lowAtmosphereWeeks;
@@ -243,7 +240,6 @@ class EventsBalance {
   final double lockerRoomConflictChance;
   final int leaderSupportWinStreak;
   final double leaderSupportChance;
-  final int leaderSupportCooldownMonths;
   final int publicCriticismAtmosphereThreshold;
   final double publicCriticismChance;
   final double moreMinutesLowShareThreshold;

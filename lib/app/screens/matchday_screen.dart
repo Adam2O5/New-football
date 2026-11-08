@@ -1,3 +1,4 @@
+import 'package:new_football/core/balance/ui_balance.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -674,20 +675,6 @@ String? _playerName(MatchEvent event, Team home, Team away) {
   return event.playerId;
 }
 
-int _eventPriority(MatchEventType type) => switch (type) {
-  MatchEventType.goal => 100,
-  MatchEventType.scoredPenalty => 100,
-  MatchEventType.redCard => 90,
-  MatchEventType.majorInjury => 85,
-  MatchEventType.minorInjury => 75,
-  MatchEventType.halfTime => 70,
-  MatchEventType.fullTime => 70,
-  MatchEventType.yellowCard => 60,
-  MatchEventType.substitution => 40,
-  MatchEventType.foul => 20,
-  MatchEventType.missedPenalty => 80,
-};
-
 IconData _eventIcon(MatchEventType type) => switch (type) {
   MatchEventType.goal || MatchEventType.scoredPenalty => Icons.sports_soccer,
   MatchEventType.yellowCard => Icons.crop_square,
@@ -699,10 +686,10 @@ IconData _eventIcon(MatchEventType type) => switch (type) {
   MatchEventType.missedPenalty => Icons.block,
 };
 
-Color _eventColor(BuildContext context, int priority) {
+Color _eventColor(BuildContext context, int priority, UiBalance balance) {
   final scheme = Theme.of(context).colorScheme;
-  if (priority >= 90) return scheme.error;
-  if (priority >= 70) return Colors.orange.shade800;
-  if (priority >= 50) return Colors.amber.shade800;
+  if (priority >= balance.eventErrorPriorityMin) return scheme.error;
+  if (priority >= balance.eventOrangePriorityMin) return Colors.orange.shade800;
+  if (priority >= balance.eventAmberPriorityMin) return Colors.amber.shade800;
   return scheme.onSurfaceVariant;
 }

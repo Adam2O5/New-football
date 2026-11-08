@@ -4271,14 +4271,14 @@ abstract class AppLocalizations {
   /// No description provided for @draft_injuryProneShort.
   ///
   /// In pl, this message translates to:
-  /// **'Kontuzje {value}/10'**
-  String draft_injuryProneShort(int value);
+  /// **'Kontuzje {value}/{maximum}'**
+  String draft_injuryProneShort(int value, int maximum);
 
   /// No description provided for @draft_determinationShort.
   ///
   /// In pl, this message translates to:
-  /// **'Determinacja {value}/10'**
-  String draft_determinationShort(int value);
+  /// **'Determinacja {value}/{maximum}'**
+  String draft_determinationShort(int value, int maximum);
 
   /// No description provided for @contract_faCounter.
   ///

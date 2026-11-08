@@ -5,6 +5,8 @@ class SalaryCapBalance {
   static const defaultMidLevelException = 20400000;
   static const defaultMinSalary = 1000000;
   const SalaryCapBalance({
+    this.rookieExtensionMaxYearsRemaining = 1,
+
     this.earlyBirdSeasons = 2,
     this.earlyBirdSalaryMultiplier = 1.75,
     this.earlyBirdMaxSalaryShare = 0.60,
@@ -37,6 +39,8 @@ class SalaryCapBalance {
     this.maxPlayersPerTrade = 5,
     this.maxPickYearsAhead = 7,
   });
+
+  final int rookieExtensionMaxYearsRemaining;
 
   final int salaryCap;
   final int earlyBirdSeasons;
@@ -87,25 +91,7 @@ class SalaryCapBalance {
 
 class ClubCashBalance {
   static const defaultStartingCash = 75000000;
-  const ClubCashBalance({
-    this.startingCash = defaultStartingCash,
-    this.startingCashVariance = 15000000,
-    this.tvBase = 90000000,
-    this.tvBonusMax = 45000000,
-    this.gateSponsorMin = 25000000,
-    this.gateSponsorMax = 70000000,
-    this.opsFixed = 18000000,
-    this.healthyCashFloor = 20000000,
-  });
+  const ClubCashBalance({this.startingCash = defaultStartingCash});
 
   final int startingCash;
-  final int startingCashVariance;
-  final int tvBase;
-  final int tvBonusMax;
-  final int gateSponsorMin;
-  final int gateSponsorMax;
-  final int opsFixed;
-
-  /// Below this → board warning / atmosphere drain.
-  final int healthyCashFloor;
 }

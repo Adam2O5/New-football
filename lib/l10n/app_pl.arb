@@ -1369,16 +1369,26 @@
       "stars": {"type": "String"}
     }
   },
-  "draft_injuryProneShort": "Kontuzje {value}/10",
+  "draft_injuryProneShort": "Kontuzje {value}/{maximum}",
   "@draft_injuryProneShort": {
     "placeholders": {
-      "value": {"type": "int"}
+      "value": {
+        "type": "int"
+      },
+      "maximum": {
+        "type": "int"
+      }
     }
   },
-  "draft_determinationShort": "Determinacja {value}/10",
+  "draft_determinationShort": "Determinacja {value}/{maximum}",
   "@draft_determinationShort": {
     "placeholders": {
-      "value": {"type": "int"}
+      "value": {
+        "type": "int"
+      },
+      "maximum": {
+        "type": "int"
+      }
     }
   },
 

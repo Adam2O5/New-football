@@ -24,7 +24,8 @@ mixin _ContractMarketStaffOffers on _ContractMarketShared {
     final actualCandidate = resolvedCandidate;
     if (isExtension &&
         (actualCandidate.contract == null ||
-            actualCandidate.contract!.yearsRemaining > 1)) {
+            actualCandidate.contract!.yearsRemaining >
+                balance.staff.extensionMaxYearsRemaining)) {
       return null;
     }
     if (!isExtension &&

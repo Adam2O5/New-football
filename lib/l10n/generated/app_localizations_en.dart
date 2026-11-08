@@ -2366,13 +2366,13 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String draft_injuryProneShort(int value) {
-    return 'Injury $value/10';
+  String draft_injuryProneShort(int value, int maximum) {
+    return 'Injury $value/$maximum';
   }
 
   @override
-  String draft_determinationShort(int value) {
-    return 'Determination $value/10';
+  String draft_determinationShort(int value, int maximum) {
+    return 'Determination $value/$maximum';
   }
 
   @override

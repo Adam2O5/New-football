@@ -217,7 +217,7 @@ return $default(_that.formation,_that.tempo,_that.attackWidth,_that.defensiveLin
 @JsonSerializable()
 
 class _TacticsSetup implements TacticsSetup {
-  const _TacticsSetup({this.formation = Formation.f433, this.tempo = Tempo.balanced, this.attackWidth = AttackWidth.balanced, this.defensiveLine = DefensiveLine.normal, this.pressing = PressingIntensity.medium, this.cornersAttack = 50, this.cornersDefense = 50, this.freeKicks = 30, this.penalties = 80});
+  const _TacticsSetup({this.formation = Formation.f433, this.tempo = Tempo.balanced, this.attackWidth = AttackWidth.balanced, this.defensiveLine = DefensiveLine.normal, this.pressing = PressingIntensity.medium, this.cornersAttack = TacticsBalance.defaultCornersAttack, this.cornersDefense = TacticsBalance.defaultCornersDefense, this.freeKicks = TacticsBalance.defaultFreeKicks, this.penalties = TacticsBalance.defaultPenalties});
   factory _TacticsSetup.fromJson(Map<String, dynamic> json) => _$TacticsSetupFromJson(json);
 
 @override@JsonKey() final  Formation formation;

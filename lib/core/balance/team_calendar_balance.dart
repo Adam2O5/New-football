@@ -100,10 +100,16 @@ class CalendarBalance {
 }
 
 class ChemistryBalance {
+  static const defaultInitialAtmosphere = 50;
+  static const defaultInitialChemistry = 50.0;
+
   /// Shared rolling window for the stored results and the team-form display.
   static const recentResultsWindow = 8;
 
   const ChemistryBalance({
+    this.initialAtmosphere = defaultInitialAtmosphere,
+    this.initialChemistry = defaultInitialChemistry,
+
     this.fullLineupChemistryBonus = 0.3,
     this.foreignPositionChemistryPenalty = 0.4,
     this.experiencedSeasonsMin = 3,
@@ -168,16 +174,11 @@ class ChemistryBalance {
       (4.0, 1.01),
       (5.0, 1.03),
     ],
-    this.multMin = 0.92,
-    this.multMax = 1.08,
-    this.roleMultOkMin = 1.05,
-    this.roleMultOkMax = 1.12,
-    this.roleMultFailMin = 0.80,
-    this.roleMultFailMax = 0.90,
-    this.formationMatchupClamp = 0.15,
   });
 
-  final double multMin;
+  final int initialAtmosphere;
+  final double initialChemistry;
+
   final double fullLineupChemistryBonus;
   final double foreignPositionChemistryPenalty;
   final int experiencedSeasonsMin;
@@ -209,10 +210,4 @@ class ChemistryBalance {
   final List<(double upperBound, double multiplier)> cohesionMultipliers;
   final List<(double upperBound, double multiplier)>
   headCoachMotivationMultipliers;
-  final double multMax;
-  final double roleMultOkMin;
-  final double roleMultOkMax;
-  final double roleMultFailMin;
-  final double roleMultFailMax;
-  final double formationMatchupClamp;
 }

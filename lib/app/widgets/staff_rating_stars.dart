@@ -246,7 +246,7 @@ class _StaffGraphicStars extends StatelessWidget {
       key: ValueKey<String>('$keyPrefix-semantics'),
       container: true,
       excludeSemantics: true,
-      label: _ratingSemanticsLabel(displayedRating!),
+      label: staffRatingAccessibilityLabel(displayedRating!),
       child: ExcludeSemantics(
         child: Row(
           key: ValueKey<String>(keyPrefix),
@@ -272,7 +272,4 @@ class _StaffGraphicStars extends StatelessWidget {
     GraphicStar.half => Icons.star_half,
     GraphicStar.empty => Icons.star_border,
   };
-
-  static String _ratingSemanticsLabel(double displayedRating) =>
-      'Rating ${displayedRating.toStringAsFixed(1)} out of 5';
 }

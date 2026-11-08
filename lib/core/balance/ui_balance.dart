@@ -1,6 +1,27 @@
+import 'package:new_football/core/models/enums.dart';
+
 /// Semantic presentation thresholds; geometry and animation stay in app.
 class UiBalance {
   const UiBalance({
+    this.matchEventPriorities = const {
+      MatchEventType.goal: 100,
+      MatchEventType.scoredPenalty: 100,
+      MatchEventType.redCard: 90,
+      MatchEventType.majorInjury: 85,
+      MatchEventType.minorInjury: 75,
+      MatchEventType.halfTime: 70,
+      MatchEventType.fullTime: 70,
+      MatchEventType.yellowCard: 60,
+      MatchEventType.substitution: 40,
+      MatchEventType.foul: 20,
+      MatchEventType.missedPenalty: 80,
+    },
+    this.eventErrorPriorityMin = 90,
+    this.eventOrangePriorityMin = 70,
+    this.eventAmberPriorityMin = 50,
+
+    this.visibleSubstituteCandidateLimit = 10,
+
     this.lowStaminaWarning = 35,
     this.formDisplayMin = 0.0,
     this.formDisplayMax = 10.0,
@@ -31,6 +52,13 @@ class UiBalance {
     this.developingPotentialMaxAge = 26,
     this.matchEventListLimit = 35,
   });
+
+  final Map<MatchEventType, int> matchEventPriorities;
+  final int eventErrorPriorityMin;
+  final int eventOrangePriorityMin;
+  final int eventAmberPriorityMin;
+
+  final int visibleSubstituteCandidateLimit;
 
   final int lowStaminaWarning;
   final double formDisplayMin;

@@ -137,7 +137,7 @@ mixin _DayWeeklyBoundary {
                   player.copyWith(
                     state: player.state.copyWith(minutesThisWeek: 0),
                   ),
-                  atmosphere: 50,
+                  atmosphere: balance.development.atmosphereNeutral.round(),
                 )
                 .player,
           )

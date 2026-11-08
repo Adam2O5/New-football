@@ -117,8 +117,8 @@ abstract class Team with _$Team {
     @Default([]) List<String> lineupPlayerIds,
     @Default({}) Map<String, String> lineupSlots,
     @Default([]) List<String> benchPlayerIds,
-    @Default(50) int atmosphere,
-    @Default(50.0) double chemistry,
+    @Default(ChemistryBalance.defaultInitialAtmosphere) int atmosphere,
+    @Default(ChemistryBalance.defaultInitialChemistry) double chemistry,
     @Default([]) List<TeamWeeklyHistory> weeklyHistory,
     @Default([]) List<TeamSeasonStats> seasonStats,
     @Default([]) List<int> recentMatchResults,
@@ -190,10 +190,12 @@ extension TeamX on Team {
     return selected;
   }
 
-  double get teamStrength {
-    final starters = startingEleven;
-    if (starters.isEmpty) return 50;
-    return starters.map((p) => p.overall()).reduce((a, b) => a + b) /
+  double get teamStrength => teamStrengthFor();
+
+  double teamStrengthFor([BalanceConfig balance = BalanceConfig.defaults]) {
+    final starters = startingElevenFor(balance);
+    if (starters.isEmpty) return balance.player.emptyTeamOverall;
+    return starters.map((p) => p.overall(balance)).reduce((a, b) => a + b) /
         starters.length;
   }
 

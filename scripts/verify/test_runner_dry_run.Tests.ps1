@@ -66,6 +66,9 @@ try {
     Assert ($dry.Text.Contains('--coverage') -and $dry.Text.Contains('-t unit')) 'Coverage and tags must be preserved.'
     $yaml = Get-Content -LiteralPath (Join-Path $repoRoot 'dart_test.yaml') -Raw
     Assert ($yaml.Contains('slow || benchmark || integration')) 'Fast preset must agree with wrapper.'
+    $bounded = Invoke-Runner @('-Profile', 'standard', '-Concurrency', '2', '-DryRun')
+    Assert ($bounded.Code -eq 0 -and $bounded.Text.Contains('--concurrency 2')) 'Explicit concurrency must reach Flutter without changing selection.'
+    Assert ((Invoke-Runner @('-Concurrency', '0', '-DryRun')).Code -ne 0) 'Zero concurrency must fail.'
     Assert ((Invoke-Runner @('-Area', 'ai', '-DryRun')).Code -eq 0) 'Empty dry run should explain selection.'
     Assert ((Invoke-Runner @('-Area', 'ai')).Code -ne 0) 'Empty selection must never fall back to all tests.'
     Assert ((Invoke-Runner @('-Fast', '-Profile', 'standard', '-DryRun')).Code -ne 0) 'Conflicting options must fail.'

@@ -4,6 +4,8 @@ class StaffBalance {
   static const defaultRatingMin = 0.0;
   static const defaultRatingMax = 5.0;
   const StaffBalance({
+    this.extensionMaxYearsRemaining = 1,
+
     this.missingHeadCoachShapeBoost = -5,
     this.headCoachShapePerStar = 2,
     this.headCoachShapeOffset = 1,
@@ -21,14 +23,12 @@ class StaffBalance {
     this.salaryCap = 15000000,
     this.minSalary = 500000,
     this.maxSalary = 5000000,
-    this.roleSlots = 6,
     this.starMin = defaultRatingMin,
     this.starMax = defaultRatingMax,
     this.starStep = 0.5,
     this.maxWatchedBase = 4,
     this.maxWatchedPerCoverageStar = 6,
     this.combineAssignCoverageFraction = 0.5,
-    this.youthCoachMaxAge = 23,
     this.growthAgeMin = 35,
     this.growthAgeMax = 45,
     this.retireAgeMin = 55,
@@ -54,6 +54,8 @@ class StaffBalance {
     },
   });
 
+  final int extensionMaxYearsRemaining;
+
   final int missingHeadCoachShapeBoost;
   final int headCoachShapePerStar;
   final int headCoachShapeOffset;
@@ -76,7 +78,6 @@ class StaffBalance {
 
   final int minSalary;
   final int maxSalary;
-  final int roleSlots;
   final double starMin;
   final double starMax;
   final double starStep;
@@ -87,7 +88,6 @@ class StaffBalance {
   /// Combine focus slots ≈ this × Coverage (stars), floored, min 1.
   final double combineAssignCoverageFraction;
 
-  final int youthCoachMaxAge;
   final int growthAgeMin;
   final int growthAgeMax;
   final int retireAgeMin;

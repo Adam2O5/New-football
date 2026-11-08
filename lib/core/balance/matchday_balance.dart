@@ -566,8 +566,6 @@ class MatchdayBalance {
     this.effectiveAttributeMax = 120.0,
     this.walkoverGoalsFor = 0,
     this.walkoverGoalsAgainst = 3,
-    this.noGkGoalsFor = 0,
-    this.noGkGoalsAgainst = 5,
     this.maxSubstitutions = 5,
     this.maxSubstitutionWindows = 3,
     this.cohesionTacticsPenalty = 2.0,
@@ -636,7 +634,6 @@ class MatchdayBalance {
     this.momentumRedCard = 20,
     this.momentumKeyPlayerInjury = 8,
     this.derbyMomentumMultiplier = 1.25,
-    this.derbyStaminaMultiplier = 1.05,
     this.derbySequenceMultiplier = 1.05,
     this.crowdHomeDivisor = 2500.0,
     this.crowdAwayDivisor = 4000.0,
@@ -679,7 +676,6 @@ class MatchdayBalance {
     this.aerialSlope = 1.2,
     this.aerialClampMin = 35,
     this.aerialClampMax = 85,
-    this.aerialDuelWeight = 0.15,
     this.aerialEdgeClamp = 25,
     this.aerialCornerCoef = 0.006,
     this.aerialFkCoef = 0.003,
@@ -949,10 +945,6 @@ class MatchdayBalance {
   final int walkoverGoalsFor;
   final int walkoverGoalsAgainst;
 
-  /// Outfield / empty GK slot → hard penalty score.
-  final int noGkGoalsFor;
-  final int noGkGoalsAgainst;
-
   /// Maximum number of players replaced and ordinary substitution windows.
   final int maxSubstitutions;
   final int maxSubstitutionWindows;
@@ -1019,7 +1011,6 @@ class MatchdayBalance {
   final int momentumRedCard;
   final int momentumKeyPlayerInjury;
   final double derbyMomentumMultiplier;
-  final double derbyStaminaMultiplier;
   final double derbySequenceMultiplier;
   final double crowdHomeDivisor;
   final double crowdAwayDivisor;
@@ -1065,7 +1056,6 @@ class MatchdayBalance {
   final double aerialSlope;
   final int aerialClampMin;
   final int aerialClampMax;
-  final double aerialDuelWeight;
   final int aerialEdgeClamp;
   final double aerialCornerCoef;
   final double aerialFkCoef;

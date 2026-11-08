@@ -80,7 +80,7 @@ class _StaffScreenState extends ConsumerState<StaffScreen>
 
     final balance = ref.watch(balanceProvider);
     final cap = balance.staff.salaryCap;
-    final used = team.staff.totalSalary;
+    final used = team.staff.totalSalaryFor(balance);
     final selected = _selectedStaff(league, team);
 
     return Scaffold(

@@ -66,7 +66,6 @@ class ContractNegBalance {
       TeamStatus.elite: 7,
     },
     this.hoursPerDay = 10,
-    this.offersPerHour = 1,
 
     // Canonical, non-overlapping offer-score bands (contracts.md §6–7).
     this.hardRejectScoreMax = 24,
@@ -114,13 +113,6 @@ class ContractNegBalance {
     this.extensionMinutesMinimumRequiredShare = 0.20,
 
     // Legacy knobs retained for compatibility with older balance callers.
-    this.playerAcceptGap = 6,
-    this.playerHardRejectGap = -14,
-    this.playerNoiseAbs = 3,
-    this.playerTemperamentalNoiseAbs = 5,
-    this.staffAcceptGap = 5,
-    this.staffHardRejectGap = -12,
-    this.staffNoiseAbs = 2,
     // Active waiting clocks, separate from finalization windows above.
     this.playerWaitingHours = 3,
     this.staffWaitingHours = 3,
@@ -178,7 +170,6 @@ class ContractNegBalance {
   final Map<TeamStatus, int> teamStatusBonuses;
   final int tradePairBlockDays;
   final int ntcTradeBlockDays;
-  final int offersPerHour;
 
   final int hardRejectScoreMax;
   final int rejectScoreMax;
@@ -219,13 +210,6 @@ class ContractNegBalance {
   final double extensionMinutesMinimumRequiredShare;
 
   // Compatibility fields for code written against the pre-Task-28 balance.
-  final int playerAcceptGap;
-  final int playerHardRejectGap;
-  final int playerNoiseAbs;
-  final int playerTemperamentalNoiseAbs;
-  final int staffAcceptGap;
-  final int staffHardRejectGap;
-  final int staffNoiseAbs;
   // Active waiting clocks for the persistent negotiation lifecycle.
   final int playerWaitingHours;
   final int staffWaitingHours;

@@ -4,6 +4,8 @@ import 'package:new_football/core/models/enums.dart';
 /// knobs moved to `TradeValueBalance` (`trade_value_balance.dart`).
 class PlayerBalance {
   const PlayerBalance({
+    this.emptyTeamOverall = 50.0,
+
     this.heatStaminaMultiplier = 1.15,
 
     this.suspensionGamesClampMax = 100,
@@ -66,6 +68,8 @@ class PlayerBalance {
   static const defaultAttributeMax = 99;
   static const defaultInitialStamina = 100;
   static const defaultInitialForm = 5.0;
+  final double emptyTeamOverall;
+
   final double heatStaminaMultiplier;
 
   final int attributeMin;

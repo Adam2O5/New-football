@@ -8,6 +8,7 @@ param(
     [string[]] $ExcludeTags,
     [switch] $Coverage,
     [switch] $DryRun,
+    [ValidateRange(1, 64)][int] $Concurrency,
     [ValidateRange(1, 86400)][int] $TimeoutSeconds
 )
 
@@ -33,6 +34,7 @@ try {
     if ($excluded.Count) { $flutterArguments += @('-x', ($excluded -join ' || ')) }
     if ($selectedTags.Count) { $flutterArguments += @('-t', ($selectedTags -join ' || ')) }
     if ($Coverage) { $flutterArguments += '--coverage' }
+    if ($PSBoundParameters.ContainsKey('Concurrency')) { $flutterArguments += @('--concurrency', $Concurrency.ToString()) }
     Write-Host "Selected: $($selection.Files.Count); process budget: $TimeoutSeconds seconds"
     if ($Profile -ne 'long') { Write-Host "LONG_NOT_RUN: $($selection.LongCount)" }
     if ($DryRun) {

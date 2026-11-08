@@ -121,7 +121,7 @@ class AiEvaluationService {
         player.state.injury?.type == InjuryType.major) {
       apply('majorInjury', balance.ai.majorInjuryMult);
     }
-    if (player.contract.yearsRemaining == 1 &&
+    if (player.contract.yearsRemaining == balance.ai.expiringContractYears &&
         !player.contract.noTradeClause &&
         !player.contract.blockedTeamIds.contains(recipient.team.id)) {
       apply('expiringContract', balance.ai.expiringContractMult);

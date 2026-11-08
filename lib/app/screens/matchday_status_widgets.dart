@@ -217,7 +217,10 @@ class _EventFeed extends ConsumerWidget {
                     itemCount: visible.length,
                     itemBuilder: (_, index) {
                       final event = visible[index];
-                      final priority = _eventPriority(event.type);
+                      final priority = ref
+                          .watch(balanceProvider)
+                          .ui
+                          .matchEventPriorities[event.type]!;
                       final teamName = event.teamId == home.id
                           ? home.name
                           : event.teamId == away.id
@@ -238,7 +241,11 @@ class _EventFeed extends ConsumerWidget {
                             Icon(
                               _eventIcon(event.type),
                               size: 15,
-                              color: _eventColor(context, priority),
+                              color: _eventColor(
+                                context,
+                                priority,
+                                ref.watch(balanceProvider).ui,
+                              ),
                             ),
                           ],
                         ),

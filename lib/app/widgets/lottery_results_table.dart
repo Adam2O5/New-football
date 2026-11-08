@@ -4,7 +4,7 @@ import 'package:new_football/core/models/draft_models.dart';
 /// Displays lottery results table with progressive reveal.
 ///
 /// Picks are revealed from #10 to #1. A position is visible if:
-/// `assignedPick >= (11 - revealedCount)`
+/// `assignedPick >= (results.length + 1 - revealedCount)`
 class LotteryResultsTable extends StatelessWidget {
   const LotteryResultsTable({
     super.key,
@@ -34,11 +34,14 @@ class LotteryResultsTable extends StatelessWidget {
         DataColumn(label: Text('Drużyna')),
       ],
       rows: sorted.map((r) {
-        final isRevealed = r.assignedPick >= (11 - revealedCount);
-        return DataRow(cells: [
-          DataCell(Text('#${r.assignedPick}')),
-          DataCell(Text(isRevealed ? (teams[r.teamId] ?? r.teamId) : '?')),
-        ]);
+        final isRevealed =
+            r.assignedPick >= (results.length + 1 - revealedCount);
+        return DataRow(
+          cells: [
+            DataCell(Text('#${r.assignedPick}')),
+            DataCell(Text(isRevealed ? (teams[r.teamId] ?? r.teamId) : '?')),
+          ],
+        );
       }).toList(),
     );
   }

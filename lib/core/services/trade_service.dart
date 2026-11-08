@@ -1309,10 +1309,10 @@ class TradeService {
     final aWasUnder = beforeA.roster.length < min;
     final bWasUnder = beforeB.roster.length < min;
     if (aWasUnder && bWasUnder) {
-      return const TradeValidation(
+      return TradeValidation(
         ok: false,
         code: 'bothRostersUnderMinimum',
-        reason: 'Obie drużyny poniżej 20 zawodników nie mogą się wymieniać',
+        reason: 'Obie drużyny poniżej $min zawodników nie mogą się wymieniać',
       );
     }
     if (aWasUnder) {
@@ -1320,11 +1320,11 @@ class TradeService {
           afterB.roster.length < min ||
           afterB.roster.length > max ||
           afterA.roster.length > max) {
-        return const TradeValidation(
+        return TradeValidation(
           ok: false,
           code: 'rosterExceptionA',
           reason:
-              'Drużyna poniżej minimum musi zwiększyć roster, a druga pozostać w limicie 20–30',
+              'Drużyna poniżej minimum musi zwiększyć roster, a druga pozostać w limicie $min–$max',
         );
       }
       return const TradeValidation(ok: true);
@@ -1334,11 +1334,11 @@ class TradeService {
           afterA.roster.length < min ||
           afterA.roster.length > max ||
           afterB.roster.length > max) {
-        return const TradeValidation(
+        return TradeValidation(
           ok: false,
           code: 'rosterExceptionB',
           reason:
-              'Drużyna poniżej minimum musi zwiększyć roster, a druga pozostać w limicie 20–30',
+              'Drużyna poniżej minimum musi zwiększyć roster, a druga pozostać w limicie $min–$max',
         );
       }
       return const TradeValidation(ok: true);
@@ -1347,10 +1347,10 @@ class TradeService {
         afterA.roster.length > max ||
         afterB.roster.length < min ||
         afterB.roster.length > max) {
-      return const TradeValidation(
+      return TradeValidation(
         ok: false,
         code: 'rosterLimit',
-        reason: 'Roster poza limitem 20–30 po trade',
+        reason: 'Roster poza limitem $min–$max po trade',
       );
     }
     return const TradeValidation(ok: true);

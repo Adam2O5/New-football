@@ -240,15 +240,18 @@ extension TeamStaffX on TeamStaff {
   /// Reads `contract.salary` only: no rating, raw or displayed value takes
   /// part in reconstructing payroll. Expired, out-of-range and mismatched
   /// legacy records are not active payroll entries.
-  int get totalSalary => members.fold(0, (sum, member) {
-    final contract = member.contract;
-    if (contract == null || contract.yearsRemaining <= 0) return sum;
-    if (contract.salary < BalanceConfig.defaults.staff.minSalary ||
-        contract.salary > BalanceConfig.defaults.staff.maxSalary) {
-      return sum;
-    }
-    return sum + contract.salary;
-  });
+  int get totalSalary => totalSalaryFor();
+
+  int totalSalaryFor([BalanceConfig balance = BalanceConfig.defaults]) =>
+      members.fold(0, (sum, member) {
+        final contract = member.contract;
+        if (contract == null || contract.yearsRemaining <= 0) return sum;
+        if (contract.salary < balance.staff.minSalary ||
+            contract.salary > balance.staff.maxSalary) {
+          return sum;
+        }
+        return sum + contract.salary;
+      });
 
   /// Raw member in the recognized [role] slot, or `null` for an EmptySlot.
   ///

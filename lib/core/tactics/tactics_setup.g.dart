@@ -6,27 +6,33 @@ part of 'tactics_setup.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_TacticsSetup _$TacticsSetupFromJson(Map<String, dynamic> json) =>
-    _TacticsSetup(
-      formation:
-          $enumDecodeNullable(_$FormationEnumMap, json['formation']) ??
-          Formation.f433,
-      tempo:
-          $enumDecodeNullable(_$TempoEnumMap, json['tempo']) ?? Tempo.balanced,
-      attackWidth:
-          $enumDecodeNullable(_$AttackWidthEnumMap, json['attackWidth']) ??
-          AttackWidth.balanced,
-      defensiveLine:
-          $enumDecodeNullable(_$DefensiveLineEnumMap, json['defensiveLine']) ??
-          DefensiveLine.normal,
-      pressing:
-          $enumDecodeNullable(_$PressingIntensityEnumMap, json['pressing']) ??
-          PressingIntensity.medium,
-      cornersAttack: (json['cornersAttack'] as num?)?.toInt() ?? 50,
-      cornersDefense: (json['cornersDefense'] as num?)?.toInt() ?? 50,
-      freeKicks: (json['freeKicks'] as num?)?.toInt() ?? 30,
-      penalties: (json['penalties'] as num?)?.toInt() ?? 80,
-    );
+_TacticsSetup _$TacticsSetupFromJson(
+  Map<String, dynamic> json,
+) => _TacticsSetup(
+  formation:
+      $enumDecodeNullable(_$FormationEnumMap, json['formation']) ??
+      Formation.f433,
+  tempo: $enumDecodeNullable(_$TempoEnumMap, json['tempo']) ?? Tempo.balanced,
+  attackWidth:
+      $enumDecodeNullable(_$AttackWidthEnumMap, json['attackWidth']) ??
+      AttackWidth.balanced,
+  defensiveLine:
+      $enumDecodeNullable(_$DefensiveLineEnumMap, json['defensiveLine']) ??
+      DefensiveLine.normal,
+  pressing:
+      $enumDecodeNullable(_$PressingIntensityEnumMap, json['pressing']) ??
+      PressingIntensity.medium,
+  cornersAttack:
+      (json['cornersAttack'] as num?)?.toInt() ??
+      TacticsBalance.defaultCornersAttack,
+  cornersDefense:
+      (json['cornersDefense'] as num?)?.toInt() ??
+      TacticsBalance.defaultCornersDefense,
+  freeKicks:
+      (json['freeKicks'] as num?)?.toInt() ?? TacticsBalance.defaultFreeKicks,
+  penalties:
+      (json['penalties'] as num?)?.toInt() ?? TacticsBalance.defaultPenalties,
+);
 
 Map<String, dynamic> _$TacticsSetupToJson(_TacticsSetup instance) =>
     <String, dynamic>{

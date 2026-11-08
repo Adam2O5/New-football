@@ -1,3 +1,4 @@
+import 'package:new_football/core/balance/staff_balance.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -50,7 +51,7 @@ class _DevelopmentScreenState extends ConsumerState<DevelopmentScreen>
   // 0-99 rating scale used elsewhere for attributes (see `_bar` in
   // player_detail_screen.dart). Adjust if staff attributes use a different
   // scale.
-  static const double _staffAttrMax = 5.0;
+  static const double _staffAttrMax = StaffBalance.defaultRatingMax;
   static const int _staffAttrStarCount = 5;
   static const double _staffAttrValueWidth = 64;
   static const double _staffAttrDeltaWidth = 40;

@@ -1387,7 +1387,7 @@ return $default(_that.teamId,_that.startingXi,_that.bench,_that.assignedPosition
 @JsonSerializable()
 
 class _MatchTeamSnapshot implements MatchTeamSnapshot {
-  const _MatchTeamSnapshot({this.teamId = '', final  List<Player> startingXi = const [], final  List<Player> bench = const [], final  List<Position> assignedPositions = const [], final  List<AssignedRole> assignedRoles = const [], this.tactics = const TacticsSetup(), this.chemistry = 50.0, this.atmosphere = 50, this.cohesionMultiplier = 1.0, this.staff = const TeamStaff()}): _startingXi = startingXi,_bench = bench,_assignedPositions = assignedPositions,_assignedRoles = assignedRoles;
+  const _MatchTeamSnapshot({this.teamId = '', final  List<Player> startingXi = const [], final  List<Player> bench = const [], final  List<Position> assignedPositions = const [], final  List<AssignedRole> assignedRoles = const [], this.tactics = const TacticsSetup(), this.chemistry = ChemistryBalance.defaultInitialChemistry, this.atmosphere = ChemistryBalance.defaultInitialAtmosphere, this.cohesionMultiplier = 1.0, this.staff = const TeamStaff()}): _startingXi = startingXi,_bench = bench,_assignedPositions = assignedPositions,_assignedRoles = assignedRoles;
   factory _MatchTeamSnapshot.fromJson(Map<String, dynamic> json) => _$MatchTeamSnapshotFromJson(json);
 
 @override@JsonKey() final  String teamId;

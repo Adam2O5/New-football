@@ -1,3 +1,4 @@
+import '../../scripts/verify/balance_audit.dart' as balance_audit;
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -88,31 +89,17 @@ void main() {
     );
   });
 
-  test('named game constants outside balance have reviewed exceptions', () {
-    final violations = <String>[];
-    for (final file in _dartFiles(Directory('lib/core'))) {
-      final path = _relativePath(file.path);
-      if (_isGenerated(path) || path.startsWith('lib/core/balance/')) {
-        continue;
-      }
-      final source = file.readAsStringSync();
-      if (_legacyNumericFiles.contains(_libraryOwner(path, source))) continue;
-      final numericAssignments = RegExp(
-        r'\b(?:const|final|var)\s+\w+\s*=\s*(-?\d+(?:\.\d+)?)\b',
-      ).allMatches(source);
-      for (final match in numericAssignments) {
-        final value = match.group(1)!;
-        if (_trivialNumericValues.contains(value)) continue;
-        violations.add('$path:${_lineOf(source, match.start)}: $value');
-      }
-    }
-
+  test('AST numeric values and texts have reviewed contextual owners', () {
+    final report = balance_audit.inspectBalanceSources();
+    final rows = report['rows'] as List;
+    final pending = rows.where((row) => row['review'] == 'unreviewed').toList();
+    expect(report['errors'], 0);
+    expect(report['stale'], isEmpty);
     expect(
-      violations,
+      pending,
       isEmpty,
       reason:
-          'New named game constants belong in lib/core/balance or need an explicit reviewed exception:\n'
-          '${violations.join('\n')}',
+          'Unreviewed numeric source contexts: ${pending.take(10).map((r) => "${r['file']}:${r['line']} ${r['literal']}").join("\n")}',
     );
   });
 }
@@ -133,27 +120,6 @@ const _legacyUserFacingFiles = <String>{
   'lib/core/services/trade_service.dart',
   'lib/core/simulation/match_engine.dart',
 };
-
-const _legacyNumericFiles = <String>{
-  // Existing domain constants pending centralization in BalanceConfig.
-  'lib/core/models/game_save.dart',
-  'lib/core/models/player.dart',
-  'lib/core/models/player_value.dart',
-  'lib/core/models/seed_data_generator.dart',
-  'lib/core/random/match_random.dart',
-  'lib/core/random/seeds.dart',
-  'lib/core/services/discipline_service.dart',
-  'lib/core/services/draft_trade_service.dart',
-  'lib/core/services/injury_service.dart',
-  'lib/core/services/league_strength_service.dart',
-  'lib/core/services/season_service.dart',
-  'lib/core/services/team_management_service.dart',
-  'lib/core/services/trade_service.dart',
-  'lib/core/simulation/match_stats.dart',
-};
-
-// Neutral elements and probability/unit identities, including double spelling.
-const _trivialNumericValues = {'0', '1', '-1', '0.0', '1.0', '-1.0'};
 
 Iterable<File> _dartFiles(Directory directory) sync* {
   if (!directory.existsSync()) return;

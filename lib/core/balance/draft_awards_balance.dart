@@ -1,6 +1,7 @@
 class DraftBalance {
   static const defaultUndraftedContractYears = 2;
   const DraftBalance({
+    this.lotteryWeightTable = lotteryWeights,
     this.undraftedContractYears = defaultUndraftedContractYears,
     this.classSize = 120,
     this.rounds = 3,
@@ -22,6 +23,7 @@ class DraftBalance {
     this.mockFinalLateNoiseMax = 25,
   });
 
+  final List<int> lotteryWeightTable;
   final int classSize;
   final int undraftedContractYears;
   final int rounds;
@@ -87,8 +89,6 @@ class AwardsBalance {
     this.mvpMinutesPct = 0.40,
     this.dpoyMinutesPct = 0.40,
     this.bestGkMinutesPct = 0.40,
-    this.scoringTitleMinutesPct = 0.30,
-    this.assistTitleMinutesPct = 0.30,
     this.totsSlotMinutesPct = 0.30,
     this.rotyMinutesPct = 0.25,
   });
@@ -117,8 +117,6 @@ class AwardsBalance {
   final double mvpMinutesPct;
   final double dpoyMinutesPct;
   final double bestGkMinutesPct;
-  final double scoringTitleMinutesPct;
-  final double assistTitleMinutesPct;
   final double totsSlotMinutesPct;
   final double rotyMinutesPct;
 

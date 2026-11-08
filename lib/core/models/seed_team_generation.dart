@@ -22,6 +22,8 @@ mixin _SeedTeamGeneration on _SeedGenerationShared {
       city: city,
       conference: conference,
       roster: roster,
+      atmosphere: balance.chemistry.initialAtmosphere,
+      chemistry: balance.chemistry.initialChemistry,
       finance: TeamFinance(
         totalPayroll: payroll,
         salaryCap: balance.salaryCap.salaryCap,
@@ -30,7 +32,13 @@ mixin _SeedTeamGeneration on _SeedGenerationShared {
         midLevelExceptionAmount: balance.salaryCap.midLevelException,
         cashBalance: balance.cash.startingCash,
       ),
-      tactics: TacticsSetup(formation: formation),
+      tactics: TacticsSetup(
+        formation: formation,
+        cornersAttack: balance.tactics.initialCornersAttack,
+        cornersDefense: balance.tactics.initialCornersDefense,
+        freeKicks: balance.tactics.initialFreeKicks,
+        penalties: balance.tactics.initialPenalties,
+      ),
       lineupPlayerIds: roster
           .take(balance.roster.startingXi)
           .map((p) => p.id)

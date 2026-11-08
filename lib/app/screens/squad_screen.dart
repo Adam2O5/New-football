@@ -629,10 +629,12 @@ class _SquadScreenState extends ConsumerState<SquadScreen>
     Player outPlayer,
   ) async {
     final allCandidates = allSubstituteCandidatesFor(
+      balance: ref.read(balanceProvider),
       team: team,
       outPlayer: outPlayer,
     );
     final visibleCandidates = substituteCandidatesFor(
+      balance: ref.read(balanceProvider),
       team: team,
       outPlayer: outPlayer,
     );

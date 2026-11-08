@@ -146,8 +146,12 @@ _MatchTeamSnapshot _$MatchTeamSnapshotFromJson(Map<String, dynamic> json) =>
       tactics: json['tactics'] == null
           ? const TacticsSetup()
           : TacticsSetup.fromJson(json['tactics'] as Map<String, dynamic>),
-      chemistry: (json['chemistry'] as num?)?.toDouble() ?? 50.0,
-      atmosphere: (json['atmosphere'] as num?)?.toInt() ?? 50,
+      chemistry:
+          (json['chemistry'] as num?)?.toDouble() ??
+          ChemistryBalance.defaultInitialChemistry,
+      atmosphere:
+          (json['atmosphere'] as num?)?.toInt() ??
+          ChemistryBalance.defaultInitialAtmosphere,
       cohesionMultiplier:
           (json['cohesionMultiplier'] as num?)?.toDouble() ?? 1.0,
       staff: json['staff'] == null

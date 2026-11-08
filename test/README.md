@@ -7,6 +7,7 @@ pwsh -NoProfile -File scripts/test.ps1
 pwsh -NoProfile -File scripts/test.ps1 -Profile fast
 pwsh -NoProfile -File scripts/test.ps1 -Area search
 pwsh -NoProfile -File scripts/test.ps1 -Profile standard -DryRun
+pwsh -NoProfile -File scripts/test.ps1 -Profile standard -Concurrency 2
 pwsh -NoProfile -File scripts/test.ps1 -Profile long -Area performance -DryRun
 ```
 
@@ -14,6 +15,7 @@ pwsh -NoProfile -File scripts/test.ps1 -Profile long -Area performance -DryRun
 - **fast** / **-Fast** wybiera te same pliki i wyklucza przypadki z tagami `slow`, `benchmark`, `integration`. Nie jest synonimem wyłącznie testów jednostkowych; zawiera też szybkie widgety i assety.
 - **long** wybiera wyłącznie `test/<obszar>/long/*_long.dart`, każdy plik w osobnym procesie z domyślnym limitem 900 s. Wymaga jawnego uruchomienia. Jest odrzucany przy `CI=true`; CI/CD go nie uruchamia.
 - **-DryRun** waliduje wybór i blacklistę bez uruchamiania Fluttera. **-TimeoutSeconds N** ustala zewnętrzny budżet procesu, w long osobno dla każdego pliku. Runner przekazuje też timeout 30 s na przypadek; deklaracje lokalne testów mogą go nadpisywać.
+- **-Concurrency N** przekazuje równoległość do Fluttera bez zmiany selekcji i limitu 30 s. Przy obciążeniu dysku wariant `-Concurrency 2` służy do pełnego odbioru; brak opcji zachowuje ustawienie domyślne Fluttera.
 - Dostępne są **-Tags**, **-ExcludeTags** i **-Coverage**. Coverage jest dozwolone dla aktywnych zestawów; `long -Coverage` jest odrzucane.
 
 `-Area`: `ai`, `app`, `balance`, `branding`, `calendar`, `core`, `data`, `integration`, `l10n`, `market`, `match`, `messages`, `performance`, `search`, `staff`, `ui`. `helpers/` zawiera fixture’y, oracles, workery i harnessy. Przejściowy folder `nowe_testy` został usunięty po migracji scenariuszy.

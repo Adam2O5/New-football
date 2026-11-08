@@ -26,6 +26,7 @@ String _prospectFogSubtitle(
   AppLocalizations l10n,
   Prospect p,
   ScoutingKnowledge? knowledge,
+  int traitMax,
 ) {
   final parts = <String>['${p.position.code} · ${p.age}y'];
   if (knowledge == null) return parts.join(' · ');
@@ -42,10 +43,10 @@ String _prospectFogSubtitle(
   }
   if (tierIndex >= ScoutingTier.tier5.index) {
     if (knowledge.injuryProneKnown) {
-      parts.add(l10n.draft_injuryProneShort(p.injuryProne));
+      parts.add(l10n.draft_injuryProneShort(p.injuryProne, traitMax));
     }
     if (knowledge.determinationKnown) {
-      parts.add(l10n.draft_determinationShort(p.determination));
+      parts.add(l10n.draft_determinationShort(p.determination, traitMax));
     }
   }
   if (knowledge.estimatedSlot != null) {
@@ -343,7 +344,14 @@ class _DraftScreenState extends ConsumerState<DraftScreen> {
 
         return ListTile(
           title: Text(p.name),
-          subtitle: Text(_prospectFogSubtitle(l10n, p, knowledge)),
+          subtitle: Text(
+            _prospectFogSubtitle(
+              l10n,
+              p,
+              knowledge,
+              ref.watch(balanceProvider).player.traitMax,
+            ),
+          ),
           onTap: () => _showProspectDetail(p, scouting),
         );
       },

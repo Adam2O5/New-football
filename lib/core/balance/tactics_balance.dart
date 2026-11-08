@@ -43,18 +43,6 @@ enum FormationFamily {
   fiveBackBlock,
 }
 
-/// Optional semantic scale for matchup strength.
-enum MatchupEdge {
-  tiny(0.01),
-  low(0.02),
-  medium(0.03),
-  high(0.04),
-  veryHigh(0.05);
-
-  const MatchupEdge(this.value);
-  final double value;
-}
-
 /// Counter-formation bonus: [formationA] gets [bonusForA] vs [formationB].
 class FormationMatchup {
   const FormationMatchup({
@@ -86,7 +74,16 @@ class FormationFamilyMatchup {
 ///
 /// Deliberately excludes formation layout / pitch coordinates.
 class TacticsBalance {
+  static const defaultCornersAttack = 50;
+  static const defaultCornersDefense = 50;
+  static const defaultFreeKicks = 30;
+  static const defaultPenalties = 80;
   const TacticsBalance({
+    this.initialCornersAttack = defaultCornersAttack,
+    this.initialCornersDefense = defaultCornersDefense,
+    this.initialFreeKicks = defaultFreeKicks,
+    this.initialPenalties = defaultPenalties,
+
     this.roleShapeDeltas = const {
       GkRole.standard: ShapeDelta.zero,
       GkRole.sweeperKeeper: ShapeDelta(def: -1, mid: 2),
@@ -226,7 +223,6 @@ class TacticsBalance {
       'registaVsGegenpressHigh': ShapeDelta(mid: -1),
     },
 
-    this.matchupClamp = 0.15,
     this.formationBaseStats = _defaultFormationBaseStats,
     this.tempoDelta = _defaultTempoDelta,
     this.attackWidthDelta = _defaultAttackWidthDelta,
@@ -237,15 +233,17 @@ class TacticsBalance {
     this.formationMatchups = _defaultFormationMatchups,
   });
 
+  final int initialCornersAttack;
+  final int initialCornersDefense;
+  final int initialFreeKicks;
+  final int initialPenalties;
+
   final Map<Enum, ShapeDelta> roleShapeDeltas;
   final List<(Formation, Formation, ShapeDelta)> formationShapeMatchups;
   final List<(FormationFamily, FormationFamily, ShapeDelta)>
   familyShapeMatchups;
   final Map<String, ShapeDelta> settingMatchupDeltas;
   final Map<String, ShapeDelta> roleSynergyDeltas;
-
-  /// Total counter bonus (formation + tactical counters) clamp: ±this value.
-  final double matchupClamp;
 
   final Map<Formation, FormationBaseStats> formationBaseStats;
   final Map<Tempo, TacticsDelta> tempoDelta;

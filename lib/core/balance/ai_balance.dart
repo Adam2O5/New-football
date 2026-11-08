@@ -148,6 +148,9 @@ class AiBalance {
   static const defaultAiTradeMutualMin = 0.02;
   static const defaultExpectedRank = 15;
   const AiBalance({
+    this.extensionMaxYearsRemaining = 1,
+    this.expiringContractYears = 1,
+
     this.tradeTransferRequestNeedFloor = 100.0,
 
     this.tradeNeedAppetiteWeight = 0.35,
@@ -350,9 +353,6 @@ class AiBalance {
     this.tradeCounterTargetRound1 = 10.0,
     this.tradeCounterTargetRound2 = 6.0,
     this.tradeCounterTargetRound3 = 2.0,
-    this.tradeHardRejectProbabilityRound1 = 0.0,
-    this.tradeHardRejectProbabilityRound2 = 0.15,
-    this.tradeHardRejectProbabilityRound3 = 0.35,
     this.tradeMaxCounters = 3,
     this.tradeOfferTarget = 10.0,
     this.tradeOfferMinimum = 2.0,
@@ -363,22 +363,17 @@ class AiBalance {
     this.tradeFirstRoundLimit = 2,
     this.tradeFirstRoundWindowYears = 3,
     this.tradeDeadlineAppetiteMultiplier = 1.8,
-    this.tradeDeadlinePickBump = 10.0,
     this.tradeDumpBurdenMaxNegative = -10.0,
     this.tradeDumpAnchorMaxNegative = -25.0,
     this.tradeDumpToxicMaxNegative = -40.0,
     this.tradeRebuildR1ContractProbability = 0.55,
     this.tradeRebuildR2ContractProbability = 0.35,
     this.tradeRetoolR2ContractProbability = 0.25,
-    this.tradeVeteranSaleProbability = 0.45,
     this.tradeNtcPlanningMinConsent = 0.35,
-    this.tradeNtcPlanningFallbackConsent = 0.70,
-    this.tradeSuperteamStarOverall = 80,
     this.pOfferToUserRegular = 0.020,
     this.pOfferToUserOffseason = 0.045,
     this.pOfferToUserDeadline = 0.050,
     this.userOfferCooldownWeeks = 3,
-    this.aiTradePairsPerWeek = 12,
     this.aiTradeMutualMin = defaultAiTradeMutualMin,
     this.aiTradeSeasonLimit = 6,
     this.draftScoreNoiseSd = 3.5,
@@ -387,7 +382,6 @@ class AiBalance {
     this.draftTradeUpSurplusPct = 5.0,
     this.scoutCoverageUsage = 1.0,
     this.scoutMockRankShare = 0.70,
-    this.scoutNeedShare = 0.30,
     this.scoutKnownNoiseRank = 8,
     this.scoutNoScoutNoiseRank = 14,
     this.draftR1SigningProbability = 1.0,
@@ -438,7 +432,6 @@ class AiBalance {
     this.faRosterRepairSize = 20,
     this.faPositionMaxProbability = 0.05,
     this.faAge33MaxYears = 2,
-    this.rosterEmergencyOfferScore = 90,
     this.rosterEmergencyOfferYears = 1,
     this.pRosterMajorInjury = 0.70,
     this.pRosterMajorGk = 0.85,
@@ -451,8 +444,6 @@ class AiBalance {
     this.rfaMatchSurplusProbability = 0.05,
     this.rfaMatchCostMultiplier = 1.40,
     this.rfaCostScale = 100.0,
-    this.staffCapUsageTargetMin = 0.90,
-    this.staffCapUsageTargetMax = 1.00,
     this.staffHeadCoachMaxSalary = 5000000,
     this.staffPriorityRoleMinSalary = 2000000,
     this.staffPriorityRoleMaxSalary = 3000000,
@@ -470,9 +461,6 @@ class AiBalance {
     this.pMatchOfferSheetTop11 = 0.85,
     this.contractDragAnchor = 30,
     this.contractDragToxic = 60,
-    this.dumpMaxNegativeSurplus = -0.40,
-    this.pRebuildAbsorbsContract = 0.55,
-    this.ntcMinConsentToPursue = 35,
     this.superteamBrakeThreshold = 12,
     this.rosterGroups = _defaultAiRosterGroups,
     this.statusAgeMultipliers = _defaultAiStatusAgeMultipliers,
@@ -488,6 +476,9 @@ class AiBalance {
     this.overpaidContractMult = 0.85,
     this.rightsValueMult = 0.85,
   });
+
+  final int extensionMaxYearsRemaining;
+  final int expiringContractYears;
 
   final double tradeTransferRequestNeedFloor;
 
@@ -688,9 +679,6 @@ class AiBalance {
   final double tradeCounterTargetRound1;
   final double tradeCounterTargetRound2;
   final double tradeCounterTargetRound3;
-  final double tradeHardRejectProbabilityRound1;
-  final double tradeHardRejectProbabilityRound2;
-  final double tradeHardRejectProbabilityRound3;
   final int tradeMaxCounters;
   final double tradeOfferTarget;
   final double tradeOfferMinimum;
@@ -701,24 +689,19 @@ class AiBalance {
   final int tradeFirstRoundLimit;
   final int tradeFirstRoundWindowYears;
   final double tradeDeadlineAppetiteMultiplier;
-  final double tradeDeadlinePickBump;
   final double tradeDumpBurdenMaxNegative;
   final double tradeDumpAnchorMaxNegative;
   final double tradeDumpToxicMaxNegative;
   final double tradeRebuildR1ContractProbability;
   final double tradeRebuildR2ContractProbability;
   final double tradeRetoolR2ContractProbability;
-  final double tradeVeteranSaleProbability;
   final double tradeNtcPlanningMinConsent;
-  final double tradeNtcPlanningFallbackConsent;
-  final int tradeSuperteamStarOverall;
 
   final double pOfferToUserRegular;
   final double pOfferToUserOffseason;
   final double pOfferToUserDeadline;
   final int userOfferCooldownWeeks;
 
-  final int aiTradePairsPerWeek;
   final double aiTradeMutualMin;
   final int aiTradeSeasonLimit;
 
@@ -728,7 +711,6 @@ class AiBalance {
   final double draftTradeUpSurplusPct;
   final double scoutCoverageUsage;
   final double scoutMockRankShare;
-  final double scoutNeedShare;
   final int scoutKnownNoiseRank;
   final int scoutNoScoutNoiseRank;
   final double draftR1SigningProbability;
@@ -761,8 +743,6 @@ class AiBalance {
   /// Shared maximum for every AI offer/extension at seniorContractAge or above.
   final int faAge33MaxYears;
 
-  /// Task 37 roster-safety and injury-response policy.
-  final int rosterEmergencyOfferScore;
   final int rosterEmergencyOfferYears;
   final double pRosterMajorInjury;
   final double pRosterMajorGk;
@@ -777,9 +757,6 @@ class AiBalance {
   final double rfaMatchCostMultiplier;
   final double rfaCostScale;
 
-  /// The documentation specifies a 90–100% target range.
-  final double staffCapUsageTargetMin;
-  final double staffCapUsageTargetMax;
   final int staffHeadCoachMaxSalary;
   final int staffPriorityRoleMinSalary;
   final int staffPriorityRoleMaxSalary;
@@ -798,9 +775,6 @@ class AiBalance {
   final double pMatchOfferSheetTop11;
   final int contractDragAnchor;
   final int contractDragToxic;
-  final double dumpMaxNegativeSurplus;
-  final double pRebuildAbsorbsContract;
-  final int ntcMinConsentToPursue;
   final int superteamBrakeThreshold;
 
   final List<AiRosterGroupDefinition> rosterGroups;

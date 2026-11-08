@@ -206,6 +206,8 @@ void main() {
         contains('12/28'),
       );
       expect(text.msg_trade_hardRejected_body(17), contains('17'));
+      expect(text.draft_injuryProneShort(4, 12), contains('4/12'));
+      expect(text.draft_determinationShort(4, 12), contains('4/12'));
     });
   }
 
@@ -283,6 +285,7 @@ void main() {
       const balance = BalanceConfig(
         contracts: ContractNegBalance(playerMinYears: 2, playerMaxYears: 3),
         staff: StaffBalance(minContractYears: 2, maxContractYears: 3),
+        ui: UiBalance(freeAgencyOvrOptions: [0, 65, 85]),
       );
       final input = marketFormLeague();
       final screen = kind == 'fa'
@@ -308,6 +311,10 @@ void main() {
       await tester.enterText(years, '4');
       await tester.pumpAndSettle();
       if (kind == 'fa') {
+        final filter = tester.widget<DropdownButton<int>>(
+          find.byType(DropdownButton<int>),
+        );
+        expect(filter.items!.map((item) => item.value), [0, 65, 85]);
         final button = find.widgetWithText(
           FilledButton,
           l10n.freeAgency_submitOffer,

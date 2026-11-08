@@ -26,6 +26,7 @@ class LotteryService {
   static List<LotteryResult> computeResults(
     List<Standing> lotteryTeams, {
     Random? random,
+    BalanceConfig balance = BalanceConfig.defaults,
     int? saveSeed,
     int seasonYear = 0,
   }) {
@@ -34,14 +35,14 @@ class LotteryService {
         (saveSeed == null
             ? Random()
             : Random(seasonEventSeed(saveSeed, seasonYear, 'lottery')));
-    final weights = DraftBalance.lotteryWeights;
+    final weights = balance.draft.lotteryWeightTable;
     if (lotteryTeams.length < weights.length) return const [];
     final remaining = List<Standing>.from(lotteryTeams.take(weights.length));
     final remainingWeights = List<int>.from(weights);
     final results = <LotteryResult>[];
     final totalOdds = weights.fold<int>(0, (s, w) => s + w);
 
-    for (var pick = 1; pick <= 10; pick++) {
+    for (var pick = 1; pick <= weights.length; pick++) {
       final total = remainingWeights.fold<int>(0, (s, w) => s + w);
       var roll = rng.nextInt(total);
       var idx = 0;

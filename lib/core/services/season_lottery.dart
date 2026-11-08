@@ -38,6 +38,7 @@ mixin _SeasonLottery on _SeasonServiceShared {
     });
     return LotteryService.computeResults(
       all,
+      balance: balance,
       saveSeed: saveSeed,
       seasonYear: league.currentSeason.year,
     );
