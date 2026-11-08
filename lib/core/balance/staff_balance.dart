@@ -4,6 +4,12 @@ class StaffBalance {
   static const defaultRatingMin = 0.0;
   static const defaultRatingMax = 5.0;
   const StaffBalance({
+    this.missingHeadCoachShapeBoost = -5,
+    this.headCoachShapePerStar = 2,
+    this.headCoachShapeOffset = 1,
+    this.headCoachShapeMin = 0,
+    this.headCoachShapeMax = 9,
+
     this.minContractYears = 1,
     this.maxContractYears = 4,
     this.wantPerStar = 20.0,
@@ -47,6 +53,12 @@ class StaffBalance {
       60: 1.0,
     },
   });
+
+  final int missingHeadCoachShapeBoost;
+  final int headCoachShapePerStar;
+  final int headCoachShapeOffset;
+  final int headCoachShapeMin;
+  final int headCoachShapeMax;
 
   final int salaryCap;
   final int minContractYears;

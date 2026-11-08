@@ -23,7 +23,9 @@ _MatchContext _$MatchContextFromJson(Map<String, dynamic> json) =>
       homeMatchInWeek: (json['homeMatchInWeek'] as num?)?.toInt() ?? 1,
       awayMatchInWeek: (json['awayMatchInWeek'] as num?)?.toInt() ?? 1,
       seed: (json['seed'] as num?)?.toInt() ?? 0,
-      homeAdvantage: (json['homeAdvantage'] as num?)?.toDouble() ?? 0.05,
+      homeAdvantage:
+          (json['homeAdvantage'] as num?)?.toDouble() ??
+          MatchdayBalance.defaultHomeAdvantage,
     );
 
 Map<String, dynamic> _$MatchContextToJson(_MatchContext instance) =>

@@ -1,3 +1,4 @@
+import 'package:new_football/core/balance/matchday_balance.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/player.dart';
@@ -20,7 +21,7 @@ abstract class MatchContext with _$MatchContext {
     @Default(1) int homeMatchInWeek,
     @Default(1) int awayMatchInWeek,
     @Default(0) int seed,
-    @Default(0.05) double homeAdvantage,
+    @Default(MatchdayBalance.defaultHomeAdvantage) double homeAdvantage,
   }) = _MatchContext;
 
   factory MatchContext.fromJson(Map<String, dynamic> json) =>

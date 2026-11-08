@@ -155,18 +155,11 @@ const _legacyNumericFiles = <String>{
   'lib/core/services/season_service.dart',
   'lib/core/services/team_management_service.dart',
   'lib/core/services/trade_service.dart',
-  'lib/core/simulation/duel_resolver.dart',
-  'lib/core/simulation/match_context_factory.dart',
-  'lib/core/simulation/match_engine.dart',
   'lib/core/simulation/match_stats.dart',
-  'lib/core/simulation/sequence_chain_resolver.dart',
-  'lib/core/simulation/sequence_resolver.dart',
-  'lib/core/simulation/shot_resolver.dart',
-  'lib/core/simulation/team_shape.dart',
-  'lib/core/simulation/unit_ratings.dart',
 };
 
-const _trivialNumericValues = {'0', '1', '-1'};
+// Neutral elements and probability/unit identities, including double spelling.
+const _trivialNumericValues = {'0', '1', '-1', '0.0', '1.0', '-1.0'};
 
 Iterable<File> _dartFiles(Directory directory) sync* {
   if (!directory.existsSync()) return;

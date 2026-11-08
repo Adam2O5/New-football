@@ -1,3 +1,5 @@
+export 'package:new_football/core/models/enums.dart' show EffectiveAttribute;
+
 import 'package:new_football/core/tactics/position_role_fit.dart';
 import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/enums.dart';
@@ -8,16 +10,6 @@ import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/staff.dart';
 import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/services/team_management_service.dart';
-
-/// The six outfield attributes consumed by the Task 16 unit ratings.
-enum EffectiveAttribute {
-  pace,
-  shooting,
-  passing,
-  dribbling,
-  defending,
-  physicality,
-}
 
 /// Multipliers used for one player's effective match profile.
 class EffectiveAttributeMultipliers {
@@ -120,6 +112,7 @@ class EffectiveAttributeCalculator {
   }) {
     final lineupList = lineup.toList(growable: false);
     final positionMult = positionMultiplier(
+      balance: balance,
       player,
       assignedPosition: assignedPosition,
     );
@@ -252,6 +245,7 @@ class EffectiveAttributeCalculator {
     required Position? assignedPosition,
   }) {
     final positionMult = positionMultiplier(
+      balance: balance,
       player,
       assignedPosition: assignedPosition,
     );
@@ -327,11 +321,16 @@ class EffectiveAttributeCalculator {
   static double positionMultiplier(
     Player player, {
     Position? assignedPosition,
+    BalanceConfig balance = BalanceConfig.defaults,
   }) {
     if (assignedPosition != null) {
-      return player.position == assignedPosition ? 1.0 : 0.90;
+      return player.position == assignedPosition
+          ? 1.0
+          : balance.matchday.roleMismatchMultiplier;
     }
-    return positionFitsRole(player.position, player.state.role) ? 1.0 : 0.90;
+    return positionFitsRole(player.position, player.state.role)
+        ? 1.0
+        : balance.matchday.roleMismatchMultiplier;
   }
 
   /// Role fit is independent from natural-position fit and chemistry cohesion.
@@ -354,12 +353,14 @@ class EffectiveAttributeCalculator {
 
   /// Ambitious players receive the documented clutch addition later in Task 18.
   double clutchBonus(Player player) =>
-      player.personality == PlayerPersonality.ambitious ? 0.03 : 0.0;
+      player.personality == PlayerPersonality.ambitious
+      ? balance.matchday.ambitiousClutchMultiplier
+      : 0.0;
 
   /// Loyal players absorb only 80% of adverse team momentum.
   double momentumForPlayer(Player player, double teamMomentum) {
     if (teamMomentum < 0 && player.personality == PlayerPersonality.loyal) {
-      return teamMomentum * 0.80;
+      return teamMomentum * balance.matchday.loyalAdverseMomentumMultiplier;
     }
     return teamMomentum;
   }
@@ -382,10 +383,12 @@ class EffectiveAttributeCalculator {
         ? balance.matchday.crowdHomeMultiplier(context.crowdIntensity)
         : balance.matchday.crowdAwayMultiplier(context.crowdIntensity);
     final matchLoad =
-        (isHome ? context.homeMatchInWeek : context.awayMatchInWeek) >= 3
-        ? 0.96
-        : (isHome ? context.homeMatchInWeek : context.awayMatchInWeek) == 2
-        ? 0.98
+        (isHome ? context.homeMatchInWeek : context.awayMatchInWeek) >=
+            balance.matchday.weeklyThirdMatchThreshold
+        ? balance.matchday.weeklyThirdMatchMultiplier
+        : (isHome ? context.homeMatchInWeek : context.awayMatchInWeek) ==
+              balance.matchday.weeklySecondMatchThreshold
+        ? balance.matchday.weeklySecondMatchMultiplier
         : 1.0;
     return weather * crowd * matchLoad;
   }

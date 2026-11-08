@@ -503,7 +503,9 @@ class SimulationLiveMatch {
     final penalty = _remainingPenaltyMinutes(expiresAtMinute) > 0
         ? balance.matchday.cohesionTacticsPenalty / 100.0
         : 0.0;
-    return (baseMultiplier - penalty).clamp(0.0, 2.0).toDouble();
+    return (baseMultiplier - penalty)
+        .clamp(0.0, balance.matchday.cohesionMultiplierMax)
+        .toDouble();
   }
 
   double _runtimeCohesionBaseMultiplier(bool homeSide) {
@@ -513,7 +515,7 @@ class SimulationLiveMatch {
           score.clamp(0.0, 100.0),
           headCoach: homeSide ? runtime.homeHeadCoach : runtime.awayHeadCoach,
         )
-        .clamp(0.0, 2.0)
+        .clamp(0.0, balance.matchday.cohesionMultiplierMax)
         .toDouble();
   }
 
@@ -584,7 +586,7 @@ class SimulationLiveMatch {
     awaySequences: _awaySequences,
     totalSequences: totalSequences,
     homePossessionPercent: minuteTraces.isEmpty
-        ? 50.0
+        ? balance.matchday.defaultPossessionPercent
         : _homePossessionSum / minuteTraces.length * 100.0,
     homeShots: _homeShots,
     awayShots: _awayShots,
@@ -688,13 +690,15 @@ class SimulationMatchEngine {
   SimulationLiveMatch start({
     required Team home,
     required Team away,
-    MatchContext context = const MatchContext(),
+    MatchContext? context,
     int rngSeed = 0,
     Map<String, Position> homeAssignedPositions = const {},
     Map<String, Position> awayAssignedPositions = const {},
   }) {
-    final seed = context.seed == 0 ? rngSeed : context.seed;
-    final seededContext = context.copyWith(seed: seed);
+    final resolvedContext =
+        context ?? MatchContext(homeAdvantage: balance.matchday.homeAdvantage);
+    final seed = resolvedContext.seed == 0 ? rngSeed : resolvedContext.seed;
+    final seededContext = resolvedContext.copyWith(seed: seed);
     final live = MatchBootstrap(balance: balance).start(
       home: home,
       away: away,
@@ -1029,7 +1033,9 @@ class SimulationMatchEngine {
     }
 
     final changed = current != tactics;
-    if (changed && !halftime && live.state.minute >= 65) {
+    if (changed &&
+        !halftime &&
+        live.state.minute >= balance.matchday.scoreReactionMinute) {
       if (homeSide) {
         live._homeManualTacticsAfter65 = true;
       } else {
@@ -1177,7 +1183,7 @@ class SimulationMatchEngine {
         attackingHome: attackingHome,
         minute: eventMinute,
       );
-    } else if (shot.xg > 0.4) {
+    } else if (shot.xg > balance.matchday.bigChanceXgThreshold) {
       state = _applyMomentumDelta(
         live,
         state,
@@ -1411,7 +1417,7 @@ class SimulationMatchEngine {
               attackingHome: true,
               minute: nextMinute,
             );
-          } else if (shot.xg > 0.4) {
+          } else if (shot.xg > balance.matchday.bigChanceXgThreshold) {
             state = _applyMomentumDelta(
               live,
               state,
@@ -1457,7 +1463,7 @@ class SimulationMatchEngine {
               attackingHome: false,
               minute: nextMinute,
             );
-          } else if (shot.xg > 0.4) {
+          } else if (shot.xg > balance.matchday.bigChanceXgThreshold) {
             state = _applyMomentumDelta(
               live,
               state,
@@ -2034,7 +2040,7 @@ class SimulationMatchEngine {
   SimulationResult simulateFull({
     required Team home,
     required Team away,
-    MatchContext context = const MatchContext(),
+    MatchContext? context,
     int rngSeed = 0,
     bool includeStoppageTime = false,
     bool collectTraces = true,
@@ -2063,7 +2069,7 @@ class SimulationMatchEngine {
   MatchResult simulateFullMatch({
     required Team home,
     required Team away,
-    MatchContext context = const MatchContext(),
+    MatchContext? context,
     int rngSeed = 0,
     bool includeStoppageTime = false,
   }) {
@@ -2094,7 +2100,10 @@ class SimulationMatchEngine {
       goals: live.state.homeGoals + live.state.awayGoals,
     );
     live._firstHalfStoppageTime =
-        (value ~/ balance.matchday.firstHalfStoppageDivisor).clamp(0, 8);
+        (value ~/ balance.matchday.firstHalfStoppageDivisor).clamp(
+          0,
+          balance.matchday.firstHalfStoppageMax,
+        );
     live._firstHalfEndMinute = 45 + live._firstHalfStoppageTime!;
   }
 
@@ -2225,10 +2234,16 @@ class SimulationMatchEngine {
       balance.matchday,
     );
     return UnitRatings(
-      defRating: (ratings.defRating + score.defenseDelta).clamp(0.0, 200.0),
+      defRating: (ratings.defRating + score.defenseDelta).clamp(
+        balance.matchday.unitRatingMin,
+        balance.matchday.unitRatingMax,
+      ),
       midRating: ratings.midRating,
       atkRating: ((ratings.atkRating + score.attackDelta) * momentumMultiplier)
-          .clamp(0.0, 200.0),
+          .clamp(
+            balance.matchday.unitRatingMin,
+            balance.matchday.unitRatingMax,
+          ),
       defensivePlayerIds: ratings.defensivePlayerIds,
       midfieldPlayerIds: ratings.midfieldPlayerIds,
       attackingPlayerIds: ratings.attackingPlayerIds,
@@ -2309,7 +2324,10 @@ class SimulationMatchEngine {
     return (baseProbability +
             settingDelta(homeTactics) -
             settingDelta(awayTactics))
-        .clamp(0.02, 0.98)
+        .clamp(
+          balance.matchday.possessionProbabilityMin,
+          balance.matchday.possessionProbabilityMax,
+        )
         .toDouble();
   }
 
@@ -2348,15 +2366,17 @@ class SimulationMatchEngine {
 
   double _decayMomentum(double momentum) {
     final decayed = momentum * balance.matchday.momentumDecay;
-    if (decayed.abs() < 0.01) return 0.0;
-    return decayed.clamp(-100.0, 100.0).toDouble();
+    if (decayed.abs() < balance.matchday.momentumCutoff) return 0.0;
+    return decayed
+        .clamp(balance.matchday.momentumMin, balance.matchday.momentumMax)
+        .toDouble();
   }
 
   double _staminaContextMultiplier(MatchContext context) {
     // PlayerBalance already contains the historical heat ×1.15 multiplier;
     // divide it out before applying the complete Task 21 weather table.
     final historicalHeatMultiplier = context.weather == Weather.heat
-        ? 1.15
+        ? balance.player.heatStaminaMultiplier
         : 1.0;
     final weatherMultiplier =
         balance.matchday.weatherStaminaMultiplier(context.weather) /
@@ -2377,7 +2397,9 @@ class SimulationMatchEngine {
     final signed =
         (homeSide ? amount.toDouble() : -amount.toDouble()) * derbyMultiplier;
     return state.copyWith(
-      momentum: (state.momentum + signed).clamp(-100.0, 100.0).toDouble(),
+      momentum: (state.momentum + signed)
+          .clamp(balance.matchday.momentumMin, balance.matchday.momentumMax)
+          .toDouble(),
     );
   }
 

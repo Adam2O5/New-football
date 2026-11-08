@@ -87,6 +87,145 @@ class FormationFamilyMatchup {
 /// Deliberately excludes formation layout / pitch coordinates.
 class TacticsBalance {
   const TacticsBalance({
+    this.roleShapeDeltas = const {
+      GkRole.standard: ShapeDelta.zero,
+      GkRole.sweeperKeeper: ShapeDelta(def: -1, mid: 2),
+      CbRole.standard: ShapeDelta.zero,
+      CbRole.ballPlayingDefender: ShapeDelta(def: -1, mid: 2),
+      CbRole.noNonsenseCentreBack: ShapeDelta(def: 3, mid: -3),
+      FullBackRole.standard: ShapeDelta.zero,
+      FullBackRole.defensiveFullBack: ShapeDelta(def: 3, mid: -1, atk: -2),
+      FullBackRole.attackingFullBack: ShapeDelta(def: -2, mid: 1, atk: 1),
+      WingBackRole.standard: ShapeDelta.zero,
+      WingBackRole.wingBack: ShapeDelta(def: -2, atk: 2),
+      WingBackRole.invertedWingBack: ShapeDelta(def: -1, mid: 2, atk: -1),
+      CdmRole.standard: ShapeDelta.zero,
+      CdmRole.regista: ShapeDelta(def: -1, mid: 2, atk: -1),
+      CdmRole.deepLyingPlaymaker: ShapeDelta(def: -1, mid: 3, atk: -1),
+      CdmRole.anchorMan: ShapeDelta(def: 4, mid: -1, atk: -3),
+      CmRole.standard: ShapeDelta(mid: 1),
+      CmRole.ballWinning: ShapeDelta(def: 2, atk: -1),
+      CmRole.playmaker: ShapeDelta(def: -1, mid: 3, atk: -1),
+      CmRole.boxToBox: ShapeDelta(def: 1, mid: -1, atk: 1),
+      CmRole.mezzala: ShapeDelta(def: -2, mid: 1, atk: 2),
+      CamRole.standard: ShapeDelta.zero,
+      CamRole.playmaker: ShapeDelta(def: -1, mid: 2, atk: -1),
+      CamRole.shadowStriker: ShapeDelta(def: -2, mid: -1, atk: 3),
+      WingerRole.standard: ShapeDelta.zero,
+      WingerRole.invertedWinger: ShapeDelta(mid: 1, atk: -1),
+      WingerRole.winger: ShapeDelta(mid: -1, atk: 1),
+      StrikerRole.standard: ShapeDelta.zero,
+      StrikerRole.falseNine: ShapeDelta(mid: 3, atk: -2),
+      StrikerRole.deepLyingForward: ShapeDelta(mid: -2, atk: 3),
+      StrikerRole.pressingForward: ShapeDelta(def: 2, atk: -1),
+      StrikerRole.completeForward: ShapeDelta(def: -1, mid: 1, atk: 1),
+    },
+    this.formationShapeMatchups = const [
+      (Formation.f4141, Formation.f343, ShapeDelta(def: -1, mid: 2, atk: 1)),
+      (Formation.f4141, Formation.f3421, ShapeDelta(def: -1, mid: 2)),
+      (Formation.f4231, Formation.f352, ShapeDelta(mid: 2, atk: 1)),
+      (Formation.f352, Formation.f4141, ShapeDelta(def: 1, mid: -2, atk: -1)),
+      (Formation.f451, Formation.f532, ShapeDelta(def: 1, mid: -1, atk: -2)),
+      (Formation.f424, Formation.f5212, ShapeDelta(def: 2, mid: -2, atk: -3)),
+      (
+        Formation.f442,
+        Formation.f41212Narrow,
+        ShapeDelta(def: -1, mid: 1, atk: 2),
+      ),
+      (Formation.f5212, Formation.f433, ShapeDelta(def: -1, mid: 1, atk: 2)),
+      (Formation.f532, Formation.f4231, ShapeDelta(def: -1, mid: 1, atk: 2)),
+    ],
+    this.familyShapeMatchups = const [
+      (
+        FormationFamily.threeBackWide,
+        FormationFamily.fourBackWideBalanced,
+        ShapeDelta(mid: 1, atk: 2),
+      ),
+      (
+        FormationFamily.threeBackWide,
+        FormationFamily.fourBackCentralControl,
+        ShapeDelta(def: -1, mid: 1, atk: 2),
+      ),
+      (
+        FormationFamily.threeBackWide,
+        FormationFamily.fourBackDirectTwoStriker,
+        ShapeDelta(def: 1, atk: -2),
+      ),
+      (
+        FormationFamily.threeBackWide,
+        FormationFamily.fiveBackBlock,
+        ShapeDelta(def: 2, mid: -2, atk: -3),
+      ),
+      (
+        FormationFamily.fourBackWideBalanced,
+        FormationFamily.fourBackCentralControl,
+        ShapeDelta(mid: 1, atk: 1),
+      ),
+      (
+        FormationFamily.fourBackWideBalanced,
+        FormationFamily.fourBackDirectTwoStriker,
+        ShapeDelta(mid: 1, atk: 1),
+      ),
+      (
+        FormationFamily.fourBackWideBalanced,
+        FormationFamily.fiveBackBlock,
+        ShapeDelta(def: 1, mid: -1, atk: -2),
+      ),
+      (
+        FormationFamily.fourBackCentralControl,
+        FormationFamily.fourBackDirectTwoStriker,
+        ShapeDelta(def: -1, mid: 2),
+      ),
+      (
+        FormationFamily.fourBackCentralControl,
+        FormationFamily.fiveBackBlock,
+        ShapeDelta(def: -1, mid: 2),
+      ),
+      (
+        FormationFamily.fourBackDirectTwoStriker,
+        FormationFamily.fiveBackBlock,
+        ShapeDelta(def: -2, atk: 2),
+      ),
+    ],
+    this.settingMatchupDeltas = const {
+      'deepVsFast': ShapeDelta(def: 1),
+      'deepVsSlow': ShapeDelta(def: -1),
+      'highVsSlow': ShapeDelta(mid: 1),
+      'highVsFast': ShapeDelta(def: -1, atk: -1),
+      'lowPressVsFast': ShapeDelta(mid: 1),
+      'lowPressVsGegenpress': ShapeDelta(def: 1, mid: 1),
+      'highPressVsSlow': ShapeDelta(mid: 1, atk: 1),
+      'gegenpressVsLowPress': ShapeDelta(mid: 1, atk: 1),
+      'gegenpressVsFast': ShapeDelta(mid: -1),
+      'wideVsNarrow': ShapeDelta(atk: 1),
+      'narrowVsWide': ShapeDelta(mid: 1),
+      'wideVsThreeBack': ShapeDelta(atk: 1),
+      'wideVsFiveBack': ShapeDelta(def: 1, atk: -1),
+      'narrowVs442': ShapeDelta(mid: 1),
+      'narrowVs433': ShapeDelta(mid: 1),
+      'narrowVsCentralControl': ShapeDelta(mid: -1),
+      'deepVsAttackingFormation': ShapeDelta(def: 1),
+      'highVsFiveBack': ShapeDelta(atk: -1),
+    },
+    this.roleSynergyDeltas = const {
+      'noNonsenseVsAttackingFormation': ShapeDelta(def: 1),
+      'defensiveFullBackVsWideRole': ShapeDelta(def: 1),
+      'anchorVsShadowOrComplete': ShapeDelta(def: 1),
+      'ballPlayingVsLowDeep': ShapeDelta(mid: 1),
+      'registaOrDeepPlaymakerVsHighHigh': ShapeDelta(mid: 1),
+      'playmakerVsNarrowMidfield': ShapeDelta(mid: 1),
+      'invertedWingBackVsNarrowFormation': ShapeDelta(mid: 1),
+      'shadowStrikerVsHighWide': ShapeDelta(atk: 1),
+      'invertedWingerVsWideRole': ShapeDelta(atk: 1),
+      'falseNineVsDeepNoNonsense': ShapeDelta(mid: 1),
+      'pressingForwardVsBallPlaying': ShapeDelta(atk: 1),
+      'completeForwardVsFiveBack': ShapeDelta(atk: 1),
+      'attackingFullBackVsFastWide': ShapeDelta(def: -1),
+      'sweeperKeeperVsFast': ShapeDelta(mid: -1),
+      'ballPlayingVsGegenpress': ShapeDelta(mid: -1),
+      'registaVsGegenpressHigh': ShapeDelta(mid: -1),
+    },
+
     this.matchupClamp = 0.15,
     this.formationBaseStats = _defaultFormationBaseStats,
     this.tempoDelta = _defaultTempoDelta,
@@ -97,6 +236,13 @@ class TacticsBalance {
     this.formationFamilyMatchups = _defaultFormationFamilyMatchups,
     this.formationMatchups = _defaultFormationMatchups,
   });
+
+  final Map<Enum, ShapeDelta> roleShapeDeltas;
+  final List<(Formation, Formation, ShapeDelta)> formationShapeMatchups;
+  final List<(FormationFamily, FormationFamily, ShapeDelta)>
+  familyShapeMatchups;
+  final Map<String, ShapeDelta> settingMatchupDeltas;
+  final Map<String, ShapeDelta> roleSynergyDeltas;
 
   /// Total counter bonus (formation + tactical counters) clamp: ±this value.
   final double matchupClamp;
@@ -515,4 +661,29 @@ class TacticsBalance {
       bonusForA: -0.03,
     ),
   ];
+}
+
+/// A tactical delta on the three TeamShape axes.
+class ShapeDelta {
+  const ShapeDelta({this.def = 0, this.mid = 0, this.atk = 0});
+
+  static const zero = ShapeDelta();
+
+  final double def;
+  final double mid;
+  final double atk;
+
+  ShapeDelta operator +(ShapeDelta other) => ShapeDelta(
+    def: def + other.def,
+    mid: mid + other.mid,
+    atk: atk + other.atk,
+  );
+
+  ShapeDelta operator -() => ShapeDelta(def: -def, mid: -mid, atk: -atk);
+
+  factory ShapeDelta.fromTactics(TacticsDelta delta) => ShapeDelta(
+    def: delta.def.toDouble(),
+    mid: delta.mid.toDouble(),
+    atk: delta.atk.toDouble(),
+  );
 }

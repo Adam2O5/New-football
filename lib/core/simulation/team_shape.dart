@@ -1,3 +1,5 @@
+export 'package:new_football/core/balance/tactics_balance.dart' show ShapeDelta;
+
 import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/assigned_role.dart';
 import 'package:new_football/core/models/enums.dart';
@@ -5,31 +7,6 @@ import 'package:new_football/core/models/player.dart';
 import 'package:new_football/core/models/staff.dart';
 import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/tactics/tactics_setup.dart';
-
-/// A tactical delta on the three TeamShape axes.
-class ShapeDelta {
-  const ShapeDelta({this.def = 0, this.mid = 0, this.atk = 0});
-
-  static const zero = ShapeDelta();
-
-  final double def;
-  final double mid;
-  final double atk;
-
-  ShapeDelta operator +(ShapeDelta other) => ShapeDelta(
-    def: def + other.def,
-    mid: mid + other.mid,
-    atk: atk + other.atk,
-  );
-
-  ShapeDelta operator -() => ShapeDelta(def: -def, mid: -mid, atk: -atk);
-
-  factory ShapeDelta.fromTactics(TacticsDelta delta) => ShapeDelta(
-    def: delta.def.toDouble(),
-    mid: delta.mid.toDouble(),
-    atk: delta.atk.toDouble(),
-  );
-}
 
 enum ShapeAxis { def, mid, atk }
 
@@ -116,9 +93,9 @@ class TeamShapeCalculator {
       opponentLineup,
     );
     final coachBoost = ShapeDelta(
-      def: headCoachTacticsBoost(headCoach).toDouble(),
-      mid: headCoachTacticsBoost(headCoach).toDouble(),
-      atk: headCoachTacticsBoost(headCoach).toDouble(),
+      def: headCoachTacticsBoost(headCoach, balance.staff).toDouble(),
+      mid: headCoachTacticsBoost(headCoach, balance.staff).toDouble(),
+      atk: headCoachTacticsBoost(headCoach, balance.staff).toDouble(),
     );
     final total =
         settings +
@@ -149,74 +126,32 @@ class TeamShapeCalculator {
   );
 
   /// Staff Tactics ★ → the documented boost shared by def/mid/atk.
-  static int headCoachTacticsBoost(StaffMember? headCoach) {
-    if (headCoach == null || headCoach.attributes.tactics <= 0) return -5;
-    return ((headCoach.attributes.tactics * 2) - 1).round().clamp(0, 9);
+  static int headCoachTacticsBoost(
+    StaffMember? headCoach, [
+    StaffBalance balance = const StaffBalance(),
+  ]) {
+    if (headCoach == null || headCoach.attributes.tactics <= 0) {
+      return balance.missingHeadCoachShapeBoost;
+    }
+    return ((headCoach.attributes.tactics * balance.headCoachShapePerStar) -
+            balance.headCoachShapeOffset)
+        .round()
+        .clamp(balance.headCoachShapeMin, balance.headCoachShapeMax);
   }
 
-  ShapeDelta _roleDelta(AssignedRole role) => role.map(
-    gk: (r) => switch (r.role) {
-      GkRole.standard => ShapeDelta.zero,
-      GkRole.sweeperKeeper => const ShapeDelta(def: -1, mid: 2),
-    },
-    cb: (r) => switch (r.role) {
-      CbRole.standard => ShapeDelta.zero,
-      CbRole.ballPlayingDefender => const ShapeDelta(def: -1, mid: 2),
-      CbRole.noNonsenseCentreBack => const ShapeDelta(def: 3, mid: -3),
-    },
-    fullBack: (r) => switch (r.role) {
-      FullBackRole.standard => ShapeDelta.zero,
-      FullBackRole.defensiveFullBack => const ShapeDelta(
-        def: 3,
-        mid: -1,
-        atk: -2,
-      ),
-      FullBackRole.attackingFullBack => const ShapeDelta(
-        def: -2,
-        mid: 1,
-        atk: 1,
-      ),
-    },
-    wingBack: (r) => switch (r.role) {
-      WingBackRole.standard => ShapeDelta.zero,
-      WingBackRole.wingBack => const ShapeDelta(def: -2, atk: 2),
-      WingBackRole.invertedWingBack => const ShapeDelta(
-        def: -1,
-        mid: 2,
-        atk: -1,
-      ),
-    },
-    cdm: (r) => switch (r.role) {
-      CdmRole.standard => ShapeDelta.zero,
-      CdmRole.regista => const ShapeDelta(def: -1, mid: 2, atk: -1),
-      CdmRole.deepLyingPlaymaker => const ShapeDelta(def: -1, mid: 3, atk: -1),
-      CdmRole.anchorMan => const ShapeDelta(def: 4, mid: -1, atk: -3),
-    },
-    cm: (r) => switch (r.role) {
-      CmRole.standard => const ShapeDelta(mid: 1),
-      CmRole.ballWinning => const ShapeDelta(def: 2, atk: -1),
-      CmRole.playmaker => const ShapeDelta(def: -1, mid: 3, atk: -1),
-      CmRole.boxToBox => const ShapeDelta(def: 1, mid: -1, atk: 1),
-      CmRole.mezzala => const ShapeDelta(def: -2, mid: 1, atk: 2),
-    },
-    cam: (r) => switch (r.role) {
-      CamRole.standard => ShapeDelta.zero,
-      CamRole.playmaker => const ShapeDelta(def: -1, mid: 2, atk: -1),
-      CamRole.shadowStriker => const ShapeDelta(def: -2, mid: -1, atk: 3),
-    },
-    winger: (r) => switch (r.role) {
-      WingerRole.standard => ShapeDelta.zero,
-      WingerRole.invertedWinger => const ShapeDelta(mid: 1, atk: -1),
-      WingerRole.winger => const ShapeDelta(mid: -1, atk: 1),
-    },
-    striker: (r) => switch (r.role) {
-      StrikerRole.standard => ShapeDelta.zero,
-      StrikerRole.falseNine => const ShapeDelta(mid: 3, atk: -2),
-      StrikerRole.deepLyingForward => const ShapeDelta(mid: -2, atk: 3),
-      StrikerRole.pressingForward => const ShapeDelta(def: 2, atk: -1),
-      StrikerRole.completeForward => const ShapeDelta(def: -1, mid: 1, atk: 1),
-    },
-  );
+  ShapeDelta _roleDelta(AssignedRole role) =>
+      balance.tactics.roleShapeDeltas[role.map<Enum>(
+        gk: (r) => r.role,
+        cb: (r) => r.role,
+        fullBack: (r) => r.role,
+        wingBack: (r) => r.role,
+        cdm: (r) => r.role,
+        cm: (r) => r.role,
+        cam: (r) => r.role,
+        winger: (r) => r.role,
+        striker: (r) => r.role,
+      )] ??
+      ShapeDelta.zero;
 
   ShapeDelta _formationMatchupDelta(Formation ours, Formation opponent) {
     final direct = _directFormationDelta(ours, opponent);
@@ -230,45 +165,7 @@ class TeamShapeCalculator {
   }
 
   ShapeDelta? _directFormationDelta(Formation ours, Formation opponent) {
-    final direct = <(Formation, Formation, ShapeDelta)>[
-      (
-        Formation.f4141,
-        Formation.f343,
-        const ShapeDelta(def: -1, mid: 2, atk: 1),
-      ),
-      (Formation.f4141, Formation.f3421, const ShapeDelta(def: -1, mid: 2)),
-      (Formation.f4231, Formation.f352, const ShapeDelta(mid: 2, atk: 1)),
-      (
-        Formation.f352,
-        Formation.f4141,
-        const ShapeDelta(def: 1, mid: -2, atk: -1),
-      ),
-      (
-        Formation.f451,
-        Formation.f532,
-        const ShapeDelta(def: 1, mid: -1, atk: -2),
-      ),
-      (
-        Formation.f424,
-        Formation.f5212,
-        const ShapeDelta(def: 2, mid: -2, atk: -3),
-      ),
-      (
-        Formation.f442,
-        Formation.f41212Narrow,
-        const ShapeDelta(def: -1, mid: 1, atk: 2),
-      ),
-      (
-        Formation.f5212,
-        Formation.f433,
-        const ShapeDelta(def: -1, mid: 1, atk: 2),
-      ),
-      (
-        Formation.f532,
-        Formation.f4231,
-        const ShapeDelta(def: -1, mid: 1, atk: 2),
-      ),
-    ];
+    final direct = balance.tactics.formationShapeMatchups;
     for (final entry in direct) {
       if (entry.$1 == ours && entry.$2 == opponent) return entry.$3;
       if (entry.$1 == opponent && entry.$2 == ours) return -entry.$3;
@@ -277,58 +174,7 @@ class TeamShapeCalculator {
   }
 
   ShapeDelta? _familyDelta(FormationFamily ours, FormationFamily opponent) {
-    final direct = <(FormationFamily, FormationFamily, ShapeDelta)>[
-      (
-        FormationFamily.threeBackWide,
-        FormationFamily.fourBackWideBalanced,
-        const ShapeDelta(mid: 1, atk: 2),
-      ),
-      (
-        FormationFamily.threeBackWide,
-        FormationFamily.fourBackCentralControl,
-        const ShapeDelta(def: -1, mid: 1, atk: 2),
-      ),
-      (
-        FormationFamily.threeBackWide,
-        FormationFamily.fourBackDirectTwoStriker,
-        const ShapeDelta(def: 1, atk: -2),
-      ),
-      (
-        FormationFamily.threeBackWide,
-        FormationFamily.fiveBackBlock,
-        const ShapeDelta(def: 2, mid: -2, atk: -3),
-      ),
-      (
-        FormationFamily.fourBackWideBalanced,
-        FormationFamily.fourBackCentralControl,
-        const ShapeDelta(mid: 1, atk: 1),
-      ),
-      (
-        FormationFamily.fourBackWideBalanced,
-        FormationFamily.fourBackDirectTwoStriker,
-        const ShapeDelta(mid: 1, atk: 1),
-      ),
-      (
-        FormationFamily.fourBackWideBalanced,
-        FormationFamily.fiveBackBlock,
-        const ShapeDelta(def: 1, mid: -1, atk: -2),
-      ),
-      (
-        FormationFamily.fourBackCentralControl,
-        FormationFamily.fourBackDirectTwoStriker,
-        const ShapeDelta(def: -1, mid: 2),
-      ),
-      (
-        FormationFamily.fourBackCentralControl,
-        FormationFamily.fiveBackBlock,
-        const ShapeDelta(def: -1, mid: 2),
-      ),
-      (
-        FormationFamily.fourBackDirectTwoStriker,
-        FormationFamily.fiveBackBlock,
-        const ShapeDelta(def: -2, atk: 2),
-      ),
-    ];
+    final direct = balance.tactics.familyShapeMatchups;
     for (final entry in direct) {
       if (entry.$1 == ours && entry.$2 == opponent) return entry.$3;
       if (entry.$1 == opponent && entry.$2 == ours) return -entry.$3;
@@ -341,83 +187,115 @@ class TeamShapeCalculator {
 
     if (ours.defensiveLine == DefensiveLine.deep &&
         opponent.tempo == Tempo.fast) {
-      result += const ShapeDelta(def: 1);
+      result +=
+          balance.tactics.settingMatchupDeltas['deepVsFast'] ?? ShapeDelta.zero;
     }
     if (ours.defensiveLine == DefensiveLine.deep &&
         opponent.tempo == Tempo.slow) {
-      result += const ShapeDelta(def: -1);
+      result +=
+          balance.tactics.settingMatchupDeltas['deepVsSlow'] ?? ShapeDelta.zero;
     }
     if (ours.defensiveLine == DefensiveLine.high &&
         opponent.tempo == Tempo.slow) {
-      result += const ShapeDelta(mid: 1);
+      result +=
+          balance.tactics.settingMatchupDeltas['highVsSlow'] ?? ShapeDelta.zero;
     }
     if (ours.defensiveLine == DefensiveLine.high &&
         opponent.tempo == Tempo.fast) {
-      result += const ShapeDelta(def: -1, atk: -1);
+      result +=
+          balance.tactics.settingMatchupDeltas['highVsFast'] ?? ShapeDelta.zero;
     }
 
     if (ours.pressing == PressingIntensity.low &&
         opponent.tempo == Tempo.fast) {
-      result += const ShapeDelta(mid: 1);
+      result +=
+          balance.tactics.settingMatchupDeltas['lowPressVsFast'] ??
+          ShapeDelta.zero;
     }
     if (ours.pressing == PressingIntensity.low &&
         opponent.pressing == PressingIntensity.gegenpressing) {
-      result += const ShapeDelta(def: 1, mid: 1);
+      result +=
+          balance.tactics.settingMatchupDeltas['lowPressVsGegenpress'] ??
+          ShapeDelta.zero;
     }
     if (ours.pressing == PressingIntensity.high &&
         opponent.tempo == Tempo.slow) {
-      result += const ShapeDelta(mid: 1, atk: 1);
+      result +=
+          balance.tactics.settingMatchupDeltas['highPressVsSlow'] ??
+          ShapeDelta.zero;
     }
     if (ours.pressing == PressingIntensity.gegenpressing &&
         opponent.pressing == PressingIntensity.low) {
-      result += const ShapeDelta(mid: 1, atk: 1);
+      result +=
+          balance.tactics.settingMatchupDeltas['gegenpressVsLowPress'] ??
+          ShapeDelta.zero;
     }
     if (ours.pressing == PressingIntensity.gegenpressing &&
         opponent.tempo == Tempo.fast) {
-      result += const ShapeDelta(mid: -1);
+      result +=
+          balance.tactics.settingMatchupDeltas['gegenpressVsFast'] ??
+          ShapeDelta.zero;
     }
 
     if (ours.attackWidth == AttackWidth.wide &&
         opponent.attackWidth == AttackWidth.narrow) {
-      result += const ShapeDelta(atk: 1);
+      result +=
+          balance.tactics.settingMatchupDeltas['wideVsNarrow'] ??
+          ShapeDelta.zero;
     }
     if (ours.attackWidth == AttackWidth.narrow &&
         opponent.attackWidth == AttackWidth.wide) {
-      result += const ShapeDelta(mid: 1);
+      result +=
+          balance.tactics.settingMatchupDeltas['narrowVsWide'] ??
+          ShapeDelta.zero;
     }
     if (ours.attackWidth == AttackWidth.wide &&
         balance.tactics.familyFor(opponent.formation) ==
             FormationFamily.threeBackWide) {
-      result += const ShapeDelta(atk: 1);
+      result +=
+          balance.tactics.settingMatchupDeltas['wideVsThreeBack'] ??
+          ShapeDelta.zero;
     }
     if (ours.attackWidth == AttackWidth.wide &&
         balance.tactics.familyFor(opponent.formation) ==
             FormationFamily.fiveBackBlock) {
-      result += const ShapeDelta(def: 1, atk: -1);
+      result +=
+          balance.tactics.settingMatchupDeltas['wideVsFiveBack'] ??
+          ShapeDelta.zero;
     }
     if (ours.attackWidth == AttackWidth.narrow &&
         opponent.formation == Formation.f442) {
-      result += const ShapeDelta(mid: 1);
+      result +=
+          balance.tactics.settingMatchupDeltas['narrowVs442'] ??
+          ShapeDelta.zero;
     }
     if (ours.attackWidth == AttackWidth.narrow &&
         opponent.formation == Formation.f433) {
-      result += const ShapeDelta(mid: 1);
+      result +=
+          balance.tactics.settingMatchupDeltas['narrowVs433'] ??
+          ShapeDelta.zero;
     }
     if (ours.attackWidth == AttackWidth.narrow &&
         balance.tactics.familyFor(opponent.formation) ==
             FormationFamily.fourBackCentralControl) {
-      result += const ShapeDelta(mid: -1);
+      result +=
+          balance.tactics.settingMatchupDeltas['narrowVsCentralControl'] ??
+          ShapeDelta.zero;
     }
 
     if (ours.defensiveLine == DefensiveLine.deep &&
         (opponent.formation == Formation.f424 ||
             opponent.formation == Formation.f343)) {
-      result += const ShapeDelta(def: 1);
+      result +=
+          balance.tactics.settingMatchupDeltas['deepVsAttackingFormation'] ??
+          ShapeDelta.zero;
     }
     if (ours.defensiveLine == DefensiveLine.high &&
         balance.tactics.familyFor(opponent.formation) ==
             FormationFamily.fiveBackBlock) {
-      result += const ShapeDelta(atk: -1);
+      result +=
+          balance.tactics.settingMatchupDeltas['highVsFiveBack'] ??
+          ShapeDelta.zero;
     }
 
     return result;
@@ -435,74 +313,112 @@ class TeamShapeCalculator {
       if (_isNoNonsense(role) &&
           (opponentTactics.formation == Formation.f424 ||
               opponentTactics.formation == Formation.f343)) {
-        result += const ShapeDelta(def: 1);
+        result +=
+            balance
+                .tactics
+                .roleSynergyDeltas['noNonsenseVsAttackingFormation'] ??
+            ShapeDelta.zero;
       }
       if (_isDefensiveFullBack(role) &&
           opponentTactics.attackWidth == AttackWidth.wide &&
           _hasAttackingWideRole(opponentLineup)) {
-        result += const ShapeDelta(def: 1);
+        result +=
+            balance.tactics.roleSynergyDeltas['defensiveFullBackVsWideRole'] ??
+            ShapeDelta.zero;
       }
       if (_isAnchor(role) && _hasShadowOrCompleteForward(opponentLineup)) {
-        result += const ShapeDelta(def: 1);
+        result +=
+            balance.tactics.roleSynergyDeltas['anchorVsShadowOrComplete'] ??
+            ShapeDelta.zero;
       }
       if (_isBallPlayingDefender(role) &&
           opponentTactics.pressing == PressingIntensity.low &&
           opponentTactics.defensiveLine == DefensiveLine.deep) {
-        result += const ShapeDelta(mid: 1);
+        result +=
+            balance.tactics.roleSynergyDeltas['ballPlayingVsLowDeep'] ??
+            ShapeDelta.zero;
       }
       if (_isRegistaOrDeepPlaymaker(role) &&
           opponentTactics.pressing == PressingIntensity.high &&
           opponentTactics.defensiveLine == DefensiveLine.high) {
-        result += const ShapeDelta(mid: 1);
+        result +=
+            balance
+                .tactics
+                .roleSynergyDeltas['registaOrDeepPlaymakerVsHighHigh'] ??
+            ShapeDelta.zero;
       }
       if (_isPlaymaker(role) &&
           opponentTactics.attackWidth == AttackWidth.narrow &&
           (opponentTactics.formation == Formation.f451 ||
               opponentTactics.formation == Formation.f4141)) {
-        result += const ShapeDelta(mid: 1);
+        result +=
+            balance.tactics.roleSynergyDeltas['playmakerVsNarrowMidfield'] ??
+            ShapeDelta.zero;
       }
       if (_isInvertedWingBack(role) &&
           (opponentTactics.formation == Formation.f41212Narrow ||
               opponentTactics.formation == Formation.f4312)) {
-        result += const ShapeDelta(mid: 1);
+        result +=
+            balance
+                .tactics
+                .roleSynergyDeltas['invertedWingBackVsNarrowFormation'] ??
+            ShapeDelta.zero;
       }
       if (_isShadowStriker(role) &&
           opponentTactics.defensiveLine == DefensiveLine.high &&
           opponentTactics.attackWidth == AttackWidth.wide) {
-        result += const ShapeDelta(atk: 1);
+        result +=
+            balance.tactics.roleSynergyDeltas['shadowStrikerVsHighWide'] ??
+            ShapeDelta.zero;
       }
       if (_isInvertedWinger(role) && _hasAttackingWideRole(opponentLineup)) {
-        result += const ShapeDelta(atk: 1);
+        result +=
+            balance.tactics.roleSynergyDeltas['invertedWingerVsWideRole'] ??
+            ShapeDelta.zero;
       }
       if (_isFalseNine(role) &&
           opponentTactics.defensiveLine == DefensiveLine.deep &&
           _hasNoNonsenseDefender(opponentLineup)) {
-        result += const ShapeDelta(mid: 1);
+        result +=
+            balance.tactics.roleSynergyDeltas['falseNineVsDeepNoNonsense'] ??
+            ShapeDelta.zero;
       }
       if (_isPressingForward(role) && _hasBallPlayingDefender(opponentLineup)) {
-        result += const ShapeDelta(atk: 1);
+        result +=
+            balance.tactics.roleSynergyDeltas['pressingForwardVsBallPlaying'] ??
+            ShapeDelta.zero;
       }
       if (_isCompleteForward(role) &&
           balance.tactics.familyFor(opponentTactics.formation) ==
               FormationFamily.fiveBackBlock) {
-        result += const ShapeDelta(atk: 1);
+        result +=
+            balance.tactics.roleSynergyDeltas['completeForwardVsFiveBack'] ??
+            ShapeDelta.zero;
       }
       if (_isAttackingFullBack(role) &&
           opponentTactics.tempo == Tempo.fast &&
           opponentTactics.attackWidth == AttackWidth.wide) {
-        result += const ShapeDelta(def: -1);
+        result +=
+            balance.tactics.roleSynergyDeltas['attackingFullBackVsFastWide'] ??
+            ShapeDelta.zero;
       }
       if (_isSweeperKeeper(role) && opponentTactics.tempo == Tempo.fast) {
-        result += const ShapeDelta(mid: -1);
+        result +=
+            balance.tactics.roleSynergyDeltas['sweeperKeeperVsFast'] ??
+            ShapeDelta.zero;
       }
       if (_isBallPlayingDefender(role) &&
           opponentTactics.pressing == PressingIntensity.gegenpressing) {
-        result += const ShapeDelta(mid: -1);
+        result +=
+            balance.tactics.roleSynergyDeltas['ballPlayingVsGegenpress'] ??
+            ShapeDelta.zero;
       }
       if (_isRegista(role) &&
           opponentTactics.pressing == PressingIntensity.gegenpressing &&
           opponentTactics.defensiveLine == DefensiveLine.high) {
-        result += const ShapeDelta(mid: -1);
+        result +=
+            balance.tactics.roleSynergyDeltas['registaVsGegenpressHigh'] ??
+            ShapeDelta.zero;
       }
     }
     return result;

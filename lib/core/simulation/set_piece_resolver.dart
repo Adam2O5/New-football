@@ -8,7 +8,6 @@ import 'package:new_football/core/random/match_random.dart';
 import 'package:new_football/core/simulation/duel_resolver.dart';
 import 'package:new_football/core/simulation/effective_attributes.dart';
 import 'package:new_football/core/simulation/goalkeeper_resolver.dart';
-import 'package:new_football/core/simulation/sequence_resolver.dart';
 import 'package:new_football/core/simulation/shot_models.dart';
 import 'package:new_football/core/simulation/shot_resolver.dart';
 import 'package:new_football/core/tactics/tactics_setup.dart';
@@ -77,7 +76,8 @@ class SetPieceResolver {
     var qualityMultiplier = aerialMultiplier;
     if (type == SetPieceType.penalty && shooter != null) {
       final shooterRating =
-          (_shooting(shooter, attackingAttributes[shooter.id]) * 0.60) +
+          (_shooting(shooter, attackingAttributes[shooter.id]) *
+              balance.matchday.sfgPenaltyShootingWeight) +
           balance.matchday.clutchBonus(
             determination: shooter.hidden.determination,
             stake: context.stake,
@@ -194,10 +194,12 @@ class SetPieceResolver {
             .toList()
           ..sort((a, b) => b.compareTo(a));
     final defenseSample = <double>[
-      ...goalkeeperValues.take(1),
-      ...defenderValues.take(3),
+      ...goalkeeperValues.take(balance.matchday.sfgDefendingGoalkeepers),
+      ...defenderValues.take(balance.matchday.sfgDefendingOutfieldPlayers),
     ];
-    final attackMean = _mean(attackValues.take(4));
+    final attackMean = _mean(
+      attackValues.take(balance.matchday.sfgAttackingPlayers),
+    );
     final defenseMean = _mean(defenseSample);
     return (attackMean - defenseMean)
         .clamp(
@@ -209,7 +211,11 @@ class SetPieceResolver {
 
   double _mean(Iterable<double> values) {
     final list = values.toList(growable: false);
-    if (list.isEmpty) return balance.matchday.aerialFactor(180);
+    if (list.isEmpty) {
+      return balance.matchday.aerialFactor(
+        balance.matchday.fallbackAerialHeight,
+      );
+    }
     return list.reduce((a, b) => a + b) / list.length;
   }
 }

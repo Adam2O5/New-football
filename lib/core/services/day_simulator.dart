@@ -80,6 +80,7 @@ class DaySimulator
        contextFactory =
            contextFactory ??
            MatchContextFactory(
+             balance: balance,
              calendar: calendar ?? CalendarService(balance: balance),
            ),
        matchMessageEmitter =

@@ -1,3 +1,5 @@
+export 'package:new_football/core/models/enums.dart' show SequenceType;
+
 import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/models/player.dart';
@@ -6,18 +8,6 @@ import 'package:new_football/core/simulation/duel_resolver.dart';
 import 'package:new_football/core/simulation/effective_attributes.dart';
 import 'package:new_football/core/simulation/unit_ratings.dart';
 import 'package:new_football/core/tactics/tactics_setup.dart';
-
-/// The eight Task 17 possession-sequence families.
-enum SequenceType {
-  centralBuildUp,
-  wingPlay,
-  crossFromWide,
-  throughBall,
-  individualDribble,
-  counterAttack,
-  longBall,
-  setPiece,
-}
 
 class SequenceContext {
   const SequenceContext({
@@ -78,50 +68,45 @@ class SequenceSelector {
 
   final BalanceConfig balance;
 
-  static const _fallbackWeights = <SequenceType, double>{
-    SequenceType.centralBuildUp: 22,
-    SequenceType.wingPlay: 20,
-    SequenceType.crossFromWide: 12,
-    SequenceType.throughBall: 11,
-    SequenceType.individualDribble: 10,
-    SequenceType.counterAttack: 9,
-    SequenceType.longBall: 8,
-    SequenceType.setPiece: 8,
-  };
-
   Map<SequenceType, double> weightsFor(SequenceContext context) {
     final weights = <SequenceType, double>{
       for (final type in SequenceType.values)
         type:
             balance.matchday.sequenceTypeBaseWeights[type.name] ??
-            _fallbackWeights[type]!,
+            MatchdayBalance.defaultSequenceTypeBaseWeights[type.name]!,
     };
     final normalBonus = balance.matchday.sequenceConditionBonus;
     final strongBonus = balance.matchday.sequenceStrongConditionBonus;
-    final highMid = context.attackingRatings.midRating >= 70;
-    final highAttack = context.attackingRatings.atkRating >= 70;
+    final highMid =
+        context.attackingRatings.midRating >=
+        balance.matchday.sequenceHighUnitThreshold;
+    final highAttack =
+        context.attackingRatings.atkRating >=
+        balance.matchday.sequenceHighUnitThreshold;
     final highPace =
         _averageAttribute(
           context.attackingLineup,
           context.attackingEffectiveAttributes,
           EffectiveAttribute.pace,
         ) >=
-        75;
+        balance.matchday.sequenceHighAttributeThreshold;
     final highPassing =
         _averageAttribute(
           context.attackingLineup,
           context.attackingEffectiveAttributes,
           EffectiveAttribute.passing,
         ) >=
-        75;
+        balance.matchday.sequenceHighAttributeThreshold;
     final highDribbling =
         _averageAttribute(
           context.attackingLineup,
           context.attackingEffectiveAttributes,
           EffectiveAttribute.dribbling,
         ) >=
-        75;
-    final tallForward = _forwardHeight(context.attackingLineup) >= 185;
+        balance.matchday.sequenceHighAttributeThreshold;
+    final tallForward =
+        _forwardHeight(context.attackingLineup) >=
+        balance.matchday.sequenceTallForwardHeight;
 
     if (context.attackingTactics.attackWidth == AttackWidth.narrow) {
       weights[SequenceType.centralBuildUp] =
@@ -260,85 +245,11 @@ class SequenceSelector {
     });
   }
 
-  DuelAttributeWeights _attackerProfile(SequenceType type) => switch (type) {
-    SequenceType.centralBuildUp => const {
-      EffectiveAttribute.passing: 0.55,
-      EffectiveAttribute.dribbling: 0.30,
-      EffectiveAttribute.physicality: 0.15,
-    },
-    SequenceType.wingPlay => const {
-      EffectiveAttribute.pace: 0.40,
-      EffectiveAttribute.dribbling: 0.45,
-      EffectiveAttribute.physicality: 0.15,
-    },
-    SequenceType.crossFromWide => const {
-      EffectiveAttribute.passing: 0.80,
-      EffectiveAttribute.pace: 0.20,
-    },
-    SequenceType.throughBall => const {
-      EffectiveAttribute.passing: 0.85,
-      EffectiveAttribute.dribbling: 0.15,
-    },
-    SequenceType.individualDribble => const {
-      EffectiveAttribute.dribbling: 0.60,
-      EffectiveAttribute.pace: 0.25,
-      EffectiveAttribute.physicality: 0.15,
-    },
-    SequenceType.counterAttack => const {
-      EffectiveAttribute.pace: 0.55,
-      EffectiveAttribute.dribbling: 0.30,
-      EffectiveAttribute.passing: 0.15,
-    },
-    SequenceType.longBall => const {
-      EffectiveAttribute.passing: 0.55,
-      EffectiveAttribute.physicality: 0.25,
-      EffectiveAttribute.pace: 0.20,
-    },
-    SequenceType.setPiece => const {
-      EffectiveAttribute.passing: 0.50,
-      EffectiveAttribute.shooting: 0.35,
-      EffectiveAttribute.physicality: 0.15,
-    },
-  };
+  DuelAttributeWeights _attackerProfile(SequenceType type) =>
+      balance.matchday.sequenceAttackerProfiles[type]!;
 
-  DuelAttributeWeights _defenderProfile(SequenceType type) => switch (type) {
-    SequenceType.centralBuildUp => const {
-      EffectiveAttribute.defending: 0.55,
-      EffectiveAttribute.physicality: 0.30,
-      EffectiveAttribute.pace: 0.15,
-    },
-    SequenceType.wingPlay => const {
-      EffectiveAttribute.defending: 0.45,
-      EffectiveAttribute.pace: 0.40,
-      EffectiveAttribute.physicality: 0.15,
-    },
-    SequenceType.crossFromWide => const {
-      EffectiveAttribute.defending: 0.60,
-      EffectiveAttribute.pace: 0.40,
-    },
-    SequenceType.throughBall => const {
-      EffectiveAttribute.defending: 0.50,
-      EffectiveAttribute.physicality: 0.50,
-    },
-    SequenceType.individualDribble => const {
-      EffectiveAttribute.defending: 0.50,
-      EffectiveAttribute.pace: 0.30,
-      EffectiveAttribute.physicality: 0.20,
-    },
-    SequenceType.counterAttack => const {
-      EffectiveAttribute.pace: 0.55,
-      EffectiveAttribute.defending: 0.45,
-    },
-    SequenceType.longBall => const {
-      EffectiveAttribute.defending: 0.50,
-      EffectiveAttribute.physicality: 0.35,
-      EffectiveAttribute.pace: 0.15,
-    },
-    SequenceType.setPiece => const {
-      EffectiveAttribute.defending: 0.55,
-      EffectiveAttribute.physicality: 0.45,
-    },
-  };
+  DuelAttributeWeights _defenderProfile(SequenceType type) =>
+      balance.matchday.sequenceDefenderProfiles[type]!;
 
   double _attackerWeight(
     SequenceContext context,
@@ -346,43 +257,16 @@ class SequenceSelector {
     Player player,
   ) {
     final position = _positionFor(player, context.attackingAssignedPositions);
-    var weight = 1.0;
-    switch (type) {
-      case SequenceType.centralBuildUp:
-        if (position == Position.cm || position == Position.cam) weight += 2;
-        if (position == Position.cdm) weight += 1;
-      case SequenceType.wingPlay:
-      case SequenceType.crossFromWide:
-        if (position == Position.lw || position == Position.rw) weight += 3;
-        if (position == Position.lb ||
-            position == Position.rb ||
-            position == Position.lwb ||
-            position == Position.rwb) {
-          weight += 1.5;
-        }
-      case SequenceType.throughBall:
-        if (position == Position.cam || position == Position.cm) weight += 2;
-        if (position == Position.st) weight += 1;
-      case SequenceType.individualDribble:
-        if (position == Position.lw ||
-            position == Position.rw ||
-            position == Position.cam) {
-          weight += 3;
-        }
-      case SequenceType.counterAttack:
-        if (position == Position.st ||
-            position == Position.lw ||
-            position == Position.rw) {
-          weight += 3;
-        }
-      case SequenceType.longBall:
-        if (position == Position.st) weight += 3;
-        if (position == Position.lw || position == Position.rw) weight += 1;
-      case SequenceType.setPiece:
-        final attributes = context.attackingEffectiveAttributes[player.id];
-        if (attributes != null) {
-          weight += (attributes.passing + attributes.shooting) / 200.0;
-        }
+    var weight = balance.matchday.sequenceAttackerBaseWeight;
+    weight +=
+        balance.matchday.sequenceAttackerPositionBonuses[type]?[position] ?? 0;
+    if (type == SequenceType.setPiece) {
+      final attributes = context.attackingEffectiveAttributes[player.id];
+      if (attributes != null) {
+        weight +=
+            (attributes.passing + attributes.shooting) /
+            balance.matchday.sequenceSetPieceAttributeDivisor;
+      }
     }
     return weight;
   }
@@ -394,7 +278,6 @@ class SequenceSelector {
     Player attacker,
   ) {
     final position = _positionFor(defender, context.defendingAssignedPositions);
-    var weight = 1.0;
     final attackerPosition = _positionFor(
       attacker,
       context.attackingAssignedPositions,
@@ -404,49 +287,16 @@ class SequenceSelector {
     final rightAction =
         attackerPosition == Position.rw || attackerPosition == Position.rwb;
 
-    switch (type) {
-      case SequenceType.wingPlay:
-      case SequenceType.crossFromWide:
-        if ((leftAction &&
+    if ((type == SequenceType.wingPlay || type == SequenceType.crossFromWide) &&
+        ((leftAction &&
                 (position == Position.lb || position == Position.lwb)) ||
             (rightAction &&
-                (position == Position.rb || position == Position.rwb))) {
-          weight = 3.0;
-        } else if (position == Position.cb) {
-          weight = 1.5;
-        } else if (position == Position.cdm) {
-          weight = 0.8;
-        }
-      case SequenceType.centralBuildUp:
-        if (position == Position.cdm) weight = 2.5;
-        if (position == Position.cm) weight = 1.5;
-        if (position == Position.cb) weight = 1.8;
-      case SequenceType.throughBall:
-        if (position == Position.cb) weight = 2.5;
-        if (position == Position.cdm) weight = 1.5;
-      case SequenceType.individualDribble:
-        if (position == Position.lb ||
-            position == Position.rb ||
-            position == Position.lwb ||
-            position == Position.rwb) {
-          weight = 2.5;
-        }
-        if (position == Position.cb) weight = 1.8;
-      case SequenceType.counterAttack:
-        if (position == Position.cb) weight = 2.0;
-        if (position == Position.lb ||
-            position == Position.rb ||
-            position == Position.lwb ||
-            position == Position.rwb) {
-          weight = 1.5;
-        }
-      case SequenceType.longBall:
-        if (position == Position.cb) weight = 2.5;
-        if (position == Position.cdm) weight = 1.5;
-      case SequenceType.setPiece:
-        if (position == Position.cb) weight = 2.0;
-        if (position == Position.cdm) weight = 1.3;
+                (position == Position.rb || position == Position.rwb)))) {
+      return balance.matchday.sequenceMatchingFlankWeight;
     }
+    final weight =
+        balance.matchday.sequenceDefenderPositionWeights[type]?[position] ??
+        balance.matchday.sequenceDefenderBaseWeight;
     return weight;
   }
 
@@ -463,7 +313,7 @@ class SequenceSelector {
         if (player.position != Position.gk && attributes[player.id] != null)
           attributes[player.id]!.valueFor(attribute),
     ];
-    if (values.isEmpty) return 50;
+    if (values.isEmpty) return balance.matchday.sequenceFallbackAttribute;
     return values.reduce((a, b) => a + b) / values.length;
   }
 
@@ -475,7 +325,7 @@ class SequenceSelector {
           player.position == Position.rw,
     );
     final list = forwards.map((player) => player.heightCm).toList();
-    if (list.isEmpty) return 180;
+    if (list.isEmpty) return balance.matchday.fallbackAerialHeight.toDouble();
     return list.reduce((a, b) => a + b) / list.length;
   }
 }

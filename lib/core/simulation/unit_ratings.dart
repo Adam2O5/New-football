@@ -1,3 +1,5 @@
+export 'package:new_football/core/models/enums.dart' show UnitKind;
+
 import 'package:new_football/core/balance/balance_config.dart';
 import 'package:new_football/core/simulation/effective_attributes.dart';
 import 'package:new_football/core/simulation/team_shape.dart';
@@ -166,20 +168,22 @@ class UnitRatingCalculator {
       if (attributes == null) continue;
       final attributeRating = switch (kind) {
         UnitKind.def =>
-          attributes.defending * 0.45 +
-              attributes.physicality * 0.25 +
-              attributes.pace * 0.20 +
-              attributes.passing * 0.10,
+          attributes.defending * balance.matchday.unitDefDefendingWeight +
+              attributes.physicality *
+                  balance.matchday.unitDefPhysicalityWeight +
+              attributes.pace * balance.matchday.unitDefPaceWeight +
+              attributes.passing * balance.matchday.unitDefPassingWeight,
         UnitKind.mid =>
-          attributes.passing * 0.35 +
-              attributes.dribbling * 0.25 +
-              attributes.defending * 0.20 +
-              attributes.physicality * 0.20,
+          attributes.passing * balance.matchday.unitMidPassingWeight +
+              attributes.dribbling * balance.matchday.unitMidDribblingWeight +
+              attributes.defending * balance.matchday.unitMidDefendingWeight +
+              attributes.physicality *
+                  balance.matchday.unitMidPhysicalityWeight,
         UnitKind.atk =>
-          attributes.shooting * 0.35 +
-              attributes.pace * 0.25 +
-              attributes.dribbling * 0.25 +
-              attributes.passing * 0.15,
+          attributes.shooting * balance.matchday.unitAtkShootingWeight +
+              attributes.pace * balance.matchday.unitAtkPaceWeight +
+              attributes.dribbling * balance.matchday.unitAtkDribblingWeight +
+              attributes.passing * balance.matchday.unitAtkPassingWeight,
       };
       weightedSum += attributeRating * member.weight;
       totalPositionWeight += member.weight;
@@ -215,7 +219,7 @@ class UnitRatingCalculator {
               supportingPositions.contains(
                 assignedPositions[player.id] ?? player.position,
               )
-              ? 0.5
+              ? balance.matchday.unitSupportingPositionWeight
               : 1.0,
         ),
   ];
@@ -255,8 +259,6 @@ class _UnitMemberships {
   final Map<String, double> midfieldWeights;
   final Map<String, double> attackingWeights;
 }
-
-enum UnitKind { def, mid, atk }
 
 class _UnitMember {
   const _UnitMember({required this.player, required this.weight});

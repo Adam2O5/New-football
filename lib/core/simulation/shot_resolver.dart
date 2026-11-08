@@ -7,7 +7,6 @@ import 'package:new_football/core/models/player_attributes.dart';
 import 'package:new_football/core/random/match_random.dart';
 import 'package:new_football/core/simulation/effective_attributes.dart';
 import 'package:new_football/core/simulation/goalkeeper_resolver.dart';
-import 'package:new_football/core/simulation/sequence_resolver.dart';
 import 'package:new_football/core/simulation/shot_models.dart';
 
 /// Runtime-only result of a shot and its bounded follow-up.
@@ -97,7 +96,7 @@ class ShotResolver {
     final rawShooterValue = _shooting(shooter, shooterAttributes[shooter.id]);
     final decisiveSituation =
         shotKind == SequenceShotKind.penalty ||
-        minute >= 85 ||
+        minute >= balance.matchday.clutchMinute ||
         context.stake == MatchStake.playoffElimination;
     final shooterValue =
         rawShooterValue +
@@ -109,7 +108,9 @@ class ShotResolver {
               )
             : 0.0);
     final shooterFactor =
-        1.0 + (shooterValue - balance.matchday.shootingBaseline) / 180.0;
+        1.0 +
+        (shooterValue - balance.matchday.shootingBaseline) /
+            balance.matchday.shootingScale;
     final baseXg =
         baseXgOverride ??
         balance.matchday.sequenceBaseXg[sequenceType.name] ??
@@ -123,7 +124,7 @@ class ShotResolver {
                 shooterFactor *
                 weatherXgMultiplier *
                 xgMultiplier)
-            .clamp(0.01, 0.95)
+            .clamp(balance.matchday.shotXgMin, balance.matchday.shotXgMax)
             .toDouble();
     final goalkeeper =
         (_goalkeeperResolver ?? GoalkeeperResolver(balance: balance)).resolve(
@@ -136,7 +137,12 @@ class ShotResolver {
         1.0 -
         (goalkeeper.gkRating - balance.matchday.gkRatingBaseline) /
             balance.matchday.gkRatingDivisor;
-    final goalProbability = (xg * gkFactor).clamp(0.005, 0.97).toDouble();
+    final goalProbability = (xg * gkFactor)
+        .clamp(
+          balance.matchday.goalProbabilityMin,
+          balance.matchday.goalProbabilityMax,
+        )
+        .toDouble();
 
     if (random.nextDouble() < goalProbability) {
       return ShotResolution(
@@ -194,10 +200,13 @@ class ShotResolver {
         random.nextDouble() < reboundChance) {
       reboundAttempted = true;
       reboundXg = (xg * balance.matchday.reboundXgMultiplier)
-          .clamp(0.005, 0.95)
+          .clamp(balance.matchday.reboundXgMin, balance.matchday.reboundXgMax)
           .toDouble();
       final reboundProbability = (reboundXg * gkFactor)
-          .clamp(0.005, 0.97)
+          .clamp(
+            balance.matchday.goalProbabilityMin,
+            balance.matchday.goalProbabilityMax,
+          )
           .toDouble();
       if (random.nextDouble() < reboundProbability) {
         reboundGoal = true;

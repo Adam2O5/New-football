@@ -8,7 +8,6 @@ import 'package:new_football/core/models/team.dart';
 import 'package:new_football/core/random/match_random.dart';
 import 'package:new_football/core/simulation/match_engine.dart';
 import 'package:new_football/core/simulation/sequence_chain_resolver.dart';
-import 'package:new_football/core/simulation/sequence_resolver.dart';
 import 'package:new_football/core/simulation/shot_models.dart';
 
 /// Converts one completed simulation into the persisted match contract.
@@ -109,7 +108,8 @@ class MatchResultAssembler {
               total.xg += shot.reboundXg;
               if (shot.reboundGoal) total.shotsOnTarget++;
             }
-            if (!shot.isGoal && shot.xg > 0.4) {
+            if (!shot.isGoal &&
+                shot.xg > balance.matchday.bigChanceXgThreshold) {
               total.missedBigChances++;
             }
           });
@@ -259,26 +259,36 @@ class MatchResultAssembler {
     for (var i = 0; i < total.goals; i++) {
       contribution += _goalContribution(player.position);
     }
-    contribution += total.assists * 0.7;
-    contribution += total.offensiveDuelsWon * 0.05;
-    contribution += total.defensiveDuelsWon * 0.06;
-    contribution -= total.defensiveDuelLossesLeadingToGoal * 0.45;
-    contribution += total.saves * 0.10;
-    contribution += total.penaltySaves * 1.2;
+    contribution += total.assists * balance.matchday.ratingAssist;
+    contribution +=
+        total.offensiveDuelsWon * balance.matchday.ratingOffensiveDuel;
+    contribution +=
+        total.defensiveDuelsWon * balance.matchday.ratingDefensiveDuel;
+    contribution -=
+        total.defensiveDuelLossesLeadingToGoal *
+        balance.matchday.ratingGoalCausingLoss;
+    contribution += total.saves * balance.matchday.ratingSave;
+    contribution += total.penaltySaves * balance.matchday.ratingPenaltySave;
     if (_isDefenderOrGoalkeeper(player.position) &&
-        minutes >= 60 &&
+        minutes >= balance.matchday.cleanSheetMinutes &&
         teamConceded == 0) {
-      contribution += 0.6;
+      contribution += balance.matchday.ratingCleanSheet;
     }
-    contribution -= total.ownGoals * 1.5;
-    contribution -= total.yellowCards * 0.3;
-    contribution -= total.redCards * 1.5;
-    contribution -= total.missedBigChances * 0.25;
-    if (minutes > 0 && minutes < 20) contribution *= minutes / 20.0;
+    contribution -= total.ownGoals * balance.matchday.ratingOwnGoalPenalty;
+    contribution -= total.yellowCards * balance.matchday.ratingYellowPenalty;
+    contribution -= total.redCards * balance.matchday.ratingRedPenalty;
+    contribution -=
+        total.missedBigChances * balance.matchday.ratingMissedBigChancePenalty;
+    if (minutes > 0 &&
+        minutes < balance.matchday.ratingShortAppearanceMinutes) {
+      contribution *= minutes / balance.matchday.ratingShortAppearanceMinutes;
+    }
 
     final rating = minutes == 0
-        ? 6.0
-        : (6.0 + contribution).clamp(1.0, 10.0).toDouble();
+        ? balance.matchday.ratingUnrated
+        : (balance.matchday.ratingBase + contribution)
+              .clamp(balance.matchday.ratingMin, balance.matchday.ratingMax)
+              .toDouble();
     return PlayerMatchStats(
       playerId: player.id,
       minutes: minutes,
@@ -301,7 +311,7 @@ class MatchResultAssembler {
       ownGoals: total.ownGoals,
       cleanSheet:
           _isDefenderOrGoalkeeper(player.position) &&
-          minutes >= 60 &&
+          minutes >= balance.matchday.cleanSheetMinutes &&
           teamConceded == 0,
       staminaAfterMatch: total.staminaAfterMatch,
       tackles: total.defensiveDuelsWon,
@@ -383,9 +393,13 @@ class MatchResultAssembler {
   }
 
   double _goalContribution(Position position) => switch (position) {
-    Position.st || Position.lw || Position.rw => 1.0,
-    Position.cdm || Position.cm || Position.cam => 1.3,
-    _ => 1.6,
+    Position.st ||
+    Position.lw ||
+    Position.rw => balance.matchday.ratingForwardGoal,
+    Position.cdm ||
+    Position.cm ||
+    Position.cam => balance.matchday.ratingMidfielderGoal,
+    _ => balance.matchday.ratingDefenderGoal,
   };
 
   bool _isDefenderOrGoalkeeper(Position position) => switch (position) {

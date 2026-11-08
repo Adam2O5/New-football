@@ -17,7 +17,7 @@ class MatchBootstrap {
   LiveMatchState start({
     required Team home,
     required Team away,
-    MatchContext context = const MatchContext(),
+    MatchContext? context,
     required int rngSeed,
     Map<String, Position> homeAssignedPositions = const {},
     Map<String, Position> awayAssignedPositions = const {},
@@ -25,10 +25,16 @@ class MatchBootstrap {
     final report = PreMatchValidator(
       balance: balance,
     ).validate(home: home, away: away);
-    final matchContext = context.copyWith(
-      homeTeamId: context.homeTeamId.isEmpty ? home.id : context.homeTeamId,
-      awayTeamId: context.awayTeamId.isEmpty ? away.id : context.awayTeamId,
-      seed: context.seed == 0 ? rngSeed : context.seed,
+    final resolvedContext =
+        context ?? MatchContext(homeAdvantage: balance.matchday.homeAdvantage);
+    final matchContext = resolvedContext.copyWith(
+      homeTeamId: resolvedContext.homeTeamId.isEmpty
+          ? home.id
+          : resolvedContext.homeTeamId,
+      awayTeamId: resolvedContext.awayTeamId.isEmpty
+          ? away.id
+          : resolvedContext.awayTeamId,
+      seed: resolvedContext.seed == 0 ? rngSeed : resolvedContext.seed,
     );
 
     final cohesionService = CohesionService(balance: balance);
@@ -123,7 +129,9 @@ class MatchBootstrap {
         homeTactics: home.tactics,
         awayTactics: away.tactics,
         context: matchContext,
-        momentum: matchContext.crowdIntensity / 8,
+        momentum:
+            matchContext.crowdIntensity /
+            balance.matchday.crowdInitialMomentumDivisor,
         rngSeed: rngSeed,
       ),
       homeTeamId: home.id,

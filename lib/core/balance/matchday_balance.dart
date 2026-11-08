@@ -1,14 +1,565 @@
+import 'package:new_football/core/balance/simulation_profiles_balance.dart';
+import 'package:new_football/core/balance/rivalry_catalog.dart';
 import 'package:new_football/core/models/enums.dart';
 import 'package:new_football/core/tactics/tactics_setup.dart';
 
-/// Tunable constants from `docs/matchday_model.md` §19.
-///
-/// The walkover and no-GK fields are retained for the current engine contract;
-/// the remaining fields are the documented model constants that later
-/// simulation tasks will consume.
+/// Seasonal weights and temperature offset; null boundaries are open.
+class WeatherSeasonProfile {
+  const WeatherSeasonProfile({
+    this.firstWeek,
+    this.lastWeek,
+    this.temperatureBias = 0,
+    this.deltas = const {},
+    this.minimums = const {},
+  });
+  final int? firstWeek;
+  final int? lastWeek;
+  final int temperatureBias;
+  final Map<Weather, int> deltas;
+  final Map<Weather, int> minimums;
+  bool contains(int week) =>
+      (firstWeek == null || week >= firstWeek!) &&
+      (lastWeek == null || week <= lastWeek!);
+}
+
+/// Numeric parameters and ordered profiles for the active match simulation.
 class MatchdayBalance {
+  static const defaultHomeAdvantage = 0.05;
+  static const defaultSequenceTypeBaseWeights = <String, double>{
+    'centralBuildUp': 22,
+    'wingPlay': 20,
+    'crossFromWide': 12,
+    'throughBall': 11,
+    'individualDribble': 10,
+    'counterAttack': 9,
+    'longBall': 8,
+    'setPiece': 8,
+  };
   static const defaultUnratedPlayerRating = 6.0;
   const MatchdayBalance({
+    this.homeAdvantage = defaultHomeAdvantage,
+
+    this.ratingUnrated = defaultUnratedPlayerRating,
+    this.defaultPossessionPercent = 50.0,
+    this.runtimeFallbackChemistry = 50.0,
+    this.runtimeFallbackAtmosphere = 50,
+
+    this.sequenceAttackerProfiles = const {
+      SequenceType.centralBuildUp: {
+        EffectiveAttribute.passing: 0.55,
+        EffectiveAttribute.dribbling: 0.30,
+        EffectiveAttribute.physicality: 0.15,
+      },
+      SequenceType.wingPlay: {
+        EffectiveAttribute.pace: 0.40,
+        EffectiveAttribute.dribbling: 0.45,
+        EffectiveAttribute.physicality: 0.15,
+      },
+      SequenceType.crossFromWide: {
+        EffectiveAttribute.passing: 0.80,
+        EffectiveAttribute.pace: 0.20,
+      },
+      SequenceType.throughBall: {
+        EffectiveAttribute.passing: 0.85,
+        EffectiveAttribute.dribbling: 0.15,
+      },
+      SequenceType.individualDribble: {
+        EffectiveAttribute.dribbling: 0.60,
+        EffectiveAttribute.pace: 0.25,
+        EffectiveAttribute.physicality: 0.15,
+      },
+      SequenceType.counterAttack: {
+        EffectiveAttribute.pace: 0.55,
+        EffectiveAttribute.dribbling: 0.30,
+        EffectiveAttribute.passing: 0.15,
+      },
+      SequenceType.longBall: {
+        EffectiveAttribute.passing: 0.55,
+        EffectiveAttribute.physicality: 0.25,
+        EffectiveAttribute.pace: 0.20,
+      },
+      SequenceType.setPiece: {
+        EffectiveAttribute.passing: 0.50,
+        EffectiveAttribute.shooting: 0.35,
+        EffectiveAttribute.physicality: 0.15,
+      },
+    },
+    this.sequenceDefenderProfiles = const {
+      SequenceType.centralBuildUp: {
+        EffectiveAttribute.defending: 0.55,
+        EffectiveAttribute.physicality: 0.30,
+        EffectiveAttribute.pace: 0.15,
+      },
+      SequenceType.wingPlay: {
+        EffectiveAttribute.defending: 0.45,
+        EffectiveAttribute.pace: 0.40,
+        EffectiveAttribute.physicality: 0.15,
+      },
+      SequenceType.crossFromWide: {
+        EffectiveAttribute.defending: 0.60,
+        EffectiveAttribute.pace: 0.40,
+      },
+      SequenceType.throughBall: {
+        EffectiveAttribute.defending: 0.50,
+        EffectiveAttribute.physicality: 0.50,
+      },
+      SequenceType.individualDribble: {
+        EffectiveAttribute.defending: 0.50,
+        EffectiveAttribute.pace: 0.30,
+        EffectiveAttribute.physicality: 0.20,
+      },
+      SequenceType.counterAttack: {
+        EffectiveAttribute.pace: 0.55,
+        EffectiveAttribute.defending: 0.45,
+      },
+      SequenceType.longBall: {
+        EffectiveAttribute.defending: 0.50,
+        EffectiveAttribute.physicality: 0.35,
+        EffectiveAttribute.pace: 0.15,
+      },
+      SequenceType.setPiece: {
+        EffectiveAttribute.defending: 0.55,
+        EffectiveAttribute.physicality: 0.45,
+      },
+    },
+    this.sequenceHighUnitThreshold = 70.0,
+    this.sequenceHighAttributeThreshold = 75.0,
+    this.sequenceTallForwardHeight = 185,
+    this.sequenceFallbackAttribute = 50.0,
+    this.sequenceAttackerBaseWeight = 1.0,
+    this.sequenceDefenderBaseWeight = 1.0,
+    this.sequenceSetPieceAttributeDivisor = 200.0,
+    this.sequenceMatchingFlankWeight = 3.0,
+    this.sequenceAttackerPositionBonuses = const {
+      SequenceType.centralBuildUp: {
+        Position.cm: 2,
+        Position.cam: 2,
+        Position.cdm: 1,
+      },
+      SequenceType.wingPlay: {
+        Position.lw: 3,
+        Position.rw: 3,
+        Position.lb: 1.5,
+        Position.rb: 1.5,
+        Position.lwb: 1.5,
+        Position.rwb: 1.5,
+      },
+      SequenceType.crossFromWide: {
+        Position.lw: 3,
+        Position.rw: 3,
+        Position.lb: 1.5,
+        Position.rb: 1.5,
+        Position.lwb: 1.5,
+        Position.rwb: 1.5,
+      },
+      SequenceType.throughBall: {
+        Position.cam: 2,
+        Position.cm: 2,
+        Position.st: 1,
+      },
+      SequenceType.individualDribble: {
+        Position.lw: 3,
+        Position.rw: 3,
+        Position.cam: 3,
+      },
+      SequenceType.counterAttack: {
+        Position.st: 3,
+        Position.lw: 3,
+        Position.rw: 3,
+      },
+      SequenceType.longBall: {Position.st: 3, Position.lw: 1, Position.rw: 1},
+    },
+    this.sequenceDefenderPositionWeights = const {
+      SequenceType.wingPlay: {Position.cb: 1.5, Position.cdm: 0.8},
+      SequenceType.crossFromWide: {Position.cb: 1.5, Position.cdm: 0.8},
+      SequenceType.centralBuildUp: {
+        Position.cdm: 2.5,
+        Position.cm: 1.5,
+        Position.cb: 1.8,
+      },
+      SequenceType.throughBall: {Position.cb: 2.5, Position.cdm: 1.5},
+      SequenceType.individualDribble: {
+        Position.lb: 2.5,
+        Position.rb: 2.5,
+        Position.lwb: 2.5,
+        Position.rwb: 2.5,
+        Position.cb: 1.8,
+      },
+      SequenceType.counterAttack: {
+        Position.cb: 2,
+        Position.lb: 1.5,
+        Position.rb: 1.5,
+        Position.lwb: 1.5,
+        Position.rwb: 1.5,
+      },
+      SequenceType.longBall: {Position.cb: 2.5, Position.cdm: 1.5},
+      SequenceType.setPiece: {Position.cb: 2, Position.cdm: 1.3},
+    },
+    this.unitDefDefendingWeight = 0.45,
+    this.unitDefPhysicalityWeight = 0.25,
+    this.unitDefPaceWeight = 0.20,
+    this.unitDefPassingWeight = 0.10,
+    this.unitMidPassingWeight = 0.35,
+    this.unitMidDribblingWeight = 0.25,
+    this.unitMidDefendingWeight = 0.20,
+    this.unitMidPhysicalityWeight = 0.20,
+    this.unitAtkShootingWeight = 0.35,
+    this.unitAtkPaceWeight = 0.25,
+    this.unitAtkDribblingWeight = 0.25,
+    this.unitAtkPassingWeight = 0.15,
+    this.unitSupportingPositionWeight = 0.5,
+    this.sequenceStages = const {
+      SequenceType.centralBuildUp: [
+        SequenceStageProfile(
+          attackerPositions: {Position.cm, Position.cam, Position.cdm},
+          defenderPositions: {Position.cdm, Position.cm, Position.cb},
+          attackerWeights: {
+            EffectiveAttribute.passing: 0.55,
+            EffectiveAttribute.dribbling: 0.30,
+            EffectiveAttribute.physicality: 0.15,
+          },
+          defenderWeights: {
+            EffectiveAttribute.defending: 0.55,
+            EffectiveAttribute.physicality: 0.30,
+            EffectiveAttribute.pace: 0.15,
+          },
+        ),
+        SequenceStageProfile(
+          attackerPositions: {Position.cam, Position.cm},
+          defenderPositions: {Position.cb},
+          attackerWeights: {
+            EffectiveAttribute.passing: 0.70,
+            EffectiveAttribute.dribbling: 0.30,
+          },
+          defenderWeights: {
+            EffectiveAttribute.defending: 0.60,
+            EffectiveAttribute.pace: 0.40,
+          },
+        ),
+      ],
+      SequenceType.wingPlay: [
+        SequenceStageProfile(
+          attackerPositions: {
+            Position.lw,
+            Position.rw,
+            Position.lb,
+            Position.rb,
+            Position.lwb,
+            Position.rwb,
+          },
+          defenderPositions: {
+            Position.lb,
+            Position.rb,
+            Position.lwb,
+            Position.rwb,
+          },
+          attackerWeights: {
+            EffectiveAttribute.pace: 0.40,
+            EffectiveAttribute.dribbling: 0.45,
+            EffectiveAttribute.physicality: 0.15,
+          },
+          defenderWeights: {
+            EffectiveAttribute.defending: 0.45,
+            EffectiveAttribute.pace: 0.40,
+            EffectiveAttribute.physicality: 0.15,
+          },
+        ),
+        SequenceStageProfile(
+          attackerPositions: {Position.lw, Position.rw, Position.cam},
+          defenderPositions: {Position.cb},
+          attackerWeights: {
+            EffectiveAttribute.passing: 0.50,
+            EffectiveAttribute.dribbling: 0.50,
+          },
+          defenderWeights: {
+            EffectiveAttribute.defending: 0.70,
+            EffectiveAttribute.physicality: 0.30,
+          },
+        ),
+      ],
+      SequenceType.crossFromWide: [
+        SequenceStageProfile(
+          attackerPositions: {Position.lw, Position.rw},
+          defenderPositions: {
+            Position.lb,
+            Position.rb,
+            Position.lwb,
+            Position.rwb,
+          },
+          attackerWeights: {
+            EffectiveAttribute.passing: 0.80,
+            EffectiveAttribute.pace: 0.20,
+          },
+          defenderWeights: {
+            EffectiveAttribute.defending: 0.60,
+            EffectiveAttribute.pace: 0.40,
+          },
+        ),
+        SequenceStageProfile(
+          attackerPositions: {Position.st},
+          defenderPositions: {Position.cb},
+          attackerWeights: {
+            EffectiveAttribute.physicality: 0.55,
+            EffectiveAttribute.shooting: 0.30,
+          },
+          defenderWeights: {
+            EffectiveAttribute.defending: 0.50,
+            EffectiveAttribute.physicality: 0.35,
+          },
+          attackerAerialWeight: 0.15,
+          defenderAerialWeight: 0.15,
+        ),
+      ],
+      SequenceType.throughBall: [
+        SequenceStageProfile(
+          attackerPositions: {Position.cam, Position.cm},
+          defenderPositions: {Position.cdm},
+          attackerWeights: {
+            EffectiveAttribute.passing: 0.85,
+            EffectiveAttribute.dribbling: 0.15,
+          },
+          defenderWeights: {
+            EffectiveAttribute.defending: 0.50,
+            EffectiveAttribute.physicality: 0.50,
+          },
+        ),
+        SequenceStageProfile(
+          attackerPositions: {Position.st, Position.lw, Position.rw},
+          defenderPositions: {Position.cb},
+          attackerWeights: {
+            EffectiveAttribute.pace: 0.70,
+            EffectiveAttribute.dribbling: 0.30,
+          },
+          defenderWeights: {
+            EffectiveAttribute.pace: 0.55,
+            EffectiveAttribute.defending: 0.45,
+          },
+        ),
+      ],
+      SequenceType.individualDribble: [
+        SequenceStageProfile(
+          attackerPositions: {
+            Position.lw,
+            Position.rw,
+            Position.cam,
+            Position.st,
+          },
+          defenderPositions: {
+            Position.lb,
+            Position.rb,
+            Position.lwb,
+            Position.rwb,
+            Position.cb,
+          },
+          attackerWeights: {
+            EffectiveAttribute.dribbling: 0.60,
+            EffectiveAttribute.pace: 0.25,
+            EffectiveAttribute.physicality: 0.15,
+          },
+          defenderWeights: {
+            EffectiveAttribute.defending: 0.55,
+            EffectiveAttribute.pace: 0.25,
+            EffectiveAttribute.physicality: 0.20,
+          },
+        ),
+        SequenceStageProfile(
+          attackerPositions: {
+            Position.lw,
+            Position.rw,
+            Position.cam,
+            Position.st,
+          },
+          defenderPositions: {Position.cb},
+          attackerWeights: {
+            EffectiveAttribute.dribbling: 0.50,
+            EffectiveAttribute.shooting: 0.50,
+          },
+          defenderWeights: {
+            EffectiveAttribute.defending: 0.80,
+            EffectiveAttribute.physicality: 0.20,
+          },
+        ),
+      ],
+      SequenceType.counterAttack: [
+        SequenceStageProfile(
+          attackerPositions: {Position.st, Position.lw, Position.rw},
+          defenderPositions: {Position.cb, Position.lb, Position.rb},
+          attackerWeights: {
+            EffectiveAttribute.pace: 0.50,
+            EffectiveAttribute.dribbling: 0.30,
+            EffectiveAttribute.passing: 0.20,
+          },
+          defenderWeights: {
+            EffectiveAttribute.pace: 0.60,
+            EffectiveAttribute.defending: 0.40,
+          },
+        ),
+        SequenceStageProfile(
+          attackerPositions: {Position.st, Position.lw, Position.rw},
+          defenderPositions: {Position.cb, Position.lb, Position.rb},
+          attackerWeights: {
+            EffectiveAttribute.shooting: 0.55,
+            EffectiveAttribute.dribbling: 0.25,
+            EffectiveAttribute.pace: 0.20,
+          },
+          defenderWeights: {
+            EffectiveAttribute.defending: 0.65,
+            EffectiveAttribute.pace: 0.35,
+          },
+        ),
+      ],
+      SequenceType.longBall: [
+        SequenceStageProfile(
+          attackerPositions: {Position.st},
+          defenderPositions: {Position.cb},
+          attackerWeights: {
+            EffectiveAttribute.physicality: 0.50,
+            EffectiveAttribute.dribbling: 0.35,
+          },
+          defenderWeights: {
+            EffectiveAttribute.defending: 0.45,
+            EffectiveAttribute.physicality: 0.40,
+          },
+          attackerAerialWeight: 0.15,
+          defenderAerialWeight: 0.15,
+        ),
+      ],
+      SequenceType.setPiece: [],
+    },
+    this.throughBallHighLineDefenderWeights = const {
+      EffectiveAttribute.pace: 0.65,
+      EffectiveAttribute.defending: 0.45,
+    },
+
+    this.rivalryKeys = rivalryCatalog,
+    this.refereeRandomMin = 0.80,
+    this.refereeRandomSpan = 0.40,
+    this.refereeMin = 0.80,
+    this.refereeMax = 1.20,
+    this.playoffRefereeMultiplier = 0.95,
+    this.crowdBase = 45,
+    this.crowdFormWeight = 0.3,
+    this.crowdDerbyBonus = 20,
+    this.crowdMin = 0,
+    this.crowdMax = 100,
+    this.crowdInitialMomentumDivisor = 8.0,
+    this.temperatureMin = -5,
+    this.temperatureMax = 38,
+    this.temperatureRandomRange = 44,
+    this.stakeCrowdBonuses = const {
+      MatchStake.regular: 0,
+      MatchStake.playIn: 10,
+      MatchStake.playoff: 15,
+      MatchStake.playoffElimination: 25,
+      MatchStake.leagueFinal: 30,
+    },
+    this.weatherBaseWeights = const {
+      Weather.clear: 24,
+      Weather.overcast: 15,
+      Weather.rain: 14,
+      Weather.heavyRain: 8,
+      Weather.wind: 10,
+      Weather.snow: 5,
+      Weather.heat: 10,
+      Weather.cold: 14,
+    },
+    this.weatherSeasons = const [
+      WeatherSeasonProfile(
+        lastWeek: 8,
+        temperatureBias: 8,
+        deltas: {
+          Weather.heat: 22,
+          Weather.clear: 8,
+          Weather.snow: -4,
+          Weather.cold: -8,
+        },
+        minimums: {Weather.snow: 1, Weather.cold: 2},
+      ),
+      WeatherSeasonProfile(
+        firstWeek: 17,
+        lastWeek: 25,
+        temperatureBias: -8,
+        deltas: {
+          Weather.snow: 22,
+          Weather.cold: 18,
+          Weather.heavyRain: 8,
+          Weather.heat: -9,
+        },
+        minimums: {Weather.heat: 1},
+      ),
+      WeatherSeasonProfile(
+        firstWeek: 26,
+        lastWeek: 34,
+        deltas: {Weather.clear: 8, Weather.heat: 8, Weather.snow: -5},
+        minimums: {Weather.snow: 1},
+      ),
+    ],
+
+    this.duelLogisticBase = 10.0,
+    this.clutchMinute = 85,
+    this.shootingScale = 180.0,
+    this.shotXgMin = 0.01,
+    this.shotXgMax = 0.95,
+    this.goalProbabilityMin = 0.005,
+    this.goalProbabilityMax = 0.97,
+    this.reboundXgMin = 0.005,
+    this.reboundXgMax = 0.95,
+    this.bigChanceXgThreshold = 0.4,
+    this.fallbackGkPhysicalityWeight = 0.4,
+    this.fallbackGkSpeedWeight = 0.3,
+    this.fallbackGkDefendingWeight = 0.3,
+    this.handlingErrorBaseline = 100.0,
+    this.handlingErrorScale = 1200.0,
+    this.scoreReactionMinute = 65,
+    this.possessionProbabilityMin = 0.02,
+    this.possessionProbabilityMax = 0.98,
+    this.momentumCutoff = 0.01,
+    this.momentumMin = -100.0,
+    this.momentumMax = 100.0,
+    this.firstHalfStoppageMax = 8,
+    this.unitRatingMin = 0.0,
+    this.unitRatingMax = 200.0,
+    this.cohesionMultiplierMax = 2.0,
+    this.ratingAssist = 0.7,
+    this.ratingOffensiveDuel = 0.05,
+    this.ratingDefensiveDuel = 0.06,
+    this.ratingGoalCausingLoss = 0.45,
+    this.ratingSave = 0.1,
+    this.ratingPenaltySave = 1.2,
+    this.cleanSheetMinutes = 60,
+    this.ratingCleanSheet = 0.6,
+    this.ratingOwnGoalPenalty = 1.5,
+    this.ratingYellowPenalty = 0.3,
+    this.ratingRedPenalty = 1.5,
+    this.ratingMissedBigChancePenalty = 0.25,
+    this.ratingShortAppearanceMinutes = 20,
+    this.ratingBase = 6.0,
+    this.ratingMin = 1.0,
+    this.ratingMax = 10.0,
+    this.ratingForwardGoal = 1.0,
+    this.ratingMidfielderGoal = 1.3,
+    this.ratingDefenderGoal = 1.6,
+    this.roleMismatchMultiplier = 0.9,
+    this.ambitiousClutchMultiplier = 0.03,
+    this.loyalAdverseMomentumMultiplier = 0.8,
+    this.weeklyThirdMatchThreshold = 3,
+    this.weeklySecondMatchThreshold = 2,
+    this.weeklyThirdMatchMultiplier = 0.96,
+    this.weeklySecondMatchMultiplier = 0.98,
+    this.chainLongBallProbabilityMin = 0.05,
+    this.chainLongBallProbabilityMax = 0.95,
+    this.chainLowQuality = 0.7,
+    this.chainNormalQuality = 1.0,
+    this.chainHighQuality = 1.4,
+    this.chainRepeatPlayerMultiplier = 0.5,
+    this.chainAllowedPositionWeight = 3.0,
+    this.chainOtherPositionWeight = 1.0,
+    this.sfgPenaltyShootingWeight = 0.6,
+    this.sfgAttackingPlayers = 5,
+    this.sfgDefendingOutfieldPlayers = 4,
+    this.sfgDefendingGoalkeepers = 1,
+    this.fallbackAerialHeight = 180,
+
     this.oneOnOneRedMultiplier = 2.0,
     this.duelInjuryMultiplier = 2.5,
     this.effectiveAttributeMin = 30.0,
@@ -146,16 +697,7 @@ class MatchdayBalance {
     this.momentumSequenceDivisor = 1500.0,
     this.sequenceConditionBonus = 4.0,
     this.sequenceStrongConditionBonus = 6.0,
-    this.sequenceTypeBaseWeights = const <String, double>{
-      'centralBuildUp': 22,
-      'wingPlay': 20,
-      'crossFromWide': 12,
-      'throughBall': 11,
-      'individualDribble': 10,
-      'counterAttack': 9,
-      'longBall': 8,
-      'setPiece': 8,
-    },
+    this.sequenceTypeBaseWeights = defaultSequenceTypeBaseWeights,
     this.stakeRegularSequenceMultiplier = 1.0,
     this.stakePlayInSequenceMultiplier = 1.02,
     this.stakePlayoffSequenceMultiplier = 1.04,
@@ -277,6 +819,129 @@ class MatchdayBalance {
   });
 
   /// Illegal roster → walkover score for the offending side.
+  final double homeAdvantage;
+
+  final double ratingUnrated;
+  final double defaultPossessionPercent;
+  final double runtimeFallbackChemistry;
+  final int runtimeFallbackAtmosphere;
+
+  final Map<SequenceType, Map<EffectiveAttribute, double>>
+  sequenceAttackerProfiles;
+  final Map<SequenceType, Map<EffectiveAttribute, double>>
+  sequenceDefenderProfiles;
+  final double sequenceHighUnitThreshold;
+  final double sequenceHighAttributeThreshold;
+  final int sequenceTallForwardHeight;
+  final double sequenceFallbackAttribute;
+  final double sequenceAttackerBaseWeight;
+  final double sequenceDefenderBaseWeight;
+  final double sequenceSetPieceAttributeDivisor;
+  final double sequenceMatchingFlankWeight;
+  final Map<SequenceType, Map<Position, double>>
+  sequenceAttackerPositionBonuses;
+  final Map<SequenceType, Map<Position, double>>
+  sequenceDefenderPositionWeights;
+  final double unitDefDefendingWeight;
+  final double unitDefPhysicalityWeight;
+  final double unitDefPaceWeight;
+  final double unitDefPassingWeight;
+  final double unitMidPassingWeight;
+  final double unitMidDribblingWeight;
+  final double unitMidDefendingWeight;
+  final double unitMidPhysicalityWeight;
+  final double unitAtkShootingWeight;
+  final double unitAtkPaceWeight;
+  final double unitAtkDribblingWeight;
+  final double unitAtkPassingWeight;
+  final double unitSupportingPositionWeight;
+  final Map<SequenceType, List<SequenceStageProfile>> sequenceStages;
+  final Map<EffectiveAttribute, double> throughBallHighLineDefenderWeights;
+
+  final Set<String> rivalryKeys;
+  final double refereeRandomMin;
+  final double refereeRandomSpan;
+  final double refereeMin;
+  final double refereeMax;
+  final double playoffRefereeMultiplier;
+  final int crowdBase;
+  final double crowdFormWeight;
+  final int crowdDerbyBonus;
+  final int crowdMin;
+  final int crowdMax;
+  final double crowdInitialMomentumDivisor;
+  final int temperatureMin;
+  final int temperatureMax;
+  final int temperatureRandomRange;
+  final Map<MatchStake, int> stakeCrowdBonuses;
+  final Map<Weather, int> weatherBaseWeights;
+  final List<WeatherSeasonProfile> weatherSeasons;
+
+  final double duelLogisticBase;
+  final int clutchMinute;
+  final double shootingScale;
+  final double shotXgMin;
+  final double shotXgMax;
+  final double goalProbabilityMin;
+  final double goalProbabilityMax;
+  final double reboundXgMin;
+  final double reboundXgMax;
+  final double bigChanceXgThreshold;
+  final double fallbackGkPhysicalityWeight;
+  final double fallbackGkSpeedWeight;
+  final double fallbackGkDefendingWeight;
+  final double handlingErrorBaseline;
+  final double handlingErrorScale;
+  final int scoreReactionMinute;
+  final double possessionProbabilityMin;
+  final double possessionProbabilityMax;
+  final double momentumCutoff;
+  final double momentumMin;
+  final double momentumMax;
+  final int firstHalfStoppageMax;
+  final double unitRatingMin;
+  final double unitRatingMax;
+  final double cohesionMultiplierMax;
+  final double ratingAssist;
+  final double ratingOffensiveDuel;
+  final double ratingDefensiveDuel;
+  final double ratingGoalCausingLoss;
+  final double ratingSave;
+  final double ratingPenaltySave;
+  final int cleanSheetMinutes;
+  final double ratingCleanSheet;
+  final double ratingOwnGoalPenalty;
+  final double ratingYellowPenalty;
+  final double ratingRedPenalty;
+  final double ratingMissedBigChancePenalty;
+  final int ratingShortAppearanceMinutes;
+  final double ratingBase;
+  final double ratingMin;
+  final double ratingMax;
+  final double ratingForwardGoal;
+  final double ratingMidfielderGoal;
+  final double ratingDefenderGoal;
+  final double roleMismatchMultiplier;
+  final double ambitiousClutchMultiplier;
+  final double loyalAdverseMomentumMultiplier;
+  final int weeklyThirdMatchThreshold;
+  final int weeklySecondMatchThreshold;
+  final double weeklyThirdMatchMultiplier;
+  final double weeklySecondMatchMultiplier;
+  final double chainLongBallProbabilityMin;
+  final double chainLongBallProbabilityMax;
+  final double chainLowQuality;
+  final double chainNormalQuality;
+  final double chainHighQuality;
+  final double chainRepeatPlayerMultiplier;
+  final double chainAllowedPositionWeight;
+  final double chainOtherPositionWeight;
+  final double sfgPenaltyShootingWeight;
+  final int sfgAttackingPlayers;
+  final int sfgDefendingOutfieldPlayers;
+  final int sfgDefendingGoalkeepers;
+  final int fallbackAerialHeight;
+
   final double effectiveAttributeMin;
   final double oneOnOneRedMultiplier;
   final double duelInjuryMultiplier;

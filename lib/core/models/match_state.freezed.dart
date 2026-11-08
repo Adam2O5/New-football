@@ -220,7 +220,7 @@ return $default(_that.homeTeamId,_that.awayTeamId,_that.weather,_that.temperatur
 @JsonSerializable()
 
 class _MatchContext implements MatchContext {
-  const _MatchContext({this.homeTeamId = '', this.awayTeamId = '', this.weather = Weather.clear, this.temperatureC = 0, this.isDerby = false, this.stake = MatchStake.regular, this.refereeStrictness = 1.0, this.crowdIntensity = 0, this.homeMatchInWeek = 1, this.awayMatchInWeek = 1, this.seed = 0, this.homeAdvantage = 0.05});
+  const _MatchContext({this.homeTeamId = '', this.awayTeamId = '', this.weather = Weather.clear, this.temperatureC = 0, this.isDerby = false, this.stake = MatchStake.regular, this.refereeStrictness = 1.0, this.crowdIntensity = 0, this.homeMatchInWeek = 1, this.awayMatchInWeek = 1, this.seed = 0, this.homeAdvantage = MatchdayBalance.defaultHomeAdvantage});
   factory _MatchContext.fromJson(Map<String, dynamic> json) => _$MatchContextFromJson(json);
 
 @override@JsonKey() final  String homeTeamId;

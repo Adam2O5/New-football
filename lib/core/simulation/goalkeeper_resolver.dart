@@ -102,9 +102,11 @@ class GoalkeeperResolver {
         ? const _GoalkeeperValues.fallback()
         : _fallbackValues(fallback, effectiveAttributes[fallback.id]);
     final fallbackRating =
-        (fallbackAttributes.physicality * 0.4 +
-            fallbackAttributes.speed * 0.3 +
-            fallbackAttributes.defending * 0.3) *
+        (fallbackAttributes.physicality *
+                balance.matchday.fallbackGkPhysicalityWeight +
+            fallbackAttributes.speed * balance.matchday.fallbackGkSpeedWeight +
+            fallbackAttributes.defending *
+                balance.matchday.fallbackGkDefendingWeight) *
         balance.matchday.noGkRatingMultiplier;
 
     return GoalkeeperResolution(
@@ -161,9 +163,9 @@ class GoalkeeperResolver {
 
   double _fallbackRating(Player player, EffectivePlayerAttributes? effective) {
     final values = _fallbackValues(player, effective);
-    return (values.physicality * 0.4 +
-            values.speed * 0.3 +
-            values.defending * 0.3) *
+    return (values.physicality * balance.matchday.fallbackGkPhysicalityWeight +
+            values.speed * balance.matchday.fallbackGkSpeedWeight +
+            values.defending * balance.matchday.fallbackGkDefendingWeight) *
         balance.matchday.noGkRatingMultiplier;
   }
 
@@ -183,8 +185,8 @@ class GoalkeeperResolver {
   }
 
   double _handlingError(double handling, Weather weather) =>
-      ((100.0 - handling) /
-              1200.0 *
+      ((balance.matchday.handlingErrorBaseline - handling) /
+              balance.matchday.handlingErrorScale *
               balance.matchday.weatherHandlingMultiplier(weather))
           .clamp(0.0, 1.0)
           .toDouble();

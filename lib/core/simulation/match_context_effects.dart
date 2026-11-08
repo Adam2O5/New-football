@@ -39,7 +39,9 @@ class ScoreStateModifiers {
     bool manualTacticsAfter65 = false,
   }) {
     final difference = homeSide ? homeGoals - awayGoals : awayGoals - homeGoals;
-    if (minute < 65 || difference == 0 || manualTacticsAfter65) {
+    if (minute < balance.scoreReactionMinute ||
+        difference == 0 ||
+        manualTacticsAfter65) {
       return const ScoreStateModifiers.neutral();
     }
 
@@ -122,7 +124,9 @@ class MatchContextEffects {
   );
 
   static double momentumMultiplier(double momentum, MatchdayBalance balance) =>
-      1.0 + momentum.clamp(-100.0, 100.0) / balance.momentumSequenceDivisor;
+      1.0 +
+      momentum.clamp(balance.momentumMin, balance.momentumMax) /
+          balance.momentumSequenceDivisor;
 
   static double temperatureStaminaMultiplier(
     int temperatureC,

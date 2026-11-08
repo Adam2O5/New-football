@@ -1,3 +1,4 @@
+import 'package:new_football/core/balance/balance_config.dart';
 import 'dart:math';
 
 import 'package:new_football/core/models/enums.dart';
@@ -14,16 +15,20 @@ import 'package:new_football/core/services/team_management_service.dart';
 /// point. It deliberately owns no calendar state and never mutates a league.
 class MatchContextFactory {
   const MatchContextFactory({
-    this.calendar = const CalendarService(),
-    this.rivalryKeys = const {},
-  });
+    CalendarService? calendar,
+    this.balance = BalanceConfig.defaults,
+    Set<String>? rivalryKeys,
+  }) : _calendar = calendar,
+       _rivalryKeys = rivalryKeys;
 
-  final CalendarService calendar;
+  final BalanceConfig balance;
+  final Set<String>? _rivalryKeys;
+  final CalendarService? _calendar;
+  CalendarService get calendar =>
+      _calendar ?? CalendarService(balance: balance);
 
-  /// Canonical keys may be supplied as `teamA|teamB` (order-independent), or
-  /// as the legacy `teamA:teamB` spelling. Cross-conference pairs are never
-  /// considered derbies, even when a key is present.
-  final Set<String> rivalryKeys;
+  /// Explicit keys override the configured catalog, including an empty set.
+  Set<String> get rivalryKeys => _rivalryKeys ?? balance.matchday.rivalryKeys;
 
   MatchContext create({
     required LeagueState league,
@@ -82,21 +87,29 @@ class MatchContextFactory {
     final rng = Random(seed);
     final weather = _weatherForWeek(rng, week);
     final temperatureC = _temperatureForWeek(rng, week);
-    var refereeStrictness = 0.80 + rng.nextDouble() * 0.40;
+    var refereeStrictness =
+        balance.matchday.refereeRandomMin +
+        rng.nextDouble() * balance.matchday.refereeRandomSpan;
     if (stake == MatchStake.playoff) {
-      refereeStrictness *= 0.95;
+      refereeStrictness *= balance.matchday.playoffRefereeMultiplier;
     }
-    refereeStrictness = refereeStrictness.clamp(0.80, 1.20).toDouble();
+    refereeStrictness = refereeStrictness
+        .clamp(balance.matchday.refereeMin, balance.matchday.refereeMax)
+        .toDouble();
 
     final derby = isDerby(home, away);
     final homeForm =
-        TeamManagementService.teamForm(home.recentMatchResults) * 100;
+        TeamManagementService.teamForm(home.recentMatchResults, balance) * 100;
     final crowdIntensity =
-        (45 + homeForm * 0.3 + _stakeCrowdBonus(stake) + (derby ? 20 : 0))
-            .clamp(0, 100)
+        (balance.matchday.crowdBase +
+                homeForm * balance.matchday.crowdFormWeight +
+                _stakeCrowdBonus(stake) +
+                (derby ? balance.matchday.crowdDerbyBonus : 0))
+            .clamp(balance.matchday.crowdMin, balance.matchday.crowdMax)
             .round();
 
     return MatchContext(
+      homeAdvantage: balance.matchday.homeAdvantage,
       homeTeamId: home.id,
       awayTeamId: away.id,
       weather: weather,
@@ -135,15 +148,8 @@ class MatchContextFactory {
     awayMatchInWeek: awayMatchInWeek,
   );
 
-  bool isDerby(Team home, Team away) {
-    if (home.conference != away.conference) return false;
-    final canonical = rivalryKey(home.id, away.id);
-    if (rivalryKeys.contains(canonical) ||
-        rivalryKeys.contains(rivalryKey(home.id, away.id, separator: ':'))) {
-      return true;
-    }
-    return _defaultSeededRivalry(home.id, away.id);
-  }
+  bool isDerby(Team home, Team away) =>
+      home.id != away.id && rivalryKeys.contains(rivalryKey(home.id, away.id));
 
   static String rivalryKey(
     String first,
@@ -165,51 +171,18 @@ class MatchContextFactory {
 
   int _matchInWeek(int? value) => (value ?? 1).clamp(1, 3);
 
-  bool _defaultSeededRivalry(String homeId, String awayId) {
-    final home = _seededTeamParts(homeId);
-    final away = _seededTeamParts(awayId);
-    if (home == null || away == null || home.conference != away.conference) {
-      return false;
-    }
-    final lower = min(home.index, away.index);
-    final upper = max(home.index, away.index);
-    return upper - lower == 1 && lower.isEven;
-  }
-
-  ({String conference, int index})? _seededTeamParts(String id) {
-    final match = RegExp(r'^team_(.+)_(\d+)$').firstMatch(id);
-    if (match == null) return null;
-    return (conference: match.group(1)!, index: int.parse(match.group(2)!));
-  }
-
   Weather _weatherForWeek(Random rng, int week) {
-    final weights = <Weather, int>{
-      Weather.clear: 24,
-      Weather.overcast: 15,
-      Weather.rain: 14,
-      Weather.heavyRain: 8,
-      Weather.wind: 10,
-      Weather.snow: 5,
-      Weather.heat: 10,
-      Weather.cold: 14,
-    };
-    if (week <= 8) {
-      weights
-        ..update(Weather.heat, (value) => value + 22)
-        ..update(Weather.clear, (value) => value + 8)
-        ..update(Weather.snow, (value) => max(1, value - 4))
-        ..update(Weather.cold, (value) => max(2, value - 8));
-    } else if (week >= 17 && week <= 25) {
-      weights
-        ..update(Weather.snow, (value) => value + 22)
-        ..update(Weather.cold, (value) => value + 18)
-        ..update(Weather.heavyRain, (value) => value + 8)
-        ..update(Weather.heat, (value) => max(1, value - 9));
-    } else if (week >= 26 && week <= 34) {
-      weights
-        ..update(Weather.clear, (value) => value + 8)
-        ..update(Weather.heat, (value) => value + 8)
-        ..update(Weather.snow, (value) => max(1, value - 5));
+    final weights = Map<Weather, int>.of(balance.matchday.weatherBaseWeights);
+    final season = _seasonForWeek(week);
+    if (season != null) {
+      for (final entry in season.deltas.entries) {
+        weights.update(
+          entry.key,
+          (value) => season.minimums.containsKey(entry.key)
+              ? max(season.minimums[entry.key]!, value + entry.value)
+              : value + entry.value,
+        );
+      }
     }
 
     final total = weights.values.fold<int>(0, (sum, value) => sum + value);
@@ -221,21 +194,20 @@ class MatchContextFactory {
     return Weather.clear;
   }
 
-  int _temperatureForWeek(Random rng, int week) {
-    final raw = -5 + rng.nextInt(44);
-    final seasonalBias = week <= 8
-        ? 8
-        : week >= 17 && week <= 25
-        ? -8
-        : 0;
-    return (raw + seasonalBias).clamp(-5, 38);
+  WeatherSeasonProfile? _seasonForWeek(int week) {
+    for (final season in balance.matchday.weatherSeasons) {
+      if (season.contains(week)) return season;
+    }
+    return null;
   }
 
-  int _stakeCrowdBonus(MatchStake stake) => switch (stake) {
-    MatchStake.regular => 0,
-    MatchStake.playIn => 10,
-    MatchStake.playoff => 15,
-    MatchStake.playoffElimination => 25,
-    MatchStake.leagueFinal => 30,
-  };
+  int _temperatureForWeek(Random rng, int week) {
+    final b = balance.matchday;
+    final raw = b.temperatureMin + rng.nextInt(b.temperatureRandomRange);
+    final seasonalBias = _seasonForWeek(week)?.temperatureBias ?? 0;
+    return (raw + seasonalBias).clamp(b.temperatureMin, b.temperatureMax);
+  }
+
+  int _stakeCrowdBonus(MatchStake stake) =>
+      balance.matchday.stakeCrowdBonuses[stake] ?? 0;
 }

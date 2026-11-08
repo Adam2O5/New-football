@@ -109,6 +109,7 @@ class SeasonService
        contextFactory =
            contextFactory ??
            MatchContextFactory(
+             balance: balance,
              calendar: calendar ?? CalendarService(balance: balance),
            ),
        matchMessageEmitter =

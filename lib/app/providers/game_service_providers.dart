@@ -17,7 +17,10 @@ final calendarServiceProvider = Provider(
 );
 
 final matchContextFactoryProvider = Provider(
-  (ref) => MatchContextFactory(calendar: ref.watch(calendarServiceProvider)),
+  (ref) => MatchContextFactory(
+    balance: ref.watch(balanceProvider),
+    calendar: ref.watch(calendarServiceProvider),
+  ),
 );
 
 final matchEngineProvider = Provider(

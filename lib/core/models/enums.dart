@@ -442,3 +442,27 @@ enum EstimatedDraftSlot { top1, top3, top5, top10, r1, r2, r3, x }
 enum TeamOfSeasonSlot { gk, lb, cb1, cb2, rb, mid1, mid2, mid3, lw, st, rw }
 
 enum TeamStatus { rebuild, retool, pretender, contender, elite }
+
+/// Attributes shared by effective calculations and balance profiles.
+enum EffectiveAttribute {
+  pace,
+  shooting,
+  passing,
+  dribbling,
+  defending,
+  physicality,
+}
+
+/// The eight possession-sequence families, in their original RNG order.
+enum SequenceType {
+  centralBuildUp,
+  wingPlay,
+  crossFromWide,
+  throughBall,
+  individualDribble,
+  counterAttack,
+  longBall,
+  setPiece,
+}
+
+enum UnitKind { def, mid, atk }

@@ -114,7 +114,10 @@ class SequenceChainResolver {
       longBallPassProbability =
           (balance.matchday.longBallPassBase +
                   (passing - balance.matchday.longBallPassThreshold) / 100.0)
-              .clamp(0.05, 0.95)
+              .clamp(
+                balance.matchday.chainLongBallProbabilityMin,
+                balance.matchday.chainLongBallProbabilityMax,
+              )
               .toDouble();
       longBallPassed = random.nextDouble() < longBallPassProbability;
       if (!longBallPassed) {
@@ -122,7 +125,7 @@ class SequenceChainResolver {
           type: type,
           duels: const [],
           wonDuels: 0,
-          chanceQualityMultiplier: 0.7,
+          chanceQualityMultiplier: balance.matchday.chainLowQuality,
           shooter: passer,
           shotKind: SequenceShotKind.header,
           canShoot: false,
@@ -211,9 +214,9 @@ class SequenceChainResolver {
     final wonDuels = traces.where((trace) => trace.attackerWon).length;
     final canShoot = wonDuels > 0;
     var quality = switch (wonDuels) {
-      0 || 1 => 0.7,
-      2 => 1.0,
-      _ => 1.4,
+      0 || 1 => balance.matchday.chainLowQuality,
+      2 => balance.matchday.chainNormalQuality,
+      _ => balance.matchday.chainHighQuality,
     };
     if (type == SequenceType.counterAttack) {
       quality *= balance.matchday.counterAttackQualityMultiplier;
@@ -237,247 +240,28 @@ class SequenceChainResolver {
     );
   }
 
-  static final Map<SequenceType, Map<bool, List<_StageSpec>>> _stageCache =
-      Map.unmodifiable(<SequenceType, Map<bool, List<_StageSpec>>>{
-        for (final type in SequenceType.values)
-          type: Map.unmodifiable(<bool, List<_StageSpec>>{
-            false: _buildStages(type, highLine: false),
-            true: _buildStages(type, highLine: true),
-          }),
-      });
-
-  List<_StageSpec> _stages(SequenceType type, SequenceContext context) {
-    final highLine =
-        context.defendingTactics.defensiveLine == DefensiveLine.high;
-    return _stageCache[type]![highLine]!;
+  List<SequenceStageProfile> _stages(
+    SequenceType type,
+    SequenceContext context,
+  ) {
+    final stages = balance.matchday.sequenceStages[type]!;
+    if (type != SequenceType.throughBall ||
+        context.defendingTactics.defensiveLine != DefensiveLine.high) {
+      return stages;
+    }
+    final stage = stages[1];
+    return [
+      stages[0],
+      SequenceStageProfile(
+        attackerPositions: stage.attackerPositions,
+        defenderPositions: stage.defenderPositions,
+        attackerWeights: stage.attackerWeights,
+        defenderWeights: balance.matchday.throughBallHighLineDefenderWeights,
+        attackerAerialWeight: stage.attackerAerialWeight,
+        defenderAerialWeight: stage.defenderAerialWeight,
+      ),
+    ];
   }
-
-  static List<_StageSpec> _buildStages(
-    SequenceType type, {
-    required bool highLine,
-  }) => List.unmodifiable(switch (type) {
-    SequenceType.centralBuildUp => [
-      const _StageSpec(
-        attackerPositions: {Position.cm, Position.cam, Position.cdm},
-        defenderPositions: {Position.cdm, Position.cm, Position.cb},
-        attackerWeights: {
-          EffectiveAttribute.passing: 0.55,
-          EffectiveAttribute.dribbling: 0.30,
-          EffectiveAttribute.physicality: 0.15,
-        },
-        defenderWeights: {
-          EffectiveAttribute.defending: 0.55,
-          EffectiveAttribute.physicality: 0.30,
-          EffectiveAttribute.pace: 0.15,
-        },
-      ),
-      const _StageSpec(
-        attackerPositions: {Position.cam, Position.cm},
-        defenderPositions: {Position.cb},
-        attackerWeights: {
-          EffectiveAttribute.passing: 0.70,
-          EffectiveAttribute.dribbling: 0.30,
-        },
-        defenderWeights: {
-          EffectiveAttribute.defending: 0.60,
-          EffectiveAttribute.pace: 0.40,
-        },
-      ),
-    ],
-    SequenceType.wingPlay => [
-      const _StageSpec(
-        attackerPositions: {
-          Position.lw,
-          Position.rw,
-          Position.lb,
-          Position.rb,
-          Position.lwb,
-          Position.rwb,
-        },
-        defenderPositions: {
-          Position.lb,
-          Position.rb,
-          Position.lwb,
-          Position.rwb,
-        },
-        attackerWeights: {
-          EffectiveAttribute.pace: 0.40,
-          EffectiveAttribute.dribbling: 0.45,
-          EffectiveAttribute.physicality: 0.15,
-        },
-        defenderWeights: {
-          EffectiveAttribute.defending: 0.45,
-          EffectiveAttribute.pace: 0.40,
-          EffectiveAttribute.physicality: 0.15,
-        },
-      ),
-      const _StageSpec(
-        attackerPositions: {Position.lw, Position.rw, Position.cam},
-        defenderPositions: {Position.cb},
-        attackerWeights: {
-          EffectiveAttribute.passing: 0.50,
-          EffectiveAttribute.dribbling: 0.50,
-        },
-        defenderWeights: {
-          EffectiveAttribute.defending: 0.70,
-          EffectiveAttribute.physicality: 0.30,
-        },
-      ),
-    ],
-    SequenceType.crossFromWide => [
-      const _StageSpec(
-        attackerPositions: {Position.lw, Position.rw},
-        defenderPositions: {
-          Position.lb,
-          Position.rb,
-          Position.lwb,
-          Position.rwb,
-        },
-        attackerWeights: {
-          EffectiveAttribute.passing: 0.80,
-          EffectiveAttribute.pace: 0.20,
-        },
-        defenderWeights: {
-          EffectiveAttribute.defending: 0.60,
-          EffectiveAttribute.pace: 0.40,
-        },
-      ),
-      const _StageSpec(
-        attackerPositions: {Position.st},
-        defenderPositions: {Position.cb},
-        attackerWeights: {
-          EffectiveAttribute.physicality: 0.55,
-          EffectiveAttribute.shooting: 0.30,
-        },
-        defenderWeights: {
-          EffectiveAttribute.defending: 0.50,
-          EffectiveAttribute.physicality: 0.35,
-        },
-        attackerAerialWeight: 0.15,
-        defenderAerialWeight: 0.15,
-      ),
-    ],
-    SequenceType.throughBall => [
-      const _StageSpec(
-        attackerPositions: {Position.cam, Position.cm},
-        defenderPositions: {Position.cdm},
-        attackerWeights: {
-          EffectiveAttribute.passing: 0.85,
-          EffectiveAttribute.dribbling: 0.15,
-        },
-        defenderWeights: {
-          EffectiveAttribute.defending: 0.50,
-          EffectiveAttribute.physicality: 0.50,
-        },
-      ),
-      _StageSpec(
-        attackerPositions: const {Position.st, Position.lw, Position.rw},
-        defenderPositions: const {Position.cb},
-        attackerWeights: const {
-          EffectiveAttribute.pace: 0.70,
-          EffectiveAttribute.dribbling: 0.30,
-        },
-        defenderWeights: highLine
-            ? const {
-                EffectiveAttribute.pace: 0.65,
-                EffectiveAttribute.defending: 0.45,
-              }
-            : const {
-                EffectiveAttribute.pace: 0.55,
-                EffectiveAttribute.defending: 0.45,
-              },
-      ),
-    ],
-    SequenceType.individualDribble => [
-      const _StageSpec(
-        attackerPositions: {
-          Position.lw,
-          Position.rw,
-          Position.cam,
-          Position.st,
-        },
-        defenderPositions: {
-          Position.lb,
-          Position.rb,
-          Position.lwb,
-          Position.rwb,
-          Position.cb,
-        },
-        attackerWeights: {
-          EffectiveAttribute.dribbling: 0.60,
-          EffectiveAttribute.pace: 0.25,
-          EffectiveAttribute.physicality: 0.15,
-        },
-        defenderWeights: {
-          EffectiveAttribute.defending: 0.55,
-          EffectiveAttribute.pace: 0.25,
-          EffectiveAttribute.physicality: 0.20,
-        },
-      ),
-      const _StageSpec(
-        attackerPositions: {
-          Position.lw,
-          Position.rw,
-          Position.cam,
-          Position.st,
-        },
-        defenderPositions: {Position.cb},
-        attackerWeights: {
-          EffectiveAttribute.dribbling: 0.50,
-          EffectiveAttribute.shooting: 0.50,
-        },
-        defenderWeights: {
-          EffectiveAttribute.defending: 0.80,
-          EffectiveAttribute.physicality: 0.20,
-        },
-      ),
-    ],
-    SequenceType.counterAttack => [
-      const _StageSpec(
-        attackerPositions: {Position.st, Position.lw, Position.rw},
-        defenderPositions: {Position.cb, Position.lb, Position.rb},
-        attackerWeights: {
-          EffectiveAttribute.pace: 0.50,
-          EffectiveAttribute.dribbling: 0.30,
-          EffectiveAttribute.passing: 0.20,
-        },
-        defenderWeights: {
-          EffectiveAttribute.pace: 0.60,
-          EffectiveAttribute.defending: 0.40,
-        },
-      ),
-      const _StageSpec(
-        attackerPositions: {Position.st, Position.lw, Position.rw},
-        defenderPositions: {Position.cb, Position.lb, Position.rb},
-        attackerWeights: {
-          EffectiveAttribute.shooting: 0.55,
-          EffectiveAttribute.dribbling: 0.25,
-          EffectiveAttribute.pace: 0.20,
-        },
-        defenderWeights: {
-          EffectiveAttribute.defending: 0.65,
-          EffectiveAttribute.pace: 0.35,
-        },
-      ),
-    ],
-    SequenceType.longBall => [
-      const _StageSpec(
-        attackerPositions: {Position.st},
-        defenderPositions: {Position.cb},
-        attackerWeights: {
-          EffectiveAttribute.physicality: 0.50,
-          EffectiveAttribute.dribbling: 0.35,
-        },
-        defenderWeights: {
-          EffectiveAttribute.defending: 0.45,
-          EffectiveAttribute.physicality: 0.40,
-        },
-        attackerAerialWeight: 0.15,
-        defenderAerialWeight: 0.15,
-      ),
-    ],
-    SequenceType.setPiece => const [],
-  });
 
   SequenceShotKind _shotKind(SequenceType type) => switch (type) {
     SequenceType.crossFromWide ||
@@ -549,7 +333,9 @@ class SequenceChainResolver {
         player: _positionWeight(
           assigned[player.id] ?? player.position,
           allowed,
-          previous == player ? 0.5 : 1.0,
+          previous == player
+              ? balance.matchday.chainRepeatPlayerMultiplier
+              : 1.0,
         ),
     });
   }
@@ -558,7 +344,11 @@ class SequenceChainResolver {
     Position position,
     Set<Position> allowed,
     double repeatPenalty,
-  ) => (allowed.contains(position) ? 3.0 : 1.0) * repeatPenalty;
+  ) =>
+      (allowed.contains(position)
+          ? balance.matchday.chainAllowedPositionWeight
+          : balance.matchday.chainOtherPositionWeight) *
+      repeatPenalty;
 
   double _rating(
     Player player,
@@ -614,22 +404,4 @@ class SequenceChainResolver {
           EffectiveAttribute.physicality => value.stats.physicality.toDouble(),
         },
       );
-}
-
-class _StageSpec {
-  const _StageSpec({
-    required this.attackerPositions,
-    required this.defenderPositions,
-    required this.attackerWeights,
-    required this.defenderWeights,
-    this.attackerAerialWeight = 0.0,
-    this.defenderAerialWeight = 0.0,
-  });
-
-  final Set<Position> attackerPositions;
-  final Set<Position> defenderPositions;
-  final DuelAttributeWeights attackerWeights;
-  final DuelAttributeWeights defenderWeights;
-  final double attackerAerialWeight;
-  final double defenderAerialWeight;
 }

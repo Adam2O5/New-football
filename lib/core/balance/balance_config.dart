@@ -1,3 +1,4 @@
+export 'package:new_football/core/balance/simulation_profiles_balance.dart';
 import 'package:new_football/core/balance/seed_balance.dart';
 import 'package:new_football/core/balance/scouting_balance.dart';
 import 'package:new_football/core/balance/ui_balance.dart';

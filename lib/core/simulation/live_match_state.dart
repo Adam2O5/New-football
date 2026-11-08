@@ -25,10 +25,10 @@ class LiveMatchState {
     this.awaySubsUsed = 0,
     this.homeSubWindows = 0,
     this.awaySubWindows = 0,
-    this.homeChemistry = 50.0,
-    this.awayChemistry = 50.0,
-    this.homeAtmosphere = 50,
-    this.awayAtmosphere = 50,
+    double? homeChemistry,
+    double? awayChemistry,
+    int? homeAtmosphere,
+    int? awayAtmosphere,
     this.homeDoctorCareMult = 1.0,
     this.awayDoctorCareMult = 1.0,
     this.administrativeResult,
@@ -44,7 +44,15 @@ class LiveMatchState {
     this.awayUnitRatings,
     Map<String, EffectivePlayerAttributes>? homeEffectiveAttributes,
     Map<String, EffectivePlayerAttributes>? awayEffectiveAttributes,
-  }) : homeEffectiveAttributes = homeEffectiveAttributes ?? const {},
+  }) : homeChemistry =
+           homeChemistry ?? balance.matchday.runtimeFallbackChemistry,
+       awayChemistry =
+           awayChemistry ?? balance.matchday.runtimeFallbackChemistry,
+       homeAtmosphere =
+           homeAtmosphere ?? balance.matchday.runtimeFallbackAtmosphere,
+       awayAtmosphere =
+           awayAtmosphere ?? balance.matchday.runtimeFallbackAtmosphere,
+       homeEffectiveAttributes = homeEffectiveAttributes ?? const {},
        awayEffectiveAttributes = awayEffectiveAttributes ?? const {},
        homeStartingLineup = List.unmodifiable(
          startingHomeLineup ?? state.homeLineup,

@@ -50,7 +50,11 @@ class DuelResolver {
     final dispersion = dispersionOverride ?? balance.matchday.duelDispersion;
     final probability =
         1.0 /
-        (1.0 + math.pow(10.0, (noisyDefender - noisyAttacker) / dispersion));
+        (1.0 +
+            math.pow(
+              balance.matchday.duelLogisticBase,
+              (noisyDefender - noisyAttacker) / dispersion,
+            ));
     final winner = resolveWinner ? random.nextDouble() < probability : null;
 
     return DuelResult(

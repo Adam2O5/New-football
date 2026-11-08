@@ -4,6 +4,8 @@ import 'package:new_football/core/models/enums.dart';
 /// knobs moved to `TradeValueBalance` (`trade_value_balance.dart`).
 class PlayerBalance {
   const PlayerBalance({
+    this.heatStaminaMultiplier = 1.15,
+
     this.suspensionGamesClampMax = 100,
     this.rolloverStamina = 90,
     this.attributeMin = defaultAttributeMin,
@@ -64,6 +66,8 @@ class PlayerBalance {
   static const defaultAttributeMax = 99;
   static const defaultInitialStamina = 100;
   static const defaultInitialForm = 5.0;
+  final double heatStaminaMultiplier;
+
   final int attributeMin;
   final int suspensionGamesClampMax;
   final int rolloverStamina;
@@ -136,7 +140,8 @@ class PlayerBalance {
   /// Weighted OVR face-stats per outfield position (weights need not sum to 1).
   final Map<Position, OutfieldAttrWeights> outfieldOverallWeights;
 
-  /// How many tallest outfield players feed set-piece / aerial averages.
+  /// Tallest outfield sample for the team height indicator. Live set pieces
+  /// use independent attacking and defending samples in MatchdayBalance.
   final int tallestOutfieldSampleSize;
 
   // wages untouchable
@@ -287,7 +292,7 @@ class PlayerBalance {
       PressingIntensity.low => 0.90,
       PressingIntensity.medium => 1.0,
     };
-    if (weather == Weather.heat) multiplier *= 1.15;
+    if (weather == Weather.heat) multiplier *= heatStaminaMultiplier;
     if (isDerby) multiplier *= 1.05;
     return multiplier * additionalMultiplier;
   }
