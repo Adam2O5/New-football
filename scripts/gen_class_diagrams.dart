@@ -8,6 +8,7 @@ import 'dart:io';
 
 import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/dart/ast/visitor.dart';
 
 import 'class_diagram_logic.dart';
 
@@ -57,6 +58,8 @@ final class DiagramFile {
   final Set<String>? only;
 }
 
+enum SectionKind { classes, providers, screens }
+
 final class DiagramGroup {
   const DiagramGroup({
     required this.page,
@@ -65,6 +68,7 @@ final class DiagramGroup {
     required this.files,
     this.showMembers = true,
     this.includePrivate = false,
+    this.section = SectionKind.classes,
   });
 
   final String page;
@@ -73,6 +77,7 @@ final class DiagramGroup {
   final List<DiagramFile> files;
   final bool showMembers;
   final bool includePrivate;
+  final SectionKind section;
 }
 
 /// Every class-diagram file group. Insertion order is the document order.
@@ -181,6 +186,290 @@ const groups = <String, DiagramGroup>{
       ),
     ],
   ),
+  'services.calendar': DiagramGroup(
+    page: 'services.md',
+    title: 'Sezon i kalendarz',
+    description:
+        'Rejestr zdarzeń kalendarza, generator terminarza oraz `SeasonService` '
+        'z mixinami faz sezonu, draftu, play-in, play-off i loterii.',
+    includePrivate: true,
+    files: [
+      DiagramFile('lib/core/services/calendar_event_registry.dart'),
+      DiagramFile('lib/core/services/calendar_service.dart'),
+      DiagramFile('lib/core/services/schedule_generator.dart'),
+      DiagramFile('lib/core/services/season_service.dart'),
+      DiagramFile('lib/core/services/season_awards.dart'),
+      DiagramFile('lib/core/services/season_draft.dart'),
+      DiagramFile('lib/core/services/season_fixtures.dart'),
+      DiagramFile('lib/core/services/season_lottery.dart'),
+      DiagramFile('lib/core/services/season_offseason_events.dart'),
+      DiagramFile('lib/core/services/season_play_in.dart'),
+      DiagramFile('lib/core/services/season_playoffs.dart'),
+      DiagramFile('lib/core/services/season_post_match.dart'),
+      DiagramFile('lib/core/services/season_rollover.dart'),
+      DiagramFile('lib/core/services/season_scouting.dart'),
+      DiagramFile('lib/core/services/lottery_service.dart'),
+    ],
+  ),
+  'services.day': DiagramGroup(
+    page: 'services.md',
+    title: 'Potok dnia',
+    description:
+        '`DayPipeline` i `DaySimulator` oraz mixiny wyniku meczu, granicy '
+        'tygodnia i aktualizacji świata. Obok jest runner symulacji, także '
+        'wariant na izolacie.',
+    includePrivate: true,
+    files: [
+      DiagramFile('lib/core/services/day_pipeline.dart'),
+      DiagramFile('lib/core/services/day_simulation_result.dart'),
+      DiagramFile('lib/core/services/day_simulator.dart'),
+      DiagramFile('lib/core/services/day_match_result_application.dart'),
+      DiagramFile('lib/core/services/day_round_resolution.dart'),
+      DiagramFile('lib/core/services/day_weekly_boundary.dart'),
+      DiagramFile('lib/core/services/day_world_updates.dart'),
+      DiagramFile('lib/core/services/simulation_worker.dart'),
+    ],
+  ),
+  'services.market': DiagramGroup(
+    page: 'services.md',
+    title: 'Rynek kontraktów',
+    description:
+        '`ContractMarketService` złożony z mixinów ofert, RFA, podpisu i '
+        'finalizacji, razem z wyceną oferty, negocjacjami i sztabem.',
+    includePrivate: true,
+    files: [
+      DiagramFile('lib/core/services/contract_market_service.dart'),
+      DiagramFile('lib/core/services/contract_market_ai_bridge.dart'),
+      DiagramFile('lib/core/services/contract_market_draft_rights.dart'),
+      DiagramFile('lib/core/services/contract_market_finalization.dart'),
+      DiagramFile('lib/core/services/contract_market_helpers.dart'),
+      DiagramFile('lib/core/services/contract_market_player_offers.dart'),
+      DiagramFile('lib/core/services/contract_market_resolution.dart'),
+      DiagramFile('lib/core/services/contract_market_rfa.dart'),
+      DiagramFile('lib/core/services/contract_market_signing.dart'),
+      DiagramFile('lib/core/services/contract_market_staff_offers.dart'),
+      DiagramFile('lib/core/services/contract_service.dart'),
+      DiagramFile('lib/core/services/contract_period_service.dart'),
+      DiagramFile('lib/core/services/negotiation_rules.dart'),
+      DiagramFile('lib/core/services/negotiation_service.dart'),
+      DiagramFile('lib/core/services/staff_service.dart'),
+    ],
+  ),
+  'services.trades': DiagramGroup(
+    page: 'services.md',
+    title: 'Wymiany i draft',
+    description:
+        'Oferta wymiany, cap, picki, mock draft i prospect. Walidacja wymiany '
+        'i przesunięcie slotu draftu są osobnymi typami wynikowymi.',
+    files: [
+      DiagramFile('lib/core/services/trade_service.dart'),
+      DiagramFile('lib/core/services/draft_service.dart'),
+      DiagramFile('lib/core/services/draft_trade_service.dart'),
+      DiagramFile('lib/core/services/salary_cap_service.dart'),
+      DiagramFile('lib/core/services/mock_draft_service.dart'),
+      DiagramFile('lib/core/services/prospect_service.dart'),
+    ],
+  ),
+  'services.events': DiagramGroup(
+    page: 'services.md',
+    title: 'Zdarzenia i wiadomości',
+    description:
+        'Zdarzenia zawodnika i drużyny, skrzynka, rozwój, dyscyplina i '
+        'kontuzje. Mixiny dzielą decyzje, triggery i treść wiadomości.',
+    includePrivate: true,
+    files: [
+      DiagramFile('lib/core/services/player_event_service.dart'),
+      DiagramFile('lib/core/services/player_event_decisions.dart'),
+      DiagramFile('lib/core/services/player_event_helpers.dart'),
+      DiagramFile('lib/core/services/player_event_messages.dart'),
+      DiagramFile('lib/core/services/player_event_triggers.dart'),
+      DiagramFile('lib/core/services/team_event_service.dart'),
+      DiagramFile('lib/core/services/team_event_decisions.dart'),
+      DiagramFile('lib/core/services/team_event_helpers.dart'),
+      DiagramFile('lib/core/services/team_event_messages.dart'),
+      DiagramFile('lib/core/services/team_event_promises.dart'),
+      DiagramFile('lib/core/services/team_event_triggers.dart'),
+      DiagramFile('lib/core/services/message_service.dart'),
+      DiagramFile('lib/core/services/message_text_service.dart'),
+      DiagramFile('lib/core/services/development_service.dart'),
+      DiagramFile('lib/core/services/discipline_service.dart'),
+      DiagramFile('lib/core/services/injury_service.dart'),
+    ],
+  ),
+  'simulation.engine': DiagramGroup(
+    page: 'simulation.md',
+    title: 'Silnik meczu',
+    description:
+        'Wejście do meczu, stan na żywo, walidacja składu, efekty kontekstu '
+        'i sam silnik minuty. Emitowane komunikaty meczu są obok.',
+    includePrivate: true,
+    files: [
+      DiagramFile('lib/core/simulation/match_engine.dart'),
+      DiagramFile('lib/core/simulation/match_bootstrap.dart'),
+      DiagramFile('lib/core/simulation/live_match_state.dart'),
+      DiagramFile('lib/core/simulation/matchday_runtime.dart'),
+      DiagramFile('lib/core/simulation/pre_match_validator.dart'),
+      DiagramFile('lib/core/simulation/match_context_factory.dart'),
+      DiagramFile('lib/core/simulation/match_context_effects.dart'),
+      DiagramFile('lib/core/simulation/match_message_emitter.dart'),
+    ],
+  ),
+  'simulation.resolvers': DiagramGroup(
+    page: 'simulation.md',
+    title: 'Rozstrzygnięcia akcji',
+    description:
+        'Pojedynki, bramkarz, strzał, sekwencja, stały fragment, faul i '
+        'składanie statystyk meczu.',
+    includePrivate: true,
+    files: [
+      DiagramFile('lib/core/simulation/duel_resolver.dart'),
+      DiagramFile('lib/core/simulation/goalkeeper_resolver.dart'),
+      DiagramFile('lib/core/simulation/shot_resolver.dart'),
+      DiagramFile('lib/core/simulation/shot_models.dart'),
+      DiagramFile('lib/core/simulation/sequence_resolver.dart'),
+      DiagramFile('lib/core/simulation/sequence_chain_resolver.dart'),
+      DiagramFile('lib/core/simulation/set_piece_resolver.dart'),
+      DiagramFile('lib/core/simulation/match_incident_resolver.dart'),
+      DiagramFile('lib/core/simulation/match_stats.dart'),
+    ],
+  ),
+  'simulation.tactics': DiagramGroup(
+    page: 'simulation.md',
+    title: 'Oceny i taktyka',
+    description:
+        'Atrybuty efektywne, oceny formacji i kształt drużyny razem z '
+        '`core/tactics`: ustawienie, sloty składu, role i zmiany.',
+    includePrivate: true,
+    files: [
+      DiagramFile('lib/core/simulation/effective_attributes.dart'),
+      DiagramFile('lib/core/simulation/unit_ratings.dart'),
+      DiagramFile('lib/core/simulation/team_shape.dart'),
+      DiagramFile('lib/core/tactics/tactics_setup.dart'),
+      DiagramFile('lib/core/tactics/formation_layout.dart'),
+      DiagramFile('lib/core/tactics/lineup_slots.dart'),
+      DiagramFile('lib/core/tactics/player_sort.dart'),
+      DiagramFile('lib/core/tactics/position_group.dart'),
+      DiagramFile('lib/core/tactics/position_role_fit.dart'),
+      DiagramFile('lib/core/tactics/substitute_candidates.dart'),
+    ],
+  ),
+  'ai.evaluation': DiagramGroup(
+    page: 'ai.md',
+    title: 'Ocena składu i aktywów',
+    description:
+        'Potrzeby pozycji, wartość picka i paczki oraz kontekst, z którego '
+        'korzystają decyzje draftu, wymiany i rynku.',
+    includePrivate: true,
+    files: [
+      DiagramFile('lib/core/ai/ai_evaluation_models.dart'),
+      DiagramFile('lib/core/ai/ai_evaluation_context.dart'),
+      DiagramFile('lib/core/ai/ai_evaluation_service.dart'),
+    ],
+  ),
+  'ai.decisions': DiagramGroup(
+    page: 'ai.md',
+    title: 'Decyzje AI',
+    description:
+        'Meczowy plan AI, draft, wymiana, rynek kontraktów i prowadzenie '
+        'składu. `TeamAiService` spina te serwisy.',
+    includePrivate: true,
+    files: [
+      DiagramFile('lib/core/ai/ai_matchday_models.dart'),
+      DiagramFile('lib/core/ai/ai_matchday_service.dart'),
+      DiagramFile('lib/core/ai/ai_draft_models.dart'),
+      DiagramFile('lib/core/ai/ai_draft_service.dart'),
+      DiagramFile('lib/core/ai/ai_trade_models.dart'),
+      DiagramFile('lib/core/ai/ai_trade_service.dart'),
+      DiagramFile('lib/core/ai/ai_contract_market_service.dart'),
+      DiagramFile('lib/core/ai/ai_roster_management_service.dart'),
+      DiagramFile('lib/core/ai/team_ai_service.dart'),
+    ],
+  ),
+  'balance.config': DiagramGroup(
+    page: 'balance.md',
+    title: 'Konfiguracja balansu',
+    description:
+        '`BalanceConfig` i klasy parametrów. Pola liczbowe są pominięte. '
+        'Katalogi szablonów wiadomości i rywalizacji zostają poza diagramem, '
+        'bo to tabele treści, a nie kształt konfiguracji.',
+    showMembers: false,
+    files: [
+      DiagramFile('lib/core/balance/balance_config.dart'),
+      DiagramFile('lib/core/balance/ai_balance.dart'),
+      DiagramFile('lib/core/balance/contract_neg_balance.dart'),
+      DiagramFile('lib/core/balance/development_balance.dart'),
+      DiagramFile('lib/core/balance/draft_awards_balance.dart'),
+      DiagramFile('lib/core/balance/events_balance.dart'),
+      DiagramFile('lib/core/balance/finance_balance.dart'),
+      DiagramFile('lib/core/balance/injury_catalog.dart'),
+      DiagramFile('lib/core/balance/matchday_balance.dart'),
+      DiagramFile('lib/core/balance/messages_balance.dart'),
+      DiagramFile('lib/core/balance/player_balance.dart'),
+      DiagramFile('lib/core/balance/scouting_balance.dart'),
+      DiagramFile('lib/core/balance/seed_balance.dart'),
+      DiagramFile('lib/core/balance/simulation_profiles_balance.dart'),
+      DiagramFile('lib/core/balance/staff_balance.dart'),
+      DiagramFile('lib/core/balance/tactics_balance.dart'),
+      DiagramFile('lib/core/balance/team_calendar_balance.dart'),
+      DiagramFile('lib/core/balance/trade_value_balance.dart'),
+      DiagramFile('lib/core/balance/ui_balance.dart'),
+    ],
+  ),
+  'persistence.saves': DiagramGroup(
+    page: 'persistence.md',
+    title: 'Zapis i losowość',
+    description:
+        'Repozytorium zapisu, jego transakcja i odczyt, adapter interfejsu '
+        'z `core/services` oraz generatory liczb z `core/random`.',
+    includePrivate: true,
+    files: [
+      DiagramFile('lib/data/save_repository.dart'),
+      DiagramFile('lib/data/save_repository_raw_operations.dart'),
+      DiagramFile('lib/data/save_repository_transaction.dart'),
+      DiagramFile('lib/data/save_repository_types.dart'),
+      DiagramFile('lib/data/save_recovery.dart'),
+      DiagramFile('lib/data/save_directory_coordinator.dart'),
+      DiagramFile('lib/data/save_management_repository_adapter.dart'),
+      DiagramFile('lib/data/staff_data_compatibility.dart'),
+      DiagramFile('lib/core/services/save_management_repository.dart'),
+      DiagramFile('lib/core/random/match_random.dart'),
+      DiagramFile('lib/core/random/seeds.dart'),
+    ],
+  ),
+  'app.providers': DiagramGroup(
+    page: 'app.md',
+    title: 'Providery i serwisy',
+    description:
+        'Zmienne `*Provider` i typ, który konstruują albo deklarują w '
+        'argumencie typu. Strzałka prowadzi do serwisu, repozytorium albo '
+        'konfiguracji, a nie do innych providerów.',
+    section: SectionKind.providers,
+    files: [
+      DiagramFile('lib/app/providers/game_provider.dart'),
+      DiagramFile('lib/app/providers/game_service_providers.dart'),
+      DiagramFile('lib/app/providers/game_simulation_types.dart'),
+      DiagramFile('lib/app/providers/game_controller_calendar_feedback.dart'),
+      DiagramFile('lib/app/providers/game_controller_contracts.dart'),
+      DiagramFile('lib/app/providers/game_controller_draft_scouting.dart'),
+      DiagramFile('lib/app/providers/game_controller_messages.dart'),
+      DiagramFile('lib/app/providers/game_controller_simulation.dart'),
+      DiagramFile('lib/app/providers/development_provider.dart'),
+      DiagramFile('lib/app/providers/message_confirmation.dart'),
+      DiagramFile('lib/app/providers/save_management_provider.dart'),
+      DiagramFile('lib/app/providers/search_filters_provider.dart'),
+      DiagramFile('lib/app/providers/settings_provider.dart'),
+      DiagramFile('lib/app/providers/club_branding_provider.dart'),
+    ],
+  ),
+  'app.screens': DiagramGroup(
+    page: 'app.md',
+    title: 'Ekrany i providery',
+    description:
+        'Pliki `*_screen.dart` i ich importy z `app/providers`. Widżety, '
+        'sekcje i dialogi z tego katalogu nie wchodzą na listę.',
+    section: SectionKind.screens,
+    files: [DiagramFile('lib/app/screens')],
+  ),
 };
 
 final class PageInfo {
@@ -207,6 +496,47 @@ const pages = <String, PageInfo>{
         'generatory i stan UI:',
     omittedUnder: 'lib/core/models',
   ),
+  'services.md': PageInfo(
+    title: 'Serwisy',
+    intro:
+        'Pięć wycinków `lib/core/services`. Mixiny prywatne są na diagramie, '
+        'bo to one dzielą sezon, dzień, rynek i zdarzenia.',
+    omittedUnder: 'lib/core/services',
+  ),
+  'simulation.md': PageInfo(
+    title: 'Symulacja i taktyka',
+    intro:
+        '`lib/core/simulation` razem z `lib/core/tactics`. Silnik, '
+        'rozstrzygnięcia akcji oraz oceny z ustawieniem taktycznym.',
+    omittedUnder: 'lib/core/simulation',
+  ),
+  'ai.md': PageInfo(
+    title: 'Sztuczna inteligencja',
+    intro:
+        'Ocena składu jest osobno od decyzji meczowych, draftu, wymiany i '
+        'rynku, żeby żaden diagram nie przekroczył około 40 typów.',
+    omittedUnder: 'lib/core/ai',
+  ),
+  'balance.md': PageInfo(
+    title: 'Balans',
+    intro:
+        'Klasy konfiguracji bez pól liczbowych. Relacja pokazuje, co '
+        '`BalanceConfig` trzyma.',
+    omittedUnder: 'lib/core/balance',
+  ),
+  'persistence.md': PageInfo(
+    title: 'Trwałość',
+    intro:
+        '`lib/data` oraz `lib/core/random`. Interfejs repozytorium zostaje '
+        'w `core/services`, a adapter w `data` go implementuje.',
+    omittedUnder: 'lib/data',
+  ),
+  'app.md': PageInfo(
+    title: 'Aplikacja',
+    intro:
+        'Providery i serwisy, które konstruują, oraz lista ekranów. Widżety '
+        'nie są na tej stronie.',
+  ),
 };
 
 const _skippedMembers = <String>{
@@ -230,7 +560,19 @@ void main() {
   final importGraph = _scanImports(root, library);
   final diagrams = [
     for (final entry in groups.entries)
-      _renderGroup(library, entry.key, entry.value),
+      switch (entry.value.section) {
+        SectionKind.classes => _renderGroup(library, entry.key, entry.value),
+        SectionKind.providers => _renderProviderServices(
+          library,
+          entry.key,
+          entry.value,
+        ),
+        SectionKind.screens => _renderScreenProviders(
+          library,
+          entry.key,
+          entry.value,
+        ),
+      },
   ];
   final outDir = Directory('${root.path}/docs/architecture');
   outDir.createSync(recursive: true);
@@ -526,6 +868,8 @@ final class RenderedDiagram {
     required this.files,
     required this.typeCount,
     required this.mermaid,
+    this.fenced = true,
+    this.countLine,
   });
 
   final String id;
@@ -535,6 +879,8 @@ final class RenderedDiagram {
   final List<String> files;
   final int typeCount;
   final String mermaid;
+  final bool fenced;
+  final String? countLine;
 }
 
 RenderedDiagram _renderGroup(_Library library, String id, DiagramGroup group) {
@@ -951,7 +1297,7 @@ List<_Relation> _relationsFor(_TypeModel type, Map<String, String> byName) {
     bool many = false,
     bool nullable = false,
   }) {
-    if (targetName == null || targetName.startsWith('_')) return;
+    if (targetName == null) return;
     final target = byName[targetName];
     if (target == null) return;
     relations.add(
@@ -1178,6 +1524,173 @@ List<String> omittedFiles(Directory root, String relativeDirectory) {
   return omitted;
 }
 
+RenderedDiagram _renderProviderServices(
+  _Library library,
+  String id,
+  DiagramGroup group,
+) {
+  final links = <String, Set<String>>{};
+  for (final file in group.files) {
+    final unit = library.unit(file.path);
+    for (final declaration in unit.declarations) {
+      if (declaration is! TopLevelVariableDeclaration) continue;
+      for (final variable in declaration.variables.variables) {
+        final name = variable.name.lexeme;
+        if (!name.endsWith('Provider') || name.startsWith('_')) continue;
+        links.putIfAbsent(name, () => <String>{});
+        links[name]!.addAll(_serviceDependencies(variable.initializer));
+      }
+    }
+  }
+  final providers = links.keys.toList()..sort();
+  final services = <String>{
+    for (final dependencies in links.values) ...dependencies,
+  }.toList()..sort();
+  final buffer = StringBuffer('flowchart LR\n');
+  for (final name in providers) {
+    buffer.writeln('    ${_flowId(name)}["$name"]');
+  }
+  for (final name in services) {
+    buffer.writeln('    ${_flowId(name)}["$name"]');
+  }
+  final edges = <String>[];
+  for (final provider in providers) {
+    final dependencies = links[provider]!.toList()..sort();
+    for (final dependency in dependencies) {
+      edges.add('    ${_flowId(provider)} --> ${_flowId(dependency)}');
+    }
+  }
+  edges.sort();
+  for (final edge in edges) {
+    buffer.writeln(edge);
+  }
+  final mermaid = buffer.toString();
+  _assertMermaidSafe(id, mermaid);
+  return RenderedDiagram(
+    id: id,
+    page: group.page,
+    title: group.title,
+    description: group.description,
+    files: [for (final file in group.files) file.path],
+    typeCount: providers.length,
+    mermaid: mermaid,
+    countLine: polishCount(
+      providers.length,
+      one: 'provider',
+      few: 'providery',
+      many: 'providerów',
+    ),
+  );
+}
+
+RenderedDiagram _renderScreenProviders(
+  _Library library,
+  String id,
+  DiagramGroup group,
+) {
+  final directory = Directory('${library.root.path}/lib/app/screens');
+  final files =
+      directory
+          .listSync()
+          .whereType<File>()
+          .map((file) => relativePosix(library.root.path, file.path))
+          .where((path) => path.endsWith('_screen.dart'))
+          .toList()
+        ..sort();
+  final lines = <String>[];
+  for (final file in files) {
+    final unit = library.unit(file);
+    final providers = <String>{};
+    for (final directive in unit.directives) {
+      if (directive is! ImportDirective) continue;
+      final uri = directive.uri.stringValue;
+      if (uri == null) continue;
+      final resolved = resolveImport(file, uri);
+      if (resolved == null) continue;
+      final path = resolved.startsWith('lib/')
+          ? resolved.substring(4)
+          : resolved;
+      if (!path.startsWith('app/providers/') || !path.endsWith('.dart')) {
+        continue;
+      }
+      providers.add(path.split('/').last);
+    }
+    final names = providers.toList()..sort();
+    final screen = file.split('/').last;
+    final target = names.isEmpty
+        ? 'brak importu providera'
+        : names.map((name) => '`$name`').join(', ');
+    lines.add('- `$screen` → $target');
+  }
+  return RenderedDiagram(
+    id: id,
+    page: group.page,
+    title: group.title,
+    description: group.description,
+    files: files,
+    typeCount: files.length,
+    mermaid: lines.join('\n'),
+    fenced: false,
+    countLine: polishCount(
+      files.length,
+      one: 'ekran',
+      few: 'ekrany',
+      many: 'ekranów',
+    ),
+  );
+}
+
+const _serviceSuffixes = [
+  'Service',
+  'Repository',
+  'Runner',
+  'Engine',
+  'Factory',
+  'Pipeline',
+  'Config',
+  'Simulator',
+];
+
+Set<String> _serviceDependencies(Expression? initializer) {
+  if (initializer == null) return const {};
+  final visitor = _ServiceDependencyVisitor();
+  initializer.accept(visitor);
+  return visitor.names;
+}
+
+final class _ServiceDependencyVisitor extends RecursiveAstVisitor<void> {
+  final names = <String>{};
+
+  @override
+  void visitInstanceCreationExpression(InstanceCreationExpression node) {
+    _add(node.constructorName.type.name.lexeme);
+    super.visitInstanceCreationExpression(node);
+  }
+
+  @override
+  void visitMethodInvocation(MethodInvocation node) {
+    final name = node.methodName.name;
+    if (name == 'Provider' || name.endsWith('Provider')) {
+      final arguments = node.typeArguments?.arguments;
+      if (arguments != null) {
+        for (final argument in arguments) {
+          if (argument is NamedType) _add(argument.name.lexeme);
+        }
+      }
+    } else {
+      _add(name);
+    }
+    super.visitMethodInvocation(node);
+  }
+
+  void _add(String name) {
+    if (_serviceSuffixes.any(name.endsWith)) names.add(name);
+  }
+}
+
+String _flowId(String name) =>
+    'n_${name.replaceAll(RegExp(r'[^A-Za-z0-9_]'), '_')}';
+
 String renderReadme(ImportGraph graph, List<RenderedDiagram> diagrams) {
   final buffer = StringBuffer()
     ..writeln(_generatedBanner)
@@ -1368,7 +1881,7 @@ String _renderFileIndex(List<RenderedDiagram> diagrams) {
   for (final diagram in diagrams) {
     buffer
       ..writeln(
-        '#### ${diagram.title} (`${diagram.id}`, ${polishTyp(diagram.typeCount)})',
+        '#### ${diagram.title} (`${diagram.id}`, ${_diagramCount(diagram)})',
       )
       ..writeln()
       ..writeln('Plik: `docs/architecture/${diagram.page}`.')
@@ -1489,14 +2002,32 @@ String renderPage(Directory root, String page, List<RenderedDiagram> diagrams) {
       ..writeln()
       ..writeln(diagram.description)
       ..writeln()
-      ..writeln('${_capitalize(polishTyp(diagram.typeCount))} na diagramie.')
-      ..writeln()
-      ..writeln('```mermaid')
-      ..writeln(diagram.mermaid.trimRight())
-      ..writeln('```')
+      ..writeln(_diagramHeadline(diagram))
       ..writeln();
+    if (diagram.fenced) {
+      buffer
+        ..writeln('```mermaid')
+        ..writeln(diagram.mermaid.trimRight())
+        ..writeln('```')
+        ..writeln();
+    } else {
+      buffer
+        ..writeln(diagram.mermaid.trimRight())
+        ..writeln();
+    }
   }
   return buffer.toString();
+}
+
+String _diagramCount(RenderedDiagram diagram) =>
+    diagram.countLine ?? polishTyp(diagram.typeCount);
+
+String _diagramHeadline(RenderedDiagram diagram) {
+  final count = _diagramCount(diagram);
+  if (diagram.fenced && diagram.mermaid.startsWith('classDiagram')) {
+    return '${_capitalize(count)} na diagramie.';
+  }
+  return '${_capitalize(count)}.';
 }
 
 String _capitalize(String value) {

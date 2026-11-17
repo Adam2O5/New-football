@@ -222,6 +222,12 @@ classDiagram
 - `scripts/gen_class_diagrams.dart` — generator. Mapa grup to `groups`, mapa stron to `pages`.
 - `scripts/class_diagram_logic.dart` — czyste funkcje używane przez generator i testy.
 - `docs/architecture/models.md` — Modele domenowe.
+- `docs/architecture/services.md` — Serwisy.
+- `docs/architecture/simulation.md` — Symulacja i taktyka.
+- `docs/architecture/ai.md` — Sztuczna inteligencja.
+- `docs/architecture/balance.md` — Balans.
+- `docs/architecture/persistence.md` — Trwałość.
+- `docs/architecture/app.md` — Aplikacja.
 
 ### Diagramy
 
@@ -282,6 +288,249 @@ Plik: `docs/architecture/models.md`.
 - `lib/core/models/player_event_state.dart`
 - `lib/core/models/team_event_state.dart`
 - `lib/core/models/enums.dart`
+
+#### Sezon i kalendarz (`services.calendar`, 24 typy)
+
+Plik: `docs/architecture/services.md`.
+
+- `lib/core/services/calendar_event_registry.dart`
+- `lib/core/services/calendar_service.dart`
+- `lib/core/services/schedule_generator.dart`
+- `lib/core/services/season_service.dart`
+- `lib/core/services/season_awards.dart`
+- `lib/core/services/season_draft.dart`
+- `lib/core/services/season_fixtures.dart`
+- `lib/core/services/season_lottery.dart`
+- `lib/core/services/season_offseason_events.dart`
+- `lib/core/services/season_play_in.dart`
+- `lib/core/services/season_playoffs.dart`
+- `lib/core/services/season_post_match.dart`
+- `lib/core/services/season_rollover.dart`
+- `lib/core/services/season_scouting.dart`
+- `lib/core/services/lottery_service.dart`
+
+#### Potok dnia (`services.day`, 21 typów)
+
+Plik: `docs/architecture/services.md`.
+
+- `lib/core/services/day_pipeline.dart`
+- `lib/core/services/day_simulation_result.dart`
+- `lib/core/services/day_simulator.dart`
+- `lib/core/services/day_match_result_application.dart`
+- `lib/core/services/day_round_resolution.dart`
+- `lib/core/services/day_weekly_boundary.dart`
+- `lib/core/services/day_world_updates.dart`
+- `lib/core/services/simulation_worker.dart`
+
+#### Rynek kontraktów (`services.market`, 26 typów)
+
+Plik: `docs/architecture/services.md`.
+
+- `lib/core/services/contract_market_service.dart`
+- `lib/core/services/contract_market_ai_bridge.dart`
+- `lib/core/services/contract_market_draft_rights.dart`
+- `lib/core/services/contract_market_finalization.dart`
+- `lib/core/services/contract_market_helpers.dart`
+- `lib/core/services/contract_market_player_offers.dart`
+- `lib/core/services/contract_market_resolution.dart`
+- `lib/core/services/contract_market_rfa.dart`
+- `lib/core/services/contract_market_signing.dart`
+- `lib/core/services/contract_market_staff_offers.dart`
+- `lib/core/services/contract_service.dart`
+- `lib/core/services/contract_period_service.dart`
+- `lib/core/services/negotiation_rules.dart`
+- `lib/core/services/negotiation_service.dart`
+- `lib/core/services/staff_service.dart`
+
+#### Wymiany i draft (`services.trades`, 19 typów)
+
+Plik: `docs/architecture/services.md`.
+
+- `lib/core/services/trade_service.dart`
+- `lib/core/services/draft_service.dart`
+- `lib/core/services/draft_trade_service.dart`
+- `lib/core/services/salary_cap_service.dart`
+- `lib/core/services/mock_draft_service.dart`
+- `lib/core/services/prospect_service.dart`
+
+#### Zdarzenia i wiadomości (`services.events`, 23 typy)
+
+Plik: `docs/architecture/services.md`.
+
+- `lib/core/services/player_event_service.dart`
+- `lib/core/services/player_event_decisions.dart`
+- `lib/core/services/player_event_helpers.dart`
+- `lib/core/services/player_event_messages.dart`
+- `lib/core/services/player_event_triggers.dart`
+- `lib/core/services/team_event_service.dart`
+- `lib/core/services/team_event_decisions.dart`
+- `lib/core/services/team_event_helpers.dart`
+- `lib/core/services/team_event_messages.dart`
+- `lib/core/services/team_event_promises.dart`
+- `lib/core/services/team_event_triggers.dart`
+- `lib/core/services/message_service.dart`
+- `lib/core/services/message_text_service.dart`
+- `lib/core/services/development_service.dart`
+- `lib/core/services/discipline_service.dart`
+- `lib/core/services/injury_service.dart`
+
+#### Silnik meczu (`simulation.engine`, 18 typów)
+
+Plik: `docs/architecture/simulation.md`.
+
+- `lib/core/simulation/match_engine.dart`
+- `lib/core/simulation/match_bootstrap.dart`
+- `lib/core/simulation/live_match_state.dart`
+- `lib/core/simulation/matchday_runtime.dart`
+- `lib/core/simulation/pre_match_validator.dart`
+- `lib/core/simulation/match_context_factory.dart`
+- `lib/core/simulation/match_context_effects.dart`
+- `lib/core/simulation/match_message_emitter.dart`
+
+#### Rozstrzygnięcia akcji (`simulation.resolvers`, 24 typy)
+
+Plik: `docs/architecture/simulation.md`.
+
+- `lib/core/simulation/duel_resolver.dart`
+- `lib/core/simulation/goalkeeper_resolver.dart`
+- `lib/core/simulation/shot_resolver.dart`
+- `lib/core/simulation/shot_models.dart`
+- `lib/core/simulation/sequence_resolver.dart`
+- `lib/core/simulation/sequence_chain_resolver.dart`
+- `lib/core/simulation/set_piece_resolver.dart`
+- `lib/core/simulation/match_incident_resolver.dart`
+- `lib/core/simulation/match_stats.dart`
+
+#### Oceny i taktyka (`simulation.tactics`, 21 typów)
+
+Plik: `docs/architecture/simulation.md`.
+
+- `lib/core/simulation/effective_attributes.dart`
+- `lib/core/simulation/unit_ratings.dart`
+- `lib/core/simulation/team_shape.dart`
+- `lib/core/tactics/tactics_setup.dart`
+- `lib/core/tactics/formation_layout.dart`
+- `lib/core/tactics/lineup_slots.dart`
+- `lib/core/tactics/player_sort.dart`
+- `lib/core/tactics/position_group.dart`
+- `lib/core/tactics/position_role_fit.dart`
+- `lib/core/tactics/substitute_candidates.dart`
+
+#### Ocena składu i aktywów (`ai.evaluation`, 13 typów)
+
+Plik: `docs/architecture/ai.md`.
+
+- `lib/core/ai/ai_evaluation_models.dart`
+- `lib/core/ai/ai_evaluation_context.dart`
+- `lib/core/ai/ai_evaluation_service.dart`
+
+#### Decyzje AI (`ai.decisions`, 28 typów)
+
+Plik: `docs/architecture/ai.md`.
+
+- `lib/core/ai/ai_matchday_models.dart`
+- `lib/core/ai/ai_matchday_service.dart`
+- `lib/core/ai/ai_draft_models.dart`
+- `lib/core/ai/ai_draft_service.dart`
+- `lib/core/ai/ai_trade_models.dart`
+- `lib/core/ai/ai_trade_service.dart`
+- `lib/core/ai/ai_contract_market_service.dart`
+- `lib/core/ai/ai_roster_management_service.dart`
+- `lib/core/ai/team_ai_service.dart`
+
+#### Konfiguracja balansu (`balance.config`, 34 typy)
+
+Plik: `docs/architecture/balance.md`.
+
+- `lib/core/balance/balance_config.dart`
+- `lib/core/balance/ai_balance.dart`
+- `lib/core/balance/contract_neg_balance.dart`
+- `lib/core/balance/development_balance.dart`
+- `lib/core/balance/draft_awards_balance.dart`
+- `lib/core/balance/events_balance.dart`
+- `lib/core/balance/finance_balance.dart`
+- `lib/core/balance/injury_catalog.dart`
+- `lib/core/balance/matchday_balance.dart`
+- `lib/core/balance/messages_balance.dart`
+- `lib/core/balance/player_balance.dart`
+- `lib/core/balance/scouting_balance.dart`
+- `lib/core/balance/seed_balance.dart`
+- `lib/core/balance/simulation_profiles_balance.dart`
+- `lib/core/balance/staff_balance.dart`
+- `lib/core/balance/tactics_balance.dart`
+- `lib/core/balance/team_calendar_balance.dart`
+- `lib/core/balance/trade_value_balance.dart`
+- `lib/core/balance/ui_balance.dart`
+
+#### Zapis i losowość (`persistence.saves`, 27 typów)
+
+Plik: `docs/architecture/persistence.md`.
+
+- `lib/data/save_repository.dart`
+- `lib/data/save_repository_raw_operations.dart`
+- `lib/data/save_repository_transaction.dart`
+- `lib/data/save_repository_types.dart`
+- `lib/data/save_recovery.dart`
+- `lib/data/save_directory_coordinator.dart`
+- `lib/data/save_management_repository_adapter.dart`
+- `lib/data/staff_data_compatibility.dart`
+- `lib/core/services/save_management_repository.dart`
+- `lib/core/random/match_random.dart`
+- `lib/core/random/seeds.dart`
+
+#### Providery i serwisy (`app.providers`, 39 providerów)
+
+Plik: `docs/architecture/app.md`.
+
+- `lib/app/providers/game_provider.dart`
+- `lib/app/providers/game_service_providers.dart`
+- `lib/app/providers/game_simulation_types.dart`
+- `lib/app/providers/game_controller_calendar_feedback.dart`
+- `lib/app/providers/game_controller_contracts.dart`
+- `lib/app/providers/game_controller_draft_scouting.dart`
+- `lib/app/providers/game_controller_messages.dart`
+- `lib/app/providers/game_controller_simulation.dart`
+- `lib/app/providers/development_provider.dart`
+- `lib/app/providers/message_confirmation.dart`
+- `lib/app/providers/save_management_provider.dart`
+- `lib/app/providers/search_filters_provider.dart`
+- `lib/app/providers/settings_provider.dart`
+- `lib/app/providers/club_branding_provider.dart`
+
+#### Ekrany i providery (`app.screens`, 30 ekranów)
+
+Plik: `docs/architecture/app.md`.
+
+- `lib/app/screens/calendar_screen.dart`
+- `lib/app/screens/contract_screen.dart`
+- `lib/app/screens/development_screen.dart`
+- `lib/app/screens/draft_history_screen.dart`
+- `lib/app/screens/draft_screen.dart`
+- `lib/app/screens/finance_screen.dart`
+- `lib/app/screens/free_agency_screen.dart`
+- `lib/app/screens/home_screen.dart`
+- `lib/app/screens/inbox_screen.dart`
+- `lib/app/screens/load_game_screen.dart`
+- `lib/app/screens/lottery_screen.dart`
+- `lib/app/screens/main_menu_screen.dart`
+- `lib/app/screens/matchday_screen.dart`
+- `lib/app/screens/new_game_screen.dart`
+- `lib/app/screens/other_screen.dart`
+- `lib/app/screens/player_detail_screen.dart`
+- `lib/app/screens/player_stats_screen.dart`
+- `lib/app/screens/prospects_screen.dart`
+- `lib/app/screens/rankings_screen.dart`
+- `lib/app/screens/rewards_screen.dart`
+- `lib/app/screens/search_filters_screen.dart`
+- `lib/app/screens/search_screen.dart`
+- `lib/app/screens/settings_screen.dart`
+- `lib/app/screens/shell_screen.dart`
+- `lib/app/screens/squad_screen.dart`
+- `lib/app/screens/staff_screen.dart`
+- `lib/app/screens/standings_screen.dart`
+- `lib/app/screens/team_overview_screen.dart`
+- `lib/app/screens/trade_history_screen.dart`
+- `lib/app/screens/trade_screen.dart`
 
 ### Polecenie
 

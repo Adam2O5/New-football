@@ -129,6 +129,7 @@ String? mermaidProblem(String diagram) {
       .replaceAll(RegExp(r'<<[A-Za-z]+>>'), '')
       .replaceAll('<|--', '')
       .replaceAll('<|..', '')
+      .replaceAll('-->', '')
       .replaceAll('..>', '');
   if (stripped.contains('<') || stripped.contains('>')) {
     return 'raw angle brackets';
