@@ -21,10 +21,10 @@ Warstwy są numerowane od dołu. Pakiet z wyższym numerem może importować pak
 | `app/providers` | 6 |
 | `app/screens` | 7 |
 
-Czerwona krawędź (`linkStyle`, `#d1242f`) oznacza jedno z dwóch:
+Są dwa rodzaje czerwieni (`linkStyle`, `#d1242f`):
 
-- pakiet z niższej warstwy importuje pakiet z wyższej,
-- `app/screens` importuje pakiet inny niż `app/providers` i `core/models` (omija providers). `core/models` zostaje dozwolony, bo ekrany czytają modele bezpośrednio.
+- ciągła: pakiet z niższej warstwy importuje pakiet z wyższej,
+- przerywana: `app/screens` importuje pakiet inny niż `app/providers` i `core/models` (omija providers). `core/models` zostaje dozwolony, bo ekrany czytają modele bezpośrednio.
 
 Liczba na strzałce to liczba dyrektyw `import` między pakietami, a nie liczba plików. Importy w obrębie jednego pakietu nie wchodzą do licznika.
 
@@ -36,12 +36,12 @@ Liczba na strzałce to liczba dyrektyw `import` między pakietami, a nie liczba 
 
 | Krawędź | Importy | Status |
 | --- | --- | --- |
-| `core/models` → `core/services` | 4 | czerwona (warstwa w górę) |
-| `core/simulation` → `core/services` | 9 | czerwona (warstwa w górę) |
-| `core/balance` → `core/ai` | 1 | czerwona (warstwa w górę) |
-| `core/services` → `core/ai` | 11 | jest, bez czerwieni |
-| `core/ai` → `core/services` | 15 | czerwona (warstwa w górę) |
-| `app/screens` → `core/services` | 25 | czerwona (omija providers) |
+| `core/models` → `core/services` | 4 | czerwona ciągła (warstwa w górę) |
+| `core/simulation` → `core/services` | 9 | czerwona ciągła (warstwa w górę) |
+| `core/balance` → `core/ai` | 1 | czerwona ciągła (warstwa w górę) |
+| `core/services` → `core/ai` | 11 | bez czerwieni |
+| `core/ai` → `core/services` | 15 | czerwona ciągła (warstwa w górę) |
+| `app/screens` → `core/services` | 25 | czerwona przerywana (omija providers) |
 
 ### Pozostałe czerwone krawędzie
 
@@ -159,7 +159,8 @@ flowchart LR
     pkg_app_screens -->|"1"| pkg_data
     pkg_app_screens -->|"25"| pkg_core_services
     pkg_app_screens -->|"49"| pkg_app_providers
-    linkStyle 1,2,3,8,13,19,21,36,37,38,39,40,41 stroke:#d1242f,stroke-width:2px
+    linkStyle 1,2,3,8,13,19,21 stroke:#d1242f,stroke-width:2px
+    linkStyle 36,37,38,39,40,41 stroke:#d1242f,stroke-width:2px,stroke-dasharray:6 4
 ```
 
 ## Legenda
@@ -168,7 +169,8 @@ flowchart LR
 
 - Strzałka `A --> B` oznacza, że pliki pakietu A importują pliki pakietu B.
 - Etykieta to liczba dyrektyw `import`.
-- Czerwień oznacza ruch w górę warstwy albo ominięcie providerów. Cykl jest ramką `subgraph` z etykietą `cykl`, a nie kolorem krawędzi w dół.
+- Ciągła czerwień to ruch w górę warstwy. Przerywana czerwień to ominięcie providerów przez `app/screens`.
+- Ramka `subgraph` z etykietą `cykl` grupuje silnie spójną składową. Krawędzie w dół wewnątrz ramki zostają w zwykłym stylu.
 
 ### Diagram klas
 

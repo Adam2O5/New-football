@@ -1257,14 +1257,16 @@ String renderReadme(ImportGraph graph, List<RenderedDiagram> diagrams) {
   buffer
     ..writeln()
     ..writeln(
-      'Czerwona krawędź (`linkStyle`, `#d1242f`) oznacza jedno z dwóch:',
+      'Są dwa rodzaje czerwieni (`linkStyle`, `#d1242f`):',
     )
     ..writeln()
-    ..writeln('- pakiet z niższej warstwy importuje pakiet z wyższej,')
     ..writeln(
-      '- `app/screens` importuje pakiet inny niż `app/providers` i `core/models` '
-      '(omija providers). `core/models` zostaje dozwolony, bo ekrany czytają '
-      'modele bezpośrednio.',
+      '- ciągła: pakiet z niższej warstwy importuje pakiet z wyższej,',
+    )
+    ..writeln(
+      '- przerywana: `app/screens` importuje pakiet inny niż `app/providers` i '
+      '`core/models` (omija providers). `core/models` zostaje dozwolony, bo '
+      'ekrany czytają modele bezpośrednio.',
     )
     ..writeln()
     ..writeln(
@@ -1297,9 +1299,7 @@ String renderReadme(ImportGraph graph, List<RenderedDiagram> diagrams) {
       );
     } else {
       final edge = match.single;
-      final status = edge.red
-          ? 'czerwona (${edge.reasons.join(', ')})'
-          : 'jest, bez czerwieni';
+      final status = _edgeStatus(edge);
       buffer.writeln(
         '| `${edge.from}` → `${edge.to}` | ${edge.count} | $status |',
       );
@@ -1354,8 +1354,10 @@ String renderReadme(ImportGraph graph, List<RenderedDiagram> diagrams) {
     )
     ..writeln('- Etykieta to liczba dyrektyw `import`.')
     ..writeln(
-      '- Czerwień oznacza ruch w górę warstwy albo ominięcie providerów. '
-      'Cykl jest ramką `subgraph` z etykietą `cykl`, a nie kolorem krawędzi w dół.',
+      '- Ciągła czerwień to ruch w górę warstwy. Przerywana czerwień to ominięcie providerów przez `app/screens`.',
+    )
+    ..writeln(
+      '- Ramka `subgraph` z etykietą `cykl` grupuje silnie spójną składową. Krawędzie w dół wewnątrz ramki zostają w zwykłym stylu.',
     )
     ..writeln()
     ..writeln('### Diagram klas')
@@ -1502,20 +1504,37 @@ String renderFlowchart(ImportGraph graph) {
     if (inCycle.contains(package.id)) continue;
     buffer.writeln('    ${nodeId(package.id)}["${package.id}"]');
   }
-  final red = <int>[];
+  final upLayer = <int>[];
+  final bypass = <int>[];
   for (var i = 0; i < graph.edges.length; i++) {
     final edge = graph.edges[i];
     buffer.writeln(
       '    ${nodeId(edge.from)} -->|"${edge.count}"| ${nodeId(edge.to)}',
     );
-    if (edge.red) red.add(i);
+    if (edge.reasons.contains('warstwa w górę')) upLayer.add(i);
+    if (edge.reasons.contains('omija providers')) bypass.add(i);
   }
-  if (red.isNotEmpty) {
+  if (upLayer.isNotEmpty) {
     buffer.writeln(
-      '    linkStyle ${red.join(',')} stroke:#d1242f,stroke-width:2px',
+      '    linkStyle ${upLayer.join(',')} stroke:#d1242f,stroke-width:2px',
+    );
+  }
+  if (bypass.isNotEmpty) {
+    buffer.writeln(
+      '    linkStyle ${bypass.join(',')} stroke:#d1242f,stroke-width:2px,stroke-dasharray:6 4',
     );
   }
   return buffer.toString();
+}
+
+String _edgeStatus(ImportEdge edge) {
+  if (edge.reasons.contains('warstwa w górę')) {
+    return 'czerwona ciągła (${edge.reasons.join(', ')})';
+  }
+  if (edge.reasons.contains('omija providers')) {
+    return 'czerwona przerywana (${edge.reasons.join(', ')})';
+  }
+  return 'bez czerwieni';
 }
 
 String renderPage(
