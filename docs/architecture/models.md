@@ -4,7 +4,7 @@
 
 Cztery wycinki `lib/core/models`. Każdy diagram ma własny opis i trzyma się granicy około 40 typów.
 
-`enums.dart` jest dzielony między diagramy polem `only` w mapie `groups`, bo jeden plik miesza wszystkie domeny. Formacje i role taktyczne (`Formation`, `GkRole` i pokrewne) zostają poza tymi czterema diagramami: sama `Formation` ma ponad dwadzieścia stałych.
+`enums.dart` jest dzielony między diagramy polem `only`, bo jeden plik miesza wszystkie domeny. Formacje i role taktyczne zostają poza tymi diagramami.
 
 Poza diagramami zostają pliki bez typu w tych wycinkach albo generatory i stan UI:
 
@@ -27,9 +27,9 @@ Poza diagramami zostają pliki bez typu w tych wycinkach albo generatory i stan 
 
 ## Liga, sezon i tabela
 
-Sezon i jego fazy, tabele konferencji, drabinka play-off, play-in, siła ligi, loteria draftu oraz koperta zapisu (`GameSave`, `SaveRecord`). `LeagueState` trzyma też drużyny, skrzynkę i negocjacje — ich klasy są na kolejnych diagramach. Z `enums.dart` są tu `Conference`, `SeasonPhase`, `PlayoffRound`, `TeamStatus` i `TeamOfSeasonSlot`.
+Sezon i jego fazy, tabele konferencji, drabinka play-off, play-in, siła ligi, loteria draftu oraz koperta zapisu (`GameSave`, `SaveRecord`). `LeagueState` trzyma też drużyny, skrzynkę i negocjacje — ich klasy są na kolejnych diagramach. Z `enums.dart`: `Conference`, `PlayoffRound`, `SeasonPhase`, `TeamOfSeasonSlot`, `TeamStatus`.
 
-Typów na diagramie: 32.
+32 typy na diagramie.
 
 ```mermaid
 classDiagram
@@ -359,9 +359,9 @@ classDiagram
 
 ## Zawodnik, drużyna i sztab
 
-Zawodnik, atrybuty z pola i bramkarza, rola, kontuzja, skauting oraz drużyna ze sztabem, historią tygodnia i statystykami sezonu. Kontrakt, pick draftu i taktyka są polami `Team` i `Player`, a ich klasy są na diagramie kontraktów albo w `core/tactics`. Z `enums.dart` są tu `Position`, `StaffRole`, `InjuryType` i `InjuryGroup`.
+Zawodnik, atrybuty z pola i bramkarza, rola, kontuzja, skauting oraz drużyna ze sztabem, historią tygodnia i statystykami sezonu. Kontrakt, pick draftu i taktyka są polami `Team` i `Player`, a ich klasy są na diagramie kontraktów albo w `core/tactics`. Z `enums.dart`: `InjuryGroup`, `InjuryType`, `Position`, `StaffRole`.
 
-Typów na diagramie: 40.
+40 typów na diagramie.
 
 ```mermaid
 classDiagram
@@ -818,9 +818,9 @@ classDiagram
 
 ## Kontrakty, wymiany i draft
 
-Kontrakt zawodnika, wyjątki od capu, finanse klubu, negocjacje, prawa draftu, RFA, oferty wymiany, stan draftu i prospect. Z `enums.dart` są tu `CapExceptionType` i `EstimatedDraftSlot`.
+Kontrakt zawodnika, wyjątki od capu, finanse klubu, negocjacje, prawa draftu, RFA, oferty wymiany, stan draftu i prospect. Z `enums.dart`: `CapExceptionType`, `EstimatedDraftSlot`.
 
-Typów na diagramie: 34.
+34 typy na diagramie.
 
 ```mermaid
 classDiagram
@@ -1190,9 +1190,9 @@ classDiagram
 
 ## Mecz, wiadomości i zdarzenia
 
-Zdarzenia i statystyki meczu, konfiguracja spotkania, stan symulacji, skrzynka wiadomości oraz modyfikatory zawodnika i drużyny. Z `enums.dart` są tu `MatchEventType`, `MatchStatus`, `MatchStake`, `MessageType`, `MessageDomain` i `MessagePriority`.
+Zdarzenia i statystyki meczu, konfiguracja spotkania, stan symulacji, skrzynka wiadomości oraz modyfikatory zawodnika i drużyny. Z `enums.dart`: `MatchEventType`, `MatchStake`, `MatchStatus`, `MessageDomain`, `MessagePriority`, `MessageType`.
 
-Typów na diagramie: 39.
+39 typów na diagramie.
 
 ```mermaid
 classDiagram
@@ -1225,7 +1225,7 @@ classDiagram
     }
     class GameMessagePayloadX {
         <<extension>>
-        +degradeMissingPayload(Set~String~? playerIds, Set~String~? teamIds, Set~String~? tradeOfferIds, Set~String~? negoti...) GameMessage
+        +degradeMissingPayload(Set~String~? playerIds, Set~String~? teamIds, Set~String~? tradeOfferIds, ...) GameMessage
     }
     class Inbox {
         <<freezed>>
@@ -1239,7 +1239,7 @@ classDiagram
         +List~GameMessage~ unread
         +acknowledge(String id) Inbox
         +addMessage(GameMessage message, MessagesBalance balance, int? digestMinItems, int? maxUnread) Inbox
-        +degradeMissingPayload(Set~String~? playerIds, Set~String~? teamIds, Set~String~? tradeOfferIds, Set~String~? negoti...) Inbox
+        +degradeMissingPayload(Set~String~? playerIds, Set~String~? teamIds, Set~String~? tradeOfferIds, ...) Inbox
         +deliverScheduled(int week, int day, int? hour, MessagesBalance balance) Inbox
         +markRead(String id) Inbox
         +retainSeasons(int currentSeasonYear, MessagesBalance balance, int? retentionSeasons) Inbox
@@ -1593,7 +1593,7 @@ classDiagram
         +negativeEventMultiplierFor(BalanceConfig balance) double
         +pointValueMultiplierFor(String playerId) double
         +promiseFor(String playerId, String? kind) TeamPromise?
-        +recordMinutes(Iterable~MinutesHistoryEntry~ entries, int currentSeasonYear, int currentWeek, BalanceConfig ...) TeamEventState
+        +recordMinutes(Iterable~MinutesHistoryEntry~ entries, int currentSeasonYear, int currentWeek, ...) TeamEventState
         +replaceModifier(String type, double value, int weeks) TeamEventState
         +resetForSeason() TeamEventState
         +seasonMinutesFor(String playerId) SeasonMinutesAggregate?

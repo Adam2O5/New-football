@@ -1,17 +1,15 @@
+/// Generates Mermaid architecture diagrams from the AST of `lib/`.
+///
+/// Run from the repository root with the Dart SDK shipped with Flutter 3.41.4:
+/// `dart run scripts/gen_class_diagrams.dart`
+library;
+
 import 'dart:io';
 
 import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:analyzer/dart/ast/ast.dart';
 
-/// Generates Mermaid architecture diagrams from the AST of `lib/`.
-///
-/// Run from the repository root with the Dart SDK shipped with Flutter 3.41.4:
-/// `dart run scripts/gen_class_diagrams.dart`
-///
-/// Stage 2 pages are further entries in [groups]:
-/// `services.md`, `simulation.md` (`lib/core/simulation` + `lib/core/tactics`),
-/// `ai.md`, `balance.md`, `persistence.md` (`lib/data` + `lib/core/random`)
-/// and `app.md` (providers, plus screens as a screen-to-provider list).
+import 'class_diagram_logic.dart';
 
 final class OverviewPackage {
   const OverviewPackage(this.id, this.directory, this.layer);
@@ -21,8 +19,9 @@ final class OverviewPackage {
   final int layer;
 }
 
-/// Higher layers may import lower layers. A lower layer importing a higher
-/// one, an edge inside a cycle, or a screen import that skips providers is red.
+/// Higher layers may import lower layers. Importing a higher layer is
+/// [EdgeKind.upLayer]. Screen imports that skip providers are
+/// [EdgeKind.bypassProviders]. Entries in [allowedExceptions] stay grey.
 const overviewPackages = <OverviewPackage>[
   OverviewPackage('core/models', 'lib/core/models', 0),
   OverviewPackage('core/random', 'lib/core/random', 0),
@@ -36,15 +35,17 @@ const overviewPackages = <OverviewPackage>[
   OverviewPackage('app/screens', 'lib/app/screens', 7),
 ];
 
-/// Edges the review expects to see in red. `services` ↔ `ai` is the pair.
-const expectedRedEdges = <(String, String)>[
-  ('core/models', 'core/services'),
-  ('core/simulation', 'core/services'),
-  ('core/balance', 'core/ai'),
-  ('core/services', 'core/ai'),
-  ('core/ai', 'core/services'),
-  ('app/screens', 'core/services'),
+const allowedExceptions = <AllowedException>[
+  AllowedException(
+    'data',
+    'core/services',
+    'adapter w data implementuje interfejs repozytorium zadeklarowany w core/services',
+  ),
 ];
+
+final _packagesById = {
+  for (final package in overviewPackages) package.id: package,
+};
 
 final class DiagramFile {
   const DiagramFile(this.path, {this.only});
@@ -62,12 +63,16 @@ final class DiagramGroup {
     required this.title,
     required this.description,
     required this.files,
+    this.showMembers = true,
+    this.includePrivate = false,
   });
 
   final String page;
   final String title;
   final String description;
   final List<DiagramFile> files;
+  final bool showMembers;
+  final bool includePrivate;
 }
 
 /// Every class-diagram file group. Insertion order is the document order.
@@ -80,9 +85,7 @@ const groups = <String, DiagramGroup>{
         'Sezon i jego fazy, tabele konferencji, drabinka play-off, play-in, '
         'siła ligi, loteria draftu oraz koperta zapisu (`GameSave`, '
         '`SaveRecord`). `LeagueState` trzyma też drużyny, skrzynkę i '
-        'negocjacje — ich klasy są na kolejnych diagramach. Z `enums.dart` '
-        'są tu `Conference`, `SeasonPhase`, `PlayoffRound`, `TeamStatus` i '
-        '`TeamOfSeasonSlot`.',
+        'negocjacje — ich klasy są na kolejnych diagramach.',
     files: [
       DiagramFile('lib/core/models/league_state.dart'),
       DiagramFile('lib/core/models/season.dart'),
@@ -115,8 +118,7 @@ const groups = <String, DiagramGroup>{
         'Zawodnik, atrybuty z pola i bramkarza, rola, kontuzja, skauting oraz '
         'drużyna ze sztabem, historią tygodnia i statystykami sezonu. Kontrakt, '
         'pick draftu i taktyka są polami `Team` i `Player`, a ich klasy są na '
-        'diagramie kontraktów albo w `core/tactics`. Z `enums.dart` są tu '
-        '`Position`, `StaffRole`, `InjuryType` i `InjuryGroup`.',
+        'diagramie kontraktów albo w `core/tactics`.',
     files: [
       DiagramFile('lib/core/models/player.dart'),
       DiagramFile('lib/core/models/player_attributes.dart'),
@@ -138,8 +140,7 @@ const groups = <String, DiagramGroup>{
     title: 'Kontrakty, wymiany i draft',
     description:
         'Kontrakt zawodnika, wyjątki od capu, finanse klubu, negocjacje, prawa '
-        'draftu, RFA, oferty wymiany, stan draftu i prospect. Z `enums.dart` '
-        'są tu `CapExceptionType` i `EstimatedDraftSlot`.',
+        'draftu, RFA, oferty wymiany, stan draftu i prospect.',
     files: [
       DiagramFile('lib/core/models/contract.dart'),
       DiagramFile('lib/core/models/contract_market_models.dart'),
@@ -160,9 +161,7 @@ const groups = <String, DiagramGroup>{
     title: 'Mecz, wiadomości i zdarzenia',
     description:
         'Zdarzenia i statystyki meczu, konfiguracja spotkania, stan symulacji, '
-        'skrzynka wiadomości oraz modyfikatory zawodnika i drużyny. Z '
-        '`enums.dart` są tu `MatchEventType`, `MatchStatus`, `MatchStake`, '
-        '`MessageType`, `MessageDomain` i `MessagePriority`.',
+        'skrzynka wiadomości oraz modyfikatory zawodnika i drużyny.',
     files: [
       DiagramFile('lib/core/models/match_models.dart'),
       DiagramFile('lib/core/models/match_state.dart'),
@@ -184,6 +183,32 @@ const groups = <String, DiagramGroup>{
   ),
 };
 
+final class PageInfo {
+  const PageInfo({required this.title, required this.intro, this.omittedUnder});
+
+  final String title;
+  final String intro;
+
+  /// When set, the page lists hand-written Dart files under this directory
+  /// that no group includes.
+  final String? omittedUnder;
+}
+
+const pages = <String, PageInfo>{
+  'models.md': PageInfo(
+    title: 'Modele domenowe',
+    intro:
+        'Cztery wycinki `lib/core/models`. Każdy diagram ma własny opis i '
+        'trzyma się granicy około 40 typów.\n\n'
+        '`enums.dart` jest dzielony między diagramy polem `only`, bo jeden '
+        'plik miesza wszystkie domeny. Formacje i role taktyczne zostają poza '
+        'tymi diagramami.\n\n'
+        'Poza diagramami zostają pliki bez typu w tych wycinkach albo '
+        'generatory i stan UI:',
+    omittedUnder: 'lib/core/models',
+  ),
+};
+
 const _skippedMembers = <String>{
   'copyWith',
   'toJson',
@@ -194,17 +219,18 @@ const _skippedMembers = <String>{
 
 const _collectionTypes = <String>{'List', 'Set', 'Iterable', 'Map'};
 
-const _maxTypesPerDiagram = 45;
+const _maxTypesPerDiagram = 40;
 
 const _generatedBanner =
     '<!-- Generated by scripts/gen_class_diagrams.dart. Do not edit by hand. -->';
 
 void main() {
   final root = findRepoRoot();
-  final importGraph = scanImports(root);
+  final library = _Library(root);
+  final importGraph = _scanImports(root, library);
   final diagrams = [
     for (final entry in groups.entries)
-      renderGroup(root, entry.key, entry.value),
+      _renderGroup(library, entry.key, entry.value),
   ];
   final outDir = Directory('${root.path}/docs/architecture');
   outDir.createSync(recursive: true);
@@ -217,11 +243,10 @@ void main() {
   for (final diagram in diagrams) {
     byPage.putIfAbsent(diagram.page, () => []).add(diagram);
   }
-  final omitted = omittedModelFiles(root);
   for (final entry in byPage.entries) {
     File(
       '${outDir.path}/${entry.key}',
-    ).writeAsStringSync(renderPage(entry.key, entry.value, omitted));
+    ).writeAsStringSync(renderPage(root, entry.key, entry.value));
   }
 
   stdout.writeln('Wrote docs/architecture/README.md');
@@ -233,26 +258,18 @@ void main() {
       '${diagram.id}: ${diagram.typeCount} types, ${diagram.mermaid.length} chars',
     );
   }
-  final red = importGraph.edges.where((edge) => edge.red).length;
+  final marked = importGraph.edges.where(
+    (edge) => edge.kind != EdgeKind.normal,
+  );
   stdout.writeln(
-    'Imports: ${importGraph.edges.length} edges, $red red, '
+    'Imports: ${importGraph.edges.length} edges, '
+    '${marked.length} marked, '
     'cycles: ${importGraph.cycles.map((cycle) => cycle.join('+')).join(' | ')}',
   );
-  for (final expected in expectedRedEdges) {
-    final match = importGraph.edges.where(
-      (edge) => edge.from == expected.$1 && edge.to == expected.$2,
+  for (final edge in marked) {
+    stdout.writeln(
+      '${edge.kind.name} ${edge.from} -> ${edge.to} = ${edge.count}',
     );
-    if (match.isEmpty) {
-      stdout.writeln('MISSING ${expected.$1} -> ${expected.$2}');
-    } else if (!match.single.red) {
-      stdout.writeln(
-        'NOT RED ${expected.$1} -> ${expected.$2} (${match.single.count})',
-      );
-    } else {
-      stdout.writeln(
-        'confirmed ${expected.$1} -> ${expected.$2} = ${match.single.count}',
-      );
-    }
   }
 }
 
@@ -285,20 +302,14 @@ bool isGeneratedPath(String relative) {
 String? packageOf(String relative) {
   final path = relative.startsWith('lib/') ? relative.substring(4) : relative;
   for (final package in overviewPackages) {
-    final directory = package.directory.startsWith('lib/')
-        ? package.directory.substring(4)
-        : package.directory;
+    final directory = package.directory.substring('lib/'.length);
     if (path == directory || path.startsWith('$directory/')) return package.id;
   }
   return null;
 }
 
-int layerOf(String id) {
-  for (final package in overviewPackages) {
-    if (package.id == id) return package.layer;
-  }
-  throw StateError('Unknown package $id');
-}
+int layerOf(String id) =>
+    _packagesById[id]?.layer ?? (throw StateError('Unknown package $id'));
 
 int packageIndex(String id) {
   for (var i = 0; i < overviewPackages.length; i++) {
@@ -315,16 +326,16 @@ final class ImportEdge {
     required this.to,
     required this.count,
     required this.sample,
-    required this.reasons,
+    required this.kind,
+    this.note = '',
   });
 
   final String from;
   final String to;
   final int count;
   final String sample;
-  final List<String> reasons;
-
-  bool get red => reasons.isNotEmpty;
+  final EdgeKind kind;
+  final String note;
 }
 
 final class ImportGraph {
@@ -339,7 +350,7 @@ final class _ImportAccum {
   String? sample;
 }
 
-ImportGraph scanImports(Directory root) {
+ImportGraph _scanImports(Directory root, _Library library) {
   final counts = <(String, String), _ImportAccum>{};
   final files =
       Directory('${root.path}/lib')
@@ -353,7 +364,7 @@ ImportGraph scanImports(Directory root) {
   for (final relative in files) {
     final fromPackage = packageOf(relative);
     if (fromPackage == null) continue;
-    final unit = parseDart(File('${root.path}/$relative'), relative);
+    final unit = library.unit(relative);
     for (final directive in unit.directives) {
       if (directive is! ImportDirective) continue;
       final uri = directive.uri.stringValue;
@@ -372,10 +383,6 @@ ImportGraph scanImports(Directory root) {
         accum.sample = sample;
       }
     }
-  }
-
-  if (expectedRedEdges.every((edge) => !counts.containsKey(edge))) {
-    throw StateError('Import scan matched none of the expected edges.');
   }
 
   final graph = <String, Set<String>>{
@@ -397,102 +404,29 @@ ImportGraph scanImports(Directory root) {
       return packageIndex(a.$2).compareTo(packageIndex(b.$2));
     });
 
-  final edges = <ImportEdge>[];
-  for (final key in keys) {
-    final reasons = <String>[];
-    if (layerOf(key.$1) < layerOf(key.$2)) reasons.add('warstwa w górę');
-    if (key.$1 == 'app/screens' &&
-        key.$2 != 'app/providers' &&
-        key.$2 != 'core/models') {
-      reasons.add('omija providers');
-    }
-    edges.add(
-      ImportEdge(
-        from: key.$1,
-        to: key.$2,
-        count: counts[key]!.count,
-        sample: counts[key]!.sample ?? '',
-        reasons: reasons,
-      ),
-    );
-  }
+  final edges = [for (final key in keys) _classifiedEdge(key, counts[key]!)];
   return ImportGraph(edges, cycles);
 }
 
-List<Set<String>> stronglyConnected(
-  Set<String> nodes,
-  Map<String, Set<String>> graph,
-) {
-  final ordered = nodes.toList()..sort();
-  final seen = <String>{};
-  final finish = <String>[];
-
-  void forward(String node) {
-    if (!seen.add(node)) return;
-    final next = (graph[node] ?? const <String>{}).toList()..sort();
-    for (final target in next) {
-      forward(target);
-    }
-    finish.add(node);
-  }
-
-  for (final node in ordered) {
-    forward(node);
-  }
-
-  final reverse = <String, Set<String>>{
-    for (final node in ordered) node: <String>{},
-  };
-  for (final entry in graph.entries) {
-    for (final target in entry.value) {
-      reverse.putIfAbsent(target, () => <String>{}).add(entry.key);
-    }
-  }
-
-  seen.clear();
-  final components = <Set<String>>[];
-  void backward(String node, Set<String> bucket) {
-    if (!seen.add(node)) return;
-    bucket.add(node);
-    final next = (reverse[node] ?? const <String>{}).toList()..sort();
-    for (final target in next) {
-      backward(target, bucket);
-    }
-  }
-
-  for (final node in finish.reversed) {
-    if (seen.contains(node)) continue;
-    final bucket = <String>{};
-    backward(node, bucket);
-    components.add(bucket);
-  }
-  return components;
-}
-
-String? resolveImport(String fromRelative, String uri) {
-  if (uri.startsWith('dart:')) return null;
-  const packagePrefix = 'package:new_football/';
-  if (uri.startsWith('package:')) {
-    if (!uri.startsWith(packagePrefix)) return null;
-    return uri.substring(packagePrefix.length);
-  }
-  if (uri.contains(':')) return null;
-  final slash = fromRelative.lastIndexOf('/');
-  final directory = slash == -1 ? '' : fromRelative.substring(0, slash);
-  return normalizePosix(directory.isEmpty ? uri : '$directory/$uri');
-}
-
-String normalizePosix(String path) {
-  final parts = <String>[];
-  for (final part in path.split('/')) {
-    if (part.isEmpty || part == '.') continue;
-    if (part == '..') {
-      if (parts.isNotEmpty) parts.removeLast();
-      continue;
-    }
-    parts.add(part);
-  }
-  return parts.join('/');
+ImportEdge _classifiedEdge((String, String) key, _ImportAccum accum) {
+  final exception = allowedExceptions
+      .where((item) => item.from == key.$1 && item.to == key.$2)
+      .firstOrNull;
+  final kind = classifyEdge(
+    from: key.$1,
+    to: key.$2,
+    fromLayer: layerOf(key.$1),
+    toLayer: layerOf(key.$2),
+    isAllowedException: exception != null,
+  );
+  return ImportEdge(
+    from: key.$1,
+    to: key.$2,
+    count: accum.count,
+    sample: accum.sample ?? '',
+    kind: kind,
+    note: exception?.note ?? '',
+  );
 }
 
 String relativePosix(String root, String absolute) {
@@ -503,8 +437,20 @@ String relativePosix(String root, String absolute) {
   return relative.replaceAll('\\', '/');
 }
 
-CompilationUnit parseDart(File file, String relative) {
-  return parseString(content: file.readAsStringSync(), path: relative).unit;
+final class _Library {
+  _Library(this.root);
+
+  final Directory root;
+  final _units = <String, CompilationUnit>{};
+
+  CompilationUnit unit(String relative) {
+    return _units.putIfAbsent(relative, () {
+      return parseString(
+        content: File('${root.path}/$relative').readAsStringSync(),
+        path: relative,
+      ).unit;
+    });
+  }
 }
 
 enum _TypeKind { classKind, mixinKind, enumKind, extensionKind }
@@ -591,19 +537,20 @@ final class RenderedDiagram {
   final String mermaid;
 }
 
-RenderedDiagram renderGroup(Directory root, String id, DiagramGroup group) {
+RenderedDiagram _renderGroup(_Library library, String id, DiagramGroup group) {
   final types = <_TypeModel>[];
   final seenNames = <String, String>{};
   for (final file in group.files) {
-    final source = File('${root.path}/${file.path}');
+    final source = File('${library.root.path}/${file.path}');
     if (!source.existsSync()) {
       throw StateError('Missing diagram file ${file.path}');
     }
-    final unit = parseDart(source, file.path);
+    final unit = library.unit(file.path);
     final found = <String>{};
     for (final declaration in unit.declarations) {
       final model = _readDeclaration(declaration);
-      if (model == null || model.simpleName.startsWith('_')) continue;
+      if (model == null) continue;
+      if (!group.includePrivate && model.simpleName.startsWith('_')) continue;
       found.add(model.simpleName);
       if (file.only != null && !file.only!.contains(model.simpleName)) {
         continue;
@@ -641,13 +588,17 @@ RenderedDiagram renderGroup(Directory root, String id, DiagramGroup group) {
     for (final type in types) ..._relationsFor(type, byName),
   ];
   types.sort((a, b) => a.id.compareTo(b.id));
-  final mermaid = _renderClassDiagram(types, relations);
+  final mermaid = _renderClassDiagram(
+    types,
+    relations,
+    showMembers: group.showMembers,
+  );
   _assertMermaidSafe(id, mermaid);
   return RenderedDiagram(
     id: id,
     page: group.page,
     title: group.title,
-    description: group.description,
+    description: _describe(group),
     files: [for (final file in group.files) file.path],
     typeCount: types.length,
     mermaid: mermaid,
@@ -655,14 +606,18 @@ RenderedDiagram renderGroup(Directory root, String id, DiagramGroup group) {
 }
 
 void _assertMermaidSafe(String id, String mermaid) {
-  final stripped = mermaid
-      .replaceAll(RegExp(r'<<[A-Za-z]+>>'), '')
-      .replaceAll('<|--', '')
-      .replaceAll('<|..', '')
-      .replaceAll('..>', '');
-  if (stripped.contains('<') || stripped.contains('>')) {
-    throw StateError('$id still contains raw angle brackets');
-  }
+  final problem = mermaidProblem(mermaid);
+  if (problem != null) throw StateError('$id: $problem');
+}
+
+String _describe(DiagramGroup group) {
+  final picked = <String>[
+    for (final file in group.files)
+      if (file.only != null) ...file.only!,
+  ]..sort();
+  if (picked.isEmpty) return group.description;
+  final names = picked.map((name) => '`$name`').join(', ');
+  return '${group.description} Z `enums.dart`: $names.';
 }
 
 _TypeModel? _readDeclaration(CompilationUnitMember declaration) {
@@ -822,13 +777,29 @@ void _collectMembers(_TypeModel model, List<ClassMember> members) {
       model.constructors.add(member);
     }
   }
-  if (!model.freezed) return;
-  for (final constructor in model.constructors) {
-    if (constructor.factoryKeyword == null || constructor.name != null) {
-      continue;
+  if (model.freezed) {
+    for (final constructor in model.constructors) {
+      if (constructor.factoryKeyword == null || constructor.name != null) {
+        continue;
+      }
+      for (final parameter in constructor.parameters.parameters) {
+        _addParameterField(model, parameter);
+      }
     }
+  }
+  _fillFieldFormalTypes(model);
+}
+
+void _fillFieldFormalTypes(_TypeModel model) {
+  for (final constructor in model.constructors) {
     for (final parameter in constructor.parameters.parameters) {
-      _addParameterField(model, parameter);
+      final inner = _unwrapParameter(parameter);
+      if (inner is! FieldFormalParameter || inner.type == null) continue;
+      final field = model.fields[inner.name.lexeme];
+      if (field != null && field.type.isEmpty) {
+        field.type = _renderType(inner.type!);
+        field.sourceType ??= inner.type;
+      }
     }
   }
 }
@@ -873,7 +844,7 @@ void _addField(
 void _addMethod(_TypeModel model, MethodDeclaration method) {
   final name = method.name.lexeme;
   if (name.startsWith('_') || _skippedMembers.contains(name)) return;
-  if (method.isOperator || name == '==' || method.isSetter) return;
+  if (method.isOperator || method.isSetter) return;
   if (method.isGetter) {
     _addField(
       model,
@@ -896,7 +867,7 @@ void _addMethod(_TypeModel model, MethodDeclaration method) {
   final buffer = StringBuffer('+$name($renderedParameters)');
   if (returnType.isNotEmpty) buffer.write(' $returnType');
   if (method.isStatic) buffer.write(r'$');
-  model.methods[name] = _Member(name, _sanitizeMember(buffer.toString()));
+  model.methods[name] = _Member(name, sanitizeMember(buffer.toString()));
 }
 
 String _renderParameters(List<FormalParameter> parameters) {
@@ -911,11 +882,9 @@ String _renderParameters(List<FormalParameter> parameters) {
       if (type.isNotEmpty) type,
       if (name.isNotEmpty) name,
     ].join(' ');
-    if (piece.isNotEmpty) parts.add(piece);
+    if (piece.isNotEmpty) parts.add(sanitizeMember(piece));
   }
-  var joined = parts.join(', ');
-  if (joined.length > 96) joined = '${joined.substring(0, 93)}...';
-  return _sanitizeMember(joined);
+  return limitParameterList(parts);
 }
 
 FormalParameter _unwrapParameter(FormalParameter parameter) {
@@ -943,24 +912,6 @@ String _renderType(TypeAnnotation type) {
   if (type is GenericFunctionType) return 'Function';
   if (type is RecordTypeAnnotation) return 'Record';
   return 'Type';
-}
-
-String _sanitizeMember(String input) {
-  const allowed =
-      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'
-      r'0123456789_~ ?,./+-$()';
-  final buffer = StringBuffer();
-  for (final rune in input.runes) {
-    final char = String.fromCharCode(rune);
-    if (allowed.contains(char)) {
-      buffer.write(char);
-    } else if (char == '<' || char == '>') {
-      buffer.write('~');
-    } else if (char == '\n' || char == '\r' || char == '\t') {
-      buffer.write(' ');
-    }
-  }
-  return buffer.toString().replaceAll(RegExp(r'\s+'), ' ').trim();
 }
 
 List<String> _linkedTypeNames(TypeAnnotation type) {
@@ -1014,18 +965,6 @@ List<_Relation> _relationsFor(_TypeModel type, Map<String, String> byName) {
       ),
     );
     if (kind == _RelKind.composition) composed.add(target);
-  }
-
-  for (final constructor in type.constructors) {
-    for (final parameter in constructor.parameters.parameters) {
-      final inner = _unwrapParameter(parameter);
-      if (inner is! FieldFormalParameter || inner.type == null) continue;
-      final field = type.fields[inner.name.lexeme];
-      if (field != null && field.type.isEmpty) {
-        field.type = _renderType(inner.type!);
-        field.sourceType ??= inner.type;
-      }
-    }
   }
 
   for (final field in type.fields.values) {
@@ -1136,29 +1075,35 @@ String _safeLabel(String label) {
   return '';
 }
 
-String _renderClassDiagram(List<_TypeModel> types, List<_Relation> relations) {
+String _renderClassDiagram(
+  List<_TypeModel> types,
+  List<_Relation> relations, {
+  required bool showMembers,
+}) {
   final buffer = StringBuffer('classDiagram\n');
   for (final type in types) {
     buffer.writeln('    class ${type.id} {');
     for (final stereotype in type.stereotypes) {
       buffer.writeln('        <<$stereotype>>');
     }
-    for (final constant in type.enumConstants) {
-      buffer.writeln('        ${_sanitizeMember(constant)}');
-    }
-    final fields = type.fields.values.toList()
-      ..sort((a, b) => a.name.compareTo(b.name));
-    for (final field in fields) {
-      final typeText = field.type.isEmpty ? '' : '${field.type} ';
-      final staticMark = field.isStatic ? r'$' : '';
-      buffer.writeln(
-        '        ${_sanitizeMember('+$typeText${field.name}$staticMark')}',
-      );
-    }
-    final methods = type.methods.values.toList()
-      ..sort((a, b) => a.name.compareTo(b.name));
-    for (final method in methods) {
-      buffer.writeln('        ${method.rendered}');
+    if (showMembers) {
+      for (final constant in type.enumConstants) {
+        buffer.writeln('        ${sanitizeMember(constant)}');
+      }
+      final fields = type.fields.values.toList()
+        ..sort((a, b) => a.name.compareTo(b.name));
+      for (final field in fields) {
+        final typeText = field.type.isEmpty ? '' : '${field.type} ';
+        final staticMark = field.isStatic ? r'$' : '';
+        buffer.writeln(
+          '        ${sanitizeMember('+$typeText${field.name}$staticMark')}',
+        );
+      }
+      final methods = type.methods.values.toList()
+        ..sort((a, b) => a.name.compareTo(b.name));
+      for (final method in methods) {
+        buffer.writeln('        ${method.rendered}');
+      }
     }
     buffer.writeln('    }');
   }
@@ -1209,13 +1154,17 @@ String _relationLine(_Relation relation) {
   }
 }
 
-List<String> omittedModelFiles(Directory root) {
+List<String> omittedFiles(Directory root, String relativeDirectory) {
+  final prefix = relativeDirectory.endsWith('/')
+      ? relativeDirectory
+      : '$relativeDirectory/';
   final covered = <String>{
     for (final group in groups.values)
       for (final file in group.files)
-        if (file.path.startsWith('lib/core/models/')) file.path,
+        if (file.path.startsWith(prefix)) file.path,
   };
-  final directory = Directory('${root.path}/lib/core/models');
+  final directory = Directory('${root.path}/$relativeDirectory');
+  if (!directory.existsSync()) return const [];
   final omitted =
       directory
           .listSync()
@@ -1233,13 +1182,20 @@ String renderReadme(ImportGraph graph, List<RenderedDiagram> diagrams) {
   final buffer = StringBuffer()
     ..writeln(_generatedBanner)
     ..writeln()
+    ..write(_renderOverview(graph))
+    ..write(_renderLegend())
+    ..write(_renderFileIndex(diagrams));
+  return buffer.toString();
+}
+
+String _renderOverview(ImportGraph graph) {
+  final buffer = StringBuffer()
     ..writeln('# Architektura')
     ..writeln()
     ..writeln(
-      'Diagramy w tym katalogu opisują podział `lib/` i modele domenowe. '
-      'Powstają ze skryptu `scripts/gen_class_diagrams.dart`, który czyta AST '
-      'pakietem `analyzer`. Pomija `*.g.dart`, `*.freezed.dart` i '
-      '`lib/l10n/generated`.',
+      'Diagramy w tym katalogu powstają ze skryptu '
+      '`scripts/gen_class_diagrams.dart`, który czyta AST pakietem `analyzer`. '
+      'Pomija `*.g.dart`, `*.freezed.dart` i `lib/l10n/generated`.',
     )
     ..writeln()
     ..writeln('## Przegląd pakietów')
@@ -1256,22 +1212,16 @@ String renderReadme(ImportGraph graph, List<RenderedDiagram> diagrams) {
   }
   buffer
     ..writeln()
-    ..writeln(
-      'Są dwa rodzaje czerwieni (`linkStyle`, `#d1242f`):',
-    )
+    ..writeln('Kolor krawędzi pochodzi z `EdgeKind`:')
+    ..writeln();
+  for (final kind in EdgeKind.values) {
+    buffer.writeln('- ${edgeKindLegend[kind]}');
+  }
+  buffer
     ..writeln()
     ..writeln(
-      '- ciągła: pakiet z niższej warstwy importuje pakiet z wyższej,',
-    )
-    ..writeln(
-      '- przerywana: `app/screens` importuje pakiet inny niż `app/providers` i '
-      '`core/models` (omija providers). `core/models` zostaje dozwolony, bo '
-      'ekrany czytają modele bezpośrednio.',
-    )
-    ..writeln()
-    ..writeln(
-      'Liczba na strzałce to liczba dyrektyw `import` między pakietami, '
-      'a nie liczba plików. Importy w obrębie jednego pakietu nie wchodzą do licznika.',
+      'Liczba na strzałce to liczba dyrektyw `import`. `export` oraz importy '
+      'warunkowe nie wchodzą do licznika. Import wewnątrz jednego pakietu też nie.',
     )
     ..writeln()
     ..writeln('### Silnie spójne składowe')
@@ -1283,61 +1233,21 @@ String renderReadme(ImportGraph graph, List<RenderedDiagram> diagrams) {
       buffer.writeln('- ${cycle.map((id) => '`$id`').join(', ')}');
     }
   }
+  final marked = graph.edges.where((edge) => edge.kind != EdgeKind.normal);
   buffer
     ..writeln()
-    ..writeln('### Krawędzie oczekiwane przez przegląd')
-    ..writeln()
-    ..writeln('| Krawędź | Importy | Status |')
-    ..writeln('| --- | --- | --- |');
-  for (final expected in expectedRedEdges) {
-    final match = graph.edges.where(
-      (edge) => edge.from == expected.$1 && edge.to == expected.$2,
-    );
-    if (match.isEmpty) {
-      buffer.writeln(
-        '| `${expected.$1}` → `${expected.$2}` | 0 | nie występuje |',
-      );
-    } else {
-      final edge = match.single;
-      final status = _edgeStatus(edge);
-      buffer.writeln(
-        '| `${edge.from}` → `${edge.to}` | ${edge.count} | $status |',
-      );
-    }
-  }
-
-  final expectedKeys = expectedRedEdges
-      .map((edge) => '${edge.$1}|${edge.$2}')
-      .toSet();
-  final extraRed = graph.edges.where((edge) {
-    return edge.red && !expectedKeys.contains('${edge.from}|${edge.to}');
-  });
-  buffer
-    ..writeln()
-    ..writeln('### Pozostałe czerwone krawędzie')
+    ..writeln('### Oznaczone krawędzie')
     ..writeln();
-  if (extraRed.isEmpty) {
-    buffer.writeln('Brak czerwonych krawędzi poza listą oczekiwaną.');
+  if (marked.isEmpty) {
+    buffer.writeln('Wszystkie krawędzie są zgodne z warstwą.');
   } else {
-    for (final edge in extraRed) {
+    for (final edge in marked) {
+      final note = edge.note.isEmpty ? '' : ' — ${edge.note}';
       buffer.writeln(
-        '- `${edge.from}` → `${edge.to}` (${edge.count}, ${edge.reasons.join(', ')})',
+        '- `${edge.from}` → `${edge.to}` (${edge.count}, '
+        '${edgeKindLabel[edge.kind]})$note',
       );
     }
-  }
-
-  buffer
-    ..writeln()
-    ..writeln('### Wszystkie krawędzie')
-    ..writeln()
-    ..writeln('| Z | Do | Importy | Oznaczenie | Przykład |')
-    ..writeln('| --- | --- | --- | --- | --- |');
-  for (final edge in graph.edges) {
-    final mark = edge.red ? edge.reasons.join(', ') : 'zgodna z warstwą';
-    buffer.writeln(
-      '| `${edge.from}` | `${edge.to}` | ${edge.count} | $mark | '
-      '`${edge.sample.replaceAll('|', '/')}` |',
-    );
   }
   buffer
     ..writeln()
@@ -1345,6 +1255,27 @@ String renderReadme(ImportGraph graph, List<RenderedDiagram> diagrams) {
     ..writeln(renderFlowchart(graph).trimRight())
     ..writeln('```')
     ..writeln()
+    ..writeln('<details>')
+    ..writeln('<summary>Wszystkie krawędzie</summary>')
+    ..writeln()
+    ..writeln('| Z | Do | Importy | Oznaczenie | Przykład |')
+    ..writeln('| --- | --- | --- | --- | --- |');
+  for (final edge in graph.edges) {
+    buffer.writeln(
+      '| `${edge.from}` | `${edge.to}` | ${edge.count} | '
+      '${edgeKindLabel[edge.kind]} | '
+      '`${edge.sample.replaceAll('|', '/')}` |',
+    );
+  }
+  buffer
+    ..writeln()
+    ..writeln('</details>')
+    ..writeln();
+  return buffer.toString();
+}
+
+String _renderLegend() {
+  final buffer = StringBuffer()
     ..writeln('## Legenda')
     ..writeln()
     ..writeln('### Przegląd')
@@ -1354,11 +1285,19 @@ String renderReadme(ImportGraph graph, List<RenderedDiagram> diagrams) {
     )
     ..writeln('- Etykieta to liczba dyrektyw `import`.')
     ..writeln(
-      '- Ciągła czerwień to ruch w górę warstwy. Przerywana czerwień to ominięcie providerów przez `app/screens`.',
-    )
-    ..writeln(
-      '- Ramka `subgraph` z etykietą `cykl` grupuje silnie spójną składową. Krawędzie w dół wewnątrz ramki zostają w zwykłym stylu.',
-    )
+      '- Ramka `subgraph` z etykietą `cykl` grupuje silnie spójną składową. '
+      'Krawędzie w dół wewnątrz ramki zostają w zwykłym stylu.',
+    );
+  for (final kind in EdgeKind.values) {
+    if (kind == EdgeKind.normal) continue;
+    buffer.writeln('- ${edgeKindLegend[kind]}');
+  }
+  for (final exception in allowedExceptions) {
+    buffer.writeln(
+      '- Wyjątek `${exception.from}` → `${exception.to}`: ${exception.note}.',
+    );
+  }
+  buffer
     ..writeln()
     ..writeln('### Diagram klas')
     ..writeln()
@@ -1385,17 +1324,25 @@ String renderReadme(ImportGraph graph, List<RenderedDiagram> diagrams) {
       '- `..>` to zależność przez parametr konstruktora albo typ `on` extension.',
     )
     ..writeln(
-      '- Metody `copyWith`, `toJson`, `fromJson`, `==`, `hashCode` i `toString` są pominięte. Operatory też.',
+      '- Pominięte są operatory oraz metody `copyWith`, `toJson`, `fromJson`, `hashCode` i `toString`.',
     )
     ..writeln(
-      '- Krawędź powstaje tylko wtedy, gdy oba typy są na tym samym diagramie. Inne typy zostają w sygnaturze składowej.',
+      '- Pole bez adnotacji typu jest zapisane samą nazwą, na przykład `+currentVersion\$`.',
+    )
+    ..writeln(
+      '- Krawędź powstaje tylko wtedy, gdy oba typy są na tym samym diagramie.',
     )
     ..writeln('- Stałe enuma, pola i metody są posortowane alfabetycznie.')
     ..writeln()
     ..writeln('```mermaid')
     ..writeln(_legendDiagram.trimRight())
     ..writeln('```')
-    ..writeln()
+    ..writeln();
+  return buffer.toString();
+}
+
+String _renderFileIndex(List<RenderedDiagram> diagrams) {
+  final buffer = StringBuffer()
     ..writeln('## Pliki i regeneracja')
     ..writeln()
     ..writeln('### Pliki')
@@ -1404,21 +1351,28 @@ String renderReadme(ImportGraph graph, List<RenderedDiagram> diagrams) {
       '- `docs/architecture/README.md` — ten przegląd, legenda i instrukcja.',
     )
     ..writeln(
-      '- `docs/architecture/models.md` — diagramy klas `lib/core/models`.',
+      '- `scripts/gen_class_diagrams.dart` — generator. Mapa grup to `groups`, mapa stron to `pages`.',
     )
     ..writeln(
-      '- `scripts/gen_class_diagrams.dart` — generator i jedyna mapa grup plików (`groups`).',
-    )
+      '- `scripts/class_diagram_logic.dart` — czyste funkcje używane przez generator i testy.',
+    );
+  for (final entry in pages.entries) {
+    buffer.writeln(
+      '- `docs/architecture/${entry.key}` — ${entry.value.title}.',
+    );
+  }
+  buffer
     ..writeln()
     ..writeln('### Diagramy')
     ..writeln();
   for (final diagram in diagrams) {
-    buffer.writeln(
-      '#### ${diagram.title} (`${diagram.id}`, ${diagram.typeCount} typów)',
-    );
-    buffer.writeln();
-    buffer.writeln('Plik: `docs/architecture/${diagram.page}`.');
-    buffer.writeln();
+    buffer
+      ..writeln(
+        '#### ${diagram.title} (`${diagram.id}`, ${polishTyp(diagram.typeCount)})',
+      )
+      ..writeln()
+      ..writeln('Plik: `docs/architecture/${diagram.page}`.')
+      ..writeln();
     for (final file in diagram.files) {
       buffer.writeln('- `$file`');
     }
@@ -1439,25 +1393,6 @@ String renderReadme(ImportGraph graph, List<RenderedDiagram> diagrams) {
     ..writeln(
       'Skrypt nadpisuje markdown w `docs/architecture/`. Wynik jest '
       'deterministyczny: typy, składowe, relacje i krawędzie przeglądu są sortowane.',
-    )
-    ..writeln()
-    ..writeln('### Kolejne strony')
-    ..writeln()
-    ..writeln(
-      'Etap 2 dopisuje kolejne wpisy do mapy `groups` na górze skryptu. '
-      'Wspólne pole `page` składa kilka diagramów w jeden plik:',
-    )
-    ..writeln()
-    ..writeln('- `services.md` — `lib/core/services`')
-    ..writeln(
-      '- `simulation.md` — `lib/core/simulation` razem z `lib/core/tactics`',
-    )
-    ..writeln('- `ai.md` — `lib/core/ai`')
-    ..writeln('- `balance.md` — uproszczony `lib/core/balance`')
-    ..writeln('- `persistence.md` — `lib/data` oraz `lib/core/random`')
-    ..writeln(
-      '- `app.md` — providery z zależnościami od serwisów oraz lista '
-      '„ekran → providery” bez widgetów',
     )
     ..writeln();
   return buffer.toString();
@@ -1504,58 +1439,57 @@ String renderFlowchart(ImportGraph graph) {
     if (inCycle.contains(package.id)) continue;
     buffer.writeln('    ${nodeId(package.id)}["${package.id}"]');
   }
-  final upLayer = <int>[];
-  final bypass = <int>[];
+  final indexes = <EdgeKind, List<int>>{
+    for (final kind in EdgeKind.values)
+      if (kind != EdgeKind.normal) kind: <int>[],
+  };
   for (var i = 0; i < graph.edges.length; i++) {
     final edge = graph.edges[i];
     buffer.writeln(
-      '    ${nodeId(edge.from)} -->|"${edge.count}"| ${nodeId(edge.to)}',
+      '    ${nodeId(edge.from)} -->|"${edgeCountLabel(edge.count, edge.kind)}"| ${nodeId(edge.to)}',
     );
-    if (edge.reasons.contains('warstwa w górę')) upLayer.add(i);
-    if (edge.reasons.contains('omija providers')) bypass.add(i);
+    indexes[edge.kind]?.add(i);
   }
-  if (upLayer.isNotEmpty) {
-    buffer.writeln(
-      '    linkStyle ${upLayer.join(',')} stroke:#d1242f,stroke-width:2px',
-    );
-  }
-  if (bypass.isNotEmpty) {
-    buffer.writeln(
-      '    linkStyle ${bypass.join(',')} stroke:#d1242f,stroke-width:2px,stroke-dasharray:6 4',
-    );
+  for (final kind in EdgeKind.values) {
+    final style = edgeKindStyle[kind];
+    final ids = indexes[kind];
+    if (style == null || ids == null || ids.isEmpty) continue;
+    buffer.writeln('    linkStyle ${ids.join(',')} $style');
   }
   return buffer.toString();
 }
 
-String _edgeStatus(ImportEdge edge) {
-  if (edge.reasons.contains('warstwa w górę')) {
-    return 'czerwona ciągła (${edge.reasons.join(', ')})';
+String renderPage(Directory root, String page, List<RenderedDiagram> diagrams) {
+  final info = pages[page];
+  if (info == null) {
+    throw StateError('Add $page to the pages map before generating it.');
   }
-  if (edge.reasons.contains('omija providers')) {
-    return 'czerwona przerywana (${edge.reasons.join(', ')})';
-  }
-  return 'bez czerwieni';
-}
-
-String renderPage(
-  String page,
-  List<RenderedDiagram> diagrams,
-  List<String> omitted,
-) {
   final buffer = StringBuffer()
     ..writeln(_generatedBanner)
     ..writeln()
-    ..writeln('# ${pageTitle(page)}')
+    ..writeln('# ${info.title}')
     ..writeln()
-    ..writeln(pageIntro(page, omitted).trimRight())
-    ..writeln();
+    ..writeln(info.intro.trimRight());
+  final omittedRoot = info.omittedUnder;
+  if (omittedRoot != null) {
+    final omitted = omittedFiles(root, omittedRoot);
+    buffer.writeln();
+    if (omitted.isEmpty) {
+      buffer.writeln('Każdy ręczny plik z `$omittedRoot` jest na diagramie.');
+    } else {
+      for (final path in omitted) {
+        buffer.writeln('- `$path`');
+      }
+    }
+  }
+  buffer.writeln();
   for (final diagram in diagrams) {
     buffer
       ..writeln('## ${diagram.title}')
       ..writeln()
       ..writeln(diagram.description)
       ..writeln()
-      ..writeln('Typów na diagramie: ${diagram.typeCount}.')
+      ..writeln('${_capitalize(polishTyp(diagram.typeCount))} na diagramie.')
       ..writeln()
       ..writeln('```mermaid')
       ..writeln(diagram.mermaid.trimRight())
@@ -1565,27 +1499,7 @@ String renderPage(
   return buffer.toString();
 }
 
-String pageTitle(String page) {
-  switch (page) {
-    case 'models.md':
-      return 'Modele domenowe';
-    default:
-      return page;
-  }
-}
-
-String pageIntro(String page, List<String> omitted) {
-  if (page != 'models.md') {
-    return 'Diagramy wygenerowane z mapy `groups` w `scripts/gen_class_diagrams.dart`.';
-  }
-  final omittedList = omitted.map((path) => '- `$path`').join('\n');
-  return '''
-Cztery wycinki `lib/core/models`. Każdy diagram ma własny opis i trzyma się granicy około 40 typów.
-
-`enums.dart` jest dzielony między diagramy polem `only` w mapie `groups`, bo jeden plik miesza wszystkie domeny. Formacje i role taktyczne (`Formation`, `GkRole` i pokrewne) zostają poza tymi czterema diagramami: sama `Formation` ma ponad dwadzieścia stałych.
-
-Poza diagramami zostają pliki bez typu w tych wycinkach albo generatory i stan UI:
-
-$omittedList
-''';
+String _capitalize(String value) {
+  if (value.isEmpty) return value;
+  return value[0].toUpperCase() + value.substring(1);
 }
