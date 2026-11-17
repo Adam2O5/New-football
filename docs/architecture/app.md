@@ -2,141 +2,209 @@
 
 # Aplikacja
 
-Providery i serwisy, które konstruują, oraz lista ekranów. Widżety nie są na tej stronie.
+Providery połączone przez `ref.watch` i `ref.read` oraz lista ekranów. Widżety nie są na tej stronie.
 
-## Providery i serwisy
+## Graf serwisów
 
-Zmienne `*Provider` i typ, który konstruują albo deklarują w argumencie typu. Strzałka prowadzi do serwisu, repozytorium albo konfiguracji, a nie do innych providerów.
+Węzeł to `nazwa: typ` widoczny dla `ref.watch`. Ciągła krawędź to `ref.watch`, przerywana to `ref.read`. `.notifier`, `.future` i `.select(...)` liczą się jako ten sam provider. Graf serwisów jest osobno od kontrolera i ustawień.
 
-39 providerów.
+- Ciągła krawędź: `ref.watch`.
+- Przerywana krawędź: `ref.read`.
+- Węzeł w stylu `nieustalone`: w ciele jest dostęp, którego provider skrypt nie rozstrzyga statycznie.
+
+24 providery.
 
 ```mermaid
 flowchart LR
-    n_activeLeagueProvider["activeLeagueProvider"]
-    n_activeSearchFiltersKeyProvider["activeSearchFiltersKeyProvider"]
-    n_aiMatchdayServiceProvider["aiMatchdayServiceProvider"]
-    n_aiRosterManagementServiceProvider["aiRosterManagementServiceProvider"]
-    n_aiTradeServiceProvider["aiTradeServiceProvider"]
-    n_balanceProvider["balanceProvider"]
-    n_calendarServiceProvider["calendarServiceProvider"]
-    n_clubBrandingProvider["clubBrandingProvider"]
-    n_clubBrandingRegistryProvider["clubBrandingRegistryProvider"]
-    n_contractMarketServiceProvider["contractMarketServiceProvider"]
-    n_contractServiceProvider["contractServiceProvider"]
-    n_dayPipelineProvider["dayPipelineProvider"]
-    n_daySimulatorProvider["daySimulatorProvider"]
-    n_developmentDataProvider["developmentDataProvider"]
-    n_draftServiceProvider["draftServiceProvider"]
-    n_draftTradeServiceProvider["draftTradeServiceProvider"]
-    n_gameControllerProvider["gameControllerProvider"]
-    n_gameFactoryProvider["gameFactoryProvider"]
-    n_legacyColorThemeSettingProvider["legacyColorThemeSettingProvider"]
-    n_localeProvider["localeProvider"]
-    n_matchContextFactoryProvider["matchContextFactoryProvider"]
-    n_matchEngineProvider["matchEngineProvider"]
-    n_negotiationServiceProvider["negotiationServiceProvider"]
-    n_nextGameEventProvider["nextGameEventProvider"]
-    n_playerEventServiceProvider["playerEventServiceProvider"]
-    n_saveManagementCoordinatorProvider["saveManagementCoordinatorProvider"]
-    n_saveManagementServiceProvider["saveManagementServiceProvider"]
-    n_saveRecordsProvider["saveRecordsProvider"]
-    n_saveRepositoryProvider["saveRepositoryProvider"]
-    n_savesListProvider["savesListProvider"]
-    n_scoutingServiceProvider["scoutingServiceProvider"]
-    n_searchFiltersProvider["searchFiltersProvider"]
-    n_seasonServiceProvider["seasonServiceProvider"]
-    n_sharedPreferencesProvider["sharedPreferencesProvider"]
-    n_simulationRunnerProvider["simulationRunnerProvider"]
-    n_staffServiceProvider["staffServiceProvider"]
-    n_teamEventServiceProvider["teamEventServiceProvider"]
-    n_tradeServiceProvider["tradeServiceProvider"]
-    n_urgentInterruptionSettingProvider["urgentInterruptionSettingProvider"]
-    n_AiMatchdayService["AiMatchdayService"]
-    n_AiRosterManagementService["AiRosterManagementService"]
-    n_AiTradeService["AiTradeService"]
-    n_BalanceConfig["BalanceConfig"]
-    n_CalendarService["CalendarService"]
-    n_ContractMarketService["ContractMarketService"]
-    n_ContractService["ContractService"]
-    n_DayPipeline["DayPipeline"]
-    n_DaySimulator["DaySimulator"]
-    n_DraftService["DraftService"]
-    n_DraftTradeService["DraftTradeService"]
-    n_GameFactory["GameFactory"]
-    n_InlineSimulationRunner["InlineSimulationRunner"]
-    n_MatchContextFactory["MatchContextFactory"]
-    n_NegotiationService["NegotiationService"]
-    n_PlayerEventService["PlayerEventService"]
-    n_SaveManagementService["SaveManagementService"]
-    n_SaveRepository["SaveRepository"]
-    n_ScoutingService["ScoutingService"]
-    n_SeasonService["SeasonService"]
-    n_SimulationMatchEngine["SimulationMatchEngine"]
-    n_SimulationRunner["SimulationRunner"]
-    n_StaffService["StaffService"]
-    n_TeamEventService["TeamEventService"]
-    n_TradeService["TradeService"]
-    n_aiMatchdayServiceProvider --> n_AiMatchdayService
-    n_aiRosterManagementServiceProvider --> n_AiRosterManagementService
-    n_aiTradeServiceProvider --> n_AiTradeService
-    n_balanceProvider --> n_BalanceConfig
-    n_calendarServiceProvider --> n_CalendarService
-    n_contractMarketServiceProvider --> n_ContractMarketService
-    n_contractServiceProvider --> n_ContractService
-    n_dayPipelineProvider --> n_DayPipeline
-    n_daySimulatorProvider --> n_DaySimulator
-    n_draftServiceProvider --> n_DraftService
-    n_draftTradeServiceProvider --> n_DraftTradeService
-    n_gameFactoryProvider --> n_GameFactory
-    n_matchContextFactoryProvider --> n_MatchContextFactory
-    n_matchEngineProvider --> n_SimulationMatchEngine
-    n_negotiationServiceProvider --> n_NegotiationService
-    n_playerEventServiceProvider --> n_PlayerEventService
-    n_saveManagementServiceProvider --> n_SaveManagementService
-    n_saveRepositoryProvider --> n_SaveRepository
-    n_scoutingServiceProvider --> n_ScoutingService
-    n_seasonServiceProvider --> n_SeasonService
-    n_simulationRunnerProvider --> n_InlineSimulationRunner
-    n_simulationRunnerProvider --> n_SimulationRunner
-    n_staffServiceProvider --> n_StaffService
-    n_teamEventServiceProvider --> n_TeamEventService
-    n_tradeServiceProvider --> n_TradeService
+    n_aiMatchdayServiceProvider["aiMatchdayServiceProvider: AiMatchdayService"]
+    n_aiRosterManagementServiceProvider["aiRosterManagementServiceProvider: AiRosterManagementService"]
+    n_aiTradeServiceProvider["aiTradeServiceProvider: AiTradeService"]
+    n_balanceProvider["balanceProvider: BalanceConfig"]
+    n_calendarServiceProvider["calendarServiceProvider: CalendarService"]
+    n_contractMarketServiceProvider["contractMarketServiceProvider: ContractMarketService"]
+    n_contractServiceProvider["contractServiceProvider: ContractService"]
+    n_dayPipelineProvider["dayPipelineProvider: DayPipeline"]
+    n_daySimulatorProvider["daySimulatorProvider: DaySimulator"]
+    n_draftServiceProvider["draftServiceProvider: DraftService"]
+    n_draftTradeServiceProvider["draftTradeServiceProvider: DraftTradeService"]
+    n_gameFactoryProvider["gameFactoryProvider: GameFactory"]
+    n_matchContextFactoryProvider["matchContextFactoryProvider: MatchContextFactory"]
+    n_matchEngineProvider["matchEngineProvider: SimulationMatchEngine"]
+    n_negotiationServiceProvider["negotiationServiceProvider: NegotiationService"]
+    n_playerEventServiceProvider["playerEventServiceProvider: PlayerEventService"]
+    n_saveRepositoryProvider["saveRepositoryProvider: SaveRepository"]
+    n_savesListProvider["savesListProvider: List~GameSaveMeta~"]
+    n_scoutingServiceProvider["scoutingServiceProvider: ScoutingService"]
+    n_seasonServiceProvider["seasonServiceProvider: SeasonService"]
+    n_simulationRunnerProvider["simulationRunnerProvider: SimulationRunner"]
+    n_staffServiceProvider["staffServiceProvider: StaffService"]
+    n_teamEventServiceProvider["teamEventServiceProvider: TeamEventService"]
+    n_tradeServiceProvider["tradeServiceProvider: TradeService"]
+    n_aiMatchdayServiceProvider --> n_balanceProvider
+    n_aiMatchdayServiceProvider --> n_matchEngineProvider
+    n_aiRosterManagementServiceProvider --> n_aiTradeServiceProvider
+    n_aiRosterManagementServiceProvider --> n_balanceProvider
+    n_aiRosterManagementServiceProvider --> n_contractMarketServiceProvider
+    n_aiRosterManagementServiceProvider --> n_tradeServiceProvider
+    n_aiTradeServiceProvider --> n_balanceProvider
+    n_aiTradeServiceProvider --> n_tradeServiceProvider
+    n_calendarServiceProvider --> n_balanceProvider
+    n_contractMarketServiceProvider --> n_balanceProvider
+    n_contractMarketServiceProvider --> n_calendarServiceProvider
+    n_contractMarketServiceProvider --> n_contractServiceProvider
+    n_contractMarketServiceProvider --> n_negotiationServiceProvider
+    n_contractMarketServiceProvider --> n_staffServiceProvider
+    n_contractServiceProvider --> n_balanceProvider
+    n_dayPipelineProvider --> n_balanceProvider
+    n_dayPipelineProvider --> n_calendarServiceProvider
+    n_dayPipelineProvider --> n_contractMarketServiceProvider
+    n_dayPipelineProvider --> n_daySimulatorProvider
+    n_dayPipelineProvider --> n_draftTradeServiceProvider
+    n_dayPipelineProvider --> n_negotiationServiceProvider
+    n_dayPipelineProvider --> n_playerEventServiceProvider
+    n_dayPipelineProvider --> n_teamEventServiceProvider
+    n_dayPipelineProvider --> n_tradeServiceProvider
+    n_daySimulatorProvider --> n_aiMatchdayServiceProvider
+    n_daySimulatorProvider --> n_aiRosterManagementServiceProvider
+    n_daySimulatorProvider --> n_aiTradeServiceProvider
+    n_daySimulatorProvider --> n_balanceProvider
+    n_daySimulatorProvider --> n_contractMarketServiceProvider
+    n_daySimulatorProvider --> n_matchEngineProvider
+    n_daySimulatorProvider --> n_playerEventServiceProvider
+    n_daySimulatorProvider --> n_seasonServiceProvider
+    n_daySimulatorProvider --> n_teamEventServiceProvider
+    n_draftServiceProvider --> n_balanceProvider
+    n_draftTradeServiceProvider --> n_balanceProvider
+    n_draftTradeServiceProvider --> n_calendarServiceProvider
+    n_gameFactoryProvider --> n_balanceProvider
+    n_matchContextFactoryProvider --> n_balanceProvider
+    n_matchContextFactoryProvider --> n_calendarServiceProvider
+    n_matchEngineProvider --> n_balanceProvider
+    n_negotiationServiceProvider --> n_balanceProvider
+    n_playerEventServiceProvider --> n_balanceProvider
+    n_savesListProvider --> n_saveRepositoryProvider
+    n_scoutingServiceProvider --> n_balanceProvider
+    n_seasonServiceProvider --> n_aiMatchdayServiceProvider
+    n_seasonServiceProvider --> n_aiRosterManagementServiceProvider
+    n_seasonServiceProvider --> n_balanceProvider
+    n_seasonServiceProvider --> n_draftTradeServiceProvider
+    n_seasonServiceProvider --> n_matchEngineProvider
+    n_seasonServiceProvider --> n_teamEventServiceProvider
+    n_simulationRunnerProvider --> n_dayPipelineProvider
+    n_staffServiceProvider --> n_balanceProvider
+    n_teamEventServiceProvider --> n_balanceProvider
+    n_tradeServiceProvider --> n_balanceProvider
+```
+
+## Kontroler, zapis i ustawienia
+
+Węzeł to `nazwa: typ` widoczny dla `ref.watch`. Ciągła krawędź to `ref.watch`, przerywana to `ref.read`. `.notifier`, `.future` i `.select(...)` liczą się jako ten sam provider. Graf serwisów jest osobno od kontrolera i ustawień.
+
+- Ciągła krawędź: `ref.watch`.
+- Przerywana krawędź: `ref.read`.
+- Węzeł w stylu `nieustalone`: w ciele jest dostęp, którego provider skrypt nie rozstrzyga statycznie.
+
+15 providerów.
+
+```mermaid
+flowchart LR
+    n_activeLeagueProvider["activeLeagueProvider: ?"]
+    n_activeSearchFiltersKeyProvider["activeSearchFiltersKeyProvider: int"]
+    n_calendarServiceProvider["calendarServiceProvider: CalendarService"]
+    n_clubBrandingProvider["clubBrandingProvider: ClubBrandingRegistry"]
+    n_clubBrandingRegistryProvider["clubBrandingRegistryProvider: ClubBrandingRegistry"]
+    n_contractMarketServiceProvider["contractMarketServiceProvider: ContractMarketService"]
+    n_dayPipelineProvider["dayPipelineProvider: DayPipeline"]
+    n_developmentDataProvider["developmentDataProvider: DevelopmentData?"]
+    n_draftTradeServiceProvider["draftTradeServiceProvider: DraftTradeService"]
+    n_gameControllerProvider["gameControllerProvider: AsyncValue~GameSave?~"]
+    n_gameFactoryProvider["gameFactoryProvider: GameFactory"]
+    n_legacyColorThemeSettingProvider["legacyColorThemeSettingProvider: bool"]
+    n_localeProvider["localeProvider: Locale"]
+    n_nextGameEventProvider["nextGameEventProvider: UpcomingAction?"]
+    n_playerEventServiceProvider["playerEventServiceProvider: PlayerEventService"]
+    n_saveManagementCoordinatorProvider["saveManagementCoordinatorProvider: SaveManagementCoordinator"]
+    n_saveManagementServiceProvider["saveManagementServiceProvider: SaveManagementService"]
+    n_saveRecordsProvider["saveRecordsProvider: List~SaveRecord~"]
+    n_saveRepositoryProvider["saveRepositoryProvider: SaveRepository"]
+    n_scoutingServiceProvider["scoutingServiceProvider: ScoutingService"]
+    n_searchFiltersProvider["searchFiltersProvider: SearchFiltersState"]
+    n_seasonServiceProvider["seasonServiceProvider: SeasonService"]
+    n_sharedPreferencesProvider["sharedPreferencesProvider: SharedPreferences"]
+    n_simulationRunnerProvider["simulationRunnerProvider: SimulationRunner"]
+    n_staffServiceProvider["staffServiceProvider: StaffService"]
+    n_teamEventServiceProvider["teamEventServiceProvider: TeamEventService"]
+    n_tradeServiceProvider["tradeServiceProvider: TradeService"]
+    n_urgentInterruptionSettingProvider["urgentInterruptionSettingProvider: bool"]
+    n_activeLeagueProvider --> n_gameControllerProvider
+    n_activeSearchFiltersKeyProvider --> n_gameControllerProvider
+    n_developmentDataProvider --> n_activeLeagueProvider
+    n_gameControllerProvider --> n_calendarServiceProvider
+    n_gameControllerProvider --> n_contractMarketServiceProvider
+    n_gameControllerProvider --> n_dayPipelineProvider
+    n_gameControllerProvider --> n_draftTradeServiceProvider
+    n_gameControllerProvider --> n_gameFactoryProvider
+    n_gameControllerProvider --> n_playerEventServiceProvider
+    n_gameControllerProvider --> n_saveRepositoryProvider
+    n_gameControllerProvider --> n_scoutingServiceProvider
+    n_gameControllerProvider --> n_seasonServiceProvider
+    n_gameControllerProvider --> n_simulationRunnerProvider
+    n_gameControllerProvider --> n_staffServiceProvider
+    n_gameControllerProvider --> n_teamEventServiceProvider
+    n_gameControllerProvider --> n_tradeServiceProvider
+    n_gameControllerProvider --> n_urgentInterruptionSettingProvider
+    n_legacyColorThemeSettingProvider --> n_sharedPreferencesProvider
+    n_localeProvider --> n_sharedPreferencesProvider
+    n_nextGameEventProvider --> n_activeLeagueProvider
+    n_nextGameEventProvider --> n_gameControllerProvider
+    n_saveManagementCoordinatorProvider --> n_gameControllerProvider
+    n_saveManagementCoordinatorProvider --> n_localeProvider
+    n_saveManagementCoordinatorProvider --> n_saveManagementServiceProvider
+    n_saveManagementCoordinatorProvider --> n_saveRepositoryProvider
+    n_saveManagementServiceProvider --> n_saveRepositoryProvider
+    n_saveRecordsProvider --> n_saveManagementServiceProvider
+    n_urgentInterruptionSettingProvider --> n_sharedPreferencesProvider
+    linkStyle 3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,20,21,22,23,24 stroke-dasharray:5 5
 ```
 
 ## Ekrany i providery
 
-Pliki `*_screen.dart` i ich importy z `app/providers`. Widżety, sekcje i dialogi z tego katalogu nie wchodzą na listę.
+Dla każdego `*_screen.dart` nazwy providerów użyte przez `ref.watch` i `ref.read`. Widżety i pliki pomocnicze obok ekranu nie wchodzą na listę.
+
+Kolumna `watch` to `ref.watch`, kolumna `read` to `ref.read`. `nieustalone` oznacza argument, którego skrypt nie rozstrzyga statycznie.
 
 30 ekranów.
 
-- `calendar_screen.dart` → `game_provider.dart`
-- `contract_screen.dart` → `game_provider.dart`
-- `development_screen.dart` → `club_branding_provider.dart`, `development_provider.dart`, `game_provider.dart`
-- `draft_history_screen.dart` → `game_provider.dart`
-- `draft_screen.dart` → `game_provider.dart`
-- `finance_screen.dart` → `club_branding_provider.dart`, `game_provider.dart`, `settings_provider.dart`
-- `free_agency_screen.dart` → `game_provider.dart`
-- `home_screen.dart` → `club_branding_provider.dart`, `game_provider.dart`
-- `inbox_screen.dart` → `game_provider.dart`
-- `load_game_screen.dart` → `club_branding_provider.dart`, `game_provider.dart`, `save_management_provider.dart`
-- `lottery_screen.dart` → `game_provider.dart`
-- `main_menu_screen.dart` → brak importu providera
-- `matchday_screen.dart` → `game_provider.dart`
-- `new_game_screen.dart` → `club_branding_provider.dart`, `game_provider.dart`
-- `other_screen.dart` → brak importu providera
-- `player_detail_screen.dart` → `club_branding_provider.dart`, `game_provider.dart`
-- `player_stats_screen.dart` → `club_branding_provider.dart`, `game_provider.dart`, `settings_provider.dart`
-- `prospects_screen.dart` → `game_provider.dart`
-- `rankings_screen.dart` → `club_branding_provider.dart`, `game_provider.dart`, `settings_provider.dart`
-- `rewards_screen.dart` → `game_provider.dart`
-- `search_filters_screen.dart` → `club_branding_provider.dart`, `game_provider.dart`, `search_filters_provider.dart`
-- `search_screen.dart` → `club_branding_provider.dart`, `game_provider.dart`, `search_filters_provider.dart`
-- `settings_screen.dart` → `settings_provider.dart`
-- `shell_screen.dart` → `club_branding_provider.dart`, `game_provider.dart`, `settings_provider.dart`
-- `squad_screen.dart` → `game_provider.dart`
-- `staff_screen.dart` → `game_provider.dart`
-- `standings_screen.dart` → `game_provider.dart`
-- `team_overview_screen.dart` → `club_branding_provider.dart`, `game_provider.dart`, `settings_provider.dart`
-- `trade_history_screen.dart` → `game_provider.dart`
-- `trade_screen.dart` → `game_provider.dart`
+| Ekran | watch | read | nieustalone |
+| --- | --- | --- | --- |
+| `calendar_screen.dart` | — | `activeLeagueProvider`, `calendarCursorMonthProvider`, `calendarServiceProvider`, `gameControllerProvider`, `shellTabIndexProvider` | — |
+| `contract_screen.dart` | `activeLeagueProvider`, `balanceProvider` | `activeLeagueProvider`, `balanceProvider`, `contractMarketServiceProvider`, `contractServiceProvider`, `gameControllerProvider` | — |
+| `development_screen.dart` | `activeLeagueProvider`, `balanceProvider`, `clubBrandingProvider`, `developmentDataProvider` | — | — |
+| `draft_history_screen.dart` | `activeLeagueProvider` | — | — |
+| `draft_screen.dart` | `activeLeagueProvider`, `balanceProvider` | `activeLeagueProvider`, `gameControllerProvider` | — |
+| `finance_screen.dart` | `activeLeagueProvider`, `balanceProvider`, `clubBrandingProvider`, `legacyColorThemeSettingProvider` | — | — |
+| `free_agency_screen.dart` | `activeLeagueProvider`, `balanceProvider` | `balanceProvider`, `calendarServiceProvider`, `contractMarketServiceProvider`, `contractServiceProvider`, `gameControllerProvider`, `staffServiceProvider` | — |
+| `home_screen.dart` | `activeLeagueProvider`, `clubBrandingProvider`, `nextGameEventProvider` | `calendarServiceProvider` | — |
+| `inbox_screen.dart` | `activeLeagueProvider` | `activeLeagueProvider`, `gameControllerProvider` | — |
+| `load_game_screen.dart` | `clubBrandingProvider`, `gameFactoryProvider`, `saveRecordsProvider` | `gameControllerProvider`, `saveManagementCoordinatorProvider` | — |
+| `lottery_screen.dart` | `activeLeagueProvider`, `balanceProvider` | `activeLeagueProvider`, `balanceProvider`, `draftServiceProvider`, `gameControllerProvider` | — |
+| `main_menu_screen.dart` | — | — | — |
+| `matchday_screen.dart` | — | `aiMatchdayServiceProvider`, `balanceProvider`, `gameControllerProvider`, `matchContextFactoryProvider`, `matchEngineProvider`, `seasonServiceProvider` | — |
+| `new_game_screen.dart` | `clubBrandingProvider`, `gameFactoryProvider` | `gameControllerProvider` | — |
+| `other_screen.dart` | — | — | — |
+| `player_detail_screen.dart` | `activeLeagueProvider`, `balanceProvider`, `clubBrandingProvider` | — | — |
+| `player_stats_screen.dart` | `activeLeagueProvider`, `clubBrandingProvider`, `legacyColorThemeSettingProvider` | `balanceProvider` | — |
+| `prospects_screen.dart` | `activeLeagueProvider` | `activeLeagueProvider`, `gameControllerProvider`, `scoutingServiceProvider` | — |
+| `rankings_screen.dart` | `activeLeagueProvider`, `clubBrandingProvider`, `legacyColorThemeSettingProvider` | `balanceProvider` | — |
+| `rewards_screen.dart` | `activeLeagueProvider` | — | — |
+| `search_filters_screen.dart` | `activeLeagueProvider`, `activeSearchFiltersKeyProvider`, `clubBrandingProvider`, `searchFiltersProvider` | `activeSearchFiltersKeyProvider`, `searchFiltersProvider` | — |
+| `search_screen.dart` | `activeLeagueProvider`, `activeSearchFiltersKeyProvider`, `clubBrandingProvider`, `searchFiltersProvider` | — | — |
+| `settings_screen.dart` | `legacyColorThemeSettingProvider`, `localeProvider`, `urgentInterruptionSettingProvider` | `legacyColorThemeSettingProvider`, `localeProvider`, `urgentInterruptionSettingProvider` | — |
+| `shell_screen.dart` | `activeLeagueProvider`, `clubBrandingProvider`, `legacyColorThemeSettingProvider`, `shellTabIndexProvider` | `gameControllerProvider`, `shellTabIndexProvider` | — |
+| `squad_screen.dart` | `activeLeagueProvider`, `balanceProvider` | `balanceProvider`, `gameControllerProvider` | — |
+| `staff_screen.dart` | `activeLeagueProvider`, `balanceProvider` | `activeLeagueProvider`, `balanceProvider`, `contractMarketServiceProvider`, `gameControllerProvider`, `staffServiceProvider` | — |
+| `standings_screen.dart` | `activeLeagueProvider` | `activeLeagueProvider` | — |
+| `team_overview_screen.dart` | `activeLeagueProvider`, `clubBrandingProvider`, `legacyColorThemeSettingProvider` | — | — |
+| `trade_history_screen.dart` | `activeLeagueProvider` | — | — |
+| `trade_screen.dart` | `activeLeagueProvider` | `activeLeagueProvider`, `aiTradeServiceProvider`, `gameControllerProvider`, `tradeServiceProvider` | — |
 

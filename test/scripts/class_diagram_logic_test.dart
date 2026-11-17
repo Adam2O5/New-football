@@ -169,6 +169,97 @@ void main() {
     });
   });
 
+  group('ref.watch and ref.read', () {
+    test('resolves providers, modifiers and family calls', () {
+      final uses = extractRefUses('''
+void f(dynamic ref, dynamic key) {
+  ref.watch(balanceProvider);
+  ref.read(gameControllerProvider.notifier);
+  ref.watch(savesListProvider.future);
+  ref.watch(searchFiltersProvider(key));
+  ref.watch(activeLeagueProvider.select((v) => v));
+  ref.read(helper());
+  ref.watch(unknownThing);
+}
+''');
+      expect(uses.map((use) => use.provider).toList(), [
+        'balanceProvider',
+        'gameControllerProvider',
+        'savesListProvider',
+        'searchFiltersProvider',
+        'activeLeagueProvider',
+        null,
+        null,
+      ]);
+      expect(uses[0].kind, RefKind.watch);
+      expect(uses[1].kind, RefKind.read);
+      expect(uses[5].resolved, isFalse);
+      expect(uses[5].snippet, 'helper()');
+      expect(uses[6].snippet, 'unknownThing');
+    });
+
+    test(
+      'builds provider edges from callbacks and the class that receives ref',
+      () {
+        final diagram = analyzeProviderSources({
+          'providers.dart': '''
+class GameController with _Extra {
+  GameController(this._ref);
+  final Object _ref;
+  Object get repo => _ref.read(saveRepositoryProvider);
+}
+mixin _Extra {
+  Object get _ref;
+  void go() { _ref.read(tradeServiceProvider); }
+}
+final gameControllerProvider =
+    StateNotifierProvider<GameController, AsyncValue<GameSave?>>((ref) {
+  return GameController(ref);
+});
+final balanceProvider = Provider<BalanceConfig>((ref) => BalanceConfig());
+final dayPipelineProvider = Provider((ref) => DayPipeline(
+  balance: ref.watch(balanceProvider),
+));
+final activeLeagueProvider = Provider((ref) {
+  return ref.watch(gameControllerProvider).value;
+});
+final aliasProvider = balanceProvider;
+final mysteryProvider = Provider((ref) {
+  final value = ref.watch(picked);
+  return value;
+});
+''',
+        });
+        final types = {
+          for (final node in diagram.nodes) node.name: node.exposedType,
+        };
+        expect(types['gameControllerProvider'], 'AsyncValue~GameSave?~');
+        expect(types['balanceProvider'], 'BalanceConfig');
+        expect(types['dayPipelineProvider'], 'DayPipeline');
+        expect(types['activeLeagueProvider'], isNull);
+        expect(types['aliasProvider'], 'BalanceConfig');
+        expect(
+          diagram.edges.map(
+            (edge) => '${edge.from} ${edge.kind.name} ${edge.to}',
+          ),
+          [
+            'activeLeagueProvider watch gameControllerProvider',
+            'dayPipelineProvider watch balanceProvider',
+            'gameControllerProvider read saveRepositoryProvider',
+            'gameControllerProvider read tradeServiceProvider',
+          ],
+        );
+        expect(
+          diagram.nodes
+              .singleWhere((node) => node.name == 'mysteryProvider')
+              .unresolved,
+          isTrue,
+        );
+        expect(diagram.unresolved.single.snippet, 'picked');
+      },
+    );
+  });
+
   group('polishTyp', () {
     test('inflects typ, typy and typów', () {
       expect(polishTyp(1), '1 typ');

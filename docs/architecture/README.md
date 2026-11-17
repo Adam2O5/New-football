@@ -478,12 +478,17 @@ Plik: `docs/architecture/persistence.md`.
 - `lib/core/random/match_random.dart`
 - `lib/core/random/seeds.dart`
 
-#### Providery i serwisy (`app.providers`, 39 providerów)
+#### Graf serwisów (`app.providers.services`, 24 providery)
+
+Plik: `docs/architecture/app.md`.
+
+- `lib/app/providers/game_service_providers.dart`
+
+#### Kontroler, zapis i ustawienia (`app.providers.app`, 15 providerów)
 
 Plik: `docs/architecture/app.md`.
 
 - `lib/app/providers/game_provider.dart`
-- `lib/app/providers/game_service_providers.dart`
 - `lib/app/providers/game_simulation_types.dart`
 - `lib/app/providers/game_controller_calendar_feedback.dart`
 - `lib/app/providers/game_controller_contracts.dart`

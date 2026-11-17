@@ -8,7 +8,6 @@ import 'dart:io';
 
 import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:analyzer/dart/ast/ast.dart';
-import 'package:analyzer/dart/ast/visitor.dart';
 
 import 'class_diagram_logic.dart';
 
@@ -440,9 +439,10 @@ const groups = <String, DiagramGroup>{
     page: 'app.md',
     title: 'Providery i serwisy',
     description:
-        'Zmienne `*Provider` i typ, który konstruują albo deklarują w '
-        'argumencie typu. Strzałka prowadzi do serwisu, repozytorium albo '
-        'konfiguracji, a nie do innych providerów.',
+        'Węzeł to `nazwa: typ` widoczny dla `ref.watch`. Ciągła krawędź to '
+        '`ref.watch`, przerywana to `ref.read`. `.notifier`, `.future` i '
+        '`.select(...)` liczą się jako ten sam provider. Graf serwisów jest '
+        'osobno od kontrolera i ustawień.',
     section: SectionKind.providers,
     files: [
       DiagramFile('lib/app/providers/game_provider.dart'),
@@ -465,8 +465,9 @@ const groups = <String, DiagramGroup>{
     page: 'app.md',
     title: 'Ekrany i providery',
     description:
-        'Pliki `*_screen.dart` i ich importy z `app/providers`. Widżety, '
-        'sekcje i dialogi z tego katalogu nie wchodzą na listę.',
+        'Dla każdego `*_screen.dart` nazwy providerów użyte przez `ref.watch` '
+        'i `ref.read`. Widżety i pliki pomocnicze obok ekranu nie wchodzą '
+        'na listę.',
     section: SectionKind.screens,
     files: [DiagramFile('lib/app/screens')],
   ),
@@ -534,8 +535,8 @@ const pages = <String, PageInfo>{
   'app.md': PageInfo(
     title: 'Aplikacja',
     intro:
-        'Providery i serwisy, które konstruują, oraz lista ekranów. Widżety '
-        'nie są na tej stronie.',
+        'Providery połączone przez `ref.watch` i `ref.read` oraz lista '
+        'ekranów. Widżety nie są na tej stronie.',
   ),
 };
 
@@ -560,18 +561,16 @@ void main() {
   final importGraph = _scanImports(root, library);
   final diagrams = [
     for (final entry in groups.entries)
-      switch (entry.value.section) {
-        SectionKind.classes => _renderGroup(library, entry.key, entry.value),
-        SectionKind.providers => _renderProviderServices(
+      ...switch (entry.value.section) {
+        SectionKind.classes => [_renderGroup(library, entry.key, entry.value)],
+        SectionKind.providers => _renderProviderDiagrams(
           library,
           entry.key,
           entry.value,
         ),
-        SectionKind.screens => _renderScreenProviders(
-          library,
-          entry.key,
-          entry.value,
-        ),
+        SectionKind.screens => [
+          _renderScreenProviders(library, entry.key, entry.value),
+        ],
       },
   ];
   final outDir = Directory('${root.path}/docs/architecture');
@@ -1524,58 +1523,117 @@ List<String> omittedFiles(Directory root, String relativeDirectory) {
   return omitted;
 }
 
-RenderedDiagram _renderProviderServices(
+List<RenderedDiagram> _renderProviderDiagrams(
   _Library library,
   String id,
   DiagramGroup group,
 ) {
-  final links = <String, Set<String>>{};
-  for (final file in group.files) {
-    final unit = library.unit(file.path);
-    for (final declaration in unit.declarations) {
-      if (declaration is! TopLevelVariableDeclaration) continue;
-      for (final variable in declaration.variables.variables) {
-        final name = variable.name.lexeme;
-        if (!name.endsWith('Provider') || name.startsWith('_')) continue;
-        links.putIfAbsent(name, () => <String>{});
-        links[name]!.addAll(_serviceDependencies(variable.initializer));
-      }
-    }
-  }
-  final providers = links.keys.toList()..sort();
-  final services = <String>{
-    for (final dependencies in links.values) ...dependencies,
+  final sources = <String, String>{
+    for (final file in group.files)
+      file.path: File('${library.root.path}/${file.path}').readAsStringSync(),
+  };
+  final data = analyzeProviderSources(sources);
+  const slices = <(String, String, bool Function(String file))>[
+    ('services', 'Graf serwisów', _isServiceProviderFile),
+    ('app', 'Kontroler, zapis i ustawienia', _isApplicationProviderFile),
+  ];
+  return [
+    for (final slice in slices)
+      _providerSlice(
+        id: '$id.${slice.$1}',
+        title: slice.$2,
+        group: group,
+        data: data,
+        include: slice.$3,
+      ),
+  ];
+}
+
+bool _isServiceProviderFile(String file) =>
+    file.endsWith('game_service_providers.dart');
+
+bool _isApplicationProviderFile(String file) => !_isServiceProviderFile(file);
+
+RenderedDiagram _providerSlice({
+  required String id,
+  required String title,
+  required DiagramGroup group,
+  required ProviderDiagramData data,
+  required bool Function(String file) include,
+}) {
+  final owners = data.nodes.where((node) => include(node.file)).toList();
+  final ownerNames = owners.map((node) => node.name).toSet();
+  final edges = data.edges.where((edge) => ownerNames.contains(edge.from));
+  final names = <String>{
+    ...ownerNames,
+    for (final edge in edges) edge.to,
   }.toList()..sort();
+  final byName = {for (final node in data.nodes) node.name: node};
+  final unresolvedOwners = owners.where((node) => node.unresolved).toList();
+  final spots = data.unresolved.where(
+    (spot) => ownerNames.contains(spot.owner),
+  );
   final buffer = StringBuffer('flowchart LR\n');
-  for (final name in providers) {
-    buffer.writeln('    ${_flowId(name)}["$name"]');
+  for (final name in names) {
+    final node = byName[name];
+    final type = node?.exposedType ?? '?';
+    buffer.writeln('    ${_flowId(name)}["$name: $type"]');
   }
-  for (final name in services) {
-    buffer.writeln('    ${_flowId(name)}["$name"]');
+  final drawn = edges.toList();
+  for (final edge in drawn) {
+    buffer.writeln('    ${_flowId(edge.from)} --> ${_flowId(edge.to)}');
   }
-  final edges = <String>[];
-  for (final provider in providers) {
-    final dependencies = links[provider]!.toList()..sort();
-    for (final dependency in dependencies) {
-      edges.add('    ${_flowId(provider)} --> ${_flowId(dependency)}');
-    }
+  if (unresolvedOwners.isNotEmpty) {
+    buffer.writeln(
+      '    classDef nieustalone fill:#fff8c5,stroke:#9a6700,stroke-width:2px',
+    );
+    final ids = unresolvedOwners.map((node) => _flowId(node.name)).toList()
+      ..sort();
+    buffer.writeln('    class ${ids.join(',')} nieustalone');
   }
-  edges.sort();
-  for (final edge in edges) {
-    buffer.writeln(edge);
+  final readIndexes = <int>[];
+  for (var i = 0; i < drawn.length; i++) {
+    if (drawn[i].kind == RefKind.read) readIndexes.add(i);
+  }
+  if (readIndexes.isNotEmpty) {
+    buffer.writeln(
+      '    linkStyle ${readIndexes.join(',')} stroke-dasharray:5 5',
+    );
   }
   final mermaid = buffer.toString();
   _assertMermaidSafe(id, mermaid);
+  final description = StringBuffer()
+    ..writeln(group.description)
+    ..writeln()
+    ..writeln('- Ciągła krawędź: `ref.watch`.')
+    ..writeln('- Przerywana krawędź: `ref.read`.')
+    ..writeln(
+      '- Węzeł w stylu `nieustalone`: w ciele jest dostęp, którego provider skrypt nie rozstrzyga statycznie.',
+    );
+  final spotList = spots.toList();
+  if (spotList.isNotEmpty) {
+    description
+      ..writeln()
+      ..writeln('Miejsca nieustalone:');
+    for (final spot in spotList) {
+      description.writeln(
+        '- `${spot.owner}` w `${spot.file}` linia ${spot.line}: `${spot.snippet}`',
+      );
+    }
+  }
   return RenderedDiagram(
     id: id,
     page: group.page,
-    title: group.title,
-    description: group.description,
-    files: [for (final file in group.files) file.path],
-    typeCount: providers.length,
+    title: title,
+    description: description.toString().trimRight(),
+    files: [
+      for (final file in group.files)
+        if (include(file.path)) file.path,
+    ],
+    typeCount: owners.length,
     mermaid: mermaid,
     countLine: polishCount(
-      providers.length,
+      owners.length,
       one: 'provider',
       few: 'providery',
       many: 'providerów',
@@ -1597,36 +1655,54 @@ RenderedDiagram _renderScreenProviders(
           .where((path) => path.endsWith('_screen.dart'))
           .toList()
         ..sort();
-  final lines = <String>[];
+  final lines = <String>[
+    '| Ekran | watch | read | nieustalone |',
+    '| --- | --- | --- | --- |',
+  ];
+  final spots = <String>[];
   for (final file in files) {
-    final unit = library.unit(file);
-    final providers = <String>{};
-    for (final directive in unit.directives) {
-      if (directive is! ImportDirective) continue;
-      final uri = directive.uri.stringValue;
-      if (uri == null) continue;
-      final resolved = resolveImport(file, uri);
-      if (resolved == null) continue;
-      final path = resolved.startsWith('lib/')
-          ? resolved.substring(4)
-          : resolved;
-      if (!path.startsWith('app/providers/') || !path.endsWith('.dart')) {
+    final source = File('${library.root.path}/$file').readAsStringSync();
+    final uses = extractRefUses(source);
+    final watched = <String>{};
+    final read = <String>{};
+    final unresolved = <RefUse>[];
+    for (final use in uses) {
+      if (!use.resolved) {
+        unresolved.add(use);
         continue;
       }
-      providers.add(path.split('/').last);
+      if (use.kind == RefKind.watch) {
+        watched.add(use.provider!);
+      } else {
+        read.add(use.provider!);
+      }
     }
-    final names = providers.toList()..sort();
     final screen = file.split('/').last;
-    final target = names.isEmpty
-        ? 'brak importu providera'
-        : names.map((name) => '`$name`').join(', ');
-    lines.add('- `$screen` → $target');
+    lines.add(
+      '| `$screen` | ${_providerCell(watched)} | ${_providerCell(read)} | '
+      '${unresolved.isEmpty ? '—' : 'tak'} |',
+    );
+    for (final use in unresolved) {
+      spots.add(
+        '- `$screen` linia ${use.line}: `${use.snippet.replaceAll('|', '/')}`',
+      );
+    }
+  }
+  if (spots.isNotEmpty) {
+    lines
+      ..add('')
+      ..add('Miejsca nieustalone:')
+      ..add('')
+      ..addAll(spots);
   }
   return RenderedDiagram(
     id: id,
     page: group.page,
     title: group.title,
-    description: group.description,
+    description:
+        '${group.description}\n\n'
+        'Kolumna `watch` to `ref.watch`, kolumna `read` to `ref.read`. '
+        '`nieustalone` oznacza argument, którego skrypt nie rozstrzyga statycznie.',
     files: files,
     typeCount: files.length,
     mermaid: lines.join('\n'),
@@ -1640,52 +1716,10 @@ RenderedDiagram _renderScreenProviders(
   );
 }
 
-const _serviceSuffixes = [
-  'Service',
-  'Repository',
-  'Runner',
-  'Engine',
-  'Factory',
-  'Pipeline',
-  'Config',
-  'Simulator',
-];
-
-Set<String> _serviceDependencies(Expression? initializer) {
-  if (initializer == null) return const {};
-  final visitor = _ServiceDependencyVisitor();
-  initializer.accept(visitor);
-  return visitor.names;
-}
-
-final class _ServiceDependencyVisitor extends RecursiveAstVisitor<void> {
-  final names = <String>{};
-
-  @override
-  void visitInstanceCreationExpression(InstanceCreationExpression node) {
-    _add(node.constructorName.type.name.lexeme);
-    super.visitInstanceCreationExpression(node);
-  }
-
-  @override
-  void visitMethodInvocation(MethodInvocation node) {
-    final name = node.methodName.name;
-    if (name == 'Provider' || name.endsWith('Provider')) {
-      final arguments = node.typeArguments?.arguments;
-      if (arguments != null) {
-        for (final argument in arguments) {
-          if (argument is NamedType) _add(argument.name.lexeme);
-        }
-      }
-    } else {
-      _add(name);
-    }
-    super.visitMethodInvocation(node);
-  }
-
-  void _add(String name) {
-    if (_serviceSuffixes.any(name.endsWith)) names.add(name);
-  }
+String _providerCell(Set<String> names) {
+  if (names.isEmpty) return '—';
+  final sorted = names.toList()..sort();
+  return sorted.map((name) => '`$name`').join(', ');
 }
 
 String _flowId(String name) =>
