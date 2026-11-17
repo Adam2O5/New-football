@@ -21,9 +21,8 @@ Warstwy są numerowane od dołu. Pakiet z wyższym numerem może importować pak
 | `app/providers` | 6 |
 | `app/screens` | 7 |
 
-Czerwona krawędź (`linkStyle`, `#d1242f`) spełnia co najmniej jeden warunek:
+Czerwona krawędź (`linkStyle`, `#d1242f`) oznacza jedno z dwóch:
 
-- oba końce leżą w tej samej silnie spójnej składowej (cykl),
 - pakiet z niższej warstwy importuje pakiet z wyższej,
 - `app/screens` importuje pakiet inny niż `app/providers` i `core/models` (omija providers). `core/models` zostaje dozwolony, bo ekrany czytają modele bezpośrednio.
 
@@ -37,33 +36,18 @@ Liczba na strzałce to liczba dyrektyw `import` między pakietami, a nie liczba 
 
 | Krawędź | Importy | Status |
 | --- | --- | --- |
-| `core/models` → `core/services` | 4 | czerwona (cykl, warstwa w górę) |
-| `core/simulation` → `core/services` | 9 | czerwona (cykl, warstwa w górę) |
-| `core/balance` → `core/ai` | 1 | czerwona (cykl, warstwa w górę) |
-| `core/services` → `core/ai` | 11 | czerwona (cykl) |
-| `core/ai` → `core/services` | 15 | czerwona (cykl, warstwa w górę) |
+| `core/models` → `core/services` | 4 | czerwona (warstwa w górę) |
+| `core/simulation` → `core/services` | 9 | czerwona (warstwa w górę) |
+| `core/balance` → `core/ai` | 1 | czerwona (warstwa w górę) |
+| `core/services` → `core/ai` | 11 | jest, bez czerwieni |
+| `core/ai` → `core/services` | 15 | czerwona (warstwa w górę) |
 | `app/screens` → `core/services` | 25 | czerwona (omija providers) |
 
 ### Pozostałe czerwone krawędzie
 
-- `core/models` → `core/tactics` (5, cykl, warstwa w górę)
-- `core/models` → `core/balance` (17, cykl, warstwa w górę)
-- `core/tactics` → `core/models` (14, cykl)
-- `core/tactics` → `core/balance` (2, cykl)
-- `core/balance` → `core/models` (14, cykl)
-- `core/balance` → `core/tactics` (1, cykl)
-- `core/simulation` → `core/models` (72, cykl)
-- `core/simulation` → `core/tactics` (7, cykl)
-- `core/simulation` → `core/balance` (18, cykl)
-- `core/ai` → `core/models` (61, cykl)
-- `core/ai` → `core/tactics` (6, cykl)
-- `core/ai` → `core/balance` (10, cykl)
-- `core/ai` → `core/simulation` (2, cykl)
+- `core/models` → `core/tactics` (5, warstwa w górę)
+- `core/models` → `core/balance` (17, warstwa w górę)
 - `data` → `core/services` (1, warstwa w górę)
-- `core/services` → `core/models` (166, cykl)
-- `core/services` → `core/tactics` (5, cykl)
-- `core/services` → `core/balance` (39, cykl)
-- `core/services` → `core/simulation` (8, cykl)
 - `app/screens` → `core/tactics` (6, omija providers)
 - `app/screens` → `core/balance` (4, omija providers)
 - `app/screens` → `core/simulation` (2, omija providers)
@@ -75,33 +59,33 @@ Liczba na strzałce to liczba dyrektyw `import` między pakietami, a nie liczba 
 | Z | Do | Importy | Oznaczenie | Przykład |
 | --- | --- | --- | --- | --- |
 | `core/models` | `core/random` | 1 | zgodna z warstwą | `lib/core/models/seed_data_generator.dart -> package:new_football/core/random/seeds.dart` |
-| `core/models` | `core/tactics` | 5 | cykl, warstwa w górę | `lib/core/models/match_models.dart -> package:new_football/core/tactics/tactics_setup.dart` |
-| `core/models` | `core/balance` | 17 | cykl, warstwa w górę | `lib/core/models/contract.dart -> package:new_football/core/balance/finance_balance.dart` |
-| `core/models` | `core/services` | 4 | cykl, warstwa w górę | `lib/core/models/seed_data_generator.dart -> package:new_football/core/services/contract_period_service.dart` |
-| `core/tactics` | `core/models` | 14 | cykl | `lib/core/tactics/formation_layout.dart -> package:new_football/core/models/enums.dart` |
-| `core/tactics` | `core/balance` | 2 | cykl | `lib/core/tactics/substitute_candidates.dart -> package:new_football/core/balance/balance_config.dart` |
-| `core/balance` | `core/models` | 14 | cykl | `lib/core/balance/ai_balance.dart -> package:new_football/core/models/enums.dart` |
-| `core/balance` | `core/tactics` | 1 | cykl | `lib/core/balance/matchday_balance.dart -> package:new_football/core/tactics/tactics_setup.dart` |
-| `core/balance` | `core/ai` | 1 | cykl, warstwa w górę | `lib/core/balance/ai_balance.dart -> package:new_football/core/ai/ai_evaluation_models.dart` |
-| `core/simulation` | `core/models` | 72 | cykl | `lib/core/simulation/effective_attributes.dart -> package:new_football/core/models/enums.dart` |
+| `core/models` | `core/tactics` | 5 | warstwa w górę | `lib/core/models/match_models.dart -> package:new_football/core/tactics/tactics_setup.dart` |
+| `core/models` | `core/balance` | 17 | warstwa w górę | `lib/core/models/contract.dart -> package:new_football/core/balance/finance_balance.dart` |
+| `core/models` | `core/services` | 4 | warstwa w górę | `lib/core/models/seed_data_generator.dart -> package:new_football/core/services/contract_period_service.dart` |
+| `core/tactics` | `core/models` | 14 | zgodna z warstwą | `lib/core/tactics/formation_layout.dart -> package:new_football/core/models/enums.dart` |
+| `core/tactics` | `core/balance` | 2 | zgodna z warstwą | `lib/core/tactics/substitute_candidates.dart -> package:new_football/core/balance/balance_config.dart` |
+| `core/balance` | `core/models` | 14 | zgodna z warstwą | `lib/core/balance/ai_balance.dart -> package:new_football/core/models/enums.dart` |
+| `core/balance` | `core/tactics` | 1 | zgodna z warstwą | `lib/core/balance/matchday_balance.dart -> package:new_football/core/tactics/tactics_setup.dart` |
+| `core/balance` | `core/ai` | 1 | warstwa w górę | `lib/core/balance/ai_balance.dart -> package:new_football/core/ai/ai_evaluation_models.dart` |
+| `core/simulation` | `core/models` | 72 | zgodna z warstwą | `lib/core/simulation/effective_attributes.dart -> package:new_football/core/models/enums.dart` |
 | `core/simulation` | `core/random` | 8 | zgodna z warstwą | `lib/core/simulation/duel_resolver.dart -> package:new_football/core/random/match_random.dart` |
-| `core/simulation` | `core/tactics` | 7 | cykl | `lib/core/simulation/effective_attributes.dart -> package:new_football/core/tactics/position_role_fit.dart` |
-| `core/simulation` | `core/balance` | 18 | cykl | `lib/core/simulation/duel_resolver.dart -> package:new_football/core/balance/balance_config.dart` |
-| `core/simulation` | `core/services` | 9 | cykl, warstwa w górę | `lib/core/simulation/effective_attributes.dart -> package:new_football/core/services/team_management_service.dart` |
-| `core/ai` | `core/models` | 61 | cykl | `lib/core/ai/ai_contract_market_service.dart -> package:new_football/core/models/contract_market_models.dart` |
+| `core/simulation` | `core/tactics` | 7 | zgodna z warstwą | `lib/core/simulation/effective_attributes.dart -> package:new_football/core/tactics/position_role_fit.dart` |
+| `core/simulation` | `core/balance` | 18 | zgodna z warstwą | `lib/core/simulation/duel_resolver.dart -> package:new_football/core/balance/balance_config.dart` |
+| `core/simulation` | `core/services` | 9 | warstwa w górę | `lib/core/simulation/effective_attributes.dart -> package:new_football/core/services/team_management_service.dart` |
+| `core/ai` | `core/models` | 61 | zgodna z warstwą | `lib/core/ai/ai_contract_market_service.dart -> package:new_football/core/models/contract_market_models.dart` |
 | `core/ai` | `core/random` | 8 | zgodna z warstwą | `lib/core/ai/ai_contract_market_service.dart -> package:new_football/core/random/seeds.dart` |
-| `core/ai` | `core/tactics` | 6 | cykl | `lib/core/ai/ai_matchday_models.dart -> package:new_football/core/tactics/tactics_setup.dart` |
-| `core/ai` | `core/balance` | 10 | cykl | `lib/core/ai/ai_contract_market_service.dart -> package:new_football/core/balance/balance_config.dart` |
-| `core/ai` | `core/simulation` | 2 | cykl | `lib/core/ai/ai_matchday_service.dart -> package:new_football/core/simulation/effective_attributes.dart` |
-| `core/ai` | `core/services` | 15 | cykl, warstwa w górę | `lib/core/ai/ai_contract_market_service.dart -> package:new_football/core/services/contract_service.dart` |
+| `core/ai` | `core/tactics` | 6 | zgodna z warstwą | `lib/core/ai/ai_matchday_models.dart -> package:new_football/core/tactics/tactics_setup.dart` |
+| `core/ai` | `core/balance` | 10 | zgodna z warstwą | `lib/core/ai/ai_contract_market_service.dart -> package:new_football/core/balance/balance_config.dart` |
+| `core/ai` | `core/simulation` | 2 | zgodna z warstwą | `lib/core/ai/ai_matchday_service.dart -> package:new_football/core/simulation/effective_attributes.dart` |
+| `core/ai` | `core/services` | 15 | warstwa w górę | `lib/core/ai/ai_contract_market_service.dart -> package:new_football/core/services/contract_service.dart` |
 | `data` | `core/models` | 5 | zgodna z warstwą | `lib/data/save_management_repository_adapter.dart -> package:new_football/core/models/game_save.dart` |
 | `data` | `core/services` | 1 | warstwa w górę | `lib/data/save_management_repository_adapter.dart -> package:new_football/core/services/save_management_repository.dart` |
-| `core/services` | `core/models` | 166 | cykl | `lib/core/services/calendar_event_registry.dart -> package:new_football/core/models/draft_models.dart` |
+| `core/services` | `core/models` | 166 | zgodna z warstwą | `lib/core/services/calendar_event_registry.dart -> package:new_football/core/models/draft_models.dart` |
 | `core/services` | `core/random` | 10 | zgodna z warstwą | `lib/core/services/contract_market_service.dart -> package:new_football/core/random/seeds.dart` |
-| `core/services` | `core/tactics` | 5 | cykl | `lib/core/services/cohesion_service.dart -> package:new_football/core/tactics/position_role_fit.dart` |
-| `core/services` | `core/balance` | 39 | cykl | `lib/core/services/calendar_event_registry.dart -> package:new_football/core/balance/balance_config.dart` |
-| `core/services` | `core/simulation` | 8 | cykl | `lib/core/services/day_simulator.dart -> package:new_football/core/simulation/match_context_factory.dart` |
-| `core/services` | `core/ai` | 11 | cykl | `lib/core/services/contract_market_service.dart -> package:new_football/core/ai/ai_contract_market_service.dart` |
+| `core/services` | `core/tactics` | 5 | zgodna z warstwą | `lib/core/services/cohesion_service.dart -> package:new_football/core/tactics/position_role_fit.dart` |
+| `core/services` | `core/balance` | 39 | zgodna z warstwą | `lib/core/services/calendar_event_registry.dart -> package:new_football/core/balance/balance_config.dart` |
+| `core/services` | `core/simulation` | 8 | zgodna z warstwą | `lib/core/services/day_simulator.dart -> package:new_football/core/simulation/match_context_factory.dart` |
+| `core/services` | `core/ai` | 11 | zgodna z warstwą | `lib/core/services/contract_market_service.dart -> package:new_football/core/ai/ai_contract_market_service.dart` |
 | `app/providers` | `core/models` | 12 | zgodna z warstwą | `lib/app/providers/development_provider.dart -> package:new_football/core/models/development_snapshot.dart` |
 | `app/providers` | `core/tactics` | 1 | zgodna z warstwą | `lib/app/providers/game_provider.dart -> package:new_football/core/tactics/lineup_slots.dart` |
 | `app/providers` | `core/balance` | 1 | zgodna z warstwą | `lib/app/providers/game_provider.dart -> package:new_football/core/balance/balance_config.dart` |
@@ -120,14 +104,16 @@ Liczba na strzałce to liczba dyrektyw `import` między pakietami, a nie liczba 
 
 ```mermaid
 flowchart LR
-    pkg_core_models["core/models"]
+    subgraph cycle_1 ["cykl"]
+        pkg_core_models["core/models"]
+        pkg_core_tactics["core/tactics"]
+        pkg_core_balance["core/balance"]
+        pkg_core_simulation["core/simulation"]
+        pkg_core_ai["core/ai"]
+        pkg_core_services["core/services"]
+    end
     pkg_core_random["core/random"]
-    pkg_core_tactics["core/tactics"]
-    pkg_core_balance["core/balance"]
-    pkg_core_simulation["core/simulation"]
-    pkg_core_ai["core/ai"]
     pkg_data["data"]
-    pkg_core_services["core/services"]
     pkg_app_providers["app/providers"]
     pkg_app_screens["app/screens"]
     pkg_core_models -->|"1"| pkg_core_random
@@ -173,7 +159,7 @@ flowchart LR
     pkg_app_screens -->|"1"| pkg_data
     pkg_app_screens -->|"25"| pkg_core_services
     pkg_app_screens -->|"49"| pkg_app_providers
-    linkStyle 1,2,3,4,5,6,7,8,9,11,12,13,14,16,17,18,19,21,22,24,25,26,27,36,37,38,39,40,41 stroke:#d1242f,stroke-width:2px
+    linkStyle 1,2,3,8,13,19,21,36,37,38,39,40,41 stroke:#d1242f,stroke-width:2px
 ```
 
 ## Legenda
@@ -182,7 +168,7 @@ flowchart LR
 
 - Strzałka `A --> B` oznacza, że pliki pakietu A importują pliki pakietu B.
 - Etykieta to liczba dyrektyw `import`.
-- Czerwień oznacza cykl, ruch w górę warstwy albo ominięcie providerów.
+- Czerwień oznacza ruch w górę warstwy albo ominięcie providerów. Cykl jest ramką `subgraph` z etykietą `cykl`, a nie kolorem krawędzi w dół.
 
 ### Diagram klas
 

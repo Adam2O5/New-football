@@ -385,13 +385,6 @@ ImportGraph scanImports(Directory root) {
     graph[entry.key.$1]!.add(entry.key.$2);
   }
   final components = stronglyConnected(graph.keys.toSet(), graph);
-  final componentOf = <String, int>{};
-  for (var i = 0; i < components.length; i++) {
-    for (final node in components[i]) {
-      componentOf[node] = i;
-    }
-  }
-
   final cycles = [
     for (final component in components)
       if (component.length > 1) (component.toList()..sort()),
@@ -407,13 +400,6 @@ ImportGraph scanImports(Directory root) {
   final edges = <ImportEdge>[];
   for (final key in keys) {
     final reasons = <String>[];
-    final fromComponent = componentOf[key.$1];
-    final toComponent = componentOf[key.$2];
-    if (fromComponent != null &&
-        fromComponent == toComponent &&
-        components[fromComponent].length > 1) {
-      reasons.add('cykl');
-    }
     if (layerOf(key.$1) < layerOf(key.$2)) reasons.add('warstwa w górę');
     if (key.$1 == 'app/screens' &&
         key.$2 != 'app/providers' &&
@@ -1271,10 +1257,9 @@ String renderReadme(ImportGraph graph, List<RenderedDiagram> diagrams) {
   buffer
     ..writeln()
     ..writeln(
-      'Czerwona krawędź (`linkStyle`, `#d1242f`) spełnia co najmniej jeden warunek:',
+      'Czerwona krawędź (`linkStyle`, `#d1242f`) oznacza jedno z dwóch:',
     )
     ..writeln()
-    ..writeln('- oba końce leżą w tej samej silnie spójnej składowej (cykl),')
     ..writeln('- pakiet z niższej warstwy importuje pakiet z wyższej,')
     ..writeln(
       '- `app/screens` importuje pakiet inny niż `app/providers` i `core/models` '
@@ -1369,7 +1354,8 @@ String renderReadme(ImportGraph graph, List<RenderedDiagram> diagrams) {
     )
     ..writeln('- Etykieta to liczba dyrektyw `import`.')
     ..writeln(
-      '- Czerwień oznacza cykl, ruch w górę warstwy albo ominięcie providerów.',
+      '- Czerwień oznacza ruch w górę warstwy albo ominięcie providerów. '
+      'Cykl jest ramką `subgraph` z etykietą `cykl`, a nie kolorem krawędzi w dół.',
     )
     ..writeln()
     ..writeln('### Diagram klas')
@@ -1501,7 +1487,19 @@ classDiagram
 
 String renderFlowchart(ImportGraph graph) {
   final buffer = StringBuffer('flowchart LR\n');
+  final inCycle = graph.cycles.expand((cycle) => cycle).toSet();
+  for (var i = 0; i < graph.cycles.length; i++) {
+    final cycle = graph.cycles[i];
+    final label = graph.cycles.length == 1 ? 'cykl' : 'cykl ${i + 1}';
+    buffer.writeln('    subgraph cycle_${i + 1} ["$label"]');
+    for (final package in overviewPackages) {
+      if (!cycle.contains(package.id)) continue;
+      buffer.writeln('        ${nodeId(package.id)}["${package.id}"]');
+    }
+    buffer.writeln('    end');
+  }
   for (final package in overviewPackages) {
+    if (inCycle.contains(package.id)) continue;
     buffer.writeln('    ${nodeId(package.id)}["${package.id}"]');
   }
   final red = <int>[];
